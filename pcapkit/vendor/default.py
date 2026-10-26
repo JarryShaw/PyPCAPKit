@@ -325,7 +325,7 @@ class Vendor(metaclass=VendorMeta):
           ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are.
 
         Any other segment, including text outside the brackets, is returned
-        verbatim and in order, as :func:`re.split` on the brackets alone did.
+        verbatim and in order, as :func:`re.split` on the brackets alone gives it.
 
         Args:
             text: Raw reference cell.
@@ -574,11 +574,10 @@ class Vendor(metaclass=VendorMeta):
         raising. So the escape is rejected outright, rather than trusted to
         produce a harmless-looking wrong path.
 
-        This is a classmethod, not an instance method, deliberately: nothing
-        in the body ever needed instance state -- it only ever consulted
-        ``type(self)``, so ``cls`` is exactly that, with no instance required
-        to obtain it. That lets a caller resolve a crawler's destination
-        *without* instantiating it, and so without triggering
+        This is a classmethod, not an instance method, deliberately: the body
+        needs no instance state, only the crawler's class, which ``cls`` is
+        with no instance required to obtain it. That lets a caller resolve a
+        crawler's destination *without* instantiating it, and so without triggering
         :meth:`Vendor.__init__`'s network fetch, render and write --
         the pre-run snapshot that ``run()`` in :mod:`pcapkit.vendor.__main__`
         takes (GitHub issue :issue:`872`) is exactly such a caller. Every crawler defined in this
@@ -742,10 +741,10 @@ class Vendor(metaclass=VendorMeta):
                             # NOTE: whatever stopped the prompt, ``input()`` is no
                             # longer waiting -- and this loop only waits because
                             # ``input()`` does, so the file it waits for can never
-                            # arrive. Discarding the exception, as this used to,
-                            # left a ``while True`` that printed three lines per
-                            # iteration at full speed: 26.7 million lines and 2.6 GB
-                            # measured in #522. The terminal this started on can
+                            # arrive. Discarding the exception would leave a
+                            # ``while True`` printing three lines per iteration at
+                            # full speed: 26.7 million lines and 2.6 GB measured in
+                            # #522. The terminal this started on can
                             # still go away mid-wait -- a closed ``stdin`` raises
                             # :exc:`ValueError`, a dropped one :exc:`EOFError`, a
                             # vanished :data:`sys.stdin` :exc:`RuntimeError` -- so the

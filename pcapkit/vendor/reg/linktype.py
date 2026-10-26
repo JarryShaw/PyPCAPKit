@@ -86,8 +86,8 @@ class LinkType(Vendor):
         # through ``sink`` (see item 2 in #852), but its *expanded* values
         # still have to count here: a single-value row can legitimately
         # duplicate one of the values a range expands to, and missing that
-        # would silently under-count the duplicate the same way the
-        # word-only rule did before #852.
+        # would silently under-count the duplicate the same way a
+        # word-only rule would (#852).
         #
         # The single-value branch accepts whatever ``int()`` accepts --
         # a leading sign, PEP 515 underscores -- rather than the narrower

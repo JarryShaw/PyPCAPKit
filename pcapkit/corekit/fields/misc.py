@@ -80,8 +80,7 @@ class ConditionalField(FieldBase[_TC]):
     Args:
         field: Field instance.
         condition: Field condition function (this function should return a bool
-            value and accept the current packet :class:`pcapkit.corekit.infoclass.Info`
-            as its only argument).
+            value and accept the current packet data as its only argument).
 
     """
 
@@ -572,9 +571,8 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         declare a given field -- see
         :func:`pcapkit.corekit.fields.byteorder.packet_byteorder` and
         :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`
-        for why that distinction matters, and note that both already
-        hand-roll this exact fallback and so are unaffected by (and do not
-        need to route through) this function.
+        for why that distinction matters; both hand-roll this exact fallback
+        themselves rather than route through this function.
 
         Nothing written through the returned mapping reaches ``packet``,
         because the returned mapping *is* a copy: a nested schema can set --
@@ -602,22 +600,22 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         :class:`~abc.ABCMeta` at all because :class:`dict` is not an
         :class:`~abc.ABCMeta`-based class. That also settles a suspicion,
         raised on :issue:`439`, that a :class:`~collections.ChainMap` here
-        corrupted the :class:`~abc.ABCMeta` cache :class:`Schema
+        would corrupt the :class:`~abc.ABCMeta` cache :class:`Schema
         <pcapkit.protocols.schema.schema.Schema>` subclasses shared on CPython
         <= 3.10. The suspicion is *probably* wrong, and this code cannot
         test it: the cache keys on the **exact type queried**, so asking about a
         :class:`~collections.ChainMap` instance caches lookups for
         :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning
         observed in :issue:`439` came from ordinary code asking
-        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` has
-        been fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own
-        ``_abc_impl``. Against that, swapping the ``ChainMap`` for a plain
-        literal on CPython 3.10 once moved
+        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` is
+        fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own
+        ``_abc_impl``. Against that, on CPython 3.10 choosing between a
+        ``ChainMap`` and a plain literal here was observed to flip
         ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``
-        between passing and failing, both ways; the likeliest reading is that
-        it changed which types flowed through unrelated :func:`isinstance`
-        calls rather than causing the corruption. It does not affect
-        correctness either way.
+        between passing and failing, in both directions; the likeliest reading
+        is that the choice changes which types flow through unrelated
+        :func:`isinstance` calls rather than causing the corruption. It does
+        not affect correctness either way.
 
     """
     return {**packet, '__packet__': packet}

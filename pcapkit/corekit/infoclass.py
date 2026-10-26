@@ -177,8 +177,8 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
             # contributes only the annotations it declares itself, on every
             # Python version: below 3.10 (bpo-43901), ``__annotations__`` of a
             # class declaring none is its nearest base's, so a field-less
-            # subclass read Info's ``__finalised__``, ``__additional__`` and
-            # ``__excluded__`` as its fields (#1692). See
+            # subclass would read Info's ``__finalised__``, ``__additional__``
+            # and ``__excluded__`` as its fields (#1692). See
             # :func:`~pcapkit.utilities.compat.get_annotations`.
             for key in reversed(get_annotations(cls_)):
                 # NOTE: We skip duplicated annotations to avoid duplicate
@@ -283,8 +283,8 @@ class InfoMeta(abc.ABCMeta):
                 __additional__ = ['e', 'f']
 
             print(A.__additional__)  # ['a', 'b']
-            print(B.__additional__)  # ['a', 'b', 'c', 'd']
-            print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']
+            print(B.__additional__)  # ['c', 'd', 'a', 'b']
+            print(C.__additional__)  # ['e', 'f', 'c', 'd', 'a', 'b']
 
     """
 
@@ -479,8 +479,8 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it
         # finalises, and a subclass reading that state through inheritance was
         # never finalised itself -- it would keep the ``__excluded__`` it copied
-        # at declaration, without the names ``info_final`` adds, which once
-        # leaked ``__map__``, ``__map_reverse__`` and ``__multi__`` from
+        # at declaration, without the names ``info_final`` adds, which would
+        # leak ``__map__``, ``__map_reverse__`` and ``__multi__`` from
         # ``to_dict()`` (GitHub issue #1490). The inner one: an ancestor hand-marked bare
         # ``@final`` passes its marker to every subclass declared before it
         # landed, and ``getattr`` would blame such a subclass for a mismarking
@@ -814,9 +814,9 @@ class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
     :mod:`~pcapkit.corekit.multidict` classes are Werkzeug's, kept verbatim,
     and Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
     defines ``__eq__`` but no ``__ne__``: ``!=`` falls back to :obj:`dict`'s,
-    which compares the internal buckets, so two equal exports compared
+    which compares the internal buckets, so two equal exports would compare
     ``!=`` as well as ``==`` -- and, since ``__eq__`` compares the values with
-    ``!=``, two exports holding a nested export compared unequal
+    ``!=``, two exports holding a nested export would compare unequal
     (:issue:`1484`). Its copies, deep copies and pickles stay of this class, as
     Werkzeug's build them from ``type(self)``, and :meth:`__repr__` writes it as
     the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it is.
@@ -1019,8 +1019,8 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
     def __eq__(self, other: 'object') -> 'bool':
         # NOTE: MultiDict's ``__eq__`` is :obj:`dict`'s, which compares the
         # internal storage, so against an OrderedMultiDict -- whose values sit
-        # in buckets -- it answered False where the OrderedMultiDict, asked the
-        # other way round, answered True. The ordered side decides, as it does
+        # in buckets -- it answers False where the OrderedMultiDict, asked the
+        # other way round, answers True. The ordered side decides, as it does
         # for a bare MultiDict, which Python asks it first for being its
         # subclass (#1484).
         if isinstance(other, OrderedMultiDict):
@@ -1091,8 +1091,8 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
 
     # NOTE: as for :class:`MultiInfo`, the mapping protocol is bound back to
     # OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and
-    # dict's compares the internal buckets, so two equal option lists compared
-    # ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports
+    # dict's compares the internal buckets, so two equal option lists would
+    # compare ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports
     # (#1484).
     __getitem__ = OrderedMultiDict.__getitem__  # type: ignore[assignment]
     __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]

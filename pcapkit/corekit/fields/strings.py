@@ -177,7 +177,7 @@ class StringField(_TextField[str]):
 
         # NOTE: A negative length is resolved from the *encoded* octets, not from
         # the character count -- the ``Ns`` template counts octets, so counting
-        # characters truncated any text that does not encode one octet per
+        # characters would truncate any text that does not encode one octet per
         # character.
         if self._length < 0:
             self._length = len(buffer)

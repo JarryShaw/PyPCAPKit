@@ -321,9 +321,9 @@ class ReturnCode(Vendor):
             # NOTE: MediaWiki renders a trailing ``|-`` row separator in the
             # wikitext as an empty ``<tr class="mw-empty-elt">``, which revision
             # 1354125851 of the article carries at the end of this table. It has
-            # no cells at all, so reading ``line[0]`` raised ``IndexError`` and
-            # took the whole crawler down. Skipping cell-less rows is the fix
-            # rather than indexing defensively further down, because a row that
+            # no cells at all, so reading ``line[0]`` would raise ``IndexError``
+            # and take the whole crawler down. Cell-less rows are skipped
+            # rather than indexed defensively further down, because a row that
             # cannot supply both a code and an explanation has nothing to
             # contribute either way; see #518.
             if len(line) < 2:

@@ -382,9 +382,9 @@ NULL = NullType()
 def _get_null() -> 'NullType':
     """Return :data:`NULL`, for a pickle written before :issue:`1842`.
 
-    ``NullType.__reduce__`` used to name this function, so such a pickle
-    calls it to load. Nothing here calls it any more; it stays so that those
-    pickles keep loading, as :data:`NULL` itself.
+    Such a pickle of :data:`NULL` names this function, so loading one calls
+    it. Nothing in the package calls it; it exists so that those pickles keep
+    loading, as :data:`NULL` itself.
 
     """
     return NULL

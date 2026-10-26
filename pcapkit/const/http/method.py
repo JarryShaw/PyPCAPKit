@@ -279,13 +279,13 @@ class Method(EnumRegistry, StrEnum):
             # else ``key`` exactly as given -- never its upper-cased form --
             # so an unregistered member's value is the caller's own casing,
             # the same convention :meth:`_unregistered_member` documents and
-            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed.
+            # :class:`~pcapkit.const.ftp.command.FEATCode` follows.
             # The name is always the canonical upper-case form, matching
             # :meth:`_missing_` and every registered member's own name. Two
             # calls naming the same method in different case, e.g.
             # ``get('frob')`` and ``get('FROB')``, therefore build results
             # that are *not* equal -- each is exactly what its own caller
-            # passed, per GitHub issue #860's conversion away from minting.
+            # passed, since ``get`` does not mint (GitHub issue #860).
             return cls._unregistered_member(default if default is not None else key, key.upper())
 
     @classmethod
