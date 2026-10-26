@@ -222,12 +222,11 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         the two lengths disagree. A parameter ``len`` of 9 over a single locator
         whose own ``len`` is 4 needs ``rfc_total(9) - 4 - 9`` = 3 padding octets;
         reading the shadowed nested value instead gives
-        ``parameter_padding_len({'len': 4})`` = 0 under the RFC formula. Measured
-        on ``f0999858e``, under the contents-aligning rule (#651): 32 octets,
-        i.e. 4 of padding. The declared
-        ``Length`` deliberately does not match the 24 octets the locator actually
-        occupies, so the record total here is not meaningful -- the padding count
-        is what is under test.
+        ``parameter_padding_len({'len': 4})`` = 0 under the RFC formula, so a
+        shadowed read packs 28 octets where the parameter's ``Length`` gives 31.
+        The declared ``Length`` deliberately does not match the 24 octets the
+        locator actually occupies, so the record total here is not meaningful --
+        the padding count is what is under test.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.schema.internet.hip import (Locator, LocatorSetParameter,
@@ -243,13 +242,14 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         self.assertEqual(
             len(raw), 4 + 24 + 3,
             msg=f'{len(raw)} octets: 4 header + 24 of locator + padding. 3 is the '
-                f'count for the parameter Length of 9; 4 would be the count for '
-                f'the nested locator len of 4, which is what shadowing gives')
+                f'count for the parameter Length of 9; shadowing by the nested '
+                f'locator len of 4 gives 0, i.e. 28 octets')
 
         # And the callback in isolation, on both the key it reads and the value
         # that key is a snapshot of.
         from pcapkit.protocols.schema.internet.hip import LOCATOR_SET_LEN
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 9}), 3)
+        self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 4}), 0)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 0}), 4)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 24}), 4)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 28}), 0)
