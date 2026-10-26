@@ -16,9 +16,15 @@ actions/runner-images' READMEs at 2c421200c.
 ``compatibility``
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
     ``ubuntu-latest`` cannot provide it.
+``compatibility-supported``
+    The supported tier alone, the legs whose names are required contexts, for a
+    docs-only or test-only pull request (#2243).
 ``test``, ``integration``
     The supported tier alone, CPython's then PyPy's (#1958); ``test`` marks the
     ``latest`` leg ``coverage: true``.
+``test-latest``, ``integration-latest``
+    The ``latest`` leg of each alone, as ``test`` and ``integration`` spell it,
+    for a test-only pull request (#2243).
 ``test-ktlo``, ``integration-ktlo``
     Each KTLO version, CPython's then PyPy's, as a leg carrying ``ktlo: true``,
     and ``os`` as above, for unit-tests.yml's jobs of the same names, which
@@ -272,6 +278,18 @@ def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
     return matrix
 
 
+def on_latest_only(matrix: 'dict[str, Any]', latest: 'str') -> 'dict[str, Any]':
+    """``matrix`` cut to its ``latest`` leg, ``include`` entries for that leg kept (#2243)."""
+    return {'python-version': [version for version in matrix['python-version'] if version == latest],
+            'include': [entry for entry in matrix['include'] if entry['python-version'] == latest]}
+
+
+def supported_only(matrix: 'dict[str, Any]') -> 'dict[str, Any]':
+    """``matrix`` without its KTLO legs, which ``include`` adds (#2243)."""
+    return {'python-version': matrix['python-version'],
+            'include': [entry for entry in matrix['include'] if entry.get('ktlo') is not True]}
+
+
 def experimental_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
     """experimental.yml's ``experimental``: the experimental legs alone, out of ``test`` (#1732).
 
@@ -319,11 +337,14 @@ def wheel_tag(version: 'str') -> 'str':
 OUTPUTS = {
     'latest': lambda data: data['latest'],
     'test': test_matrix,
+    'test-latest': lambda data: on_latest_only(test_matrix(data), data['latest']),
     'test-ktlo': ktlo_matrix,
     'experimental': experimental_matrix,
     'integration': supported_matrix,
+    'integration-latest': lambda data: on_latest_only(supported_matrix(data), data['latest']),
     'integration-ktlo': ktlo_matrix,
     'compatibility': tiered,
+    'compatibility-supported': lambda data: supported_only(tiered(data)),
     'pypcap-parity': parity_matrix,
     'pypcap-parity-ktlo': parity_ktlo_matrix,
     'pypi': pypi_matrix,

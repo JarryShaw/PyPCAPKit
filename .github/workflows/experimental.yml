@@ -13,7 +13,8 @@ name: Experimental Tests
 # (experimental)` (#2060); no required context of ruleset 23497679 names one.
 #
 # The same events and `changes` job as unit-tests.yml, so a docs-only pull
-# request skips the legs here as it skips `test` there.
+# request skips the legs here as it skips `test` there, and a test-only one as
+# it skips the KTLO jobs there (#2243).
 on:
   push:
     branches: [main]
@@ -123,6 +124,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       code: ${{ steps.classify.outputs.code }}
+      test-only: ${{ steps.classify.outputs.test-only }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -163,7 +165,8 @@ jobs:
     # `changes` or `python-versions` still skips the legs.
     if: >-
       ${{ !cancelled() && needs.changes.result == 'success' && needs.python-versions.result == 'success'
-      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
+      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false'
+      && needs.changes.outputs.test-only != 'true' }}
     needs: [current, changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 140
@@ -626,7 +629,8 @@ jobs:
     name: Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental)
     if: >-
       ${{ !cancelled() && needs.changes.result == 'success' && needs.python-versions.result == 'success'
-      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
+      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false'
+      && needs.changes.outputs.test-only != 'true' }}
     needs: [current, changes, python-versions]
     runs-on: windows-latest
     timeout-minutes: 80

@@ -392,11 +392,25 @@ def resolve(workflows: 'dict[str, Any]', name: 'str', job_id: 'str', text: 'Any'
     return json.loads(values[output]) if match.group(1) else values[output]
 
 
+#: #2243: a matrix a docs-only or test-only pull request cuts,
+#: ``fromJSON(<light> && <cut matrix> || <full matrix>)``; group 1 is the full one.
+LIGHT = re.compile(r"\$\{\{\s*fromJSON\(\s*needs\.changes\.outputs\.[\w-]+\s*==\s*'true'\s*&&\s*"
+                   r"(?:needs|steps)\.[\w-]+\.outputs\.[\w-]+\s*\|\|\s*((?:needs|steps)\.[\w-]+\.outputs\.[\w-]+)"
+                   r"\s*\)\s*\}\}")
+
+
 def matrix_spec(workflows: 'dict[str, Any]', name: 'str', job_id: 'str',
                 values: 'dict[str, str]') -> 'Optional[dict[str, Any]]':
-    """Job ``job_id``'s ``strategy.matrix`` read from ``values``, or :data:`None` if it reads none."""
+    """Job ``job_id``'s ``strategy.matrix`` read from ``values``, or :data:`None` if it reads none.
+
+    A :data:`LIGHT` matrix is read as a push to ``main`` expands it, its full one.
+
+    """
     raw = ((workflows[name]['jobs'][job_id].get('strategy') or {}).get('matrix'))
     if isinstance(raw, str):
+        light = LIGHT.fullmatch(raw.strip())
+        if light is not None:
+            raw = '${{ fromJSON(%s) }}' % light.group(1)
         found = resolve(workflows, name, job_id, raw, values)
         return found if isinstance(found, dict) else None
     if not isinstance(raw, dict):

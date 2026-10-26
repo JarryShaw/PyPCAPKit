@@ -307,7 +307,7 @@ class TestScriptsImportIt(unittest.TestCase):
                 self.assertIn('_actions', modules)
                 self.assertNotIn('util._actions', modules)
                 if name == 'classify_changes':
-                    self.assertEqual(output.read_text(encoding='utf-8'), 'code=true\n')
+                    self.assertEqual(output.read_text(encoding='utf-8'), 'code=true\ntest-only=false\n')
 
 
 def sparse_checkouts_missing_the_helper(spec: 'Any') -> 'list[tuple[str, list[str]]]':

@@ -4,7 +4,7 @@
 * :file:`util/leg_summary.py`, every ``KTLO summary`` and the ``Experimental
   summary``: :class:`TestLegSummary`. The steps themselves are pinned in
   :mod:`tests.project.test_ktlo_legs_stay_green_1672`.
-* :file:`util/classify_changes.py`, ``Classify the diff`` in both ``changes`` jobs:
+* :file:`util/classify_changes.py`, ``Classify the diff`` in every ``changes`` job:
   :class:`TestClassifyChanges`. Its classification against a real merge commit is
   :mod:`tests.project.test_unit_tests_queue`'s.
 * :file:`util/coverage_report.py`, ``Report coverage``: :class:`TestCoverageReport`.
@@ -108,8 +108,9 @@ class TestClassifyChanges(_Scratch):
         output.write_text('earlier=1\n', encoding='utf-8')
         result = run('classify_changes.py', env={'OWN_PR': 'false', 'GITHUB_OUTPUT': str(output)}, cwd=self.tmp)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, "Not this workflow's own pull_request run: everything runs.\ncode=true\n")
-        self.assertEqual(output.read_text(encoding='utf-8'), 'earlier=1\ncode=true\n')
+        self.assertEqual(result.stdout,
+                         "Not this workflow's own pull_request run: everything runs.\ncode=true\ntest-only=false\n")
+        self.assertEqual(output.read_text(encoding='utf-8'), 'earlier=1\ncode=true\ntest-only=false\n')
 
     def test_an_unreadable_diff_warns_and_is_code(self) -> None:
         if shutil.which('git') is None:  # pragma: no cover
@@ -119,11 +120,12 @@ class TestClassifyChanges(_Scratch):
         result = run('classify_changes.py', env=env, cwd=self.tmp)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertRegex(result.stdout, r'^::warning title=Could not list the changed files::git diff exited '
-                                        r'[1-9]\d* with 0 files: .*Treating the diff as code\.\ncode=true\n$')
-        self.assertEqual(output.read_text(encoding='utf-8'), 'code=true\n')
+                                        r'[1-9]\d* with 0 files: .*Treating the diff as code\.\n'
+                                        r'code=true\ntest-only=false\n$')
+        self.assertEqual(output.read_text(encoding='utf-8'), 'code=true\ntest-only=false\n')
 
-    def test_both_workflows_run_it_from_a_checkout(self) -> None:
-        for name in ('unit-tests.yml', 'experimental.yml'):
+    def test_every_workflow_runs_it_from_a_checkout(self) -> None:
+        for name in ('unit-tests.yml', 'experimental.yml', 'python-compatibility.yml'):
             found = steps(name, 'changes')
             with self.subTest(workflow=name):
                 self.assertNotIn('if', found[0])

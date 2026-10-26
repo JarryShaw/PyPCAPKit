@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       compatibility: ${{ steps.read.outputs.compatibility }}
+      compatibility-supported: ${{ steps.read.outputs.compatibility-supported }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,6 +43,30 @@ jobs:
         id: read
         run: python3 util/python_versions.py --github-output
 
+  # #2243, the owner's option B: unit-tests.yml's `changes`, the same
+  # util/classify_changes.py step. This workflow is never called, so its own
+  # pull_request run is every pull_request run, and every other event, a push
+  # to main included, runs everything. `light` is `true` on a docs-only or a
+  # test-only diff, neither of which can change what this workflow checks:
+  # pcapkit/ and util/ compile and import as on the base branch.
+  changes:
+    name: Classify changed files
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      light: ${{ steps.classify.outputs.code == 'false' || steps.classify.outputs.test-only == 'true' }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      - name: Classify the diff
+        id: classify
+        env:
+          OWN_PR: ${{ github.event_name == 'pull_request' }}
+        run: python3 util/classify_changes.py
+
   compatibility:
     # `Compat`, so `gh pr checks` cannot show two `Python 3.N` rows, this and
     # Unit Tests', with nothing to tell them apart.
@@ -52,8 +77,19 @@ jobs:
     # as in unit-tests.yml's `test` job: job-level, a failed leg's check run
     # concludes `failure`, so every commit shows red (#1672). Nothing below
     # `requires-python`'s 3.8 runs (#2051).
+    #
+    # #2243: the supported legs are required contexts, so a docs-only or
+    # test-only pull request still runs them, by name, but they skip every
+    # step that sets up, installs or checks, and pass. A job-level `if:` would
+    # not do: a matrix job it skips reports one check under its unexpanded
+    # name, as Unit Tests' docs-only run 40238795866 did, which matches no
+    # required context, so each would stay pending.
+    # The KTLO legs, required by nothing, are left out of that matrix.
+    # `!cancelled()` replaces the implicit `success()`, so a failed `changes`,
+    # whose `light` is then empty, runs every leg in full.
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
-    needs: [python-versions]
+    needs: [python-versions, changes]
+    if: ${{ !cancelled() && needs.python-versions.result == 'success' }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     env:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
@@ -63,14 +99,24 @@ jobs:
       # the `os` pins: a KTLO leg carries `ktlo: true`, and `os` where
       # `ubuntu-latest` has no setup-python build for it. A tier change edits
       # ruleset 23497679 too.
-      matrix: ${{ fromJSON(needs.python-versions.outputs.compatibility) }}
+      matrix: ${{ fromJSON(needs.changes.outputs.light == 'true' && needs.python-versions.outputs.compatibility-supported || needs.python-versions.outputs.compatibility) }}
     steps:
+      - name: Skip on a docs-only or test-only diff
+        if: ${{ needs.changes.outputs.light == 'true' }}
+        env:
+          LEG: Python ${{ matrix.python-version }}
+        run: echo "::notice title=Nothing to check on ${LEG}::A docs-only or test-only diff leaves pcapkit/ and util/ as on the base branch, so this leg passes without checking them (#2243)."
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
+        if: ${{ needs.changes.outputs.light != 'true' }}
         continue-on-error: ${{ matrix.ktlo == true }}
 
+      # Every later step waits on this one's `outcome`, so on a light diff,
+      # where it skips, they skip too.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
+        if: ${{ needs.changes.outputs.light != 'true' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}

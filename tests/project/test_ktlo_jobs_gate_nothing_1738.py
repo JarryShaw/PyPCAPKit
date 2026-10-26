@@ -155,7 +155,10 @@ class TestTheKTLOJobsKeepTheirMechanics(unittest.TestCase):
             with self.subTest(job=twin):
                 self.assertEqual(spec['steps'], gate['steps'])
                 self.assertEqual(needs(spec), needs(gate))
-                self.assertEqual(spec['if'], gate['if'])
+                # #2243: and skips a test-only pull request, which `test` and
+                # `integration` run on `latest` alone and `pypcap-parity` skips.
+                skip = " && needs.changes.outputs.test-only != 'true'"
+                self.assertEqual(spec['if'], gate['if'].replace(skip, '').replace(' }}', f'{skip} }}}}'))
                 self.assertEqual((spec['runs-on'], spec['timeout-minutes']), (gate['runs-on'], gate['timeout-minutes']))
                 self.assertEqual(spec['env']['ANNOTATION_LEVEL'], gate['env']['ANNOTATION_LEVEL'])
                 self.assertTrue(all(leg.get('ktlo') is True for leg in matrix_legs(twin)))

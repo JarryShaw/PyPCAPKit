@@ -177,9 +177,31 @@ def resolve(name: 'str', job_id: 'str', text: 'Any', values: 'Optional[dict[str,
     return json.loads(values[output]) if match.group(1) else values[output]
 
 
-def matrix(name: 'str', job_id: 'str', values: 'Optional[dict[str, str]]' = None) -> 'dict[str, Any]':
-    """Job ``job_id``'s ``strategy.matrix``, each expression read from the script."""
+#: #2243: a matrix that a light pull request cuts, ``fromJSON(<light> && <light matrix> || <full matrix>)``.
+LIGHT = re.compile(r'\$\{\{ fromJSON\((?P<light>needs\.changes\.outputs\.[\w-]+ == \'true\') && '
+                   r'(?P<cut>needs\.[\w-]+\.outputs\.[\w-]+) \|\| (?P<full>needs\.[\w-]+\.outputs\.[\w-]+)\) \}\}')
+
+
+def light_matrix(name: 'str', job_id: 'str') -> 'Optional[re.Match[str]]':
+    """Job ``job_id``'s matrix as :data:`LIGHT` reads it, or :data:`None` for a matrix every run expands alike."""
     raw = workflow(name)['jobs'][job_id]['strategy']['matrix']
+    return LIGHT.fullmatch(raw) if isinstance(raw, str) else None
+
+
+def matrix(name: 'str', job_id: 'str', values: 'Optional[dict[str, str]]' = None,
+           light: 'bool' = False) -> 'dict[str, Any]':
+    """Job ``job_id``'s ``strategy.matrix``, each expression read from the script.
+
+    A :data:`LIGHT` matrix is read as a push to ``main`` expands it, or with
+    ``light`` as a docs-only or test-only pull request does (#2243).
+
+    """
+    raw = workflow(name)['jobs'][job_id]['strategy']['matrix']
+    cut = light_matrix(name, job_id)
+    if cut is not None:
+        raw = '${{ fromJSON(%s) }}' % cut.group('cut' if light else 'full')
+    elif light:
+        raise AssertionError(f'{name} {job_id} has no light matrix')
     if isinstance(raw, str):
         found = resolve(name, job_id, raw, values)
         assert isinstance(found, dict), f'{name} {job_id} matrix is {raw!r}'
