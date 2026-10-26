@@ -757,6 +757,36 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                 # ``read`` with no explicit length falls back to ``len(self)``
                 self.assertEqual(inst.read().length, 16)
 
+    def test_base_make_keywords_are_refused_where_a_subclass_ignores_them(self) -> None:
+        """#2286: without ``__own_make_keywords__``, the base ``make``'s ``len``
+        and ``data`` stay in every subclass's construction allowlist, so
+        ``IPv6_Route(len=99)`` builds the same octets as ``IPv6_Route()``. With
+        the marker, a subclass accepts each only if its own ``make`` declares
+        it, and accepts the ``next`` they all declare; the base keeps all three.
+        """
+        import inspect
+
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.protocol import _declared_keywords
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        self.assertTrue({'next', 'len', 'data'} <= _declared_keywords(IPv6_Ext))
+        self.assertEqual(bytes(IPv6_Ext(next=TransType.TCP, len=0, data=b'\x00' * 6,
+                                        version=6))[:2], bytes([int(TransType.TCP), 0]))
+
+        for klass in self._family():
+            own = inspect.signature(klass.make).parameters
+            for name, value in (('len', 99), ('data', b'zzzz')):
+                with self.subTest(klass=klass.__name__, keyword=name):
+                    if name in own:
+                        self.assertIn(name, _declared_keywords(klass))
+                        continue
+                    with self.assertRaisesRegex(UnsupportedCall, f"unexpected keyword\\(s\\): '{name}'"):
+                        klass(**{name: value})
+            with self.subTest(klass=klass.__name__, keyword='next'):
+                self.assertIsInstance(bytes(klass(next=TransType.TCP)), bytes)
+
     def test_length_hint_is_the_eight_octet_rfc_6564_minimum(self) -> None:
         """Eight: :rfc:`6564#section-4`'s Hdr Ext Len excludes the first 8
         octets, so no conforming header is shorter (:rfc:`8200#section-4`).

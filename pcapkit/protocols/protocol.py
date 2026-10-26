@@ -281,7 +281,11 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
 
     The walk covers the whole MRO rather than the most derived override of each
     method, so that a subclass declaring its own keyword and forwarding the rest
-    to its parent does not make the parent's keywords unreachable.
+    to its parent does not make the parent's keywords unreachable. The one
+    exception is a class that sets :attr:`ProtocolBase.__own_make_keywords__
+    <pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__>`: its
+    ``make`` counts only while it is the ``make`` of ``cls``, not once a
+    subclass overrides it (:issue:`2286`).
 
     """
     try:
@@ -291,6 +295,9 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
 
     unchecked = False
     names = set(OUT_OF_BAND_KEYWORDS)
+    # NOTE: The class whose ``make`` is the one ``cls`` resolves to; any other
+    # ``make`` in the MRO has been overridden.
+    make_owner = next((klass for klass in cls.__mro__ if 'make' in klass.__dict__), None)
     for klass in cls.__mro__:
         # NOTE: A keyword read out of ``**kwargs`` by name is invisible to
         # :func:`inspect.signature`, so the class lists it in ``__keywords__``.
@@ -321,6 +328,13 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             # lands here.
             func = klass.__dict__.get(method)
             if func is None:
+                continue
+
+            # NOTE: A ``make`` whose keywords its class keeps to itself is read
+            # only while it is the one ``cls`` uses. Read from ``__dict__`` so
+            # the marker, like the :obj:`None` opt-out above, is not inherited.
+            if (method == 'make' and klass is not make_owner
+                    and klass.__dict__.get('__own_make_keywords__', False)):
                 continue
 
             try:
@@ -555,6 +569,18 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: and exempting them along with their base would forgo the check on the very
     #: classes that can have it.
     __keywords__: 'Optional[frozenset[str]]' = frozenset()
+
+    #: Whether the parameters of this class's own :meth:`make` are accepted only
+    #: while that ``make`` is the one in use. By default
+    #: :func:`_declared_keywords` takes every ``make`` in the MRO, so a subclass
+    #: that overrides ``make`` and forwards the rest to its parent keeps the
+    #: parent's keywords. A base whose subclasses override ``make`` *without*
+    #: forwarding sets this, so that its keywords are refused for them rather than
+    #: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #: does, for ``len`` and ``data`` (:issue:`2286`). Read from the defining
+    #: class alone, so it is not inherited, and it leaves :attr:`__keywords__`
+    #: and the other construction methods unaffected.
+    __own_make_keywords__: 'bool' = False
 
     #: Whether this instance is being rebuilt by :meth:`from_data` from a parsed
     #: data model, as against constructed from keywords somebody wrote. It governs

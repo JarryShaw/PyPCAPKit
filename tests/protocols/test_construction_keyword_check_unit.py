@@ -426,6 +426,51 @@ class ForwardedKeywordTests(unittest.TestCase):
             with self.subTest(keyword=name):
                 self.assertIn(name, accepted)
 
+    def test_a_base_may_keep_its_make_keywords_to_itself(self) -> None:
+        """``__own_make_keywords__`` drops a base's ``make`` once it is overridden.
+
+        For a base whose subclasses replace ``make`` without forwarding to it, as
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s do (#2286). The
+        base's ``make`` counts for the base itself and for a subclass that does
+        not override it, and the marker is not inherited: an overriding
+        subclass's own ``make`` is handed down as usual. ``__keywords__`` is
+        unaffected.
+
+        """
+        from pcapkit.protocols.protocol import _declared_keywords
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        base = _protocol_class(__own_make_keywords__=True,
+                               __keywords__=frozenset({'eggs'}))
+
+        class Inheriting(base):  # type: ignore[misc,valid-type]
+            pass
+
+        class Overriding(base):  # type: ignore[misc,valid-type]
+            def make(self, ham: 'bytes' = b'ab', **kwargs: 'Any') -> 'Any':
+                return super().make(spam=ham)  # the base's name, never the caller's
+
+        class Grandchild(Overriding):  # type: ignore[misc,valid-type]
+            def make(self, beans: 'bytes' = b'ab', **kwargs: 'Any') -> 'Any':
+                return super().make(ham=beans, **kwargs)
+
+        for klass in (base, Inheriting):
+            with self.subTest(klass=klass.__name__):
+                self.assertIn('spam', _declared_keywords(klass))
+        self.assertEqual(bytes(Inheriting(spam=b'xy')), b'xy')
+
+        for klass, own in ((Overriding, {'ham'}), (Grandchild, {'ham', 'beans'})):
+            with self.subTest(klass=klass.__name__):
+                accepted = _declared_keywords(klass)
+                self.assertNotIn('spam', accepted)
+                self.assertTrue(own | {'eggs'} <= accepted)
+
+        with self.assertRaisesRegex(UnsupportedCall, r"unexpected keyword\(s\): 'spam'"):
+            Overriding(spam=b'xy')
+        # Its own keyword, and the base's ``__keywords__``.
+        self.assertEqual(bytes(Overriding(ham=b'xy', eggs=1)), b'xy')
+        self.assertEqual(bytes(Grandchild(beans=b'xy')), b'xy')
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ScopeTests(unittest.TestCase):
