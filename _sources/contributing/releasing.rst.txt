@@ -173,7 +173,7 @@ the default branch, and ``tag`` pulls ``main`` before tagging.
   build, by Conda Update's ``publish`` dispatch (see `Recovery`_).
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``, in
   their "Upload package to GitHub Release" steps, not ``action-gh-release``,
-  which calls Update a release before every upload (3.0.2's ``release()`` in
+  which calls Update a release before every upload (3.0.3's ``release()`` in
   ``src/github.ts``, on a release that exists). A file
   the release already has is left alone
   (:issue:`1640`): the action
@@ -253,7 +253,7 @@ tag the pending version at ``main``'s tip and fail Create Release's tag check.
 The action would also retarget a draft at ``commit``
 (``Action.updateDraftOrCreateRelease()`` and ``Action.updateRelease()``), which ``omitDraftDuringUpdate`` keeps a
 draft, but Create Release's ``workflow_run`` run finds the draft and resets
-its target to the run's sha (``action-gh-release`` 3.0.2's ``release()`` and
+its target to the run's sha (``action-gh-release`` 3.0.3's ``release()`` and
 ``findTagFromReleases()``), so skipping a draft is a precaution
 against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a ``::notice``. The
@@ -319,7 +319,7 @@ final release, first delete any draft ``v<version>`` the refused run left:
 ``action-gh-release`` creates a non-prerelease as a draft and publishes it
 with Update a release in the same step (``createRelease()`` in
 ``src/github.ts``), and the next run would reuse that draft and its target
-(``:631-647`` there). Then re-run
+(``release()`` there). Then re-run
 the job; that a re-run reads variables and secrets set since is unmeasured.
 
 Per-Job Evidence, Not a Shared Proxy

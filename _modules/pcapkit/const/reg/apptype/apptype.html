@@ -3017,10 +3017,10 @@
 <span class="sd">            key: Port number the caller is looking up, validated here so that</span>
 <span class="sd">                every entry point rejects a non-port identically.</span>
 <span class="sd">            proto: Transport protocol, as a member, its name, or a bare</span>
-<span class="sd">                :class:`int`. That last shape is not merely defensive: GitHub</span>
-<span class="sd">                issue :issue:`808` dropped</span>
-<span class="sd">                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s</span>
-<span class="sd">                ``IntFlag`` base, so</span>
+<span class="sd">                :class:`int`. That last shape is not merely defensive:</span>
+<span class="sd">                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`</span>
+<span class="sd">                is an ``IntEnum``, not an ``IntFlag`` (GitHub issue</span>
+<span class="sd">                :issue:`808`), so</span>
 <span class="sd">                ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,</span>
 <span class="sd">                the same as any caller passing a literal port-transport bitmask</span>
 <span class="sd">                -- falls through to ``int.__or__`` and returns a bare</span>

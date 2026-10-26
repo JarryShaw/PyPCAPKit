@@ -1179,9 +1179,8 @@ so <code class="docutils literal notranslate"><span class="pre">get</span></code
     reach <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, and is <strong>not</strong> caught by
     the miss fallback described under <em>Returns</em> – only a failed
     lookup is. Raising is the intended behaviour for
-    <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> as well: a member whose name and
-    value were both the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> object is not a thing
-    this registry should hand back.</p>
+    <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> as well, since no member of this registry
+    has a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> name or value.</p>
 </dd>
 </dl>
 </dd></dl>

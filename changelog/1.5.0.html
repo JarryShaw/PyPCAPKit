@@ -1517,8 +1517,8 @@ itself, from <code class="docutils literal notranslate"><span class="pre">fin</s
 <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">self._flag_s</span></code> (the flag that gated the <code class="docutils literal notranslate"><span class="pre">open()</span></code>), and the
 <a class="reference internal" href="../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> wrapping a non-seekable input asked for
 <code class="docutils literal notranslate"><span class="pre">stream_closing=not</span> <span class="pre">self._flag_s</span></code> in the same wrong direction. The leak was one
-descriptor per extraction, the root cause of the <code class="docutils literal notranslate"><span class="pre">ResourceWarning</span></code> that reddened
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/577">#577</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/596">#596</a> and <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/600">#600</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/606">#606</a> had only made the test immune).
+descriptor per extraction, which surfaced as a <code class="docutils literal notranslate"><span class="pre">ResourceWarning</span></code> failing the test
+suite (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/577">#577</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/596">#596</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/600">#600</a>; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/606">#606</a> only made the test immune).
 Both conditions now follow ownership via a single <code class="docutils literal notranslate"><span class="pre">Extractor._owns_input</span></code>, and a
 finaliser releases the handle of an extraction <em>abandoned</em> before end of file
 (<code class="docutils literal notranslate"><span class="pre">auto=False</span></code>, iterated part way and dropped); the files <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a> names
@@ -3481,8 +3481,8 @@ annotation is emitted per failure, and the step’s own exit code is always
 <code class="docutils literal notranslate"><span class="pre">0</span></code>. A per-target <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">--</span> <span class="pre">&lt;path&gt;</span></code> restore step was dropped: with
 snapshot/restore, a failed target’s const file is never touched. Closes
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/872">#872</a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/873">#873</a>).</p></li>
-<li><p>follow-ups from <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/873">#873</a>’s review, none changing merged
-behaviour: an unpinned invariant and inaccurate prose and lint. <strong>1.</strong>
+<li><p><code class="docutils literal notranslate"><span class="pre">_snapshot_and_restore</span></code> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/873">#873</a>) carried an unpinned invariant and inaccurate
+prose and lint, none of it changing behaviour. <strong>1.</strong>
 <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">BaseException:</span></code> in <code class="docutils literal notranslate"><span class="pre">_snapshot_and_restore</span></code> is pinned:
 a test asserts that a <code class="docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code> still restores the file and propagates.
 <strong>2.</strong> A false docstring clause is corrected: a crawler whose <code class="docutils literal notranslate"><span class="pre">_dest_path</span></code> is an
@@ -3914,8 +3914,10 @@ notice names the current year; and BSD-3-Clause’s canonical form is a singular
 <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">&lt;year&gt;</span> <span class="pre">&lt;owner&gt;</span></code>. A range was six years of hand maintenance buying
 nothing, and automation was considered and rejected, since automating a value that
 need not be current is worse than not carrying it. <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> is untouched (a
-self-maintaining footer showing a range is conventional and correct). The licence
-body is unaltered: the change is confined to the copyright line, and the <code class="docutils literal notranslate"><span class="pre">DAMAGE.</span></code>
+self-maintaining footer showing a range is conventional and correct). The
+<code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line and the comma in the notice follow
+choosealicense.com’s template, whose first line is that title and whose notice reads
+<code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">[year],</span> <span class="pre">[fullname]</span></code>. The licence body is unaltered: the change is confined to the copyright line, and the <code class="docutils literal notranslate"><span class="pre">DAMAGE.</span></code>
 that <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/615">#615</a> repaired from <code class="docutils literal notranslate"><span class="pre">DAMAGE.s</span></code> is still clean (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/630">#630</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> shipped in no source distribution. <code class="docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> has an <code class="docutils literal notranslate"><span class="pre">include</span></code>
 each for <code class="docutils literal notranslate"><span class="pre">README.md</span></code>, <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> and <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> but none for the citation
@@ -3937,24 +3939,6 @@ skipped itself with “CITATION.cff is not
 shipped in the source distribution”. <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">build</span> <span class="pre">--sdist</span></code> now differs from
 before only by the archive entry <code class="docutils literal notranslate"><span class="pre">pypcapkit-1.5.0b4/CITATION.cff</span></code>, the shipped copy
 is byte-identical, and <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">check</span> <span class="pre">--strict</span></code> passes on both (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/631">#631</a>).</p></li>
-<li><p>inaccurate claims in the <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/630">#630</a> entry above, caught in review after <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/630">#630</a>
-had merged; both concern the history of <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code>, which is untouched here. 2017 was
-and remains the right answer, so this is a changelog-prose correction. The entry said
-the file “until then was stock MPL text carrying no author notice at all, so 2018 is
-the first start year the project ever asserted and it was already a year late when it
-was written”. That was true of the single blob <code class="docutils literal notranslate"><span class="pre">bc836cfa2</span></code> replaced and wrong as a
-description of the era: the pre-BSD file was MIT, then GPL v3, then Apache 2.0, then
-MPL 2.0; the MIT and GPL texts both carried an author notice naming <strong>2017</strong>; and
-<code class="docutils literal notranslate"><span class="pre">2018</span></code> first appeared in the Apache notice of 2018-12-08 as a single year, current
-when written. The claim also contradicted the entry’s own dating of the first commit
-to 2017-11-07. The history supports a stronger argument than the one written, which is
-why this is corrected rather than deleted: 2017 is the year asserted from the first
-commit, and <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/630">#630</a> restores it. The <code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line is
-reattributed from opensource.org’s template to choosealicense.com’s, whose first line
-is that title and which carries the <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">[year],</span> <span class="pre">[fullname]</span></code> comma this
-file uses. The error came from generalising the pre-BSD era off the blobs
-<code class="docutils literal notranslate"><span class="pre">bc836cfa2^:LICENSE</span></code> and <code class="docutils literal notranslate"><span class="pre">1c69341dc:LICENSE</span></code>, which were the same file;
-enumerating every commit that touched <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> caught it (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/638">#638</a>).</p></li>
 <li><p>the release workflow published to PyPI and to Anaconda with nothing a human had to
 approve. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job had <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">release</span></code> commented
 out while the <code class="docutils literal notranslate"><span class="pre">id-token:</span> <span class="pre">write</span></code> from the same upstream snippet was re-added live

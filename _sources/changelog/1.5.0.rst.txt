@@ -1015,8 +1015,8 @@ Fixed
   ``not self._flag_s`` (the flag that gated the ``open()``), and the
   :class:`.SeekableReader` wrapping a non-seekable input asked for
   ``stream_closing=not self._flag_s`` in the same wrong direction. The leak was one
-  descriptor per extraction, the root cause of the ``ResourceWarning`` that reddened
-  :pr:`577`, :pr:`596` and :pr:`600` (:issue:`606` had only made the test immune).
+  descriptor per extraction, which surfaced as a ``ResourceWarning`` failing the test
+  suite (:pr:`577`, :pr:`596`, :pr:`600`; :issue:`606` only made the test immune).
   Both conditions now follow ownership via a single ``Extractor._owns_input``, and a
   finaliser releases the handle of an extraction *abandoned* before end of file
   (``auto=False``, iterated part way and dropped); the files :issue:`610` names
@@ -2970,8 +2970,8 @@ Fixed
   ``0``. A per-target ``git checkout -- <path>`` restore step was dropped: with
   snapshot/restore, a failed target's const file is never touched. Closes
   :issue:`872` (:pr:`873`).
-* follow-ups from :pr:`873`'s review, none changing merged
-  behaviour: an unpinned invariant and inaccurate prose and lint. **1.**
+* ``_snapshot_and_restore`` (:pr:`873`) carried an unpinned invariant and inaccurate
+  prose and lint, none of it changing behaviour. **1.**
   ``except BaseException:`` in ``_snapshot_and_restore`` is pinned:
   a test asserts that a ``KeyboardInterrupt`` still restores the file and propagates.
   **2.** A false docstring clause is corrected: a crawler whose ``_dest_path`` is an
@@ -3400,8 +3400,10 @@ Fixed
   ``Copyright (c) <year> <owner>``. A range was six years of hand maintenance buying
   nothing, and automation was considered and rejected, since automating a value that
   need not be current is worse than not carrying it. ``conf.py`` is untouched (a
-  self-maintaining footer showing a range is conventional and correct). The licence
-  body is unaltered: the change is confined to the copyright line, and the ``DAMAGE.``
+  self-maintaining footer showing a range is conventional and correct). The
+  ``BSD 3-Clause License`` title line and the comma in the notice follow
+  choosealicense.com's template, whose first line is that title and whose notice reads
+  ``Copyright (c) [year], [fullname]``. The licence body is unaltered: the change is confined to the copyright line, and the ``DAMAGE.``
   that :pr:`615` repaired from ``DAMAGE.s`` is still clean (:pr:`630`).
 * ``CITATION.cff`` shipped in no source distribution. ``MANIFEST.in`` has an ``include``
   each for ``README.md``, ``LICENSE`` and ``CHANGELOG.md`` but none for the citation
@@ -3423,24 +3425,6 @@ Fixed
   shipped in the source distribution". ``python -m build --sdist`` now differs from
   before only by the archive entry ``pypcapkit-1.5.0b4/CITATION.cff``, the shipped copy
   is byte-identical, and ``twine check --strict`` passes on both (:pr:`631`).
-* inaccurate claims in the :pr:`630` entry above, caught in review after :pr:`630`
-  had merged; both concern the history of ``LICENSE``, which is untouched here. 2017 was
-  and remains the right answer, so this is a changelog-prose correction. The entry said
-  the file "until then was stock MPL text carrying no author notice at all, so 2018 is
-  the first start year the project ever asserted and it was already a year late when it
-  was written". That was true of the single blob ``bc836cfa2`` replaced and wrong as a
-  description of the era: the pre-BSD file was MIT, then GPL v3, then Apache 2.0, then
-  MPL 2.0; the MIT and GPL texts both carried an author notice naming **2017**; and
-  ``2018`` first appeared in the Apache notice of 2018-12-08 as a single year, current
-  when written. The claim also contradicted the entry's own dating of the first commit
-  to 2017-11-07. The history supports a stronger argument than the one written, which is
-  why this is corrected rather than deleted: 2017 is the year asserted from the first
-  commit, and :pr:`630` restores it. The ``BSD 3-Clause License`` title line is
-  reattributed from opensource.org's template to choosealicense.com's, whose first line
-  is that title and which carries the ``Copyright (c) [year], [fullname]`` comma this
-  file uses. The error came from generalising the pre-BSD era off the blobs
-  ``bc836cfa2^:LICENSE`` and ``1c69341dc:LICENSE``, which were the same file;
-  enumerating every commit that touched ``LICENSE`` caught it (:pr:`638`).
 * the release workflow published to PyPI and to Anaconda with nothing a human had to
   approve. ``create-release.yml``'s ``pypi`` job had ``environment: release`` commented
   out while the ``id-token: write`` from the same upstream snippet was re-added live

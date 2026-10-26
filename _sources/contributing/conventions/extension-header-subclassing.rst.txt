@@ -137,23 +137,6 @@ RFC ground in the ``#:`` comment beside it. The test walks
 ``IPv6_Ext.__subclasses__()`` rather than a hard-coded list, so any further header is
 held to the convention whether or not anyone remembers this page.
 
-The Retired ``IPv6_GenericExt`` Name
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The class arrived as ``IPv6_GenericExt``, a fallback parser for an unrecognised
-extension header (:issue:`891`), and
-:issue:`917` merged that role with
-the shared-base role into one class under the shorter name. No compatibility alias
-was left behind, and that was deliberate. The owner ruled that the
-``IPv6_GenericExt`` name goes for good: it was an intermediate state, and it was never
-released.
-
-What makes that safe rather than merely decided: ``IPv6_GenericExt`` existed on
-``main`` from ``b3551cb63`` to ``93cf940b3``, under four hours on one day, and no release tag falls
-between the two commits -- ``git tag --contains`` names the same tags for both -- so it
-appears in **no** release and the break has no callers to inconvenience. Do not
-reintroduce it as an alias, and do not cite it as a former public name.
-
 ESP's Two Facts
 ~~~~~~~~~~~~~~~
 

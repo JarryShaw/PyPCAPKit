@@ -926,7 +926,8 @@ recorded teardown is for.</p>
 <em>tuple</em>) is as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) index
  |--&gt; (Info) data
- |     |--&gt; 'fpout' : (Optional[str]) output filename if exists
+ |     |--&gt; 'fpout' : (Optional[str]) output filename, or None when
+ |     |                              the format writes no file
  |     |--&gt; 'index': (tuple) tuple of frame index, both directions,
  |     |                     in capture order
  |     |              |--&gt; (int) frame index
@@ -1202,7 +1203,8 @@ flush <em>this</em> conversation without disturbing any other.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.fpout">
 <span class="sig-name descname"><span class="pre">fpout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.fpout" title="Link to this definition">¶</a></dt>
-<dd><p>Output filename if exists.</p>
+<dd><p>Path of the flow’s output file, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the output format
+writes no file. Open and finalised flows report the same path.</p>
 </dd></dl>
 
 <dl class="py attribute">

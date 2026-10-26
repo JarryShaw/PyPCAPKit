@@ -2768,6 +2768,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of options and total length of options.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an option maker rejects its option, e.g. a user</span>
+<span class="sd">                timeout too large for 15 bits of minutes, or an MPTCP option</span>
+<span class="sd">                whose fields, or the segment's flags, it cannot encode.</span>
+<span class="sd">            ProtocolNotImplemented: If an option argument given by name, an</span>
+<span class="sd">                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is</span>
+<span class="sd">                not in its namespace and has no default.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            The options are emitted in the given order, ``NOP`` and ``EOOL``</span>
 <span class="sd">            included, so that a parsed option list re-emits the same octets.</span>
@@ -3661,6 +3669,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the segment's flags are none of SYN, SYN/ACK and</span>
+<span class="sd">                ACK.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">Enum_Flags</span><span class="o">.</span><span class="n">SYN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="ow">and</span> <span class="n">Enum_Flags</span><span class="o">.</span><span class="n">ACK</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span><span class="p">:</span>  <span class="c1"># MP_JOIN-SYN</span>

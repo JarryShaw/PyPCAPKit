@@ -523,7 +523,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.error_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCode</span> <span class="k">as</span> <span class="n">Enum_ErrorCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Enum_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.setting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Setting</span> <span class="k">as</span> <span class="n">Enum_Setting</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContinuationFrame</span> <span class="k">as</span> <span class="n">Data_ContinuationFrame</span>
@@ -1834,7 +1834,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_settings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_SettingsFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[Enum_Setting, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                            <span class="n">settings</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[Enum_Setting, int] | dict[Enum_Setting | int, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Schema_SettingsFrame, Flags]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HTTP/2 ``SETTINGS`` frame.</span>
 
@@ -1842,7 +1842,8 @@
 <span class="sd">            frame: Frame data model.</span>
 <span class="sd">            ack: Acknowledge flag.</span>
 <span class="sd">            settings: Settings, as raw octets, an</span>
-<span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` or a list of</span>
+<span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, a plain</span>
+<span class="sd">                :obj:`dict` of identifier to value or a list of</span>
 <span class="sd">                ``(identifier, value)`` pairs.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1866,7 +1867,9 @@
             <span class="n">settings_val</span> <span class="o">=</span> <span class="n">settings</span>  <span class="c1"># type: bytes | list[Schema_SettingPair]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">settings_val</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="c1"># A plain ``dict`` has no ``multi`` keyword (#2223).</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)</span> <span class="k">else</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
                 <span class="n">settings_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Schema_SettingPair</span><span class="p">(</span>
                     <span class="nb">id</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
                     <span class="n">value</span><span class="o">=</span><span class="n">val</span><span class="p">,</span>

@@ -661,7 +661,7 @@ tagged it, or, for Anaconda files that run’s own <code class="docutils literal
 build, by Conda Update’s <code class="docutils literal notranslate"><span class="pre">publish</span></code> dispatch (see <a class="reference internal" href="#recovery">Recovery</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> attach their files with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code>, in
 their “Upload package to GitHub Release” steps, not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>,
-which calls Update a release before every upload (3.0.2’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> in
+which calls Update a release before every upload (3.0.3’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> in
 <code class="docutils literal notranslate"><span class="pre">src/github.ts</span></code>, on a release that exists). A file
 the release already has is left alone
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>): the action
@@ -733,7 +733,7 @@ tag the pending version at <code class="docutils literal notranslate"><span clas
 The action would also retarget a draft at <code class="docutils literal notranslate"><span class="pre">commit</span></code>
 (<code class="docutils literal notranslate"><span class="pre">Action.updateDraftOrCreateRelease()</span></code> and <code class="docutils literal notranslate"><span class="pre">Action.updateRelease()</span></code>), which <code class="docutils literal notranslate"><span class="pre">omitDraftDuringUpdate</span></code> keeps a
 draft, but Create Release’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> run finds the draft and resets
-its target to the run’s sha (<code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code> 3.0.2’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> and
+its target to the run’s sha (<code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code> 3.0.3’s <code class="docutils literal notranslate"><span class="pre">release()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">findTagFromReleases()</span></code>), so skipping a draft is a precaution
 against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a <code class="docutils literal notranslate"><span class="pre">::notice</span></code>. The
@@ -796,7 +796,7 @@ final release, first delete any draft <code class="docutils literal notranslate"
 <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code> creates a non-prerelease as a draft and publishes it
 with Update a release in the same step (<code class="docutils literal notranslate"><span class="pre">createRelease()</span></code> in
 <code class="docutils literal notranslate"><span class="pre">src/github.ts</span></code>), and the next run would reuse that draft and its target
-(<code class="docutils literal notranslate"><span class="pre">:631-647</span></code> there). Then re-run
+(<code class="docutils literal notranslate"><span class="pre">release()</span></code> there). Then re-run
 the job; that a re-run reads variables and secrets set since is unmeasured.</p>
 </section>
 <section id="per-job-evidence-not-a-shared-proxy">

@@ -34,6 +34,7 @@ Octets      Bits        Name                    Description
    .. automethod:: make
 
    .. automethod:: _make_data
+   .. automethod:: _next_exthdr_depth
 
    .. automethod:: __index__
 

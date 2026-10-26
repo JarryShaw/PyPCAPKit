@@ -736,11 +736,19 @@
 <div class="viewcode-block" id="QuickStartOption">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for IPv6-Opts Quick Start option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for IPv6-Opts Quick Start option.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       ``rate`` is an :obj:`int` rather than a :obj:`float` (:issue:`2167`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: QS function.</span>
     <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span>
-    <span class="c1">#: Rate request/report.</span>
+    <span class="c1">#: Rate request/report, in kbps: ``40 * 2 ** N`` for the Rate Request or</span>
+    <span class="c1">#: Rate Report field ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782`</span>
+    <span class="c1">#: Section 3.1).</span>
     <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span></div>
 
 

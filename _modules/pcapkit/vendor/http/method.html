@@ -654,9 +654,8 @@
 <span class="s1">                reach ``_missing_``, and is **not** caught by</span>
 <span class="s1">                the miss fallback described under *Returns* -- only a failed</span>
 <span class="s1">                lookup is. Raising is the intended behaviour for</span>
-<span class="s1">                ``get(b'GET')`` as well: a member whose name and</span>
-<span class="s1">                value were both the :class:`bytes` object is not a thing</span>
-<span class="s1">                this registry should hand back.</span>
+<span class="s1">                ``get(b'GET')`` as well, since no member of this registry</span>
+<span class="s1">                has a :class:`bytes` name or value.</span>
 
 <span class="s1">        """</span>
 <span class="s1">        try:</span>

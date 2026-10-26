@@ -511,12 +511,12 @@
 
     <span class="c1">#: Original enumeration of this protocol.</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
-    <span class="c1">#: Message saying why the packet data is kept raw, if any: the error its</span>
+    <span class="c1">#: Message saying why the packet data is kept raw, if any: that of the error its</span>
     <span class="c1">#: parse raised, or the dissection limit it is past.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[Exception]'</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[Exception]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 </pre></div>
         </article>

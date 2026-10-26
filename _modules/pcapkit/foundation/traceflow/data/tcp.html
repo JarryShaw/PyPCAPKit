@@ -657,7 +657,8 @@
     <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.</span>
     <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
 
-    <span class="c1">#: Output filename if exists.</span>
+    <span class="c1">#: Path of the flow's output file, or :data:`None` when the output format</span>
+    <span class="c1">#: writes no file. Open and finalised flows report the same path.</span>
     <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
     <span class="c1">#: Tuple of frame index, **both directions**, in capture order.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>

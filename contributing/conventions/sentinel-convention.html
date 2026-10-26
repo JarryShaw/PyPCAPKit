@@ -604,9 +604,10 @@ in an early draft of <a class="reference internal" href="../../pcapkit/corekit/e
 as written: the value of a vendored copy is that it can still be diffed against
 upstream, and a house-style rewrite destroys that in exchange for a sentinel nobody
 outside the port ever sees. The rule above is for sentinels this package writes
-itself. The case that settled it, <code class="docutils literal notranslate"><span class="pre">_NOT_FOUND</span> <span class="pre">=</span> <span class="pre">object()</span></code> in the
-<a class="reference internal" href="../../pcapkit/utilities/index.html#pcapkit.utilities.compat.cached_property" title="pcapkit.utilities.compat.cached_property"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property</span></code></a> backport for interpreters below
-3.8, went with that backport when 1.5.0 raised the floor to 3.8 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
+itself. The ruling was made for <code class="docutils literal notranslate"><span class="pre">_NOT_FOUND</span> <span class="pre">=</span> <span class="pre">object()</span></code> in the backport of
+<a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> that served interpreters below 3.8. With the floor
+at 3.8, <a class="reference internal" href="../../pcapkit/utilities/index.html#pcapkit.utilities.compat.cached_property" title="pcapkit.utilities.compat.cached_property"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property</span></code></a> is a re-export of
+<a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
 </section>
 <section id="per-sentinel-dunder-methods">
 <h2>Per-Sentinel Dunder Methods<a class="headerlink" href="#per-sentinel-dunder-methods" title="Link to this heading">¶</a></h2>

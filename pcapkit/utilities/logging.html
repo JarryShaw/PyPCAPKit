@@ -588,9 +588,12 @@ were read, and when cleanup ran. Reassembly reports datagram counts on flush and
 flow tracing reports flows opening and closing.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Nothing is logged from inside per-frame or per-field parsing loops, so
+<p>No record is logged for each frame parsed or each field read, so
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> on a million-packet capture does not yield a million
-records. Registration bookkeeping in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is
+records. What is logged per item is what gets dropped: the PyShark engine
+logs a line for each tshark record it skips as not a packet
+(<code class="docutils literal notranslate"><span class="pre">skipping</span> <span class="pre">tshark</span> <span class="pre">frame</span></code>), and reassembly logs a line for each buffer it
+abandons on timeout (<code class="docutils literal notranslate"><span class="pre">abandoning</span> <span class="pre">buffer</span></code>). Registration bookkeeping in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is
 at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> rather than <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">INFO</span></code></a>, since a library
 announcing its own registry entries is not news to its consumer.</p>
 </div>

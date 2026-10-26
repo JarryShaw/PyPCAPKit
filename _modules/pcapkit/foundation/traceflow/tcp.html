@@ -935,6 +935,25 @@
         <span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_output_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Path of a flow's output file, as an index entry reports it.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            label: the flow's label</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The file :meth:`trace` writes the flow to, or :data:`None` when the</span>
+<span class="sd">            output format writes no file at all. An *empty* extension still</span>
+<span class="sd">            writes one, named after the label alone.</span>
+
+<span class="sd">        Both :meth:`submit` and :meth:`_finalise` report through this, so an</span>
+<span class="sd">        open flow and a finalised one name the same file (:issue:`2237`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">'</span>
+
 <div class="viewcode-block" id="TCP._ended">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP._ended">[docs]</a>
     <span class="nd">@staticmethod</span>
@@ -980,7 +999,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> finalised after </span><span class="si">%d</span><span class="s1"> frame(s) (</span><span class="si">%d</span><span class="s1"> forward, </span><span class="si">%d</span><span class="s1"> reverse)'</span><span class="p">,</span>
                      <span class="n">label</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">))</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span>
-            <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
             <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>
@@ -1057,7 +1076,7 @@
 
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
         <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_path</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">),</span>
                              <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
                              <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
                              <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>

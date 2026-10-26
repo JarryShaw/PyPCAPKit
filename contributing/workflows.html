@@ -1282,10 +1282,9 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 <a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">H1</span></code>, <code class="docutils literal notranslate"><span class="pre">H2</span></code> and <code class="docutils literal notranslate"><span class="pre">H4</span></code> on a non-blocking job are warnings, not HARD, so they do
 not fail the run (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>): on every job of <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>, which no
-required context names, on every <a class="reference internal" href="#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg, a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and on a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(experimental)</span></code> in any workflow. That
-last also covers older runs of <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, whose experimental legs ran under
-<code class="docutils literal notranslate"><span class="pre">test</span></code>’s 45-minute cap until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a> moved them to <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>.
+required context names, and on every <a class="reference internal" href="#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg, a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>). A job whose name ends in <code class="docutils literal notranslate"><span class="pre">(experimental)</span></code> counts by its workflow, not
+its name.
 The finding keeps its <code class="docutils literal notranslate"><span class="pre">H</span></code> id and says it is non-blocking. A
 KTLO leg past its job’s <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is still cancelled, and its check run
 reads red, though since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a> nothing gating waits on it, so that warning is worth
@@ -1313,6 +1312,112 @@ on every leg. What that gives up is the file in a venv holding only <code class=
 </ul>
 <p>The 3.15 engine cells are not among the cuts: 3.15 is in the supported tier
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), so its cells block on every run.</p>
+</section>
+<section id="light-pull-requests-2243">
+<h2>Light Pull Requests (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>)<a class="headerlink" href="#light-pull-requests-2243" title="Link to this heading">¶</a></h2>
+<p>A docs-only or test-only pull request runs only the jobs its files can affect, by the
+owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2243">#2243</a>: a docs-only one the docs build and <code class="docutils literal notranslate"><span class="pre">Lint</span></code>, a
+test-only one the tests on <code class="docutils literal notranslate"><span class="pre">latest</span></code> and <code class="docutils literal notranslate"><span class="pre">Lint</span></code>. A push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, the schedule
+and every other event run everything, and <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> stays required on
+both paths.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">changes</span></code> job (“Classify changed files”) of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>,
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> runs
+<code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code> in its <code class="docutils literal notranslate"><span class="pre">Classify</span> <span class="pre">the</span> <span class="pre">diff</span></code> step, on the workflow’s
+own <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> run alone. It writes two outputs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">code:</span> <span class="pre">false</span></code> – <strong>docs-only</strong>: every changed file is under <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or ends in
+<code class="docutils literal notranslate"><span class="pre">.md</span></code>, outside <code class="docutils literal notranslate"><span class="pre">.github/</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit/</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/</span></code>, <code class="docutils literal notranslate"><span class="pre">util/</span></code> and
+<code class="docutils literal notranslate"><span class="pre">examples/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test-only:</span> <span class="pre">true</span></code> – <strong>test-only</strong>: every changed file is docs or under <code class="docutils literal notranslate"><span class="pre">tests/</span></code>,
+and at least one is under <code class="docutils literal notranslate"><span class="pre">tests/</span></code>. That takes in the support files every test
+runs under, such as <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> and <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>, since the
+<code class="docutils literal notranslate"><span class="pre">latest</span></code> legs still run the whole suite. A workflow, a <code class="docutils literal notranslate"><span class="pre">util/</span></code> script or an
+<code class="docutils literal notranslate"><span class="pre">examples/</span></code> file is never a test.</p></li>
+</ul>
+<p>Anything else, and a diff the script cannot list, is code: <code class="docutils literal notranslate"><span class="pre">code:</span> <span class="pre">true</span></code> and
+<code class="docutils literal notranslate"><span class="pre">test-only:</span> <span class="pre">false</span></code>. A rename lists both of its paths, so moving a code file under
+<code class="docutils literal notranslate"><span class="pre">docs/</span></code> or <code class="docutils literal notranslate"><span class="pre">tests/</span></code> is code too.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Workflow and job</p></th>
+<th class="head"><p>Docs-only</p></th>
+<th class="head"><p>Test-only</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code></p></td>
+<td><p>skipped</p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg alone, the coverage leg included</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code></p></td>
+<td><p>skipped</p></td>
+<td><p>skipped</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
+<td><p>the project pins’ plain-unittest run and the docs readers</p></td>
+<td><p>the project pins</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, <code class="docutils literal notranslate"><span class="pre">windows</span></code></p></td>
+<td><p>skipped</p></td>
+<td><p>skipped</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">compatibility</span></code></p></td>
+<td><p>the supported legs, checking nothing</p></td>
+<td><p>the supported legs, checking nothing</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code></p></td>
+<td><p>not run</p></td>
+<td><p>not run</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code> (the docs build)</p></td>
+<td><p>runs</p></td>
+<td><p>not run, unless a docs file changed too</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lint.yml</span></code></p></td>
+<td><p>runs</p></td>
+<td><p>runs</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each job skips by its own <code class="docutils literal notranslate"><span class="pre">if:</span></code>, so its check reads <code class="docutils literal notranslate"><span class="pre">skipped</span></code>, never <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>,
+which GitHub counts against the commit. <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> pick their matrix
+with <code class="docutils literal notranslate"><span class="pre">fromJSON</span></code>, from <code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">test-latest</span></code> and
+<code class="docutils literal notranslate"><span class="pre">integration-latest</span></code> outputs on a test-only diff. <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>
+accepts <code class="docutils literal notranslate"><span class="pre">skipped</span></code> from <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> only where <code class="docutils literal notranslate"><span class="pre">changes</span></code> succeeded and said docs-only, and from
+<code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> only where it said test-only; a skipped
+<code class="docutils literal notranslate"><span class="pre">test</span></code> or <code class="docutils literal notranslate"><span class="pre">integration</span></code> fails a test-only diff, and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> must
+succeed on every diff (see <a class="reference internal" href="#required-status-checks">Required Status Checks</a>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> legs are required contexts, so they cannot be skipped the same
+way. A conditionally skipped job reports <code class="docutils literal notranslate"><span class="pre">Success</span></code> (docs.github.com,
+<a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks">Troubleshooting required status checks</a>,
+“Handling skipped but required checks”), but a matrix job skipped by a job-level
+<code class="docutils literal notranslate"><span class="pre">if:</span></code> expands no legs: it reports one check under its unexpanded name, such as
+<code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, as the docs-only Unit Tests run
+40238795866 shows. No required context matches that name, so each <code class="docutils literal notranslate"><span class="pre">Compat</span></code> context
+would stay pending. Instead <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> runs on a light diff with the matrix of
+<code class="docutils literal notranslate"><span class="pre">python_versions.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">compatibility-supported</span></code> output, its supported legs alone,
+under their required names. Each leg runs only its <code class="docutils literal notranslate"><span class="pre">Skip</span> <span class="pre">on</span> <span class="pre">a</span> <span class="pre">docs-only</span> <span class="pre">or</span> <span class="pre">test-only</span>
+<span class="pre">diff</span></code> notice and the job summary’s steps, since its diff leaves <code class="docutils literal notranslate"><span class="pre">pcapkit/</span></code> and
+<code class="docutils literal notranslate"><span class="pre">util/</span></code> as on the base branch. The <code class="docutils literal notranslate"><span class="pre">changes</span></code> job there writes <code class="docutils literal notranslate"><span class="pre">light</span></code>, which is
+<code class="docutils literal notranslate"><span class="pre">true</span></code> on either light diff, and <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> opens with
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so a failed <code class="docutils literal notranslate"><span class="pre">changes</span></code> runs every leg in full.</p>
+<p><code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code> gate by a <code class="docutils literal notranslate"><span class="pre">paths-ignore</span></code> filter on
+<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> instead, as no ruleset requires a check of theirs. A workflow a path
+filter skips never starts, so “checks associated with that workflow will remain in a
+‘Pending’ state” (<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onpushpull_requestpull_request_targetpathspaths-ignore">Workflow syntax</a>,
+“Example: Including paths”), and the troubleshooting page’s advice is to “avoid
+requiring workflows that can be skipped”. So no workflow emitting a required context
+has one. CodeQL’s filter is
+docs.github.com’s own recipe (<a class="reference external" href="https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning#avoiding-unnecessary-scans-of-pull-requests">Avoiding unnecessary scans of pull requests</a>),
+and its config leaves <code class="file docutils literal notranslate"><span class="pre">tests</span></code> out of the database anyway (see <a class="reference internal" href="#codeql-configuration-2130">CodeQL
+Configuration (#2130)</a>). The docs build reads nothing under <code class="file docutils literal notranslate"><span class="pre">tests</span></code>.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_light_pull_requests_2243.py</span></code> evaluates every gate above on
+each kind of diff, and <code class="file docutils literal notranslate"><span class="pre">tests/project/test_unit_tests_queue.py</span></code> runs the
+classifier and the <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> step.</p>
 </section>
 <section id="required-status-checks">
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
@@ -1380,8 +1485,9 @@ required job succeeded” step. Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs every test that reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown as well;
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> must pass on every diff. The <code class="docutils literal notranslate"><span class="pre">Compat</span></code> legs stay required separately because they come from
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs every test that reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown as well, and
+<code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> only on a test-only one (see <a class="reference internal" href="#light-pull-requests-2243">Light Pull
+Requests (#2243)</a>); <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> must pass on every diff. The <code class="docutils literal notranslate"><span class="pre">Compat</span></code> legs stay required separately because they come from
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
@@ -1476,7 +1582,7 @@ Tests run completes without it, and with it <code class="docutils literal notran
 <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> and the workflows that wait on Unit Tests completing
 (<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>). It runs on Unit Tests’ <code class="docutils literal notranslate"><span class="pre">push</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> events,
-skips a docs-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and lets a newer
+skips a docs-only or test-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and lets a newer
 commit supersede a run, a pull request’s or, unlike Unit Tests, a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
 waits on the legs, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s newest commit is the one worth testing, whereas Unit
@@ -1861,8 +1967,8 @@ and <code class="docutils literal notranslate"><span class="pre">windows</span><
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Classify</span> <span class="pre">the</span> <span class="pre">diff</span></code> in the <code class="docutils literal notranslate"><span class="pre">changes</span></code> job of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> and of
-<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Classify</span> <span class="pre">the</span> <span class="pre">diff</span></code> in the <code class="docutils literal notranslate"><span class="pre">changes</span></code> job of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, of
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> and of <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/coverage_report.py</span></code></p></td>
@@ -2496,6 +2602,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#coverage-1063">Coverage (#1063)</a></li>
 <li><a class="reference internal" href="#ci-timing-review-1538">CI Timing Review (#1538)</a></li>
 <li><a class="reference internal" href="#work-kept-off-the-pull-request-queue-1538">Work Kept Off the Pull-Request Queue (#1538)</a></li>
+<li><a class="reference internal" href="#light-pull-requests-2243">Light Pull Requests (#2243)</a></li>
 <li><a class="reference internal" href="#required-status-checks">Required Status Checks</a></li>
 <li><a class="reference internal" href="#test-tiers">Test Tiers</a></li>
 <li><a class="reference internal" href="#project-pins">Project Pins</a></li>

@@ -120,7 +120,8 @@ Terminology
 
           (tuple) index
            |--> (Info) data
-           |     |--> 'fpout' : (Optional[str]) output filename if exists
+           |     |--> 'fpout' : (Optional[str]) output filename, or None when
+           |     |                              the format writes no file
            |     |--> 'index': (tuple) tuple of frame index, both directions,
            |     |                     in capture order
            |     |              |--> (int) frame index

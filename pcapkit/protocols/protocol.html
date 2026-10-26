@@ -614,6 +614,18 @@ because <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol
 <dd><p>Header <a class="reference internal" href="../../glossary.html#term-schema"><span class="xref std std-term">schema</span></a> instance of the protocol.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.context">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">context</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><span class="pre">ContextRegistry</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.context" title="Link to this definition">¶</a></dt>
+<dd><p>Caller supplied parsing context.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> for what this channel is for, and
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._get_context" title="pcapkit.protocols.protocol.ProtocolBase._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._get_context</span></code></a> for how a
+protocol implementation reaches its own entry.</p>
+</div>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.id" title="Link to this definition">¶</a></dt>
@@ -1977,12 +1989,14 @@ documented under it above; each group below links to its entries.</p>
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">packet</span></span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.packet" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.schema">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema</span></span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.schema" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.context">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.context" title="Link to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.name" title="pcapkit.protocols.protocol.Protocol.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.info_name" title="pcapkit.protocols.protocol.Protocol.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.data" title="pcapkit.protocols.protocol.Protocol.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.payload" title="pcapkit.protocols.protocol.Protocol.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.protocol" title="pcapkit.protocols.protocol.Protocol.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.protochain" title="pcapkit.protocols.protocol.Protocol.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.packet" title="pcapkit.protocols.protocol.Protocol.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.schema" title="pcapkit.protocols.protocol.Protocol.schema"><code class="xref py py-attr docutils literal notranslate"><span class="pre">schema</span></code></a></p>
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.schema" title="pcapkit.protocols.protocol.Protocol.schema"><code class="xref py py-attr docutils literal notranslate"><span class="pre">schema</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.context" title="pcapkit.protocols.protocol.Protocol.context"><code class="xref py py-attr docutils literal notranslate"><span class="pre">context</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">

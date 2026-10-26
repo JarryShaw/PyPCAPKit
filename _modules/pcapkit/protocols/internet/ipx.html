@@ -755,6 +755,8 @@
         <span class="p">}</span></div>
 
 
+<div class="viewcode-block" id="IPX._next_exthdr_depth">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX._next_exthdr_depth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_next_exthdr_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Place the next layer in its chain of IPv6 extension headers.</span>
 
@@ -767,7 +769,8 @@
 <span class="sd">            never names an IPv6 extension header (:issue:`2169`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ipx_address</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="s1">'Data_Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>

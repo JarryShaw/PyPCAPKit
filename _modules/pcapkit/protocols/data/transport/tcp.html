@@ -891,9 +891,17 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.QuickStartResponse">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartResponse</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for TCP quick start response option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for TCP quick start response option.</span>
 
-    <span class="c1">#: Rate request.</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       ``req_rate`` is an :obj:`int` rather than a :obj:`float`</span>
+<span class="sd">       (:issue:`2167`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Rate request, in kbps: ``40 * 2 ** N`` for the Rate Request field</span>
+    <span class="c1">#: ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782` Section 3.1).</span>
     <span class="n">req_rate</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: TTL difference.</span>
     <span class="n">ttl_diff</span><span class="p">:</span> <span class="s1">'int'</span>

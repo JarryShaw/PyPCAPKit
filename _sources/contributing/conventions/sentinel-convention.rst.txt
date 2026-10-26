@@ -105,9 +105,10 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
 as written: the value of a vendored copy is that it can still be diffed against
 upstream, and a house-style rewrite destroys that in exchange for a sentinel nobody
 outside the port ever sees. The rule above is for sentinels this package writes
-itself. The case that settled it, ``_NOT_FOUND = object()`` in the
-:class:`~pcapkit.utilities.compat.cached_property` backport for interpreters below
-3.8, went with that backport when 1.5.0 raised the floor to 3.8 (:issue:`2051`).
+itself. The ruling was made for ``_NOT_FOUND = object()`` in the backport of
+:func:`functools.cached_property` that served interpreters below 3.8. With the floor
+at 3.8, :class:`~pcapkit.utilities.compat.cached_property` is a re-export of
+:func:`functools.cached_property` itself (:issue:`2051`).
 
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
