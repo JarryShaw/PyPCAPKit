@@ -116,9 +116,8 @@ NON_BLOCKING_WORKFLOWS = ('experimental.yml',)
 #: The suffix every KTLO leg's job name carries (#1633); such a leg's steps cannot
 #: fail it (#1672).
 KTLO_SUFFIX = ' (KTLO)'
-#: The suffix an experimental leg's job name carried in ``unit-tests.yml`` before
-#: #1732 moved it out; such a leg's steps could not fail it either, and its runs
-#: stay in the window until they age out.
+#: The suffix every experimental leg's job name carries (#1732); such a leg's
+#: steps cannot fail it either.
 EXPERIMENTAL_SUFFIX = ' (experimental)'
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
@@ -364,7 +363,7 @@ def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
 
     A cap written as an expression differs by leg, and the job's spec does not say
     which leg a name ran, so it reads as none, as an uncapped step's does. No
-    workflow writes one since #1732 moved the experimental legs out of ``test``.
+    workflow writes one (#1732).
 
     """
     found = []  # type: list[dict[str, Any]]

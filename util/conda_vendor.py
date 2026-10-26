@@ -701,11 +701,11 @@ def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str
                 notes.append(('notice', f'{name} on {subdir} moves from {pin.version} to {newest}, the newest '
                                         f'release with a wheel there; due for review by {kept[subdir].review_by}'))
             elif newest is None:
-                # #2025: a pin no release can move to used to stay without a word.
+                # #2025: a pin no release can move to stays, with a warning.
                 notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
                                          f'hold: {stuck(project, subdir, pythons, have)}'))
             elif Version(newest) < current < ceiling:
-                # #2028: the pinned release itself lost a wheel, which used to pass without a word too.
+                # #2028: the pinned release itself lost a wheel, which warns too.
                 notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
                                          f'hold: {lost(project, subdir, pythons, pin.version)}, and the '
                                          f'newest release up to {have} with wheels for all of {_tags(pythons)} '

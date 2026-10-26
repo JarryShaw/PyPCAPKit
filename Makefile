@@ -5,12 +5,12 @@ export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
 export PIP_CACHE_DIR ?= $(CURDIR)/.pip-cache
 export all_proxy=
 
-# No recipe below needs a bash-only feature -- the last one, brace
-# expansion in the `isort:` target, went with #765's `find`-based fix (see
-# that target and tests/project/test_isort_clean.py for why: a later revision
-# of that same fix leaned on brace expansion plus a bash new enough for
-# `shopt -s globstar`, which is a second, version-specific way bash-only
-# reliance can go wrong beyond just needing bash at all). The pin stays
+# No recipe below needs a bash-only feature: the `isort:` target uses `find`
+# where a recursive glob would need brace expansion (#765; see that target and
+# tests/project/test_isort_clean.py for why: brace expansion plus
+# `shopt -s globstar` needs a bash new enough for it, which is a second,
+# version-specific way bash-only reliance can go wrong beyond just needing
+# bash at all). The pin stays
 # anyway: one known shell to write recipes against, rather than whatever
 # `/bin/sh` happens to be on a given machine, is worth keeping even with
 # nothing bash-specific relying on it, and it costs nothing to take
@@ -149,25 +149,23 @@ RUN ?= pipenv run
 # flags in each. Note the `pcapkit` before the flags as well as after: that is how this
 # recipe has always read, and vermin de-duplicates the paths (it reports the
 # same number of files analyzed either way), so it is preserved verbatim rather
-# than tidied. `--no-parse-comments` is gone (#2145): it came with the first
-# vermin recipe, with no recorded reason, and made vermin ignore the
-# `# novermin` markers on compat.py's version-gated imports. The cost of parsing
+# than tidied. There is no `--no-parse-comments` (#2145): it makes vermin ignore
+# the `# novermin` markers on compat.py's version-gated imports. The cost of parsing
 # them is that a marker silences its whole line, so keep them on guarded lines.
 VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --eval-annotations -vv
-# `pylint.extensions.emptystring` no longer exists (#767): the check it provided,
-# `compare-to-empty-string`, was folded into the core `refactoring` checker at
-# pylint 3.0 as `use-implicit-booleaness-not-comparison-to-string` (C1804), with
-# `compare-to-empty-string` kept only as a message alias -- no plugin load needed
-# any more (confirmed: it fires the same with or without the dead plugin
-# reference, so it was never actually gated by it), so the entry is dropped
-# rather than the check. `old-division`, `no-absolute-import` and
-# `input-builtin` are dropped because pylint has genuinely removed them.
-# `eq-without-hash` is dropped for a different reason: the extension module
-# that still ships that check (`pylint.extensions.eq_without_hash`, `W1641`)
-# was simply never named in `--load-plugins=`, so `--disable=eq-without-hash`
-# was as unrecognised as if it had been removed -- same spurious Command-line
-# message, not the same cause. See .github/workflows/lint.yml's header for
-# the full account.
+# `--load-plugins=` names no `pylint.extensions.emptystring`, which pylint no
+# longer ships (#767): the check it provided, `compare-to-empty-string`, was
+# folded into the core `refactoring` checker at pylint 3.0 as
+# `use-implicit-booleaness-not-comparison-to-string` (C1804), with
+# `compare-to-empty-string` kept only as a message alias, so `--enable=` names
+# the core check and no plugin load is needed (it fires the same with or
+# without the plugin reference). `--disable=` names no `old-division`,
+# `no-absolute-import` or `input-builtin`, because pylint has removed them.
+# Nor does it name `eq-without-hash`, for a different reason: the extension
+# module that ships that check (`pylint.extensions.eq_without_hash`, `W1641`)
+# is not in `--load-plugins=`, so `--disable=eq-without-hash` would be as
+# unrecognised as a removed check -- the same spurious Command-line message,
+# not the same cause.
 PYLINT_FLAGS = --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,use-implicit-booleaness-not-comparison-to-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes
 MYPY_FLAGS = --follow-imports=silent --ignore-missing-imports --show-column-numbers --show-error-codes
 BANDIT_FLAGS = -r

@@ -17,11 +17,8 @@ prune temp
 prune typings
 
 # Belt-and-braces, both of them: setuptools ships these two whether or not this
-# file mentions them, so neither line is load-bearing. An earlier version of this
-# comment claimed the opposite -- that ``include README.md`` was "the only thing
-# that puts it in an sdist" and that an sdist without it "cannot be installed at
-# all" -- and both halves are false. Measured by deleting the two ``include``
-# lines below and rebuilding from a clean tree: the ``tar tzf`` listing is
+# file mentions them, so neither line is load-bearing. Measured by deleting the
+# two ``include`` lines below and rebuilding from a clean tree: the ``tar tzf`` listing is
 # identical either way, with an empty ``diff``, and the resulting sdist
 # installs with exit 0. ``README.md``, ``LICENSE``, ``CHANGELOG.md`` and
 # ``CITATION.cff`` are all still in it.
@@ -34,7 +31,7 @@ prune typings
 #   (``setuptools/_distutils/command/sdist.py``) appends the first of those
 #   that exists to the file list unconditionally, before ``MANIFEST.in`` is read.
 #   The ``.md`` entry is setuptools' own addition over the distutils default, so
-#   the README becoming Markdown is exactly what this line stopped mattering for.
+#   it is what ships a Markdown README without this line.
 # * ``Distribution._finalize_license_files`` (``setuptools/dist.py``) supplies
 #   the default ``license_files`` glob
 #   ``['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']``, used because
@@ -48,9 +45,9 @@ prune typings
 # So the failure mode is real in principle; it just cannot be reached by removing
 # this line, because the README is in the sdist regardless.
 #
-# Of the ``include`` lines this file originally carried, only
-# ``include CHANGELOG.md`` is load-bearing: deleting it alone drops just that
-# file from the listing, and nothing else changes.
+# Of these two and ``include CHANGELOG.md`` below, only the last is
+# load-bearing: deleting it alone drops just that file from the listing, and
+# nothing else changes.
 #
 # These two are kept anyway, as an explicit statement of intent that does not
 # depend on a setuptools default staying where it is -- a much weaker reason than
@@ -96,5 +93,5 @@ recursive-include docs/source/changelog *.rst
 # straight from the tree, so the conda recipe builds no sdist; its modules
 # reach that wheel through package discovery, and every other file under it
 # through the ``package-data`` entry in ``pyproject.toml`` (#1814). A line naming
-# it would warn in every other build, and ``include`` of a directory matched
+# it would warn in every other build, and ``include`` of a directory matches
 # nothing even in the conda one (#1794).

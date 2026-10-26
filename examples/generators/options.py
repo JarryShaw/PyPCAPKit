@@ -106,8 +106,8 @@ can trip it on a case that normally takes milliseconds (#1428):
 every second until :func:`roundtrip` has the :exc:`TimeoutError`, because one
 raise can be lost: a finaliser the cyclic collector runs reports it to
 :func:`sys.unraisablehook` and drops it, and an ``except OSError`` drops it too,
-:exc:`TimeoutError` being one. A single alarm then left the case running for good
-(#1889).
+:exc:`TimeoutError` being one. A single alarm would then leave the case running
+for good (#1889).
 
 """
 
@@ -163,7 +163,7 @@ DST_IP6 = '2001:db8::2'
 #: (:rfc:`2675#section-2`). See :func:`_jumbogram_datagram`.
 JUMBO_LEN = 0x10000
 #: Snapshot length of a capture whose frames all fit in it: scapy's default,
-#: which keeps every capture but a jumbogram's as it always was.
+#: which every capture but a jumbogram's carries.
 SNAPLEN = 0xFFFF
 #: Snapshot length of a capture holding a longer frame: libpcap's
 #: ``MAXIMUM_SNAPLEN``. A libpcap reader cuts a record to the file's snaplen, so
@@ -371,14 +371,13 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
                     attribute: 'str') -> 'Any':
     """A protocol's dispatch registry, or a stand-in derived from its handlers.
 
-    ``IPv4`` and ``HIP`` were the last two protocols to dispatch their options
-    and parameters by attribute name rather than through a registry, and for
-    those there was nothing to enumerate. The equivalent source of truth is the
-    enumeration crossed with the presence of the handler, which is what this
-    builds when the registry is absent.
+    A protocol that dispatches its options or parameters by attribute name
+    rather than through a registry has nothing to enumerate. The equivalent
+    source of truth is the enumeration crossed with the presence of the
+    handler, which is what this builds when the registry is absent.
 
-    Both of them have a real registry (#429), so the fallback is not taken
-    for either -- it is kept because it costs nothing and is
+    ``IPv4`` and ``HIP``, read through here, both have a real registry (#429),
+    so the fallback is not taken for either -- it is kept because it costs nothing and is
     the only thing that would notice a protocol added tomorrow without one. Both
     shapes are a :class:`collections.defaultdict`, so :func:`cases` and
     :func:`handler` cannot tell which one they were given -- and in particular
@@ -418,24 +417,23 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
 #: option and nothing else.
 #:
 #: Every key here has to be spelled the way :meth:`TCP.make
-#: <pcapkit.protocols.transport.tcp.TCP.make>` declares it, because ``make``
-#: takes ``**kwargs`` and *silently drops* whatever it does not declare -- no
-#: ``UnknownFieldWarning``, no ``TypeError``, nothing. GitHub issue #602 is
-#: the keys below, spelled wrong and therefore ignored:
+#: <pcapkit.protocols.transport.tcp.TCP.make>` declares it: an undeclared
+#: keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (#617).
+#: Without that check, ``make``'s ``**kwargs`` drops it silently, and GitHub
+#: issue #602 is this table's keys spelled wrong and so ignored:
 #:
-#: * ``'seq'`` is ``seq_no``. The mapping read as sequence number 1 and every
-#:   generated frame carried 0, which is what made the defect worth an issue:
-#:   the captures were not the packets this table describes.
-#: * ``'urgent_pointer'`` is ``urgent``. Harmless in effect, since the value
-#:   asked for and the default that was used are both 0.
-#: * ``'ack_flag'`` is ``ack``, and ``ack`` is the *acknowledgement flag*
-#:   rather than the acknowledgement number, which is ``ack_no``. So the two
-#:   were the wrong way round: ``'ack': 0`` set the flag (to a falsy 0) and
-#:   ``'ack_flag': False`` set nothing at all.
+#: * ``'seq'`` for ``seq_no``. The mapping reads as sequence number 1 and
+#:   every generated frame carries 0, so the captures are not the packets this
+#:   table describes.
+#: * ``'urgent_pointer'`` for ``urgent``. Harmless in effect, since the value
+#:   asked for and the default are both 0.
+#: * ``'ack_flag'`` for ``ack``, where ``ack`` is the *acknowledgement flag*
+#:   rather than the acknowledgement number, which is ``ack_no``: ``'ack': 0``
+#:   sets the flag (to a falsy 0) and ``'ack_flag': False`` sets nothing at
+#:   all.
 #:
-#: The values are unchanged from what the mapping always claimed to mean: a
-#: SYN-only segment with sequence number 1, every other flag clear, and the
-#: acknowledgement number, checksum and urgent pointer at zero.
+#: The mapping is a SYN-only segment with sequence number 1, every other flag
+#: clear, and the acknowledgement number, checksum and urgent pointer at zero.
 TCP_BASE = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
     'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
@@ -531,11 +529,10 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
     return {
         # Two authorities rather than one because two bits set in the bitmap say
-        # more than one does, not because one is unrepresentable: it used to be,
-        # a single ``GENSER`` (value 0) making ``_make_opt_sec`` size a
-        # zero-octet bitmap and then index into it for a bare ``IndexError``, and
-        # #537 fixed that arithmetic. So this is a coverage choice and routes
-        # around nothing.
+        # more than one does, not because one is unrepresentable. Without
+        # #537's fix, a single ``GENSER`` (value 0) makes ``_make_opt_sec`` size
+        # a zero-octet bitmap and then index into it for a bare ``IndexError``.
+        # So this is a coverage choice and routes around nothing.
         OptionNumber.SEC: {'authorities': [ProtectionAuthority.GENSER,
                                            ProtectionAuthority.NSA]},
         # ``counts=10``, the default, needs 43 option octets, which overflows
@@ -1007,9 +1004,10 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
-#: One, since #689. What follows is why it was two, and why it is not.
+#: One (#689). What follows records why a pair is not needed, and what a pair
+#: would hide.
 #:
-#: It was two because of the defect #651 fixed. ``HIP.make`` computes the
+#: A pair hides the defect #651 fixed. ``HIP.make`` computes the
 #: header's ``len`` field as ``total_length // 8 + 4``, which is lossless only
 #: when the parameter octets are a multiple of eight; and every padding site in
 #: the two HIP modules aligned the *contents* to eight, ignoring the four-octet
@@ -1026,7 +1024,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: What kept the pair afterwards was a short list of codes whose own packed
 #: length disagreed with the ``len`` they declared, so their record was not
 #: 8-aligned however the padding was computed, and a pair cancelled that
-#: misalignment the same way the pre-#651 padding rule once did. #672 and #679
+#: misalignment the same way it cancelled #651's padding defect. #672 and #679
 #: closed two of those -- ``R1_COUNTER`` (129), whose 8-octet :rfc:`7401`
 #: Section 5.2.3 counter had packed as four, and ``LOCATOR_SET`` (193), whose
 #: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
@@ -1042,7 +1040,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #:   made the field two octets.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
 #:   any other version -- and is built at version 1 through
-#:   :data:`HIP_VERSION`, so it round-trips and is no longer recorded.
+#:   :data:`HIP_VERSION`, so it round-trips and needs no entry.
 #:
 #: A third gap here, ``R1_Counter`` (128), was closed separately by #690 and was
 #: never one of the pair's cancellations above: it parsed as an
@@ -1050,8 +1048,8 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: ``code=`` of the class statement and ``R1CounterParameter`` declared only
 #: 129 -- even though ``__parameter__``'s ``_read_param_*``/``_make_param_*``
 #: entries already existed for both codes, as two hand-written dict entries,
-#: not because of any name-normalisation rule. Not recorded since #690,
-#: which registered ``R1CounterParameter`` for 128 too.
+#: not because of any name-normalisation rule. #690 registered
+#: ``R1CounterParameter`` for 128 too, so it needs no entry.
 #:
 #: So the pair was routing around nothing by the time #672, #679 and #690 had
 #: all landed, and dropping to one copy does not change what round-trips.
@@ -1100,8 +1098,8 @@ def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
         # These two are not here because the default fails -- ``counter=0``
         # constructs and parses perfectly well. They are here because a
         # zero-valued field cannot discriminate a width defect from a correct
-        # one, and this parameter's width defect (#672) hid behind exactly that
-        # for as long as it did. The RFC-only walk over
+        # one, which is how this parameter's width defect (#672) stayed
+        # hidden. The RFC-only walk over
         # ``options-internet.pcap`` -- which takes its stride solely from
         # :rfc:`7401` Section 5.2.1's ``Total Length = 11 + Length - (Length +
         # 3) % 8`` -- read ``Length = 12``, advanced 16 over a 12-octet record,
@@ -1110,8 +1108,8 @@ def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
         # octets. Every octet it mis-read was zero, so its zero-padding check
         # passed and it reported no violation. Measured: patching one counter to
         # ``aabbccdd`` turned that silence into ``type 0 padding not zeroed:
-        # aabbccdd``. With a non-zero counter the fixture can no longer conceal
-        # a mis-stride here, whether or not the width is right -- which is the
+        # aabbccdd``. With a non-zero counter the fixture cannot conceal a
+        # mis-stride here, whether or not the width is right -- which is the
         # reason to keep this override, #672 having corrected the width.
         Parameter.R1_COUNTER: {'counter': 0xaabbccdd},
         Parameter.R1_Counter: {'counter': 0xaabbccdd},
@@ -1784,7 +1782,7 @@ def roundtrip(case: 'Case', deadline: 'int' = DEADLINE) -> 'Outcome':
                 # Broad on purpose: the point is to find out *what* a
                 # constructor does when it is wrong, and narrowing this to
                 # ProtocolError would let an AttributeError or a KeyError --
-                # which is what most of the current defects raise -- abort the
+                # which is what most defects here raise -- abort the
                 # sweep rather than be recorded as this case's result.
                 return Outcome(case, 'CONSTRUCT', f'{type(exc).__name__}: {exc}', None,
                                seen())
@@ -1868,7 +1866,7 @@ class _deadline:  # pylint: disable=invalid-name
     Each raise re-arms the alarm for one more second, so the raise repeats until
     :attr:`settled` is set (#1889). One raise is not enough: one that lands in a
     finaliser, or in an ``except OSError``, never reaches the body, and a single
-    alarm then left a hung case hung. The body must set :attr:`settled` before
+    alarm would leave a hung case hung. The body must set :attr:`settled` before
     it leaves: :meth:`__exit__` sets it too, but a firing handled as
     :meth:`__exit__` is entered runs before it can.
 

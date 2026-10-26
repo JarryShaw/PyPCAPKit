@@ -22,15 +22,15 @@ that fails or is missing included, counts nothing, so an outage reads
 ``false``, the safe default, without failing ``version_check`` (see
 :func:`fetch`). Both are ``true`` only once what they count reaches what they
 expect, so a version expecting nothing is ``true`` unread. The one count runs
-on ``python3 -`` as a snippet of its own, which keeps a body that does not
-parse failing the step as it did, with ``python3``'s status and traceback.
+on ``python3 -`` as a snippet of its own, so a body that does not parse fails
+the step, with ``python3``'s status and traceback.
 
-Both steps formerly held this as shell under ``set -euo pipefail`` and the
-runner's ``bash -e``, and the two did the same but for their endpoint, their
-expectation and their count; so they share this script. It keeps their
-outcomes: the lists are read as ``read -r -a`` read them, from the first line,
-split on spaces and tabs; ``curl``'s ``-w`` code and the ``000`` its failure
-added are the ``http`` the log line names; a count that is not an integer is
+The two steps differ only in their endpoint, their expectation and their
+count, so they share this script, which keeps the outcomes of a shell step
+under ``set -euo pipefail`` and the runner's ``bash -e``: the lists are read
+as ``read -r -a`` reads them, from the first line, split on spaces and tabs;
+``curl``'s ``-w`` code and the ``000`` its failure adds are the ``http`` the
+log line names; a count that is not an integer is
 ``[``'s error and reads ``false``; a variable it reads that is unset, which
 Actions never leaves it, is ``<name>: unbound variable`` and status 1.
 
@@ -117,11 +117,11 @@ def anaconda_source(path: 'str') -> 'str':
 
 
 class Unbound(Exception):
-    """A variable read as ``$NAME`` that is unset, which ``set -u`` refused."""
+    """A variable read as ``$NAME`` that is unset, which ``set -u`` refuses."""
 
 
 class Failed(Exception):
-    """A command whose failure ended the shell under ``set -e``, with its status."""
+    """A command whose failure ends a shell under ``set -e``, with its status."""
 
     def __init__(self, status: 'int') -> 'None':
         super().__init__(status)
@@ -276,7 +276,7 @@ def anaconda(path: 'str') -> 'int':
     """``PCAPKIT_CONDA_COMPLETE``: each platform the version was released for, for each supported version."""
     builds = var('PCAPKIT_CONDA_BUILDS')
     subdirs = released_subdirs()
-    # Exported, as the step did, so curl and the snippet see it.
+    # Exported, so curl and the snippet see it.
     os.environ['PCAPKIT_CONDA_SUBDIRS'] = os.fsdecode(subdirs)
     expected = len(words(subdirs)) * len(words(builds))
     return check('anaconda', expected, ANACONDA_URL.encode() + var('PCAPKIT_VERSION'), path, anaconda_source)

@@ -10,7 +10,7 @@ source file -- there is not one on this host to transcribe -- each entry is
 one round trip through Wireshark's own ``wiretap/pcap-common.c``, and this
 script is that round trip, made runnable instead of ad hoc.
 
-The method, unchanged from #850
+The method, as #850 used it
 --------------------------------
 
 For every encapsulation :program:`editcap` accepts under ``-T``:
@@ -55,8 +55,8 @@ words on top of the 226 real tokens. The listing also opens with **two**
 banner lines, not one: ``editcap: "" isn't a valid encapsulation type`` (the
 error for the empty argument itself) and then ``editcap: The available
 encapsulation types for the "-T" flag are:`` immediately after it -- so a
-line-oriented split still has two non-entries to exclude, not the single line
-an earlier draft of this docstring assumed. The true count is **226**, and
+line-oriented split still has two non-entries to exclude, not one. The true
+count is **226**, and
 the shape that yields it is ``<token> - <description>``, anchored to leading
 whitespace so neither banner line -- both flush against the left margin, with
 no leading whitespace at all -- can match:

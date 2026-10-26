@@ -62,7 +62,7 @@ def main() -> 'int':
                               capture_output=True, text=True, check=False)
         files = [path for path in diff.stdout.split('\0') if path]
         if diff.returncode != 0 or not files:
-            # #2047: unescaped, as before the helper, so git's stderr keeps its lines.
+            # #2047: unescaped, so git's stderr keeps its lines.
             _actions.annotate('warning', f'git diff exited {diff.returncode} with {len(files)} files: '
                               f'{diff.stderr.strip()}. Treating the diff as code.',
                               title='Could not list the changed files', escape=False)

@@ -4,24 +4,22 @@
 Classic PCAP declares its own byte order in the magic number of the global
 header, and every 32-bit field after that -- the global header's own, and the
 four in each record header -- is written in *that* order rather than in the
-host's. A reader therefore carries a branch for it, and until this module there
-was no ``.pcap`` fixture in the repository to take the big-endian side of that
-branch: every capture under ``examples/captures/`` was little-endian, so on a
-little-endian runner the branch was never taken and reading the host's order
-instead of the file's produced the right answer anyway.
+host's. A reader therefore carries a branch for it, and only a big-endian
+fixture takes the big-endian side of that branch: with little-endian captures
+alone, a little-endian runner never takes it, and reading the host's order
+instead of the file's produces the right answer anyway.
 
-That is how GitHub issue #605 survived: ``Frame.unpack`` seeded the byte order
-under the key ``bytesorder`` where ``byteorder_callback`` -- then in
-:file:`pcapkit/protocols/schema/misc/pcap/frame.py`, since moved to
-:file:`pcapkit/corekit/fields/byteorder.py` -- reads ``byteorder``, so the
-lookup always missed and always fell back to :data:`sys.byteorder`. Reading a
-big-endian capture then byte-swapped ``ts_sec``, ``ts_usec``, ``incl_len`` and
+That is how a defect such as GitHub issue #605 goes unseen: with ``Frame.unpack`` seeding the
+byte order under the key ``bytesorder`` where ``byteorder_callback``
+(:file:`pcapkit/corekit/fields/byteorder.py`) reads ``byteorder``, the lookup
+always misses and always falls back to :data:`sys.byteorder`. Reading a
+big-endian capture then byte-swaps ``ts_sec``, ``ts_usec``, ``incl_len`` and
 ``orig_len`` -- and because ``incl_len`` is the payload length, the first record
-swallowed the rest of the file and the read that followed was handed a negative
+swallows the rest of the file and the read that follows is handed a negative
 payload length, raising
 ``ValueError: read length must be non-negative or -1`` out of
-:file:`pcapkit/protocols/schema/schema.py`. A one-character fix, with nothing in
-the suite able to tell whether it worked.
+:file:`pcapkit/protocols/schema/schema.py`. The fix is one character, and
+nothing but these fixtures can tell whether it works.
 
 =============================== ==========================================
 Fixture                         Exercises

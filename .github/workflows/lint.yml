@@ -14,11 +14,11 @@ name: "Lint"
 # one tree disagree on it; a change in the R class alone is not evidence.
 #
 # Promotion order, cheapest first:
-#   * bandit -- clean since #2145: each finding was a false positive and carries
+#   * bandit -- clean (#2145): each finding was a false positive and carries
 #     a justified `# nosec`. Promotable.
-#   * vermin -- clean since #2145: meets vermin.ini's 3.8 target. Promotable.
-#   * mypy -- #2145 cleared the `unused-ignore`s and the pyshark link-type
-#     tables; the rest is real typing work.
+#   * vermin -- clean (#2145): meets vermin.ini's 3.8 target. Promotable.
+#   * mypy -- the `unused-ignore`s and the pyshark link-type tables are clean
+#     (#2145); the rest is real typing work.
 #   * pylint -- not realistically promotable: `unused-argument`,
 #     `redefined-builtin` and `super-init-not-called` are inherent to the
 #     schema DSL, and its metaprogramming yields `unsubscriptable-object` and
@@ -73,7 +73,7 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
       # `.[all,dev]`: pylint and mypy resolve imports, and `dev` carries the
-      # engines #910 took out of `all`. pylint's `import-error` for `pypcap` and
+      # engines `all` leaves out (#910). pylint's `import-error` for `pypcap` and
       # `pypcapfile` (`python_version < '3.12'`) and `pcap-ct` (in no extra
       # installed here) is expected.
       - name: Install package and lint tools

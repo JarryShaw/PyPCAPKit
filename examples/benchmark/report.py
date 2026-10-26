@@ -52,8 +52,7 @@ literals -- because docutils does not know them and renders them as errors.
 The snippets land in :file:`docs/source/engines.rst`, which Sphinx renders, so a
 Sphinx-only role would in fact survive there. Staying docutils-clean is kept
 deliberately anyway: it is what lets a table be pasted into any reStructuredText
-a plain docutils reader will see, the project README having been one such
-destination until it became Markdown.
+a plain docutils reader will see.
 
 """
 
@@ -84,12 +83,10 @@ BASELINE_LABEL = 'pcapkit'
 #: mark a row or a column that carries a note: one reference per noted row, matched to
 #: the ``.. [*]`` bodies emitted directly after the table, in the same order.
 #:
-#: These used to be literal symbols with a hand-written legend, on the theory that a
-#: footnote reference could collide with footnote numbers already on the page the
-#: snippet is pasted into. It cannot: docutils assigns auto-symbols and auto-numbers
-#: page-wide, in document order, so a snippet's footnotes simply take the next free
-#: symbols and numbers wherever they land -- and :file:`docs/source/engines.rst` used
-#: footnotes for these tables before this module did.
+#: A footnote reference cannot collide with footnote numbers already on the page the
+#: snippet is pasted into: docutils assigns auto-symbols and auto-numbers page-wide,
+#: in document order, so a snippet's footnotes simply take the next free symbols and
+#: numbers wherever they land.
 FOOTNOTE = '[*]_'
 
 #: Label of the one footnote every overlapping row shares. Auto-numbered and labelled
@@ -762,8 +759,8 @@ def _simple_table(headers: 'Sequence[str]', body: 'Sequence[Sequence[str]]',
         return ' '.join(padded).rstrip()
 
     rule = ' '.join('=' * width for width in widths)
-    # The header stays left-aligned even in a numeric table, matching the hand-written
-    # table this one replaces: a right-aligned ``3.10`` sits over the tail of its
+    # The header stays left-aligned even in a numeric table, matching the table in
+    # docs/source/engines.rst: a right-aligned ``3.10`` sits over the tail of its
     # column and reads as though it belonged to the column before it.
     lines = [rule, line(headers, False), rule]
     lines.extend(line(row, numeric) for row in body)
@@ -848,10 +845,8 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
                              f"SHA-256 ``{capture['sha256'][:16]}...``"))
     # Every engine on every interpreter should see the same number of frames in the same
     # capture, so this row is normally one number. A disagreement is reported rather than
-    # dropped: with one interpreter it was barely possible and omitting it cost nothing,
-    # but two CPython versions extracting different counts from one file would be the
-    # most interesting thing in the report, and the previous behaviour was to hide
-    # exactly that by printing no row at all.
+    # dropped: two CPython versions extracting different counts from one file would be the
+    # most interesting thing in the report, and printing no row would hide exactly that.
     packets = {entry['packets'] for document in ordered for entry in document['results']
                if entry['packets']}
     if len(packets) == 1:
@@ -875,9 +870,8 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
     # column are counting the same unit. They are not the same *number*, and cannot be:
     # a pass happens once per environment, so the table's count is this figure times the
     # number of environments.
-    # The column was called "Passes" while there were two environments and one
-    # interpreter, where the difference was easy to overlook; across a matrix it reads as
-    # a contradiction, hence the rename.
+    # Hence "Samples" for the column rather than "Passes": across a matrix, one name for
+    # two different numbers reads as a contradiction.
     environments = ', '.join(f"``{document['environment']}``" for document in ordered)
     noun = 'environment' if len(ordered) == 1 else 'environments'
     pairs.append(('Passes', f"{first['repeats']} over the whole engine set, "
@@ -1089,7 +1083,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
     lines.extend(_simple_table(headers, body, numeric=True))
     lines.append('')
 
-    # The owner's own sentence about the old hand-maintained table, kept word for word:
+    # The owner's own sentence about the hand-maintained table, kept word for word:
     # it is the right warning, and a regenerated table that rewords it would show up as
     # a diff in the prose every time the numbers changed. It sits between the table and
     # the footnotes, where docs/source/engines.rst has it.
@@ -1337,9 +1331,9 @@ def render_text(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         lines.append('')
         # No per-version failure lines here. The provenance block above already names
         # every version the run could not measure and why, in the same output a few
-        # lines up, and a second rendering of the same fact managed to disagree with the
-        # first: it called a partly measured version "not measured" while its figures
-        # were printed in the grid directly above.
+        # lines up, and a second rendering of the same fact can disagree with the first,
+        # calling a partly measured version "not measured" while its figures are printed
+        # in the grid directly above.
 
     lines.append(f'{"engine":14} {"relative":>10} {"range":>19} {"ms/packet":>12}  samples')
     lines.append('-' * 78)

@@ -21,11 +21,11 @@ Only ``gh release view`` and ``gh release upload`` run, neither of which calls
 Update a release, where GitHub re-checks the release's target against the
 workflow-file rule (#1634). A missing release fails the view, before any upload.
 
-Each line's words, split on spaces and tabs, are expanded as the former shell's
-unquoted ``$pattern`` expanded them: a word holding ``*``, ``?`` or ``[`` stands
-for the files it matches, sorted, and for itself where it matches none; a word
-that is not then a regular file gets an ``::error`` and exits 1. A failing
-``gh`` ends the script with its status, as ``set -e`` ended the step.
+Each line's words, split on spaces and tabs, are expanded as an unquoted shell
+``$pattern`` expands them: a word holding ``*``, ``?`` or ``[`` stands for the
+files it matches, sorted, and for itself where it matches none; a word that is
+not then a regular file gets an ``::error`` and exits 1. A failing ``gh`` ends
+the script with its status, as ``set -e`` would end a shell step.
 
 The script is standard library only, and keeps to Python 3.8's syntax.
 
@@ -78,7 +78,7 @@ def gh(*args: 'str', capture: 'bool' = False) -> 'Tuple[int, str]':
 def states(published: 'str') -> 'Dict[str, str]':
     """``{name: state}`` of ``published``, the view's lines; a name listed twice keeps its last state.
 
-    As ``IFS=$'\\t' read -r asset asset_state`` split each line: the tabs around
+    As ``IFS=$'\\t' read -r asset asset_state`` splits each line: the tabs around
     it dropped, the name up to the next tab, and the state the rest, its leading
     tabs dropped.
 
@@ -91,7 +91,7 @@ def states(published: 'str') -> 'Dict[str, str]':
 
 
 def expand(pattern: 'str') -> 'List[str]':
-    """The files one line of ``$PCAPKIT_ASSETS`` names, as the shell's unquoted ``$pattern`` gave them."""
+    """The files one line of ``$PCAPKIT_ASSETS`` names, as an unquoted shell ``$pattern`` gives them."""
     files = []  # type: List[str]
     for word in re.split(r'[ \t]+', pattern):
         if not word:

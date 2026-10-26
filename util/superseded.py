@@ -33,7 +33,7 @@ the session's group (:func:`stop`). Where ``COMMAND`` exits, it writes the notic
 line and ``stopped=true`` to ``$GITHUB_OUTPUT``, and exits 0: a stopped pytest writes no JUnit
 file, so the upload after it reads the output and expects none (#2073). Otherwise it exits
 with ``COMMAND``'s own status, ``128 + N`` for a signal ``N`` as a shell reports it, so a test
-failure on a current commit reads as it did without the watcher. SIGINT, SIGTERM and SIGHUP sent to the
+failure on a current commit reads as it would without the watcher. SIGINT, SIGTERM and SIGHUP sent to the
 watcher are passed on to ``COMMAND``.
 
 Every wait is bounded. Where ``COMMAND`` outlives SIGKILL by ``--kill-wait``

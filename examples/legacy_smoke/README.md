@@ -106,14 +106,13 @@ Both *inputs* are committed, so this works on a fresh clone with no `make sample
 first. Use `make fixtures PYTHON=../../.venv/bin/python` to pick a specific
 interpreter.
 
-These reports were tracked once, and #685 is why they are not any more. Nothing reads a
-report back -- no test asserts on one, and the docs only quote them as prose -- so a
-parser change that alters how a frame renders leaves the committed copy quietly wrong,
-with no failure anywhere to say so. `pcapng.txt` sat recording `packet -> NIL` for
-blocks that had started carrying their captured octets, and the staleness was
-found by reading the file rather than by anything breaking. Generating them on demand
-means the copy on your disk describes the tree you are standing in, which was the only
-thing that made them worth looking at.
+They are untracked by design (#685). Nothing reads a report back -- no test asserts on
+one, and the docs only quote them as prose -- so a parser change that alters how a frame
+renders would leave a committed copy quietly wrong, with no failure anywhere to say so:
+a committed `pcapng.txt` recorded `packet -> NIL` for blocks that carry their captured
+octets, and the staleness was found by reading the file rather than by anything
+breaking. Generated on demand, the copy on your disk describes the tree you are
+standing in, which is the only thing that makes them worth looking at.
 
 `TZ=UTC` is a belt-and-braces pin, not a requirement. `pcapkit` renders a frame
 timestamp in UTC, or in the zone a PCAP-NG interface declares in `if_tzone`, and

@@ -18,17 +18,17 @@ versions", after setup-python. It appends ``pypi-wheels`` and
   ``::error`` and status 1. A tag on this run's commit counts this run's, as
   they are the same.
 
-The step formerly held this as shell under ``set -euo pipefail`` and the
-runner's ``bash -e``, and this keeps its outcomes: a ``git``, ``mktemp`` or
+It keeps the outcomes of a shell step under ``set -euo pipefail`` and the
+runner's ``bash -e``: a ``git``, ``mktemp`` or
 ``python3`` that fails ends the script with its status, but for the first
 look for the tag, which a fetch follows, the looks for the tier file and the
 helper, and the read of ``HEAD``, which only compares; a command missing from ``PATH`` is
 status 127; a file that does not open for writing is status 1; a variable it
 reads that is unset, which Actions never leaves it, is ``<name>: unbound
 variable`` and status 1; a command killed by a signal is ``128 + N``, without
-bash's own report of the kill. The outputs are written as the shell's ``echo``
-wrote them, a line each, and the scratch directory is left behind as ``mktemp
--d`` left it.
+bash's own report of the kill. The outputs are written as ``echo`` writes
+them, a line each, and the scratch directory is left behind as ``mktemp -d``
+leaves it.
 
 It runs on setup-python's ``python3``, the interpreter it runs the tag's
 reader on, but keeps to the standard library and Python 3.8's syntax as the
@@ -62,11 +62,11 @@ HELPER = 'util/_actions.py'
 
 
 class Unbound(Exception):
-    """A variable read as ``$NAME`` that is unset, which ``set -u`` refused."""
+    """A variable read as ``$NAME`` that is unset, which ``set -u`` refuses."""
 
 
 class Failed(Exception):
-    """A command whose failure ended the shell under ``set -e``, with its status."""
+    """A command whose failure ends a shell under ``set -e``, with its status."""
 
     def __init__(self, status: 'int') -> 'None':
         super().__init__(status)
@@ -120,12 +120,12 @@ def last_line(output: 'bytes') -> 'bytes':
 
 
 def say(text: 'bytes') -> 'None':
-    """Write ``text`` and a newline to standard output, as ``echo`` did."""
+    """Write ``text`` and a newline to standard output, as ``echo`` does."""
     _actions.emit(text + b'\n')
 
 
 def refused(path: 'bytes', error: 'OSError') -> 'int':
-    """Say why a redirection to ``path`` did not open, as bash did; status 1."""
+    """Say why a redirection to ``path`` did not open, as bash does; status 1."""
     sys.stdout.flush()
     print(f'{os.fsdecode(path)}: {os.strerror(error.errno or 0)}', file=sys.stderr, flush=True)
     return 1

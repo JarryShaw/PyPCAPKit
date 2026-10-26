@@ -558,8 +558,8 @@ jobs:
   #
   # Scoped out (#845): per-engine integration coverage, which needs regenerated
   # captures and stays in aggregate in `integration` and `pypcap-parity`, and
-  # the multi-engine HAS_RUNTIME gate. #1538 dropped the DPKT cell, which ran
-  # only what `test` runs.
+  # the multi-engine HAS_RUNTIME gate. There is no DPKT cell (#1538): it would
+  # run only what `test` runs.
   engine-tests:
     name: Engines (${{ matrix.engine }})
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -605,7 +605,7 @@ jobs:
       # `not-installable` ones too, so their failure is a genuine compile
       # failure rather than no compiler.
       #
-      # #974: an apt stall used to eat the whole job, whose cap reports
+      # #974: an unbounded apt stall eats the whole job, whose cap reports
       # `cancelled` and so fails `Required checks passed`. Not `-o
       # Acquire::Retries=3 -o Acquire::http::Timeout=30`, which #974 proposed:
       # both are noble's defaults already, and that per-`select()` timeout never
@@ -613,7 +613,7 @@ jobs:
       # command: 60s update, 180s install (#1306), two attempts, inside the
       # 10-minute step cap, which stays the hang detector.
       #
-      # #1432: a slow mirror, not a dead one, then killed both attempts. So:
+      # #1432: a slow mirror, not a dead one, can kill both attempts. So:
       #
       # * **The .deb files are cached**, so a warm run downloads nothing. The
       #   key is a digest of the `Inst` lines of `apt-get install -s` -- every
@@ -704,7 +704,7 @@ jobs:
       # its extra, the others as the raw distribution, bypassing the marker
       # that would otherwise skip it silently (#845 finding 2). `set +e` covers
       # only that install; the pip upgrade and the `test` extra run under
-      # `set -eu`, as a broken base install once read as "expected" (#845).
+      # `set -eu`, as a broken base install would otherwise read as "expected" (#845).
       - name: Write the per-cell script
         run: |
           cat > "$RUNNER_TEMP/engine-cell.sh" <<'CELL'
@@ -939,7 +939,7 @@ jobs:
       # only place tests/integration/test_engine_runtime.py's real
       # ``engine='pyshark'`` extraction is reachable. Without tshark the engine
       # declines, the extractor silently falls back to the default parser, and
-      # the test used to pass on that fallback's output.
+      # the test passes on that fallback's output.
       #
       # The apt steps are `engine-tests`'s, for the reasons in the note above
       # its plan step, with APT_SET keeping this job's cache entries apart; this
@@ -1120,8 +1120,8 @@ jobs:
   # #1029: the protocols cell took 30.4 minutes of the 45-minute cap, so it is
   # split into `protocols/internet` and the rest (`protocols` with `--exclude
   # protocols/internet`), measured on CI at 8.2m and 7.6m. The cost: a pair of
-  # modules split between the two no longer shares a process, so pollution
-  # between them is invisible again; every pair of a protocols module followed
+  # modules split between the two does not share a process, so pollution
+  # between them is invisible; every pair of a protocols module followed
   # by a root-level module survives. The modules directly in tests/protocols
   # stay in the rest cell, as moving them would split more pairs than it joins.
   #
@@ -1132,10 +1132,6 @@ jobs:
   #     it under pytest. tests._tiers.is_unit_tier() rejects every one of its
   #     files, so the leg would run the root-level modules alone -- green,
   #     while covering none of it.
-  #
-  # tests/corekit was once left out as permanently red; #2115 found its
-  # failures were test modules mixing two pcapkit imports, fixed them, and
-  # added the leg.
   #
   # The `project` cell keeps the project pins (#1954): whether a module passes
   # in one interpreter, in file order, with no xdist, is a question about the
@@ -1154,7 +1150,7 @@ jobs:
     runs-on: ubuntu-latest
     # 45, as `test`'s: this is the only test job with no xdist, so a cell
     # carries its whole serial cost, and a contended run once passed 20
-    # minutes. The slowest cell since #1029 is 8.2m; even #1029's slowdown
+    # minutes. The slowest cell, with #1029's split, is 8.2m; even #1029's slowdown
     # window, at least 1.6x, leaves it far inside the cap.
     timeout-minutes: 45
     strategy:

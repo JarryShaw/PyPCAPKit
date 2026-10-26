@@ -44,8 +44,8 @@ concurrency:
 # all need ``github``: rejecting it leaves nothing tagged and nothing published.
 # ``TestGatedJobsDependOnGithub`` in tests/project/test_release_gates.py checks
 # the ``needs:`` closure. Do not add a reviewer elsewhere without re-examining
-# it: a reviewer on ``conda-tag`` with ``needs: [ version_check ]`` is the bug
-# #887 fixed, which tagged and committed to ``main`` before the Release was
+# it: a reviewer on ``conda-tag`` with ``needs: [ version_check ]`` is #887's
+# defect, which tags and commits to ``main`` before the Release is
 # approved. One shared ``release`` would publish PyPI and Anaconda, different
 # credentials and indexes, together; and PyPI cannot afford an unintended
 # publish, since an accepted version number cannot be reused (``skip-existing:
@@ -69,8 +69,8 @@ concurrency:
 # publishes without naming an environment.
 #
 # #888: each publisher reads its own evidence, never "the ``v*`` tag exists" --
-# the two diverge on a half-completed release, and the next run then skipped
-# every job and reported green. ``github`` still reads ``PCAPKIT_TAG_EXISTS``,
+# the two diverge on a half-completed release, and a run reading the tag would
+# skip every job and report green. ``github`` still reads ``PCAPKIT_TAG_EXISTS``,
 # since that tag is its own artefact; ``tag`` reads whether ``conda-<version>+0``
 # exists, ``pypi`` PyPI's file count, and ``conda`` Anaconda's aggregate count
 # (a cost saver) plus, per leg, its own distribution -- the correctness fix,
@@ -133,7 +133,7 @@ jobs:
   # ``filter`` defaults to ``latest``:
   # https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run
   # ``updated`` is ``'false'`` only for a ``skipped`` job; anything else it cannot
-  # read leaves it unset, and ``version_check`` runs as before.
+  # read leaves it unset, and ``version_check`` runs as it otherwise would.
   #
   # The concurrency group reads only the event, so such a run still joins
   # ``main``'s group and can displace a run pending there. It releases nothing
@@ -602,8 +602,8 @@ jobs:
       # its own ``ktlo_*`` output above (test_python_matrix_tiers_1633.py).
       matrix: ${{ fromJSON(needs.version_check.outputs.PYTHON_PYPI) }}
     steps:
-      # #1634: this run's commit, not ``ref: v<version>``, which was whatever
-      # ``main`` had become by approval; the next step checks the tag names it.
+      # #1634: this run's commit, not ``ref: v<version>``, which is whatever
+      # ``main`` has become by approval; the next step checks the tag names it.
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -680,7 +680,7 @@ jobs:
       # alone, as a rebuild is not byte-identical; after a 502 an asset "may
       # leave an empty asset with a state of starter", which ``--clobber``
       # replaces. A missing release fails ("release not found") where the action
-      # created one on the default branch. ``conda`` runs the same script.
+      # creates one on the default branch. ``conda`` runs the same script.
       - name: Upload package to GitHub Release
         id: upload
         if: ${{ steps.publish.outcome == 'success' }}

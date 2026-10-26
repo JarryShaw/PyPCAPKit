@@ -34,8 +34,8 @@ under it.
 A cheaper alternative exists, and is recorded here rather than left
 undocumented: running ``pytest --noconftest`` over just those same
 modules, in that order, disables the very same autouse fixture directly and
-reproduces the identical ``subTest`` failures in about 70s on the pre-fix
-tree, under the exact :program:`pytest` version this CI already installs.
+reproduces the identical ``subTest`` failures in about 70s on a tree without
+#981's fix, under the exact :program:`pytest` version this CI already installs.
 Whether that single invocation would have been sufficient instead of this
 dedicated runner and its per-directory matrix was not evaluated when this
 script was written; this paragraph records that gap rather than inventing a
@@ -50,7 +50,7 @@ subdirectory per invocation (its ``directory`` argument), which is what
 :file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
 once per entry of its own matrix -- the leg list lives in that workflow, not
 as a module-level constant here. :mod:`tests.protocols` is the largest leg;
-its CI timings, before and after it was sharded, are in that workflow's own
+its CI timings, whole and sharded, are in that workflow's own
 comment rather than restated here. At the other end sit
 :mod:`tests.dumpkit` and :mod:`tests.interface`, small legs within a few
 seconds of each other in wall time (~39s and ~38s). Neither small leg is
@@ -75,8 +75,7 @@ finished. Running the directory first and the root modules second is what gives
 any purging module in that directory a chance to desync a root module that
 assumes its own import is current -- matching the reproduction exactly for
 ``protocols`` and ``const``, and giving the same opportunity to every other
-directory this script is pointed at, most of which have never been tried in
-that configuration before.
+directory this script is pointed at.
 
 GitHub issue #1029 -- sharding a leg: ``directory`` may be a deeper path such as
 ``protocols/internet``, and ``--exclude SUBDIR`` (repeatable) drops a

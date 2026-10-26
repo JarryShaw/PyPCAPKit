@@ -27,11 +27,10 @@ In order, the first that applies:
 Before any of them, a notice reports ``pypi``'s KTLO legs where either recorded
 an outcome (#1633), since neither reaches ``needs.pypi.result``.
 
-The step formerly held this as shell, run under ``set -euo pipefail``; this
-prints the same annotations, unescaped as ``echo`` wrote them. A variable the
-step's ``env:`` names that is unset, which Actions never leaves it, ends the
-script with ``<name>: unbound variable`` and status 1 at the point the shell's
-``set -u`` would have, rather than with a traceback.
+It prints its annotations unescaped, as a shell step's ``echo`` writes them. A
+variable the step's ``env:`` names that is unset, which Actions never leaves
+it, ends the script with ``<name>: unbound variable`` and status 1, where a
+shell's ``set -u`` would, rather than with a traceback.
 
 The job checks out only :file:`util/` and has no setup-python, so this runs on
 the image's ``python3``: standard library only, and Python 3.8's syntax.
@@ -66,7 +65,7 @@ TARGETS = (
 
 
 class Unbound(Exception):
-    """A variable read as ``$NAME`` that is unset, which ``set -u`` refused."""
+    """A variable read as ``$NAME`` that is unset, which ``set -u`` refuses."""
 
 
 def var(name: 'str') -> 'str':
@@ -78,7 +77,7 @@ def var(name: 'str') -> 'str':
 
 
 def say(level: 'str', title: 'str', message: 'str') -> 'None':
-    """Print the ``::level`` annotation as the shell's ``echo`` did, unescaped."""
+    """Print the ``::level`` annotation as a shell's ``echo`` does, unescaped."""
     _actions.say(_actions.annotation(level, message, title=title, escape=False))
 
 

@@ -72,7 +72,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         print(f'{leg}: no step failed.')
         return 0
     # The runner splits an annotation's properties on `,`, so the title's are escaped;
-    # #2047: nothing else is, as before the helper.
+    # #2047: nothing else is.
     title = leg.replace(',', '%2C')
     with _actions.open_summary() as summary:
         for step in failed:

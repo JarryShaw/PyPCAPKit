@@ -190,7 +190,7 @@ def open_summary(*, environ: 'Optional[Mapping[str, str]]' = None) -> 'IO[str]':
 
     """
     environ = os.environ if environ is None else environ
-    # Both are the caller's to close, as the file this returned before #2030 was.
+    # Both are the caller's to close, as a plain summary file would be (#2030).
     page = open(environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8')  # pylint: disable=consider-using-with
     path = environ.get(SUMMARY_COPY)
     if not path:
@@ -268,5 +268,5 @@ def getenvb(name: 'str') -> 'bytes':
     if os.supports_bytes_environ:
         return os.environb[name.encode()]
     # #2120: Windows keeps its environment as text and has no os.environb, so
-    # reading it there raised AttributeError on the win-64 conda leg.
+    # reading it there raises AttributeError, as on the win-64 conda leg.
     return os.fsencode(os.environ[name])

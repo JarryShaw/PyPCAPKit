@@ -50,7 +50,7 @@ jobs:
     # 23497679's required contexts. A KTLO leg is suffixed ` (KTLO)`, so no
     # required context can match it, and its steps carry `continue-on-error`,
     # as in unit-tests.yml's `test` job: job-level, a failed leg's check run
-    # concluded `failure`, so every commit showed red (#1672). Nothing below
+    # concludes `failure`, so every commit shows red (#1672). Nothing below
     # `requires-python`'s 3.8 runs (#2051).
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     needs: [python-versions]

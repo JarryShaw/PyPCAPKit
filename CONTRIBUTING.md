@@ -178,16 +178,15 @@ review round.
 
 We follow a rough convention designed to answer two questions: what changed and why. The subject
 line carries the what, and the body of the commit describes the why. A real one from the history,
-with its body abridged:
+with its body abridged and its line anchors replaced by names:
 
 ```
 fix(tcp): resolve the connection flags before building the options (#587) (#597)
 
 Building any MP_JOIN option raised `AttributeError: 'TCP' object has no
-attribute '_flags'`. `TCP.make` built the options at tcp.py:547 and assigned
-`self._flags` only at tcp.py:567, but `_make_mptcp_join` (tcp.py:2780-2786)
-branches on that attribute to choose between RFC 8684 s3.2's three MP_JOIN
-layouts [...]
+attribute '_flags'`. `TCP.make` built the options before it assigned
+`self._flags`, but `_make_mptcp_join` branches on that attribute to choose
+between RFC 8684 s3.2's three MP_JOIN layouts [...]
 ```
 
 The format is:

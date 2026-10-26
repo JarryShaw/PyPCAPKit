@@ -265,7 +265,7 @@ def markdown_tables(text: 'str') -> 'list[list[list[Any]]]':
     Parsed with markdown-it-py (#1894), imported here for the reason
     :func:`fetch` imports :mod:`requests` there. An escaped pipe, ``\\|``, stays
     inside its cell, in a code span too, as GitHub renders it; splitting each
-    line on ``|`` cut such a cell in two and shifted every column after it.
+    line on ``|`` would cut such a cell in two and shift every column after it.
 
     """
     from markdown_it import MarkdownIt  # pylint: disable=import-outside-toplevel

@@ -3,10 +3,10 @@ requires = [
     # 69.0.0 is the first release that ships ``pcapkit/py.typed`` unasked
     # (pypa/setuptools#3136, in its NEWS.rst): nothing here declares the file, so
     # a wheel built with 68.2.2 or older leaves it out and type checkers read the
-    # package as untyped (#2062). Measured on both sides of the bump. It also
-    # keeps what the earlier floor of 62.3.0 was for: ``package-data`` globs that
-    # read ``**`` as any depth, which the ``pcapkit._extern`` entry below needs
-    # (#1814) -- 61.0.0 and 62.2.0 read it as ``*``, measured. 69.0.0 still
+    # package as untyped (#2062). Measured on both sides of the bump. It is also
+    # above 62.3.0, the floor for ``package-data`` globs that read ``**`` as any
+    # depth, which the ``pcapkit._extern`` entry below needs (#1814) -- 61.0.0
+    # and 62.2.0 read it as ``*``, measured. 69.0.0 still
     # supports Python 3.8, the ``requires-python`` floor.
     "setuptools>=69.0.0",
 ]
@@ -28,8 +28,8 @@ maintainers = [
 ]
 license = { text="BSD 3-Clause License" }
 # 3.8 is the floor (#2051): the sources use 3.8 syntax (assignment expressions,
-# positional-only parameters) and nothing converts them any more, since the
-# ``bpc-*`` backport tools are no longer maintained. No upper bound: there is no
+# positional-only parameters) and nothing converts them for an older Python, as
+# the ``bpc-*`` backport tools are no longer maintained. No upper bound: there is no
 # Python 4 for one to exclude, and a cap here is copied into the metadata of
 # every project that depends on this one.
 #
@@ -124,9 +124,9 @@ crypto = [
 #     carries obligations on redistribution that a BSD-licensed dependent may
 #     not want.
 #
-# #910's owner accepted that trade deliberately rather than leaving ``all``
-# contradict the reasoning that used to keep ``pycrate`` out of it -- see the
-# ``all`` extra's own comment below for the rest of that ruling. This extra
+# #910's owner accepted that trade deliberately, over the size and licence
+# costs above -- see the ``all`` extra's own comment below for the rest of that
+# ruling. This extra
 # still exists on its own, for installing NGAP support without the ``cli`` and
 # ``crypto`` core addons ``all`` bundles it with.
 #
@@ -216,27 +216,25 @@ PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # `pcapkit-vendor` to regenerate pcapkit.const. Includes ``pycrate`` so
 # pcapkit.vendor.ngap's crawlers (#880) can run, and ``requests``/
 # ``beautifulsoup4`` for the crawlers that import them at module scope
-# (c.f. the ``test`` extra's own comment below for which, and #507). #910
-# narrowed ``all`` to core addons only, so this extra names each of them
-# itself rather than leaning on ``all`` to also carry them -- ``pycrate``
-# happens to be a core addon in its own right post-#910 (see the ``all``
-# extra's comment below), but ``requests``/``beautifulsoup4`` are not, having
-# moved to ``dev`` instead. Either way, this extra's own requirements are what
+# (c.f. the ``test`` extra's own comment below for which, and #507). ``all``
+# carries core addons only (#910), so this extra names each of them itself
+# rather than leaning on ``all`` to also carry them -- ``pycrate`` happens to be
+# a core addon in its own right (see the ``all`` extra's comment below), but
+# ``requests``/``beautifulsoup4`` are not, and ``dev`` carries them
+# instead. Either way, this extra's own requirements are what
 # it is correct against, not whatever ``all`` happens to carry.
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
-# #910: narrowed to *core addons* only -- the owner's ruling scopes this to
-# everything needed for the library itself to work at full functionality, rather
-# than everything an end user might conceivably want. An earlier ruling on the
-# same issue read the latter and added ``pycrate`` on that basis; the ruling that
-# stuck narrowed it again, this time by kind: ``cli``, ``crypto`` and ``pycrate``
-# (NGAP) are core addons and stay, and the 3rd-party capture engines that
-# used to be here -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are
-# installed one at a time on demand, as ``PyPCAP`` and ``PCAP_CT`` always were,
-# and move out to their own extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
+# #910: *core addons* only -- the owner's ruling scopes this to everything
+# needed for the library itself to work at full functionality, rather than
+# everything an end user might conceivably want, and draws the line by kind:
+# ``cli``, ``crypto`` and ``pycrate`` (NGAP) are core addons, and the 3rd-party
+# capture engines -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are
+# installed one at a time on demand, as ``PyPCAP`` and ``PCAP_CT`` are, from
+# their own extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
 # ``[Scapy]`` / ``[PyShark]`` / ``[PyPCAPFile]``.
 #
-# ``pypcap`` and ``pcap-ct``/``libpcap`` stay out for the reason they always
-# have, which #910 leaves untouched: installability, not desirability.
+# ``pypcap`` and ``pcap-ct``/``libpcap`` stay out for a reason of their own,
+# apart from #910's: installability, not desirability.
 # ``pypcap`` is an sdist-only C extension that needs a compiler and the libpcap
 # development files, and fails where only the header is present -- as on the
 # macOS runners. ``pcap-ct`` and ``libpcap`` need no compiler, but are published
@@ -253,10 +251,10 @@ all = [
 ]
 # Not for an end user -- for CI, which has a different need entirely: pylint,
 # mypy and Sphinx's autodoc all resolve imports against whatever is installed,
-# so narrowing ``all`` above would otherwise have made every one of
-# ``dpkt``/``scapy``/``pyshark``/``pypcapfile`` newly unresolvable to those
+# so with ``all`` limited to core addons, every one of
+# ``dpkt``/``scapy``/``pyshark``/``pypcapfile`` would be unresolvable to those
 # tools. This extra is what a workflow installs *alongside* ``all`` --
-# ``.[all,dev]`` -- to see everything ``all`` used to carry, for that purpose
+# ``.[all,dev]`` -- to see those engines too, for that purpose
 # only. ``.github/workflows/lint.yml``'s own comment traces pylint's
 # ``import-error`` messages, from ``pypcap``/``pcap-ct`` (via ``PyPCAP`` and
 # ``PCAP_CT`` above, both absent on the Python it lints) and from
@@ -267,8 +265,8 @@ all = [
 dev = [
     # scapy: the same floor as the Scapy extra above, #1572
     "dpkt", "scapy>=2.6.0", "pyshark",
-    # same marker and reasoning as the PyPCAPFile extra above and the old
-    # ``all``: on 3.12+ the package installs cleanly and is then unusable, so
+    # same marker and reasoning as the PyPCAPFile extra above: on 3.12+ the
+    # package installs cleanly and is then unusable, so
     # the marker keeps the resolver from fetching something that could never
     # run. It is not guarding against a hard error -- ``Extractor.run`` already
     # degrades to the default engine with a warning, installed or not
@@ -290,7 +288,7 @@ test = [
     # >=3.6.1, not >=3: the `shouldfail` forwarding tests/conftest.py's xdist fix
     # depends on (`WorkerInteractor.pytest_sessionfinish` in xdist/remote.py)
     # lands in 3.6.0, which PyPI has yanked, so 3.6.1 is the actual floor.
-    # Below it the fix silently reverts and
+    # Below it the fix silently does nothing and
     # test_xdist_run_reports_the_diagnostic_and_fails goes red rather than
     # skipped, since `importlib.util.find_spec('xdist')` still succeeds.
     "pytest-xdist>=3.6.1",
@@ -329,10 +327,10 @@ test = [
     "requests",
     "beautifulsoup4",
     # Same reason as the entries above, for a different test: without it
-    # ``tests/project/test_isort_clean.py`` skipped on every CI leg, so the only
+    # ``tests/project/test_isort_clean.py`` skips on every CI leg, so the only
     # guard on ``make isort``'s recipe lines -- and on the target-resolving
-    # globs behind them, wrong more than once (#757, #765, #767) -- ran
-    # nowhere. #766.
+    # globs behind them, wrong more than once (#757, #765, #767) -- runs
+    # nowhere (#766).
     #
     # A lint tool in the ``test`` extra rather than in a ``lint`` extra of its
     # own, deliberately. ``isort`` is what *this suite* needs in order not to
@@ -350,8 +348,8 @@ test = [
     # Unpinned, matching ``requests`` and ``beautifulsoup4`` above rather than
     # inventing an unmeasured floor (verified against 9.0.1). A future isort
     # whose verdict moves therefore turns that test red, which is the intended
-    # failure: it names the file and prints the diff, where the skip it replaced
-    # said nothing at all.
+    # failure: it names the file and prints the diff, where a skip would say
+    # nothing at all.
     "isort",
     # The second opinion on the hand-rolled YAML scanners: the ``yaml.safe_load``
     # cross-checks under ``tests/project/``, and the tests there that parse a

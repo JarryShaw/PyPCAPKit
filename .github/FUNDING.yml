@@ -1,9 +1,9 @@
 # Platforms behind the repository's sponsor button.
 #
 # Only the platforms actually configured are listed. GitHub's commented-out
-# roster of every other platform used to sit below, but those lines were
-# instructions to whoever adopted the file rather than configuration, and one of
-# them (`otechie`) is no longer a platform GitHub documents.
+# roster of every other platform is left out: those lines are instructions to
+# whoever adopts the file rather than configuration, and one of them
+# (`otechie`) is no longer a platform GitHub documents.
 
 github: jarryshaw
 patreon: jarryshaw

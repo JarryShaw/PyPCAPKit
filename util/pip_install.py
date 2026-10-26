@@ -14,8 +14,8 @@ with ``ANNOTATION_LEVEL``, ``error`` or ``warning``, ``LEG``, the leg's name, an
 ``RUNNER_TEMP`` in the environment. It runs, on the same interpreter:
 
 1. ``python -m pip install -U pip setuptools wheel``, its output passed through. A
-   failure ends the script with pip's status and no annotation, as ``set -e`` ended
-   the step.
+   failure ends the script with pip's status and no annotation, as ``set -e``
+   would end a shell step.
 2. ``python -m pip install -e SPEC``, its standard error merged into its standard
    output, which it copies, as it arrives, both to its own standard output and to
    :file:`$RUNNER_TEMP/pip-install.log`. On a failure it writes one
@@ -108,7 +108,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
 
     # The runner splits the properties on `,` before it un-escapes `%2C`, so the
     # leg's `(KTLO, non-blocking)` would end the title at "(KTLO" (#1633). #2047:
-    # escaped as before the helper, so pip's bytes pass through as they are.
+    # escaped here, not by the helper, so pip's bytes pass through as they are.
     message = reason(output).replace(b'%', b'%25') + SKIPPED
     _actions.say(_actions.annotation(level, message.decode('utf-8', 'surrogateescape'),
                                      title=TITLE + leg.replace(',', '%2C'), escape=False))

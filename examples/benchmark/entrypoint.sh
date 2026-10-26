@@ -17,7 +17,7 @@
 # `BENCH_MODE=report` reports on documents produced by *other* containers, handed in
 # through `/in`. The matrix spans several interpreters and no single one of them
 # measured all of it, so the reporting pass cannot be the tail of a measuring run
-# the way it was when there was one image. It runs here rather than on the host
+# the way it could be with one image. It runs here rather than on the host
 # because the host is not required to have a Python at all -- docker is the only
 # thing `run.sh` insists on, and report.py is standard library only, so the
 # interpreter it happens to run under does not affect what it says.
