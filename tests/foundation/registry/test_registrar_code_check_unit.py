@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A registrar handed a ``code`` that is not an enum member changes nothing. C.f. #2186.
+"""A registrar handed a ``code`` outside its enum changes nothing. C.f. #2186 and #2224.
 
 The registrars keyed on an enum code log ``code.name`` once the registration is
 done, so an ``int`` or :obj:`None` failed there with :exc:`AttributeError` after
@@ -12,7 +12,16 @@ method tables, the schema tables, :data:`pcapkit.protocols.__proto__` and the
 name leases -- calls the registrar with an otherwise valid argument list, and
 compares every registry with the snapshot. The registrars that take a plain
 ``int`` port or PPID (``register_tcp``, ``register_udp``, ``register_sctp`` and
-``register_apptype``) are out of scope: an ``int`` is a valid code there.
+``register_apptype``) are out of scope for those codes: an ``int`` is a valid
+code there.
+
+Every registrar, those four included, also rejects a member of an enum other
+than the one it is typed on (#2224). The registry enums compare equal to their
+values, so such a member keys the entry of the registrar's own member of that
+value: ``register_linktype(TransType.ICMP, ...)`` replaced
+``Frame.__proto__[LinkType.ETHERNET]``. Each wrong-enum case picks a member
+equal to one of the registrar's own where the value types allow, so the check
+has to be on the type.
 
 """
 
@@ -81,6 +90,40 @@ MODULE_REGISTRARS = (
 #: :class:`str` (the PCAP-NG option codes are a string enum).
 BAD_CODES = (250, None, '250')
 
+#: The enum each registrar above is typed on, for the wrong-enum cases (#2224).
+REGISTRAR_ENUMS = {
+    'register_ipv4_option': 'pcapkit.const.ipv4.option_number:OptionNumber',
+    'register_hip_parameter': 'pcapkit.const.hip.parameter:Parameter',
+    'register_hopopt_option': 'pcapkit.const.ipv6.option:Option',
+    'register_ipv6_opts_option': 'pcapkit.const.ipv6.option:Option',
+    'register_ipv6_route_routing': 'pcapkit.const.ipv6.routing:Routing',
+    'register_mh_message': 'pcapkit.const.mh.packet:Packet',
+    'register_mh_option': 'pcapkit.const.mh.option:Option',
+    'register_mh_extension': 'pcapkit.const.mh.cga_extension:CGAExtension',
+    'register_tcp_option': 'pcapkit.const.tcp.option:Option',
+    'register_tcp_mp_option': 'pcapkit.const.tcp.mp_tcp_option:MPTCPOption',
+    'register_http_frame': 'pcapkit.const.http.frame:Frame',
+    'register_pcapng_block': 'pcapkit.const.pcapng.block_type:BlockType',
+    'register_pcapng_option': 'pcapkit.const.pcapng.option_type:OptionType',
+    'register_pcapng_record': 'pcapkit.const.pcapng.record_type:RecordType',
+    'register_pcapng_secrets': 'pcapkit.const.pcapng.secrets_type:SecretsType',
+    'register_linktype': 'pcapkit.const.reg.linktype:LinkType',
+    'register_pcap': 'pcapkit.const.reg.linktype:LinkType',
+    'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',
+    'register_ethertype': 'pcapkit.const.reg.ethertype:EtherType',
+    'register_transtype': 'pcapkit.const.reg.transtype:TransType',
+}
+
+#: Registrars that also take a plain ``int``: the port or PPID used, the classes
+#: whose ``__proto__`` they write, and any trailing arguments.
+NUMBER_REGISTRARS = (
+    ('register_tcp', 80, ('pcapkit.protocols.transport.tcp:TCP',), ()),
+    ('register_udp', 53, ('pcapkit.protocols.transport.udp:UDP',), ()),
+    ('register_sctp', 60, ('pcapkit.protocols.transport.sctp:SCTP',), ()),
+    ('register_apptype', 80, ('pcapkit.protocols.transport.tcp:TCP',
+                              'pcapkit.protocols.transport.udp:UDP'), ('tcp',)),
+)
+
 
 def resolve(path: 'str') -> 'type':
     module, _, name = path.partition(':')
@@ -105,13 +148,33 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                     found[(cls.__qualname__, attr)] = value
         return found
 
+    def _wrong_code(self, name: 'str') -> 'object':
+        """A member of another enum, equal to one of ``name``'s own where the value types allow."""
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.const.reg.transtype import TransType
+
+        kind = resolve(REGISTRAR_ENUMS[name])
+        own = next(iter(kind))
+        if kind is LinkType:
+            # the issue's example: ICMP == 1 == LinkType.ETHERNET
+            wrong, own = TransType.ICMP, LinkType.ETHERNET
+        elif isinstance(own.value, int):
+            wrong = LinkType(own.value)
+        else:
+            # the PCAP-NG option codes are a string enum, which no other enum equals
+            return TLSKeyLabel.RSA
+        self.assertNotIsInstance(wrong, kind)
+        self.assertEqual(wrong, own)
+        return wrong
+
     def _assert_rejected_unchanged(self, name: 'str', classes: 'tuple[type, ...]', *args: 'object',
-                                   **kwargs: 'object') -> None:
+                                   codes: 'tuple[object, ...]' = BAD_CODES, **kwargs: 'object') -> None:
         from pcapkit.foundation.registry import protocols as registrars
         from pcapkit.utilities.exceptions import RegistryError
 
         registries = self._registries(classes)
-        for code in BAD_CODES:
+        for code in codes:
             with self.subTest(registrar=name, code=code):
                 before = {key: dict(table) for key, table in registries.items()}
                 try:
@@ -140,6 +203,33 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
         for name, targets in MODULE_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw)
+
+    def test_method_registrars_reject_a_member_of_another_enum(self) -> None:
+        def parser(*args: 'object', **kwargs: 'object') -> None: ...
+
+        for name, proto, schema in METHOD_REGISTRARS:
+            proto_cls, schema_cls = resolve(proto), resolve(schema)
+            self._assert_rejected_unchanged(name, (proto_cls, schema_cls), (parser, parser),
+                                            codes=(self._wrong_code(name),), schema=schema_cls)
+
+    def test_module_registrars_reject_a_member_of_another_enum(self) -> None:
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, targets in MODULE_REGISTRARS:
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw,
+                                            codes=(self._wrong_code(name),))
+
+    def test_number_registrars_reject_a_member_of_another_enum(self) -> None:
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, number, targets, extra in NUMBER_REGISTRARS:
+            # an IntEnum member is an int, so accepting an int must not let it in
+            wrong = LinkType(number)
+            self.assertIsInstance(wrong, int)
+            self.assertEqual(wrong, number)
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                                            codes=(wrong,))
 
 
 if __name__ == '__main__':

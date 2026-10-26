@@ -20,6 +20,18 @@ from typing import TYPE_CHECKING, cast, overload
 
 import aenum
 
+from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
+from pcapkit.const.http.frame import Frame as HTTP_Frame
+from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
+from pcapkit.const.ipv6.option import Option as IPv6_Option
+from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
+from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
+from pcapkit.const.mh.option import Option as MH_Option
+from pcapkit.const.mh.packet import Packet as MH_Packet
+from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
+from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
+from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
+from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -27,6 +39,8 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
+from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
+from pcapkit.const.tcp.option import Option as TCP_Option
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.protocols import __proto__ as protocol_registry
@@ -69,25 +83,11 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 if TYPE_CHECKING:
     from typing import Any, Iterator, Optional, Type
 
-    from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
-    from pcapkit.const.http.frame import Frame as HTTP_Frame
-    from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
-    from pcapkit.const.ipv6.option import Option as IPv6_Option
-    from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
-    from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
-    from pcapkit.const.mh.option import Option as MH_Option
-    from pcapkit.const.mh.packet import Packet as MH_Packet
-    from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
-    from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
-    from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
-    from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.sctp.payload_protocol_identifier import \
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
-    from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
-    from pcapkit.const.tcp.option import Option as TCP_Option
     from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
@@ -536,21 +536,38 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
                      destination.__name__, key)
 
 
-def _check_code(code: 'Any') -> 'None':
-    """Reject a registration key that is not an enum member.
+def _check_code(code: 'Any', kind: 'type', *, number: 'bool' = False) -> 'None':
+    """Reject a registration key that is not a member of the registrar's enum.
 
-    The registrars typed on an enum key call this before touching any
-    registry, so a bad ``code`` leaves every registry as it was (:issue:`2186`).
+    Each registrar typed on one enum calls this before touching any registry,
+    so a bad ``code`` leaves every registry as it was (:issue:`2186`). The check is on the type,
+    not the value: the registry enums compare equal to their values, so a
+    member of another enum would key the entry of the member it equals, e.g.
+    :attr:`TransType.ICMP <pcapkit.const.reg.transtype.TransType.ICMP>` would
+    replace :attr:`LinkType.ETHERNET <pcapkit.const.reg.linktype.LinkType.ETHERNET>`
+    (:issue:`2224`).
 
     Args:
         code: Registration key handed to the registrar.
+        kind: Enum the registrar is typed on.
+        number: Whether a bare :class:`int` is a valid key too, as for the
+            registrars keyed on a port number or a payload protocol identifier.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member.
+        RegistryError: If ``code`` is not a member of ``kind`` and, with
+            ``number``, not an :class:`int` either. A member of another enum is
+            rejected even where an :class:`int` is accepted.
 
     """
-    if not isinstance(code, (enum.Enum, aenum.Enum)):
-        raise RegistryError(f'code must be an enum member, not {code!r}')
+    if isinstance(code, kind):
+        return
+    member = isinstance(code, (enum.Enum, aenum.Enum))
+    if number and isinstance(code, int) and not member:
+        return
+    expected = f'an int or a member of {kind.__name__}' if number else f'a member of {kind.__name__}'
+    if member:
+        raise RegistryError(f'code must be {expected}, not a member of {type(code).__name__}: {code!r}')
+    raise RegistryError(f'code must be {expected}, not {code!r}')
 
 
 ###############################################################################
@@ -589,12 +606,13 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
         * :func:`pcapkit.foundation.registry.protocols.register_pcapng`
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``module``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
+            member, e.g. a member of another enum, or ``module``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
-    _check_code(code)
+    _check_code(code, Enum_LinkType)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -633,12 +651,13 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``module``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
+            member, e.g. a member of another enum, or ``module``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
-    _check_code(code)
+    _check_code(code, Enum_LinkType)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -676,12 +695,13 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``module``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
+            member, e.g. a member of another enum, or ``module``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
-    _check_code(code)
+    _check_code(code, Enum_LinkType)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -724,12 +744,13 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``module``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.ethertype.EtherType`
+            member, e.g. a member of another enum, or ``module``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
-    _check_code(code)
+    _check_code(code, Enum_EtherType)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -772,12 +793,13 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``module``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.transtype.TransType`
+            member, e.g. a member of another enum, or ``module``
             is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             subclass.
 
     """
-    _check_code(code)
+    _check_code(code, Enum_TransType)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -809,11 +831,12 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv4.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv4.option_number.OptionNumber`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, IPv4_OptionNumber)
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv4 option parser function')
 
@@ -842,11 +865,12 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hip.Parameter`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.hip.parameter.Parameter`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_param_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, HIP_Parameter)
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
         raise RegistryError('method must be a valid HIP parameter parser function')
 
@@ -875,11 +899,12 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hopopt.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.option.Option`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, IPv6_Option)
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid HOPOPT option parser function')
 
@@ -908,11 +933,12 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_opts.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.option.Option`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, IPv6_Option)
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
@@ -941,11 +967,12 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipv6.routing.Routing`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_data_type_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, IPv6_Routing)
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
@@ -974,11 +1001,12 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.packet.Packet`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_msg_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, MH_Packet)
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
         raise RegistryError('method must be a valid MH message type parser function')
 
@@ -1007,11 +1035,12 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.option.Option`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, MH_Option)
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid MH option parser function')
 
@@ -1040,7 +1069,8 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.mh.cga_extension.CGAExtension`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_ext_*`` method.
 
     .. versionchanged:: 1.5.0
@@ -1049,7 +1079,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
        that take one (:issue:`516`).
 
     """
-    _check_code(code)
+    _check_code(code, MH_CGAExtension)
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid MH CGA extension function')
 
@@ -1119,7 +1149,9 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             :class:`int` carries no such default and so requires at least one.
 
     Raises:
-        pcapkit.utilities.exceptions.RegistryError: If no transport protocol is
+        pcapkit.utilities.exceptions.RegistryError: If ``code`` is neither an
+            :class:`int` nor an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+            member, e.g. a member of another enum; if no transport protocol is
             given for a bare :class:`int`; if one of those given (member or name)
             names no port-keyed registry; or if a ``str`` matches no
             :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member's
@@ -1159,6 +1191,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
        protocol per argument, with no alias (:issue:`806`).
 
     """
+    _check_code(code, Enum_AppType, number=True)
+
     # NOTE: ``class_`` sits at the sibling position -- positional, ahead of
     # ``*transport`` -- per maintainer ruling, so a third positional that is
     # really a transport would be swallowed as a class name. That is
@@ -1279,7 +1313,13 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
+    Raises:
+        RegistryError: If ``code`` is neither an :class:`int` nor an
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a
+            member of another enum.
+
     """
+    _check_code(code, Enum_AppType, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
@@ -1313,11 +1353,12 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.option.Option`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_mode_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, TCP_Option)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
         raise RegistryError('method must be a TCP option parser function')
 
@@ -1346,11 +1387,12 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_mptcp_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, TCP_MPTCPOption)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
         raise RegistryError('method must be a MPTCP option parser function')
 
@@ -1384,7 +1426,13 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
 
+    Raises:
+        RegistryError: If ``code`` is neither an :class:`int` nor an
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a
+            member of another enum.
+
     """
+    _check_code(code, Enum_AppType, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
@@ -1430,7 +1478,14 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
         number: SCTP names its upper layer per DATA chunk rather than per
         association. See :rfc:`9260#section-3.3.1`.
 
+    Raises:
+        RegistryError: If ``code`` is neither an :class:`int` nor a
+            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+            member, e.g. a member of the
+            :class:`~pcapkit.const.reg.apptype.sctp.SCTP` port enum.
+
     """
+    _check_code(code, Enum_PayloadProtocolIdentifier, number=True)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -1467,11 +1522,12 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
             It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.http.frame.Frame`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_http_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, HTTP_Frame)
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
         raise RegistryError('method must be a frame parser function')
 
@@ -1505,11 +1561,12 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.block_type.BlockType`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_block_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, PCAPNG_BlockType)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
         raise RegistryError('method must be a block parser function')
 
@@ -1538,11 +1595,12 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.option_type.OptionType`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_option_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, PCAPNG_OptionType)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
         raise RegistryError('method must be a option parser function')
 
@@ -1571,11 +1629,12 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.record_type.RecordType`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_record_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, PCAPNG_RecordType)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
         raise RegistryError('method must be a name resolution record parser function')
 
@@ -1604,11 +1663,12 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
 
     Raises:
-        RegistryError: If ``code`` is not an enum member, or ``meth``
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`
+            member, e.g. a member of another enum, or ``meth``
             is a name with no matching ``_read_secrets_*`` method.
 
     """
-    _check_code(code)
+    _check_code(code, PCAPNG_SecretsType)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
         raise RegistryError('method must be a decryption secrets parser function')
 
