@@ -312,9 +312,8 @@ def _link_payload(code: 'int') -> 'bytes':
     if code == EtherType.Internet_Protocol_version_6:
         return _ip6(6, _tcp(9999))
     if code == 0x8137:  # Novell IPX.
-        # A run of zero octets the length of an IPX header: dispatch into
-        # IPX is all this probes.
-        return b'\x00' * 30
+        from pcapkit.protocols.internet.ipx import IPX
+        return bytes(IPX())
     raise LookupError(f'link: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -374,8 +373,9 @@ def _internet_payload(code: 'int') -> 'bytes':
     if code == TransType.IPv6_Opts:
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
         return bytes(IPv6_Opts(options=[], next=6, payload=_tcp(9999)))
-    if code == TransType.IPX_in_IP:  # As for Link's IPX.
-        return b'\x00' * 30
+    if code == TransType.IPX_in_IP:
+        from pcapkit.protocols.internet.ipx import IPX
+        return bytes(IPX())
     if code == TransType.SCTP:
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.protocols.transport.sctp import SCTP
@@ -390,11 +390,9 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
 
-        # Two copies of one parameter, though one round-trips as well (see
-        # HIP_COPIES in examples/generators/options.py). Only the dispatch
-        # into HIP is under test here, so which parameter travels inside it,
-        # and how many, does not matter.
-        return bytes(HIP(parameters=[(Parameter.SEQ, {})] * 2, extension=True,
+        # Only the dispatch into HIP is under test here, so which parameter
+        # travels inside it does not matter.
+        return bytes(HIP(parameters=[(Parameter.SEQ, {})], extension=True,
                          next=6, packet=1, version=2, checksum=b'\x00\x00',
                          controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
     if code == TransType.OSPFIGP:
@@ -898,7 +896,9 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
 #: :data:`examples.generators.options.EXPECTED_FAILURES`: a case listed there
 #: must still fail to reach its target, or the entry is stale; a case *not*
 #: listed there must reach its target, or a fresh regression has gone
-#: unnoticed. Nothing holds the two copies to each other.
+#: unnoticed. :meth:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests
+#: .test_known_degraded_matches_the_generator` holds the two copies to each
+#: other.
 KNOWN_DEGRADED = {
     # NGAP is registered for both of its PPIDs. Building a well-formed
     # PER-encoded NGAP-PDU is out of scope for a minimal dispatch probe --
@@ -909,21 +909,21 @@ KNOWN_DEGRADED = {
     # optional ``pycrate`` dependency is installed the decoder runs and reports
     # a malformed PDU, and where it is not, NGAP reports the missing
     # dependency instead. Both are the same placeholder-payload limitation, so
-    # the entry accepts either -- CI installs ``.[test]``, which deliberately
-    # excludes ``[NGAP]``, so pinning only the first reason would fail there.
+    # the entry accepts either: CI installs ``[NGAP]`` and reports the first,
+    # and a local run without ``pycrate`` reports the second.
     'sctp/PayloadProtocolIdentifier_3GPP_NG_Application_Protocol': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-        'pcapkit/protocols/application/ngap.py -- b\'ngap-pdu\' is not an '
-            'aligned PER NGAP-PDU; this is a placeholder-payload limitation of '
-            'the probe, not a library defect'),
+        'placeholder payload is not an aligned PER NGAP-PDU; building '
+            'one is out of scope for a minimal dispatch probe, not a '
+            'library defect'),
     # PPID 66 is NGAP wrapped in a DTLS record, and pcapkit implements no
     # DTLS -- registered so the PPID is *named*, per the registry's own
     # comment in pcapkit/protocols/transport/sctp.py, not because it decodes.
     # The same placeholder payload fails the same way, for the same reason.
     'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-        'pcapkit implements no DTLS; the payload is meant to be a DTLS record '
-            'wrapping an NGAP-PDU, and the placeholder used here is neither'),
+        'pcapkit implements no DTLS, and the same placeholder payload '
+            'is not a DTLS record either'),
 }
 
 
