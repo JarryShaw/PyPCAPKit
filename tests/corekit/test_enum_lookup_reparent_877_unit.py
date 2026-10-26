@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Phase 2 of GitHub issue #877, the unblocked half: re-parenting 11 helper
-enumerations across 8 files onto :class:`~pcapkit.corekit.enum.EnumLookup`.
+"""Phase 2 of GitHub issue #877, the unblocked half: re-parenting the
+helper enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 
 The owner's last word on #877 was to re-parent every non-registry enumeration
 onto an in-house base class so that they all share the same contracts; it
@@ -20,7 +20,7 @@ from the base -- :class:`TransportProtocol
 :class:`PacketReception <pcapkit.protocols.misc.pcapng.PacketReception>`,
 :class:`WireGuardKeyLabel <pcapkit.protocols.misc.pcapng.WireGuardKeyLabel>`,
 and :class:`FrameType.Flags
-<pcapkit.protocols.schema.application.httpv2.FrameType.Flags>` plus its six
+<pcapkit.protocols.schema.application.httpv2.FrameType.Flags>` plus its
 concrete per-frame subclasses.
 
 :class:`TransportProtocol` defines its own ``get``, as a :class:`classmethod`
@@ -158,7 +158,7 @@ class ReparentedBasesTests(unittest.TestCase):
 
 
 class HttpV2FlagsHierarchyTests(unittest.TestCase):
-    """``FrameType.Flags`` plus its six concrete per-frame subclasses -- one
+    """``FrameType.Flags`` plus its concrete per-frame subclasses -- one
     hierarchy, re-parented at the root only.
 
     Each concrete subclass declares ``class Flags(FrameType.Flags):`` with no
@@ -254,8 +254,8 @@ class PureReparentGetTests(unittest.TestCase):
         self.assertIs(WireGuardKeyLabel.get('PRESHARED_KEY'), WireGuardKeyLabel.PRESHARED_KEY)
 
     def test_a_pure_reparent_still_refuses_an_unknown_name(self) -> None:
-        """The base's own contract -- raise, never mint -- reaches these nine
-        for free, exactly as it does the registries."""
+        """The base's own contract -- raise, never mint -- reaches these for
+        free, exactly as it does the registries."""
         from pcapkit.corekit.infoclass import FinalisedState
 
         with self.assertRaises(KeyError):
@@ -418,9 +418,10 @@ class CriticalityGetTests(unittest.TestCase):
         self.assertIn('3', str(caught.exception))
 
     def test_default_is_honoured_by_the_inherited_base(self) -> None:
-        """The one thing that could have made GitHub issue #923's deletion of
-        this override unsafe. The override forwarded ``default`` verbatim, so
-        the inherited base has to answer identically: a member-valued default
+        """The one thing that could make relying on the inherited base, with
+        no override (GitHub issue #923), unsafe. An override would forward
+        ``default`` verbatim, so the base has to answer identically: a
+        member-valued default
         resolves, and one naming no registered value is not honoured."""
         from pcapkit.protocols.application.ngap import Criticality
 
@@ -433,7 +434,7 @@ class CriticalityGetTests(unittest.TestCase):
 
 
 class NoMintingTests(unittest.TestCase):
-    """None of the eleven re-parented classes mint on a lookup -- each is a
+    """None of the re-parented classes mint on a lookup -- each is a
     closed set on the bare lookup tier, not the mutating
     :class:`~pcapkit.corekit.enum.EnumRegistry` one. Measured per class in a
     throwaway subprocess, so a lookup made by an *earlier* assertion in this

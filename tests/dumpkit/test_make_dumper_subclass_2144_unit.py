@@ -99,7 +99,7 @@ class TestMakeDumperSubclass(unittest.TestCase):
                 self.assertEqual(self.hook(Sub, value), ('sub', value))
 
     def test_unsubclassed_class_unchanged(self) -> None:
-        """The class ``make_dumper`` returns still falls through as before."""
+        """The class ``make_dumper`` returns, unsubclassed, still falls through."""
         from pcapkit.dumpkit.common import make_dumper
 
         for name, output in self.outputs():

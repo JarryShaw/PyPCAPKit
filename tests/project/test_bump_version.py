@@ -95,8 +95,8 @@ def _load_script():
 
     ``util/`` is a directory of scripts rather than a package, so there is no
     import path to it. Loading it by location is safe because the bump runs under
-    a ``__main__`` guard -- which it did not, before the change these tests cover,
-    when importing the module rewrote two files as a side effect.
+    a ``__main__`` guard; without it, importing the module would rewrite two files
+    as a side effect.
 
     """
     path = ROOT / 'util' / 'bump_version.py'
@@ -178,8 +178,8 @@ class CitationVersionTests(CitationTreeMixin, unittest.TestCase):
             bump_version.plan_citation(spaced, '1.5.0b5', '2026-09-22')
 
     def test_the_refusal_is_a_runtime_error(self) -> None:
-        # Anything already catching the ``cannot find version`` RuntimeError this
-        # script has always raised keeps catching this one.
+        # Anything catching the ``cannot find version`` RuntimeError this script
+        # raises catches this one too.
         self.assertTrue(issubclass(bump_version.CitationFieldError, RuntimeError))
 
 
@@ -418,7 +418,7 @@ class AbsentCitationFileTests(CitationTreeMixin, unittest.TestCase):
 
 
 class VersionBumpTests(unittest.TestCase):
-    """:func:`~bump_version.bump`, whose behaviour the change leaves alone."""
+    """:func:`~bump_version.bump`, the version arithmetic itself."""
 
     def test_a_prerelease_bumps_its_counter(self) -> None:
         self.assertEqual(bump_version.bump('1.5.0b4'), '1.5.0b5')
@@ -446,7 +446,7 @@ class VersionBumpTests(unittest.TestCase):
 
 
 class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
-    """:file:`pcapkit/__init__.py`, which must still be rewritten exactly as before."""
+    """:file:`pcapkit/__init__.py`, which must be rewritten in place, its other lines kept."""
 
     def write_init(self, version: str = '1.5.0b4') -> pathlib.Path:
         """Write a stand-in :file:`pcapkit/__init__.py` and return its path."""
@@ -487,12 +487,12 @@ class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
         self.assertEqual(before[:-1], after[:-1])
 
     def test_the_fallback_reader_strips_the_closing_quote_and_newline(self) -> None:
-        # The fallback ran ``line.split('=')[1].strip(" '")``, which stops at the
-        # trailing newline and so returned ``"1.5.0b4'\n"`` -- quote and newline
-        # included -- which ``packaging`` rejects as an invalid version. The path
-        # had never worked; nothing noticed because the only caller installs the
-        # package first, so ``import pcapkit`` always succeeds and the fallback is
-        # unreachable in CI. Forced here by making that import fail.
+        # A fallback running ``line.split('=')[1].strip(" '")`` stops at the
+        # trailing newline and so returns ``"1.5.0b4'\n"`` -- quote and newline
+        # included -- which ``packaging`` rejects as an invalid version. Nothing
+        # in CI notices that, because the only caller installs the package first,
+        # so ``import pcapkit`` always succeeds and the fallback is unreachable.
+        # Forced here by making that import fail.
         self.write_init()
         cwd = os.getcwd()
         self.addCleanup(os.chdir, cwd)
@@ -502,7 +502,7 @@ class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
             version = bump_version.current_version()
 
         self.assertEqual(version, '1.5.0b4')
-        # And the value is usable, which is the part that was broken.
+        # And the value is usable, which is what that fallback gets wrong.
         self.assertEqual(bump_version.bump(version), '1.5.0b5')
 
     def test_the_fallback_still_complains_when_there_is_no_version(self) -> None:

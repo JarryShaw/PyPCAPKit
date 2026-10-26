@@ -304,7 +304,7 @@ class TestFetch(unittest.TestCase):
         self.assertEqual(self.sleeps, [5, 10])
 
     def test_the_last_failure_is_an_oserror_naming_the_source(self) -> None:
-        """``main`` reports an :exc:`OSError` as the run's error, as it did before."""
+        """``main`` reports an :exc:`OSError` as the run's error."""
         self.outcomes = [http_response(404)] * 3
         with self.assertRaises(OSError) as caught:
             self.module.fetch('release-cycle')
@@ -360,7 +360,7 @@ class TestTheImageTable(unittest.TestCase):
         self.assertEqual(module.parse_images(text), [module.Image('ubuntu', '24.04', 'x64', ('ubuntu-24.04',))])
 
     def test_what_it_refuses(self) -> None:
-        """The same errors as before markdown-it-py read the table."""
+        """What the table reader refuses, and the error each gets."""
         module = updater()
         cases = (
             ('no table', 'Images: `ubuntu-24.04`.\n', 'has no table with a "YAML Label" column'),
@@ -409,7 +409,7 @@ class TestTheTiers(unittest.TestCase):
         _, plan, texts = plan_for(self, snapshot())
         self.assertEqual(changes(plan), {'pypy3.12': (None, {'tier': 'supported'})})
         self.assertEqual(plan['latest'], ['3.15', '3.15'])
-        # Only the tier file: releasing.rst counted the wheels until #1811, so a new PyPy rewrote it.
+        # Only the tier file: releasing.rst counts no wheels (#1811), so a new PyPy leaves it alone.
         self.assertEqual(sorted(texts), ['.github/python-versions.toml'])
         self.assertEqual(plan['required'], {'remove': [], 'add': []})
         # #1958: a supported PyPy gets a `test` and an `integration` leg too.
@@ -767,8 +767,8 @@ class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
         root = self.scratch()
         plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
         self.assertEqual((plan['changes'], texts, plan['notes']), ([], {}, []))
-        # The leg counts this read back went with #1811; the fact behind them is
-        # that the hand-kept entries are experimental.yml's legs and no Unit Tests job's.
+        # No leg count is read back (#1811); the fact that matters is that the hand-kept
+        # entries are experimental.yml's legs and no Unit Tests job's.
         module = updater()
         values = module.pv.outputs(module.validate((root / module.TIER_FILE).read_text(encoding='utf-8')))
         found = {job: {leg.get('python-version') for leg in legs}
@@ -1262,11 +1262,11 @@ class TestTheProposalIsNotRepeated(unittest.TestCase):
 
 
 class TestDetectAgainstAHandEditedBranch(ScratchOrigin):
-    """The cross-review's case, end to end: ``update``, ``body`` and ``publish`` against a scratch ``origin``.
+    """A hand-edited branch, end to end: ``update``, ``body`` and ``publish`` against a scratch ``origin``.
 
     The pull request body tells the owner to finish a failed audit by hand on the
-    branch. A ``detect`` reading only the tip then took his commit for no
-    proposal, asked for the approval every week, and ``publish`` refused it.
+    branch. A ``detect`` reading only the tip would take his commit for no
+    proposal, ask for the approval every week, and ``publish`` would refuse it.
 
     """
 
@@ -1385,9 +1385,9 @@ class TestTheWorkflowCommands(unittest.TestCase):
     """#2047: every annotation, step output and summary line the script writes, byte for byte.
 
     The other tests read the commands with ``assertIn``; these pin each whole
-    line, in order, with text each escape changes, so moving the writes onto
-    util/_actions.py can be shown to change nothing. The plan, ``git``, ``gh``
-    and the branch lookups are stubbed: only the writing is under test.
+    line, in order, with text each escape changes, so any change to what is
+    written fails here. The plan, ``git``, ``gh`` and the branch lookups are
+    stubbed: only the writing is under test.
 
     """
 

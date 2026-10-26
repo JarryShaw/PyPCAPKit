@@ -1,7 +1,7 @@
-"""An unassigned enumeration value raised :mod:`aenum`'s own ``ValueError``.
+"""An unassigned enumeration value must not raise :mod:`aenum`'s own ``ValueError``.
 
-GitHub issue #701. :meth:`EnumField.post_process
-<pcapkit.corekit.fields.numbers.EnumField.post_process>` resolved a wire value
+GitHub issue #701. Without the fix, :meth:`EnumField.post_process
+<pcapkit.corekit.fields.numbers.EnumField.post_process>` resolves a wire value
 through the *constructor* of its registry::
 
     return self._namespace(value)
@@ -15,21 +15,20 @@ and it is neither one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot
 tell it from a bug of its own, nor an :exc:`EOFError`, so
 :meth:`Extractor.record_frames
 <pcapkit.foundation.extraction.Extractor.record_frames>` does not catch it. One
-unassigned code therefore cost the whole extraction.
+unassigned code therefore costs the whole extraction.
 
-It also made the "unknown" reader every one of these formats requires
+It also makes the "unknown" reader every one of these formats requires
 unreachable. PCAP-NG's
 :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` exists, its
-``__default__`` selects it, and
-:meth:`PCAPNG._read_block_unknown <pcapkit.protocols.misc.pcapng.PCAPNG._read_block_unknown>`
-reads it -- but the lookup failed several frames before the dispatch that would
-have chosen it, so the default only ever fired for the ``Reserved_*`` ranges
-:meth:`BlockType._missing_ <pcapkit.const.pcapng.block_type.BlockType._missing_>`
-auto-extends. PCAP-NG repeats a block's total length at both ends precisely so a
-reader can skip a block type it does not recognise; that skip is what the fix
-restores.
+``__default__`` selects it, and :meth:`PCAPNG._read_block_unknown
+<pcapkit.protocols.misc.pcapng.PCAPNG._read_block_unknown>` reads it -- but the
+lookup fails several frames before the dispatch that would choose it, so the
+default only ever fires for the ``Reserved_*`` ranges :meth:`BlockType._missing_
+<pcapkit.const.pcapng.block_type.BlockType._missing_>` auto-extends. PCAP-NG
+repeats a block's total length at both ends precisely so a reader can skip a
+block type it does not recognise; that skip is what the fix restores.
 
-Three things about this suite are deliberate.
+These things about this suite are deliberate.
 
 **The field layer is tested separately from the extraction.** The defect has two
 faces -- a foreign exception out of
@@ -39,11 +38,10 @@ unreadable. :class:`UnassignedEnumFieldTests` pins the field, and
 :class:`UnassignedBlockTypeExtractionTests` pins the consequence the issue was
 filed about.
 
-**What must go on raising is asserted too.** The change is at the *field* layer,
-so every registry's own guard has to be exactly as it was -- a registry that
-declares a width and rejects outside it, as
-:class:`pcapkit.const.tcp.flags.Flags` does over 16 bits, is making a decision
-this layer is in no position to overrule.
+**What must go on raising is asserted too.** The fallback is at the *field*
+layer, so every registry's own guard has to hold -- a registry that declares a
+width and rejects outside it, as :class:`pcapkit.const.tcp.flags.Flags` does
+over 16 bits, is making a decision this layer is in no position to overrule.
 :meth:`UnassignedEnumFieldTests.test_the_registry_own_guard_is_not_weakened` and
 :meth:`UnassignedEnumFieldTests.test_an_in_library_rejection_is_not_absorbed`
 are what distinguish the fix from a blanket ``except ValueError: pass``; the
@@ -161,7 +159,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         self.assertEqual(field.pack(resolved, dict()), UNASSIGNED_BLOCK_OCTETS)
 
     def test_a_declared_member_still_resolves_to_the_registry_member(self) -> None:
-        """The 99.99% path is untouched, and identity proves it.
+        """The declared-member path returns the member itself, and identity proves it.
 
         ``assertIs`` rather than ``assertEqual``: a pseudo-member with the same
         value compares equal to the real one, so equality would pass against a
@@ -207,13 +205,13 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         self.assertEqual(int(resolved), 0x0bad0bad)
 
     def test_the_registry_own_guard_is_not_weakened(self) -> None:
-        """The change is at the field layer and nowhere else.
+        """The fallback is at the field layer and nowhere else.
 
         A registry rejecting a value is a statement about that registry, and
         callers -- including the generated ``get()`` -- rely on it. The fallback
         lives in the field, which knows the value arrived in a field of a fixed
         width; it does not reach into the registry, so both of these go on
-        raising exactly as before.
+        raising.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
@@ -282,12 +280,12 @@ class UnassignedEnumFieldTests(unittest.TestCase):
                     field.unpack(b'\x63', dict())
 
     def test_a_field_with_no_registry_at_all_is_unchanged(self) -> None:
-        """The branch the fallback reuses still behaves as it did.
+        """The branch the fallback reuses: a field with no registry.
 
-        A namespace-less :class:`~pcapkit.corekit.fields.numbers.EnumField` has
-        always produced this nameless member; the fix reuses the same mechanism
-        rather than inventing a second shape, so an unassigned code and a
-        registry-less field answer alike.
+        A namespace-less :class:`~pcapkit.corekit.fields.numbers.EnumField` produces
+        this nameless member; the fix reuses the same mechanism rather than
+        inventing a second shape, so an unassigned code and a registry-less field
+        answer alike.
 
         """
         from pcapkit.corekit.fields.numbers import EnumField
@@ -299,7 +297,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         self.assertEqual(resolved.name, '<unassigned>')
 
     def test_bit_length_masking_still_precedes_the_lookup(self) -> None:
-        """``post_process`` masks before it resolves, and still does.
+        """``post_process`` masks before it resolves.
 
         A bit-field's value is the masked one, so the registry must be asked
         about the masked value rather than about the octet it was carved out of.
@@ -427,14 +425,14 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
             os.unlink(reported)
 
     def test_the_unknown_block_reader_is_reachable_for_an_unassigned_code(self) -> None:
-        """``UnknownBlock`` was unreachable, and this is the dispatch that proves it.
+        """``UnknownBlock`` is reachable, and this is the dispatch that proves it.
 
-        Both halves of the dispatch were always in place -- ``__block__`` falls
-        back to ``'unknown'`` for a code it does not register, and the block-type
-        schema registry's ``__default__`` selects
-        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`. Neither was
-        reachable for a genuinely unassigned code, because the enum lookup failed
-        first. With the code resolving, both answer.
+        Both halves of the dispatch are in place -- ``__block__`` falls back to
+        ``'unknown'`` for a code it does not register, and the block-type schema
+        registry's ``__default__`` selects
+        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`. Without the
+        fix neither is reachable for a genuinely unassigned code, because the
+        enum lookup fails first. With the code resolving, both answer.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType

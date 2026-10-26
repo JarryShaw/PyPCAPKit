@@ -24,13 +24,13 @@ write annotations are executed. Both summaries run :file:`util/leg_summary.py`
 (#1967), :file:`create-release.yml`'s ``pypi``'s too, whose former inline copy
 of its shell is run against the script on the same steps.
 
-#1660 added an experimental tier, free-threaded CPython and GraalPy, as legs of
-``test`` only; #1732 moved them to a job of their own, ``experimental``, which
-nothing gating needs. They are non-blocking by the same mechanics, every step
-that can fail guarded, and report through ``Experimental summary``, that job's
-last step: :class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their
-setup-python, install and test steps have caps of their own, so a slow or hung leg
-fails a step rather than being cancelled with its job:
+The experimental tier, free-threaded CPython and GraalPy (#1660), is a job of its
+own, ``experimental``, which nothing gating needs (#1732). They are non-blocking
+by the same mechanics, every step that can fail guarded, and report through
+``Experimental summary``, that job's last step:
+:class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their setup-python, install
+and test steps have caps of their own, so a slow or hung leg fails a step rather
+than being cancelled with its job:
 :class:`TestASlowExperimentalLegTimesOutAStepNotTheJob`.
 
 """
@@ -172,7 +172,7 @@ COMPILEALL = re.compile(r'-m compileall\b(?:[^\n]*\\\n)*[^\n]*')
 #: tests. #1732: the tests' is GraalPy's unit tier less the round-trip sweeps, 88-113
 #: minutes (estimate) from the 26% its leg reached in 25 (job 115915976024).
 EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
-#: ``experimental``'s own ``timeout-minutes`` (#1732), and ``test``'s, main's 45 again.
+#: ``experimental``'s own ``timeout-minutes`` (#1732), and ``test``'s.
 EXPERIMENTAL_JOB_CAP = 140
 JOB_CAP = 45
 #: The job's minutes those caps leave for the rest of an experimental leg: the steps
@@ -563,7 +563,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertIn(f'{LEG_KTLO}: no step failed.', result.stdout)
 
     def test_the_former_release_copy_reports_as_the_script_does(self) -> None:
-        """``pypi``'s ``KTLO summary`` held its own shell until #1967; the script reports as it did."""
+        """``pypi``'s ``KTLO summary`` shell from before #1967 and the script report alike."""
         if shutil.which('jq') is None:  # pragma: no cover
             self.skipTest('jq, on every Ubuntu runner image, is needed to run the former KTLO summary')
         self.assertEqual(summary_step(job(*UNCOPIED_SUMMARY))['run'], SUMMARY_RUN)
@@ -643,7 +643,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
 
 
 class TestASupportedLegStillFails(unittest.TestCase):
-    """(c) On a supported leg every step fails the job as before, and no summary runs."""
+    """(c) On a supported leg every step fails the job, and no summary runs."""
 
     def test_every_failure_still_fails_a_supported_leg(self) -> None:
         """A step's failure is the job's, unless it is masked on every leg by its own design.
@@ -826,10 +826,7 @@ class TestASlowExperimentalLegTimesOutAStepNotTheJob(unittest.TestCase):
                     self.assertTrue(continue_on_error(step, {'matrix': leg}), label(step))
 
     def test_test_keeps_mains_caps(self) -> None:
-        """#1732: ``test``'s job cap is 45 again, and none of its steps has one, so the 45 binds.
-
-        main's step caps were 360, the documented maximum, on every leg but the
-        experimental ones, which leave with them.
+        """#1732: ``test``'s job cap is 45, and none of its steps has one, so the 45 binds.
 
         """
         spec = job('unit-tests.yml', 'test')

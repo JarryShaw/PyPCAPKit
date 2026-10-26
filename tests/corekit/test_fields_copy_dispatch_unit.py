@@ -51,8 +51,8 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
 
     Rather than :func:`copy.copy(self) <copy.copy>`. Each test patches
     :func:`copy.copy` and :meth:`FieldBase.__copy__` with wrappers that still do
-    the real work (``side_effect=`` the original), so the field returned is
-    exactly what it always was; only the call counts are new.
+    the real work (``side_effect=`` the original), so the field returned is the
+    real one; the wrappers only count the calls.
 
     """
 

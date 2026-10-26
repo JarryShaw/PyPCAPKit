@@ -432,7 +432,7 @@ class ExtractorTests(unittest.TestCase):
         itself -- ``register_dumper`` directly (``Dumper`` has a plain ``type``
         metaclass), the other three from inside ``abc`` -- so the documented
         ``RegistryError`` was unreachable. A wrong *class* still reaches the
-        subclass check and raises ``RegistryError`` as before.
+        subclass check and raises ``RegistryError``.
         """
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.extraction import Extractor
@@ -510,7 +510,7 @@ class ExtractorTests(unittest.TestCase):
         # 3. The registry write still happens even when the guard stays quiet.
         self.assertIs(Extractor.__engine__['unit-engine-identity'], UnitEngineIdentityA)
 
-        # 2. Replacing with a different object still warns, message unchanged.
+        # 2. Replacing with a different object still warns.
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
             Extractor.register_engine('unit-engine-identity', UnitEngineIdentityB)
         warn.assert_called_once_with(
@@ -556,7 +556,7 @@ class ExtractorTests(unittest.TestCase):
         # 3. The registry write still happens even when the guard stays quiet.
         self.assertIs(Extractor.__reassembly__['unit-reassembly-identity'], UnitReassemblyIdentityA)
 
-        # 2. Replacing with a different object still warns, message unchanged.
+        # 2. Replacing with a different object still warns.
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
             Extractor.register_reassembly('unit-reassembly-identity', UnitReassemblyIdentityB)
         warn.assert_called_once_with(
@@ -608,7 +608,7 @@ class ExtractorTests(unittest.TestCase):
         # 3. The registry write still happens even when the guard stays quiet.
         self.assertIs(Extractor.__traceflow__['unit-traceflow-identity'], UnitTraceFlowIdentityA)
 
-        # 2. Replacing with a different object still warns, message unchanged.
+        # 2. Replacing with a different object still warns.
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
             Extractor.register_traceflow('unit-traceflow-identity', UnitTraceFlowIdentityB)
         warn.assert_called_once_with(
@@ -646,7 +646,7 @@ class ExtractorTests(unittest.TestCase):
         # 3. The registry write still happens even when the guard stays quiet.
         self.assertEqual(Extractor.__output__['unit-dumper-identity'], (NotImplementedIO, '.unit-a'))
 
-        # 2. Replacing with a different object still warns, message unchanged.
+        # 2. Replacing with a different object still warns.
         with mock.patch('pcapkit.foundation.extraction.warn') as warn:
             Extractor.register_dumper('unit-dumper-identity', UnitDumperIdentityB, '.unit-b')
         warn.assert_called_once_with(
@@ -933,8 +933,7 @@ class ExtractorTests(unittest.TestCase):
         self.assertTrue(call_interrupt._flag_e)
 
         # ``_flag_s`` set means ``fin`` was a path and ``Extractor`` opened the
-        # handle itself, so ``_cleanup`` owns it and has to close it. This
-        # assertion read ``assertFalse`` until #610, pinning the leak in place.
+        # handle itself, so ``_cleanup`` owns it and has to close it (#610).
         named_file = self._bare_extractor()
         named_file._flag_s = True
         named_file._ifile = ClosableBytesIO(b'data')
@@ -950,8 +949,8 @@ class ExtractorTests(unittest.TestCase):
         self.assertFalse(given_stream._ifile.closed_by_test)
 
         # Leaving the ``with`` block follows the same ownership rule: it closes
-        # a handle ``Extractor`` opened, and leaves a caller's stream open. This
-        # assertion closed the caller's stream until #1999.
+        # a handle ``Extractor`` opened, and leaves a caller's stream open
+        # (#1999).
         manual._flag_s = True
         with manual as ctx:
             self.assertIs(ctx, manual)
@@ -1216,10 +1215,11 @@ class ExtractorTests(unittest.TestCase):
 
     def test_warns_bullet_for_pcap_trace_output_names_the_engines_its_guard_warns_for(self) -> None:
         # The bullet lists engines by name and the guard lists them again as a
-        # tuple, and nothing tied the two: when DPKT and Scapy left the guard in
-        # #1507 the bullet kept naming them (#1719). Every engine is put through
-        # the guard -- ``_traced`` takes the requested engine as the one that runs
-        # -- and the set that warns is compared with the set the bullet names.
+        # tuple, and nothing else ties the two: the bullet once went on naming
+        # DPKT and Scapy after #1507 took them out of the guard (#1719). Every
+        # engine is put through the guard -- ``_traced`` takes the requested
+        # engine as the one that runs -- and the set that warns is compared
+        # with the set the bullet names.
         from pcapkit.foundation.extraction import Extractor
 
         warned = set()

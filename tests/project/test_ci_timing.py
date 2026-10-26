@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Tests for :file:`util/ci_timing.py`, the weekly CI timing review, and its inputs.
 
-GitHub issue #1538 added the review and the per-test timings it reads. Four things
-are checked, offline, since this tier has no network and no token:
+GitHub issue #1538 added the review and the per-test timings it reads. These are
+checked, offline, since this tier has no network and no token:
 
 * :class:`TestArithmetic` and :class:`TestWorkflowText` -- the quantiles, the
   projection to a cap, and the indentation reader the caps come from, on the real
@@ -450,7 +450,7 @@ class TestTransport(unittest.TestCase):
 
 @unittest.skipUnless(HAS_LXML, NO_LXML)
 class TestStrictJUnit(unittest.TestCase):
-    """#1894: JUnit is parsed by lxml with a hardened parser, where ElementTree read it before."""
+    """#1894: JUnit is parsed by lxml with a hardened parser, not by ElementTree."""
 
     CASE = b'<testcase classname="tests.a.TestA" name="test_a" time="0.5"/>'
     PARSED = [('tests.a.TestA', 'test_a', 0.5)]
@@ -472,7 +472,7 @@ class TestStrictJUnit(unittest.TestCase):
     def test_an_entity_is_neither_expanded_nor_read(self) -> 'None':
         """An internal one stays an entity node, and one naming a file or a URL is never opened.
 
-        ElementTree expanded the internal one, and refused the document over the
+        ElementTree expands the internal one, and refuses the document over the
         external ones; neither is what this asks of the parser.
 
         """
@@ -1150,7 +1150,7 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertIn('--durations=', section)
 
     def test_the_legs_the_review_reads_exist(self) -> 'None':
-        """``test``'s legs, from .github/python-versions.toml since #1660."""
+        """``test``'s legs, from .github/python-versions.toml (#1660)."""
         found = matrix_legs(matrix('unit-tests.yml', 'test'))
         for leg in ci_timing.JUNIT_LEGS:
             with self.subTest(leg=leg):

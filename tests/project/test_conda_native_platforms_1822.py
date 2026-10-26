@@ -2,10 +2,10 @@
 """Each conda package carries binaries for its own platform (#1822).
 
 * Both conda jobs map each runner label of their ``os`` axis, through
-  :file:`util/release_conda.py`'s ``PLATFORMS`` since #1967, to the conda
-  platform of that runner's own architecture, as GitHub's runner-images table
-  gives it (the snapshot in :file:`python_versions_fixtures`), and between them
-  build exactly :data:`conda_vendor.PLATFORMS`, win-64 included (#2060).
+  :file:`util/release_conda.py`'s ``PLATFORMS`` (#1967), to the conda platform
+  of that runner's own architecture, as GitHub's runner-images table gives it
+  (the snapshot in :file:`python_versions_fixtures`), and between them build
+  exactly :data:`conda_vendor.PLATFORMS`, win-64 included (#2060).
 * Neither job runs ``conda convert``. Run as the job runs it, with a stand-in
   ``conda``, a leg publishes the one package conda built, and fails before any
   upload when that is not the platform its label maps to.
@@ -69,7 +69,7 @@ JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
 #: as read on 2026-10-16; the test below checks the snapshot of the image table too.
 LEGS = {'macos-latest': 'osx-arm64', 'macos-26-intel': 'osx-64', 'ubuntu-latest': 'linux-64',
         'windows-latest': 'win-64'}
-#: Each job's legs, the same since #2060 gave the release job its Windows one.
+#: Each job's legs, alike for both (#2060 gave the release job its Windows one).
 JOB_LEGS = {('cron-conda.yml', 'conda-dist'): LEGS, ('create-release.yml', 'conda'): LEGS}
 #: ``platform.machine()``, as the runner-images table names the architecture.
 ARCH = {'x86_64': 'x64', 'arm64': 'arm64', 'AMD64': 'x64'}

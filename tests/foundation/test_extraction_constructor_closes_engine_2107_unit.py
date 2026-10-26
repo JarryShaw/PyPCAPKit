@@ -236,7 +236,7 @@ class TestConstructorClosesEngine(unittest.TestCase):
                     extractor: Any = extraction.Extractor(fin=str(self.path), nofile=True, auto=False,
                                                           **self.trace_kwargs())
                     if close_raises:
-                        # ``__exit__`` lets the close's error out, as it always has.
+                        # ``__exit__`` lets the close's error out.
                         with self.assertRaises(UnsupportedCall), extractor:
                             pass
                     else:

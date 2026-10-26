@@ -26,7 +26,7 @@ run stays build-only, which :mod:`tests.project.test_build_only_dispatch` pins.
   :class:`TestTheReportOfAnUnpushedForcedBump`: where Push Changes does not
   push a forced bump, which no later run repeats, it warns that nothing was
   published and to dispatch again, and the report says so too; every other
-  run's notice is as before.
+  run's notice is the ordinary one.
 
 """
 
@@ -325,7 +325,7 @@ class TestTheBumpIsForced(unittest.TestCase):
             with self.subTest(step=label):
                 self.assertTrue(step_runs('conda-update', label, context(DISPATCH, 'true', bump='true')))
                 self.assertFalse(step_runs('conda-update', label, context('schedule', 'true', bump='false')))
-        # A build-only run bumps on a change as before, and pushes nothing.
+        # A build-only run still bumps on a change, and pushes nothing.
         self.assertTrue(step_runs('conda-update', 'Bump Version', context(DISPATCH, 'false', bump='true')))
         self.assertFalse(step_runs('conda-update', 'Push Changes', context(DISPATCH, 'false', bump='true')))
 
@@ -358,7 +358,7 @@ class TestAnUnpushedForcedBumpSaysSo(CondaStepHarness, unittest.TestCase):
     No later run repeats a forced bump, so the notice that leaves the bump to the
     next Conda Update would be wrong: the run ends green having published
     nothing. Each path warns instead and says to dispatch again; with no forced
-    bump, each notice is as before, byte for byte.
+    bump, each notice is the ordinary one, byte for byte.
 
     """
 

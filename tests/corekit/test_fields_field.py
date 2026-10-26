@@ -642,7 +642,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
     around preserving it, and third-party PR #571 was declined for breaking it.
     So the cases that the option and list loops depend on -- above all a read
     against an entirely empty buffer, which pads to all zeros either way -- are
-    asserted here too, unchanged.
+    asserted here too.
 
     """
 
@@ -922,8 +922,8 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     can resolve to that negative remainder. :class:`~pcapkit.corekit.fields.
     strings._TextField.__call__` then builds a template such as ``'-5s'``
     from it with no lower bound, and :func:`struct.calcsize` cannot size
-    that -- pre-fix this surfaced as a bare, uncatchable :exc:`struct.error`
-    (GitHub issue #805).
+    that -- without the fix this surfaces as a bare, uncatchable
+    :exc:`struct.error` (GitHub issue #805).
 
     """
 
@@ -941,9 +941,9 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     def test_a_negative_resolved_length_raises_protocolerror_not_structerror(self) -> None:
         """The crash reproduction from #805, isolated to the field property.
 
-        Pre-fix, ``struct.error: bad char in struct format`` -- a bare
-        stdlib exception, not even a :exc:`ValueError`, uncatchable by
-        ordinary caller code -- escaped here. This is the exact shape
+        Without the fix, ``struct.error: bad char in struct format`` -- a
+        bare stdlib exception, not even a :exc:`ValueError`, uncatchable by
+        ordinary caller code -- escapes here. This is the exact shape
         HTTP/2's ``GoawayFrame.debug``/``PushPromiseFrame.fragment`` fields
         hit once their fixed-width siblings have already driven
         ``pkt['__length__']`` negative.
@@ -962,9 +962,9 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     def test_a_zero_or_positive_resolved_length_is_unaffected(self) -> None:
         """The fix must not change the answer for any non-negative length.
 
-        The property is a thin ``try/except`` around the same
-        :func:`struct.calcsize` call as before; a resolved length that never
-        raises must return exactly what it always returned.
+        The property is a thin ``try/except`` around
+        :func:`struct.calcsize`; a resolved length that does not raise
+        must return exactly what :func:`struct.calcsize` does.
         """
         for resolved in (0, 1, 5, 1024):
             with self.subTest(resolved=resolved):
@@ -978,10 +978,11 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
         :func:`struct.calcsize` raises the identical bare :exc:`struct.error`
         -- ``bad char in struct format`` -- for a malformed template as it
         does for a negative one (measured on 3.14.7: ``calcsize('-1s')`` and
-        ``calcsize('Xs')`` both raise it). Pre-fix, :attr:`FieldBase.length
-        <pcapkit.corekit.fields.field.FieldBase.length>` caught that blanket
-        and always reported "resolved to a negative length", which would have
-        misdiagnosed this case. The template here (``'Xs'``) never matches
+        ``calcsize('Xs')`` both raise it). Without the fix,
+        :attr:`FieldBase.length
+        <pcapkit.corekit.fields.field.FieldBase.length>` catches that blanket
+        and always reports "resolved to a negative length", which
+        misdiagnoses this case. The template here (``'Xs'``) never matches
         the leading-minus-sign shape a resolved negative count takes, so it
         must fall to the distinct, template-naming message instead.
         """

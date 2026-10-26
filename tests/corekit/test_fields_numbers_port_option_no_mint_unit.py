@@ -15,19 +15,19 @@ accounts for. On ``examples/captures/http.pcap`` that is 111 calls, all from
 ephemeral TCP ports with no IANA assignment, and measured at 13-17% of
 extraction self time.
 
-Each of them falls through to
-:meth:`EnumField._unregistered_member <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`
-instead of minting: an actual instance of the registry the field names --
-``isinstance`` holds, and it renders and dispatches exactly like a declared
-member -- built by calling the registry's own storage base's ``__new__``
-directly and skipping the registry's own ``__new__`` (and the
-``cls.__registry__.add(...)`` / ``cls.__members_ns__[...]`` line inside it)
-entirely, so nothing is ever added to any of its lookup tables. That is the
-owner's ruling on this issue's return type: it is to apply to every other
-enumeration's legitimate but unbounded values as well, so that no registered
-enumeration member is created out of an unrecognised or unregistered value,
-unless the user or caller explicitly created it. That is tracked more broadly
-as #775, and applied here only to these four call sites.
+Each of them falls through to :meth:`EnumField._unregistered_member
+<pcapkit.corekit.fields.numbers.EnumField._unregistered_member>` instead of
+minting: an actual instance of the registry the field names -- ``isinstance``
+holds, and it renders and dispatches exactly like a declared member -- built by
+calling the registry's own storage base's ``__new__`` directly and skipping the
+registry's own ``__new__`` (and the ``cls.__registry__.add(...)`` /
+``cls.__members_ns__[...]`` line inside it) entirely, so nothing is ever added
+to any of its lookup tables. That is the owner's ruling on this issue's return
+type: it is to apply to every other enumeration's legitimate but unbounded
+values as well, so that no registered enumeration member is created out of an
+unrecognised or unregistered value, unless the user or caller explicitly
+created it. That is tracked more broadly as #775, and applied here only to
+these call sites.
 
 This mirrors :mod:`tests.corekit.test_fields_numbers_unassigned_enum`'s shape:
 the field is tested directly, in isolation from extraction, and the "still
@@ -171,10 +171,10 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
         """The member is absent from ``_value2member_map_``, so looking the
         same port back up *by value*, on the same per-transport class the
         field resolved it against -- rather than reading the attributes off
-        the object already in hand -- still raises, exactly as it did before
-        this member existed. Nothing on the parse or reconstruction path
-        does this to a value it just resolved; this pins that the registry
-        itself has not changed underneath that assumption.
+        the object already in hand -- still raises, as it does for any value
+        the registry does not hold. Nothing on the parse or reconstruction
+        path does this to a value it just resolved; this pins that the
+        registry itself has not changed underneath that assumption.
 
         A direct call to ``.get()`` is different on purpose and stays that
         way: the owner's ruling and the docstring above are both explicit
@@ -365,14 +365,14 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
 class UnregisteredMemberStorageBaseTests(unittest.TestCase):
     """``_unregistered_member``'s ``int`` branch and its ``TypeError`` guard.
 
-    Neither is reachable from the four call sites this issue touches:
+    Neither is reachable from the call sites this issue touches:
     :class:`~pcapkit.const.reg.apptype.AppType` and
-    :class:`~pcapkit.const.pcapng.option_type.OptionType` are both
-    ``StrEnum``, so all four take the :class:`str` branch. The method is
-    written for registries in general, though, and an untested branch in a
-    fallback is the kind that turns out to be wrong the first time something
-    needs it -- so both are driven directly here, against registries standing
-    in for the ones a future caller would hand it.
+    :class:`~pcapkit.const.pcapng.option_type.OptionType` are both ``StrEnum``, so
+    every one of them takes the :class:`str` branch. The method is written for
+    registries in general, though, and an untested branch in a fallback is the
+    kind that turns out to be wrong the first time something needs it -- so both
+    are driven directly here, against registries standing in for the ones a future
+    caller would hand it.
 
     """
 
@@ -437,12 +437,12 @@ class UnregisteredMemberRoundTripTests(unittest.TestCase):
     """:mod:`pickle` and :mod:`copy` of a resolved unassigned port.
 
     ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``, i.e. to the
-    one lookup an unregistered member is deliberately absent from. Before this
-    issue's fix the port fields minted, so the member *was* registered and a
-    round-trip worked; without the ``__reduce_ex__``
+    one lookup an unregistered member is deliberately absent from. A minted
+    member *is* registered, so its round-trip works; without the
+    ``__reduce_ex__``
     :meth:`~pcapkit.corekit.fields.numbers.EnumField._unregistered_member`
-    installs, removing the mint would have taken that away -- and taken it away
-    on read-back, since ``pickle.dumps`` succeeds either way. These pin the
+    installs, not minting would take that away -- and take it away on
+    read-back, since ``pickle.dumps`` succeeds either way. These pin the
     mitigation, and that it does not put the mint back.
 
     """
@@ -488,12 +488,12 @@ class UnregisteredMemberRoundTripTests(unittest.TestCase):
 
     def test_copy_and_deepcopy_survive_without_the_3_11_enum_shim(self) -> None:
         """CPython's :mod:`enum` grew ``Enum.__copy__``/``__deepcopy__``, both
-        returning ``self`` without any lookup, in 3.11; on 3.10 -- still a
-        supported version here -- neither exists and both fall through to
-        ``__reduce_ex__``. :class:`aenum.Enum` subclasses stdlib
-        :class:`enum.Enum` and defines only ``__reduce_ex__`` of its own, so
-        deleting those two off :class:`enum.Enum` is what 3.10 looks like from
-        here; there is no 3.10 interpreter on this host to run instead.
+        returning ``self`` without any lookup, in 3.11; below it neither
+        exists and both fall through to ``__reduce_ex__``.
+        :class:`aenum.Enum` subclasses stdlib :class:`enum.Enum` and defines
+        only ``__reduce_ex__`` of its own, so deleting those two off
+        :class:`enum.Enum` is what those versions look like from here,
+        whichever interpreter runs the test.
 
         """
         member = self._resolved()

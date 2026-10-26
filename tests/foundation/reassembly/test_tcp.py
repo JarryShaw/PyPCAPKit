@@ -271,9 +271,9 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
       was computed as the sequence number *after* the segment while the
       descriptor list treats its bounds as inclusive.
 
-    A fourth, closely related error surfaced while fixing them: the sequence
-    number a SYN spends became a NUL octet at the head of the payload, so a
-    complete datagram did not compare equal to the octets that were sent.
+    A closely related error is pinned too: the sequence number a SYN spends
+    became a NUL octet at the head of the payload, so a complete datagram
+    did not compare equal to the octets that were sent.
 
     Every stream here is driven through :class:`~pcapkit.foundation.reassembly.tcp.TCP`
     with segment descriptors built exactly as the :mod:`pcapkit.toolkit` modules
@@ -390,8 +390,8 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         """The same stream reassembles the same way whatever ISN it uses.
 
         This is the property the defect broke: at zero the two coordinate
-        systems coincide and the fragments came out one octet long each too
-        long; anywhere else the datagram disappeared entirely.
+        systems coincide and the fragments came out one octet too long
+        each; anywhere else the datagram disappeared entirely.
 
         """
         from pcapkit.foundation.reassembly.data.data import Completion
@@ -625,8 +625,8 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
                 self.assertEqual(datagram.payload, b'A' * 10 + b'B' * 10)
 
     # The end-to-end case on a generated capture lives in
-    # tests/foundation/reassembly/test_tcp_runtime.py, since the unit-test
-    # workflow runs without the generated fixtures.
+    # tests/foundation/reassembly/test_tcp_runtime.py, since the unit tier
+    # runs without the generated fixtures.
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -641,8 +641,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     conflicting portion of whichever segment arrived later is discarded, and
     the sequence range on which they disagreed is recorded on
     :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.conflict` --
-    additive, so ``completed`` is untouched and existing callers are
-    unaffected.
+    additive, so ``completed`` means what it does without a conflict.
 
     Every test drives the public API only -- build :class:`Packet`, feed
     :class:`TCP`, read back the :class:`Datagram` from
@@ -733,7 +732,7 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         self.assertEqual(datagram.conflict, ((base + 4, base + 7),))
 
     def test_conflicting_partial_overlap_on_the_head_side_reach_back(self) -> None:
-        """The mirrored reach-back branch, at the line the issue calls out at :204.
+        """The mirrored reach-back branch, the one the issue calls out.
 
         A segment arriving with a *lower* sequence number than the buffer's
         current ISN, whose tail overlaps the buffer's head: the overlapping
@@ -773,11 +772,11 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     def test_conflict_persists_once_a_later_segment_completes_the_datagram(self) -> None:
         """A conflict recorded while the stream is still partial survives to completion.
 
-        The gap between the two original segments is a real hole -- unlike
-        the overlap in the other tests here, filling it is an ordinary gap
-        fill, not a conflict -- and once it closes the datagram reports
+        The gap between the two original segments is a real hole -- unlike the
+        overlap in the other tests here, filling it is an ordinary gap fill,
+        not a conflict -- and once it closes the datagram reports
         :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`,
-        per the decision to leave ``completed`` alone: the conflict recorded
+        since ``completed`` does not consider conflicts: the conflict recorded
         earlier is still there, on the completed datagram, rather than being
         dropped or blocking completion.
 
@@ -810,20 +809,19 @@ class TCPReassemblyConflictTests(unittest.TestCase):
 
         The sibling test below covers the inverse -- that a *hole* closed in one
         bucket does not look received in another -- and asserts an empty
-        ``conflict`` for both. Nothing asserted the case where one bucket
+        ``conflict`` for both. This one asserts the case where one bucket
         genuinely *does* record a conflict while another, in flight at the same
         time, must not: the gap lists and conflict records are per
         :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment`, and this is
         what proves it rather than arguing it from where the field is declared.
 
         Worth stating why this case in particular. The data loss this whole
-        mechanism exists to fix survived six boundary tests precisely because
+        mechanism exists to fix survived the boundary tests precisely because
         every one of them used a *single* ACK bucket, so none could see state
-        leaking across buckets. The representation has since changed from a
-        per-octet ``received`` mask to
-        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`, and that
-        change arrived with two more single-bucket tests -- so the same blind
-        spot had reopened against the new mechanism.
+        leaking across buckets, and the
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`
+        representation came with more single-bucket tests -- the same blind
+        spot.
 
         Bucket 1000 takes a real conflicting retransmission over ``base..base+3``
         and must report exactly that range. Bucket 2000 is interleaved with it,

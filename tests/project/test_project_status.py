@@ -837,7 +837,7 @@ class TestTheWorkflowCommands(unittest.TestCase):
             '1 of 1 item(s) changed\n')))
 
     def test_a_percent_in_the_repository_is_escaped(self) -> None:
-        """Before util/_actions.py the query went out as written; ``%`` is not in a repository name GitHub allows."""
+        """Escaped all the same, though ``%`` is not in a repository name GitHub allows."""
         fake = FakeGraphQL([], issue_count=1)
         code, printed = self.run_main(['--reconcile', '--repo', 'o/50%'], fake)
         self.assertEqual(code, 0)

@@ -78,11 +78,10 @@ class SeekableReaderTests(unittest.TestCase):
 
         :meth:`io.IOBase.writable` documents the gate for both methods it guards -- "If
         :data:`False`, :meth:`write` and :meth:`truncate` will raise :exc:`OSError`" -- and
-        :meth:`~pcapkit.corekit.io.SeekableReader.writable` returns :data:`False` here. Two of
-        the three writability-gated methods already honoured that: ``write`` and ``writelines``
-        raise. ``truncate`` returned its new size instead, so a caller that checked
-        ``writable()`` first -- which is exactly what the contract invites -- got a surprise
-        either way round.
+        :meth:`~pcapkit.corekit.io.SeekableReader.writable` returns :data:`False` here. ``write``
+        and ``writelines`` honour that and raise. Without the fix ``truncate`` returns its new
+        size instead, so a caller that checks ``writable()`` first -- which is exactly what the
+        contract invites -- gets a surprise either way round.
 
         Every form is asserted, since the omitted-size form takes a different path through the
         method than an explicit size and only the explicit one would have been noticed.
@@ -185,8 +184,7 @@ class SeekableReaderTests(unittest.TestCase):
 
         reader = self.SeekableReader(io.BytesIO(b'abcdef'), buffer_size=4)
         # NOTE: the reader genuinely cannot write -- ``write`` raises -- so False is the honest
-        # answer, and the reporting was never the dishonest half. Only where it was *defined*
-        # was wrong, and the guard on ``truncate`` was missing.
+        # answer. What #645 is about is where it is *defined*, and the guard on ``truncate``.
         self.assertFalse(reader.writable())
         self.assertFalse(hasattr(reader, 'writeable'))
         self._close_reader(reader)
@@ -272,8 +270,8 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertTrue(reader.seekable())
         self.assertFalse(reader.writable())
         # NOTE: an omitted size means the current position, per :meth:`io.IOBase.truncate`.
-        # The position is 6 and the buffer starts at 2, so 4 octets of it are kept. This
-        # asserted 0 until issue #622, which is what an omitted size was resized to.
+        # The position is 6 and the buffer starts at 2, so 4 octets of it are kept, not the
+        # 0 an omitted size is resized to without issue #622's fix.
         self.assertEqual(reader._buffer_set, 2)
         self.assertEqual(reader._truncate_buffer(None), 4)
         self.assertEqual(reader._truncate_buffer(6), 6)
@@ -538,11 +536,11 @@ class SeekableReaderTests(unittest.TestCase):
     def test_buffered_read_returns_every_buffered_octet(self) -> None:
         """A read served from the buffer stops at the content, not one octet short of it.
 
-        The existing round trip at :meth:`test_buffered_readline_read_read1_and_peek_paths`
-        cannot see this: it seeks to 1, where ``_buffer_cur - 1`` happens to equal the
-        octets actually available, so the two candidate caps agree. Seeking to 0 separates
-        them -- four octets are available and, without the fix, the cap allows three,
-        making up the fourth from the stream *past* the octet it skipped.
+        The round trip at :meth:`test_buffered_readline_read_read1_and_peek_paths` cannot
+        see this: it seeks to 1, where ``_buffer_cur - 1`` happens to equal the octets
+        actually available, so the two candidate caps agree. Seeking to 0 separates them
+        -- four octets are available and, without the fix, the cap allows three, making up
+        the fourth from the stream *past* the octet it skipped.
 
         """
         reader = self.SeekableReader(io.BytesIO(b'abcde'), buffer_size=8)
@@ -846,14 +844,14 @@ class SeekableReaderTests(unittest.TestCase):
     def test_the_window_base_and_content_pointer_track_the_stream_consumption(self) -> None:
         """``_buffer_set + _buffer_cur`` is how far the stream has been read, always.
 
-        This is the invariant #633's first revision broke, turning a loud
-        :exc:`ValueError` into silent data corruption: :meth:`seek` reads the pair as the
-        stream's consumption point and reads ahead from it to fill a gap, so a pair that
-        under-reports makes the next forward seek splice octets in from the wrong absolute
-        offset without complaining. It is asserted directly here, against a stream that
-        counts what has actually been taken off it, after *every* operation rather than at
-        the end -- an output assertion can pass while the bookkeeping behind it is already
-        wrong, which is exactly how that revision got as far as review.
+        This is the invariant a draft of #633 broke, turning a loud :exc:`ValueError` into
+        silent data corruption: :meth:`seek` reads the pair as the stream's consumption
+        point and reads ahead from it to fill a gap, so a pair that under-reports makes
+        the next forward seek splice octets in from the wrong absolute offset without
+        complaining. It is asserted directly here, against a stream that counts what has
+        actually been taken off it, after *every* operation rather than at the end -- an
+        output assertion can pass while the bookkeeping behind it is already wrong, which
+        is exactly how that draft got as far as review.
 
         Deriving the buffer's cursor from ``_tell`` at each point of use is what preserves
         the pair by construction: nothing clamps or adjusts either member to make a read fit,
@@ -888,14 +886,14 @@ class SeekableReaderTests(unittest.TestCase):
 
         :meth:`_truncate_buffer` advances the window's base past the octets it drops, which can
         leave a position already set sitting before it. :meth:`seek` refuses that position
-        outright -- the stream cannot be rewound to re-supply the octets, so there is
-        nothing to read -- but the buffered read paths reached it too, by way of a position
-        set *before* the truncation rather than after, and answered from whatever offset the
-        cursor happened to hold. Here that returned ``b'c'``, the octet at 2, for a read at
-        1.
+        outright -- the stream cannot be rewound to re-supply the octets, so there is nothing
+        to read -- but the buffered read paths reached it too, by way of a position set
+        *before* the truncation rather than after, and answered from whatever offset the cursor
+        happened to hold. Without the refusal that is ``b'c'`` here, the octet at 2, for a read
+        at 1.
 
-        Refusing it is the same answer :meth:`seek` already gives, and turns the last silent
-        wrong answer in this family into a loud one.
+        Refusing it is the same answer :meth:`seek` already gives, and turns a silent wrong
+        answer into a loud one.
 
         """
         reader = self.SeekableReader(io.BytesIO(b'abcdefghijkl'), buffer_size=8)
@@ -907,7 +905,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.tell(), 1)               # and the position is behind it
 
         with self.assertRaises(self.exceptions.SeekError):
-            reader.read(1)                               # was b'c', the octet at 2
+            reader.read(1)                               # not b'c', the octet at 2
         with self.assertRaises(self.exceptions.SeekError):
             reader.seek(1)
         self._close_reader(reader)
@@ -916,10 +914,10 @@ class SeekableReaderTests(unittest.TestCase):
         """A request for no octets must not be refused for having nowhere to read from.
 
         The refusal in the previous test is on the window, and the window has nothing to say
-        about a request that wants nothing: every one of these returned ``b''`` before the
-        refusal existed, and a zero-length read failing on position grounds is not a
-        behaviour either issue asked for. Checking the window before looking at the requested
-        size made all four of them raise from a position :meth:`_truncate_buffer` had stranded.
+        about a request that wants nothing: every one of these returns ``b''`` without the
+        refusal, and a zero-length read failing on position grounds is not a behaviour either
+        issue asked for. Checking the window before looking at the requested size would make
+        every one of them raise from a position :meth:`_truncate_buffer` had stranded.
 
         The same position is asserted both ways round, which is what makes this a statement
         about the *size* rather than about the state: at size zero all four return, and the

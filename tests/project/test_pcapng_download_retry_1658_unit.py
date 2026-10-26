@@ -6,13 +6,13 @@ sends a CI leg straight to the synthesised stand-in. So ``_download`` retries an
 HTTP 429 or 5xx, or a timeout, with backoff, honouring ``Retry-After``, within a
 small budget; any other failure falls back at once.
 
-#1894 moved the download from :mod:`urllib.request` to :mod:`requests`.
-:class:`DownloadRetryTests` runs against a stubbed ``requests.get`` and a fake
-clock bound over the generator's ``time``, so nothing touches the network or
-sleeps. :class:`LocalServerTests` sends real requests to a server on the
-loopback interface, because what :mod:`requests` raises for a timeout while the
-body is read is its own behaviour, not something a stub can show. This module
-is unit-tier and reads no capture.
+The download goes through :mod:`requests` (#1894). :class:`DownloadRetryTests`
+runs against a stubbed ``requests.get`` and a fake clock bound over the
+generator's ``time``, so nothing touches the network or sleeps.
+:class:`LocalServerTests` sends real requests to a server on the loopback
+interface, because what :mod:`requests` raises for a timeout while the body is
+read is its own behaviour, not something a stub can show. This module is
+unit-tier and reads no capture.
 
 """
 from __future__ import annotations

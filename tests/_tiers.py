@@ -81,21 +81,22 @@ engine, say -- but only when the capture name is a string literal. The call-time
 check sees the name however it was computed, e.g. ``sample_path(sample)`` in a
 parametrised loop, but only once the call is reached.
 
-What neither catches, deliberately: a unit-tier module that opens a capture
-without going through :func:`~tests._support.sample_path` at all, e.g. by joining
+What neither catches, deliberately: a unit-tier module that opens a capture without
+going through :func:`~tests._support.sample_path` at all, e.g. by joining
 :file:`examples/captures/` and a name itself. No *unit-tier* module does this:
-:file:`tests/protocols/misc/test_pcapng_unit.py` was the last one, and
-reads ``sample_path('dhcp_big_endian.pcapng')`` inside the ``try``/``except
-FileNotFoundError`` idiom :func:`explain` recommends. Only the *unit* tier is
-claimed there, deliberately: fixture-tier modules join the directory freely and
-are entitled to, e.g. :file:`tests/protocols/test_option_coverage_runtime.py`,
-which imports :data:`SAMPLE_ROOT` from here and joins names onto it -- legal,
-because that tier runs only once the fixtures exist. The one unit-tier module that
-touches :data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, stats
-:file:`in.pcap` directly -- which is committed -- and separately loops over every
-name :func:`committed_captures` reports, each committed by construction, since that
-is git's own tracked listing rather than a name the test made up. But nothing stops
-the next unit-tier module from opening a *generated* capture that way, and the shape
+:file:`tests/protocols/misc/test_pcapng_unit.py`, for one, reads
+``sample_path('dhcp_big_endian.pcapng')`` inside the
+``try``/``except FileNotFoundError`` idiom :func:`explain` recommends. Only the
+*unit* tier is claimed there, deliberately: fixture-tier modules join the directory
+freely and are entitled to, e.g.
+:file:`tests/protocols/test_option_coverage_runtime.py`, which imports
+:data:`SAMPLE_ROOT` from here and joins names onto it -- legal, because that tier
+runs only once the fixtures exist. The one unit-tier module that touches
+:data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, stats :file:`in.pcap`
+directly -- which is committed -- and separately loops over every name
+:func:`committed_captures` reports, each committed by construction, since that is
+git's own tracked listing rather than a name the test made up. But nothing stops the
+next unit-tier module from opening a *generated* capture that way, and the shape
 stays invisible here.
 
 Flagging it in general was considered and rejected, with a measurement behind the
@@ -1729,8 +1730,7 @@ def fixture_tier_paths(tier: 'Optional[str]' = None) -> 'tuple[str, ...]':
     :func:`skip_idiom_modules` directly, so that pulling in one skip-idiom test
     does not also pull in every unrelated method the same module happens to
     hold. Without that, the skip-idiom modules would add every one of their
-    tests back into this selection -- well over a hundred -- to reach the
-    handful that actually need it.
+    tests back into this selection to reach the handful that actually need it.
 
     This is deliberately *not* "the complement of :func:`is_unit_tier`"
     expressed as a single predicate the way :func:`is_unit_tier` itself is: the

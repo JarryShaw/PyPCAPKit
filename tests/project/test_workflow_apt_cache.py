@@ -2,14 +2,14 @@
 """Tests for the apt ``.deb`` cache and fallback mirror in :file:`unit-tests.yml` (#1432).
 
 #1432: ``azure.archive.ubuntu.com`` served ~75 kB/s, so ``timeout 180`` killed
-both tshark install attempts, three times in one day. The fix wraps the
-unchanged install step (pinned by
-:class:`tests.project.test_unit_tests_queue.TestAptRetry`) with a plan step that
-computes a cache key, ``actions/cache`` restore/seed/collect/save steps, and a
-retry that drops azure from the runner's ``mirror+file:`` list.
+both tshark install attempts, three times in one day. The fix wraps the install
+step (pinned by :class:`tests.project.test_unit_tests_queue.TestAptRetry`) with
+a plan step that computes a cache key, ``actions/cache``
+restore/seed/collect/save steps, and a retry that drops azure from the runner's
+``mirror+file:`` list.
 
 Each property below is exercised by running the step's real ``run:`` script, which
-runs :file:`util/apt_packages.py` since #1967, under ``bash -e`` with
+runs :file:`util/apt_packages.py` (#1967), under ``bash -e`` with
 ``sudo``/``timeout``/``apt-get`` stubbed, the way ``TestAptRetry`` does, or by
 reading the step text where only the Actions runner could execute it:
 
@@ -337,7 +337,7 @@ class TestOneSaverPerKey(unittest.TestCase):
     def test_only_one_parity_cell_saves(self) -> None:
         """APT_CACHE_SAVE selects exactly one of the parity matrices' Python versions.
 
-        Since #1738 the KTLO legs are ``pypcap-parity-ktlo``'s, under the same
+        The KTLO legs are ``pypcap-parity-ktlo``'s (#1738), under the same
         ``APT_SET`` and so the same key, and that job never saves.
 
         """

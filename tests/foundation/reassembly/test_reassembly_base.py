@@ -171,8 +171,8 @@ class ReassemblyBaseTests(unittest.TestCase):
                 def submit(self, buf: DummyBuffer, **kwargs: object) -> list[DummyDatagram]:
                     return []
 
-        # #514: registration is opt-in. Before it, the absent keyword fell back to
-        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- and this registered
+        # #514: registration is opt-in. A fallback for the absent keyword to
+        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- would register this
         # under ``'defaultproto'``. A class attribute is not a registry key.
         register.assert_not_called()
         self.assertEqual(Default.name, 'DefaultProto')

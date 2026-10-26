@@ -2,8 +2,8 @@
 """``version_check``'s Anaconda completeness check counts every platform the ``conda`` legs publish (#1922).
 
 * The platforms it counts, :file:`util/release_published.py`'s ``SUBDIRS``
-  since #1967, are the ones the ``conda`` job's ``os`` legs map to, read from
-  that job's matrix and :file:`util/release_conda.py`'s ``PLATFORMS``, which its
+  (#1967), are the ones the ``conda`` job's ``os`` legs map to, read from that
+  job's matrix and :file:`util/release_conda.py`'s ``PLATFORMS``, which its
   steps run.
 * Run as the workflow runs it, with ``curl`` stubbed, a release reads complete
   only with each of those platforms for each build, so a missing ``osx-arm64``

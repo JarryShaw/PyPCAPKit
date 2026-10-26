@@ -50,7 +50,7 @@ __tier__ = 'LATEST'
 #:   ``nested_packet_context`` are helpers for writing a field or its callbacks,
 #:   reached by their module path. ``nested_packet_context`` in particular builds
 #:   the packet context a nested schema's callbacks receive; star-exporting it
-#:   would drop a generic name into the caller's namespace (:issue:`2174`).
+#:   would drop a generic name into the caller's namespace (#2174).
 #: * ``DecodedString`` is the value type :class:`~pcapkit.corekit.fields.strings.StringField`
 #:   returns, not a field.
 FIELDS_DELIBERATE_NON_EXPORTS = {

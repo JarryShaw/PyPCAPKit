@@ -2,11 +2,12 @@
 """The ``tree`` dumper writes a :class:`complex` number instead of raising.
 
 GitHub issue #1266: :meth:`dictdumper.tree.Tree._append_number` hands every
-number to :func:`math.isnan`, which raises ``TypeError: must be real number, not
-complex`` for the :class:`complex` values :class:`~dictdumper.tree.Tree` routes
-there. :func:`~pcapkit.dumpkit.common.make_dumper` writes those itself, in
-the writer's own ``-> <number>`` style. ``json`` and ``plist`` are untouched:
-they already write a :class:`complex` as the string ``(1+2j)``.
+number to :func:`math.isnan`, which raises
+``TypeError: must be real number, not complex`` for the :class:`complex` values
+:class:`~dictdumper.tree.Tree` routes there.
+:func:`~pcapkit.dumpkit.common.make_dumper` writes those itself, in the writer's
+own ``-> <number>`` style. ``json`` and ``plist`` need nothing: they write a
+:class:`complex` as the string ``(1+2j)``.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, not at module load, so that the

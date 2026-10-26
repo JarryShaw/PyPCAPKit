@@ -11,10 +11,10 @@ teardown, so it resolves ``gnutimeout`` where it exists and ``timeout`` otherwis
 
 A ``timeout`` with no option, ``timeout 60 apt-get update`` as the apt steps run
 it, behaves alike under both in the same image: exit 124, and its child's own
-children end with it. So the rule here is that a ``timeout`` given any option
-runs through that resolution, in every workflow. Since #1967 the steps' shell
-moves into ``util/`` scripts, so the rule covers what those run too: no string in
-one is an optioned ``timeout`` command, and no command one builds as a sequence,
+children end with it. So the rule here is that a ``timeout`` given any option runs
+through that resolution, in every workflow. The steps' shell lives in ``util/``
+scripts (#1967), so the rule covers what those run too: no string in one is an
+optioned ``timeout`` command, and no command one builds as a sequence,
 ``['sudo', 'timeout', '60', 'apt-get', 'update']`` as :file:`util/apt_packages.py`
 does, gives ``timeout`` an option.
 

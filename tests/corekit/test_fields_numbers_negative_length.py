@@ -297,15 +297,15 @@ class NegativeBitLengthTests(unittest.TestCase):
         """The second half of #831: one wire condition, one message.
 
         No in-tree call site combines a fixed ``bit_length`` with a callable
-        ``length`` -- ``vlan.py``'s three ``bit_length`` fields all take
-        positive literal ``length`` -- so this is a constructed reproduction,
-        not a real wire shape. Without the fix, #829's guard in ``__call__``
-        sits inside ``if new_self._bit_length < 0:`` and this combination
-        never enters that branch, so no ``ProtocolError`` fires there at all;
-        the field instead degrades to ``template='>-1s'`` and the error is
+        ``length`` -- ``vlan.py``'s ``bit_length`` fields all take positive
+        literal ``length`` -- so this is a constructed reproduction, not a
+        real wire shape. Without the fix, #829's guard in ``__call__`` sits
+        inside ``if new_self._bit_length < 0:`` and this combination never
+        enters that branch, so no ``ProtocolError`` fires there at all; the
+        field instead degrades to ``template='>-1s'`` and the error is
         deferred to :attr:`~pcapkit.corekit.fields.field.FieldBase.length`,
-        which reports ``template='>-1s'`` rather than ``length=-1`` --
-        a different message for the same underlying defect.
+        which reports ``template='>-1s'`` rather than ``length=-1`` -- a
+        different message for the same underlying defect.
 
         """
         from pcapkit.corekit.fields.numbers import NumberField

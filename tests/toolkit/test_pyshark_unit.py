@@ -79,19 +79,17 @@ class FakePySharkPacket:
             frame_fields['encap_type'] = encap_type
         self.frame_info = FakeLayer('frame', **frame_fields)
         self.layers = [
-            # Real PyShark names a layer from the PDML ``<proto name>``
-            # attribute, which is Wireshark's protocol *filter* name --
-            # ``eth``, not ``ethernet`` -- so the fake has to match that or it
-            # is not exercising what the real engine hands ``tcp_traceflow``.
-            # That name is not a LinkType *member* name either, so
-            # ``pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE`` translates
-            # the ones measured to be unambiguous -- see that table's own
-            # comment for the evidence and for what was deliberately left
-            # out. Since #843 that table is the *fallback*, reached only when
-            # the frame layer carries no ``encap_type``, and there is no
-            # ``LinkType.get()`` attempt after it. ``link_layer`` lets a test pick any
-            # root-layer name, including one outside that table, without
-            # duplicating this whole fake.
+            # Real PyShark names a layer from the PDML ``<proto name>`` attribute,
+            # which is Wireshark's protocol *filter* name -- ``eth``, not ``ethernet``
+            # -- so the fake has to match that or it is not exercising what the real
+            # engine hands ``tcp_traceflow``. That name is not a LinkType *member*
+            # name either, so ``pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE``
+            # translates the ones measured to be unambiguous -- see that table's own
+            # comment for the evidence and for what was deliberately left out. That
+            # table is the *fallback* (#843), reached only when the frame layer
+            # carries no ``encap_type``, and there is no ``LinkType.get()`` attempt
+            # after it. ``link_layer`` lets a test pick any root-layer name, including
+            # one outside that table, without duplicating this whole fake.
             FakeLayer(link_layer, src='aa:aa:aa:aa:aa:aa'),
             FakeLayer('ip', src='192.0.2.1', dst='198.51.100.1'),
             # ``flags_reset`` is PyShark's spelling of Wireshark's
@@ -220,8 +218,8 @@ class PySharkToolkitTests(unittest.TestCase):
 
     def test_tcp_traceflow_raises_for_an_ip_rooted_packet(self) -> None:
         """``'ip'`` is absent from ``FILTER_NAME_TO_LINKTYPE``, so the
-        fallback path raises. Since #843 the name is reported as PyShark
-        gave it rather than upper-cased, there being no upper-case
+        fallback path raises. The name is reported as PyShark gave it
+        rather than upper-cased (#843), there being no upper-case
         ``Enum_LinkType.get()`` attempt left to upper-case it for.
 
         The double feeds ``'ip'`` as ``layers[0]`` to exercise that path. A real
@@ -273,19 +271,19 @@ class PySharkToolkitTests(unittest.TestCase):
         wrong* DLT with no error. ``frame.encap_type`` separates them, and
         ``ENCAP_TYPE_TO_LINKTYPE`` turns it into the right member.
 
-        Each ``(encap_type, filter name, expected)`` triple below was
-        measured on this host with ``editcap``/``tshark`` 4.6.9 -- the
-        encapsulation rewritten with ``editcap -F pcap -T <encap>``, the DLT
-        read out of the resulting pcap file header at offset 20, and
-        ``frame.encap_type`` read back from ``tshark -T pdml``. The
-        ``wrong`` column is what the pre-#843 filter-name path returned.
+        Each ``(encap_type, filter name, expected)`` triple below was measured on
+        this host with ``editcap``/``tshark`` 4.6.9 -- the encapsulation
+        rewritten with ``editcap -F pcap -T <encap>``, the DLT read out of the
+        resulting pcap file header at offset 20, and ``frame.encap_type`` read
+        back from ``tshark -T pdml``. The ``wrong`` column is what an
+        upper-casing filter-name path returns (#843).
 
         """
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import pyshark as toolkit
 
         cases = [
-            # encap, editcap -T, filter name, expected,        pre-#843 answer
+            # encap, editcap -T, filter name, expected,        upper-cased answer
             ('174', 'loop',       'null', LinkType.LOOP,         LinkType.NULL),
             ('15',  'null',       'null', LinkType.NULL,         LinkType.NULL),
             ('210', 'linux-sll2', 'sll',  LinkType.LINUX_SLL2,   None),  # raised
@@ -370,12 +368,12 @@ class PySharkToolkitTests(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0], 'frame.encap_type=Ethernet')
 
     def test_filter_name_fallback_no_longer_upper_cases_onto_a_member(self) -> None:
-        """The pre-#843 fallback tried ``Enum_LinkType.get(name.upper())``,
-        which is what silently answered ``PPP`` (9) for a
-        ``ppp-with-direction`` capture (DLT 204) and ``LAPD`` (203) for a
-        ``linux-lapd`` one (DLT 177). Those names are ambiguous, so with no
-        ``frame.encap_type`` to key on there is nothing to resolve them to
-        and they must raise instead of answering the commoner DLT.
+        """A fallback trying ``Enum_LinkType.get(name.upper())`` (#843)
+        silently answers ``PPP`` (9) for a ``ppp-with-direction`` capture
+        (DLT 204) and ``LAPD`` (203) for a ``linux-lapd`` one (DLT 177).
+        Those names are ambiguous, so with no ``frame.encap_type`` to key
+        on there is nothing to resolve them to and they must raise instead
+        of answering the commoner DLT.
 
         """
         from pcapkit.toolkit import pyshark as toolkit

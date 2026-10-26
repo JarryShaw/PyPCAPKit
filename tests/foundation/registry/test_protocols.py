@@ -120,8 +120,9 @@ class ProtocolRegistryTests(unittest.TestCase):
                     warnings.simplefilter('always')
                     registry.register_protocol(replacement)
 
-                # The overwrite still happens. This fix reports the collision,
-                # it does not resolve it -- resolving it is #514's business.
+                # The overwrite still happens. The warning reports the
+                # collision, it does not resolve it -- resolving it is #514's
+                # business.
                 self.assertIs(registry.protocol_registry['HTTP'], replacement)
 
                 messages = self._registry_warnings(caught, RegistryWarning)
@@ -177,17 +178,17 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_register_protocol_stays_quiet_when_nothing_is_displaced(self) -> None:
         """A fresh key and an identical re-registration are both silent.
 
-        Since #718, the code-keyed siblings share this identity guard too --
-        see ``test_sibling_registries_now_stay_quiet_on_an_identical_re_registration``
-        in this file. Here the key is *derived* from the class rather than
-        supplied by the caller, and this function is the funnel every wrapper
-        registrar ends in, so registering one class under two codes -- supported,
-        and exactly what :func:`~pcapkit.foundation.registry.protocols.register_tcp`
-        followed by :func:`~pcapkit.foundation.registry.protocols.register_udp`
-        does -- reaches it twice with the same class and nothing displaced. A
-        presence-only guard would warn there, and a caller who filters
-        :exc:`~pcapkit.utilities.warnings.RegistryWarning` to silence that noise
-        stops seeing the ``HTTP`` collision the warning exists for.
+        The code-keyed siblings share this identity guard too (#718) -- see
+        ``test_sibling_registries_now_stay_quiet_on_an_identical_re_registration`` in
+        this file. Here the key is *derived* from the class rather than supplied by
+        the caller, and this function is the funnel every wrapper registrar ends in,
+        so registering one class under two codes -- supported, and exactly what
+        :func:`~pcapkit.foundation.registry.protocols.register_tcp` followed by
+        :func:`~pcapkit.foundation.registry.protocols.register_udp` does -- reaches it
+        twice with the same class and nothing displaced. A presence-only guard would
+        warn there, and a caller who filters
+        :exc:`~pcapkit.utilities.warnings.RegistryWarning` to silence that noise stops
+        seeing the ``HTTP`` collision the warning exists for.
 
         """
         from pcapkit.foundation.registry import protocols as registry
@@ -290,7 +291,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         :class:`~pcapkit.protocols.transport.udp.UDP` rather than overriding it,
         and :meth:`ProtocolBase.register
         <pcapkit.protocols.protocol.ProtocolBase.register>` itself, which the
-        other six shadow.
+        others shadow.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -390,13 +391,13 @@ class ProtocolRegistryTests(unittest.TestCase):
             warnings.simplefilter('always')
             registry.register_protocol(second)
 
-        # The guard's firing condition is unchanged: the overwrite still
-        # happens and is still reported exactly once.
+        # The guard's firing condition: the overwrite happens and is
+        # reported exactly once.
         self.assertIs(registry.protocol_registry['UNITPROTOCOL'], second)
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
 
-        # The pre-fix message text must be gone...
+        # The message is not the bare pair of reprs...
         self.assertNotIn(f'overwriting {first!r} with {second!r}', messages[0])
 
         # ...replaced by something that tells the two objects apart. id() is
@@ -447,8 +448,8 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_top_level_link_internet_and_transport_protocol_wrappers(self) -> None:
         # Members live in the per-transport registries GitHub issue #732 split
         # AppType into; the base class itself holds none. 3com-amp3 is registered
-        # on both TCP and UDP, and the TCP copy is used, arbitrarily; since #806
-        # its .proto names TCP alone, which the notes below rely on.
+        # on both TCP and UDP, and the TCP copy is used, arbitrarily; its .proto
+        # names TCP alone (#806), which the notes below rely on.
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.apptype import UDP as AppType_UDP
         from pcapkit.const.reg.apptype import TransportProtocol
@@ -499,8 +500,8 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: a member with no explicit transport protocol registers under its
         # own ``proto``, which names exactly the registry it lives in -- so a TCP
-        # member reaches TCP alone. It fanned out to UDP as well until GitHub
-        # issue #806 retyped ``proto`` from the whole IANA set to one transport.
+        # member reaches TCP alone, since ``proto`` names one transport rather
+        # than the whole IANA set (GitHub issue #806).
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:
                 with mock.patch.object(registry, 'register_protocol') as register_protocol:
@@ -530,11 +531,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: ``class_`` is positional again, at the sibling position --
-        # further maintainer ruling on #815 -- so a class name and a
-        # transport fit in the same call: the class name third, since
-        # ``module`` here is a ``str``, and the transport from the fourth
-        # position onward.
+        # NOTE: ``class_`` is positional, at the sibling position --
+        # maintainer ruling on #815 -- so a class name and a transport
+        # fit in the same call: the class name third, since ``module``
+        # here is a ``str``, and the transport from the fourth position
+        # onward.
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:
                 with mock.patch.object(registry, 'register_protocol') as register_protocol:
@@ -553,8 +554,8 @@ class ProtocolRegistryTests(unittest.TestCase):
             registry.register_apptype(65004, UnitProtocol)
 
         # NOTE: a composite is refused: one call registers under one transport
-        # protocol, and since #808 dropped the ``IntFlag`` base ``tcp | udp`` is
-        # a bare ``int`` rather than a member.
+        # protocol, and without an ``IntFlag`` base (#808) ``tcp | udp`` is a
+        # bare ``int`` rather than a member.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65005, UnitProtocol,
                                       TransportProtocol.tcp | TransportProtocol.udp)
@@ -596,11 +597,11 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: a composite name such as ``'tcp|udp'`` raises for the same
         # reason the equivalent composite member is refused above: one call
-        # registers under one transport protocol. This was the case that most
-        # needed covering while ``TransportProtocol`` was an ``IntFlag``, until
-        # #808: aenum's ``Flag`` getitem parsed a ``'|'``-joined name into a
-        # composite value on its own, so a resolver built on it unguarded would
-        # have accepted this silently instead of refusing it.
+        # registers under one transport protocol. On an ``IntFlag`` base,
+        # which #808 removed from ``TransportProtocol``, aenum's ``Flag``
+        # getitem parses a ``'|'``-joined name into a composite value on its
+        # own, so a resolver built on it unguarded would accept this silently
+        # instead of refusing it.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65010, UnitProtocol, 'tcp|udp')
 
@@ -697,8 +698,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIs(registry.UDP.__proto__[65201], UnitProtocol)
 
         # NOTE: a ``str`` transport after a class module reaches ``transport``
-        # the same way a member does, then goes through the existing
-        # ``str``-coercion path unchanged.
+        # the same way a member does, then goes through the ``str``-coercion
+        # path.
         self._guard_registry(registry.TCP.__proto__, 65202)
         self._guard_registry(registry.UDP.__proto__, 65202)
         with mock.patch.object(registry, 'register_protocol'):
@@ -728,15 +729,14 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: this is not a heuristic on the value -- with a ``str`` module,
         # a ``str`` third argument is *always* a class name, even one that
-        # happens to spell a transport's own name. ``'tcp'`` is looked up as
-        # a class in ``raw_module[0]``, which has none, so it fails the same
-        # way any other wrong class name would: a ``ProtocolError`` naming
-        # ``'tcp'`` itself, not a ``RegistryError`` about an unknown
-        # transport -- proof it was never coerced as one. GitHub issue #832
-        # retyped this from a bare stdlib ``AttributeError`` to
-        # ``ProtocolError`` -- the property that a ``str`` third positional is
-        # resolved as a class name, never sniffed as a transport, is what has
-        # to survive; only the exception type changed.
+        # happens to spell a transport's own name. ``'tcp'`` is looked up as a
+        # class in ``raw_module[0]``, which has none, so it fails the same way
+        # any other wrong class name would: a ``ProtocolError`` naming
+        # ``'tcp'`` itself, not a ``RegistryError`` about an unknown transport
+        # -- proof it was never coerced as one. The ``ProtocolError`` rather
+        # than a bare stdlib ``AttributeError`` is GitHub issue #832's; the
+        # property that a ``str`` third positional is resolved as a class
+        # name, never sniffed as a transport, is what this pins.
         with mock.patch.object(registry, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(65204, raw_module[0], 'tcp', TransportProtocol.udp)
@@ -797,11 +797,11 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_register_apptype_explicit_null_string_is_a_class_name_not_the_sentinel(self) -> None:
         """GitHub issue #833: ``class_='(null)'`` is data, not the sentinel.
 
-        Before the sentinel stopped being a plain :class:`str`, an
-        equal-but-distinct ``'(null)'`` passed by a caller was indistinguishable
-        from the default -- both compared equal, and which branch ran depended
-        on identity/interning rather than intent. Passed explicitly here, it
-        must be resolved as an ordinary (missing) class name, the same way any
+        Were the sentinel a plain :class:`str`, an equal-but-distinct
+        ``'(null)'`` passed by a caller would be indistinguishable from the
+        default -- both compare equal, and which branch ran would depend on
+        identity/interning rather than intent. Passed explicitly here, it must
+        be resolved as an ordinary (missing) class name, the same way any
         other wrong class name is, and the failure must name the module and
         the literal ``'(null)'`` that was looked up.
 
@@ -949,8 +949,8 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         ``code`` and ``meth`` are positional, ``schema`` is keyword-only. See #516,
         where :func:`~pcapkit.foundation.registry.protocols.register_mh_extension`
-        was missing the ``*`` that its fourteen siblings carry and so accepted
-        ``schema`` positionally.
+        was missing the ``*`` that its siblings carry and so accepted ``schema``
+        positionally.
 
         """
         from pcapkit.foundation.registry import protocols as registry

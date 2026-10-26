@@ -118,7 +118,7 @@ class IPReassemblyTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPOverlapConflictTests(unittest.TestCase):
-    """:issue:`477` -- an overlapping fragment carrying different bytes must
+    """#477 -- an overlapping fragment carrying different bytes must
     have the disagreement recorded, not silently overwrite the earlier one.
 
     :rfc:`791` resolves *which* bytes win itself: "this procedure will use the
@@ -271,9 +271,9 @@ class IPOverlapConflictTests(unittest.TestCase):
         """Coverage gap named in #482's review: ``Buffer.conflict`` is created
         fresh per BUFID, but "created fresh" is an argument, not a test --
         nothing exercised two BUFIDs actually in flight at once. This is the
-        more valuable of the two gaps: #478's original six boundary cases all
-        shared a single ACK bucket, and that is exactly the shape of gap that
-        let a genuine cross-bucket data-loss regression through undetected.
+        more valuable of the two gaps: #478's boundary cases all shared a
+        single ACK bucket, and that is exactly the shape of gap that let a
+        genuine cross-bucket data-loss regression through undetected.
 
         So this interleaves two datagrams' fragments -- neither one completes
         before the other's next fragment arrives -- rather than finishing one

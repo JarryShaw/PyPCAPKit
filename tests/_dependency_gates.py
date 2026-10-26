@@ -2,9 +2,9 @@
 """Which CI job installs the dependency each ``HAS_*`` gate asks for.
 
 :mod:`tests._tiers` answers "may this module read that capture". This module
-answers the neighbouring question that nothing asked before: **when a test is
-gated on an optional dependency, does the job whose selection reaches that test
-actually install it?**
+answers the neighbouring question: **when a test is gated on an optional
+dependency, does the job whose selection reaches that test actually install
+it?**
 
 The reason it needs asking is that the failure mode is silence. A
 ``@unittest.skipUnless(HAS_CRYPTO, ...)`` whose dependency nobody installs does
@@ -740,8 +740,8 @@ def _top_level_providers(module: 'str') -> 'tuple[str, ...]':
     unrecognised one is the worst answer available; #779 is what that cost, and
     :func:`_disqualified_providers` below is the message shape this follows.
 
-    Unchanged for a mapped module: the same tuple the subscript returned, so the
-    lookup is a diagnostic improvement and not a semantic one.
+    For a mapped module it is the same tuple a subscript returns, so only the
+    failure for an unmapped one differs from a bare lookup.
 
     """
     top_level = module.partition('.')[0]
@@ -762,14 +762,13 @@ def _top_level_providers(module: 'str') -> 'tuple[str, ...]':
 def module_providers(module: 'str') -> 'frozenset[str]':
     """Every distribution (or :data:`CORE`) :data:`MODULE_PROVIDERS` says could ship ``module``.
 
-    Unlike :func:`extras_providing`, which this deliberately does not touch,
-    keyed on the dotted path *exactly as given* when :data:`MODULE_PROVIDERS`
-    has a dedicated entry for it -- ``pcap._pcap`` resolves to ``('pcap-ct',)``
-    alone rather than falling back to plain ``pcap``'s two-wide entry. Falls
-    back to the top-level package otherwise, the same rule
-    :func:`extras_providing` always uses, which is what makes an unmapped
-    module a failure there rather than a silent pass here too (the fallback goes
-    through :func:`_top_level_providers`, so it raises the same
+    Unlike :func:`extras_providing`, keyed on the dotted path *exactly as given*
+    when :data:`MODULE_PROVIDERS` has a dedicated entry for it -- ``pcap._pcap``
+    resolves to ``('pcap-ct',)`` alone rather than falling back to plain
+    ``pcap``'s two-wide entry. Falls back to the top-level package otherwise,
+    the same rule :func:`extras_providing` always uses, which is what makes an
+    unmapped module a failure there rather than a silent pass here too (the
+    fallback goes through :func:`_top_level_providers`, so it raises the same
     :exc:`AssertionError` naming the module that that function's own lookup
     does).
 
@@ -886,9 +885,8 @@ def _probed_modules(node: 'ast.AST', names: 'dict[str, tuple[str, ...]]',
     cannot tell them apart -- it would report ``HAS_PYPCAP`` as needing a module
     whose presence makes it false.
 
-    ``want_negated`` picks which side this call collects: :data:`False` (the
-    default, and every call site before :func:`module_flag_exclusions` existed)
-    yields the positively-required modules, as before. :data:`True` yields the
+    ``want_negated`` picks which side this call collects: :data:`False`, the
+    default, yields the positively-required modules. :data:`True` yields the
     mirror image -- the modules a negated probe asks to be absent -- which is
     what :func:`module_flag_exclusions` asks for. A module is never yielded by
     both calls on the same expression: exactly one of ``negated == want_negated``
@@ -1228,11 +1226,9 @@ def _engine_matrix_variants(name: 'str', section: 'str') -> 'Optional[tuple[Job,
 
     This also, separately, asserts that the workflow's own ``engine:`` matrix
     list agrees with the ``case "$ENGINE" in ...`` arms it is supposed to
-    describe: earlier versions of this function built :class:`Job` entries
-    purely from the case arms and never looked at the ``engine:`` list at
-    all, so deleting a cell from that list (the ordinary way to retire one)
-    left this guard still crediting the retired engine with coverage it no
-    longer has, silently.
+    describe: built purely from the case arms, the :class:`Job` entries would
+    go on crediting an engine deleted from that list (the ordinary way to
+    retire a cell) with coverage it does not have, silently.
 
     """
     code = '\n'.join(line for line in section.splitlines() if not line.strip().startswith('#'))
@@ -1570,8 +1566,8 @@ def ambiguous_satisfactions(
     This is the check that notices, scoped to exactly the names
     :data:`MUTUALLY_EXCLUSIVE_IMPORTS` declares genuinely contested --
     deliberately *not* every name :data:`MODULE_PROVIDERS` lists more than one
-    requirement string for for. ``html5lib`` also has two entries there, and
-    is not this: both name the same one distribution reached two ways, not two
+    requirement string for. ``html5lib`` also has two entries there, and is
+    not this: both name the same one distribution reached two ways, not two
     distributions that could each independently win the import, so scoping on
     ``len(MODULE_PROVIDERS[...]) > 1`` instead would false-positive on it the
     moment some job gained the ``vendor`` extra.
@@ -1615,8 +1611,7 @@ def ambiguous_satisfactions(
                 # not for every gate this job reaches: an excluded module with
                 # no MODULE_PROVIDERS entry of its own raises here (see
                 # _disqualified_providers), and a flag with nothing to do with
-                # a contested name must never pay for that -- see this
-                # function's own history (#762 round 3).
+                # a contested name must never pay for that (#762).
                 excluded_modules = exclusions.get((gate.module, gate.flag), frozenset())
                 disqualified = _disqualified_providers(excluded_modules)
 

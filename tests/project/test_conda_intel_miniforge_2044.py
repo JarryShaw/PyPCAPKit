@@ -89,7 +89,7 @@ def installer(received: 'dict[str, str]') -> 'str':
 
 
 class TestTheIntelLegsInstallMiniforge(unittest.TestCase):
-    """Miniforge on ``macos-26-intel``, and the former installer on every other leg."""
+    """Miniforge on ``macos-26-intel``, and Miniconda on every other leg."""
 
     def test_the_step_is_setup_miniconda(self) -> None:
         for name, job_id in JOBS:
@@ -132,7 +132,7 @@ def python_input(entry: 'dict[str, Any]', os: 'str', python: 'str') -> 'str':
 
 
 class TestTheIntelLegsKeepBasesPython(unittest.TestCase):
-    """#2123: no Python install into base on ``macos-26-intel``; the other legs as before."""
+    """#2123: no Python install into base on ``macos-26-intel``; other legs install all but 3.15."""
 
     supported = ()  # type: tuple[str, ...]
 

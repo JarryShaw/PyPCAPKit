@@ -17,18 +17,17 @@ already run, and the guard under test is the thing that makes the difference
 invisible.
 
 Each case is a *pair*: the order that failed, and one file that is known to
-pollute paired with one that is known to import the package. Three distinct leaks
-were found, and they are covered separately because they fail differently and are
-fixed by different halves of the change:
+pollute paired with one that is known to import the package. Each leak is covered
+separately because they fail differently and have different fixes:
 
 * :meth:`OrderIndependenceTests.test_the_reported_three_file_order_passes` is the
   reproduction from the issue verbatim -- ``tests/corekit/test_protochain.py``
   leaking a fake ``ProtocolBase``.
 * :meth:`OrderIndependenceTests.test_the_integration_tier_polluter_order_passes`
-  is a second leak, in ``tests/integration/test_module_loading.py``, found while
-  fixing the first and not mentioned in the issue. It fails differently -- a stub
-  ``pcapkit`` carrying only ``__path__``, so ``__all__`` entries resolve to
-  nothing rather than raising.
+  is a second leak, in ``tests/integration/test_module_loading.py``, not
+  mentioned in the issue. It fails differently -- a stub ``pcapkit``
+  carrying only ``__path__``, so ``__all__`` entries resolve to nothing
+  rather than raising.
 * :meth:`OrderIndependenceTests.test_the_cli_polluter_order_passes` is the third
   leak, in ``tests/cli/test_main.py``. That file calls
   :func:`tests._support.isolate_modules` like its neighbours, so this case is a

@@ -13,11 +13,11 @@ __tier__ = 'ALL'
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: The eight :class:`~pcapkit.corekit.fields.numbers.NumberField` subclasses that
-#: fix their sign through ``__signed__``, each paired with the sign it fixes.
-#: Derived by introspection in :meth:`FixedSignTests.test_the_census_is_complete`
-#: rather than only written down here, so a ninth subclass added tomorrow fails
-#: that test instead of quietly escaping every other test in this module.
+#: The :class:`~pcapkit.corekit.fields.numbers.NumberField` subclasses that fix
+#: their sign through ``__signed__``, each paired with the sign it fixes. Derived
+#: by introspection in :meth:`FixedSignTests.test_the_census_is_complete` rather
+#: than only written down here, so a subclass added later fails that test instead
+#: of quietly escaping every other test in this module.
 FIXED_SIGN = {
     'Int8Field': True, 'Int16Field': True, 'Int32Field': True, 'Int64Field': True,
     'UInt8Field': False, 'UInt16Field': False, 'UInt32Field': False, 'UInt64Field': False,
@@ -29,7 +29,7 @@ class FixedSignTests(unittest.TestCase):
     """``signed=`` on a subclass whose ``__signed__`` fixes the sign.
 
     GitHub issue #545. The argument was accepted, documented on every one of
-    these eight classes, and then discarded -- in *both* directions, so
+    these classes, and then discarded -- in *both* directions, so
     ``UInt8Field(signed=True)._signed`` was :data:`False` and
     ``Int8Field(signed=False)._signed`` was :data:`True`. A caller who asked for
     a signed field got unsigned parsing with no warning, and the values only
@@ -140,7 +140,7 @@ class DeferredSignTests(unittest.TestCase):
         self.assertEqual(NumberField(length=4, signed=False).template, '>I')
 
     def test_the_base_class_defaults_to_unsigned(self) -> None:
-        """:data:`None` is the new default and has to mean what ``False`` meant."""
+        """:data:`None`, the default, has to mean unsigned, as ``False`` does."""
         from pcapkit.corekit.fields.numbers import NumberField
 
         self.assertIs(NumberField(length=4)._signed, False)

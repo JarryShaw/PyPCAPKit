@@ -2,10 +2,10 @@
 """Tests that nothing in the workflows that publish does so ungated or unpublished.
 
 Two files: :file:`.github/workflows/create-release.yml`, which everything up to
-:class:`TestYAMLAgreesWithTheScanner` is about, and -- since #1632 --
-:file:`.github/workflows/cron-conda.yml`, whose conda build bumps stopped being
-tagged and uploaded altogether. They share the scanner, the expression
-evaluator and the cascade model below; nothing else.
+:class:`TestYAMLAgreesWithTheScanner` is about, and
+:file:`.github/workflows/cron-conda.yml`, whose conda build bumps #1632 found
+neither tagged nor uploaded. They share the scanner, the expression evaluator
+and the cascade model below; nothing else.
 
 #641: the ``pypi`` job's ``environment: release`` was commented out while the
 ``id-token: write`` from the same upstream snippet had been re-added live below it,
@@ -48,9 +48,9 @@ Two things this deliberately does **not** test, because it cannot:
   tier runs on a fresh clone with no network and no token. It is written down in
   the workflow's own comment and in #641 instead.
 * **Whether GitHub requests one approval per environment or one per matrix leg.**
-  ``pypi`` and ``conda`` are both matrix jobs. That is a property of
-  the Actions runner, observable only from a real run -- and moot for both,
-  since #887 removed their required reviewers. The question would resurface
+  ``pypi`` and ``conda`` are both matrix jobs. That is a property of the
+  Actions runner, observable only from a real run -- and moot for both,
+  which have no required reviewers (#887). The question would resurface
   only if a matrix job were gated by its own environment again.
 
 :mod:`yaml` comes only with the ``test`` extra, so the scanner in this module is
@@ -167,14 +167,14 @@ the evaluator; both are modelled *beside* it, by :func:`cascade_skipped_by` and
 
 #1632 is what happens when a job does not escape it, so for
 :file:`cron-conda.yml` the cascade is evaluated rather than only asserted
-about. Since #731 that workflow runs on ``workflow_run`` and skips its own
+about. That workflow runs on ``workflow_run`` (#731) and skips its own
 ``unit-tests`` gate on that event; ``conda-update`` escapes the skipped
 ancestor with ``!cancelled()`` and commits a build bump, while ``conda-tag``
 and ``conda-dist`` called no status-check function at all -- so Actions'
 implicit ``success()`` skipped both, and the five bumps #1632 lists were
-committed and then neither tagged nor uploaded. Measured on run
-38325136710: ``Update requirements.txt`` succeeded with its Bump, Commit and
-Push steps all green (pushing ``f4f94bcad``), and both downstream jobs reported
+committed and then neither tagged nor uploaded. Measured on run 38325136710:
+``Update requirements.txt`` succeeded with its Bump, Commit and Push steps
+all green (pushing ``f4f94bcad``), and both downstream jobs reported
 ``skipped``.
 
 That defect sits one layer *below* an ``if:`` -- both conditions evaluated
@@ -184,8 +184,8 @@ the same shape of argument #962 made one layer up.
 :func:`job_runs`, which composes the declared condition with
 :func:`cascade_skipped_by`'s model of the implicit check;
 :class:`TestTheCascadeModel` pins that model on fixtures, including the
-pre-fix condition text, so the model itself cannot drift into agreeing with
-whatever the file happens to say.
+condition text #1632 found, with no status-check call, so the model itself
+cannot drift into agreeing with whatever the file happens to say.
 
 Getting past the cascade exposed a second defect: two runs can compute the same
 bump from one checkout, and the second reports the bump the first already
@@ -207,11 +207,11 @@ pushes only when what its rebase brings in is covered by
 :file:`util/verdict_covers_checkout.py`'s rule, and Conda Tag tags the
 ``CONDA_COMMIT`` it pushed; :class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
 
-Since #1967 the ``unit-tests`` gate and the ``verdict`` job are the jobs of
-:file:`cron-head.yml`, which ``cron-conda.yml`` calls as its ``head`` job. The
-rows still say whether each of those two runs, and :data:`HEAD_JOBS` are
-decided against that file; the jobs of ``cron-conda.yml`` read ``head``'s result
-and its ``verified`` output.
+The ``unit-tests`` gate and the ``verdict`` job are the jobs of
+:file:`cron-head.yml` (#1967), which ``cron-conda.yml`` calls as its ``head``
+job. The rows still say whether each of those two runs, and :data:`HEAD_JOBS`
+are decided against that file; the jobs of ``cron-conda.yml`` read ``head``'s
+result and its ``verified`` output.
 
 """
 
@@ -243,15 +243,14 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: The workflow #641 is about, and the one every test above
 #: :class:`TestCondaBumpIsTaggedAndUploaded` reads.
 #:
-#: Not the only one that publishes, which this comment claimed until #1632:
-#: :file:`cron-conda.yml` uploads to anaconda.org and attaches the same
-#: packages to a GitHub Release, from its ``conda-dist`` job
-#: (``anaconda/actions/upload-package`` and ``ncipollo/release-action``,
-#: :file:`cron-conda.yml` at the end of the file). It is read through
-#: :data:`CONDA_WORKFLOW` below, for whether a bump reaches those uploads at
-#: all; the ``environment:`` rule in this module is asserted over *this* file
-#: only. ``conda-dist`` names ``anaconda`` since #1968, but for its
-#: ``ANACONDA_TOKEN`` rather than as an approval gate, which
+#: Not the only one that publishes (#1632): :file:`cron-conda.yml` uploads to
+#: anaconda.org and attaches the same packages to a GitHub Release, from its
+#: ``conda-dist`` job (``anaconda/actions/upload-package`` and
+#: ``ncipollo/release-action``, :file:`cron-conda.yml` at the end of the
+#: file). It is read through :data:`CONDA_WORKFLOW` below, for whether a bump
+#: reaches those uploads at all; the ``environment:`` rule in this module is
+#: asserted over *this* file only. ``conda-dist`` names ``anaconda`` (#1968),
+#: but for its ``ANACONDA_TOKEN`` rather than as an approval gate, which
 #: :mod:`tests.project.test_secret_environments_1968` checks.
 #:
 #: :file:`cron-vendor.yml` does build and commit without uploading, and
@@ -275,11 +274,12 @@ PUBLISHING_MARKERS = {
     'pypa/gh-action-pypi-publish': 'uploads a distribution to PyPI or TestPyPI',
     'anaconda/actions/upload-package': 'uploads a package to anaconda.org',
     # #2044: the ``macos-26-intel`` leg's ``anaconda … upload``, which
-    # util/release_conda.py makes since #1967; a bare ``anaconda`` is not matched.
+    # util/release_conda.py makes (#1967); a bare ``anaconda`` is not
+    # matched.
     'util/release_conda.py upload': 'uploads a package to anaconda.org with the anaconda-client CLI',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
-    # ``pypi`` and ``conda`` attach their files with ``gh release upload`` since
-    # #1634, which util/release_upload.py runs since #1967.
+    # ``pypi`` and ``conda`` attach their files with ``gh release upload``
+    # (#1634), which util/release_upload.py runs (#1967).
     'util/release_upload.py': 'attaches a file to a public GitHub Release',
     'git push': 'pushes a commit or a tag to the repository',
 }
@@ -389,8 +389,8 @@ def declared_needs(block: 'str') -> 'list[str]':
     """The job names in this job's ``needs: [ ... ]`` list, empty if it has none.
 
     ``version_check`` has no ``needs:`` at all and correctly returns ``[]``
-    rather than raising, since it is the root of the graph this module walks --
-    since #1052, when it moved ahead of ``unit-tests``.
+    rather than raising, since it is the root of the graph this module walks,
+    ahead of ``unit-tests`` (#1052).
 
     """
     for line in block.splitlines():
@@ -405,7 +405,7 @@ def declared_if(block: 'str') -> 'str':
 
     Handles both the single-line ``if: ${{ ... }}`` form used elsewhere in this
     file and the folded block-scalar form (``if: >-``, continued below at six
-    spaces) #888 introduces for ``tag``, ``pypi`` and ``conda``, whose
+    spaces) #888 introduced for ``tag``, ``pypi`` and ``conda``, whose
     conditions grew past one line.
 
     Folding here is "join each continuation line with a single space", which is
@@ -1198,9 +1198,9 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
       ``version_check`` actually leaves. Weaker as a guard, and kept because
       it is the shape the retry case takes.
     * **``unit-tests`` over all four results**, #1052's axis. Only
-      ``success`` runs: since that issue the release test gate skips whenever
-      nothing is publishable, so a ``skipped`` gate is a normal result, and a
-      publisher that admitted one would publish untested.
+      ``success`` runs: the release test gate skips whenever nothing is
+      publishable, so a ``skipped`` gate is a normal result, and a publisher
+      that admitted one would publish untested.
     * **Each publishing predecessor over all four results.** ``success`` and a
       legitimate ``skipped`` both run -- that is #888's escape hatch, and the
       ``skipped`` row is what stops it being quietly removed again -- while
@@ -1324,8 +1324,8 @@ def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
     ``version_check`` having strictly succeeded. The mirror exists so that
     :class:`TestGateMutationsChangeTheTruthTable` can report *which* layer
     rejects each mutation; #962 settled that the text assertions themselves
-    stay exactly as #961 left them, so they are copied here rather than
-    refactored into a helper the real tests then call.
+    stay as #961 wrote them, so they are copied here rather than refactored
+    into a helper the real tests then call.
     ``test_the_real_conditions_violate_neither_layer`` is what keeps the
     mirror from drifting away from the original.
 
@@ -1693,8 +1693,9 @@ def conda_context(unit_tests: 'str' = 'skipped',
 
     Except in one respect: ``verdict`` defaults to a verdict that covers the
     checkout. 38325136710's did not -- it was for 9083163f5 with 2e941bbb7
-    checked out -- and since #1643 that run's own shape is the row that skips
-    ``conda-update``. ``verified=NULL`` is a ``verdict`` that wrote no output.
+    checked out -- and that run's own shape is the row that skips
+    ``conda-update`` (#1643). ``verified=NULL`` is a ``verdict`` that wrote no
+    output.
 
     ``unit_tests`` and ``verdict`` are :data:`HEAD_JOBS`' results (#1967). They
     sit under ``needs.head.jobs``, which no expression reads, and make
@@ -1902,9 +1903,9 @@ CONDA_ROWS = [
                    outputs_present=False),
      {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
     # #2060: a manual run. Without `publish` it builds what `conda-update`
-    # left and tags nothing, as before; with it from `main`, the build is
-    # bumped although nothing changed, then tagged and uploaded as the
-    # schedule's is; with it from another ref, `mode` fails and nothing runs.
+    # left and tags nothing; with it from `main`, the build is bumped
+    # although nothing changed, then tagged and uploaded as the schedule's
+    # is; with it from another ref, `mode` fails and nothing runs.
     ('a manual run without publish, nothing changed',
      conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
                    verified=NULL, files_changed='false', pushed=NULL, conda_tag='skipped'),
@@ -1949,7 +1950,7 @@ class TestPublishingJobsAreGated(WorkflowMixin, unittest.TestCase):
         """No job may reach PyPI, Anaconda, a Release or a git push unapproved.
 
         An ``environment:`` is what lets Actions hold a job for a human, but
-        since #887 only ``github-release``'s actually does -- ``conda-tag``,
+        only ``github-release``'s actually does (#887) -- ``conda-tag``,
         ``pypi`` and ``anaconda`` kept their environments with no reviewer on
         them, and are held instead by depending on ``github`` through
         ``needs:``. This test only checks that the line is present, not that
@@ -1992,11 +1993,12 @@ class TestEnvironmentsAreNotShared(WorkflowMixin, unittest.TestCase):
         prevent rather than rename. Different credentials reach the two
         indexes -- OIDC trusted publishing and ``ANACONDA_TOKEN`` -- and
         ``tag``'s write to ``main`` uses a third, so sharing one environment
-        would still merge those blast radii even though, since #887, only
-        ``github-release`` carries a reviewer of its own; the other gated jobs
-        are held by depending on it instead. That each *does* depend on it is
-        :class:`TestGatedJobsDependOnGithub`'s check, not this one -- this
-        test only stops the four gates from being collapsed back into one.
+        would still merge those blast radii even though only
+        ``github-release`` carries a reviewer of its own (#887); the other
+        gated jobs are held by depending on it instead. That each *does*
+        depend on it is :class:`TestGatedJobsDependOnGithub`'s check, not
+        this one -- this test only stops the four gates from being collapsed
+        back into one.
 
         """
         environments = {}  # type: dict[str, list[str]]
@@ -2231,7 +2233,7 @@ class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
                 self.assertTrue(gate_coverage_violations(mutant, self.jobs))
 
 
-#: ``version_check``'s PyPI and Anaconda evidence checks, since #1967.
+#: ``version_check``'s PyPI and Anaconda evidence checks (#1967).
 EVIDENCE_SCRIPT = 'util/release_published.py'
 
 
@@ -2343,7 +2345,7 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         pair applied to "each of their own direct dependencies", which is
         false for ``version_check`` specifically -- a direct dependency of
         all three, required to have *strictly* succeeded, with no
-        ``|| 'skipped'``. Nothing in this module pinned that before.
+        ``|| 'skipped'``.
 
         An ``assertNotIn`` over known-bad spellings cannot pin this, because a
         weakening can keep the ``== 'success'`` literal while meaning the
@@ -2363,18 +2365,17 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         whole -- which fails *closed*, since Actions rejects the real
         expression and nothing publishes.
 
-        **Not closed by this test:** a top-level ``||`` outside the
-        conjunction chain. Appending ``|| github.event_name ==
-        'workflow_dispatch'`` to the end of the condition, or wrapping it in
-        ``true || ...``, bypasses the gate while leaving the compacted clause
-        byte-identical. Conjunction is monotone, so *adding* ``&&`` conjuncts
-        can only strengthen the gate and needs no guard; disjunction is the
-        only remaining weakening, and catching it needs the expression
-        evaluated rather than matched.
+        **Not closed by this test:** a top-level ``||`` outside the conjunction
+        chain. Appending ``|| github.event_name == 'workflow_dispatch'`` to the
+        end of the condition, or wrapping it in ``true || ...``, bypasses the
+        gate while leaving the compacted clause byte-identical. Conjunction is
+        monotone, so *adding* ``&&`` conjuncts can only strengthen the gate and
+        needs no guard; disjunction is the only remaining weakening, and
+        catching it needs the expression evaluated rather than matched.
         :class:`TestGateExpressionsEvaluateCorrectly` is where #962 does that,
         and ``TestGateMutationsChangeTheTruthTable.MUTATIONS`` is where the
         ``true ||`` prefix is recorded as caught by the evaluator and missed
-        here. This test stays as #961 left it: it fails with a message naming
+        here. This test stays as #961 wrote it: it fails with a message naming
         the clause rather than a scenario row, and it catches the one thing the
         evaluator cannot -- operands reversed, which keeps the truth table
         intact.
@@ -2546,13 +2547,13 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
     ]
 
     #: ``(row name, context, whether version_check must run)``. Its ``if:``
-    #: is the workflow's outermost gate -- held by ``unit-tests`` until #1052
-    #: moved ``version_check`` ahead of it: a ``workflow_run`` trigger only
-    #: proceeds when the Vendor Update run that triggered it concluded
-    #: ``success``, and every other trigger proceeds -- #1634 -- unless it is
-    #: the ``v*`` push the release App's token makes, whose run would rerun
-    #: the gate and ask for a second approval. A person's push, and a
-    #: ``workflow_run`` whatever its actor, still run.
+    #: is the workflow's outermost gate -- ``version_check`` runs ahead of
+    #: ``unit-tests`` (#1052): a ``workflow_run`` trigger only proceeds when
+    #: the Vendor Update run that triggered it concluded ``success``, and
+    #: every other trigger proceeds -- #1634 -- unless it is the ``v*`` push
+    #: the release App's token makes, whose run would rerun the gate and ask
+    #: for a second approval. A person's push, and a ``workflow_run``
+    #: whatever its actor, still run.
     VERSION_CHECK_ROWS = [
         ('a v* tag push', release_context(event_name='push'), True),
         ("a v* tag push by the release App's bot",
@@ -2667,12 +2668,12 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         """The scenario table has to name the same predecessors the file does.
 
         :data:`PUBLISHING_PREDECESSORS` is hand-written, so a ``needs:`` added
-        to one of these jobs would otherwise be absent from every row --
-        held at a running default and never varied, which is a gate the table
+        to one of these jobs would otherwise be absent from every row -- held
+        at a running default and never varied, which is a gate the table
         silently stops checking. :data:`STRICT_PREDECESSORS` --
-        ``version_check`` and, since #1052, ``unit-tests`` -- are added back
-        here because they are deliberately *not* in that mapping: they are held
-        to the stricter ``== 'success'`` alone, with no ``|| 'skipped'``.
+        ``version_check`` and ``unit-tests`` (#1052) -- are added back here
+        because they are deliberately *not* in that mapping: they are held to
+        the stricter ``== 'success'`` alone, with no ``|| 'skipped'``.
 
         """
         for job in ('tag', 'pypi', 'conda'):
@@ -2792,10 +2793,9 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     """Every mutation, applied to a scratch copy of each real condition, with
     the layer that rejects it recorded.
 
-    This is the part the three earlier attempts at #961 got wrong: a test that
-    passes against the current file says nothing about what it would catch.
-    So each mutation below is actually applied and actually run, against both
-    layers -- :func:`gate_violations` (the evaluator) and
+    A test that passes against the current file says nothing about what it
+    would catch. So each mutation below is actually applied and actually run,
+    against both layers -- :func:`gate_violations` (the evaluator) and
     :func:`text_gate_violations` (the assertions
     :class:`TestEvidenceBasedGating` already makes) -- and the set of layers
     that rejected it is asserted exactly rather than "at least one did".
@@ -2824,15 +2824,14 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: regenerated condition would differ in ways nobody would have typed.
     #:
     #: The mutations #962 names come first, then this module's own, covering
-    #: the clauses the issue only points at -- the
-    #: publishing predecessors' equality pair, the ``startsWith``
-    #: short-circuit, and reading somebody else's evidence. The ``!= 'true'``
-    #: row is #967's, and is the only row here that the table as #962 left it
-    #: did not catch at all: it is rejected by exactly one scenario -- the
-    #: ``null`` evidence row :func:`gate_rows` grew for it -- and by no text
-    #: assertion. The rows after it are #1052's, for the release test gate
-    #: conjunct that issue added, and the last rows are #1748's, for its
-    #: released-elsewhere conjunct.
+    #: the clauses the issue only points at -- the publishing predecessors'
+    #: equality pair, the ``startsWith`` short-circuit, and reading somebody
+    #: else's evidence. The ``!= 'true'`` row is #967's, and is the only row
+    #: here that #962's table did not catch at all: it is rejected by exactly
+    #: one scenario -- the ``null`` evidence row :func:`gate_rows` grew for
+    #: it -- and by no text assertion. The rows after it are #1052's, for the
+    #: release test gate conjunct that issue added, and the last rows are
+    #: #1748's, for its released-elsewhere conjunct.
     MUTATIONS = [
         ('the && before the version_check clause becomes ||',
          "!cancelled() && needs.version_check.result",
@@ -3221,7 +3220,7 @@ class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
                 self.assertEqual(publishing_reasons(self.jobs[name]), [])
 
 
-#: ``release_status``'s step, and the script it runs since #1967.
+#: ``release_status``'s step, and the script it runs (#1967).
 RELEASE_STATUS_STEP = 'Report why this run did or did not release anything'
 RELEASE_STATUS_SCRIPT = 'util/release_status.py'
 
@@ -3296,14 +3295,14 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
     over a table of the shapes a real run can take: the step's ``python3
     util/release_status.py`` (#1967), on this interpreter.
 
-    A cross-review of the #888 change found that an earlier revision of this
-    script demanded the same outcome (all four release jobs ``skipped``, or
-    all four ``success``) before treating a run as complete, which reads a
-    self-heal -- ``github``/``tag`` skipping because their artefacts already
-    exist, ``pypi``/``conda`` running and succeeding because theirs did not --
-    as the #888 shape itself, erroring on the run that just fixed it. Every
-    other test in this module is a string assertion over the YAML, so none
-    of them executed the script and none of them could have caught that.
+    A script demanding the same outcome (all four release jobs ``skipped``, or
+    all four ``success``) before treating a run as complete reads a self-heal
+    -- ``github``/``tag`` skipping because their artefacts already exist,
+    ``pypi``/``conda`` running and succeeding because theirs did not -- as the
+    #888 shape itself, erroring on the run that just fixed it, as a
+    cross-review of #888 found. Every other test in this module is a string
+    assertion over the YAML, so none of them executes the script or could
+    catch that.
 
     """
 
@@ -3345,8 +3344,8 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
         )
 
     #: ``(scenario name, env overrides, expected title substring, expected exit code)``.
-    #: The self-heal row is the one an earlier revision of the script got
-    #: wrong: mixed results, all reconciled against their own evidence.
+    #: The self-heal row is the one a same-outcome check gets wrong: mixed results, all
+    #: reconciled against their own evidence.
     VECTORS = [
         (
             'vendor_update_had_nothing_to_do',
@@ -3646,7 +3645,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
     itself put there -- this class is what actually runs each snippet under
     an older interpreter to check that claim, rather than trusting it.
 
-    Since #1967 the PyPI and Anaconda evidence checks in ``version_check`` feed
+    The PyPI and Anaconda evidence checks in ``version_check`` (#1967) feed
     ``python3 -`` from :file:`util/release_published.py` instead, and ``conda``'s
     per-leg check from :file:`util/release_conda.py`, so this runs those
     snippets, as those scripts build them.
@@ -3821,7 +3820,7 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         """:func:`declared_if` against the same real parse, for the same reason.
 
         This is the one that actually exercises the folded block-scalar form
-        #888 introduces -- ``test_the_same_job_to_environment_mapping`` and
+        #888 introduced -- ``test_the_same_job_to_environment_mapping`` and
         ``test_the_same_job_to_needs_mapping`` above only ever see single-line
         values, so neither would have caught a folding mistake the way this
         one does.
@@ -3869,12 +3868,11 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
     The chain is ``head`` (the gate, :file:`cron-head.yml`) -> ``conda-update`` (bumps
     ``conda/build`` and pushes the commit) -> ``conda-tag`` (pushes
-    ``conda-<version>+<build>``) -> ``conda-dist`` (builds that tag and uploads
-    it to anaconda.org). Since #731 the gate skips on the ``workflow_run``
-    event, and the two publishing jobs called no status-check function, so
-    Actions' implicit ``success()`` skipped them behind the skipped gate even
-    though ``conda-update`` had escaped it and succeeded -- see this module's
-    docstring for the measured run.
+    ``conda-<version>+<build>``) -> ``conda-dist`` (builds that tag and uploads it to
+    anaconda.org). The gate skips on the ``workflow_run`` event (#731), and in #1632
+    the two publishing jobs called no status-check function, so Actions' implicit
+    ``success()`` skipped them behind the skipped gate even though ``conda-update``
+    had escaped it and succeeded -- see this module's docstring for the measured run.
 
     Every assertion here goes through :func:`job_runs` rather than
     :func:`evaluate_condition`, because the conditions were *true* on the run
@@ -4051,8 +4049,8 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
         Run 38325153882's ``files_changed`` was ``'true'`` and its push landed
         nothing, so the row is decided by which of the two ``CONDA_CHANGED`` is
-        mapped to. Mapped to ``files_changed``, as it was, ``conda-tag`` runs
-        and fails on a second ``git tag conda-1.5.0b9+3``.
+        mapped to. Mapped to ``files_changed``, ``conda-tag`` runs and fails on
+        a second ``git tag conda-1.5.0b9+3``.
 
         """
         context = conda_context(pushed='false', conda_tag='skipped', conda_dist='skipped')
@@ -4182,7 +4180,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
                          'Create Tag does not tag `$CONDA_COMMIT` by name')
 
     def test_cron_conda_really_does_publish(self) -> None:
-        """The claim #1632 found wrong in this module's own comment.
+        """The claim #1632 found wrong in a comment of this module's.
 
         :data:`WORKFLOW`'s comment read that ``cron-conda.yml`` "build[s] and
         commit[s] but upload[s] nothing", which is how this chain came to have
@@ -4883,10 +4881,10 @@ class TestTheCascadeModel(unittest.TestCase):
 
     The cascade model is the one thing in this module that is not checkable
     against the file it describes -- it *is* the description -- so it is pinned
-    on a fixture carrying the #1632 shape, and on the pre-fix condition text
-    itself. Same reasoning as :class:`TestTheExpressionEvaluator`: a mistake
-    here would otherwise show up as a quietly wrong row in
-    :data:`CONDA_ROWS`.
+    on a fixture carrying the #1632 shape, and on the condition text #1632
+    found, with no status-check call. Same reasoning as
+    :class:`TestTheExpressionEvaluator`: a mistake here would otherwise show up
+    as a quietly wrong row in :data:`CONDA_ROWS`.
 
     """
 

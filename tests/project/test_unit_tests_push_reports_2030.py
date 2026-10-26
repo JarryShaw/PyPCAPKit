@@ -556,7 +556,7 @@ class TestTheReport(unittest.TestCase):
         self.assertIn('- `Python 3.13`: `DeprecationWarning: something old`', report)
 
     def test_a_scheduled_run_counts_every_warning(self) -> None:
-        """A run that posts every time keeps the rule as it was: any annotation on a passing job warns."""
+        """A run that posts every time keeps the plain rule: any annotation on a passing job warns."""
         outputs, report, _ = self.report('success', check_runs(('Compat Python 3.13', 'SUCCESS', BLOCKING[2])),
                                          workflow='Python Compatibility', event='schedule')
         self.assertEqual(outputs, {'post': 'true', 'title': 'python-compatibility: main scheduled runs',

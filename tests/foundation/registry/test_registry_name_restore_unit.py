@@ -9,7 +9,7 @@ then ``register_tcp(80, shipped)`` left ``'CUSTOM'`` behind for good, and a
 custom class named like a built-in left the built-in displaced.
 
 :mod:`tests.foundation.registry.test_registry_symmetry_unit` covers the plain
-round trip for all nine registrars. These pin the cases it does not reach: a
+round trip for every registrar. These pin the cases it does not reach: a
 displaced built-in name, a class still held by a second code, a name that was
 there before the registration, which a restore must not take away, and a
 built-in retaking its name from a custom class shadowing it -- plus a seeded

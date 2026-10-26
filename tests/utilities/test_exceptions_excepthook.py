@@ -93,7 +93,7 @@ def run_in_subprocess(code: 'str', devmode: 'bool' = False) -> 'subprocess.Compl
 
 
 class UnrelatedTracebackSurvivesALoudErrorTests(unittest.TestCase):
-    """The regression itself, live and reproducible against the pre-fix tree."""
+    """The regression itself, live and reproducible without the fix."""
 
     def test_unrelated_exception_keeps_its_frames_after_a_loud_error(self) -> None:
         code = '''
@@ -493,13 +493,13 @@ class CrossInstanceReinstallTests(unittest.TestCase):
     def test_a_fresh_instance_installs_over_a_stale_instance_hook(self) -> None:
         # ``capture()`` alone is enough to keep this quiet -- it swaps the
         # logger's handlers out and restores them in a ``finally``. Setting
-        # ``logger.disabled`` directly instead, as an earlier revision of this
-        # test did, would not be: ``logging.getLogger(name)`` hands back the
-        # *same* cached singleton regardless of how many times this module is
-        # reloaded, so disabling it here without restoring it would silence
-        # every other test in the process sharing that name afterwards --
-        # exactly the class of leak this file exists to catch, just aimed at a
-        # different piece of global state.
+        # ``logger.disabled`` directly instead would not be:
+        # ``logging.getLogger(name)`` hands back the *same* cached singleton
+        # regardless of how many times this module is reloaded, so disabling
+        # it here without restoring it would silence every other test in the
+        # process sharing that name afterwards -- exactly the class of leak
+        # this file exists to catch, just aimed at a different piece of global
+        # state.
         first = bootstrap(devmode=False)['exceptions']
         with capture(first.logger):
             first.BaseError('boom')

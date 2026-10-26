@@ -12,13 +12,13 @@ confirmed.
 This does **not** re-test Sphinx's cross-reference resolution itself -- as
 :file:`tests/project/test_documentation_claims.py` explains at length, whether a
 reference resolves is a property of the built inventory rather than of the source, and
-the honest check is the rendered HTML from an actual ``sphinx-build`` run, recorded in
-the pull request rather than reimplemented here. What this pins instead is the two
-purely textual preconditions a later edit could silently break even though a plain
-(non-nitpicky) build would keep passing either way: the page has to keep existing and
-keep declaring the module it documents, and the ``corekit`` index has to keep listing it
-in its toctree so it is not an orphan page -- Sphinx does not fail a plain build over an
-orphan page either, so nothing else would catch that regression.
+the honest check is the rendered HTML from an actual ``sphinx-build`` run, not
+reimplemented here. What this pins instead is the two purely textual preconditions a
+later edit could silently break even though a plain (non-nitpicky) build would keep
+passing either way: the page has to keep existing and keep declaring the module it
+documents, and the ``corekit`` index has to keep listing it in its toctree so it is not
+an orphan page -- Sphinx does not fail a plain build over an orphan page either, so
+nothing else would catch that regression.
 
 """
 

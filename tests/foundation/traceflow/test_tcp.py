@@ -38,9 +38,8 @@ class TCPTraceFlowTests(unittest.TestCase):
     def test_tcp_trace_ipv4_fin_submit_cache_callback_and_dump(self) -> None:
         """One direction, traced with ``bidirectional=False``.
 
-        This is the per-direction behaviour flow tracing had before conversations
-        became one flow, and it is still reachable on request -- so a single FIN
-        closes the flow, since in that mode a flow *is* one direction.
+        This is per-direction flow tracing, reachable on request -- so a single
+        FIN closes the flow, since in that mode a flow *is* one direction.
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
@@ -82,8 +81,8 @@ class TCPTraceFlowTests(unittest.TestCase):
     def test_both_halves_of_a_connection_are_one_flow(self) -> None:
         """The two directions share a buffer, a label and an output file.
 
-        Keyed on (source, destination) they were two flows with two labels and two
-        dump files, leaving a caller to pair them up by reading the labels.
+        Keyed on (source, destination) they would be two flows with two labels and
+        two dump files, leaving a caller to pair them up by reading the labels.
 
         """
         from pcapkit.dumpkit.null import NotImplementedIO
@@ -159,11 +158,11 @@ class TCPTraceFlowTests(unittest.TestCase):
     def test_a_reused_port_pair_does_not_join_the_closed_connection(self) -> None:
         """A new connection on the same endpoints is a second flow.
 
-        This is the defect the review found. With the flow submitted on the second
-        FIN, the final ACK arrived after the buffer had been popped and opened a
-        stray one-packet buffer under the same canonical buffer ID; the next
-        connection to reuse the endpoints then merged into that stray buffer, and
-        two unrelated connections came back as one flow.
+        Were the flow submitted on the second FIN, the final ACK would arrive
+        after the buffer had been popped and open a stray one-packet buffer under
+        the same canonical buffer ID; the next connection to reuse the endpoints
+        would then merge into that stray buffer, and two unrelated connections
+        would come back as one flow.
 
         A SYN is what proves the previous connection can receive nothing further,
         so it is what finalises the old flow and starts a new one.
@@ -228,10 +227,10 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertEqual(flow.index, (1, 2))
 
     def test_a_reset_ends_the_connection_as_a_close_does(self) -> None:
-        """RST is the other way a connection ends, and was not modelled at all.
+        """RST is the other way a connection ends, and has to be modelled too.
 
-        Without the flag reaching the tracer a reset connection looked merely
-        idle, so a later connection reusing the endpoints merged into it -- the
+        Without the flag reaching the tracer a reset connection looks merely
+        idle, so a later connection reusing the endpoints merges into it -- the
         same contamination as the FIN case, by a different route.
 
         """

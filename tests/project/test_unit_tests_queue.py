@@ -16,7 +16,7 @@ These fail silently if they drift, so they are pinned here:
   ``continue-on-error`` rather than a job-level one (#1633), and the job has no
   ``DPKT`` cell (#1538).
 * The classifier, :file:`util/classify_changes.py` (#1967), the engine cell loops
-  and the apt retry, :file:`util/apt_packages.py`'s since #1967, are executed
+  and the apt retry, :file:`util/apt_packages.py`'s (#1967), are executed
   too: the classifier against a scratch merge commit, the others with their
   commands stubbed on ``PATH``.
 * Every test outside :file:`tests/project` that reads ``docs/`` or Markdown is
@@ -275,7 +275,7 @@ class TestJobGating(unittest.TestCase):
                       " && github.event_name != 'pull_request' }}\n", head)
 
     def test_the_ktlo_cell_runs_on_every_event(self) -> None:
-        """#1633: 3.10 still runs wherever it did; #1538's main-only cut was for prerelease 3.15."""
+        """#1633: the KTLO cell runs on every event; #1538's main-only cut was for a prerelease."""
         ktlo = step(job('engine-tests'), 'Run the KTLO cells (non-blocking)')
         self.assertNotRegex(ktlo, r'(?m)^        if:')
 

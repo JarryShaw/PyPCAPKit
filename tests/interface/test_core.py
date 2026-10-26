@@ -92,9 +92,9 @@ class FakeDecoded:
 class InterfaceCoreTests(unittest.TestCase):
     def setUp(self) -> None:
         # ``isolate_modules`` rather than ``purge_modules``: ``_load_module`` below
-        # binds a non-generic ``ProtocolBase`` stand-in and five other stand-in
-        # modules under ``pcapkit.*`` names, none of which may outlive the test
-        # that installed them. See #660.
+        # binds a non-generic ``ProtocolBase`` stand-in and other stand-in modules
+        # under ``pcapkit.*`` names, none of which may outlive the test that
+        # installed them. See #660.
         isolate_modules(self)
 
     def _load_module(self):

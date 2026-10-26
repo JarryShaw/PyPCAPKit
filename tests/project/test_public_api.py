@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """The public API surface holds together.
 
-Four invariants about :attr:`__all__`, none of which anything else in the suite
-checked before:
+Invariants about :attr:`__all__`:
 
 #. every public subpackage survives ``from <package> import *``;
 #. every name in every public module's :attr:`__all__` actually resolves;
@@ -38,14 +37,14 @@ Two scoping decisions, both measured rather than assumed.
 **Nothing is excluded, :mod:`pcapkit.vendor` included.** The vendor crawlers
 ``import requests`` and ``import bs4`` at module scope, which reads as a reason to
 skip the subtree through :data:`EXCLUDED_ROOTS` if those came only from the
-``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it
-has to pass on ``pip install -e '.[test]'``. Both are in the ``test`` extra too,
-since #507 (:file:`pyproject.toml`), so such a skip buys nothing. Sweeping the
-vendor modules and packages (#1772) found
-packages holding public attributes their :attr:`__all__` omitted:
-:mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary of its ``sys.path``
-save-and-restore, since renamed ``_path``; the attributes :mod:`pcapkit.vendor`
-itself left unlisted are recorded in :data:`DELIBERATE_NON_EXPORTS`.
+``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it has
+to pass on ``pip install -e '.[test]'``. Both are in the ``test`` extra too (#507,
+:file:`pyproject.toml`), so such a skip buys nothing. Sweeping the vendor modules
+and packages (#1772) found packages holding public attributes their
+:attr:`__all__` omitted: :mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary
+of its ``sys.path`` save-and-restore, private as ``_path``; the attributes
+:mod:`pcapkit.vendor` itself left unlisted are recorded in
+:data:`DELIBERATE_NON_EXPORTS`.
 
 No import is wrapped in a skip, either. That is deliberate and also measured: with
 ``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
@@ -76,15 +75,15 @@ explicit instead of leaving it to be guessed at.
 load-bearing rather than an escape hatch: without it the assertion is
 unsatisfiable, and with it every exclusion is something somebody wrote down and a
 reviewer can argue with. Of the names the package sweep flagged, about half were
-genuine omissions and are exported as of the commit that added this assertion --
-among them the ``register_*_callback`` and ``register_extractor_*`` functions that
-:mod:`pcapkit.foundation` withheld while listing the other registry functions,
-``ReassemblyManager`` and ``TraceFlowManager``, which are defined *below* the
-:attr:`__all__` literal that forgot them and imported by name from several modules,
-and the decorators :mod:`pcapkit.utilities` then advertised in its own module
-docstring (since moved to :mod:`pcapkit.corekit.decorators` and dropped from that
-package by #1735). The rest are listed with their reasons, as are the names
-:mod:`pcapkit.vendor` added once it joined the sweep (#1772), and
+genuine omissions and are exported -- among them the ``register_*_callback`` and
+``register_extractor_*`` functions that :mod:`pcapkit.foundation` withheld while
+listing the other registry functions, ``ReassemblyManager`` and
+``TraceFlowManager``, which are defined *below* the :attr:`__all__` literal that
+forgot them and imported by name from several modules, and the decorators
+:mod:`pcapkit.utilities` then advertised in its own module docstring (in
+:mod:`pcapkit.corekit.decorators`, #1735). The rest are listed with their
+reasons, as are the names :mod:`pcapkit.vendor` added once it joined the sweep
+(#1772), and
 :meth:`~PublicAPISurfaceTests.test_the_non_export_allowlist_is_tight` stops the
 list rotting into a silencer: every entry has to name a package that exists, an
 attribute that package really holds, and a name its :attr:`__all__` really omits,
@@ -99,9 +98,9 @@ its :attr:`__all__` is an oversight by construction. That is precisely how #515
 happened, and this is the assertion that makes the next one fail immediately
 instead of in three years.
 
-Further assertions cover the rest of the family, because a name can fail to
-be exported in more ways than by being misspelled. Each of them failed
-against the tree this module was written on, and each is fixed in the same commit:
+Further assertions cover the rest of the family, because a name can fail to be
+exported in more ways than by being misspelled. Each of them failed against the
+tree this module was written on:
 
 * :meth:`~PublicAPISurfaceTests.test_no_misspelled_all` --
   ``pcapkit/const/pcapng/__init__.py`` spelled it ``___all__``, with *three*
@@ -114,7 +113,7 @@ against the tree this module was written on, and each is fixed in the same commi
 * :meth:`~PublicAPISurfaceTests.test_every_public_package_declares_all` -- the
   same defect seen from the other side, and the one that catches "forgot it
   entirely" rather than "typed it wrong". Every public package declares
-  :attr:`__all__` once ``pcapng`` is fixed.
+  :attr:`__all__`.
 * :meth:`~PublicAPISurfaceTests.test_no_duplicate_all_entries` --
   ``'MH_HandoverACKStatus'`` appeared *twice* in both :mod:`pcapkit.const` and
   :mod:`pcapkit.const.mh`, and the duplicate sat in the slot that should have held
@@ -131,9 +130,8 @@ against the tree this module was written on, and each is fixed in the same commi
 ``pcapkit/vendor/__init__.py`` and ``pcapkit/vendor/mh/__init__.py``, and there it
 was worse: ``pcapkit/vendor/__main__.py`` builds its crawler target lists out of
 those :attr:`__all__` lists, so the ``handover_initiate_status`` crawler had never
-run. #531 fixed it while the subtree was still excluded, and
-:mod:`tests.vendor.test_crawler_reachability_unit` guards it; since #1772 these
-assertions cover that copy too.
+run. #531 fixed it, :mod:`tests.vendor.test_crawler_reachability_unit` guards it,
+and these assertions cover that copy too (#1772).
 
 """
 from __future__ import annotations
@@ -148,11 +146,11 @@ import unittest
 #: build paths.
 __tier__ = 'ALL'
 
-#: First path component under ``pcapkit.`` whose subtree the sweep skips. Empty:
-#: it held ``'vendor'`` until #1772, though ``requests`` and ``beautifulsoup4``
-#: were in the ``test`` extra before the exclusion was written, and
+#: First path component under ``pcapkit.`` whose subtree the sweep skips. Empty,
+#: :mod:`pcapkit.vendor` included (#1772), since ``requests`` and
+#: ``beautifulsoup4`` are in the ``test`` extra, and
 #: :meth:`~PublicAPISurfaceTests.test_public_modules_were_actually_found` pins
-#: :mod:`pcapkit.vendor` in the walk so that restoring it fails.
+#: :mod:`pcapkit.vendor` in the walk so that excluding it fails.
 EXCLUDED_ROOTS = frozenset()  # type: frozenset[str]
 
 #: The packages whose whole job is to re-export their children, and which
@@ -165,11 +163,11 @@ AGGREGATORS = (
     'pcapkit.foundation.registry',
 )
 
-#: Public attributes a public package holds and deliberately does not export,
-#: keyed by the package. Adding a name here is an API decision to be argued for in
-#: review -- it is not the way to quiet a failure of
+#: Public attributes a public package holds and deliberately does not export, keyed by the
+#: package. Adding a name here is an API decision to be argued for in review -- it is not
+#: the way to quiet a failure of
 #: :meth:`~PublicAPISurfaceTests.test_every_public_package_exports_every_public_attribute`.
-#: Three kinds of thing are in here, and nothing else should be.
+#: These kinds of thing are in here, and nothing else should be.
 #:
 #: **The abstract bases** -- ``Field``, ``Engine``, ``Reassembly``,
 #: ``IP_Reassembly``, ``TraceFlow``, ``Protocol``, ``Application``, ``Internet``,
@@ -291,8 +289,8 @@ class PublicAPISurfaceTests(unittest.TestCase):
         # a silent pass over an empty list, so pin the shape of what it returns.
         # The floor is deliberately far below the population found when this was
         # written: it catches "found nothing", not "the library gained a module".
-        # The vendor packages are pinned because the subtree was excluded until
-        # #1772, and each held __all__ gaps the exclusion hid.
+        # The vendor packages are pinned because excluding the subtree hid
+        # __all__ gaps in each (#1772).
         modules = public_modules()
         packages = [name for name, is_package in modules if is_package]
 

@@ -18,10 +18,9 @@ to -- so that each reference has a target.
   ``:special-members: __new__`` document an enumeration's own ``__new__``.
 
 Whether a role resolves is a property of the built inventory, not of the source,
-so the honest check is a ``sphinx-build`` run, recorded in the pull request. What
-this pins is the textual precondition a plain (non-nitpicky) build would not
-notice losing: the entry is declared, the role is written, and the dotted path it
-names is a real object.
+so the honest check is a ``sphinx-build`` run. What this pins is the textual
+precondition a plain (non-nitpicky) build would not notice losing: the entry is
+declared, the role is written, and the dotted path it names is a real object.
 
 """
 
@@ -102,7 +101,7 @@ CONVERTED = (
      ':class:`~pcapkit.const.ftp.command.CommandType`'),
     ('docs/source/contributing/conventions/sentinel-convention.rst', '``NoDefaultType``',
      ':class:`~pcapkit.corekit.sentinels.NoDefaultType`'),
-    # Moved here from documentation.rst with the backport it named (#2051).
+    # On this page with the backport it names (#2051).
     ('docs/source/contributing/conventions/sentinel-convention.rst', '``cached_property``',
      ':class:`~pcapkit.utilities.compat.cached_property`'),
     ('docs/source/contributing/releasing.rst', '``pcapkit.__version__``',

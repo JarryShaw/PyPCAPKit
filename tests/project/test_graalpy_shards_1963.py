@@ -3,12 +3,12 @@
 
 #1753 gives every GraalPy process a 2 GiB heap and an exit once it is spent, and a
 worker's live heap grows with every test it runs. Over the curated ``ALL`` tier
-that took job 118912680486's workers to 2.5-3.0 GB RSS and nine of them down,
-each failing the test it ran, though each such test passes alone. So
-``Run unit tests`` hands GraalPy's pytest command to :file:`util/pytest_shards.py`,
-which runs it once per directory ``SHARDS`` names and once over the rest, each
-run with workers of its own, all under the step's one ``timeout``, scope and
-watcher. 3.14t's leg runs pytest once, as before.
+that took job 118912680486's workers to 2.5-3.0 GB RSS and nine of them down, each
+failing the test it ran, though each such test passes alone. So ``Run unit tests``
+hands GraalPy's pytest command to :file:`util/pytest_shards.py`, which runs it once
+per directory ``SHARDS`` names and once over the rest, each run with workers of its
+own, all under the step's one ``timeout``, scope and watcher. 3.14t's leg runs
+pytest once.
 
 :class:`TestTheStep` reads the step, :class:`TestTheStepRuns` runs it with
 ``sudo`` and ``python`` stubbed on ``PATH``, and :class:`TestTheScript` runs the
@@ -66,7 +66,7 @@ class TestTheStep(unittest.TestCase):
         for version in versions:
             with self.subTest(version=version):
                 self.assertEqual(by_impl(env['SHARDS'], version), SHARDS if version.startswith('graalpy') else '')
-        # The heap and the workers are #1753's and #1740's, unchanged.
+        # The heap and the workers are #1753's and #1740's.
         self.assertEqual(by_impl(env['GRAAL_PYTHON_VM_ARGS'], 'graalpy-25.4'), HEAP)
         self.assertEqual(by_impl(env['WORKERS'], 'graalpy-25.4'), '3')
 

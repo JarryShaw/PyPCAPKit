@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """#2060: the conda jobs build, smoke-test and publish win-64.
 
-Phase 1 gave ``conda-dist`` in :file:`.github/workflows/cron-conda.yml` a
-non-blocking ``windows-latest`` leg that published nothing. Once its Conda
-Update runs were green, phase 2 gave ``conda`` in
-:file:`.github/workflows/create-release.yml` the leg too, made both blocking, and
-uploaded from both with the anaconda-client CLI, as the Intel legs do (#2044).
+``conda-dist`` in :file:`.github/workflows/cron-conda.yml` and ``conda`` in
+:file:`.github/workflows/create-release.yml` each have a blocking
+``windows-latest`` leg, which uploads with the anaconda-client CLI, as the Intel
+legs do (#2044).
 
 * :class:`TestTheWindowsLegPublishes`: on ``windows-latest`` each job runs one
   upload, "Upload conda packages to Anaconda (Windows)", evaluated with
@@ -73,7 +72,7 @@ INTEL_UPLOAD = 'Upload conda packages to Anaconda (Intel)'
 ANACONDA_UPLOADS = ['Upload conda packages to Anaconda', INTEL_UPLOAD, WINDOWS_UPLOAD]
 #: What publishes besides :data:`PUBLISHING_MARKERS`: Conda Update's GitHub Release upload.
 MORE_MARKERS = ('ncipollo/release-action',)
-#: The step that ran phase 1's warnings.
+#: A non-blocking leg's warnings step, which the blocking leg must not have.
 SUMMARY = 'Windows summary'
 
 
@@ -189,7 +188,7 @@ class TestTheWindowsLegPublishes(unittest.TestCase):
                 self.assertEqual(names.index(WINDOWS_UPLOAD), names.index(INTEL_UPLOAD) + 1)
 
     def test_the_check_sees_an_upload_gated_off_the_leg(self) -> None:
-        """So :meth:`test_the_windows_leg_runs_its_own_upload_alone` reads the gate, as phase 1 had it."""
+        """So :meth:`test_the_windows_leg_runs_its_own_upload_alone` reads the gate, not only the step list."""
         for name, job_id in JOBS:
             job = copy.deepcopy(spec(name, job_id))
             job['steps'] = [entry for entry in job['steps'] if entry.get('name') != WINDOWS_UPLOAD]
@@ -503,7 +502,7 @@ class TestTheEnvironmentWithoutEnvironb(unittest.TestCase):
                 self.assertEqual(str(caught.exception), 'PCAPKIT_UNSET')
 
     def test_build_gets_past_its_variables(self) -> None:
-        """``build`` reads both variables and runs ``conda build``, where it raised AttributeError."""
+        """``build`` reads both variables and runs ``conda build``, rather than raising AttributeError."""
         with tempfile.TemporaryDirectory() as temp:
             output = os.path.join(temp, 'output')
             out_dir = os.path.join(temp, 'compilation-x')

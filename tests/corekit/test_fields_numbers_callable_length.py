@@ -186,12 +186,12 @@ class CallableLengthTests(unittest.TestCase):
     def test_an_unresolved_field_repairs_its_length_and_honours_the_new_template(self) -> None:
         """``pre_process``'s ``_length < 0`` safety net, kept consistent.
 
-        A field packed without having been resolved falls into the repair at
-        ``numbers.py``, which recomputes the length from the value and rebuilds
-        the template. That rebuild can land on a native width, and before the
-        fix the method went on to return :obj:`bytes` anyway -- the same
-        mismatch as #591, one branch further down. Widths with no native code
-        still come back as :obj:`bytes`.
+        A field packed without having been resolved falls into
+        ``pre_process``'s repair, which recomputes the length from the value
+        and rebuilds the template. That rebuild can land on a native width, and
+        without the fix the method goes on to return :obj:`bytes` anyway -- the
+        same mismatch as #591, one branch further down. Widths with no native
+        code still come back as :obj:`bytes`.
 
         """
         from pcapkit.corekit.fields.numbers import NumberField
@@ -255,7 +255,7 @@ class SubclassCallableLengthTests(unittest.TestCase):
                                  (1 << 4).to_bytes(width, 'big'))
 
     def test_a_subclass_fixing_a_template_keeps_working_either_way(self) -> None:
-        """The control on the other side: these were never broken, and still are not.
+        """The control on the other side: these do not latch, with or without the fix.
 
         ``UInt32Field`` and friends fix ``__template__``, so ``__init__`` skips
         ``build_template`` entirely and the placeholder never latched anything.

@@ -470,7 +470,7 @@ class ExtractorLoggingTests(unittest.TestCase):
     whatever unrelated point the collector reaches it -- inside a sibling module's
     test. :mod:`tests.utilities.test_stacklevel` records warnings to inspect their
     attribution, and a window asserted to hold exactly one record is failed by a
-    stray handle from here (:issue:`606`).
+    stray handle from here (#606).
 
     Beyond that, the constructions are plain: with ``auto=True`` the extraction
     runs in ``__init__``, so the bodies are empty and everything asserted is read

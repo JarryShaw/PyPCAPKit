@@ -28,16 +28,17 @@ one another: ``dispatch`` covers the tables the registrar names -- the
 flow-tracing tables -- and ``names`` covers :data:`pcapkit.protocols.__proto__`,
 the by-name registry the protocol registrars all funnel into.
 
-The scope is the 36 public registrars in
+The scope is the public registrars in
 :data:`pcapkit.foundation.registry.__all__`. Of those, the callback registrars
 (``register_reassembly_*_callback`` and ``register_traceflow_tcp_callback``)
 only append, and offer nothing to undo an append with, so they have no case
 here; nor does ``register_protocol_code``, which funnels into the same
-:meth:`ProtocolBase.register <pcapkit.protocols.protocol.ProtocolBase.register>`
-the ``register_tcp`` cases reach. Class-level registrars with no foundation wrapper are out of scope:
-``SCTP.register_chunk``, ``register_parameter`` and ``register_cause``
-(covered by :file:`tests/protocols/transport/test_sctp_unit.py`),
-``Schema.register``, the PCAP-NG ``Option.register`` and ``ESP.register``.
+:meth:`ProtocolBase.register
+<pcapkit.protocols.protocol.ProtocolBase.register>` the ``register_tcp`` cases
+reach. Class-level registrars with no foundation wrapper are out of scope:
+``SCTP.register_chunk``, ``register_parameter`` and ``register_cause`` (covered
+by :file:`tests/protocols/transport/test_sctp_unit.py`), ``Schema.register``,
+the PCAP-NG ``Option.register`` and ``ESP.register``.
 
 Every case restores the registries it touched, whatever its outcome. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

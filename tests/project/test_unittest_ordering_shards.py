@@ -13,7 +13,7 @@ job stays green while covering less. The assertions are therefore over the
   ``protocols`` leg, so a new ``tests/protocols/<dir>/`` is either inside a
   shard or fails here;
 * every other matrix cell is a bare direct child of ``tests/`` with no
-  ``--exclude``, i.e. runs exactly what it ran before the split;
+  ``--exclude``, i.e. runs that whole directory;
 * every ``tests/`` subdirectory holding a test module is a leg, except the
   :data:`NOT_LEGS` names, each left out for the reason the workflow comment
   gives (#2115: ``corekit`` was missing, and nothing said so).

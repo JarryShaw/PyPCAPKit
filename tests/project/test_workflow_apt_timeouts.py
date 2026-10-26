@@ -24,9 +24,9 @@ that has none.
 
 The second half of the rule matters as much as the first. A step timeout at or
 above the job's budget is decorative -- the job's own timer fires first and the
-run is cancelled exactly as before -- so a bound that does not actually bind is
-treated as a failure here rather than passing on the strength of the key being
-present.
+run is cancelled exactly as without it -- so a bound that does not actually
+bind is treated as a failure here rather than passing on the strength of the
+key being present.
 
 Two things this deliberately does **not** test:
 
@@ -47,8 +47,9 @@ skipping on an install without that extra. That is the same split
 assertion that must run everywhere does not need the dependency, and the one
 that needs it guards the substitute.
 
-Since #1967 the steps run apt through :file:`util/apt_packages.py`, so a step running
-its ``plan`` or ``install`` counts as invoking apt, as one naming ``apt-get`` does.
+The steps run apt through :file:`util/apt_packages.py` (#1967), so a step running
+its ``plan`` or ``install`` counts as invoking apt, as one naming ``apt-get``
+does.
 
 Comments are stripped before the ``apt-get`` marker is looked for. Without that,
 prose *about* apt -- including the long note #974 added above the very step this
@@ -89,9 +90,9 @@ WORKFLOW_DIR = ROOT / '.github' / 'workflows'
 #: it cannot invent a second one. Adding a different installer to a workflow
 #: means adding its marker here.
 APT_MARKER = 'apt-get'
-#: The commands that invoke apt for a step since #1967: :file:`util/apt_packages.py`'s
+#: The commands that invoke apt for a step (#1967): :file:`util/apt_packages.py`'s
 #: ``plan`` and ``install``, which run ``apt-get``. Its ``seed`` and ``collect`` run
-#: none, and so need no bound of their own, as before.
+#: none, and so need no bound of their own.
 APT_SCRIPT = re.compile(r'\butil/apt_packages\.py (?:plan|install)\b')
 
 #: The steps known to invoke apt, as ``(workflow name, step name)``. Quoted

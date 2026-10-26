@@ -98,11 +98,11 @@ class FollowTCPStreamTests(unittest.TestCase):
             self.assertGreaterEqual(len(stream.packets), 1)
             self.assertIsNotNone(stream.filename)
         # the merged conversation carries both of its frames, which is the point:
-        # keyed per direction they were two streams of one frame each
+        # keyed per direction they would be two streams of one frame each
         self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 2])
 
     def test_per_direction_tracing_still_splits_the_conversation(self) -> None:
-        """``trace_bidirectional=False`` restores the older per-direction flows.
+        """``trace_bidirectional=False`` gives per-direction flows.
 
         The compatibility escape hatch has to keep working, and it is what makes
         the merge above measurable rather than merely asserted.
@@ -131,11 +131,11 @@ class FollowTCPStreamTests(unittest.TestCase):
     def test_scapy_engine_matches_the_default_engine(self) -> None:
         # Scapy dissects in.pcap in full -- its two ICMPv6-over-IPv6 frames, its
         # three IPv4/TCP frames and its one UDP frame -- so it must agree with the
-        # native engine rather than differ from it.
-        # This is the regression guard for #406: the engine imported only
-        # ``scapy.sendrecv``, so Scapy's ``conf.l2types`` registry was empty,
-        # ``PcapReader`` could not map link type 1, and all six frames arrived as
-        # ``Raw`` -- turning three streams into zero with nothing raised.
+        # native engine rather than differ from it. This is the regression guard
+        # for #406: the engine imported only ``scapy.sendrecv``, so Scapy's
+        # ``conf.l2types`` registry was empty, ``PcapReader`` could not map link
+        # type 1, and all six frames arrived as ``Raw`` -- turning every stream
+        # into none with nothing raised.
         import pcapkit
 
         with warnings.catch_warnings():
@@ -148,7 +148,7 @@ class FollowTCPStreamTests(unittest.TestCase):
         # Asserted first, and on the frame type rather than on the stream count,
         # because it names the *cause*. A regression of #406 fails here as "frame 0
         # came back Raw", which points straight at the engine's import, instead of
-        # surfacing downstream as an unexplained 0 != 3 stream-count mismatch.
+        # surfacing downstream as an unexplained stream-count mismatch.
         self.assertNotIsInstance(
             extractor.frame[0], self._scapy_raw(),
             'scapy returned frame 0 of in.pcap as an undissected Raw layer, so its '

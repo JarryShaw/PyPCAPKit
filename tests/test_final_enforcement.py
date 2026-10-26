@@ -9,7 +9,7 @@ every finalised class in the library already carried the marker and nothing read
 it. Issue #778 is the ruling that it should be read, and this module is what
 pins the reading.
 
-**Four answers, one per shape, and the differences are the ruling.** In the
+**One answer per shape, and the differences are the ruling.** In the
 maintainer's terms: ``@info_final`` implies ``@final``, and ``@final`` must not
 be used without ``@info_final``.
 
@@ -29,10 +29,11 @@ third and fourth rows are the two that are easy to conflate: both reach
 :func:`info_final` with ``__final__`` already in the class's own ``__dict__``,
 so only ``__finalised__`` -- which records *that function* having run -- can
 tell "already finalised" from "merely marked". Keying the re-entry check on
-``__final__`` instead made row two warn and skip the generation, and that is a
-defect, not a style choice: the class came back with no generated ``__init__``
-and construction failed with ``TypeError: 'int' object is not iterable`` on the
-:class:`Info` side, and *silently returned bookkeeping attributes* on the
+``__final__`` instead would make row two warn and skip the generation, and that
+is a defect, not a style choice: the class comes back with no generated
+``__init__`` and construction fails with
+``TypeError: 'int' object is not iterable`` on the :class:`Info` side, and
+*silently returns bookkeeping attributes* on the
 :class:`~pcapkit.protocols.schema.schema.Schema` side.
 
 What the rule costs is nothing up front and everything later, which is why it needs
@@ -42,7 +43,7 @@ subclassed**; of :class:`~pcapkit.protocols.schema.schema.Schema`'s 445, 408 do
 and none is subclassed. So the raise cannot fire on any declaration in the tree
 as it stands, and the only way to know it fires at all is to make it.
 
-Three properties are easy to get subtly wrong, and each has a test here for the
+These properties are easy to get subtly wrong, and each has a test here for the
 *wrong* answer as much as the right one:
 
 :meth:`OwnDictRuleTests`
@@ -251,10 +252,10 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
 
         :meth:`EnumSchema.__init_subclass__` writes ``cls`` into ``__enum__``
         for every ``code`` the declaration names, and the guard it inherits is
-        what refuses the declaration. Were the base hook still called at the end
-        of that method rather than at its start, the raise would discard the
-        class object while leaving the registry pointing at it -- so a
-        declaration that failed would still have overwritten a built-in schema.
+        what refuses the declaration. Were the base hook called at the end of
+        that method rather than at its start, the raise would discard the class
+        object while leaving the registry pointing at it -- so a declaration
+        that failed would still have overwritten a built-in schema.
 
         """
         from pcapkit.protocols.schema.schema import EnumSchema, schema_final
@@ -278,19 +279,20 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
         self.assertNotIn(Code.two, before)
 
     def test_a_refused_pcapng_option_declaration_leaves_the_registry_alone(self) -> None:
-        """The same guarantee, on the one in-tree hook that did not have it.
+        """The same guarantee, on the in-tree hook that overrides it.
 
         :meth:`~pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__`
         overrides :class:`EnumSchema`'s hook and calls
         :meth:`~pcapkit.protocols.schema.misc.pcapng.Option.register` -- which
-        writes ``cls`` into :attr:`~pcapkit.protocols.schema.misc.pcapng.Option.\
-        __enum__` -- before calling ``super().__init_subclass__()``, which is
-        where the guard that refuses to subclass a finalised schema actually
-        lives. So a refused declaration still displaced a built-in option schema
-        first, exactly the failure the test above pins for the generic
-        :class:`EnumSchema` hook, and this pins the same guarantee for the one
-        subclass override that had grown out of step with it. A dedicated
-        namespace keeps this from touching the built-in ``opt`` registry at all.
+        writes ``cls`` into
+        :attr:`~pcapkit.protocols.schema.misc.pcapng.Option.__enum__` -- before
+        calling ``super().__init_subclass__()``, which is where the guard that
+        refuses to subclass a finalised schema actually lives. So without the
+        fix a refused declaration displaces a built-in option schema first,
+        exactly the failure the test above pins for the generic
+        :class:`EnumSchema` hook, and this pins the same guarantee for the
+        subclass override. A dedicated namespace keeps this from touching the
+        built-in ``opt`` registry at all.
 
         """
         from pcapkit.const.pcapng.option_type import \

@@ -8,11 +8,11 @@ GitHub issue #1921: ``Command.get``, ``Method.get``, ``OptionType.get``,
 private member off its page, so a ``:meth:`get``` naming one renders as an
 unlinked ``get()`` chip.
 
-Whether a reference resolves is a property of the built inventory, which the
-pull request checks in the rendered HTML. What this pins is the source-side
-precondition: no override carries the tag, in the generated module or in the
-vendor template that regenerates it, and no ``:meth:`` reference to one lands
-on a member marked private.
+Whether a reference resolves is a property of the built inventory, checked in
+the rendered HTML. What this pins is the source-side precondition: no
+override carries the tag, in the generated module or in the vendor template
+that regenerates it, and no ``:meth:`` reference to one lands on a member
+marked private.
 
 """
 

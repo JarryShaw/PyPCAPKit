@@ -1,13 +1,11 @@
 """The registry helpers' documented keyword names must be the real ones.
 
 :func:`~pcapkit.foundation.registry.foundation.register_extractor_engine`
-once documented its first argument as ``engine`` while the signature
-declared ``name``, so a caller following the docstring got a
-:exc:`TypeError` rather than a registration -- noted in passing while
-auditing the ``__init_subclass__`` keyword rename in #557. The docstring
-has since been corrected to say ``name``, matching the signature, but
-nothing pinned the pairing itself, so a future rename could put the two
-back out of step just as silently as before.
+documented its first argument as ``engine`` while the signature declared
+``name``, so a caller following the docstring got a :exc:`TypeError`
+rather than a registration -- noted in passing while auditing the
+``__init_subclass__`` keyword rename in #557. A rename can put the two
+out of step silently.
 
 These pin the keyword spelling directly against the real signature.
 
@@ -31,7 +29,7 @@ class RegistryKeywordNameTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_register_extractor_engine_takes_name_not_engine(self) -> None:
-        """``name=`` registers; ``engine=`` -- as documented -- does not."""
+        """``name=`` registers; ``engine=`` does not."""
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import foundation as registry
 

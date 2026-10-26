@@ -3,11 +3,11 @@
 
 ``release_status`` in :file:`.github/workflows/create-release.yml` posts it when
 every target reconciled by skipping. It named fixed PyPI and Anaconda totals,
-while ``version_check`` derives both at release time from the tag's own tier
-file, so the notice went wrong once a supported version was added or retired,
-and for an older tag. The step is read with :func:`tests._workflows.steps` and its
-script, :file:`util/release_status.py` since #1967, run in that state, so the
-notice checked is the one a run prints.
+while ``version_check`` derives both at release time from the tag's own tier file,
+so the notice went wrong once a supported version was added or retired, and for an
+older tag. The step is read with :func:`tests._workflows.steps` and its script,
+:file:`util/release_status.py` (#1967), run in that state, so the notice checked
+is the one a run prints.
 
 """
 

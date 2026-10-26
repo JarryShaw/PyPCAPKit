@@ -66,7 +66,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
         from pcapkit.foundation.reassembly.data.data import Completion
 
-        # only COMPLETE is truthy, so ``if datagram.completed:`` reads as it did
+        # only COMPLETE is truthy, so ``if datagram.completed:`` reads as a bool would
         self.assertTrue(Completion.COMPLETE)
         self.assertFalse(Completion.PARTIAL)
         self.assertFalse(Completion.TIMEOUT)

@@ -120,7 +120,7 @@ class TestBitLengthRoundTrip(unittest.TestCase):
 
 
 class TestBitLengthSuppliedValue(unittest.TestCase):
-    """A value a caller supplies is truncated to ``bit_length`` bits, as before."""
+    """A value a caller supplies is truncated to ``bit_length`` bits."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

@@ -13,7 +13,7 @@ with ``--skip-existing``.
 
 Each step's ``if:`` is evaluated per matrix leg with
 :func:`tests.project.test_release_gates.evaluate_condition`. The CLI step's
-script, :file:`util/release_conda.py` ``upload`` since #1967, is run with a
+script, :file:`util/release_conda.py` ``upload`` (#1967), is run with a
 stand-in ``conda`` and ``anaconda``, and the arguments it passes are compared
 with those :func:`action_arguments` builds as the action's "Upload to
 anaconda.org" step does.

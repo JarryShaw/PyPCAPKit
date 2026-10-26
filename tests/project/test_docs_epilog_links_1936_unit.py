@@ -248,7 +248,7 @@ class DefinitionTests(unittest.TestCase):
         self.assertEqual(offenders, [])
 
     def test_a_doc_comment_redefinition_is_seen(self) -> 'None':
-        """A ``#:`` comment renders, so a definition in one counts (:issue:`2177`)."""
+        """A ``#:`` comment renders, so a definition in one counts (#2177)."""
         with tempfile.TemporaryDirectory() as tmp:
             path = pathlib.Path(tmp) / 'mod.py'
             path.write_text('#: A `DPKT`_ packet.\n#:\n#: .. _DPKT: https://dpkt.readthedocs.io\n'

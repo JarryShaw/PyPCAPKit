@@ -430,9 +430,10 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         matches the plain form, which
         :file:`tests/integration/test_frame_iteration.py` already pins.
 
-        This is the case that proved an in-process deadline cannot bound:
-        without the fix it absorbed the ``SIGALRM`` into the parse path's
-        ``except Exception`` and then ran unbounded.
+        This is the case that showed an in-process deadline does not
+        hold: without the fix it escaped the deadline entirely and ran
+        unbounded -- see the module docstring for why, and for the cause
+        it rules out.
 
         """
         self.run_bounded(f"""

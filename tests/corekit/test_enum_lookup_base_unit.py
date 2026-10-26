@@ -70,7 +70,7 @@ __tier__ = 'ALL'
 MUTATING = ('register', 'register_alias', 'register_aliases', '_extend',
             '_unregistered_member')
 
-#: The lookup half, which must move to :class:`~pcapkit.corekit.enum.EnumLookup`.
+#: The lookup half, which must live on :class:`~pcapkit.corekit.enum.EnumLookup`.
 LOOKUP = ('get', 'get_all', '_validate_value')
 
 
@@ -171,7 +171,7 @@ class TwoTierSplitTests(unittest.TestCase):
         """Each method is defined on exactly one tier, and on the right one.
 
         Asserted against ``__dict__`` rather than with :func:`hasattr`, which
-        cannot tell "defined here" from "inherited": the mutating five are
+        cannot tell "defined here" from "inherited": the mutating methods are
         reachable from :class:`EnumLookup`'s subclasses either way, so presence
         alone would pass on a single-tier hierarchy.
 
@@ -460,7 +460,7 @@ class ValidateValueTests(unittest.TestCase):
 
 
 class UnassignedAsymmetryTests(unittest.TestCase):
-    """The declared-but-unassigned ``str`` gap, unchanged on the new base.
+    """The declared-but-unassigned ``str`` gap, which holds on the base too.
 
     :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s own docstring calls this
     deliberate: closing it would mean calling ``cls(key)`` for a ``str`` value,
@@ -540,7 +540,7 @@ class PickleTests(unittest.TestCase):
         self.assertRoundTrips(_PickleFlag.solo)
 
     def test_bare_base_members_round_trip_too(self) -> 'None':
-        """And a closed set on the base alone, which is what phase 2 will create."""
+        """And a closed set on the base alone, the shape phase 2's enumerations take."""
         self.assertRoundTrips(_Int.one)
         self.assertRoundTrips(_Str.plain)
         self.assertRoundTrips(_Flag.first)

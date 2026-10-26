@@ -433,7 +433,7 @@ def triggers(spec: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
-    """#1732, option 2: nothing waits on the experimental legs, so they leave unit-tests.yml."""
+    """#1732, option 2: nothing waits on the experimental legs, so they are not in unit-tests.yml."""
 
     def setUp(self) -> None:
         self.unit = workflow('unit-tests.yml')
@@ -457,7 +457,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
     def test_the_same_events_and_no_concurrency_group(self) -> None:
         """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, sharing no group.
 
-        #1938 drops its group, so a superseded run is skipped or stopped, not
+        No group (#1938), so a superseded run is skipped or stopped, not
         cancelled: :mod:`tests.project.test_superseded_runs_1938`.
 
         """
@@ -520,7 +520,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
     def test_a_failure_never_turns_the_run_red(self) -> None:
         """Job-level ``continue-on-error`` there and on the KTLO jobs alone: a ``test`` leg's failure must still fail its gate.
 
-        unit-tests.yml's KTLO jobs carry it too since #1738, which nothing gating
+        unit-tests.yml's KTLO jobs carry it too (#1738), which nothing gating
         ``needs:`` (``tests/project/test_ktlo_jobs_gate_nothing_1738.py``).
 
         """
