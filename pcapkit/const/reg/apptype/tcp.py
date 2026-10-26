@@ -544,6 +544,8 @@ class TCP(AppType):
        * - ``nodel``
          - [TCP] Lightweight event based control protocol utilising JavaScript
            Object Notation
+       * - ``noonien``
+         - [TCP] noonien peer-to-peer memory replication
        * - ``nq``
          - [TCP] Network Quality test server endpoint
        * - ``nusdp``
