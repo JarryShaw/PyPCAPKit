@@ -887,7 +887,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     warn(f'{self.alias}: [OptNo {schema.type}] invalid format: remaining data', ProtocolWarning)
 
             if schema.data[-1] & 0x01 == 1:
-                warn(f'{self.alias}: [OptNo {schema.type}] invalid format: field termination indicator not set', ProtocolWarning)
+                warn(f'{self.alias}: [OptNo {schema.type}] invalid format: '
+                     f'field termination indicator set on the final octet: {schema.data[-1]!r}', ProtocolWarning)
             termination = tuple(bool(byte & 0x01) for byte in schema.data)
         else:
             flags = []

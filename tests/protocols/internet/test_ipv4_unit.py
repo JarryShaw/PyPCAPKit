@@ -502,9 +502,9 @@ class IPv4UnitTests(unittest.TestCase):
         :rfc:`1108` section 2.4(a) makes the low-order bit of each protection
         authority octet a *field termination indicator*: ``1`` means another
         octet follows, ``0`` means this is the last. ``_read_opt_sec`` enforces
-        it, warning ``field termination indicator not set`` when the final octet
-        has it set. The writer and the reader agree with each other (#537) and
-        with the RFC (#1321).
+        it, warning ``field termination indicator set on the final octet`` when
+        the final octet has it set. The writer and the reader agree with each
+        other (#537) and with the RFC (#1321).
 
         The round trip is asserted through a real datagram and with warnings
         promoted to errors, because a disagreement's only symptom is a warning.
