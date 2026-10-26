@@ -3067,6 +3067,66 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(schema.length, length)
                 self.assertEqual(schema.address, expected)
 
+    def test_mh_lmaa_code_follows_the_address_family(self) -> None:
+        """The LMAA code is the one :rfc:`5949#section-6.2.2` gives the family. See #2280.
+
+        The maker derives the length from the address, but the code defaulted
+        to ``IPv6_LMAA`` regardless, so ``address='10.0.0.1'`` packed
+        ``290601000a000001``: an IPv4 length with the IPv6 code.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH, LMAAddressCode
+        from pcapkit.protocols.schema.internet.mh import LMAAddressOption
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+        lmaa = Option.Local_Mobility_Anchor_Address_Option
+
+        for address, octets in (
+            ('10.0.0.1', '290602000a000001'),
+            ('2001:db8::1', '291201' '00' '20010db8' + '00' * 10 + '0001'),
+        ):
+            with self.subTest(address=address, code='derived'):
+                schema = proto._make_opt_lmaa(lmaa, address=address)  # type: ignore[arg-type]
+                self.assertEqual(schema.pack().hex(), octets)
+            with self.subTest(address=address, code='explicit, matching'):
+                code = LMAAddressCode.IPv4_LMAA if '.' in address else LMAAddressCode.IPv6_LMAA
+                schema = proto._make_opt_lmaa(lmaa, address=address, code=code)  # type: ignore[arg-type]
+                self.assertEqual(schema.pack().hex(), octets)
+            with self.subTest(address=address, code='explicit, matching, by name'):
+                # #2280: a str code name has to resolve against LMAAddressCode even
+                # when code_namespace is not given, as every sibling _make_opt_*
+                # does -- _make_index's str resolution needs an enum default.
+                name = 'IPv4_LMAA' if '.' in address else 'IPv6_LMAA'
+                schema = proto._make_opt_lmaa(lmaa, address=address, code=name)  # type: ignore[arg-type]
+                self.assertEqual(schema.pack().hex(), octets)
+
+        for address, code in (('10.0.0.1', LMAAddressCode.IPv6_LMAA),
+                              ('2001:db8::1', LMAAddressCode.IPv4_LMAA),
+                              ('10.0.0.1', LMAAddressCode.Reserved)):
+            with self.subTest(address=address, code=code):
+                with self.assertRaises(ProtocolError) as context:
+                    proto._make_opt_lmaa(lmaa, address=address, code=code)  # type: ignore[arg-type]
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn(f'invalid code: code does not match address family: {int(code)}',
+                              str(context.exception))
+
+        for address, name in (('10.0.0.1', 'IPv6_LMAA'), ('2001:db8::1', 'IPv4_LMAA')):
+            with self.subTest(address=address, code=name):
+                with self.assertRaises(ProtocolError) as context:
+                    proto._make_opt_lmaa(lmaa, address=address, code=name)  # type: ignore[arg-type]
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('invalid code: code does not match address family:',
+                              str(context.exception))
+
+        # a captured mismatch is data, not a request, so it still rebuilds as read
+        captured = bytes.fromhex('290601000a000001')
+        data = proto._read_opt_lmaa(  # type: ignore[arg-type]
+            LMAAddressOption.unpack(captured), options=None)
+        self.assertEqual(data.code, LMAAddressCode.IPv6_LMAA)
+        rebuilt = proto._make_opt_lmaa(lmaa, data)  # type: ignore[arg-type]
+        self.assertEqual(rebuilt.pack(), captured)
+
     def test_mh_target_careof_address_suboption_round_trips_both_families(self) -> None:
         """The sub-option length is derived from the family, so both widths need pinning.
 
