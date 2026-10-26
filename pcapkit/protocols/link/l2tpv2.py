@@ -429,8 +429,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             'version': data.version,
             # NOTE: Passed as ``total_length`` since ``length`` is the parse
             # length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so
-            # under that key it never reached :meth:`make`, and the rebuild
-            # dropped both the Length field and the ``L`` flag (#1172).
+            # under that key it would never reach :meth:`make`, and the rebuild
+            # would drop both the Length field and the ``L`` flag (#1172).
             'total_length': data.length,
             # NOTE: Passed so that a control message captured without ``L``
             # rebuilds as captured, rather than gaining the Length field

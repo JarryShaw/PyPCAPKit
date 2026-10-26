@@ -418,9 +418,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         """
         # NOTE: checked before the ``htype`` dispatch, for the same reason as
-        # in ``_make_proto_resolve``: without it a ``bool`` reaches the MAC
-        # pattern or falls through unchanged, and fails later as a
-        # ``TypeError`` (#2166).
+        # in ``_make_proto_resolve``: without it a ``bool`` gets the generic
+        # ``ProtocolError`` the branches below raise for any non-address,
+        # rather than the ``FieldValueError`` ``_make_proto_resolve`` raises
+        # for one (#2166).
         if isinstance(addr, bool):
             raise FieldValueError(
                 f'{self.__class__.__name__}: invalid hardware address: must not be a bool, '
@@ -492,8 +493,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
         # NOTE: checked before the ``ptype`` dispatch, for the placement reason
         # ``_reject_bool`` in ``pcapkit.corekit.fields.ipaddress`` gives: the
         # non-IP branches below never reach ``parse_ip_address``, so without it
-        # a ``bool`` falls through them unchanged and fails later as a
-        # ``TypeError`` from ``len()`` (#2166).
+        # a ``bool`` gets their generic ``ProtocolError`` rather than the
+        # ``FieldValueError`` the IP branches raise for it (#2166).
         if isinstance(addr, bool):
             raise FieldValueError(
                 f'{self.__class__.__name__}: invalid protocol address: must not be a bool, '
