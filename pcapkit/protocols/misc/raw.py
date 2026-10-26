@@ -69,7 +69,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
 
         Args:
             length: Length of packet data.
-            error: Parsing errors if any.
+            error: Message saying why the data is kept raw, if any.
             alias: Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
 
@@ -114,14 +114,14 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
-        When :mod:`pcapkit` meets a malformed packet, the original parsing
-        error instance is given as ``error``.
+        When :mod:`pcapkit` meets a malformed packet, or a layer past a
+        dissection limit, the message saying so is given as ``error``.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            error: Parsing error if any (for parsing), an :class:`Exception`
-                instance or :obj:`None`.
+            error: Message saying why the data is kept raw, if any (for
+                parsing), a :obj:`str` or :obj:`None`.
             alias: Original enumeration of the unknown protocol, an :obj:`int`
                 or :obj:`None`.
             **kwargs: Arbitrary keyword arguments.

@@ -579,10 +579,10 @@ def secrets_area(packet: 'dict[str, Any]') -> 'int':
         Length less its 20 framing octets, and never below zero.
 
     ``secrets_length`` is a 32-bit wire field. Read as declared, a length past
-    the block read the trailing Block Total Length and the blocks after it as
-    secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` the
-    read raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside
-    the block's schema, which ended the whole extraction (:issue:`1980`). This
+    the block would read the trailing Block Total Length and the blocks after it
+    as secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`
+    the read would raise :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+    from inside the block's schema, ending the whole extraction (:issue:`1980`). This
     is the Secrets Data counterpart of :func:`captured_area`: the block keeps its
     declared ``secrets_length``, the secrets are the octets the block holds, and
     the padding and option area are sized from those octets.

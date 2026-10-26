@@ -66,8 +66,8 @@ class PCAPNG(Protocol):
     """Data model for PCAP-NG file blocks."""
 
     # NOTE: ``__truncated_raw__`` is a dunder key, which ``to_dict`` carries
-    # only so named (#2003); the rebuild reads it, and the dumps write it, as
-    # before.
+    # only when it is named here (#2003); the rebuild reads it, and the dumps
+    # write it.
     __included__ = ['__truncated_raw__']
 
     #: Block type.

@@ -691,7 +691,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     """
 
     if TYPE_CHECKING:
-        #: PCAP-NG context manager.
+        #: Section context of the block; see :attr:`section_context`.
         _ctx: 'Optional[Context]'
 
         #: PCAP-NG block type.
@@ -738,7 +738,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
-    #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+    #: module and class, or a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -957,8 +957,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """Section context of current PCAP-NG block.
 
         Raises:
-            UnsupportedCall: On a Section Header Block, which has no section
-                context of its own.
+            UnsupportedCall: If the block holds no section context: a block
+                given ``ctx=None``, or a Section Header Block, which starts a
+                section rather than reading one, unless the
+                :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` engine read
+                it and assigned it the section it opens.
 
         .. versionadded:: 1.5.0
 
@@ -1058,11 +1061,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this link type is
@@ -1516,7 +1519,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         self._sect = sct
         #: int: Block index number.
         self._fnum = num
-        #: pcapkit.foundation.engines.pcapng.Context: Context of the PCAP-NG file.
+        #: pcapkit.foundation.engines.pcapng.Context: Section context of the PCAP-NG file.
         self._ctx = ctx
         #: collections.Counter: Counter for option types.
         self._opt = collections.Counter()  # type: Counter[Enum_OptionType]
