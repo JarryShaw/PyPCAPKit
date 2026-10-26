@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from scapy.layers.inet import IP, TCP
-    from scapy.layers.inet6 import IPv6
+    from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
     from scapy.packet import Packet
 
 __all__ = [
@@ -449,6 +449,68 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[IP | IPv6, TCP, bytes, bytes] | Non
     return carrier, tcp, *segment
 
 
+def _fragment_header(ipv6: 'IPv6') -> 'IPv6ExtHdrFragment | None':
+    """Fetch the IPv6 Fragment header of an IPv6 layer, if any.
+
+    Args:
+        ipv6: Scapy IPv6 layer.
+
+    Returns:
+        The IPv6 Fragment header (:class:`scapy.layers.inet6.IPv6ExtHdrFragment`)
+        among the extension headers `Scapy`_ dissects in that layer's own
+        chain, or :data:`None` if there is none.
+
+    """
+    from scapy.layers.inet6 import IPv6ExtHdrFragment, _IPv6ExtHdr
+
+    header = ipv6.payload
+    while isinstance(header, _IPv6ExtHdr) and not isinstance(header, IPv6ExtHdrFragment):
+        header = header.payload
+    return header if isinstance(header, IPv6ExtHdrFragment) else None
+
+
+def _fragment(packet: 'Packet', name: 'str') -> 'IP | IPv6 | None':
+    """Fetch the IPv4 or IPv6 layer of a packet that IP reassembly reads.
+
+    Args:
+        packet: Scapy packet.
+        name: ``'IP'`` or ``'IPv6'``, the layer to fetch.
+
+    Returns:
+        The first ``name`` layer, from the outside in, that is a fragment --
+        for IPv4, one with **MF** set or a non-zero fragment offset, for IPv6,
+        one with an IPv6 Fragment header (see :func:`_fragment_header`); with
+        none, ``packet[name]``, the outermost; with no ``name`` layer,
+        :data:`None`.
+
+    Note:
+        As with :func:`pcapkit.toolkit.pcap._fragment`, either datagram of an
+        IP-in-IP tunnel may be the fragmented one, and each is reassembled on
+        its own header (:issue:`2307`). The datagram an ICMP error quotes is
+        of another class, so is not ``packet[name]`` and is not walked to.
+
+    """
+    from scapy.layers.inet import IP
+    from scapy.layers.inet6 import IPv6
+    from scapy.packet import NoPayload
+
+    if name not in packet:
+        return None
+    outermost = cast('IP | IPv6', packet[name])
+    kind = IP if name == 'IP' else IPv6
+    layer = outermost  # type: Packet
+    while not isinstance(layer, NoPayload):
+        # an exact match, as ``packet[name]`` is, so a quoted datagram is not one
+        if type(layer) is kind:  # pylint: disable=unidiomatic-typecheck
+            if kind is IP:
+                if layer.flags.MF or layer.frag:
+                    return layer
+            elif _fragment_header(cast('IPv6', layer)) is not None:
+                return layer
+        layer = layer.payload
+    return outermost
+
+
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
@@ -458,7 +520,8 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     :func:`_within_datagrams`), and the **DF** (``scapy.layers.inet.IP.flags.DF``)
     flag is :data:`False`. A zero-length frame has none, though `Scapy`_ hands it back
     as an IPv4 layer of defaults at the ``RAW`` and ``IPV4`` link types (see
-    :func:`_frame`).
+    :func:`_frame`). In an IP-in-IP tunnel, the layer is the first that is a
+    fragment (see :func:`_fragment`).
 
     Args:
         packet: Scapy packet.
@@ -472,8 +535,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
-    if 'IP' in packet:
-        ipv4 = cast('IP', packet['IP'])
+    if (ipv4 := cast('IP | None', _fragment(packet, 'IP'))) is not None:
         if ipv4.flags.DF:       # dismiss not fragmented packet
             return None
         if not _frame(packet):  # a zero-length frame (#1676)
@@ -527,7 +589,8 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
     (:class:`scapy.layers.inet6.IPv6`), in no later IPv4 fragment, and an IPv6 Fragment
     header (:rfc:`2460#section-4.5`, i.e.,
     :class:`scapy.layers.inet6.IPv6ExtHdrFragment`) among the extension headers `Scapy`_
-    dissects in that layer's own chain.
+    dissects in that layer's own chain. In an IP-in-IP tunnel, the layer is the first
+    that has one (see :func:`_fragment`).
 
     Args:
         packet: Scapy packet.
@@ -548,26 +611,20 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         no upper-layer header in it (:rfc:`791#section-3.2`), but `Scapy`_
         dissects IPv6 there whatever the fragment offset. And the header and
         addresses handed on are those of the IPv6 layer the Fragment header
-        follows, so one inside a packet that layer carries, such as the inner
-        packet of 6in6, is not taken.
+        follows.
 
     """
     if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
     from scapy.layers.inet import IP
-    from scapy.layers.inet6 import IPv6ExtHdrFragment, _IPv6ExtHdr
 
-    if 'IPv6' in packet:
-        ipv6 = cast('IPv6', packet['IPv6'])
+    if (ipv6 := cast('IPv6 | None', _fragment(packet, 'IPv6'))) is not None:
         above = ipv6.underlayer
         while above is not None:
             if isinstance(above, IP) and above.frag:    # data of a later fragment
                 return None
             above = above.underlayer
-        ipv6_frag = ipv6.payload
-        while isinstance(ipv6_frag, _IPv6ExtHdr) and not isinstance(ipv6_frag, IPv6ExtHdrFragment):
-            ipv6_frag = ipv6_frag.payload
-        if not isinstance(ipv6_frag, IPv6ExtHdrFragment):
+        if (ipv6_frag := _fragment_header(ipv6)) is None:
             return None                        # dismiss not fragmented packet
 
         # NOTE: ``len()`` of a Scapy layer spans that layer and everything after

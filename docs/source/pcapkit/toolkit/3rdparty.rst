@@ -46,6 +46,10 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.scapy._within_datagrams
 
+.. autofunction:: pcapkit.toolkit.scapy._fragment
+
+.. autofunction:: pcapkit.toolkit.scapy._fragment_header
+
 .. autofunction:: pcapkit.toolkit.scapy._tcp_carrier
 
 .. autofunction:: pcapkit.toolkit.scapy._tcp_segment
@@ -90,6 +94,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.dpkt.packet2dict
 
 .. autofunction:: pcapkit.toolkit.dpkt._capture_time
+
+.. autofunction:: pcapkit.toolkit.dpkt._fragment
 
 Auxiliary Data
 --------------
