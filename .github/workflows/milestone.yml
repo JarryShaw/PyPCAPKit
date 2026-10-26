@@ -1,0 +1,91 @@
+name: Milestone
+
+# #2218: sets the release milestone on each issue and pull request as it opens,
+# reopens and closes, so every item records the release line it targets and
+# ships in without anyone setting it by hand; a manual run backfills the items
+# that have none. The rule is util/milestone.py's action_for, documented under
+# "Milestone" in docs/source/contributing/workflows.rst: an open item, a merged
+# pull request or an issue closed as completed gets the open milestone named
+# after the checked-out `pcapkit.__version__`, unless it already holds another;
+# an unmerged pull request or an issue closed as not planned loses whichever
+# milestone it holds. A missing milestone is a warning, never created.
+#
+# SECURITY. `pull_request_target` gives this run a write token on events a
+# stranger can cause, so it must never execute anything the pull request
+# supplies. The job below:
+#
+#   * checks out `github.sha`, which under `pull_request_target` is the tip of
+#     the *base* branch, never the PR head, and only the three files it reads,
+#     without persisting the token;
+#   * reads `__version__` from pcapkit/__init__.py as text, importing nothing;
+#   * takes nothing from the event payload but the item number, passed through
+#     `env:`, and re-reads the item's state from the API.
+#
+# tests/project/test_milestone_2218.py asserts each of these over this file.
+
+on:
+  issues:
+    types: [opened, reopened, closed]
+  pull_request_target:
+    types: [opened, reopened, closed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Report what the backfill would change, and change nothing
+        type: boolean
+        default: true
+
+# The job holds its own scopes.
+permissions: {}
+
+# Runs on one item serialize, so an open, close and reopen in quick succession
+# never overlap. Nothing is cancelled: by default a group holds one pending run
+# and cancels it when a newer one arrives, and `queue: max` lets up to 100 wait
+# instead. Queue order is not guaranteed, but each run re-reads the item, so
+# the last to execute writes the item's state as it then stands. A backfill
+# has a group of its own. GitHub documents `queue`, and that it and
+# `cancel-in-progress` together are a validation error:
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+concurrency:
+  group: milestone-${{ (github.event.issue.number || github.event.pull_request.number) && format('item-{0}', github.event.issue.number || github.event.pull_request.number) || 'backfill' }}
+  queue: max
+
+jobs:
+  milestone:
+    name: Set the milestone
+    runs-on: ubuntu-latest
+    # One item is a few API calls. A backfill is one listing page per 100 items
+    # plus one update per item that changed, a second apart, and a rate-limited
+    # request may wait minutes before its retry.
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      # The base branch, and only the files the next step reads.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: |
+            pcapkit/__init__.py
+            util/_actions.py
+            util/milestone.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      # A dispatch is a dry run unless `dry_run` is unticked.
+      - name: Set the milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ITEM: ${{ github.event.issue.number || github.event.pull_request.number }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ -n "$ITEM" ]; then
+            python3 util/milestone.py --item "$ITEM"
+          elif [ "$DRY_RUN" = 'false' ]; then
+            python3 util/milestone.py --backfill
+          else
+            python3 util/milestone.py --backfill --dry-run
+          fi

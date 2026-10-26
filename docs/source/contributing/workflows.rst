@@ -100,6 +100,13 @@ At a Glance
      - daily 00:37
      - --
      - ``issues``, ``pull_request_target``, ``workflow_dispatch``
+   * - Milestone
+     - :file:`milestone.yml`
+     - --
+     - --
+     - --
+     - --
+     - ``issues``, ``pull_request_target``, ``workflow_dispatch``
    * - Coverage Comment
      - :file:`coverage-comment.yml`
      - --
@@ -183,6 +190,7 @@ than starting a new one.
        CT["CI Timing<br/>ci-timing.yml"]
        BM["Engine Benchmark<br/>benchmark.yml"]
        PS["Project Status<br/>project-status.yml"]
+       MS["Milestone<br/>milestone.yml"]
        CR["Create Release<br/>create-release.yml"]
 
        PUSH --> UT
@@ -226,6 +234,10 @@ than starting a new one.
        DAILY -->|00:37| PS
        ISSUES --> PS
        PRT --> PS
+
+       DISPATCH --> MS
+       ISSUES --> MS
+       PRT --> MS
 
        TAG --> CR
 
@@ -553,8 +565,11 @@ release waits for the next Vendor Update on ``main``.
 ``pull_request_target``
 -----------------------
 
-**Project Status** is the only workflow on ``pull_request_target``, and the only one
-that runs with a secret on an event a fork can cause: it writes the project board's
+**Project Status** and **Milestone** are the workflows on ``pull_request_target``,
+which runs the base branch's copy of a workflow with a write token on an event a fork
+can cause, so neither runs anything the pull request supplies.
+
+**Project Status** is the one that runs with a secret: it writes the project board's
 *Status* field with ``PROJECT_TOKEN``, which a fork's ``pull_request`` run would not
 receive. It therefore never checks out the repository and has no ``uses:`` step. It
 fetches :file:`util/project_status.py`, and :file:`util/_actions.py`, which it imports
@@ -564,6 +579,57 @@ number from the payload.
 ``tests/project/test_project_status.py`` asserts this over the file. Without the
 secret it skips with a ``::notice::``. The Status mapping it applies is documented in
 :doc:`conventions/process`.
+
+**Milestone** writes with ``GITHUB_TOKEN``, scoped to ``issues: write`` and
+``pull-requests: write`` on its one job, beside ``contents: read`` for its
+checkout. Its checkout is of ``github.sha`` without
+persisted credentials, and holds :file:`pcapkit/__init__.py`, :file:`util/milestone.py`
+and :file:`util/_actions.py` alone; the version is read from the first as text, so
+no code from :mod:`pcapkit` is imported. It takes only the item number from the
+payload. ``tests/project/test_milestone_2218.py`` asserts this over the file.
+
+Milestone (:issue:`2218`)
+-------------------------------------------------------------------------------
+
+Each issue and pull request gets its release milestone as it opens, reopens and
+closes, by the rule under "Milestones and the Project Board" in
+:doc:`conventions/process`, which ``action_for`` in :file:`util/milestone.py` applies:
+
+* an open item, a merged pull request, or an issue closed as completed gets the open
+  milestone titled ``PyPCAPKit v<major>.<minor>`` from the checked-out
+  ``__version__`` -- ``1.5.0b14`` gives ``PyPCAPKit v1.5``;
+* a pull request closed unmerged, or an issue closed as not planned or as a
+  duplicate, loses any milestone it has;
+* an issue closed with no reason recorded is left as it is.
+
+**A milestone already on an item wins over the one the rule gives.** An item that
+holds a different milestone, such as a later release set by hand, keeps it on open,
+reopen and close; the milestone is given only to an item that has none. Removal is
+the exception: an unmerged or not-planned close takes away whichever milestone the
+item holds, since work closed without shipping belongs to no release.
+
+The run re-reads the item through the API rather than trusting the event payload.
+Where no open milestone has the title, the item is left without one and the run
+emits a ``::warning::``: the script never creates a milestone, since opening the
+next one is a release step done by hand. A removal needs no milestone, so it goes
+ahead regardless.
+
+A ``workflow_dispatch`` backfills: it applies the same rule to every item, open or
+closed, with no milestone whose number is above the highest-numbered item of the
+previous release's milestone, the newest of the ``PyPCAPKit v<major>.<minor>``
+milestones below the current one. Items at or below that bound belong to releases
+already made, and those among them without a milestone were left so by hand. With
+no earlier milestone to bound it, the backfill warns and changes nothing. Its
+``dry_run`` input is ticked by default, so a dispatch reports what it would change
+until it is unticked. Its updates go out a second apart, under GitHub's secondary
+rate limit on content-creating requests, and a request refused with a rate limit is
+retried a bounded number of times, after the ``Retry-After`` GitHub sends or an
+exponential backoff from a minute. The ``Set the milestone`` step picks the mode.
+
+Runs on one item share a concurrency group with ``queue: max``, as Project Status's
+do, so a quick open, close and reopen never overlap and none is cancelled. Queue
+order is not guaranteed, but each run re-reads the item, so the last to execute
+writes its state as it then stands.
 
 Coverage (:issue:`1063`)
 -------------------------------------------------------------------------
@@ -1731,8 +1797,8 @@ script it flags. The step's run summary counts the findings by actionlint rule a
 by shellcheck code.
 
 The step's ``-ignore`` pattern, which matches a message, not a file, hides a false
-positive: ``concurrency.queue``, which ``project-status.yml`` sets and GitHub
-documents, is a key no actionlint release knows yet (`rhysd/actionlint#657
+positive: ``concurrency.queue``, which ``project-status.yml`` and ``milestone.yml``
+set and GitHub documents, is a key no actionlint release knows yet (`rhysd/actionlint#657
 <https://github.com/rhysd/actionlint/issues/657>`__). The pattern goes once a
 release that knows it is pinned.
 

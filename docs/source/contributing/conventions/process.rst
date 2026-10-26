@@ -346,11 +346,15 @@ carrying it are that kind:
 Milestones and the Project Board
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Milestones are release lines**, titled by minor version (``1.4``, ``1.5``). An issue
-or pull request belongs to the line it ships in: the open milestone collects work
-targeting the next release, and it is closed when that release's final tag is cut,
+**Milestones are release lines**, titled by minor version (``PyPCAPKit v1.4``,
+``PyPCAPKit v1.5``). An issue or pull request belongs to the line it ships in: the
+open milestone collects work targeting the next release, and it is closed when that release's final tag is cut,
 with ``due_on`` set to the tag date. Work closed without shipping -- an unmerged pull
-request, an issue closed as not planned -- takes no milestone. The closed milestones
+request, an issue closed as not planned -- takes no milestone.
+:file:`.github/workflows/milestone.yml` gives an item the open milestone as it opens,
+and settles it as the item closes; a milestone already set by hand to another
+release is kept, and a manual run backfills the items without one
+(:doc:`../workflows`). The closed milestones
 were backfilled from merge and close dates against the release tags, so an item that
 landed just before a tag may sit one line early.
 
