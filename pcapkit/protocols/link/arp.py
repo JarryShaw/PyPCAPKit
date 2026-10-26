@@ -407,40 +407,35 @@ class ARP(Link[Data_ARP, Schema_ARP],
             :class:`bytes`.
 
         Raises:
-            FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``htype``
-                is.
-            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a
-                well-formed MAC address given as :class:`str`,
-                :class:`bytes` or :class:`bytearray`, or if ``htype`` is not
-                ``1`` and ``addr`` is either a :class:`str` that is not *hex*
-                encoded or none of :class:`str`, :class:`bytes` and
-                :class:`bytearray`.
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or if
+                ``htype`` is ``1`` and ``addr`` is not a well-formed MAC
+                address, or if ``htype`` is not ``1`` and ``addr`` is a
+                :class:`str` that is not *hex* encoded.
+
+        Notes:
+            The messages are prefixed with :attr:`self.__class__.__name__
+            <type.__name__>` rather than :attr:`self.alias
+            <pcapkit.protocols.protocol.Protocol.alias>`, for the reason
+            :meth:`_make_proto_resolve` gives.
 
         """
-        # NOTE: checked before the ``htype`` dispatch, for the same reason as
-        # in ``_make_proto_resolve``: without it a ``bool`` gets the generic
-        # ``ProtocolError`` the branches below raise for any non-address,
-        # rather than the ``FieldValueError`` ``_make_proto_resolve`` raises
-        # for one (#2166).
-        if isinstance(addr, bool):
-            raise FieldValueError(
-                f'{self.__class__.__name__}: invalid hardware address: must not be a bool, '
-                f'not {addr!r} -- pass int({addr!r}) if the numeric value is what is wanted')
+        name = 'MAC address' if htype == Enum_Hardware.Ethernet else 'hardware address'
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: must be a str, '
+                                f'bytes or bytearray, not {addr!r}')
         if htype == Enum_Hardware.Ethernet:
-            if not isinstance(addr, (str, bytes, bytearray)):
-                raise ProtocolError(f'Invalid MAC address: {addr!r}')
             _addr = addr.encode() if isinstance(addr, str) else addr
             if PAT_MAC_ADDR.fullmatch(_addr) is not None:
                 return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-            raise ProtocolError(f'Invalid MAC address: {addr!r}')
+            raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: {addr!r}')
         if isinstance(addr, str):
             try:
                 return bytes.fromhex(addr.replace(':', '').replace('-', ''))
             except ValueError:
-                raise ProtocolError(f'Invalid hardware address: {addr!r}') from None
-        if isinstance(addr, (bytes, bytearray)):
-            return bytes(addr)
-        raise ProtocolError(f'Invalid hardware address: {addr!r}')
+                raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: '
+                                    f'{addr!r}') from None
+        return bytes(addr)
 
     def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int',
                             plen: 'Optional[int]' = None) -> 'bytes':

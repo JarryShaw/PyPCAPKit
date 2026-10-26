@@ -92,17 +92,35 @@ class TestARPHardwareAddressType(unittest.TestCase):
     (``TypeError: expected string or bytes-like object``) for Ethernet, and fell
     through unchanged (``TypeError: object of type 'bool' has no len()``) for
     any other ``htype``.
+
+    A :obj:`bool` is rejected like any other wrong type, with
+    :exc:`~pcapkit.utilities.exceptions.ProtocolError` (#2256).
     """
 
     HTYPES = {'Ethernet': Hardware.Ethernet, 'non-Ethernet': Hardware.Fibre_Channel}
 
-    def test_bool_raises_field_value_error(self) -> None:
+    #: The address noun each ``htype`` uses in its messages.
+    NOUNS = {'Ethernet': 'MAC address', 'non-Ethernet': 'hardware address'}
+
+    def test_wrong_type_message(self) -> None:
         for name, htype in self.HTYPES.items():
-            for value in (True, False):
+            for value in (True, False, 5, None, 1.5):
                 with self.subTest(htype=name, value=value):
-                    with self.assertRaises(FieldValueError) as context:
+                    with self.assertRaises(ProtocolError) as context:
                         ARP(htype=htype, sha=value, tha=value)
-                    self.assertIn('must not be a bool', str(context.exception))
+                    self.assertNotIsInstance(context.exception, FieldValueError)
+                    self.assertEqual(
+                        str(context.exception),
+                        f'ARP: invalid {self.NOUNS[name]}: must be a str, bytes or '
+                        f'bytearray, not {value!r}')
+
+    def test_malformed_str_message(self) -> None:
+        for name, htype in self.HTYPES.items():
+            with self.subTest(htype=name):
+                with self.assertRaises(ProtocolError) as context:
+                    ARP(htype=htype, sha='zz', tha='zz')
+                self.assertEqual(str(context.exception),
+                                 f"ARP: invalid {self.NOUNS[name]}: 'zz'")
 
     def test_unsupported_type_raises_protocol_error(self) -> None:
         for name, htype in self.HTYPES.items():
