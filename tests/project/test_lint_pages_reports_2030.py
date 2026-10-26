@@ -29,6 +29,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, pinned
 from tests.project.test_cron_reports_2030 import _ReportStep, launcher, step
 from tests.project.test_discussion_report_2030 import (BASH, CATEGORY, FAKE_PYTHON, FIRST_PARTY,
@@ -276,7 +277,7 @@ class TestThePostSteps(unittest.TestCase):
         script.write_text(step(name, 'discussion', POST)['run'], encoding='utf-8')
         env = dict(env, PATH=f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', FAKE_PYTHON_LOG=str(self.log),
                    REPORT_CATEGORY=CATEGORY)
-        result = subprocess.run([str(BASH), '-e', str(script)], cwd=work, env=env,  # nosec: B603
+        result = subprocess.run(bash_argv('-e', str(script), executable=str(BASH)), cwd=work, env=env,  # nosec: B603
                                 capture_output=True, text=True, check=False, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         logged = json.loads(self.log.read_text(encoding='utf-8'))

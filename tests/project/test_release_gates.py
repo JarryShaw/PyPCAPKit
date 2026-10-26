@@ -227,7 +227,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -4403,7 +4403,7 @@ class CondaStepHarness(CondaWorkflowMixin):
                        GITHUB_OUTPUT=str(output))
         run_env.update(env)
         result = subprocess.run(
-            ['bash', '-e', str(path)], cwd=cwd, env=run_env,
+            bash_argv('-e', str(path)), cwd=cwd, env=run_env,
             capture_output=True, text=True, timeout=scale_timeout(60),
         )
         outputs = dict(line.split('=', 1) for line in

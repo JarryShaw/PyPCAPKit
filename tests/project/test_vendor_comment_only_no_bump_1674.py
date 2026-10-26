@@ -34,7 +34,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 from tests.project.test_release_gates import (_RUN_LITERAL, NULL, STATUS, block_scalar_after,
                                               evaluate_condition, evaluate_expression, job_blocks,
                                               step_block, step_mapping)
@@ -547,7 +547,7 @@ class TestTheDocumentationCommitStep(WorkflowMixin, ScratchRepository):
         output.write_text('', encoding='utf-8')
         # `bash -e {0}`: a `run:` with no `shell:` (GitHub, "Workflow syntax for
         # GitHub Actions", `jobs.<job_id>.steps[*].shell`).
-        result = subprocess.run(['bash', '-e', str(path)], cwd=self.repo,
+        result = subprocess.run(bash_argv('-e', str(path)), cwd=self.repo,
                                 env=dict(self.env, GITHUB_OUTPUT=str(output), **env),
                                 capture_output=True, text=True, check=False,
                                 timeout=scale_timeout(60))

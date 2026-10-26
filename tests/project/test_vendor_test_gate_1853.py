@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests import _workflows
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 
 try:
     import yaml
@@ -267,7 +267,7 @@ class TestTheDiscardStep(ScratchRepository):
         self.assertEqual(len(self.changed()), 3, self.changed())
 
         # `bash -e {0}`, as for a `run:` with no `shell:`.
-        result = subprocess.run(['bash', '-e', str(script)], cwd=self.repo,
+        result = subprocess.run(bash_argv('-e', str(script)), cwd=self.repo,
                                 env=dict(self.env, GITHUB_STEP_SUMMARY=str(self.summary)),
                                 capture_output=True, text=True, check=False, timeout=scale_timeout(60))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

@@ -32,6 +32,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, pinned
 from tests.project.test_discussion_report_2030 import (BASH, CATEGORY, FAKE_PYTHON, FIRST_PARTY,
                                                        POSTER, RUN, evaluate)
@@ -260,8 +261,8 @@ class TestThePinRefresh(unittest.TestCase):
             script = root / 'step.sh'
             script.write_text(step(CONDA, 'conda-update', 'Refresh the platform pins')['run'], encoding='utf-8')
             env = {'PATH': f'{root}{os.pathsep}{os.environ.get("PATH", "")}', 'RUNNER_TEMP': str(root)}
-            result = subprocess.run([str(BASH), '-e', str(script)], cwd=root, env=env,  # nosec: B603
-                                    capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(bash_argv('-e', str(script), executable=str(BASH)),  # nosec: B603
+                                    cwd=root, env=env, capture_output=True, text=True, check=False, timeout=60)
             return result, (root / 'platform-pins.log').read_text(encoding='utf-8')
 
     def test_the_log_keeps_the_annotations(self) -> None:
@@ -301,8 +302,8 @@ class _ReportStep(unittest.TestCase):
         self.output.write_text('', encoding='utf-8')
         env = dict(env, PATH=f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', RUNNER_TEMP=str(self.temp),
                    GITHUB_OUTPUT=str(self.output))
-        result = subprocess.run([str(BASH), '-e', str(self.script)], cwd=self.work, env=env,  # nosec: B603
-                                capture_output=True, text=True, check=False, timeout=60)
+        result = subprocess.run(bash_argv('-e', str(self.script), executable=str(BASH)),  # nosec: B603
+                                cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         text = (self.temp / self.file).read_text(encoding='utf-8')
         self.assertEqual(result.stdout, text)
@@ -487,8 +488,8 @@ class TestThePostSteps(unittest.TestCase):
         script.write_text(step(name, 'discussion', 'Post the report to Discussions')['run'], encoding='utf-8')
         env = dict(env, PATH=f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', FAKE_PYTHON_LOG=str(self.log),
                    REPORT_CATEGORY=CATEGORY)
-        result = subprocess.run([str(BASH), '-e', str(script)], cwd=work, env=env,  # nosec: B603
-                                capture_output=True, text=True, check=False, timeout=60)
+        result = subprocess.run(bash_argv('-e', str(script), executable=str(BASH)),  # nosec: B603
+                                cwd=work, env=env, capture_output=True, text=True, check=False, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         logged = json.loads(self.log.read_text(encoding='utf-8'))
         args = logged['args']

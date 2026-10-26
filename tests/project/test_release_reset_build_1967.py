@@ -36,6 +36,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
 
@@ -389,7 +390,7 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
     def reference(self, build: 'Callable[[Scratch], str]', env: 'dict[str, Optional[str]]') -> 'tuple[object, ...]':
         """The inline shell form as a step runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         scratch, run = self.scratch(build)
-        result = subprocess.run([BASH, '-e', str(self.shell)], cwd=scratch.work,  # nosec: B603
+        result = subprocess.run(bash_argv('-e', str(self.shell), executable=BASH), cwd=scratch.work,  # nosec: B603
                                 env=self.environ(scratch, run, env), capture_output=True, text=True,
                                 check=False, timeout=120)
         result.stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', result.stderr)

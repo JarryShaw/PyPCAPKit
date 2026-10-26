@@ -48,6 +48,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests.project.test_python_versions_1660 import live_outputs
 
 if TYPE_CHECKING:
@@ -121,7 +122,7 @@ class TestRequiredChecksSkips(unittest.TestCase):
         results.update(override)
         env = dict(os.environ, CHANGES=changes, CODE=code, TEST_ONLY=test_only, PROJECT_TESTS=project,
                    **results)
-        return subprocess.run(['bash', '-c', self.script], env=env, check=False,
+        return subprocess.run(bash_argv('-c', self.script), env=env, check=False,
                               capture_output=True, text=True).returncode
 
     def test_needs_every_leg_and_the_docs_only_helpers(self) -> None:
@@ -408,7 +409,7 @@ def step_cap(section: 'str', name: 'str') -> 'int':
 
 def bash(script: 'str', env: 'dict[str, str]', cwd: 'Optional[str]' = None) -> 'int':
     """Run ``script`` under ``bash -e`` (GitHub's default shell) and return its status."""
-    return subprocess.run(['bash', '-e', '-c', script], env=dict(os.environ, **env), cwd=cwd,
+    return subprocess.run(bash_argv('-e', '-c', script), env=dict(os.environ, **env), cwd=cwd,
                           check=False, capture_output=True, text=True).returncode
 
 

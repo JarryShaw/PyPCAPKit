@@ -33,6 +33,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from tests._support import bash_argv
 from tests.project.test_resource_monitor_1740 import DEFAULT, TESTS, sh, step
 
 if TYPE_CHECKING:
@@ -165,7 +166,8 @@ class TestTheTestsStepRunsGNUs(unittest.TestCase):
 
     def resolve(self, path: 'str') -> 'str':
         # bash by its own path, since ``path`` holds the stubs alone.
-        result = sh(RESOLVE + 'echo "$gnu_timeout"\n', {'PATH': path}, (str(shutil.which('bash')), '-e'))
+        result = sh(RESOLVE + 'echo "$gnu_timeout"\n', {'PATH': path},
+                    tuple(bash_argv('-e', executable=str(shutil.which('bash')))))
         self.assertEqual(result.returncode, 0, result.stderr)
         return result.stdout.strip()
 

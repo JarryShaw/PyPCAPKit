@@ -52,6 +52,7 @@ import unittest
 import unittest.mock
 from typing import TYPE_CHECKING, NamedTuple
 
+from tests._support import bash_argv
 from tests.project.test_python_matrix_tiers_1633 import (EXPERIMENTAL_GUARD, EXPERIMENTAL_JOB, KTLO_GUARD,
                                                          KTLO_LEGS, LEG_KTLO, TITLE_KTLO, annotation_level,
                                                          is_experimental, is_ktlo, is_nonblocking, job,
@@ -392,7 +393,7 @@ def run_summary(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedPr
 
 def bash(script: 'str', env: 'dict[str, str]', cwd: 'pathlib.Path') -> 'subprocess.CompletedProcess[str]':
     """``script`` as ``shell: bash`` runs it."""
-    return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', script],
+    return subprocess.run(bash_argv('-eo', 'pipefail', '-c', script),
                           env=dict(os.environ, **env), cwd=cwd, capture_output=True, text=True,
                           check=False, timeout=60)
 
@@ -608,7 +609,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(written.returncode, 0, written.stderr)
         if level is not None:
             env['ANNOTATION_LEVEL'] = level
-        return subprocess.run(['bash', str(self.tmp / 'engine-cell.sh'), py],
+        return subprocess.run(bash_argv(str(self.tmp / 'engine-cell.sh'), py),
                               env=dict({k: v for k, v in os.environ.items() if k != 'ANNOTATION_LEVEL'}, **env),
                               cwd=self.tmp, capture_output=True, text=True, check=False, timeout=60)
 

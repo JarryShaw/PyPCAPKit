@@ -43,6 +43,7 @@ import unittest
 import unittest.mock
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, pinned
 from tests.project.test_discussion_report_2030 import (CATEGORY, MARKER,
                                                        _FakeGitHub)
@@ -206,7 +207,7 @@ def run_step(name: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]',
     """Step ``name``'s ``run:`` as a bash step runs it."""
     script = cwd.parent / 'step.sh'
     script.write_text(named(name, workflow)['run'], encoding='utf-8')
-    return subprocess.run([str(BASH), '--noprofile', '--norc', '-eo', 'pipefail', str(script)],  # nosec: B603
+    return subprocess.run(bash_argv('-eo', 'pipefail', str(script), executable=str(BASH)),  # nosec: B603
                           cwd=cwd, env=env, capture_output=True, text=True, check=False, timeout=120)
 
 
@@ -439,7 +440,7 @@ class TestTheJobSummaries(unittest.TestCase):
             temp = pathlib.Path(tmp)
             for text in ('', '| table |\n'):
                 (temp / 'job-summary.md').write_text(text, encoding='utf-8')
-                result = subprocess.run([str(BASH), '--noprofile', '--norc', '-eo', 'pipefail', '-c', save['run']],
+                result = subprocess.run(bash_argv('-eo', 'pipefail', '-c', save['run'], executable=str(BASH)),
                                         env={'RUNNER_TEMP': tmp, 'JOB_NAME': 'Python 3.8 (KTLO)',
                                              'PATH': os.environ.get('PATH', '')},
                                         capture_output=True, text=True, check=False, timeout=60)

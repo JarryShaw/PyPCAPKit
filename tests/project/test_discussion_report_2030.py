@@ -36,6 +36,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, pinned
 from tests.project.test_release_gates import STATUS, job_blocks, job_runs
 
@@ -722,8 +723,8 @@ class TestTheVendorPostStep(unittest.TestCase):
         env = {'PATH': f'{self.bin}{os.pathsep}{os.environ.get("PATH", "")}', 'FAKE_PYTHON_LOG': str(self.log),
                'REPORT_CATEGORY': CATEGORY, 'MODE': 'scheduled', 'HEAD_RESULT': head, 'VENDOR_RESULT': vendor,
                'VENDOR_STATUS': status}
-        result = subprocess.run([str(BASH), '-e', str(self.script)], cwd=self.work, env=env,  # nosec: B603
-                                capture_output=True, text=True, check=False, timeout=60)
+        result = subprocess.run(bash_argv('-e', str(self.script), executable=str(BASH)),  # nosec: B603
+                                cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         logged = json.loads(self.log.read_text(encoding='utf-8'))
         args = logged['args']
@@ -789,7 +790,7 @@ class TestTheVendorReport(unittest.TestCase):
         """The report, and the ``status`` the step wrote to ``GITHUB_OUTPUT``."""
         (self.temp / 'vendor-stderr.log').write_text(stderr, encoding='utf-8')
         self.output.write_text('', encoding='utf-8')
-        result = subprocess.run([str(BASH), '-e', str(self.script)], cwd=self.repo,  # nosec: B603
+        result = subprocess.run(bash_argv('-e', str(self.script), executable=str(BASH)), cwd=self.repo,  # nosec: B603
                                 env=dict(self.env, **env), capture_output=True, text=True, check=False,
                                 timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

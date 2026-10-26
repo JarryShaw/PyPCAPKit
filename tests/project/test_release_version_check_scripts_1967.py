@@ -39,6 +39,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import load, steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
 
@@ -58,7 +59,8 @@ def bash_version() -> 'str':
     """The ``bash`` on ``PATH``'s ``major.minor``, or ``''``."""
     if not BASH:
         return ''
-    found = subprocess.run([BASH, '-c', 'echo "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'],  # nosec: B603
+    probe = 'echo "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'
+    found = subprocess.run(bash_argv('-c', probe, executable=BASH),  # nosec: B603
                            capture_output=True, text=True, check=False, timeout=30)
     return found.stdout.strip()
 
@@ -576,7 +578,7 @@ class _Stand(unittest.TestCase):
         self.shell.write_text(shell.replace('/tmp/pypi_release.json', str(self.tmp / 'release.json'))
                               .replace('/tmp/anaconda_release.json', str(self.tmp / 'release.json')),
                               encoding='utf-8')
-        found = self.state([BASH, '-e', str(self.shell)], env, reply, git)
+        found = self.state(bash_argv('-e', str(self.shell), executable=BASH), env, reply, git)
         stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', str(found[2]))
         if not BASH_52:
             # Bash 5.3 shortened ``[``'s message; 5.2, the runner's, is the one kept.

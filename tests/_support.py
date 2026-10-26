@@ -1205,3 +1205,27 @@ def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) ->
         if time.monotonic() >= deadline:
             return False
         time.sleep(0.05)
+
+
+#: Flags every ``bash`` a test starts is run with, as GitHub Actions runs a
+#: ``shell: bash`` step (#2306). Without them, a ``bash -c`` whose parent is a
+#: top-level shell sources :file:`~/.bashrc` when ``SSH_CLIENT`` is set or its
+#: stdin is a socket, and that file's output and ``PATH`` leak into the step under
+#: test. A stdin of :data:`subprocess.DEVNULL` does not help: ``SSH_CLIENT`` alone
+#: is enough.
+BASH_STARTUP = ('--noprofile', '--norc')
+
+
+def bash_argv(*args: str, executable: str = 'bash') -> 'list[str]':
+    """The argv running ``bash`` with ``args`` and no startup files.
+
+    Args:
+        *args: What follows :data:`BASH_STARTUP`, such as ``'-e', '-c', script``.
+        executable: The ``bash`` to run, such as a path :func:`shutil.which`
+            resolved.
+
+    Returns:
+        ``executable``, then :data:`BASH_STARTUP`, then ``args``.
+
+    """
+    return [executable, *BASH_STARTUP, *args]

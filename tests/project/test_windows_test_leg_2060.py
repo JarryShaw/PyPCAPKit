@@ -40,6 +40,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from tests._support import bash_argv
 from tests.project.test_ktlo_legs_stay_green_1672 import (EXPERIMENTAL_REASON, JOB_SUMMARY_STEPS, KTLO_COMMANDS,
                                                           SUMMARY_COPY, commands, interpolate, label, scenarios)
 from tests.project.test_python_versions_1660 import live_outputs, prose, resolve
@@ -102,7 +103,7 @@ def bash(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[s
     """``script`` as ``shell: bash`` runs it, from the root."""
     full = dict(os.environ, **env)
     full.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
-    return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', script],  # nosec: B603 B607
+    return subprocess.run(bash_argv('-eo', 'pipefail', '-c', script),  # nosec: B603 B607
                           env=full, cwd=ROOT, capture_output=True, text=True, check=False, timeout=120)
 
 

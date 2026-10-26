@@ -42,6 +42,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS
 from tests.project.test_build_only_dispatch import MARKERS
 from tests.project.test_cron_reports_2030 import _ReportStep
@@ -159,8 +160,8 @@ class TestTheModeJob(unittest.TestCase):
         self.output.write_text('', encoding='utf-8')
         env = {'PATH': os.environ.get('PATH', ''), 'GITHUB_OUTPUT': str(self.output),
                'GITHUB_EVENT_NAME': event_name, 'GITHUB_REF': ref, 'PUBLISH': publish}
-        result = subprocess.run([str(BASH), '-e', str(self.script)], cwd=self.tmp, env=env,  # nosec: B603
-                                capture_output=True, text=True, check=False, timeout=60)
+        result = subprocess.run(bash_argv('-e', str(self.script), executable=str(BASH)),  # nosec: B603
+                                cwd=self.tmp, env=env, capture_output=True, text=True, check=False, timeout=60)
         return result.returncode, self.output.read_text(encoding='utf-8'), result.stdout
 
     def test_every_other_event_publishes(self) -> None:
@@ -314,8 +315,8 @@ class TestTheBumpIsForced(unittest.TestCase):
                 output.write_text('', encoding='utf-8')
                 env = {'PATH': os.environ.get('PATH', ''), 'GITHUB_OUTPUT': str(output),
                        'FILES_CHANGED': files_changed, 'FORCED': forced}
-                result = subprocess.run([str(BASH), '-e', '-c', script], cwd=tmp, env=env,  # nosec: B603
-                                        capture_output=True, text=True, check=False, timeout=60)
+                result = subprocess.run(bash_argv('-e', '-c', script, executable=str(BASH)),  # nosec: B603
+                                        cwd=tmp, env=env, capture_output=True, text=True, check=False, timeout=60)
                 with self.subTest(files_changed=files_changed, forced=forced):
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(output.read_text(encoding='utf-8'), f'bump={expected}\nforced={forced}\n')

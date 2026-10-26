@@ -43,6 +43,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _tiers
+from tests._support import bash_argv
 from tests.project.test_graalpy_shards_1963 import rest_ignores
 from tests.project.test_python_matrix_tiers_1633 import REQUIRED, is_experimental, job, legs, workflow
 from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose
@@ -154,7 +155,7 @@ def run_step_each(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB,
         env.setdefault('ANNOTATION_LEVEL', 'error')
         env.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
         # From the root, as the runner runs it: the steps import tests/_tiers.py.
-        result = subprocess.run(['bash', '-e', '-c', script or step(where)['run']], env=env,  # nosec B603 B607
+        result = subprocess.run(bash_argv('-e', '-c', script or step(where)['run']), env=env,  # nosec B603 B607
                                 cwd=ROOT, capture_output=True, text=True, check=False, timeout=120)
         if result.returncode:
             raise AssertionError(f'the step failed on {leg}: {result.stdout[-2000:]}{result.stderr[-2000:]}')

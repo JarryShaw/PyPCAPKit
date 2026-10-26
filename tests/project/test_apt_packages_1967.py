@@ -38,6 +38,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, steps
 from tests.project.test_ktlo_legs_stay_green_1672 import KTLO_COMMANDS, commands
 from tests.project.test_unit_tests_queue import IMAGE_PYTHON
@@ -610,7 +611,7 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
         for text in (shell, script):
             self.reset()
             prepare()
-            result = subprocess.run(['bash', '-e', '-c', text], cwd=ROOT, env=self.env(**env),  # nosec: B603
+            result = subprocess.run(bash_argv('-e', '-c', text), cwd=ROOT, env=self.env(**env),  # nosec: B603
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=120)
             found.append((result.returncode, result.stdout.decode('utf-8', 'replace'), *self.state()))
         return found[0], found[1]
@@ -676,7 +677,7 @@ class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
                 with self.subTest(job=job, restored=prepare is restored):
                     self.reset()
                     prepare()
-                    result = subprocess.run(['bash', '-e', '-c', script], cwd=ROOT, env=self.env(),  # nosec: B603
+                    result = subprocess.run(bash_argv('-e', '-c', script), cwd=ROOT, env=self.env(),  # nosec: B603
                                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
                                             timeout=120)
                     output = result.stdout.decode('utf-8', 'replace')

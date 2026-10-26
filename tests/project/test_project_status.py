@@ -46,6 +46,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from tests._support import bash_argv
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PROCESS_RST = ROOT / 'docs' / 'source' / 'contributing' / 'conventions' / 'process.rst'
 WORKFLOW = ROOT / '.github' / 'workflows' / 'project-status.yml'
@@ -890,7 +892,7 @@ class TestTheStepRunsTheFetchedScript(unittest.TestCase):
                         GITHUB_REPOSITORY='JarryShaw/PyPCAPKit', RUNNER_TEMP=str(self.temp))
 
     def test_both_files_are_fetched_and_the_import_finds_the_helper(self) -> None:
-        result = subprocess.run(['bash', '-e', '-c', self.script], cwd=self.tmp, env=self.env,  # nosec B603 B607
+        result = subprocess.run(bash_argv('-e', '-c', self.script), cwd=self.tmp, env=self.env,  # nosec B603 B607
                                 capture_output=True, text=True, check=False, timeout=60)
         # The board cannot be read here, so the run ends there: after the import.
         self.assertNotIn('ModuleNotFoundError', result.stderr)

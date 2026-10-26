@@ -24,6 +24,7 @@ import tempfile
 import textwrap
 import unittest
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, job, load, steps
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -186,7 +187,7 @@ class TestTheStepMatchesTheReferenceShell(_Scratch):
             python.symlink_to(sys.executable)
         env = self.env(level)
         env['PATH'] = f'{bin_dir}{os.pathsep}{env.get("PATH", "")}'
-        return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', REFERENCE_SHELL],  # nosec
+        return subprocess.run(bash_argv('-eo', 'pipefail', '-c', REFERENCE_SHELL),  # nosec
                               cwd=self.tmp, env=env, capture_output=True, text=True, check=False, timeout=120)
 
     def test_every_outcome_matches(self) -> None:

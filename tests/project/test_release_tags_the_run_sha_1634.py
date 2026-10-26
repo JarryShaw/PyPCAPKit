@@ -71,7 +71,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 from tests.project import test_release_gates as gates
 from tests.project.test_release_gates import (declared_environment, declared_if, evaluate_condition,
                                               evaluate_expression, job_blocks, strip_comments)
@@ -784,7 +784,7 @@ class ScratchRepository(WorkflowMixin, unittest.TestCase):
             step_env = dict(self.env, **env)
             if path is not None:
                 step_env['PATH'] = path + os.pathsep + step_env['PATH']
-            command = script_command(self.step(job, name)['run']) or [BASH, '-e', str(script)]
+            command = script_command(self.step(job, name)['run']) or bash_argv('-e', str(script), executable=BASH)
             result = subprocess.run(command, cwd=self.work, env=step_env,
                                     capture_output=True, text=True, check=False,
                                     timeout=scale_timeout(60))
@@ -1251,7 +1251,7 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         env = dict(self.env, REPLY=str(self.tmp / 'reply.json'), PCAPKIT_VERSION=self.VERSION,
                    PCAPKIT_PYPI_WHEELS=wheels, PCAPKIT_CONDA_BUILDS=builds, PCAPKIT_TAG_EXISTS='false')
         # #1967: ``python3 util/release_published.py ...``, on this interpreter.
-        command = script_command(script) or [BASH, '-e', str(self.tmp / 'check.sh')]
+        command = script_command(script) or bash_argv('-e', str(self.tmp / 'check.sh'), executable=BASH)
         result = subprocess.run(command, cwd=self.tmp, env=env, capture_output=True,
                                 text=True, check=False, timeout=scale_timeout(60))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -1468,8 +1468,9 @@ class TestTheRefusalExplanation(WorkflowMixin, unittest.TestCase):
         tmp = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-1634-explain-'))
         self.addCleanup(shutil.rmtree, tmp, True)
         (tmp / 'step.sh').write_text(step['run'])
-        result = subprocess.run([BASH, '-e', str(tmp / 'step.sh')], env=dict(env, PATH=os.environ.get('PATH', '')),
-                                capture_output=True, text=True, check=False, timeout=scale_timeout(30))
+        result = subprocess.run(bash_argv('-e', str(tmp / 'step.sh'), executable=BASH),
+                                env=dict(env, PATH=os.environ.get('PATH', '')), capture_output=True, text=True,
+                                check=False, timeout=scale_timeout(30))
         self.assertEqual(result.returncode, 0, result.stderr)
         lines = result.stdout.splitlines()
         self.assertEqual(len(lines), 1, lines)
@@ -1583,7 +1584,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
             'LC_ALL': 'C', 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit',
             'GH_ASSETS': str(self.assets), 'GH_LOG': str(self.log),
         })
-        command = script_command(step['run']) or [BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(script)]
+        command = script_command(step['run']) or bash_argv('-eo', 'pipefail', str(script), executable=BASH)
         return subprocess.run(command,
                               cwd=self.work, env=env, capture_output=True, text=True, check=False,
                               timeout=scale_timeout(60))
@@ -1811,7 +1812,7 @@ class TestTheReleaseCheckScript(CondaDistMixin, unittest.TestCase):
             'TMPDIR': str(self.tmp), 'LC_ALL': 'C', 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit',
             'GITHUB_OUTPUT': str(self.output), 'GH_ASSETS': str(self.assets), 'GH_LOG': str(self.log),
         })
-        result = subprocess.run([BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(script)],
+        result = subprocess.run(bash_argv('-eo', 'pipefail', str(script), executable=BASH),
                                 cwd=self.tmp, env=env, capture_output=True, text=True, check=False,
                                 timeout=scale_timeout(60))
         lines = self.output.read_text().splitlines() if self.output.exists() else []

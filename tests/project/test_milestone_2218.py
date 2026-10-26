@@ -36,6 +36,7 @@ import unittest
 from unittest import mock
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import job, load, pinned, steps
 from tests.project.test_project_status import (evaluate_expression, expression_spliced, payload_outside_env,
                                                scan, strip_comments, yaml_pairs)
@@ -592,7 +593,7 @@ class TestTheStep(unittest.TestCase):
 
     def run_step(self, item: 'str', dry_run: 'str') -> 'str':
         env = {'PATH': f'{self.tmp}{os.pathsep}{os.environ.get("PATH", "")}', 'ITEM': item, 'DRY_RUN': dry_run}
-        result = subprocess.run(['bash', '-e', '-c', self.script], cwd=self.tmp, env=env,  # nosec B603 B607
+        result = subprocess.run(bash_argv('-e', '-c', self.script), cwd=self.tmp, env=env,  # nosec B603 B607
                                 capture_output=True, text=True, check=True, timeout=60)
         return result.stdout.strip()
 

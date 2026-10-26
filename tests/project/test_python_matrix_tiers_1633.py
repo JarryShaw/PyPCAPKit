@@ -51,6 +51,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests.project.test_python_versions_1660 import legs as expand
 from tests.project.test_python_versions_1660 import matrix, resolve, setups, workflow
 from tests.project.test_python_versions_1660 import script as versions_script
@@ -233,7 +234,7 @@ def leg_label(leg: 'dict[str, Any]') -> 'str':
 
 def bash(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
     """``script`` under ``bash -e``, GitHub's default shell, with ``env`` added."""
-    return subprocess.run(['bash', '-e', '-c', script], env=dict(os.environ, **env),
+    return subprocess.run(bash_argv('-e', '-c', script), env=dict(os.environ, **env),
                           capture_output=True, text=True, check=False, timeout=60)
 
 
@@ -603,7 +604,7 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
         spec = job(name, job_id)
         step = next(step for step in spec['steps'] if step.get('name') == step_name)
         self.assertIn(step.get('shell'), ('bash', None))
-        flags = ['--noprofile', '--norc', '-eo', 'pipefail'] if step.get('shell') == 'bash' else ['-e']
+        flags = ['-eo', 'pipefail'] if step.get('shell') == 'bash' else ['-e']
         self.assertEqual(step['env']['LEG'], leg_template(name, job_id))
         self.assertEqual(spec['env']['ANNOTATION_LEVEL'], annotation_level(name, job_id))
         env = dict(env, LEG=leg_label(leg), ANNOTATION_LEVEL='warning' if is_nonblocking(leg) else 'error')
@@ -621,7 +622,7 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
         else:
             python.write_text('#!/bin/bash\n' + stub, encoding='utf-8')
             python.chmod(0o755)
-        return subprocess.run(['bash', *flags, '-c', step['run']],
+        return subprocess.run(bash_argv(*flags, '-c', step['run']),
                               env=dict(os.environ, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
                                        RUNNER_TEMP=str(self.tmp), **env),
                               cwd=ROOT, capture_output=True, text=True, check=False, timeout=60)

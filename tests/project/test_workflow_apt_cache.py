@@ -38,6 +38,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from tests._support import bash_argv
 from tests.project.test_python_versions_1660 import ROOT, legs, matrix
 from tests.project.test_unit_tests_queue import checkout_script, job, step_script
 from util.apt_packages import MIRRORS as MIRRORS_DEFAULT
@@ -121,7 +122,7 @@ class _Stubbed(unittest.TestCase):
         full = dict(os.environ, **env, PATH=f'{self.bin}{os.pathsep}{os.environ["PATH"]}',
                     STUB_LOG=str(self.log))
         script = checkout_script(script, mirrors or self.tmp / 'no-mirror-list')
-        proc = subprocess.run(['bash', '-e', '-c', script], env=full, check=False, cwd=ROOT,
+        proc = subprocess.run(bash_argv('-e', '-c', script), env=full, check=False, cwd=ROOT,
                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         return proc.returncode, proc.stdout
 

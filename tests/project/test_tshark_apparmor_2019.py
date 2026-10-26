@@ -22,6 +22,7 @@ import subprocess  # nosec: B404
 import tempfile
 import unittest
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, steps
 
 WORKFLOW = 'unit-tests.yml'
@@ -131,7 +132,7 @@ class TestTheStepRuns(unittest.TestCase):
         script = script.replace(APPARMOR, str(self.etc))
         env = dict(os.environ, PATH=f'{self.bin}{os.pathsep}{os.environ["PATH"]}',
                    STUB_LOG=str(self.log), GITHUB_WORKSPACE=self.workspace)
-        return subprocess.run(['bash', '-e', '-c', script], env=env, check=False,
+        return subprocess.run(bash_argv('-e', '-c', script), env=env, check=False,
                               capture_output=True, text=True).returncode
 
     def parser_calls(self) -> 'list[str]':

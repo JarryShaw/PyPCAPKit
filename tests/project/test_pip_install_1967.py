@@ -35,6 +35,7 @@ import textwrap
 import unittest
 
 from tests._dependency_gates import EDITABLE_INSTALL
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, job, load, steps
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -322,8 +323,8 @@ class TestTheStepMatchesTheReferenceShell(_Scratch):
         if not python.exists():
             python.symlink_to(sys.executable)  # the leg's `python`; here, this interpreter
         env = dict(env, PATH=f'{bin_dir}{os.pathsep}{env.get("PATH", "")}')
-        command = (['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', shell] if shell is REFERENCE_ANNOTATED
-                   else ['bash', '-e', '-c', shell])
+        command = (bash_argv('-eo', 'pipefail', '-c', shell) if shell is REFERENCE_ANNOTATED
+                   else bash_argv('-e', '-c', shell))
         return subprocess.run(command, cwd=self.tmp, env=env,  # nosec: B603
                               capture_output=True, text=True, check=False, timeout=120)
 

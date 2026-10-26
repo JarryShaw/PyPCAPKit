@@ -32,6 +32,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import job, steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
 from util import release_conda
@@ -381,7 +382,7 @@ class _Stand(unittest.TestCase):
         self.shell.write_text(shell.replace('/tmp/anaconda_release.json', str(self.release))
                               .replace('${{ matrix.os }}', label)
                               .replace('${{ matrix.python-version }}', python), encoding='utf-8')
-        result = subprocess.run([BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(self.shell)],  # nosec: B603
+        result = subprocess.run(bash_argv('-eo', 'pipefail', str(self.shell), executable=BASH),  # nosec: B603
                                 cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=120)
         result.stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', result.stderr)
         return self.state(result)

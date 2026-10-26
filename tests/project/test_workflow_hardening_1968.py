@@ -27,7 +27,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 from tests.project.test_release_gates import STATUS, job_blocks, job_runs
 
 try:
@@ -154,7 +154,7 @@ class TestTheChangedFilesStep(unittest.TestCase):
         script.write_text(step(*CHANGED_FILES_JOBS[0])['run'], encoding='utf-8')
         output = self.root / 'step.output'
         output.write_text('', encoding='utf-8')
-        result = subprocess.run(['bash', '-e', str(script)], cwd=self.repo,
+        result = subprocess.run(bash_argv('-e', str(script)), cwd=self.repo,
                                 env=dict(self.env, GITHUB_OUTPUT=str(output)),
                                 capture_output=True, text=True, check=False, timeout=scale_timeout(60))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -342,7 +342,7 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
         env = {'PATH': f'{self.root / "bin"}{os.pathsep}{os.environ.get("PATH", "")}', 'LC_ALL': 'C',
                'GITHUB_SHA': OURS, 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit', 'GITHUB_OUTPUT': str(output),
                'STUB_LOG': str(log), 'STUB_MESSAGE': message, 'STUB_STATUS': status, **flags}
-        result = subprocess.run(['bash', '-e', str(script)], cwd=self.root, env=env, capture_output=True,
+        result = subprocess.run(bash_argv('-e', str(script)), cwd=self.root, env=env, capture_output=True,
                                 text=True, check=False, timeout=scale_timeout(30))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         outputs = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').splitlines())

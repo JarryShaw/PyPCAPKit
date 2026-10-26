@@ -41,6 +41,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import load, steps
 from tests.project.test_release_gates import job_blocks
 from tests.project.test_requires_python_floor_2051 import FLOOR
@@ -457,7 +458,7 @@ class _Stand(unittest.TestCase):
     def reference(self, shell: 'str', env: 'dict[str, str]', reply: 'bytes' = b'') -> 'tuple[object, ...]':
         """``shell`` as a step with no ``shell:`` runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         self.shell.write_text(shell, encoding='utf-8')
-        found = self.state([BASH, '-e', str(self.shell)], env, reply)
+        found = self.state(bash_argv('-e', str(self.shell), executable=BASH), env, reply)
         stderr = re.sub(rf'(?m)^{re.escape(str(self.shell))}: line \d+: ', '', str(found[2]))
         return (*found[:2], stderr, *found[3:])
 

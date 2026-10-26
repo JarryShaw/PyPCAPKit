@@ -31,6 +31,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import load, steps
 from tests.project.test_requires_python_floor_2051 import FLOOR
 
@@ -277,7 +278,7 @@ class _Stand(unittest.TestCase):
         """``shell`` as ``shell: bash`` runs it, ``bash --noprofile --norc -eo pipefail``."""
         script = self.tmp / 'step.sh'
         script.write_text(shell, encoding='utf-8')
-        return subprocess.run([BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(script)],  # nosec: B603
+        return subprocess.run(bash_argv('-eo', 'pipefail', str(script), executable=BASH),  # nosec: B603
                               cwd=self.work, env=env, capture_output=True, text=True, check=False, timeout=120)
 
     def state(self, result: 'subprocess.CompletedProcess[str]') -> 'tuple[object, ...]':

@@ -32,6 +32,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, load, pinned
 from tests.project.test_discussion_report_2030 import (BASH, CATEGORY, FAKE_PYTHON, MARKER, RUN, SCRIPT,
                                                        _FakeGitHub, evaluate)
@@ -64,7 +65,7 @@ def run_step(name: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]') -> 'subpro
     """Step ``name``'s ``run:`` as a bash step runs it."""
     script = cwd.parent / 'step.sh'
     script.write_text(named(name)['run'], encoding='utf-8')
-    return subprocess.run([str(BASH), '--noprofile', '--norc', '-eo', 'pipefail', str(script)],  # nosec: B603
+    return subprocess.run(bash_argv('-eo', 'pipefail', str(script), executable=str(BASH)),  # nosec: B603
                           cwd=cwd, env=env, capture_output=True, text=True, check=False, timeout=120)
 
 

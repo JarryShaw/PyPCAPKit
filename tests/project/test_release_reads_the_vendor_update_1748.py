@@ -30,7 +30,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 from tests.project.test_release_gates import (NULL, WORKFLOW, declared_if, declared_needs,
                                               evaluate_condition, job_blocks, release_context)
 from tests.project.test_release_tags_the_run_sha_1634 import workflow_steps
@@ -142,7 +142,7 @@ class TestTheScript(unittest.TestCase):
             'REPLY': str(self.tmp / 'reply.json'), 'ARGS': str(self.tmp / 'args'),
             'GH_FAIL': '1' if fail else '',
         }
-        result = subprocess.run(['bash', '-e', str(self.tmp / 'step.sh')], cwd=self.tmp, env=env,
+        result = subprocess.run(bash_argv('-e', str(self.tmp / 'step.sh')), cwd=self.tmp, env=env,
                                 capture_output=True, text=True, check=False, timeout=scale_timeout(30))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result, output.read_text(encoding='utf-8')

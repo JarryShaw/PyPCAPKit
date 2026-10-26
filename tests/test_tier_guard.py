@@ -52,6 +52,7 @@ import unittest
 import unittest.mock
 
 from tests import _dependency_gates, _tiers, conftest as _conftest
+from tests._support import bash_argv
 
 #: Test tier (#1958): tests/conftest.py runs this guard at collection on every leg,
 #: with that leg's own ast module.
@@ -384,7 +385,7 @@ def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
         full = dict(os.environ, **env, ARGS_FILE=str(record), RUNNER_TEMP=temp, REAL_PYTHON=sys.executable,
                     PATH=temp + os.pathsep + os.environ.get('PATH', ''))
         full.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
-        result = subprocess.run([BASH, '-e', '-c', script], env=full, cwd=str(_tiers.ROOT),
+        result = subprocess.run(bash_argv('-e', '-c', script, executable=BASH), env=full, cwd=str(_tiers.ROOT),
                                 capture_output=True, text=True, check=False, timeout=120)
         if result.returncode:
             raise AssertionError(f'the step failed: {result.stdout[-1000:]}{result.stderr[-1000:]}')

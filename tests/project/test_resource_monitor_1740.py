@@ -32,6 +32,7 @@ import time
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests.project.test_python_matrix_tiers_1633 import job, legs, workflow, workflow_commands
 from tests.project.test_python_versions_1660 import ROOT, prose
 
@@ -139,8 +140,8 @@ def gnu_timeout(env: 'dict[str, str]') -> 'str | None':
     return shutil.which('gnutimeout', path=env['PATH']) or shutil.which('timeout', path=env['PATH'])
 
 
-BASH = ('bash', '--noprofile', '--norc', '-eo', 'pipefail')
-DEFAULT = ('bash', '-e')
+BASH = tuple(bash_argv('-eo', 'pipefail'))
+DEFAULT = tuple(bash_argv('-e'))
 
 
 @unittest.skipUnless(sys.platform.startswith('linux') and all(map(shutil.which, ('bash', 'free', 'tail', 'ps'))),

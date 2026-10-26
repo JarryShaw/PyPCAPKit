@@ -22,6 +22,7 @@ import tempfile
 import unittest
 
 from tests import _tiers
+from tests._support import bash_argv
 from tests.project.test_python_matrix_tiers_1633 import job, legs
 from tests.project.test_python_versions_1660 import ROOT, prose
 from tests.project.test_sweeps_on_latest_only_1732 import (JOB, RUNNER_TEMP, run_step_each, shards, step,
@@ -101,7 +102,7 @@ class TestTheRunsCoverTheTier(unittest.TestCase):
                        REAL_PYTHON=sys.executable, ANNOTATION_LEVEL='error',
                        PATH=temp + os.pathsep + os.environ.get('PATH', ''))
             env.pop('PYTHONSAFEPATH', None)
-            result = subprocess.run(['bash', '-e', '-c', step()['run']], env=env, cwd=ROOT,  # nosec B603 B607
+            result = subprocess.run(bash_argv('-e', '-c', step()['run']), env=env, cwd=ROOT,  # nosec B603 B607
                                     capture_output=True, text=True, check=False, timeout=120)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
             self.assertEqual(runs.read_text(encoding='utf-8').count('run'), len(SHARDS) + 1)

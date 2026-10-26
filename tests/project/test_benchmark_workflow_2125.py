@@ -37,6 +37,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests._support import bash_argv
 from tests._workflows import WORKFLOWS, job, load, steps
 
 try:
@@ -59,7 +60,7 @@ VERSIONS_SCRIPT = ROOT / 'util' / 'python_versions.py'
 UPDATER = ROOT / 'util' / 'update_python_versions.py'
 BASH = shutil.which('bash')
 #: How ``shell: bash`` runs a step's script, ahead of the script.
-SHELL = [BASH or 'bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c']
+SHELL = bash_argv('-eo', 'pipefail', '-c', executable=BASH or 'bash')
 TITLE = 'benchmark: weekly engine benchmark report'
 INPUTS = {'runner', 'pythons', 'engines', 'rounds', 'repeats'}
 MEASURE = 'Run examples/benchmark/native.sh'

@@ -42,6 +42,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests._support import bash_argv
 from tests._workflows import job
 from tests.project.test_python_matrix_tiers_1633 import legs
 from tests.project.test_release_gates import evaluate_condition
@@ -127,7 +128,7 @@ def run_step(cwd: 'pathlib.Path', tmp: 'pathlib.Path') -> 'subprocess.CompletedP
     (bindir / 'python').symlink_to(sys.executable)
     env = dict(os.environ, PATH=f'{bindir}{os.pathsep}{os.environ["PATH"]}', RUNNER_TEMP=str(tmp),
                ANNOTATION_LEVEL='warning', LEG=LEG)
-    return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', step()['run']],
+    return subprocess.run(bash_argv('-eo', 'pipefail', '-c', step()['run']),
                           cwd=cwd, env=env, capture_output=True, text=True, check=False, timeout=60)
 
 

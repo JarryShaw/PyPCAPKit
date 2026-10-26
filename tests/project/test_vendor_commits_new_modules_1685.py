@@ -28,7 +28,7 @@ import subprocess
 import sys
 import unittest
 
-from tests._support import scale_timeout
+from tests._support import bash_argv, scale_timeout
 from tests.project.test_release_gates import (_RUN_LITERAL, NULL, block_scalar_after,
                                               evaluate_expression, step_block, step_mapping)
 from tests.project.test_vendor_comment_only_no_bump_1674 import (BOT, EDITS, HUMAN, MODULE, PATH,
@@ -104,7 +104,7 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
                         encoding='utf-8')
         output = self.root / 'verify.output'
         output.write_text('', encoding='utf-8')
-        result = subprocess.run(['bash', '-e', str(path)], cwd=self.repo,
+        result = subprocess.run(bash_argv('-e', str(path)), cwd=self.repo,
                                 env=dict(self.env, GITHUB_OUTPUT=str(output)),
                                 capture_output=True, text=True, check=False,
                                 timeout=scale_timeout(60))
@@ -154,7 +154,7 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
         path = self.root / 'step.sh'
         path.write_text(interpolate(block_scalar_after(block, _RUN_LITERAL), context), encoding='utf-8')
         # `bash -e {0}`, as for a `run:` with no `shell:`.
-        return subprocess.run(['bash', '-e', str(path)], cwd=self.repo, env=dict(self.env, **env),
+        return subprocess.run(bash_argv('-e', str(path)), cwd=self.repo, env=dict(self.env, **env),
                               capture_output=True, text=True, check=False,
                               timeout=scale_timeout(60))
 
