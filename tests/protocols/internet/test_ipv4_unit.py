@@ -1385,7 +1385,7 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(padded[-1].type, OptionNumber.EOOL)
 
         with self.assertRaises(ProtocolError):
-            proto._make_opt_ts(OptionNumber.TS, timestamp=None)
+            proto._make_opt_ts(OptionNumber.TS, timestamp='abc')  # type: ignore[arg-type]
         with self.assertRaises(ProtocolError):
             proto._make_opt_qs(OptionNumber.QS, func=99)
 

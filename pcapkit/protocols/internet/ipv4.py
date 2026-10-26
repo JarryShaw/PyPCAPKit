@@ -1700,7 +1700,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             timestamp: list of timestamps, i.e. the slots before the pointer, or
                 a mapping of the addresses to their timestamps; an address may
                 be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
-                accepts for IPv4
+                accepts for IPv4; :data:`None` is an empty list
             remaining: raw 32-bit words for the slots at or beyond the pointer;
                 the slots left over up to ``counts`` are zero
             **kwargs: arbitrary keyword arguments
@@ -1710,8 +1710,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Raises:
             ProtocolError: If ``option`` is not given and ``timestamp`` is
-                neither a :obj:`list` nor a :obj:`dict`, which includes the
-                default :data:`None`.
+                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`.
             FieldValueError: If an address is a :obj:`bool` or is not a valid
                 IPv4 address.
 
@@ -1748,6 +1747,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             ts_list = []
             remainder = b''
+            if timestamp is None:
+                timestamp = []
             if isinstance(timestamp, list):
                 flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
                 counts = min(9, counts)  # 9 is the maximum number of timestamps
@@ -1785,7 +1786,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                         flag = Enum_TSFlag.Prespecified_IP_with_Timestamp  # type: ignore[assignment]
                     ts_list.append(ts)
             else:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: {timestamp}')
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: '
+                                    f'must be a list or a dict, not {timestamp!r}')
             pointer = 5 + len(ts_list) * 4
 
             # NOTE: Every slot of the option is written, the empty ones as zero.

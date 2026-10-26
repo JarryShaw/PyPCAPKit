@@ -541,7 +541,8 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
         OptionNumber.LSR: {'counts': 9},
         OptionNumber.RR: {'counts': 9},
         OptionNumber.SSR: {'counts': 9},
-        # ``timestamp=None``, the default, is rejected outright.
+        # The default builds an option with no timestamp in it, which is
+        # degenerate; one is recorded.
         OptionNumber.TS: {'counts': 1, 'timestamp': [1]},
         OptionNumber.E_SEC: {'info': b'\x00'},
     }
