@@ -933,7 +933,7 @@ class Extractor(Generic[_P]):
                 self._exnam = 'default'  # using default/pcapkit engine
 
         if self._exnam not in ('default', 'pcapkit'):
-            warn(f'unsupported extraction engine: {self._exnam}; '
+            warn(f'unsupported extraction engine: {self._exnam!r}; '
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
             self._exnam = 'default'  # using default/pcapkit engine
         return None
@@ -1038,7 +1038,7 @@ class Extractor(Generic[_P]):
             entry = cls.__output__.get(fmt)
             registered = entry[1] if entry is not None else None
             if registered is None:
-                raise FormatError(f'unknown output format: {fmt}')
+                raise FormatError(f'unknown output format: {fmt!r}')
 
             # NOTE: ``__output__`` spells its extensions with the leading dot,
             # and so does every ``ext=`` handed to
@@ -1502,7 +1502,7 @@ class Extractor(Generic[_P]):
         if not self._flag_q:
             output, ext = self.__output__[fmt]
             if ext is None:
-                warn(f'Unsupported output format: {fmt}; disabled file output feature',
+                warn(f'unsupported output format: {fmt!r}; disabled file output feature',
                      FormatWarning, stacklevel=stacklevel())
             if isinstance(output, ModuleDescriptor):
                 output = output.klass

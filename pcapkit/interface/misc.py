@@ -122,7 +122,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     # all and disable TCP flow tracing outright, so ``extraction.trace`` below
     # would raise instead of yielding streams.
     if engine is not None and engine.lower() in ('pyshark', 'pypcap', 'pcap_ct'):
-        warn(f'unsupported extraction engine: {engine}; fallback to default engine',
+        warn(f'unsupported extraction engine: {engine!r}; using default engine instead',
              EngineWarning, stacklevel=stacklevel())
         engine = None
 
@@ -182,7 +182,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         # to the pcapkit adapter is exactly the #399 failure mode -- a wrong or empty
         # result indistinguishable from a real one -- so warn and return no streams
         # rather than reassemble frames whose shape we cannot parse.
-        warn(f'unsupported extraction engine for TCP stream following: {exeng.name}; '
+        warn(f'unsupported extraction engine for TCP stream following: {exeng.name!r}; '
              'returning no streams', EngineWarning, stacklevel=stacklevel())
         return ()
 
