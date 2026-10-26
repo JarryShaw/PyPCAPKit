@@ -1179,6 +1179,14 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_aps`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_aps`</span>
 
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       ``context`` returns the caller supplied</span>
+<span class="sd">       :class:`~pcapkit.corekit.context.ContextRegistry` inherited from</span>
+<span class="sd">       :class:`~pcapkit.protocols.protocol.ProtocolBase`, on every block. The</span>
+<span class="sd">       block's section ``Context``, which ``context`` returned through 1.4.x,</span>
+<span class="sd">       is :attr:`section_context` (:issue:`2172`).</span>
+
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1444,10 +1452,23 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Context'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Context of current PCAP-NG block."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">section_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Context'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Section context of current PCAP-NG block.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: On a Section Header Block, which has no section</span>
+<span class="sd">                context of its own.</span>
+
+<span class="sd">        .. versionadded:: 1.5.0</span>
+
+<span class="sd">           Renamed from ``context``, with no alias. ``context`` is the one</span>
+<span class="sd">           inherited from :class:`~pcapkit.protocols.protocol.ProtocolBase`,</span>
+<span class="sd">           the caller supplied parsing context of</span>
+<span class="sd">           :mod:`pcapkit.corekit.context` (:issue:`2172`).</span>
+
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'context'"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'section_context'"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span>
 
     <span class="nd">@property</span>

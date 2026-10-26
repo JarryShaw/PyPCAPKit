@@ -840,6 +840,13 @@ attribute:</p>
 </tbody>
 </table>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">context</span></code> returns the caller supplied
+<a class="reference internal" href="../../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> inherited from
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, on every block. The
+block’s section <code class="docutils literal notranslate"><span class="pre">Context</span></code>, which <code class="docutils literal notranslate"><span class="pre">context</span></code> returned through 1.4.x,
+is <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.section_context" title="pcapkit.protocols.misc.pcapng.PCAPNG.section_context"><code class="xref py py-attr docutils literal notranslate"><span class="pre">section_context</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2172">#2172</a>).</p>
+</div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.name" title="Link to this definition">¶</a></dt>
@@ -863,9 +870,21 @@ does not distinguish them, but a PCAP-NG block carries a trailer.
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.context">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">context</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.Context" title="pcapkit.foundation.engines.pcapng.Context"><span class="pre">Context</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.context" title="Link to this definition">¶</a></dt>
-<dd><p>Context of current PCAP-NG block.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.section_context">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">section_context</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.Context" title="pcapkit.foundation.engines.pcapng.Context"><span class="pre">Context</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.section_context" title="Link to this definition">¶</a></dt>
+<dd><p>Section context of current PCAP-NG block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – On a Section Header Block, which has no section
+    context of its own.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0: </span>Renamed from <code class="docutils literal notranslate"><span class="pre">context</span></code>, with no alias. <code class="docutils literal notranslate"><span class="pre">context</span></code> is the one
+inherited from <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>,
+the caller supplied parsing context of
+<a class="reference internal" href="../../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2172">#2172</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py property">

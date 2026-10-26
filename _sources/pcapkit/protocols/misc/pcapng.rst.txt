@@ -34,7 +34,7 @@ which implements an extractor for PCAP-NG file format [*]_, and the
 
    .. autoproperty:: name
    .. autoproperty:: length
-   .. autoproperty:: context
+   .. autoproperty:: section_context
    .. autoproperty:: byteorder
    .. autoproperty:: nanosecond
    .. autoproperty:: ts_resolution
