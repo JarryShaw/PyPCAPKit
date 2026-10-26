@@ -276,6 +276,27 @@ class TestWorkflowText(unittest.TestCase):
                 self.assertEqual((experimental['id'], experimental['timeout'],
                                   ci_timing.step_cap(experimental, ci_timing.TESTS_STEP)), ('experimental', 140, 120))
 
+    def test_every_step_of_interest_names_a_real_step(self) -> 'None':
+        """#2230: each alternative of :data:`STEPS_OF_INTEREST` matches a step some workflow has.
+
+        A pattern, or one alternative of a ``(?:...)`` group in it, that no step
+        matches is dead, and makes the steps reported look wider than they are.
+
+        """
+        names = {step['name'] for path in sorted(WORKFLOWS.glob('*.yml'))
+                 for spec in ci_timing.parse_workflow(path.read_text(encoding='utf-8'))
+                 for step in spec['steps']}
+        self.assertTrue(names)
+        for pattern in ci_timing.STEPS_OF_INTEREST:
+            groups = list(re.finditer(r'\(\?:([^()]*)\)', pattern))
+            # Only a group's alternatives are split out, so a bare one would go unchecked.
+            self.assertNotIn('|', re.sub(r'\(\?:[^()]*\)', '', pattern), pattern)
+            variants = [pattern[:group.start()] + option + pattern[group.end():]
+                        for group in groups for option in group.group(1).split('|')] or [pattern]
+            for variant in variants:
+                with self.subTest(pattern=pattern, alternative=variant):
+                    self.assertTrue([name for name in names if re.fullmatch(variant, name)])
+
     def test_a_cap_by_leg_reads_as_none(self) -> 'None':
         """An expression is no one cap; a literal beside it still reads."""
         specs = ci_timing.parse_workflow(
@@ -1017,10 +1038,6 @@ class TestNonBlockingLegs(unittest.TestCase):
     #: (workflow, job name, its cap in the real workflow file).
     EXPERIMENTAL = ('experimental.yml', 'Python graalpy-25.4 (experimental)', 140)
     KTLO = ('unit-tests.yml', 'Python 3.10 (KTLO)', 45)
-    #: Experimental legs from before the split, run under ``test``'s 45-minute cap and
-    #: still in the 7-day window for a week after it merges.
-    LEGACY = (('unit-tests.yml', 'Python graalpy-25.4 (experimental)', 45),
-              ('unit-tests.yml', 'Python 3.14t (experimental)', 45))
     BLOCKING = ('unit-tests.yml', 'Python 3.14', 45)
 
     def levels(self, change: 'Callable[[dict], None]') -> 'list[tuple[str, str]]':
@@ -1029,7 +1046,7 @@ class TestNonBlockingLegs(unittest.TestCase):
         return [(item['id'], item['level']) for item in ci_timing.evaluate(report, baseline)]
 
     def test_each_cap_rule_only_warns_on_a_non_blocking_leg(self) -> 'None':
-        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO, *self.LEGACY):
+        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO):
             def leg(row: 'dict') -> 'None':
                 row.update(workflow=workflow, name=name, cap=cap)
 
@@ -1051,11 +1068,12 @@ class TestNonBlockingLegs(unittest.TestCase):
         self.assertFalse(ci_timing.non_blocking(workflow, name))
         self.assertEqual(self.levels(lambda r: r['jobs'][0].update(p90=cap / 2)), [('H1', 'hard')])
         self.assertEqual(self.levels(lambda r: r['steps'][0].update(p90=10.0)), [('H2', 'hard')])
-        # The same name in experimental.yml would not be, and either suffix counts only
-        # at the end.
+        # The same name in experimental.yml would not be, and the KTLO suffix counts
+        # only at the end.
         self.assertTrue(ci_timing.non_blocking('experimental.yml', name))
         self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.10 (KTLO) extra'))
-        self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.14t (experimental) extra'))
+        # #2230: an experimental leg is non-blocking by its workflow, not by its name.
+        self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.14t (experimental)'))
 
     def run_report(self, workflow: 'str', name: 'str', took: 'float') -> 'tuple[int, str]':
         """``_report`` on ``ci_timing.MIN_SAMPLES`` runs of one job taking ``took`` minutes, against the real file."""
@@ -1080,7 +1098,7 @@ class TestNonBlockingLegs(unittest.TestCase):
         return status, stdout.getvalue()
 
     def test_the_run_stays_green_on_a_non_blocking_leg_past_its_share(self) -> 'None':
-        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO, *self.LEGACY):
+        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO):
             with self.subTest(job=name):
                 status, stdout = self.run_report(workflow, name, cap / 2 + 1)
                 self.assertEqual(status, 0)
@@ -1098,7 +1116,8 @@ class TestNonBlockingLegs(unittest.TestCase):
     def test_the_rule_is_documented(self) -> 'None':
         page = ' '.join(DOC.read_text(encoding='utf-8').split())
         self.assertIn('``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings', page)
-        self.assertIn('a job whose name ends in ``(experimental)``', page)
+        self.assertIn('a job whose name ends in ``(KTLO)``', page)
+        self.assertIn('``(experimental)`` counts by its workflow, not its name', page)
 
 
 def step_blocks(text: 'str', name: 'str') -> 'list[str]':

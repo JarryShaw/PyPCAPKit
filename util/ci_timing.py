@@ -116,9 +116,6 @@ NON_BLOCKING_WORKFLOWS = ('experimental.yml',)
 #: The suffix every KTLO leg's job name carries (#1633); such a leg's steps cannot
 #: fail it (#1672).
 KTLO_SUFFIX = ' (KTLO)'
-#: The suffix every experimental leg's job name carries (#1732); such a leg's
-#: steps cannot fail it either.
-EXPERIMENTAL_SUFFIX = ' (experimental)'
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
@@ -157,8 +154,7 @@ STEPS_OF_INTEREST = (
     r'Report coverage',
     r'Run full test suite',
     r'Run tests/.* under plain unittest',
-    # engine-tests' KTLO step, named by its one version until #1660.
-    r'Run the (?:3\.10 cell|KTLO cells).*',
+    r'Run the KTLO cells.*',
 )
 
 # Thresholds. Each is anchored to a value measured on 2026-10-05..09 for #1538,
@@ -1128,12 +1124,11 @@ def _fmt(value: 'Optional[float]', digits: 'int' = 1) -> 'str':
 def non_blocking(workflow: 'str', job: 'str') -> 'bool':
     """Whether ``job``'s cap findings (H1, H2, H4) are warnings rather than HARD.
 
-    Every job of :data:`NON_BLOCKING_WORKFLOWS` is non-blocking, and so is a KTLO leg
-    or an experimental leg from before the split, wherever it ran (#1732).
+    Every job of :data:`NON_BLOCKING_WORKFLOWS` is non-blocking (#1732), and so is a
+    KTLO leg, wherever it runs.
 
     """
-    return (workflow in NON_BLOCKING_WORKFLOWS
-            or job.endswith(KTLO_SUFFIX) or job.endswith(EXPERIMENTAL_SUFFIX))
+    return workflow in NON_BLOCKING_WORKFLOWS or job.endswith(KTLO_SUFFIX)
 
 
 def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 'list[dict[str, str]]':
