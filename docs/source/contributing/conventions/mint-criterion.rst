@@ -143,8 +143,8 @@ than one range block -- and
 :mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A company name is the
 assignment, for the reason in the next section.
 
-Further ranges in that file carry a suffixed name without being company names at
-all: ``IEEE802.3 Length Field``, which names a field in a standard, and
+Further ranges in :mod:`pcapkit.const.reg.ethertype` carry a suffixed name without
+being company names at all: ``IEEE802.3 Length Field``, which names a field in a standard, and
 ``Berkeley Trailer encap/IP``, which names an encapsulation. Neither is among the company names, and
 neither is suffixed for the reason the next section gives.
 
