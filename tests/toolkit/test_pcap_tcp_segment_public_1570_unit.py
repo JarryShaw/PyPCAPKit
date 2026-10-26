@@ -3,11 +3,10 @@
 
 The helper the TCP adapters of :mod:`pcapkit.toolkit.pcap` and
 :mod:`pcapkit.toolkit.pcapng` share was the private ``pcap._tcp_segment``, which
-``pcapng`` imported across modules, and its result type was the private
-``pcap._TCPSegment``. Under the rulings on #1519 a shared helper becomes public in
-the module both callers already import, as ``test_start_line`` did in #1525, so the
-two keep their names without the underscore and stay in ``pcap``, which ``pcapng``
-already imports. The adapters' end-to-end behaviour is covered by
+``pcapng`` imported across modules. Under the rulings on #1519 a shared helper
+becomes public in the module both callers already import, as ``test_start_line``
+did in #1525, so the helper and its result type are public and stay in ``pcap``,
+which ``pcapng`` already imports. The adapters' end-to-end behaviour is covered by
 ``tests/toolkit/test_pcap_tcp_segment_unit.py``; these tests pin the public surface
 and that both toolkits read the segment through it.
 
@@ -96,7 +95,7 @@ class TestPublicSurface(_Base):
         from pcapkit.toolkit import pcap, pcapng
 
         self.assertIs(pcapng.tcp_segment, pcap.tcp_segment)
-        for module, name in ((pcap, '_tcp_segment'), (pcap, '_TCPSegment'), (pcapng, '_tcp_segment')):
+        for module, name in ((pcap, '_tcp_segment'), (pcapng, '_tcp_segment')):
             with self.subTest(module=module.__name__, name=name):
                 self.assertFalse(hasattr(module, name))
 

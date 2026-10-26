@@ -3,8 +3,8 @@
 
 The *House Conventions* pages, under :file:`docs/source/contributing/conventions/`,
 record the settled design rulings, and most of what they record is reasoning --
-which no test can check. Some of it is not: a per-class classification, a retired
-name, an exception type. Those are the parts that rot silently, because Sphinx
+which no test can check. Some of it is not: a per-class classification, a forbidden
+role, an exception type. Those are the parts that rot silently, because Sphinx
 builds without ``-W`` and without ``nitpicky``, so a page whose every factual claim
 has gone stale still renders and CI still passes.
 
@@ -31,9 +31,6 @@ structure:
   against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
   already pins the *code* to the ruling; nothing pinned the *page* to the code, which is
   the half that goes stale when a new header lands.
-* :class:`RetiredNameTests` -- the #924 ruling that the ``IPv6_GenericExt`` name goes for
-  good. A ruling that a name must not exist is exactly the kind a later change
-  reintroduces without noticing.
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which names :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, not the
   true but unspecific :exc:`KeyError` (#918).
@@ -48,13 +45,13 @@ structure:
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
   ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
   ``objects.inv`` carries no ``py:`` objects), converted to plain literals rather
-  than roles. A forbidden role needs a test or it comes back, exactly as
-  :class:`RetiredNameTests` guards a retired name. Pins the other half of the same
-  fix alongside it: the sentinel references #934 part B qualified stay
-  qualified, since none of ``AbsentType``, ``NoValueType`` or ``ABSENT`` resolves
-  unqualified outside :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module
-  context. Both checks scan every split page rather than one file, since either
-  could in principle land on any of them.
+  than roles. A forbidden role needs a test or it comes back. Pins the other
+  half of the same fix alongside it: the sentinel references #934 part B
+  qualified stay qualified, since none of ``AbsentType``, ``NoValueType`` or
+  ``ABSENT`` resolves unqualified outside
+  :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module context. Both
+  checks scan every split page rather than one file, since either could in
+  principle land on any of them.
 
 * :class:`ProcessConventionTests` -- the *process* rulings #918 harvested onto
   :file:`process.rst`: what the ``all`` extra carries (#910), what a
@@ -370,9 +367,7 @@ class ConventionAnchorTests(unittest.TestCase):
         never needs that phrase, since every true statement about ruling content
         here names a child page, or says "the pages below" / "here" for the set of
         them. Paired with a positive check that the standing-instruction phrase is
-        present, rather than merely that the single-page one is absent, following
-        :class:`RetiredNameTests`'s two-sided pattern for a retired name elsewhere
-        in this module.
+        present, rather than merely that the single-page one is absent.
 
         """
         text = INDEX.read_text(encoding='utf-8')
@@ -626,31 +621,6 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
                          set(IPv6ExtSharedBaseContractTests.STANDALONE_MEMBERS))
 
 
-class RetiredNameTests(unittest.TestCase):
-    """#924's ruling that ``IPv6_GenericExt`` goes: an unreleased intermediate name."""
-
-    def test_the_retired_base_name_is_absent_from_the_package(self) -> 'None':
-        """A ruling that a name must not exist needs a test, or it comes back.
-
-        Checked over the package source rather than by import, because the failure
-        this guards against is a *reintroduced alias* -- which would import perfectly
-        well and satisfy any behavioural assertion.
-
-        """
-        offenders = [str(path.relative_to(ROOT))
-                     for path in sorted((ROOT / 'pcapkit').rglob('*.py'))
-                     if 'IPv6_GenericExt' in path.read_text(encoding='utf-8')]
-        self.assertEqual(offenders, [],
-                         'the retired name is back; the ruling on GitHub pull request '
-                         '#924 is that it was an intermediate state and never released')
-
-    def test_the_shared_base_still_carries_the_name_the_ruling_left(self) -> 'None':
-        """The other half: the name was renamed, not simply removed."""
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-
-        self.assertEqual(IPv6_Ext.__name__, 'IPv6_Ext')
-
-
 class FailedLookupExceptionTests(unittest.TestCase):
     """The worked example the page gives for a lookup that does not resolve."""
 
@@ -693,8 +663,7 @@ class AenumRoleExclusionTests(unittest.TestCase):
     B converted every such role this page carried to plain double-backtick
     literals rather than leaving them promising a link that can never exist. A
     forbidden role needs a test, or a later edit reintroduces one without
-    noticing -- exactly the failure mode :class:`RetiredNameTests` guards a
-    retired name against.
+    noticing.
 
     The other half of the same fix is pinned alongside it: the references to
     ``AbsentType``, ``NoValueType`` and ``ABSENT`` that part B qualified to their
