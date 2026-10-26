@@ -13,6 +13,9 @@ GitHub issues from the internet-v4 round-trip audit (#1202):
   :class:`~datetime.timedelta`, so 197 of the 256 octets could not be rebuilt.
 * #1328 -- the reserved bits of ``Controls`` and of ``ESP_INFO`` were written
   back as zero.
+* #2309 -- ``REG_FAILED`` read its Failure Type octet as a ``lifetime`` and its
+  Reg Type octets as failure types, rather than as :rfc:`8003#section-4.5`
+  lays them out.
 
 Every case builds its own octets in memory and reads no capture. :class:`HIP`
 is imported inside each test, after :func:`~tests._support.reimport_once_per_class`,
@@ -33,6 +36,13 @@ def packet(params: bytes = b'', controls: bytes = b'\x00\x00') -> bytes:
     """Return a HIPv2 I1 packet carrying ``params`` (already 8-octet aligned)."""
     return (bytes([59, 4 + len(params) // 8, 0x01, 0x21]) + b'\x00\x00'
             + controls + bytes(32) + params)
+
+
+def reg_failed(failure_type: int, reg_types: 'list[int]') -> bytes:
+    """Return a ``REG_FAILED`` parameter, zero-padded to 8 octets."""
+    body = (936).to_bytes(2, 'big') + (1 + len(reg_types)).to_bytes(2, 'big') \
+        + bytes([failure_type, *reg_types])
+    return body + bytes(-len(body) % 8)
 
 
 class TestHIPRoundTrip(unittest.TestCase):
@@ -105,6 +115,67 @@ class TestHIPRoundTrip(unittest.TestCase):
         """#1328: the two ``ESP_INFO`` reserved octets rebuild unchanged."""
         self.assertRoundTrips(packet(bytes.fromhex('0041000c' 'abcd' '0102')
                                      + bytes.fromhex('0a0b0c0d' '01020304')))
+
+    def test_reg_failed_reads_failure_type_then_registration_types(self) -> None:
+        """#2309: the first octet is a Failure Type, and the rest are Reg Types."""
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.const.hip.registration import Registration
+        from pcapkit.const.hip.registration_failure import RegistrationFailure
+        from pcapkit.protocols.internet.hip import HIP
+
+        wire = packet(reg_failed(1, [1, 2, 3]))
+        param = HIP(io.BytesIO(wire), len(wire), extension=True).info.parameters[Parameter.REG_FAILED]
+
+        # Both registries are integer enums, so ``==`` alone cannot tell a
+        # Failure Type from a Reg Type of the same value: compare the types too.
+        self.assertIs(type(param.failure_type), RegistrationFailure)
+        self.assertEqual(param.failure_type, RegistrationFailure.Registration_type_unavailable)
+        self.assertEqual([type(reg) for reg in param.reg_type], [Registration] * 3)
+        self.assertEqual(param.reg_type, (Registration.RENDEZVOUS,
+                                          Registration.RELAY_UDP_HIP,
+                                          Registration.RELAY_UDP_ESP))
+        # No ``lifetime`` alias is kept: ``REG_FAILED`` has no lifetime.
+        self.assertNotIn('lifetime', param)
+        self.assertFalse(hasattr(param, 'lifetime'))
+
+    def test_reg_failed_parse_then_rebuild_is_byte_exact(self) -> None:
+        """#2309: every Failure Type, with several Reg Types, rebuilds unchanged."""
+        for failure_type in (0, 1, 2, 3, 9, 201, 255):
+            for reg_types in ([], [1], [1, 2, 3], [0, 4, 200, 255, 2, 1, 3]):
+                with self.subTest(failure_type=failure_type, reg_types=reg_types):
+                    self.assertRoundTrips(packet(reg_failed(failure_type, reg_types)))
+
+    def test_reg_failed_make_then_parse_is_byte_exact(self) -> None:
+        """#2309: ``failure_type`` and ``reg_failed`` build the RFC 8003 octets."""
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.const.hip.registration import Registration
+        from pcapkit.const.hip.registration_failure import RegistrationFailure
+        from pcapkit.protocols.internet.hip import HIP
+
+        for failure_type, reg_types, octets in (
+            (RegistrationFailure.Insufficient_resources,
+             [Registration.RELAY_UDP_ESP, Registration.RENDEZVOUS], (2, [3, 1])),
+            (3, [1, 2, 3], (3, [1, 2, 3])),
+            (RegistrationFailure.Registration_requires_additional_credentials, [], (0, [])),
+        ):
+            with self.subTest(failure_type=failure_type, reg_types=reg_types):
+                wire = HIP.__new__(HIP).make(parameters=[(Parameter.REG_FAILED, {
+                    'failure_type': failure_type,
+                    'reg_failed': reg_types,
+                })]).pack()
+                self.assertEqual(wire[40:].hex(), reg_failed(*octets).hex())
+
+                param = HIP(io.BytesIO(wire), len(wire), extension=True).info.parameters[Parameter.REG_FAILED]
+                self.assertIs(type(param.failure_type), RegistrationFailure)
+                self.assertEqual(param.failure_type, octets[0])
+                self.assertEqual([type(reg) for reg in param.reg_type],
+                                 [Registration] * len(octets[1]))
+                self.assertEqual(list(param.reg_type), octets[1])
+                self.assertRoundTrips(wire)
+
+        # The default Failure Type is octet 0, as the removed ``lifetime`` was.
+        wire = HIP.__new__(HIP).make(parameters=[(Parameter.REG_FAILED, {})]).pack()
+        self.assertEqual(wire[40:].hex(), reg_failed(0, []).hex())
 
 
 if __name__ == '__main__':

@@ -700,13 +700,15 @@ class HIPUnitTests(unittest.TestCase):
             version=2,
             options=options,
         ).lifetime, datetime.timedelta(seconds=4))
-        self.assertEqual(proto._read_param_reg_failed(
+        reg_failed = proto._read_param_reg_failed(
             hip_schema.RegFailedParameter(type=Parameter.REG_FAILED, len=2,
-                                          lifetime=5,
-                                          reg_failed=[RegistrationFailure.Insufficient_resources]),
+                                          failure_type=RegistrationFailure.Insufficient_resources,
+                                          reg_failed=[Registration.RELAY_UDP_HIP]),
             version=2,
             options=options,
-        ).reg_type, (RegistrationFailure.Insufficient_resources,))
+        )
+        self.assertEqual(reg_failed.failure_type, RegistrationFailure.Insufficient_resources)
+        self.assertEqual(reg_failed.reg_type, (Registration.RELAY_UDP_HIP,))
 
         self.assertEqual(proto._read_param_reg_from(
             hip_schema.RegFromParameter(type=Parameter.REG_FROM, len=20,
@@ -1150,12 +1152,14 @@ class HIPUnitTests(unittest.TestCase):
             lifetime=4,
             reg_response=[Registration.RELAY_UDP_ESP],
         ).reg_response, [Registration.RELAY_UDP_ESP])
-        self.assertEqual(proto._make_param_reg_failed(
+        reg_failed_schema = proto._make_param_reg_failed(
             Parameter.REG_FAILED,
             version=2,
-            lifetime=datetime.timedelta(seconds=5),
-            reg_failed=[RegistrationFailure.Insufficient_resources],
-        ).reg_failed, [RegistrationFailure.Insufficient_resources])
+            failure_type=RegistrationFailure.Insufficient_resources,
+            reg_failed=[Registration.RELAY_UDP_HIP],
+        )
+        self.assertEqual(reg_failed_schema.failure_type, RegistrationFailure.Insufficient_resources)
+        self.assertEqual(reg_failed_schema.reg_failed, [Registration.RELAY_UDP_HIP])
         self.assertEqual(proto._make_param_reg_from(
             Parameter.REG_FROM,
             version=2,
@@ -1620,10 +1624,10 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.REG_FAILED,
             hip_data.RegFailedParameter(type=Parameter.REG_FAILED,
                                         critical=False, length=8,
-                                        lifetime=dt1,
-                                        reg_type=(RegistrationFailure.Insufficient_resources,)),
+                                        failure_type=RegistrationFailure.Insufficient_resources,
+                                        reg_type=(Registration.RELAY_UDP_HIP,)),
             version=2,
-        ).lifetime, 1)
+        ).failure_type, RegistrationFailure.Insufficient_resources)
         self.assertEqual(proto._make_param_reg_failed(Parameter.REG_FAILED,
                                                       version=2).reg_failed, [])
         self.assertEqual(proto._make_param_reg_from(
@@ -1823,7 +1827,8 @@ class HIPUnitTests(unittest.TestCase):
 
     def test_hip_registration_parameters_reject_underflowing_length(self) -> None:
         """#438: a registration parameter's ``Length`` too small for its own
-        ``lifetime`` octet must raise, not silently drop the registration list.
+        prefix octet (``lifetime``, or ``failure_type`` for ``REG_FAILED``)
+        must raise, not silently drop the registration list.
 
         ``reg_request``, ``reg_response`` and ``reg_failed`` each size their
         list of registration-type octets as ``Length - 1``. Nothing floored
@@ -1851,7 +1856,7 @@ class HIPUnitTests(unittest.TestCase):
             ('REG_FAILED', 936),
         ):
             with self.subTest(parameter=name):
-                # type(2) len(2)=0 lifetime(1), then 3 octets padding out the
+                # type(2) len(2)=0 prefix(1), then 3 octets padding out the
                 # 8-octet parameter area the outer header declared.
                 param = code.to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(4)
                 raw = fixed + param
@@ -1867,7 +1872,7 @@ class HIPUnitTests(unittest.TestCase):
         ``reg_info`` sizes its list of registration-type octets as
         ``Length - 2`` -- the two octets are ``min_lifetime`` and
         ``max_lifetime``, which ``REG_INFO`` carries in place of the single
-        ``lifetime`` octet #438 fixed for ``reg_request``/``reg_response``/
+        prefix octet #438 fixed for ``reg_request``/``reg_response``/
         ``reg_failed``. Nothing floored that at zero either, so a peer
         declaring ``Length = 0`` drove the list length to ``-2``. Unlike a
         :class:`~pcapkit.corekit.fields.strings.BytesField`,
@@ -2431,10 +2436,11 @@ class HIPUnitTests(unittest.TestCase):
 
         # #438: ``reg_request``/``reg_response``/``reg_failed`` size their
         # registration-type list as ``Length - 1``, the ``- 1`` accounting for
-        # the ``lifetime`` octet already read unconditionally.
+        # the prefix octet (``lifetime``, or ``failure_type`` for ``REG_FAILED``)
+        # already read unconditionally.
         self.assertEqual(hip_schema.registration_type_list_len({'len': 1}), 0)
         self.assertEqual(hip_schema.registration_type_list_len({'len': 4}), 3)
-        # a ``Length`` too small to hold that ``lifetime`` octet must raise
+        # a ``Length`` too small to hold that prefix octet must raise
         # rather than drive the list length negative.
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.registration_type_list_len({'len': 0})

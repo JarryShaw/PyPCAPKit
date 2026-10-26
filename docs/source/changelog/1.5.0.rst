@@ -1489,6 +1489,15 @@ Changed
   :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` engine has not assigned the section
   it opens. Code reading ``block.context`` for the section reads
   ``block.section_context`` (:issue:`2172`, :pr:`2205`).
+* **a breaking change to** HIP's ``REG_FAILED`` parameter: its first octet is the
+  Failure Type, and it carries no lifetime (:rfc:`8003#section-4.5`), so
+  :class:`pcapkit.protocols.data.internet.hip.RegFailedParameter` replaces ``lifetime``
+  with ``failure_type``, a :class:`~pcapkit.const.hip.registration_failure.RegistrationFailure`,
+  with no alias, and its ``reg_type`` holds
+  :class:`~pcapkit.const.hip.registration.Registration` values rather than failure
+  types. :meth:`.HIP._make_param_reg_failed` takes ``failure_type`` in place of
+  ``lifetime``, and ``reg_failed`` takes registration types. The octets are unchanged
+  (:issue:`2309`).
 
 Fixed
 ~~~~~

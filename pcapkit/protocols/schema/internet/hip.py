@@ -186,8 +186,9 @@ def registration_type_list_len(pkt: 'dict[str, Any]') -> 'int':
     Used by the ``reg_request``, ``reg_response`` and ``reg_failed`` fields of
     :class:`RegRequestParameter`, :class:`RegResponseParameter` and
     :class:`RegFailedParameter` respectively, each of which follows a single
-    ``lifetime`` octet with a list of registration type octets sized by the
-    remainder of the parameter.
+    prefix octet (the ``lifetime`` of the first two, the ``failure_type`` of
+    the last) with a list of registration type octets sized by the remainder
+    of the parameter.
 
     Args:
         pkt: Parameter unpacked schema.
@@ -197,7 +198,7 @@ def registration_type_list_len(pkt: 'dict[str, Any]') -> 'int':
 
     Raises:
         FieldValueError: If the parameter's ``Length`` on the wire is too
-            short to hold the ``lifetime`` octet already read, which would
+            short to hold the prefix octet already read, which would
             otherwise underflow the list length below zero.
 
     """
@@ -1171,18 +1172,18 @@ class RegResponseParameter(Parameter, code=Enum_Parameter.REG_RESPONSE):
 class RegFailedParameter(Parameter, code=Enum_Parameter.REG_FAILED):
     """Header schema for HIP ``REG_FAILED`` parameters."""
 
-    #: Lifetime.
-    lifetime: 'int' = UInt8Field()
+    #: Registration failure type.
+    failure_type: 'Enum_RegistrationFailure' = EnumField(length=1, namespace=Enum_RegistrationFailure)
     #: Registration types.
-    reg_failed: 'list[Enum_RegistrationFailure]' = ListField(
+    reg_failed: 'list[Enum_Registration]' = ListField(
         length=registration_type_list_len,
-        item_type=EnumField(length=1, namespace=Enum_RegistrationFailure),
+        item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_failed: 'list[Enum_RegistrationFailure]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', failure_type: 'Enum_RegistrationFailure', reg_failed: 'list[Enum_Registration]') -> 'None': ...
 
 
 @schema_final

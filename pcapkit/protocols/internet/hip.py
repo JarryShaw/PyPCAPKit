@@ -49,6 +49,7 @@ from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
 from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.packet import Packet as Enum_Packet
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -217,8 +218,6 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
     from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
     from pcapkit.const.hip.registration import Registration as Enum_Registration
-    from pcapkit.const.hip.registration_failure import \
-        RegistrationFailure as Enum_RegistrationFailure
     from pcapkit.const.hip.suite import Suite as Enum_Suite
     from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
@@ -1998,7 +1997,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |             Type              |             Length            |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |   Lifetime    |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |
+           | Failure Type  |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |      ...      |     ...       |  Reg Type #n  |               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +
@@ -2018,7 +2017,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
-            lifetime=datetime.timedelta(seconds=schema.lifetime),
+            failure_type=schema.failure_type,
             reg_type=tuple(schema.reg_failed),
         )
         return reg_failed
@@ -4432,23 +4431,35 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_reg_failed(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFailedParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
-                               lifetime: 'int | timedelta' = 0,
-                               reg_failed: 'Optional[list[Enum_RegistrationFailure | StdlibEnum | AenumEnum | str | int]]' = None,
+                               failure_type: 'Enum_RegistrationFailure | StdlibEnum | AenumEnum | str | int' = Enum_RegistrationFailure.Registration_requires_additional_credentials,  # pylint: disable=line-too-long
+                               failure_type_default: 'Optional[int]' = None,
+                               failure_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               failure_type_reversed: 'bool' = False,
+                               reg_failed: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
                                reg_failed_default: 'Optional[int]' = None,
                                reg_failed_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                reg_failed_reversed: 'bool' = False,
                                **kwargs: 'Any') -> 'Schema_RegFailedParameter':
         """Make HIP ``REG_FAILED`` parameter.
 
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is replaced by ``failure_type``, with no alias, and
+           ``reg_failed`` takes registration types rather than failure types
+           (:issue:`2309`).
+
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            lifetime: lifetime
-            reg_failed: registration failure list
-            reg_failed_default: default registration failure
-            reg_failed_namespace: registration failure namespace
-            reg_failed_reversed: reverse registration failure namespace
+            failure_type: registration failure type
+            failure_type_default: default registration failure type
+            failure_type_namespace: registration failure type namespace
+            failure_type_reversed: reverse registration failure type namespace
+            reg_failed: list of registration types that failed
+            reg_failed_default: default registration type
+            reg_failed_namespace: registration type namespace
+            reg_failed_reversed: reverse registration type namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4456,9 +4467,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         """
         if param is not None:
-            reg_type = cast('list[Enum_RegistrationFailure]', param.reg_type)
-            lt = math.floor(param.lifetime.total_seconds())
+            failure = param.failure_type
+            reg_type = cast('list[Enum_Registration]', param.reg_type)
         else:
+            failure = self._make_index(failure_type, failure_type_default, namespace=failure_type_namespace,  # type: ignore[assignment]
+                                       reversed=failure_type_reversed, pack=False)
+
             if reg_failed is None:
                 reg_failed = []
 
@@ -4467,12 +4481,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reg_type.append(self._make_index(reg, reg_failed_default, namespace=reg_failed_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_failed_reversed, pack=False))
 
-            lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
-
         return Schema_RegFailedParameter(
             type=code,
             len=1 + len(reg_type),
-            lifetime=lt,
+            failure_type=failure,
             reg_failed=reg_type,
         )
 
