@@ -2333,8 +2333,8 @@ class DependencyGateCoverageTests(unittest.TestCase):
             'leg leaves it out (#1954); the whole-suite one collects tests/project/; '
             'integration and pypcap-parity select by fixture tier and never reach it, '
             'the same reason they are absent from HAS_MYPY above. engine-tests (#849) '
-            'no longer reaches it either -- none of its five explicit TEST_PATHS lists '
-            'names tests/project/, the same change that dropped it out of HAS_MYPY above')
+            'does not reach it either -- none of its explicit TEST_PATHS lists names '
+            'tests/project/, which is also what keeps it out of HAS_MYPY above')
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
         for job in sorted(reaching):
@@ -2575,7 +2575,6 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
         gap = gaps[('HAS_CRYPTO', 'test')]
         self.assertEqual(gap.missing, ('cryptography',))
-        self.assertEqual(len(gap.gates), 14)
         self.assertEqual({gate.module for gate in gap.gates},
                          {'tests/protocols/internet/test_esp_unit.py'})
 

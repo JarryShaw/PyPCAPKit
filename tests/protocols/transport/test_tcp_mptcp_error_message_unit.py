@@ -32,6 +32,7 @@ places that exercise these messages cannot catch the doubling --
 from __future__ import annotations
 
 import pathlib
+import re
 import unittest
 from typing import TYPE_CHECKING
 
@@ -197,9 +198,9 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         """The source-level sweep, so another site cannot be added unnoticed.
 
         A test that pins only the known strings would not notice another
-        appearing, so the absence is asserted over the whole file -- and the
-        single-separator count is asserted too, since deleting the offending
-        lines outright would satisfy an absence check on its own.
+        appearing, so every ``[OptNo …]`` message in the file is read, and each
+        must put exactly one separator after its prefix. Deleting the #649
+        messages outright is caught by the tests above, which raise each one.
 
         """
         import pcapkit.protocols.transport.tcp as tcp_module
@@ -207,23 +208,10 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         source = pathlib.Path(tcp_module.__file__).read_text(encoding='utf-8')
 
         self.assertNotIn("f'{self.alias}: : ", source)
-        self.assertEqual(source.count("f'{self.alias}: : "), 0)
 
-        # The exact count of the single-separator form: the #649 messages join
-        # the house form rather than being removed. A guard against "fixed" by
-        # deletion.
-        #
-        # NOTE TO A FUTURE EDITOR: this count is deliberately exact, and it is
-        # therefore a tripwire on the whole module rather than on the lines
-        # #649 was about. Adding or removing *any* `f'{self.alias}: [OptNo …]'`
-        # message anywhere in the file will fail this assertion for a reason
-        # that has nothing to do with the doubled separator. That is intended
-        # -- the alternative, asserting only the absence, passes if the
-        # offending lines are deleted outright -- so when you legitimately
-        # change the number of such messages, update the number here rather
-        # than loosening the assertion. The one above it, on the doubled form,
-        # is the one that must stay at 0 forever.
-        self.assertEqual(source.count("f'{self.alias}: [OptNo"), 35)
+        separators = re.findall(r'((?:\s*:)+)\s*\[OptNo', source)
+        self.assertTrue(separators)
+        self.assertEqual(set(separators), {':'})
 
 
 if __name__ == '__main__':

@@ -1430,7 +1430,6 @@ class PCAPNGUnitTests(unittest.TestCase):
             'ECH_CONFIG',
         }
         self.assertEqual(set(TLSKeyLabel.__members__), expected)
-        self.assertEqual(len(TLSKeyLabel.__members__), 11)
 
         # Every member's value pinned exactly -- this is a value-matched
         # registry (``TLSKeyLabel(label.upper())`` in

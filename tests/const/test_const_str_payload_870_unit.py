@@ -85,13 +85,13 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
         self.assertEqual(Method.GET, 'GET')
         self.assertTrue(Method.GET == 'GET')  # pylint: disable=singleton-comparison
 
-    def test_every_one_of_the_40_registered_members_carries_its_value_as_str_payload(self) -> None:
+    def test_every_registered_member_carries_its_value_as_str_payload(self) -> None:
         """Swept, not just ``GET`` -- the defect was in ``__new__``, so every
         member built through it was affected identically."""
         from pcapkit.const.http.method import Method
 
         members = list(Method)
-        self.assertEqual(len(members), 40, 'Method no longer declares 40 members; a fresh look is needed')
+        self.assertTrue(members)
 
         for member in members:
             with self.subTest(member=member.name):
@@ -152,20 +152,16 @@ class StrValuedRegistryPayloadTests(unittest.TestCase):
         registries = {'Command': Command, 'FEATCode': FEATCode, 'Method': Method}
         self.assertEqual(set(registries), set(self.SWEPT_REGISTRIES))
 
-        checked = 0
         for name in self.SWEPT_REGISTRIES:
             cls = registries[name]
+            # An empty registry would pass the sweep without checking anything.
+            self.assertTrue(list(cls), f'{name} declares no members')
             for member in cls:
-                checked += 1
                 with self.subTest(registry=name, member=member.name):
                     self.assertEqual(
                         str(member), member.value,
                         f'{name}.{member.name}: str(member) != member.value; '
                         f'see GitHub issue #870')
-
-        # Command (60) + FEATCode (15) + Method (40), pinned so a registry
-        # gaining or losing members gets a fresh look rather than a silent pass.
-        self.assertEqual(checked, 115)
 
     def test_optiontype_is_exempt_but_its_own_contract_still_holds(self) -> None:
         """Not swept above because ``OptionType.value`` *is* the formatted

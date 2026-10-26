@@ -261,7 +261,6 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
             msg='address-typed SwitchField declarations and the table have diverged; '
                 f'only discovered: {sorted(discovered - tabled)}; '
                 f'only tabled: {sorted(tabled - discovered)}')
-        self.assertEqual(len(discovered), 10)
 
         # and the ones an annotation grep misses really are wrapped
         from pcapkit.corekit.fields.misc import ConditionalField

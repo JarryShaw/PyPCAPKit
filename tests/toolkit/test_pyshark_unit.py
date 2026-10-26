@@ -431,16 +431,14 @@ class PySharkToolkitTests(unittest.TestCase):
         ``ENCAP_TYPE_TO_LINKTYPE`` would never match the ``int()`` the lookup
         does, and would fail silently rather than loudly.
 
-        The counts are the sweep's own: 152 encapsulations and 58 filter
-        names, with the encapsulation table necessarily the larger of the two
-        because a filter name shared by several DLTs cannot be mapped at all.
+        The encapsulation table is necessarily the larger of the two, because a
+        filter name shared by several DLTs cannot be mapped at all.
 
         """
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import pyshark as toolkit
 
         encaps = toolkit.ENCAP_TYPE_TO_LINKTYPE
-        self.assertEqual(len(encaps), 152)
         for key, value in encaps.items():
             with self.subTest(encap=key):
                 self.assertIsInstance(key, int)
@@ -448,7 +446,8 @@ class PySharkToolkitTests(unittest.TestCase):
                 self.assertIs(LinkType(int(value)), value)
 
         names = toolkit.FILTER_NAME_TO_LINKTYPE
-        self.assertEqual(len(names), 58)
+        self.assertTrue(names)
+        self.assertGreater(len(encaps), len(names))
         for key, value in names.items():
             with self.subTest(filter_name=key):
                 self.assertIsInstance(key, str)

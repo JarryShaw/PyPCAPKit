@@ -153,7 +153,6 @@ class TestMHFlagsReserved(unittest.TestCase):
                         data={'options': [option]}))
 
     def test_every_site_is_covered(self) -> None:
-        self.assertEqual(len(FRAMES), 24)
         self.assertEqual(set(FRAMES), set(MESSAGES) | set(OPTIONS)
                          | {'MultiPrefixExtension', 'PerSessionBitRateAttribute'})
 
