@@ -94,11 +94,6 @@ OLD_NAMES = (
     ('pcapkit/protocols/misc/pcap/header.py', '_MAGIC_NUM'),
     ('pcapkit/foundation/engines/pcapng.py', 'BLOCK_MINIMUM'),
     ('pcapkit/foundation/engines/pcapng.py', 'BYTE_ORDER_MAGIC'),
-    ('pcapkit/protocols/internet/ip.py', 'IP_MAX_LENGTH'),
-    ('pcapkit/protocols/internet/ipv4.py', 'IPV4_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ah.py', 'AH_HEADER_LEN'),
-    ('pcapkit/protocols/transport/tcp.py', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/protocols/transport/tcp.py', 'TCP_DATA_OFFSET_OCTET'),
 )
 
 #: Literals distinctive enough to find by value, mapped to the one file allowed

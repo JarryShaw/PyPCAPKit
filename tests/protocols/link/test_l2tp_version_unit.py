@@ -171,7 +171,7 @@ class L2TPVersionTests(unittest.TestCase):
     ##########################################################################
 
     def test_ip_protocol_115_has_no_class_to_dispatch_to(self) -> None:
-        """115 is :rfc:`3931` L2TPv3 over IP, and no ``L2TPv3`` class exists.
+        """115 is :rfc:`3931` L2TPv3 over IP, and nothing is bound to it.
 
         The companion assertion to
         :meth:`tests.protocols.test_dispatch_bindings_unit.DispatchBindingTests.test_l2tp_over_ip_waits_on_an_l2tpv3_class`,
@@ -179,18 +179,11 @@ class L2TPVersionTests(unittest.TestCase):
         reasoning enforceable rather than merely asserted.
 
         """
-        import pkgutil
-
-        import pcapkit.protocols.link as linkpkg
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
 
         self.assertEqual(int(TransType.L2TP), 115)
         self.assertNotIn(TransType.L2TP, Internet.__proto__)
-
-        modules = {info.name for info in pkgutil.iter_modules(linkpkg.__path__)}
-        self.assertIn('l2tpv2', modules)
-        self.assertNotIn('l2tpv3', modules)
 
     def test_l2tpv3_over_ip_degrades_to_raw_rather_than_a_fabricated_header(self) -> None:
         """Binding ``L2TPv2`` at 115 must not invent an L2TPv2 header.

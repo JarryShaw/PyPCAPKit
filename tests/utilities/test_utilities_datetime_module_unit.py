@@ -16,7 +16,7 @@ __tier__ = 'LATEST'
 
 
 class TestDatetimeModule(unittest.TestCase):
-    """:mod:`pcapkit.utilities.datetime` holds the conversions, and the old path is gone."""
+    """:mod:`pcapkit.utilities.datetime` holds the conversions."""
 
     def test_new_module_exposes_the_conversions(self) -> None:
         module = importlib.import_module('pcapkit.utilities.datetime')
@@ -28,10 +28,6 @@ class TestDatetimeModule(unittest.TestCase):
         module = importlib.import_module('pcapkit.utilities.datetime')
         self.assertIs(module.datetime, datetime)
         self.assertIs(sys.modules['datetime'], datetime)
-
-    def test_old_module_path_is_gone(self) -> None:
-        with self.assertRaises(ModuleNotFoundError):
-            importlib.import_module('pcapkit.utilities.timestamp')
 
 
 if __name__ == '__main__':

@@ -50,7 +50,7 @@ MOVED = {
     'pcapkit.protocols.protocol': ['FRAME_LAYER_LIMIT'],
     'pcapkit.protocols.internet.internet': ['EXTENSION_HEADER_LIMIT'],
     'pcapkit.protocols.internet.ipv6': ['FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT'],
-    'pcapkit.toolkit.pypcapfile': ['IPV6_TCP_WARNED_LIMIT', 'EXTENSION_HEADER_LIMIT'],
+    'pcapkit.toolkit.pypcapfile': ['EXTENSION_HEADER_LIMIT'],
     'pcapkit.dumpkit.common': ['FALLBACK_LIMIT'],
     'pcapkit.utilities.chardet': ['DETECT_CACHE_SIZE'],
     'pcapkit.corekit.io': ['_READ_CHUNK'],

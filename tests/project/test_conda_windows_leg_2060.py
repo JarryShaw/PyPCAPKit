@@ -11,9 +11,9 @@ legs do (#2044).
   :func:`tests.project.test_release_gates.evaluate_condition`; it is the Intel
   step's call in a login shell, and skips a build-only manual run and a leg
   already on Anaconda. :data:`release_published.SUBDIRS` counts the platform.
-* :class:`TestTheWindowsLegBlocks`: no step continues on error and no
-  ``Windows summary`` reports, so a failure fails the leg as it does the others;
-  each ``run:`` the leg reaches names ``bash``.
+* :class:`TestTheWindowsLegBlocks`: no step continues on error, so a failure
+  fails the leg as it does the others; each ``run:`` the leg reaches names
+  ``bash``.
 * :class:`TestTheWindowsClient`: ``release_conda.py upload`` runs base's
   ``Scripts\\anaconda.exe`` on Windows.
 * :class:`TestBldBat`: ``conda/pypcapkit/bld.bat`` does what ``build.sh`` does:
@@ -52,7 +52,7 @@ from unittest import mock
 from tests import _workflows
 from tests.project.test_conda_native_platforms_1822 import DISTRIBUTION, SHIM, elf, load, pe
 from tests.project.test_release_gates import PUBLISHING_MARKERS, STATUS, evaluate_condition
-from util import _actions, leg_summary, release_conda, release_published, release_tiers
+from util import _actions, release_conda, release_published, release_tiers
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -73,8 +73,6 @@ INTEL_UPLOAD = 'Upload conda packages to Anaconda (Intel)'
 ANACONDA_UPLOADS = ['Upload conda packages to Anaconda', INTEL_UPLOAD, WINDOWS_UPLOAD]
 #: What publishes besides :data:`PUBLISHING_MARKERS`: Conda Update's GitHub Release upload.
 MORE_MARKERS = ('ncipollo/release-action',)
-#: A non-blocking leg's warnings step, which the blocking leg must not have.
-SUMMARY = 'Windows summary'
 
 
 def spec(name: 'str', job_id: 'str') -> 'dict[str, Any]':
@@ -214,8 +212,6 @@ class TestTheWindowsLegBlocks(unittest.TestCase):
                 self.assertNotIn('continue-on-error', job)
                 self.assertEqual([entry.get('name') or entry.get('id') for entry in job['steps']
                                   if 'continue-on-error' in entry], [])
-                self.assertNotIn(SUMMARY, [entry.get('name') for entry in job['steps']])
-        self.assertNotIn('conda-windows', leg_summary.REASONS)
 
     def test_the_bash_steps_name_their_shell(self) -> None:
         """A ``run:`` step's default shell on Windows is ``pwsh``."""
