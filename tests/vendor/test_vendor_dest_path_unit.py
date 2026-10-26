@@ -93,7 +93,7 @@ nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
 only pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
 anything under :file:`tests/vendor/` at all, since ``integration`` and
 ``pypcap-parity`` never reach it and ``engine-tests`` runs only each engine's
-own test files since #849 -- unlike :file:`tests/vendor/test_user_agent_unit.py`,
+own test files (#849) -- unlike :file:`tests/vendor/test_user_agent_unit.py`,
 whose own gate also lists ``html5lib`` and so skips on both.
 
 """
@@ -350,7 +350,7 @@ class NestedCrawlerDestPathTests(unittest.TestCase):
                          'dropped inside vendor/const/apptype/')
 
     def test_module_outside_vendor_root_raises_instead_of_self_truncating(self) -> None:
-        # The destructive case a reviewer caught: const/ and vendor/ are
+        # The destructive case: const/ and vendor/ are
         # siblings at equal depth, so for a module that is NOT under
         # vendor_root, os.path.relpath(module, vendor_root)'s leading '..'
         # segments cancel out exactly against const_root -- reproducing

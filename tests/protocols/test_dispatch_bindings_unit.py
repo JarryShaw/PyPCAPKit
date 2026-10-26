@@ -115,9 +115,9 @@ class DispatchBindingTests(unittest.TestCase):
     def test_stacked_service_and_customer_tags_both_parse_and_stay_distinct(self) -> None:
         """A Q-in-Q frame yields both tags, under their own info names.
 
-        This is the acceptance test for the S-Tag work: before the service tag
-        was bound, the whole of ``S-Tag + C-Tag + IPv4 + TCP`` collapsed into a
-        single opaque ``Raw`` payload hanging off the Ethernet header.
+        This is the acceptance test for the S-Tag binding: without it, the
+        whole of ``S-Tag + C-Tag + IPv4 + TCP`` collapses into a single opaque
+        ``Raw`` payload hanging off the Ethernet header.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -180,10 +180,10 @@ class DispatchBindingTests(unittest.TestCase):
     def test_ospf_parses_when_dispatched_from_ip_protocol_89(self) -> None:
         """OSPF is reachable from ``TransType.OSPFIGP`` and parses its header.
 
-        The dissector could not parse anything at all before: ``read`` consulted
-        the schema *class* rather than the parsed header, and ``alias`` -- which
-        the dispatch reads while ``read`` is still running -- reached for an
-        ``_info`` that does not exist yet.
+        Guards against a dissector that parses nothing at all: a ``read`` that
+        consults the schema *class* rather than the parsed header, and an
+        ``alias`` -- which the dispatch reads while ``read`` is still running --
+        reaching for an ``_info`` that does not exist yet.
 
         """
         from pcapkit.const.ospf.authentication import Authentication

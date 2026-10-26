@@ -98,12 +98,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_unregistered_extension_codes_do_not_mutate_the_class_registry(self) -> None:
         """Parsing must not write to the shared IPv6 extension registries.
 
-        #425's defect on the three IPv6 extension header registries. Each is a
-        :class:`collections.defaultdict` on a class attribute shared by every
-        instance of its protocol in the process, so ``registry[code]`` inserted
-        every unrecognised option type and routing type a capture carried -- and
-        the value it inserted was ``'none'``, which the default factory returns
-        anyway. That made
+        Guards against #425's defect on the IPv6 extension header registries.
+        Each is a :class:`collections.defaultdict` on a class attribute shared by
+        every instance of its protocol in the process, so a ``registry[code]``
+        read inserts every unrecognised option type and routing type a capture
+        carries -- and the value it inserts is ``'none'``, which the default
+        factory returns anyway. That makes
         :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT.register_option` and its
         siblings warn about overwriting something nobody registered.
 
@@ -386,7 +386,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ``IPv6_Route.make``'s ``dst`` is converted to an :class:`~ipaddress.IPv6Address`
         ahead of dispatching to the per-type constructor; a bare
         ``ipaddress.ip_address`` there converts ``dst=True`` to ``::1`` with no
-        exception at all. This is the most reachable of the four
+        exception at all. This is the most reachable of the
         #540 sites, being on the public ``make`` entry point rather than a private
         helper.
         """
@@ -1677,15 +1677,13 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_ipv6_route_rpl_length_guard_follows_rfc6554_address_arithmetic(self) -> None:
         """The reader's length guard must judge ``Hdr Ext Len`` in 8-octet units.
 
-        See #564; the guard is the defect #489 flagged and deliberately left,
-        for want of a working RPL round trip to validate a replacement
-        against. It read ``if header.length % 16 != 0``, which is wrong twice
-        over: ``header.length`` is ``Hdr Ext Len``, *"the length of the
+        See #564 and #489. A guard reading ``if header.length % 16 != 0`` is
+        wrong twice over: ``header.length`` is ``Hdr Ext Len``, *"the length of the
         Routing header in 8-octet units"* (:rfc:`6554#section-3`), not an
         octet count; and a fixed multiple-of-16 bound assumes 16-octet
         addresses, which an SRH only carries when ``CmprI`` and ``CmprE`` are
-        both 0. Together those rejected every realistic header -- the bound
-        admitted only ``Hdr Ext Len`` of 0, 16, 32 ..., i.e. nothing under
+        both 0. Together those reject every realistic header -- the bound
+        admits only ``Hdr Ext Len`` of 0, 16, 32 ..., i.e. nothing under
         136 octets.
 
         :rfc:`6554#section-4.2` gives the arithmetic that *is* available::
@@ -1696,7 +1694,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         whole.
 
         Every case here is a **hand-built wire form**, parsed through the
-        public constructor. That matters for the same reason it did in #489: a
+        public constructor. That matters for the reason #489 gives: a
         construct-then-parse round trip can pass on two mistakes cancelling
         out, whereas octets written out by hand from the RFC diagram cannot
         agree with a wrong reader.
@@ -1815,13 +1813,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ``IPv6_Route.read`` hands ``_read_data_type_rpl`` the schema ``make``
         just built rather than a freshly parsed one. On that path
         ``RPL.post_process`` sees ``addresses`` as the ``list[bytes]`` the
-        constructor was handed (the #556 case) and returned early without
-        setting ``ip`` -- so the reader raised a bare, out-of-library
+        constructor was handed (the #556 case); returning early there without
+        setting ``ip`` makes the reader raise a bare, out-of-library
         ``AttributeError: 'RPL' object has no attribute 'ip'``.
 
-        It was masked for as long as the ``% 16`` guard rejected every
-        constructed header first, which is why it only became reachable once
-        that guard was corrected in the same pass.
+        A ``% 16`` length guard masks it, by rejecting every constructed header
+        first.
 
         """
         from pcapkit.const.ipv6.routing import Routing
@@ -2535,20 +2532,20 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(hopopt_options[key].__name__, opts_options[key].__name__)
 
     def test_ipv6_route_source_route_make_accepts_tuple_and_list_addresses(self) -> None:
-        """#480 fixed ``Schema.pack``'s ``ListField`` branch to accept a tuple as
-        well as a list, but the one consumer that ships a ``tuple[...]``-typed
-        field against that branch shipped with no test of its own:
+        """#480: ``Schema.pack``'s ``ListField`` branch accepts a tuple as well
+        as a list, pinned here for the consumer that declares a
+        ``tuple[...]``-typed field against that branch:
         ``SourceRoute.ip`` on the data model (``tuple[IPv6Address, ...]`` in
         pcapkit/protocols/data/internet/ipv6_route.py) backed by the
-        ``ListField`` in ``SourceRoute`` here in the schema module. Before
+        ``ListField`` in ``SourceRoute`` here in the schema module. Without
         #480, building a Type 0 (deprecated Source Route) routing header
         through :meth:`IPv6_Route.make <pcapkit.protocols.internet.ipv6_route.
-        IPv6_Route.make>` with a tuple of source addresses raised
-        ``ProtocolUnbound`` where the same call with a list succeeded; this
+        IPv6_Route.make>` with a tuple of source addresses raises
+        ``ProtocolUnbound`` where the same call with a list succeeds; this
         pins the ``make`` -> ``pack`` path for both, through the public
         construction API rather than by building ``Schema_SourceRoute``
         directly, and checks the two forms produce byte-identical output --
-        the actual invariant #480 established (see #476).
+        the invariant #480 sets (see #476).
 
         Boundaries: zero addresses, one, and two, so a fix that special-cases
         "empty" or stops one item short of the general case is still caught.
@@ -2601,7 +2598,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 packed_tuple = make_and_pack(as_tuple)
                 packed_list = make_and_pack(as_list)
 
-                # the actual invariant #480 established: tuple and list of the
+                # the invariant #480 sets: tuple and list of the
                 # same addresses pack identically
                 self.assertEqual(packed_tuple, packed_list)
                 self.assertEqual(packed_tuple, expected)

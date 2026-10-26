@@ -48,9 +48,9 @@ class EngineRuntimeTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_scapy_engine_returns_scapy_packets(self) -> None:
-        # #406: this asserted ``Raw`` -- the engine imported only ``scapy.sendrecv``,
-        # so scapy's layer registries were empty and every frame came back
-        # undissected. ``Ether`` is what the capture actually holds: frame 1 of
+        # #406: guards against the engine importing only ``scapy.sendrecv``, under
+        # which scapy's layer registries are empty and every frame comes back
+        # undissected, as ``Raw``. ``Ether`` is what the capture actually holds: frame 1 of
         # in.pcap is an Ethernet frame carrying an ICMPv6 neighbour solicitation over
         # IPv6, which is exactly what the two tests above independently report for the
         # same frame -- 'Ethernet:IPv6:IPv6_ICMP' from the default engine and

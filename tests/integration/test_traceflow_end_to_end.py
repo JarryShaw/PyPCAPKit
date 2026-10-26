@@ -122,9 +122,9 @@ class TraceFlowScaleTests(EndToEndTestCase):
         # its four-way close: the final acknowledgement then arrives after the
         # buffer has been popped and forms a flow of its own, so each conversation
         # comes back as a nine-frame flow plus a one-frame tail -- 109 of them
-        # here, which is what the review caught. The assertions below are what
-        # would notice it again: a stray tail is a single-frame flow, and it is a
-        # flow a later connection reusing those endpoints can be absorbed into.
+        # here. The assertions below are what notice it: a stray tail is a
+        # single-frame flow, and it is a flow a later connection reusing those
+        # endpoints can be absorbed into.
         self.assertEqual(len(flows), 111)
         self.assertEqual(sum(1 for flow in flows if len(flow.index) == 1), 0,
                          'a flow of one frame is a stray tail, not a conversation')

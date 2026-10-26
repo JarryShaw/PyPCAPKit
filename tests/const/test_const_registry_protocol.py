@@ -38,21 +38,19 @@ if TYPE_CHECKING:
 #: Repository root, for reading generated sources as text.
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The batch converted onto :class:`~pcapkit.corekit.enum.EnumRegistry`: the
-#: six bespoke-template registries whose members carry no extra attributes, so
-#: the shared ``_unregistered_member`` -- which sets only ``_name_`` and
-#: ``_value_`` -- builds a complete member for them. ``tcp/flags`` joined the
-#: original five once measurement showed its exclusion rationale did not hold:
-#: the PR description had grouped it with the five templates below on the
-#: strength of "each attach extra attributes in ``__new__``", but
-#: ``grep -c 'def __new__'`` reports ``0`` for both ``pcapkit/vendor/tcp/flags.py``
-#: and ``pcapkit/const/tcp/flags.py`` -- it never defined one, so it is the same
-#: shape as the four ``mh/*_flag`` registries, not the five below. Its own
-#: ``_missing_`` still does its own 16-bit range check ending in
-#: ``super()._missing_(value)``, unchanged by the conversion: that call chain
-#: resolves through :mod:`aenum`'s own :class:`~aenum.Flag` machinery either
-#: way, since :class:`~pcapkit.corekit.enum.EnumRegistry` never defines
-#: ``_missing_`` itself. The remaining five bespoke templates (``ftp/command``,
+#: The bespoke-template registries converted onto
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` whose members carry no extra
+#: attributes, so the shared ``_unregistered_member`` -- which sets only
+#: ``_name_`` and ``_value_`` -- builds a complete member for them. ``tcp/flags``
+#: is one of them: ``grep -c 'def __new__'`` reports ``0`` for both
+#: ``pcapkit/vendor/tcp/flags.py`` and ``pcapkit/const/tcp/flags.py``, so it is
+#: the same shape as the four ``mh/*_flag`` registries, not the templates below
+#: that "each attach extra attributes in ``__new__``". Its own ``_missing_``
+#: does its own 16-bit range check ending in ``super()._missing_(value)``,
+#: whichever base it has: that call chain resolves through :mod:`aenum`'s own
+#: :class:`~aenum.Flag` machinery either way, since
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` never defines ``_missing_``
+#: itself. The remaining bespoke templates (``ftp/command``,
 #: ``ftp/return_code``, ``http/method``, ``http/status_code``,
 #: ``pcapng/option_type``) do each define a custom ``__new__`` attaching further
 #: attributes, so an unregistered member of theirs would be missing them; they
@@ -86,8 +84,8 @@ def _unused_value(cls: 'Any') -> 'int':
     """First non-negative integer no member of ``cls`` carries.
 
     Read from ``_value2member_map_`` rather than by calling ``cls(value)``:
-    after tier 1 a declared-but-unassigned value resolves to an unregistered
-    member instead of raising, so a successful call proves nothing about
+    a declared-but-unassigned value resolves to an unregistered member
+    instead of raising (#775 tier 1), so a successful call proves nothing about
     membership -- the same reason ``register_alias`` itself tests that table.
 
     """
@@ -248,8 +246,8 @@ class TCPFlagsConversionTests(unittest.TestCase):
     ``grep -c 'def __new__'`` reports ``0`` for both
     ``pcapkit/vendor/tcp/flags.py`` and ``pcapkit/const/tcp/flags.py``, the
     same shape as the four ``mh/*_flag`` registries in :data:`CONVERTED`, so
-    it belongs there rather than among the five templates excluded for
-    actually defining one.
+    it belongs there rather than among the templates excluded for actually
+    defining one.
     """
 
     def setUp(self) -> None:
@@ -260,7 +258,7 @@ class TCPFlagsConversionTests(unittest.TestCase):
 
         Resolves ``EnumRegistry`` freshly from the just-reimported
         ``pcapkit.corekit.enum`` rather than the module-scope import above --
-        ``setUp`` gave this class its own ``pcapkit`` import, so ``Flags`` now
+        ``setUp`` gave this class its own ``pcapkit`` import, so ``Flags``
         inherits a *new* ``EnumRegistry`` class object, and identity against
         the stale outer one would fail for a reason that says nothing about
         the product (see ``ProtocolIsInheritedTests.setUpClass`` above, which
@@ -499,10 +497,10 @@ class RegisterContractTests(unittest.TestCase):
         ``__members__`` pointing at it, and mints nothing -- reachable under
         the wrong method, unannounced, and contradicting the method's own
         docstring contract that ``register`` is what mints and nothing else
-        does so silently. Reproduced against this exact shape on
-        ``pcapkit.const.reg.apptype.apptype.TransportProtocol`` (a different,
-        non-:class:`~pcapkit.corekit.enum.EnumRegistry` registry, since
-        that one is not gated the same way) before this guard existed:
+        does so silently. Reproduced against this exact shape, without the
+        guard, on ``pcapkit.const.reg.apptype.apptype.TransportProtocol`` (a
+        different, non-:class:`~pcapkit.corekit.enum.EnumRegistry` registry,
+        since that one is not gated the same way):
         ``TransportProtocol.register(6, 'TOTALLY_NEW_NAME')`` returned
         ``TransportProtocol.tcp`` unchanged and minted nothing. This pins the
         fix on the base class every :data:`CONVERTED` registry actually uses.
@@ -695,20 +693,20 @@ GENERATED_SAMPLE = (
     ('pcapkit.const.hip.parameter', 'Parameter', 'pcapkit/const/hip/parameter.py'),
 )
 
-#: Const modules tier 3 deliberately leaves alone. The first six override
+#: Const modules tier 3 deliberately leaves alone. The bespoke ones override
 #: their crawler's own ``process()``/``context()`` with a bespoke ``get()``/
 #: ``_missing_`` pair that does not share :mod:`pcapkit.vendor.default`'s
 #: template at all -- mixing :class:`~pcapkit.corekit.enum.EnumRegistry` in
 #: without further care would silently change behaviour rather than just
-#: move it, since four of the six are :class:`~aenum.StrEnum` registries whose
+#: move it, since several are :class:`~aenum.StrEnum` registries whose
 #: own ``__new__`` attaches further attributes the base's generic
 #: ``_unregistered_member`` does not set. GitHub issue #860 fixes the base
 #: ``get()``'s own str-key-never-tries-the-value-path limitation -- measured
 #: on a synthetic registry in :class:`StrEnumValueFallbackTests` below -- and
-#: issue #860's step 2 converts all six (``FEATCode``, ``Command``, ``Method``,
-#: ``ReturnCode``/``ResponseKind``/``GroupingInformation``, ``StatusCode``
-#: and ``OptionType`` in PR 1; ``AppType`` and its four transport subclasses
-#: in PR 2), each with its own ``_unregistered_member`` override where a
+#: issue #860's step 2 converts them all (``FEATCode``, ``Command``,
+#: ``Method``, ``ReturnCode``/``ResponseKind``/``GroupingInformation``,
+#: ``StatusCode``, ``OptionType``, and ``AppType`` and its transport
+#: subclasses), each with its own ``_unregistered_member`` override where a
 #: custom ``__new__`` needs one. They stay excluded from *this* file's
 #: tier-3 sweep regardless, because the exclusion here is about their
 #: bespoke ``process()``/``get()`` shape not sharing the generated template,
@@ -718,13 +716,13 @@ GENERATED_SAMPLE = (
 #: generated template, and several also keep a bespoke
 #: ``_unregistered_member`` (``Command``, ``Method``, ``OptionType``,
 #: ``ReturnCode``, ``StatusCode``) or a bespoke ``get`` of their own
-#: (``Command``, ``Method``, ``OptionType``; ``AppType`` and its four
-#: transport subclasses keep all four ``get``/``get_all``/``register``/
-#: ``register_alias``, added in PR 2) -- but not every one does:
+#: (``Command``, ``Method``, ``OptionType``; ``AppType`` and its transport
+#: subclasses keep ``get``/``get_all``/``register``/``register_alias`` of
+#: their own) -- but not every one does:
 #: ``FEATCode``, ``ResponseKind`` and ``GroupingInformation`` resolve every
 #: protocol method to the base's generic implementation unchanged.
 #: ``TransportProtocol`` alone is excluded for
-#: the separate reason it always was: it never mixes in
+#: a separate reason: it never mixes in
 #: :class:`~pcapkit.corekit.enum.EnumRegistry` at all, by the owner's own
 #: ruling against extending it (GitHub PR #836) -- there is no registry
 #: protocol here to inherit or shadow.
@@ -746,21 +744,21 @@ GENERATED_SAMPLE = (
 #: (a) too, but on narrower grounds worth spelling out, since -- unlike the
 #: rest of that group -- it does not carry a bespoke ``get()``/``register()``
 #: at all; its own ``get``/``get_all``/``register``/``register_alias`` are
-#: exactly the base's generic implementation, same as every one of the 107
-#: :data:`GENERATED_SAMPLE`-shaped registries below. What excludes it is
+#: exactly the base's generic implementation, same as every
+#: :data:`GENERATED_SAMPLE`-shaped registry below. What excludes it is
 #: simply that this whole census, and its
 #: ``class \w+(EnumRegistry, IntEnum):`` regex a few lines down, is scoped to
 #: the :class:`~aenum.IntEnum` batch tier 3 of #775 converted.
 #: ``TLSKeyLabel`` is :class:`~aenum.StrEnum`-valued -- RFC 9850's labels are
-#: strings, matched by value -- and it was generated after that batch
-#: closed, so it was never a candidate for it either way. Excluding it here
+#: strings, matched by value -- so it is outside that batch either way.
+#: Excluding it here
 #: is not a judgement about its own inherited-protocol cleanliness;
 #: :mod:`tests.const.test_const_enum_get`,
 #: :mod:`tests.const.test_const_enum_lookup` and
 #: :mod:`tests.const.test_const_enum_builtin_parity`'s dynamic
 #: ``pkgutil.walk_packages`` sweeps already discover and cover it
-#: generically -- it is simply outside what this file's historical,
-#: IntEnum-only census counts.
+#: generically -- it is simply outside what this file's IntEnum-only census
+#: counts.
 EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
     # (a) str-valued: not an IntEnum, so excluded from the regex census
     # regardless of override.
@@ -793,7 +791,7 @@ EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
 
 class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
     """The default-template registries must inherit the protocol too,
-    not just the six bespoke ones :class:`GeneratedSourceInheritsTests`
+    not just the bespoke ones :class:`GeneratedSourceInheritsTests`
     above (tier 2) already covers."""
 
     def test_generated_sample_declares_the_base(self) -> None:
@@ -861,7 +859,7 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
 class GeneratedProtocolIsInheritedTests(unittest.TestCase):
     """The generated sample's protocol methods must resolve to the base
     class, exactly as :class:`ProtocolIsInheritedTests` above pins for the
-    six bespoke ones."""
+    bespoke ones."""
 
     if TYPE_CHECKING:
         registries: 'list[Any]'
@@ -1145,13 +1143,12 @@ class StrEnumValueFallbackTests(unittest.TestCase):
     """GitHub issue #860, step 1: guards against the base ``get()``'s
     ``isinstance(key, str)`` branch trying only ``cls._member_map_[key]`` --
     a *name* lookup -- and never falling back to treating a ``str`` key as a
-    *value*, unlike the integer path. Found during #858's review on a
-    synthetic registry rather than a real one
-    (:class:`~pcapkit.corekit.enum.EnumRegistry` itself came from tier 1,
-    #855, which converted no :class:`~aenum.StrEnum` registry). The bespoke
-    ``StrEnum`` const registries mix in this base through #860's separate
-    step 2 -- ``FEATCode``, ``Command`` and ``Method`` in PR 1, ``AppType``
-    and its transport subclasses in PR 2 -- and
+    *value*, unlike the integer path. It shows on a synthetic registry
+    rather than a real one, since #855 converts no :class:`~aenum.StrEnum`
+    registry to :class:`~pcapkit.corekit.enum.EnumRegistry`. The bespoke
+    ``StrEnum`` const registries -- ``FEATCode``, ``Command``, ``Method``,
+    and ``AppType`` with its transport subclasses -- mix in this base
+    through #860's separate step 2, and
     :data:`EXCLUDED_FROM_INTENUM_CENSUS` above holds them out of *this*
     file's tier-3 sweep for a different reason: they are
     :class:`~aenum.StrEnum`, not :class:`~aenum.IntEnum`, which is reason
@@ -1399,8 +1396,8 @@ class NoDefaultSentinelTests(unittest.TestCase):
         Neither is a registered value of any shipped registry, whose domains
         all start at ``0``, so ``default`` does not resolve: there is no
         ``cls(default)`` fallback left to attempt, and the name lookup's own
-        :exc:`KeyError` propagates, as with no default at all; the pre-#864
-        tree raised :exc:`ValueError` from ``cls(-1)`` instead. This does *not*
+        :exc:`KeyError` propagates, as with no default at all; without #864
+        the lookup raises :exc:`ValueError` from ``cls(-1)`` instead. This does *not*
         discriminate #857, which raised the same :exc:`KeyError`;
         :meth:`test_missing_name_with_default_negative_one_is_now_a_real_default`
         does.
@@ -1472,12 +1469,11 @@ class GetDefaultNoMintTests(unittest.TestCase):
 
         ``0x1234`` (4660) falls in no ``_missing_`` range, so the lookup
         falls to ``default``; ``0x0888`` (2184) falls inside the ``Xyplex``
-        range #775's *original* ruling deliberately kept minting -- but only
-        when reached as a ``key``. (#775's final round converts that range
-        too; see
-        :meth:`GetDefaultNoMintTests.test_key_path_minting_is_preserved`.)
-        Without #864's fix this mints for that reason; with it, ``default``
-        does not reach ``cls(default)`` at all, so ``0x0888``
+        range, which resolves without minting when reached as a ``key``
+        (#775; see
+        :meth:`GetDefaultNoMintTests.test_key_path_minting_is_preserved`).
+        Without #864's fix the lookup reaches ``cls(default)``; with it,
+        ``default`` does not reach ``cls(default)`` at all, so ``0x0888``
         not being an *already-registered* value propagates the ``0x1234``
         lookup's own failure instead of minting anything."""
         from pcapkit.const.reg.ethertype import EtherType
@@ -1497,13 +1493,12 @@ class GetDefaultNoMintTests(unittest.TestCase):
     def test_key_path_minting_is_preserved(self) -> None:
         """``EtherType.get(0x0888)`` -- no ``default`` at all -- falls through
         ``_missing_``, the one path by which #864 ruled ``get`` may mint.
-        #775's original mint/unmint criterion classed ``Xyplex`` as a
-        kept-minting, real-attributed-name range; GitHub issue #775's final
-        round converts that range (and every other one minting on
-        ``EtherType``/:class:`~pcapkit.const.ipx.socket.Socket`) to
-        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`,
-        preserving the hex-suffixed name unchanged -- so ``key`` resolution
-        through ``get()`` takes the same non-minting path, which this pins.
+        ``Xyplex`` is a real-attributed-name range, and like every other range
+        on ``EtherType``/:class:`~pcapkit.const.ipx.socket.Socket` it resolves
+        through :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        (GitHub issue #775), keeping the hex-suffixed name -- so ``key``
+        resolution through ``get()`` takes the same non-minting path, which
+        this pins.
         #864's own point -- that ``default`` never reaches ``_missing_`` at
         all -- holds either way."""
         from pcapkit.const.reg.ethertype import EtherType

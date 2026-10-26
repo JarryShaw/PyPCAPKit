@@ -205,16 +205,16 @@ h = re.compile(r'\\r*\\n', re.MULTILINE)
 class RuntimeDeprecationWarningTests(unittest.TestCase):
     """The interpreter-level symptom, pinned directly on the exact call shape.
 
-    Every one of the thirteen sites shares the same pattern, ``r'\\r*\\n'``,
-    which contains no ``^``/``$``/``\\A``/``\\Z`` anchor -- so moving the flag
-    to ``flags=`` cannot change *what* it matches (it was already a no-op for
-    this pattern), only removes the ``count=8`` cap and the warning below.
+    Every affected site shares the same pattern, ``r'\\r*\\n'``, which
+    contains no ``^``/``$``/``\\A``/``\\Z`` anchor -- so moving the flag to
+    ``flags=`` cannot change *what* it matches (it is a no-op for this
+    pattern), only removes the ``count=8`` cap and the warning below.
 
     """
 
-    #: The pattern shared by all thirteen sites, reproduced verbatim rather
+    #: The pattern shared by every affected site, reproduced verbatim rather
     #: than imported, since the point is to pin the runtime symptom
-    #: independent of which file happens to still contain it.
+    #: independent of which file contains it.
     PATTERN = r'\r*\n'
 
     #: The CPython version that began emitting a ``DeprecationWarning`` when
@@ -266,9 +266,9 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
         # disagree with it either way:
         #   - already warns (3.13+): push the boundary one minor version
         #     higher, so the branch flips to "no warning expected" while the
-        #     real behaviour still warns -- the mirror image of the wild
-        #     failure, where the boundary was wrongly read as 3.12 instead
-        #     of 3.13 and a real 3.12 interpreter landed on the wrong side.
+        #     real behaviour still warns -- the mirror image of reading the
+        #     boundary as 3.12 instead of 3.13, which puts a real 3.12
+        #     interpreter on the wrong side.
         #   - does not warn yet (below 3.13): pull the boundary down to this
         #     interpreter's own version, so the branch flips to "warning
         #     expected" while the real behaviour still does not warn.

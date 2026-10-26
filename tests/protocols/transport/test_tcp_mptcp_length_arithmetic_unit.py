@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Multipath TCP option lengths, re-derived from RFC 8684 at the six sites #576 names.
+"""Multipath TCP option lengths, re-derived from RFC 8684 at the sites #576 names.
 
-GitHub issue #576, the follow-up #567 invited ("worth checking the sibling ``_make_mptcp_*``
-helpers' length arithmetic in the same pass") and #579 deliberately left alone, being scoped
-to ``MPTCP.subtype`` and MP_CAPABLE.
+GitHub issue #576: the check of the sibling ``_make_mptcp_*`` helpers' length arithmetic that
+#567 suggests, outside the scope of #579 (``MPTCP.subtype`` and MP_CAPABLE).
 
 An MPTCP option carries its own octet count in its ``Length`` field, and three separate
 places have to agree on it: the ``_make_mptcp_*`` maker that *writes* that octet, the schema
 in :mod:`pcapkit.protocols.schema.transport.tcp` whose fields actually *pack* the octets, and
-the ``_read_mptcp_*`` reader whose guard *accepts* it coming back. Each of the six sites below
-had at least one of the three disagreeing with :rfc:`8684`, and one had all three disagreeing
-with each other.
+the ``_read_mptcp_*`` reader whose guard *accepts* it coming back. These tests guard against
+any of the three disagreeing with :rfc:`8684` at each site below; at MP_FASTCLOSE all three can
+disagree with each other.
 
 What each site is, and where its number comes from
 --------------------------------------------------
@@ -21,34 +20,34 @@ octet where the subtype's 4 bits are followed by 4 bits of flags or reserved, an
 where they are followed by 12 reserved bits.
 
 * **MP_FASTCLOSE** -- :rfc:`8684` section 3.5, figure 14. Head 4 (``Kind`` 1 + ``Length`` 1 +
-  subtype-and-12-reserved-bits 2) + the receiver's key 8 = **12**. The maker already wrote 12;
-  :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPFastclose` packed **11**, having no
-  reserved field at all; and ``_read_mptcp_fastclose`` required **16**, a number neither of
-  the other two nor the RFC produces. Note section 3.5, not 3.7: 3.7 is Fallback (MP_FAIL),
-  and #576's own text -- and the ``EXPECTED_FAILURES`` entry it left behind -- cite 3.7 here
-  in error.
+  subtype-and-12-reserved-bits 2) + the receiver's key 8 = **12**, which the maker,
+  :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPFastclose` and
+  ``_read_mptcp_fastclose`` all have to agree on: a schema with no reserved field packs
+  **11**, and a reader requiring **16** wants a number neither of the other two nor the RFC
+  produces. Note section 3.5, not 3.7: 3.7 is Fallback (MP_FAIL), and #576's own text cites
+  3.7 here in error.
 * **MP_JOIN-SYN/ACK** -- :rfc:`8684` section 3.2, figure 6. Head 4 (``Kind`` 1 + ``Length`` 1 +
   subtype/rsv/``B`` 1 + ``Address ID`` 1) + the truncated HMAC 8 + the random number 4 =
-  **16**. The maker wrote **12**, which is ``_make_join_syn``'s own correct length for the
-  *SYN* form of figure 5 -- that one carries a 4-octet token where this one carries an
-  8-octet HMAC -- copied across without recomputing. ``_read_join_synack`` independently
-  required **20**, contradicting its own docstring figure.
+  **16**. **12** is ``_make_join_syn``'s own correct length for the *SYN* form of figure 5
+  -- that one carries a 4-octet token where this one carries an 8-octet HMAC -- so copying
+  it across without recomputing is the mistake to catch; a ``_read_join_synack`` requiring
+  **20** contradicts its own docstring figure.
 * **MP_JOIN-ACK** -- :rfc:`8684` section 3.2, figure 7. Head 4 (``Kind`` 1 + ``Length`` 1 +
-  subtype-and-12-reserved-bits 2) + the full 160-bit HMAC 20 = **24**. The maker wrote **8**.
-  Its reader already required 24, so nothing the maker produced could be parsed back at all.
+  subtype-and-12-reserved-bits 2) + the full 160-bit HMAC 20 = **24**, which the reader
+  requires, so a maker writing **8** produces nothing that parses back at all.
 * **REMOVE_ADDR** -- :rfc:`8684` section 3.4.2, figure 13, which states ``Length = 3 + n``
   outright: head 3 (``Kind`` 1 + ``Length`` 1 + subtype-and-4-reserved-bits 1) + one octet per
-  Address ID. The maker wrote a constant **4**, correct for exactly one list length -- and
+  Address ID. A constant **4** is correct for exactly one list length -- and
   ``examples.generators.options``' fixture passes ``addr_id=[1]``, so the round-trip suite
-  exercised only that one.
+  exercises only that one.
 * **MP_PRIO** -- :rfc:`8684` section 3.3.8, figure 11: head 3 (``Kind`` 1 + ``Length`` 1 +
   subtype/rsv/``B`` 1) and **nothing else**, since section 5 of that document "specifies the
   removal of the AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical attack
   in which a subflow could be forced into backup mode. So **3**, with :rfc:`6824`'s 4-octet
-  Address ID form still accepted as legacy. The maker wrote a constant **4**, and because
+  Address ID form still accepted as legacy. Because
   :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPPriority.addr_id` is conditional on
-  ``pkt['length'] == 4``, that constant satisfied its own predicate: a caller who gave no
-  Address ID got a phantom all-zero one anyway.
+  ``pkt['length'] == 4``, a maker writing a constant **4** satisfies its own predicate: a
+  caller who gives no Address ID gets a phantom all-zero one anyway.
 * **DSS** -- :rfc:`8684` section 3.3, figure 9. Head 4, then the Data ACK (4 octets, or 8 when
   ``a`` is set) if ``A``, the Data Sequence Number (4, or 8 when ``m`` is set), the Subflow
   Sequence Number (4), the Data-Level Length (2) and the Checksum (2) if ``M``. All flags set
@@ -83,7 +82,7 @@ A callable length also has to pack at all. :class:`~pcapkit.corekit.fields.numbe
 builds its template once at ``__init__`` with the placeholder length ``-1``, and recomputes
 ``_need_process`` from the width in force rather than latching it from that placeholder
 (#598), so a callable length packs and unpacks both widths; latched, the 8-octet form
-``_make_mptcp_dss(DSS, ack=1 << 40)`` raised ``struct.error: required argument is not an
+``_make_mptcp_dss(DSS, ack=1 << 40)`` raises ``struct.error: required argument is not an
 integer``. The schema selects between :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
 and :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at
 class level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
@@ -107,16 +106,16 @@ pass does not "fix" a correct number.
 Coverage
 --------
 
-One test class per site, not one test for all six, so a regression names the option it broke.
+One test class per site, not one test for every site, so a regression names the option it broke.
 
 Each class asserts the **byte-exact** packed option from its maker rather than only its
 ``length`` octet -- a declared length and a packed length can disagree, which is the whole
 defect, so both are checked, and the octets themselves pin that the payload really is where
-the figure puts it. Where the *reader* guard was also wrong (MP_FASTCLOSE, MP_JOIN-SYN/ACK) a
+the figure puts it. Where the *reader* guard is also at stake (MP_FASTCLOSE, MP_JOIN-SYN/ACK) a
 second test splices hand-built, spec-correct octets into a real TCP segment and parses them
 back through :class:`~pcapkit.protocols.transport.tcp.TCP` proper, so a pack-side and a
 parse-side bug cannot cancel out behind a closed round trip -- the pattern
-:mod:`tests.protocols.transport.test_tcp_mptcp_capable_length_unit` established for #567, and
+:mod:`tests.protocols.transport.test_tcp_mptcp_capable_length_unit` uses for #567, and
 the blind spot :mod:`tests.protocols.test_option_roundtrip_unit`'s own docstring names ("a
 defect can leave the cycle closed").
 
@@ -229,7 +228,7 @@ def make(meth: 'str', subtype_name: 'str', **kwargs: 'object') -> 'bytes':
 
 
 class LengthInvariantMixin:
-    """The one invariant every site below broke: declared length is packed length."""
+    """The one invariant every site below must keep: declared length is packed length."""
 
     def assertLengthMatchesWire(self, packed: 'bytes', expected: 'int') -> 'None':  # noqa: N802
         """Assert ``packed`` is ``expected`` octets long and says so in its length octet.
@@ -285,9 +284,8 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_public_constructor_round_trips(self) -> None:
         """MP_FASTCLOSE builds through ``TCP()`` and reports itself back.
 
-        This is the case ``tcp-mptcp/MP_FASTCLOSE`` records in
-        :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`: the maker's
-        *correct* length failing the parser's wrong check made the whole construction raise.
+        Guards against the maker's *correct* length failing a wrong parser check, which makes
+        the whole construction raise.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -576,8 +574,8 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         This is #576's filed measurement: ``ack=1, dsn=2, ssn=3, dl_len=4,
         checksum=b'\\x00\\x00'`` packed **12** octets against a declared 20, with neither
         ``ack`` nor ``dsn`` on the wire. The round-trip suite cannot see that, because
-        construct -> parse -> reconstruct produces the same wrong 12 octets every time and
-        the suite only checks the cycle is self-consistent.
+        construct -> parse -> reconstruct would produce the same wrong 12 octets every time
+        and the suite only checks the cycle is self-consistent.
 
         """
         packed = make('_make_mptcp_dss', 'DSS', ack=1, dsn=2, ssn=3, dl_len=4,
@@ -624,14 +622,14 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
 
 
 class TCPMPTCPDSSExtendedFieldsUnitTests(LengthInvariantMixin, unittest.TestCase):
-    """Site 6, second half -- the 8-octet DSS forms, which could not be packed at all.
+    """Site 6, second half -- the 8-octet DSS forms, which a latched field cannot pack at all.
 
-    ``MPTCPDSS.ack``/``.dsn`` used ``NumberField(length=<callable>)``, and that field latches
-    ``_need_process = True`` at ``__init__`` from the placeholder length ``-1`` and never
-    clears it, so once ``__call__`` resolved a real width of 8 and rebuilt the template as
-    ``>Q``, ``pre_process`` handed :func:`struct.pack` bytes for an integer template. Every
-    test in this class raised ``struct.error: required argument is not an integer`` before the
-    fix -- not a wrong length, no length at all.
+    Guards against ``MPTCPDSS.ack``/``.dsn`` using a ``NumberField(length=<callable>)`` that
+    latches ``_need_process = True`` at ``__init__`` from the placeholder length ``-1`` and
+    never clears it: once ``__call__`` resolves a real width of 8 and rebuilds the template as
+    ``>Q``, ``pre_process`` hands :func:`struct.pack` bytes for an integer template. Every test
+    in this class then raises ``struct.error: required argument is not an integer`` -- not a
+    wrong length, no length at all.
 
     """
 
@@ -694,7 +692,7 @@ class TCPMPTCPJoinSYNIsCorrectUnitTests(LengthInvariantMixin, unittest.TestCase)
     """
 
     def test_maker_packs_twelve_octets(self) -> None:
-        """``_make_join_syn`` packs 12 octets and declares 12, before and after #576."""
+        """``_make_join_syn`` packs 12 octets and declares 12."""
         packed = make('_make_join_syn', 'MP_JOIN', addr_id=1, token=2, nonce=3)
 
         self.assertLengthMatchesWire(packed, 12)

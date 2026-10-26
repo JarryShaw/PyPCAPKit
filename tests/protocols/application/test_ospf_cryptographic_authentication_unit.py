@@ -68,7 +68,6 @@ class OSPFCryptographicAuthenticationUnitTests(unittest.TestCase):
                     self.assertNotIn(name, application)
 
     def test_auth_data_selector_picks_the_cryptographic_schema(self) -> None:
-        # Moved from tests/protocols/link/test_link_unit.py.
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.strings import BytesField

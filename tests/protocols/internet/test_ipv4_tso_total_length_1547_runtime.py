@@ -3,9 +3,10 @@
 
 GitHub issue #1547. A capture taken on a host that offloads TCP segmentation
 (TSO/GSO) records its outgoing IPv4 headers with ``total_length`` 0, since the
-NIC fills it in later. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
-handed the next layer ``0 - hdr_len`` octets, so TCP fell back to
-:class:`~pcapkit.protocols.misc.raw.Raw` and the flow was never traced. A Total
+NIC fills it in later. These tests guard against
+:meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` handing the next
+layer ``0 - hdr_len`` octets, under which TCP falls back to
+:class:`~pcapkit.protocols.misc.raw.Raw` and the flow is never traced. A Total
 Length of 0 means the rest of the captured frame, with no trailer, as dpkt
 (``ip.py``) and Wireshark ("presumed TSO") read it, and the rebuild writes the 0
 back. Following the owner's ruling to match Wireshark, any other Total Length
@@ -156,7 +157,7 @@ class TSOTotalLengthTests(unittest.TestCase):
         self.assertEqual(IPv4.from_data(parsed.info).data, made.data)
         self.assertEqual(IPv4.from_data(parsed.info.to_dict()).data, made.data)
 
-        # Without an explicit Total Length it is computed, as before.
+        # Without an explicit Total Length it is computed.
         computed = IPv4(protocol='TCP', payload=segment)
         self.assertEqual(struct.unpack('!H', computed.data[2:4])[0], 20 + len(segment))
 
@@ -223,7 +224,8 @@ class TSOTotalLengthTests(unittest.TestCase):
     def test_a_total_length_past_the_capture_is_unchanged(self) -> None:
         # The other direction, which Wireshark reports as "IPv4 total length
         # exceeds packet length (64 bytes)" while still dissecting TCP: the
-        # declared length is kept for the rebuild (#1155), and #1547 leaves it be.
+        # declared length is kept for the rebuild (#1155), and #1547's TSO
+        # reading does not apply to it.
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.transport.tcp import TCP

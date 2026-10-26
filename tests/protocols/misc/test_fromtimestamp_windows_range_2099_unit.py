@@ -3,9 +3,9 @@
 
 :meth:`datetime.datetime.fromtimestamp` with a ``tz`` breaks the instant down
 with the C library's ``gmtime()``, and the Windows CRT's ``gmtime_s`` takes
-nothing before 1970 or after 23:59:59, December 31, 3000, UTC. On the first
-Windows run (#2095) a PCAP-NG packet dated in year 1 or year 9999 therefore took
-the invalid-timestamp fallback and was dated 1970.
+nothing before 1970 or after 23:59:59, December 31, 3000, UTC. Without the
+fix, a PCAP-NG packet dated in year 1 or year 9999 therefore takes the
+invalid-timestamp fallback on Windows and is dated 1970 (#2095).
 
 Windows is emulated here by a ``datetime`` whose ``fromtimestamp`` raises what
 CPython raises there, ``OSError(EINVAL)``, outside that range. Every reader is

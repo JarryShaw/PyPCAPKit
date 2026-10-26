@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """The unused Ethernet-address pattern in the OSPF module.
 
-GitHub issue #1844. :mod:`pcapkit.protocols.application.ospf` defined a
-``PAT_MAC_ADDR`` that nothing read, a leftover that came along when OSPF moved
-to the application layer in #1031, and it imported :mod:`re` only to compile
-it. The constant and the import are gone. This pins that the constant stays
-gone and that the module does not import :mod:`re` without using it. The
-copies of the pattern in the Ethernet, ARP and PCAP-NG modules have readers
-and are untouched.
+GitHub issue #1844. Guards against
+:mod:`pcapkit.protocols.application.ospf` defining a ``PAT_MAC_ADDR`` that
+nothing reads, and importing :mod:`re` only to compile it. These tests pin
+that the constant is absent and that the module does not import :mod:`re`
+without using it. The copies of the pattern in the Ethernet, ARP and PCAP-NG
+modules have readers, and stay.
 
 """
 from __future__ import annotations

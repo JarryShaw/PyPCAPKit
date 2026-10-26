@@ -22,7 +22,7 @@ from unittest import mock
 from tests._support import reimport_once_per_class
 
 #: ``(module, class, registrar, registry)`` for every parser registrar but
-#: PCAP-NG's, which another change owns.
+#: PCAP-NG's, which :mod:`tests.protocols.misc.test_pcapng_unit` covers.
 SITES = (
     ('pcapkit.protocols.internet.ipv4', 'IPv4', 'register_option', '__option__'),
     ('pcapkit.protocols.internet.hopopt', 'HOPOPT', 'register_option', '__option__'),

@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """HIP keeps the reserved bits of the ``Version`` octet and the route ``Flags``.
 
-GitHub issue #1417. Three HIP ``BitField`` namespaces left bits unnamed, so those
-bits were packed as zero on rebuild (start, length):
+GitHub issue #1417. Guards against HIP ``BitField`` namespaces leaving bits
+unnamed, under which those bits pack as zero on rebuild. The sites, as (start,
+length):
 
 * ``HIP.ver``: (4, 3) -- the ``RES`` bits between ``Version`` and the fixed
   low-order ``1`` (:rfc:`7401#section-5.1`);
 * ``RouteDstParameter.flags`` and ``RouteViaParameter.flags``: (2, 14) -- the
   reserved bits after ``S`` and ``M`` (:rfc:`6028#section-5`).
 
-The fix names a ``reserved`` sub-field at each site, per the #654 per-site
-policy, and carries it through the data model and ``make()``.
+Each site names a ``reserved`` sub-field, per the #654 per-site policy, and
+carries it through the data model and ``make()``.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -289,7 +289,7 @@ class TestTrialParseWarnings(unittest.TestCase):
         A warning made an error is raised where the trial that kept it ends,
         inside the guard it was raised in when nothing was held, so the same
         layer, and only it, becomes ``Raw``. Holding until the outermost trial
-        ended instead turned the whole subtree into ``Raw``.
+        ends instead would turn the whole subtree into ``Raw``.
 
         """
         import pcapkit.protocols.protocol as protocol_module

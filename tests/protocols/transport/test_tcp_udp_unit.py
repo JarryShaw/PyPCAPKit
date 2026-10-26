@@ -1114,9 +1114,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         # NOTE: length 5, not 4: :rfc:`8684` section 3.4.2 figure 13 gives
         # ``Length = 3 + n``, so a two-Address-ID REMOVE_ADDR is 5 octets. The
         # reader only requires ``>= 3`` and does not cross-check the list against
-        # the length, so 4 passed -- but it enshrined the very constant #576
-        # removed from ``_make_mptcp_remove``, which is worth not leaving in a
-        # test as though it were correct.
+        # the length, so 4 would pass -- but it is the constant #576 keeps out of
+        # ``_make_mptcp_remove``, which is worth not leaving in a test as though
+        # it were correct.
         remove = mark(
             MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value, 'reserved': 0}, addr_id=[1, 2]),
             5,
@@ -1481,11 +1481,11 @@ class TCPUDPUnitTests(unittest.TestCase):
         nothing registers. ``__option__`` is a
         :class:`collections.defaultdict` on a class attribute shared by every
         :class:`~pcapkit.protocols.transport.tcp.TCP` instance in the process, so
-        ``__option__[kind]`` inserted the kind it missed -- and the value it
-        inserted was ``'donone'``, exactly what the default factory returns
-        anyway. The entry bought nothing and cost a
+        a ``__option__[kind]`` read inserts the kind it misses -- and the value
+        it inserts is ``'donone'``, exactly what the default factory returns
+        anyway. The entry buys nothing and costs a
         :func:`~pcapkit.foundation.registry.protocols.register_tcp_option` call
-        afterwards a warning about an overwrite that never happened.
+        afterwards a warning about an overwrite that never happens.
 
         The segment is the issue's, with its data offset corrected from 7 words
         to 6: the issue supplies 24 octets but declared a 28-octet header. The
@@ -1584,14 +1584,14 @@ class TCPUDPUnitTests(unittest.TestCase):
         :data:`True`, so ``assertEqual(proto.connection, 0)`` passes with either seed
         and cannot discriminate -- and neither can a membership test alone, on
         the flagful rows. Hence ``assertIs(type(...), Enum_Flags)``, which is what the
-        :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` property has always
-        advertised it returns.
+        :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` property advertises
+        it returns.
 
         The last block pins the consequence rather than the type. ``_read_mptcp_join``
         chooses between :rfc:`8684` section 3.2's three MP_JOIN layouts by testing
         ``self._flags`` for SYN and ACK, and falls through to the library's own
         ``ProtocolError`` when neither is set. On an :obj:`int` it would die on a bare
-        :exc:`TypeError` two lines earlier instead. That branch is not reachable from
+        :exc:`TypeError` at the flag test instead. That branch is not reachable from
         a caller -- :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector`
         rejects a flagless MP_JOIN with a ``FieldError`` before the dispatcher runs --
         so the defect is latent, but latent only by virtue of a guard in a different

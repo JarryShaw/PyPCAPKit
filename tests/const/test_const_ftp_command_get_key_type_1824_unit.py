@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """``Command.get`` refuses a non-``str`` key the way ``Method.get`` does.
 
-GitHub issue #1824. :meth:`~pcapkit.const.ftp.command.Command.get` was a
-:class:`staticmethod` that called ``key.upper()`` on whatever it was given, so
-``Command.get(b'\\x01')`` built an unregistered member keyed by the
-:class:`bytes` object, and ``Command.get(-1)`` raised a builtin
-:exc:`AttributeError` whether or not ``default`` was supplied.
-:meth:`~pcapkit.const.http.method.Method.get` had the same shape until #908,
-which made it a :class:`classmethod` delegating to
-:meth:`~pcapkit.corekit.enum.EnumLookup.get`.
+GitHub issue #1824. Guards against :meth:`~pcapkit.const.ftp.command.Command.get`
+being a :class:`staticmethod` that calls ``key.upper()`` on whatever it is
+given, under which ``Command.get(b'\\x01')`` builds an unregistered member keyed by the
+:class:`bytes` object, and ``Command.get(-1)`` raises a builtin
+:exc:`AttributeError` whether or not ``default`` is supplied.
+:meth:`~pcapkit.const.http.method.Method.get` is a :class:`classmethod`
+delegating to :meth:`~pcapkit.corekit.enum.EnumLookup.get` (#908).
 
 ``Command.get`` follows it: a non-``str`` key goes to the base, whose call
 to ``Command._validate_value`` (added by #1823) raises

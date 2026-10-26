@@ -241,9 +241,9 @@ class HIPUnitTests(unittest.TestCase):
             registry[Parameter.ESP_INFO] = original
 
         # An unregistered code carries no entry, so registering one is not an
-        # overwrite. The setattr form could not tell the two apart: it keyed the
-        # warning on ``hasattr(cls, f'_read_param_{name}')``, which is true of
-        # every shipped handler as well as of anything a user had installed.
+        # overwrite. A setattr form cannot tell the two apart: keyed on
+        # ``hasattr(cls, f'_read_param_{name}')``, its warning fires for every
+        # shipped handler as well as for anything a user installed.
         custom = Parameter.Unassigned_65501
         self.assertNotIn(custom, registry)
         try:
@@ -270,11 +270,11 @@ class HIPUnitTests(unittest.TestCase):
         :data:`ParameterConstructor` declare -- ``(schema, *, version, options)``
         and ``(code, param=None, *, version, **kwargs)`` -- i.e. as plain
         callables rather than as methods with an implicit ``self``. That is the
-        calling convention every other dispatch family uses, and the reason the
-        registry form replaced ``setattr``: installing the callable on the class
-        made it a descriptor, so dispatch passed ``self`` as the first positional
-        argument and a handler written to the declared signature could not be
-        called at all.
+        calling convention every other dispatch family uses, and the reason
+        dispatch goes through the registry rather than ``setattr``: a callable
+        installed on the class becomes a descriptor, so dispatch would pass
+        ``self`` as the first positional argument and a handler written to the
+        declared signature could not be called at all.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -338,10 +338,11 @@ class HIPUnitTests(unittest.TestCase):
     def test_hip_parameter_registry_covers_every_shipped_handler(self) -> None:
         """Every ``_read_param_*`` / ``_make_param_*`` pair must be reachable.
 
-        The setattr form derived the handler name from ``code.name.lower()``, so
-        a handler was reachable by construction and "what is registered?" had no
-        direct answer. Under the registry the mapping is explicit data, which
-        means a handler added without its registry entry becomes dead code --
+        A setattr form, deriving the handler name from ``code.name.lower()``,
+        makes a handler reachable by construction and leaves "what is
+        registered?" with no direct answer. In the registry the mapping is
+        explicit data, which means a handler added without its registry entry
+        becomes dead code --
         this pins the two sides together.
 
         """
@@ -366,7 +367,7 @@ class HIPUnitTests(unittest.TestCase):
 
         # ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129, HIPv2) are distinct
         # codes whose names differ only in case, so both have to be keyed
-        # explicitly -- ``code.name.lower()`` collapsed them for free.
+        # explicitly -- ``code.name.lower()`` would collapse them.
         self.assertEqual(registry[Parameter.R1_Counter], 'r1_counter')
         self.assertEqual(registry[Parameter.R1_COUNTER], 'r1_counter')
 
@@ -383,9 +384,8 @@ class HIPUnitTests(unittest.TestCase):
         :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
         is a :class:`collections.defaultdict` on a class attribute shared by
         every instance in the process, so ``registry[code]`` would insert each
-        code it missed -- the leak #428 swept out of the sixteen registries that
-        already existed. This one is new, so the guard has to be pinned here too:
-        the reads go through
+        code it missed -- the leak #428 guards the other registries against, so
+        it is pinned here too: the reads go through
         :meth:`~pcapkit.protocols.protocol.ProtocolBase._lookup_registry`.
 
         Code 65499 is unassigned in IANA's registry and 4650 is
@@ -2043,8 +2043,8 @@ class HIPUnitTests(unittest.TestCase):
         whatever ``item_type`` the ``formats`` field declares. A hand-built
         ``TransportFormatListParameter(type=..., len=..., formats=...)``
         picks a self-consistent ``len`` by hand and so cannot expose a
-        maker/schema disagreement -- which is why the one-octet
-        ``item_type`` survived review once already. Building through the
+        maker/schema disagreement, such as a one-octet ``item_type``.
+        Building through the
         maker instead pins the two to agree: with one-octet items and two
         real entries, the maker's ``len=4`` reads back as ``len // 1 == 4``
         entries -- ``[10, 20, 0, 0]``, two spurious trailing zeros -- while
@@ -2530,8 +2530,8 @@ class HIPUnitTests(unittest.TestCase):
         discriminators: at a multiple of 8 the defect's ``ceil(bits / 4)`` and
         the floor variant both coincide with the correct width, which is exactly
         why every byte-aligned fixture this library ships passed through the
-        defect unharmed. They are asserted to confirm the repair changes nothing
-        on the path that already worked.
+        defect unharmed. They are asserted to confirm the byte-aligned path
+        builds the same width as well.
 
         """
         import math
@@ -2969,8 +2969,8 @@ class HIPUnitTests(unittest.TestCase):
                     schema, version=1, options=options,
                 ).random, value)
 
-                # HIPv2: unchanged, still derived from the value when nothing
-                # declares the width. This is what makes the v1 column a fix rather
+                # HIPv2: derived from the value when nothing declares the
+                # width. This is what makes the v1 column a fix rather
                 # than a blanket constant.
                 self.assertEqual(proto._make_param_puzzle(
                     Parameter.PUZZLE, version=2, index=1, lifetime=1,
@@ -3174,14 +3174,14 @@ class HIPUnitTests(unittest.TestCase):
 
         # Which parameters this governs, stated rather than implied: every padding
         # site in ``schema/internet/hip.py`` and every reported record length in
-        # ``internet/hip.py`` routes through these two helpers -- 45 of the 46
-        # parameter schemas and 48 of the 49 reported lengths. The forty-sixth is
+        # ``internet/hip.py`` routes through these two helpers -- every parameter
+        # schema and every reported length but one. The exception is
         # ``LOCATOR_SET``, which uses
         # :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`
         # instead (#679): the same arithmetic, read off a snapshot of the parameter's
         # own ``Length`` rather than off ``pkt['len']``, which its nested
-        # locators shadow while they pack. The counts and the identity of that
-        # one callback are asserted directly in
+        # locators shadow while they pack. The identity of that one callback is
+        # asserted directly in
         # :meth:`test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else`,
         # so a third expression cannot appear unnoticed.
         #
@@ -3204,8 +3204,8 @@ class HIPUnitTests(unittest.TestCase):
         # the three spot values worth naming, so a regression reads as a number
         # rather than as a loop index
         self.assertEqual(hip_schema.parameter_total_len(4), 8)    # SEQ: no padding
-        self.assertEqual(hip_schema.parameter_total_len(8), 16)   # was 12, short by 4
-        self.assertEqual(hip_schema.parameter_total_len(20), 24)  # SOLUTION: was 28
+        self.assertEqual(hip_schema.parameter_total_len(8), 16)   # 12 without #651, short by 4
+        self.assertEqual(hip_schema.parameter_total_len(20), 24)  # SOLUTION: 28 without #651
         self.assertEqual(hip_schema.parameter_padding_len({'len': 4}), 0)
         self.assertEqual(hip_schema.parameter_padding_len({'len': 8}), 4)
 
@@ -3220,7 +3220,7 @@ class HIPUnitTests(unittest.TestCase):
             hip_schema.parameter_padding_len({'len': -1})
 
     def test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else(self) -> None:
-        """#651/#664/#679: two padding callbacks cover all 46, and no third exists.
+        """#651/#664/#679: two padding callbacks cover every parameter, and no third exists.
 
         Every HIP padding site goes through
         :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`
@@ -3232,7 +3232,7 @@ class HIPUnitTests(unittest.TestCase):
         and #664 documented the exclusion rather than leaving it to look
         accidental.
 
-        **With the pair fixed (#679), the exclusion is not a hold-back.**
+        **The exclusion is not a hold-back (#679).**
         ``LocatorSetParameter.padding`` uses
         :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`,
         which defers to ``parameter_padding_len`` for the arithmetic and differs
@@ -3302,13 +3302,13 @@ class HIPUnitTests(unittest.TestCase):
             'given a snapshot it has no nested schemas to need.'
         )
 
-        # Three schemas declare no padding field at all, which is correct rather
-        # than an omission and is unchanged by #651: their contents are a fixed
-        # 20 octets (a two-octet port, two reserved and a 16-octet address), and
+        # These schemas declare no padding field at all, which is correct rather
+        # than an omission: their contents are a fixed 20 octets (a two-octet
+        # port, two reserved and a 16-octet address), and
         # 11 + 20 - (20 + 3) % 8 == 24 == 4 + 20, so the RFC asks for no padding.
-        # Measured on this tree and on b34f132f6: all three pack to 24 octets.
-        # Listed explicitly because a *fourth* name appearing here would mean a
-        # parameter had quietly lost its padding field.
+        # Measured on b34f132f6: each packs to 24 octets. Listed explicitly
+        # because another name appearing here would mean a parameter had quietly
+        # lost its padding field.
         self.assertEqual(
             sorted(unpadded),
             ['RegFromParameter', 'RelayFromParameter', 'RelayToParameter'])

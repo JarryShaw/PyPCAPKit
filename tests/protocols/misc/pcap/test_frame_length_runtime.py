@@ -348,13 +348,9 @@ class PcapngFrameLengthRuntimeTests(unittest.TestCase):
 
                 self.assertGreaterEqual(frame.len, frame.cap_len)
                 # NOTE: no assertion that ``cap_len == len(frame.packet)`` here,
-                # which is the PCAP side's independent check. The PCAP-NG
-                # reader leaves the block's own ``packet`` field empty -- every
-                # block in ``test.pcapng`` comes back with ``packet == b''``
-                # while carrying a ``captured_len`` in the hundreds -- so
-                # ``block2frame`` hands on nothing to measure. That is a separate
-                # defect from #618 and is not fixed here; asserting it would pin
-                # the wrong reading of the two.
+                # which is the PCAP side's independent check. The octets a
+                # PCAP-NG block carries are #646's concern, pinned in
+                # tests/protocols/test_pcapng_regression.py rather than here.
 
                 if block.captured_len != block.original_len:
                     truncated += 1

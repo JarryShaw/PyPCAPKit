@@ -91,7 +91,7 @@ and the backup's cleanup -- the previous content stays truncated and a
 ``.const.py.*.bak`` is left behind in the directory, measured directly as
 ``['.const.py.<random>.bak', 'const.py']``. The interrupt itself still
 propagates out of ``run()`` either way, since ``run()``'s own
-``except Exception:`` never caught it either; what the mutant changes is
+``except Exception:`` does not catch it either; what the mutant changes is
 only whether anything got restored on the way out. This is why the method
 asserts three things rather than two: the exception's propagation, the
 content, and the directory listing -- the first alone is silent about
@@ -194,11 +194,11 @@ class SnapshotRestoreTests(unittest.TestCase):
         ``__module__`` and ``__name__``, so the message names exactly the class
         that *was* raised.
 
-        ``vendor_main`` and ``Vendor`` were already immune to this, because they
-        were resolved here in ``setUp`` rather than at module level.
-        ``VendorRuntimeWarning`` was not; it joins them, resolved through
-        :func:`importlib.import_module` so this always compares against the
-        same generation the crawler actually raises.
+        ``vendor_main``, ``Vendor`` and ``VendorRuntimeWarning`` are immune to
+        this, because they are resolved here in ``setUp`` rather than at module
+        level -- the warning class through :func:`importlib.import_module`, so
+        this always compares against the same generation the crawler actually
+        raises.
 
         """
         import pcapkit.vendor.__main__ as vendor_main

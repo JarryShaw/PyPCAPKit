@@ -2,7 +2,7 @@
 """Unit tests for :mod:`pcapkit.vendor.ngap`'s pycrate-sourced crawlers.
 
 GitHub issue #880's owner ruling for the ``ngap.py`` half of the defect: unlike
-the four closed :mod:`pcapkit.protocols.internet.mh` helper enums #877 ruled
+the closed :mod:`pcapkit.protocols.internet.mh` helper enums #877 ruled
 on, :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
 :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` are genuinely open per
 3GPP TS 38.413, so their real assignment is sourced from |pycrate|_ through a

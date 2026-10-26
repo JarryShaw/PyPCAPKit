@@ -67,10 +67,10 @@ class TCPHTTPDispatchTests(unittest.TestCase):
                 self.assertEqual(descriptor.name, 'HTTP')
 
     def test_tcp_and_udp_agree_on_the_http_ports(self) -> None:
-        """The TCP/UDP asymmetry #682 closed stays closed.
+        """TCP and UDP bind the HTTP ports alike (#682).
 
-        UDP already bound the proxy for both ports; TCP bound ``httpv1`` for the
-        same two. Pinning the equality rather than each table separately is what
+        UDP binds the proxy for both ports, and so must TCP, rather than
+        ``httpv1`` for the same two. Pinning the equality rather than each table separately is what
         makes a future one-sided edit fail here.
 
         """

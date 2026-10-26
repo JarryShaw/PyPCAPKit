@@ -4,10 +4,10 @@
 GitHub issue #1459. The leading bit of the ``Packet Type`` octet and the
 low-order bit of the ``Version`` octet are reserved for SHIM6 compatibility:
 they "MUST be set as shown when sending and MUST be ignored when receiving"
-(:rfc:`7401#section-5.1`). ``HIP.read`` raised ``ProtocolError`` unless they
-read ``0`` and ``1``.
+(:rfc:`7401#section-5.1`). These tests guard against ``HIP.read`` raising
+``ProtocolError`` unless they read ``0`` and ``1``.
 
-The fix stops validating them, carries them as ``packet_fixed`` and
+``HIP`` does not validate them: it carries them as ``packet_fixed`` and
 ``version_fixed``, and lets ``make()`` write them, defaulting to the
 RFC-prescribed values.
 

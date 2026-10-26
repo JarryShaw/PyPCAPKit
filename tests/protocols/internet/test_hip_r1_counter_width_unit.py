@@ -10,45 +10,47 @@ counter layout, which is why both codes that reach
 :class:`~pcapkit.protocols.schema.internet.hip.R1CounterParameter` are affected:
 ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129).
 
-``counter`` was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`. The
-parameter therefore *declared* the correct ``len=12`` -- 4 octets of ``Reserved``
-plus 8 of counter, which is the ``Length 12`` the RFC states -- and *packed* only
-eight of those twelve, for a record of 12 octets where :rfc:`7401`
-Section 5.2.1's ``Total Length = 11 + Length - (Length + 3) % 8`` makes it 16.
+Guards against ``counter`` being a
+:class:`~pcapkit.corekit.fields.numbers.UInt32Field`. The parameter would then
+*declare* the correct ``len=12`` -- 4 octets of ``Reserved`` plus 8 of counter,
+which is the ``Length 12`` the RFC states -- and *pack* only eight of those
+twelve, for a record of 12 octets where :rfc:`7401` Section 5.2.1's
+``Total Length = 11 + Length - (Length + 3) % 8`` makes it 16.
 Four short, at ``4 (mod 8)``, in both directions: a conformant receiver reading
 ``Length = 12`` consumes 16 octets and takes four octets of the next parameter as
 this one's tail, and a real peer's 16-octet ``R1_COUNTER`` leaves its last four
 octets to be read as the following parameter's ``Type``.
 
-Why the suite could not see it
+Why a round trip cannot see it
 ------------------------------
 
-Three things hid it at once, and the third is the reason this module asserts
+Three things can hide it at once, and the third is the reason this module asserts
 against the RFC's arithmetic rather than against a round trip.
 
-1. ``HIP_COPIES = 2`` in :mod:`examples.generators.options` puts two copies of
-   each parameter in a frame, and two four-octet shortfalls sum to eight, so the
-   record area stays 8-aligned and ``HIP.make``'s ``total_length // 8 + 4``
-   comes out exact.
+1. With two copies of each parameter in a frame (``HIP_COPIES = 2`` in
+   :mod:`examples.generators.options`), two four-octet shortfalls sum to eight,
+   so the record area stays 8-aligned and ``HIP.make``'s
+   ``total_length // 8 + 4`` comes out exact.
 2. A padding rule that aligns the parameter *contents* rather than the record
    (the #651 defect) appends, at ``Length = 12``, exactly the four surplus octets
-   this parameter was missing. So correcting the padding does not break
+   this parameter would be missing. So correcting the padding does not break
    ``R1_COUNTER``; it stops compensating for it.
-3. The round trip cannot see it at all, because pcapkit's reader consumes exactly
-   the twelve octets its writer wrote. Only a comparison against the RFC's own
+3. The round trip cannot see it at all, because pcapkit's reader would consume
+   exactly the twelve octets its writer wrote. Only a comparison against the RFC's own
    stride -- or a real peer -- can tell the difference, which is what
    :meth:`test_r1_counter_record_is_the_rfc_total_at_both_codes` does, with the
    formula spelled out locally rather than taken from the library.
 
-The fixture could not see it either, for a fourth reason
---------------------------------------------------------
+A zero counter hides it from the fixture too
+--------------------------------------------
 
-``R1_COUNTER`` had no entry in ``_hip_overrides()``, so the generator built it
-with ``counter = 0``. An RFC-only walk over :file:`options-internet.pcap` read
-``Length = 12``, advanced 16 over a 12-octet record, landed four octets inside the
-second copy, and found a phantom ``Type = 0, Length = 0`` record in that copy's
-own zeroed contents -- whose "padding" was four zero octets, so its zero-padding
-check passed and the walk ended tidily on the area boundary. Measured on
+Without an entry in ``_hip_overrides()``, the generator builds ``R1_COUNTER``
+with ``counter = 0``. Given the four-octet field, an RFC-only walk over
+:file:`options-internet.pcap` reads ``Length = 12``, advances 16 over a 12-octet
+record, lands four octets inside the second copy, and finds a phantom
+``Type = 0, Length = 0`` record in that copy's own zeroed contents -- whose
+"padding" is four zero octets, so its zero-padding check passes and the walk
+ends tidily on the area boundary. Measured on
 ``f0999858e``: patching one counter to ``aabbccdd`` turns that silence into
 ``frame 101: type 0 padding not zeroed: aabbccdd``. A zero-valued field cannot
 discriminate a width defect from a correct one, so

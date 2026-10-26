@@ -97,11 +97,11 @@ class FTPUnitTests(unittest.TestCase):
 
         The rule is in section 5.3 (COMMANDS, which gives the command syntax),
         not section 4.1 (FTP COMMANDS, which only lists the per-command
-        semantics); #582 cited 4.1 and a cross-review caught it. Verified against
-        the RFC text: the sentence sits between the 5.3 and 5.4 headings. The
+        semantics). Verified against the RFC text: the sentence sits between
+        the 5.3 and 5.4 headings. The
         *link* above says ``#section-5`` rather than ``#section-5.3`` because RFC
         959 renders anchors only for its eight top-level sections -- GitHub issue
-        #944 -- so ``#section-5.3`` was a live link to nothing. The
+        #944 -- so ``#section-5.3`` would be a live link to nothing. The
         ``:rfc:`959#section-4``` citations in :mod:`pcapkit.const.ftp.command` are
         a different claim -- the command *kind* (access control, transfer
         parameter, service) -- and are correct.
