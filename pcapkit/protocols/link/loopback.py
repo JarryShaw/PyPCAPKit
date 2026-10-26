@@ -233,12 +233,16 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
 
         Raises:
             ProtocolError: If ``byteorder`` is neither ``'big'`` nor
-                ``'little'``, or ``family`` does not fit in 4 octets.
+                ``'little'``, or ``family`` is not an :obj:`int` (a
+                :obj:`bool` included, :issue:`2289`) or does not fit in 4
+                octets.
 
         """
         if byteorder not in ('big', 'little'):
             raise ProtocolError(f'Loopback: invalid byte order: {byteorder!r}')
-        if not 0 <= family <= 0xFFFF_FFFF:
+        # NOTE: ``bool`` is an ``int`` subclass, so without the explicit check
+        # ``True`` would pack as address family 1 (#2289).
+        if isinstance(family, bool) or not isinstance(family, int) or not 0 <= family <= 0xFFFF_FFFF:
             raise ProtocolError(f'Loopback: invalid address family: {family!r}')
 
         return Schema_Loopback(
