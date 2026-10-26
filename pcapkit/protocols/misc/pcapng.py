@@ -2118,15 +2118,19 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             MAC address packed as 6 octets.
 
         Raises:
-            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
-                *hex* encoded MAC address.
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or is not a
+                ``:``- or ``-``-separated *hex* encoded MAC address.
 
         """
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'PCAP-NG: invalid MAC address: must be a str, bytes or '
+                                f'bytearray, not {addr!r}')
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_MAC_ADDR.fullmatch(_addr) is not None:
             return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'invalid MAC address: {addr!r}')
+        raise ProtocolError(f'PCAP-NG: invalid MAC address: {addr!r}')
 
     def _make_eui_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
         """Make EUI address.
@@ -2138,15 +2142,19 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             EUI address packed as 8 octets.
 
         Raises:
-            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
-                *hex* encoded EUI-64 address.
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or is not a
+                ``:``- or ``-``-separated *hex* encoded EUI-64 address.
 
         """
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'PCAP-NG: invalid EUI address: must be a str, bytes or '
+                                f'bytearray, not {addr!r}')
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_EUI_ADDR.fullmatch(_addr) is not None:
             return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'invalid EUI address: {addr!r}')
+        raise ProtocolError(f'PCAP-NG: invalid EUI address: {addr!r}')
 
     def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ

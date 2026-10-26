@@ -232,12 +232,16 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             MAC address packed as 6 octets.
 
         Raises:
-            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated
-                *hex* encoded MAC address.
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or is not a
+                ``:``- or ``-``-separated *hex* encoded MAC address.
 
         """
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'{self.alias}: invalid MAC address: must be a str, bytes or '
+                                f'bytearray, not {addr!r}')
         _addr = addr.encode() if isinstance(addr, str) else addr
 
         if PAT_MAC_ADDR.fullmatch(_addr) is not None:
             return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'invalid MAC address: {addr!r}')
+        raise ProtocolError(f'{self.alias}: invalid MAC address: {addr!r}')
