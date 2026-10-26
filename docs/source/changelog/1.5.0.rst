@@ -90,6 +90,14 @@ Changed
 * **a breaking change to** :class:`~pcapkit.const.mh.lla_code.LLACode`: ``Wilcard`` is
   spelled ``Wildcard`` and ``MH`` is ``MN``, the names :rfc:`5568` gives codes 0 and 2,
   with no alias for either old name (:issue:`1848`, :pr:`1872`).
+* **a breaking change to** :class:`tcp.flags.Flags <pcapkit.const.tcp.flags.Flags>`:
+  each member is its wire mask in the flags field, ``FIN`` ``0x001`` up to ``AE``
+  ``0x100``, rather than ``1 << offset`` in IANA's most-significant-first bit numbering,
+  which put ``FIN`` at ``0x8000``. ``int(tcp.connection)`` of a SYN/ACK is ``0x012``,
+  as the header carries it, not ``0x4800``, and ``Flags(0x12)`` is ``SYN | ACK``. The
+  range guard narrows to the 12-bit flags field, ``0 <= value <= 0xFFF``. Code that
+  stored or compared the old integers has to change; membership tests and names are
+  unaffected (:issue:`2310`).
 
 Fixed
 ~~~~~

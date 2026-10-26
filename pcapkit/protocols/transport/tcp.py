@@ -528,9 +528,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:
         # argument of type 'int' is not a container or iterable``. A segment with any flag
         # set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` whose
-        # ``_missing_`` accepts any value from ``0`` to ``0xFFFF``, so ``Enum_Flags(0)`` is
-        # a valid flagless member that compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`
-        # advertises.
+        # ``_missing_`` accepts any value in the 12-bit flags field, ``0`` to ``0xFFF``,
+        # so ``Enum_Flags(0)`` is a valid flagless member that compares equal to ``0`` and
+        # ORs as usual. This is the type :attr:`connection` advertises.
         _flag = Enum_Flags(0)
         for key, val in schema.flags.items():
             if val == 1:

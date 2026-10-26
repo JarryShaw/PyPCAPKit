@@ -26,40 +26,40 @@ class Flags(EnumRegistry, IntFlag):
     """[Flags] TCP Header Flags"""
 
     #: Reserved for future use [:rfc:`9293`]
-    Reserved_4 = 1 << 4
+    Reserved_4 = 1 << 11
 
     #: Reserved for future use [:rfc:`9293`]
-    Reserved_5 = 1 << 5
+    Reserved_5 = 1 << 10
 
     #: Reserved for future use [:rfc:`9293`]
-    Reserved_6 = 1 << 6
+    Reserved_6 = 1 << 9
 
     #: AE (Accurate ECN) [:rfc:`9768`]
-    AE = 1 << 7
+    AE = 1 << 8
 
     #: CWR (Congestion Window Reduced) [:rfc:`3168`]
-    CWR = 1 << 8
+    CWR = 1 << 7
 
     #: ECE (ECN-Echo) [:rfc:`3168`]
-    ECE = 1 << 9
+    ECE = 1 << 6
 
     #: Urgent Pointer field is significant (URG) [:rfc:`9293`]
-    URG = 1 << 10
+    URG = 1 << 5
 
     #: Acknowledgment field is significant (ACK) [:rfc:`9293`]
-    ACK = 1 << 11
+    ACK = 1 << 4
 
     #: Push Function (PSH) [:rfc:`9293`]
-    PSH = 1 << 12
+    PSH = 1 << 3
 
     #: Reset the connection (RST) [:rfc:`9293`]
-    RST = 1 << 13
+    RST = 1 << 2
 
     #: Synchronize sequence numbers (SYN) [:rfc:`9293`]
-    SYN = 1 << 14
+    SYN = 1 << 1
 
     #: No more data from sender (FIN) [:rfc:`9293`]
-    FIN = 1 << 15
+    FIN = 1 << 0
 
     @classmethod
     def _validate_value(cls, value: 'Any') -> 'None':
@@ -80,7 +80,7 @@ class Flags(EnumRegistry, IntFlag):
                 unaffected.
 
         """
-        if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
+        if not (isinstance(value, int) and 0 <= value <= 0xFFF):
             raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
 
     @classmethod
@@ -91,6 +91,6 @@ class Flags(EnumRegistry, IntFlag):
             value: Value to get enum item.
 
         """
-        if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
+        if not (isinstance(value, int) and 0 <= value <= 0xFFF):
             raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         return super()._missing_(value)
