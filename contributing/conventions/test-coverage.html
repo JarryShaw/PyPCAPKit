@@ -648,6 +648,8 @@ root-level modules, in one plain-unittest process, which is what CI’s
 when the change moves imports or module state:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols/internet
 python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols<span class="w"> </span>--exclude<span class="w"> </span>protocols/internet
+python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>project<span class="w"> </span>--half<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>project<span class="w"> </span>--half<span class="w"> </span><span class="m">2</span>
 </pre></div>
 </div>
 <p>The leg list lives in the workflow, not the script. Every <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>

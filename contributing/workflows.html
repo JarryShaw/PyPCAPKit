@@ -1908,7 +1908,7 @@ Every <code class="docutils literal notranslate"><span class="pre">test</span></
 selection, so no workflow lists the pins, and <code class="file docutils literal notranslate"><span class="pre">tests/test_tier_guard.py</span></code> runs
 the steps to check what each does with the answer. Under <code class="docutils literal notranslate"><span class="pre">gate-only</span></code>, <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s
 full suite runs the pins with everything else. <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code>
-cell keeps them, as it asks how a module runs in one interpreter, in file order and
+cells keep them, as they ask how a module runs in one interpreter, in file order and
 without xdist, which is a question about the module rather than the Python version.</p>
 <p>A pin’s skip where <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> is missing, before 3.11, runs on no leg: the scripts
 those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and

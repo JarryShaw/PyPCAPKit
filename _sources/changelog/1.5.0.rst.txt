@@ -2698,12 +2698,13 @@ Fixed
   Linux (:issue:`2099`, :pr:`2111`), and encode through
   :func:`pcapkit.utilities.datetime.totimestamp`, since GraalPy's ``timestamp()`` put a
   pre-1970 instant with a fraction one second late (:issue:`2134`, :pr:`2136`).
-* ARP's address makers refuse what they cannot pack: a ``bool`` hardware or protocol
-  address raises :exc:`.FieldValueError` whatever ``htype`` or ``ptype`` is; a hardware
-  address that is none of ``str``, ``bytes`` and ``bytearray``, or a protocol address
-  not packed as IPv4 or IPv6 that is none of those and not an ``ipaddress`` address,
-  raises :exc:`.ProtocolError`, where both failed later with a bare ``TypeError``. A
-  ``bytearray`` packs as ``bytes`` (:issue:`2166`, :pr:`2182`).
+* ARP's address makers refuse what they cannot pack: a ``bool`` protocol address
+  raises :exc:`.FieldValueError` whatever ``ptype`` is; a hardware address that is
+  none of ``str``, ``bytes`` and ``bytearray`` (a ``bool`` included), or a protocol
+  address not packed as IPv4 or IPv6 that is none of those and not an ``ipaddress``
+  address, raises :exc:`.ProtocolError`, where both failed later with a bare
+  ``TypeError``. A ``bytearray`` packs as ``bytes`` (:issue:`2166`, :pr:`2182`,
+  :issue:`2256`).
 * the Quick-Start rate parses as the ``int`` the IPv4, HOPOPT, IPv6-Opts and TCP data
   models declare, where it was a ``float`` such as ``80.0``, and a TCP Fast Open cookie
   request, the option of length 2, parses with ``cookie`` as ``b''`` rather than
