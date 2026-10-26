@@ -45,7 +45,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
 SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
-           'coverage_report', 'discussion_report', 'leg_summary', 'pip_install', 'project_status',
+           'coverage_report', 'discussion_report', 'leg_summary', 'milestone', 'pip_install', 'project_status',
            'python_versions', 'regenerate_samples', 'release_conda', 'release_published', 'release_reset_build',
            'release_status', 'release_tags', 'release_tiers', 'release_upload', 'superseded',
            'update_python_versions', 'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
@@ -63,6 +63,7 @@ RUNS = {
     'coverage_report': (['--help'], {}),
     'discussion_report': (['--help'], {}),
     'leg_summary': (['ktlo'], {'LEG': 'Python 3.8 (KTLO, non-blocking)', 'STEPS': '{}'}),
+    'milestone': (['--help'], {}),
     'pip_install': (['--help'], {}),
     'project_status': (['--help'], {}),
     'python_versions': (['latest'], {}),
