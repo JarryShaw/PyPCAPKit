@@ -88,13 +88,19 @@ class IPReassemblyTests(unittest.TestCase):
         reasm(self._packet(num=1, fo=0, mf=True, payload=b'abcdefgh'))
         reasm(self._packet(num=2, fo=0, mf=False, payload=b'ignored', header=b'fresh'))
 
-        datagram, = reasm.datagram
+        # the flushed datagram is reported incomplete, and the unfragmented one
+        # after it on its own (#2270)
+        datagram, single = reasm.datagram
         self.assertFalse(datagram.completed)
         self.assertEqual(datagram.index, (1,))
         self.assertEqual(datagram.header, b'ip-header')
         self.assertEqual(datagram.payload, (b'abcdefgh',))
         self.assertIsNone(datagram.packet)
-        self.assertEqual(len(callback_calls), 1)
+        self.assertTrue(single.completed)
+        self.assertEqual(single.index, (2,))
+        self.assertEqual(single.header, b'fresh')
+        self.assertEqual(single.payload, b'ignored')
+        self.assertEqual(len(callback_calls), 2)
 
         pending = TestIP()
         pending(self._packet(num=3, fo=8, mf=True, payload=b'ijkl', header=b'ignored'))

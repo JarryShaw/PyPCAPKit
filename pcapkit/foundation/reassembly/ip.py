@@ -67,11 +67,20 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
        <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
        (:issue:`477`). An incomplete buffer expires
        after ``timeout`` seconds of capture time, 60 by default for both IPv4
-       and IPv6.
+       and IPv6. A datagram with fragment offset zero and **MF** clear is
+       reported even when its BUFID is already buffered, rather than dropped
+       (:issue:`2270`).
 
     """
     if TYPE_CHECKING:
         protocol: 'Type[IP_Protocol]'
+
+    #: bool: Whether a datagram with fragment offset zero and **MF** clear is
+    #: reassembled apart from the buffer its BUFID names, rather than flushing
+    #: that buffer first. IPv4 flushes it (:rfc:`791#section-3.2`); IPv6
+    #: overrides this, since :rfc:`6946#section-4` keeps an atomic fragment's
+    #: buffer intact (:issue:`2270`).
+    __isolate_atomic__: 'bool' = False
 
     ##########################################################################
     # Methods.
@@ -147,13 +156,22 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # belong to.
         self._dtgram.extend(self.expire(TS))
 
-        # when non-fragmented (possibly discarded) packet received
+        # when non-fragmented (possibly discarded) packet received: it is
+        # reassembled on its own, in a buffer of its own (#2270)
+        isolated = False
         if not FO and not MF:
-            if BUFID in self._buffer:
+            if self.__isolate_atomic__:
+                # an IPv6 atomic fragment "MUST" be processed in isolation, and
+                # fragments queued under its BUFID "MUST NOT" be discarded
+                # (:rfc:`6946#section-4`), so the buffer is left alone
+                isolated = True
+            elif BUFID in self._buffer:
+                # :rfc:`791#section-3.2` flushes the buffer and then submits
+                # this datagram, so the flushed one is reported incomplete and
+                # this one goes on to a fresh buffer below
                 self._dtgram.extend(
                     self.submit(self._buffer.pop(BUFID), bufid=BUFID)
                 )
-                return
 
         # the header of the fragment at offset zero is the reassembled datagram's
         header = b'' if FO else self._rectify_header(info.header, BUFID[3])
@@ -162,8 +180,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # block of the data buffer, its partial last block included -- 8191
         # would cover octets 0 to 65527 only, so a fragment reaching octet 65528,
         # e.g. at the largest Fragment Offset, would index past it (#1565)
-        if BUFID not in self._buffer:
-            self._buffer[BUFID] = Buffer(
+        buf: 'Buffer[_AT]'
+        if isolated or BUFID not in self._buffer:
+            buf = Buffer(
                 TDL=-1,                              # Total Data Length
                 RCVBT=bytearray(8192),              # Fragment Received Bit Table
                 index=[],                           # index record
@@ -172,12 +191,13 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 timestamp=TS,                       # first-arriving fragment's clock reading
                 conflict=[],                        # conflicting octet ranges
             )
+            if not isolated:
+                self._buffer[BUFID] = buf
         else:
+            buf = self._buffer[BUFID]
             # put header into header buffer
-            if not FO:  # pylint: disable=else-if-used
-                self._buffer[BUFID].__update__(header=header)
-
-        buf = self._buffer[BUFID]
+            if not FO:
+                buf.__update__(header=header)
 
         # append packet index
         buf.index.append(info.num)
@@ -270,8 +290,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         if not MF:
             buf.__update__(TDL=length + FO)
 
+        # an isolated datagram has no buffer to wait in, so it is submitted
+        # whether or not it is complete
+        if isolated:
+            self._dtgram.extend(self.submit(buf, bufid=BUFID))
         # when datagram is reassembled in whole
-        if self._is_complete(buf):
+        elif self._is_complete(buf):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
