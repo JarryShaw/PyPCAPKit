@@ -781,10 +781,9 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 
 ``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
 not fail the run (:issue:`1732`): on every job of :file:`experimental.yml`, which no
-required context names, on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
-(:issue:`1633`), and on a job whose name ends in ``(experimental)`` in any workflow. That
-last also covers older runs of :file:`unit-tests.yml`, whose experimental legs ran under
-``test``'s 45-minute cap until :issue:`1732` moved them to :file:`experimental.yml`.
+required context names, and on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
+(:issue:`1633`). A job whose name ends in ``(experimental)`` counts by its workflow, not
+its name.
 The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
 reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
