@@ -441,6 +441,25 @@ class TransportUnitTests(unittest.TestCase):
         # which would lose the protocol it was resolved for.
         self.assertIs(Transport._make_port(over_sctp, TransportProtocol.tcp), over_sctp)
 
+    def test_make_refuses_a_bool_port(self) -> None:
+        # #2287: ``bool`` is an ``int`` subclass, so ``AppType.get`` resolving
+        # ``True``/``False`` to port 1/0 is a defect this guards against.
+        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for cls in (TCP, UDP, SCTP):
+            for value in (True, False):
+                for kwargs in ({'srcport': value, 'dstport': 53}, {'srcport': 53, 'dstport': value}):
+                    with self.subTest(protocol=cls.__name__, **kwargs):
+                        with self.assertRaises(ProtocolError) as ctx:
+                            cls(**kwargs)
+                        self.assertEqual(str(ctx.exception), f'{cls.__name__}: invalid port: {value!r}')
+
+        # An ``int`` port resolves to its application type.
+        self.assertEqual(UDP(srcport=1, dstport=53).info.srcport.port, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

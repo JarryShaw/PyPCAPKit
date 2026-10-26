@@ -19,7 +19,7 @@ from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
-from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import ProtocolError, StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -206,8 +206,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
     # Utilities.
     ##########################################################################
 
-    @staticmethod
-    def _make_port(port: 'Enum_AppType | int',
+    @classmethod
+    def _make_port(cls, port: 'Enum_AppType | int',
                    proto: 'Enum_TransportProtocol') -> 'Enum_AppType':
         """Resolve a port number to its application type.
 
@@ -218,6 +218,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Returns:
             The :class:`~pcapkit.const.reg.apptype.apptype.AppType` for ``port``.
+
+        Raises:
+            ProtocolError: If ``port`` is a :obj:`bool` (:issue:`2287`).
 
         Important:
             :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` accepts
@@ -233,6 +236,10 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         """
         if isinstance(port, Enum_AppType):
             return port
+        # NOTE: ``bool`` is an ``int`` subclass, so ``AppType.get`` would look
+        # ``True``/``False`` up as port 1/0 rather than refuse them (#2287).
+        if isinstance(port, bool):
+            raise ProtocolError(f'{cls.__name__}: invalid port: {port!r}')
         return Enum_AppType.get(port, proto=proto)
 
     def _decode_next_layer(self, dict_: '_PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
