@@ -55,9 +55,12 @@ flow tracing reports flows opening and closing.
 
 .. note::
 
-   Nothing is logged from inside per-frame or per-field parsing loops, so
+   No record is logged for each frame parsed or each field read, so
    :data:`~logging.DEBUG` on a million-packet capture does not yield a million
-   records. Registration bookkeeping in :mod:`pcapkit.foundation.registry` is
+   records. What is logged per item is what gets dropped: the PyShark engine
+   logs a line for each tshark record it skips as not a packet
+   (``skipping tshark frame``), and reassembly logs a line for each buffer it
+   abandons on timeout (``abandoning buffer``). Registration bookkeeping in :mod:`pcapkit.foundation.registry` is
    at :data:`~logging.DEBUG` rather than :data:`~logging.INFO`, since a library
    announcing its own registry entries is not news to its consumer.
 

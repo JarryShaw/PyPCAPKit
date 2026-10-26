@@ -386,12 +386,14 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         # snapshot length cut short the latter exceeds what the file holds, and
         # handing it over is the declared-length-exceeds-available-octets fault.
         #
-        # No test pins this line: reverting just this argument to ``frame.len``
-        # leaves the whole suite green. ``big_endian.pcap``'s truncated frame
-        # dissects to ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the
-        # ``length`` it is handed, so the over-long value never reaches anything
-        # that checks it. Catching a regression needs a fixture whose truncation
-        # lands in a length-checked field instead of bottoming out in ``Raw``.
+        # The schemas count their fields down from this length, so it is what
+        # lets a truncation be noticed: a frame cut inside its IPv4 header
+        # leaves IPv4 fewer octets than its header, and the count running below
+        # zero issues a ``SchemaWarning`` (``packet length < 0``). Handed the
+        # on-wire length, IPv4 would be told of octets the file does not hold
+        # and the truncation would pass silently.
+        # ``test_truncated_ipv4_header_warns_whatever_the_on_wire_length`` pins it
+        # (#2236).
         return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
 
     def make(self,
