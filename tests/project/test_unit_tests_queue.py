@@ -4,12 +4,16 @@
 These fail silently if they drift, so they are pinned here:
 
 * ``required-checks`` may accept a ``skipped`` leg **only** when ``changes``
-  classified the diff as docs-only. Its shell step is executed below against
-  every combination that matters, rather than read, because the one way it goes
-  wrong -- a skip accepted on a code change -- is a green gate over untested code.
-  It needs ``project-tests`` on every diff, as the project pins' one run (#1954).
+  classified the diff as docs-only, or a skipped ``engine-tests`` and
+  ``pypcap-parity`` only when it classified it as test-only (#2243). Its shell
+  step is executed below against every combination that matters, rather than
+  read, because the one way it goes wrong -- a skip accepted on a code change --
+  is a green gate over untested code. It needs ``project-tests`` on every diff,
+  as the project pins' one run (#1954).
 * The ``changes`` classifier must call anything outside ``docs/`` and ``*.md``
-  code, and a Markdown file under a code directory code too.
+  not docs, and a Markdown file under a code directory not docs either. A diff of
+  ``tests/`` and docs alone is test-only, and any other file makes it code (#2243).
+  The jobs each class skips are :mod:`tests.project.test_light_pull_requests_2243`'s.
 * ``unittest-ordering`` stays off pull requests and out of the required set,
   and queues behind ``test`` without needing it to pass (#1538);
   ``engine-tests``'s KTLO cells stay non-blocking through a step-level
@@ -58,6 +62,11 @@ CLASSIFY_RUN = '        run: python3 util/classify_changes.py\n'
 
 #: The legs a docs-only pull request may skip.
 LEGS = ('test', 'integration', 'engine-tests', 'pypcap-parity')
+#: The legs a test-only pull request may skip (#2243); the others run ``latest`` alone.
+TEST_ONLY_SKIPS = ('engine-tests', 'pypcap-parity')
+#: The variable each leg's result reaches the gate's step in.
+LEG_ENV = {'test': 'TEST', 'integration': 'INTEGRATION', 'engine-tests': 'ENGINE_TESTS',
+           'pypcap-parity': 'PYPCAP_PARITY'}
 
 
 def job(name: 'str') -> 'str':
@@ -106,11 +115,12 @@ class TestRequiredChecksSkips(unittest.TestCase):
         self.script = run_block(job('required-checks'))
 
     def gate(self, code: 'str', legs: 'str', project: 'str', changes: 'str' = 'success',
-             **override: 'str') -> 'int':
+             test_only: 'str' = 'false', **override: 'str') -> 'int':
         """The gate's exit status with every leg reporting ``legs`` unless overridden."""
         results = {'TEST': legs, 'INTEGRATION': legs, 'ENGINE_TESTS': legs, 'PYPCAP_PARITY': legs}
         results.update(override)
-        env = dict(os.environ, CHANGES=changes, CODE=code, PROJECT_TESTS=project, **results)
+        env = dict(os.environ, CHANGES=changes, CODE=code, TEST_ONLY=test_only, PROJECT_TESTS=project,
+                   **results)
         return subprocess.run(['bash', '-c', self.script], env=env, check=False,
                               capture_output=True, text=True).returncode
 
@@ -157,10 +167,58 @@ class TestRequiredChecksSkips(unittest.TestCase):
 
     def test_an_unclassified_diff_skips_nothing(self) -> None:
         """A failed, skipped or garbled ``changes`` makes every skip a failure."""
-        for changes, code in (('failure', ''), ('skipped', ''), ('success', ''),
-                              ('success', 'maybe'), ('failure', 'false')):
-            with self.subTest(changes=changes, code=code):
-                self.assertNotEqual(self.gate(code, 'skipped', 'success', changes), 0)
+        for changes, code, test_only in (('failure', '', ''), ('skipped', '', ''), ('success', '', ''),
+                                         ('success', 'maybe', 'false'), ('failure', 'false', 'false'),
+                                         ('failure', 'true', 'true'), ('success', 'true', ''),
+                                         ('success', 'true', 'maybe'), ('success', 'false', ''),
+                                         ('success', 'false', 'true')):
+            with self.subTest(changes=changes, code=code, test_only=test_only):
+                self.assertNotEqual(self.gate(code, 'skipped', 'success', changes, test_only), 0)
+                skips = {LEG_ENV[name]: 'skipped' for name in TEST_ONLY_SKIPS}
+                self.assertNotEqual(self.gate(code, 'success', 'success', changes, test_only, **skips), 0)
+
+    def test_test_only_accepts_skipped_engine_and_parity_legs(self) -> None:
+        """#2243: a test-only diff may skip ``engine-tests`` and ``pypcap-parity``, or pass them."""
+        skips = {LEG_ENV[name]: 'skipped' for name in TEST_ONLY_SKIPS}
+        self.assertEqual(self.gate('true', 'success', 'success', test_only='true', **skips), 0)
+        self.assertEqual(self.gate('true', 'success', 'success', test_only='true'), 0)
+
+    def test_test_only_still_needs_test_and_integration(self) -> None:
+        """#2243: their ``latest`` legs are the test-only path's tests, so a skip there fails."""
+        skips = {LEG_ENV[name]: 'skipped' for name in TEST_ONLY_SKIPS}
+        for name in sorted(set(LEGS) - set(TEST_ONLY_SKIPS)):
+            for result in ('skipped', 'failure', 'cancelled'):
+                with self.subTest(leg=name, result=result):
+                    self.assertNotEqual(self.gate('true', 'success', 'success', test_only='true',
+                                                  **dict(skips, **{LEG_ENV[name]: result})), 0)
+
+    def test_test_only_still_rejects_a_failed_or_cancelled_skippable_leg(self) -> None:
+        """#2243: ``skipped`` is accepted on a test-only diff; ``failure`` and ``cancelled`` are not."""
+        for name in TEST_ONLY_SKIPS:
+            for result in ('failure', 'cancelled'):
+                with self.subTest(leg=name, result=result):
+                    self.assertNotEqual(self.gate('true', 'success', 'success', test_only='true',
+                                                  **{LEG_ENV[name]: result}), 0)
+
+    def test_test_only_still_needs_project_tests(self) -> None:
+        """#2243: ``project-tests`` runs the pins on a test-only diff too."""
+        skips = {LEG_ENV[name]: 'skipped' for name in TEST_ONLY_SKIPS}
+        for result in ('skipped', 'failure', 'cancelled'):
+            with self.subTest(result=result):
+                self.assertNotEqual(self.gate('true', 'success', result, test_only='true', **skips), 0)
+
+    def test_a_code_change_skips_nothing_the_test_only_path_may(self) -> None:
+        """#2243: without ``test-only``, a skipped ``engine-tests`` or ``pypcap-parity`` fails."""
+        for name in TEST_ONLY_SKIPS:
+            with self.subTest(leg=name):
+                self.assertNotEqual(self.gate('true', 'success', 'success', test_only='false',
+                                              **{LEG_ENV[name]: 'skipped'}), 0)
+
+    def test_the_gate_reads_test_only_from_changes(self) -> None:
+        """#2243: ``TEST_ONLY`` is the ``changes`` job's output, set nowhere else."""
+        self.assertEqual(job('required-checks').count('TEST_ONLY: '), 1)
+        self.assertIn('          TEST_ONLY: ${{ needs.changes.outputs.test-only }}\n', job('required-checks'))
+        self.assertIn('      test-only: ${{ steps.classify.outputs.test-only }}\n', job('changes'))
 
 
 class TestChangesClassifier(unittest.TestCase):
@@ -172,6 +230,7 @@ class TestChangesClassifier(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         self.is_docs = module.is_docs  # type: Callable[[str], bool]
+        self.kind = module.kind  # type: Callable[[str], str]
 
     def test_docs_and_markdown_are_docs(self) -> None:
         """``docs/**`` and top-level Markdown are docs."""
@@ -180,14 +239,35 @@ class TestChangesClassifier(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue(self.is_docs(path))
 
-    def test_everything_else_is_code(self) -> None:
-        """Anything else, and Markdown under a code directory, is code."""
+    def test_everything_else_is_not_docs(self) -> None:
+        """Anything else, and Markdown under a code directory, is not docs."""
         for path in ('pyproject.toml', 'setup.py', 'pcapkit/__init__.py', 'Makefile',
                      '.github/workflows/unit-tests.yml', '.github/PULL_REQUEST_TEMPLATE.md',
                      'tests/project/README.md', 'util/notes.md', 'examples/README.md',
                      'pcapkit/vendor/README.md'):
             with self.subTest(path=path):
                 self.assertFalse(self.is_docs(path))
+
+    def test_tests_and_their_support_files_are_tests(self) -> None:
+        """#2243: everything under ``tests/``, the support files every test runs under included."""
+        for path in ('tests/project/test_unit_tests_queue.py', 'tests/conftest.py', 'tests/_tiers.py',
+                     'tests/__init__.py', 'tests/project/README.md', 'tests/project/ci_timing_fixtures/x.yml'):
+            with self.subTest(path=path):
+                self.assertEqual(self.kind(path), 'test')
+
+    def test_workflows_util_and_examples_are_never_tests(self) -> None:
+        """#2243: a workflow, a ``util/`` script or a capture fixture changes more than the tests."""
+        for path in ('.github/workflows/unit-tests.yml', '.github/python-versions.toml', 'util/classify_changes.py',
+                     'examples/captures/in.pcap', 'examples/generators/make_samples.py', 'pyproject.toml',
+                     'pcapkit/__init__.py', 'conftest.py', 'test_x.py', 'testsuite/x.py'):
+            with self.subTest(path=path):
+                self.assertEqual(self.kind(path), 'code')
+
+    def test_docs_stay_docs(self) -> None:
+        """``kind`` agrees with ``is_docs``."""
+        for path in ('docs/source/index.rst', 'README.md'):
+            with self.subTest(path=path):
+                self.assertEqual(self.kind(path), 'docs')
 
     def test_only_this_workflows_own_pull_request_is_classified(self) -> None:
         """Other events, and callers, always run everything."""
@@ -351,6 +431,12 @@ class _Scratch(unittest.TestCase):
         self.tmp = pathlib.Path(tmp.name)
 
 
+#: What the classifier writes for each kind of diff (#2243).
+DOCS_ONLY = 'code=false\ntest-only=false'
+TEST_ONLY = 'code=true\ntest-only=true'
+CODE = 'code=true\ntest-only=false'
+
+
 class TestClassifierAgainstARealMerge(_Scratch):
     """The whole ``Classify the diff`` script, run in a scratch repository.
 
@@ -366,7 +452,11 @@ class TestClassifierAgainstARealMerge(_Scratch):
         if shutil.which('git') is None:  # pragma: no cover
             self.skipTest('git is not available')
         self.assertIn(CLASSIFY_RUN, job('changes'))
-        self.repo = self.tmp / 'repo'
+        self.make_repo('repo')
+
+    def make_repo(self, name: 'str') -> None:
+        """A fresh scratch repository ``name``, on the PR branch, with main a code change ahead."""
+        self.repo = self.tmp / name
         self.repo.mkdir()
         self.git('init', '-q', '-b', 'main')
         self.write('README.md', 'base\n')
@@ -383,7 +473,10 @@ class TestClassifierAgainstARealMerge(_Scratch):
     def git(self, *args: 'str') -> None:
         """Run git in the scratch repository, isolated from user config."""
         env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1')
-        config = ('-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false')
+        # #2243: no directory renames, or moving pcapkit/'s one file in the PR
+        # would carry main's new pcapkit/y.py along, as a merge conflict.
+        config = ('-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false',
+                  '-c', 'merge.directoryRenames=false')
         subprocess.run(['git', *config, *args], cwd=self.repo, env=env, check=True,
                        capture_output=True)
 
@@ -403,8 +496,8 @@ class TestClassifierAgainstARealMerge(_Scratch):
         self.git('merge', '-q', '--no-ff', '--no-edit', 'pr')
 
     def classify(self, own_pr: 'str' = 'true', cwd: 'Optional[pathlib.Path]' = None) -> 'str':
-        """Run the classifier and return the line it wrote to ``GITHUB_OUTPUT``."""
-        output = self.tmp / 'output'
+        """Run the classifier and return the lines it wrote to ``GITHUB_OUTPUT``."""
+        output = self.tmp / f'output-{self.repo.name}'
         status = subprocess.run([sys.executable, str(CLASSIFIER)],
                                 env=dict(os.environ, OWN_PR=own_pr, GITHUB_OUTPUT=str(output)),
                                 cwd=str(cwd or self.repo), check=False, capture_output=True, text=True).returncode
@@ -414,33 +507,64 @@ class TestClassifierAgainstARealMerge(_Scratch):
     def test_a_docs_only_pull_request_is_not_code(self) -> None:
         """Only ``HEAD^1`` sees the PR's own diff; ``HEAD^2`` would see main's code."""
         self.pr('docs/source/index.rst', 'CONTRIBUTING.md')
-        self.assertEqual(self.classify(), 'code=false')
+        self.assertEqual(self.classify(), DOCS_ONLY)
 
     def test_a_code_file_makes_it_code(self) -> None:
         """One code file among docs is enough."""
         self.pr('docs/source/index.rst', 'pcapkit/x.py')
-        self.assertEqual(self.classify(), 'code=true')
+        self.assertEqual(self.classify(), CODE)
 
     def test_a_name_holding_whitespace_is_one_path(self) -> None:
         """``notes.md docs/y`` is a root file, not ``notes.md`` and ``docs/y``."""
         self.pr('docs/source/index.rst', 'notes.md docs/y')
-        self.assertEqual(self.classify(), 'code=true')
+        self.assertEqual(self.classify(), CODE)
 
     def test_another_event_always_runs_everything(self) -> None:
         """``OWN_PR`` false (a push, or a caller's pull request) is code."""
         self.pr('docs/source/index.rst')
-        self.assertEqual(self.classify(own_pr='false'), 'code=true')
+        self.assertEqual(self.classify(own_pr='false'), CODE)
+
+    def test_a_push_of_tests_alone_is_code(self) -> None:
+        """#2243: a push to ``main`` never takes the test-only path, however little it changed."""
+        self.pr('tests/test_x.py')
+        self.assertEqual(self.classify(own_pr='false'), CODE)
 
     def test_an_empty_diff_is_code(self) -> None:
         """Nothing to classify is not evidence of a docs-only change."""
         self.pr()
-        self.assertEqual(self.classify(), 'code=true')
+        self.assertEqual(self.classify(), CODE)
 
     def test_a_failed_diff_is_code(self) -> None:
         """Outside a repository ``git diff`` fails, and that must not skip anything."""
         elsewhere = self.tmp / 'not-a-repo'
         elsewhere.mkdir()
-        self.assertEqual(self.classify(cwd=elsewhere), 'code=true')
+        self.assertEqual(self.classify(cwd=elsewhere), CODE)
+
+    def test_tests_alone_are_test_only(self) -> None:
+        """#2243: a diff under ``tests/`` alone, its support files included, is test-only."""
+        self.pr('tests/test_x.py', 'tests/conftest.py', 'tests/_tiers.py')
+        self.assertEqual(self.classify(), TEST_ONLY)
+
+    def test_tests_and_docs_are_test_only(self) -> None:
+        """#2243: docs alongside tests do not make it code."""
+        self.pr('tests/test_x.py', 'docs/source/index.rst', 'README.md')
+        self.assertEqual(self.classify(), TEST_ONLY)
+
+    def test_tests_and_anything_else_are_code(self) -> None:
+        """#2243: one file outside ``tests/`` and the docs makes it code."""
+        for index, other in enumerate(('pcapkit/x.py', 'util/classify_changes.py', '.github/workflows/unit-tests.yml',
+                                       'examples/captures/in.pcap', 'pyproject.toml')):
+            with self.subTest(other=other):
+                self.make_repo(f'repo-{index}')
+                self.pr('tests/test_x.py', other)
+                self.assertEqual(self.classify(), CODE)
+
+    def test_moving_code_under_tests_is_code(self) -> None:
+        """#2243: ``--no-renames`` lists the old path too, so a move out of ``pcapkit/`` is code."""
+        (self.repo / 'tests').mkdir()
+        self.git('mv', 'pcapkit/x.py', 'tests/x.py')
+        self.pr()
+        self.assertEqual(self.classify(), CODE)
 
 
 class TestEngineCellLoops(_Scratch):

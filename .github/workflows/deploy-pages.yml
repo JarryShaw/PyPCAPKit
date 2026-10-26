@@ -15,8 +15,15 @@ on:
   # Vendor Update (#1634). workflows.rst gives the evidence.
   schedule:
     - cron: '0 2 * * 6' # Saturdays at 02:00 UTC
+  # #2243, the owner's option B: a test-only pull request, one of tests/ files
+  # alone, skips the docs build, which reads none of them; one that touches
+  # docs too still builds. A path filter rather than unit-tests.yml's
+  # `changes` job, as no ruleset requires a check of this workflow, so a run
+  # that never starts holds nothing pending.
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'tests/**'
   # A build-only run of the dispatched ref: `head`'s test gate and the Sphinx
   # build, whose site is kept as the `pages-html` artifact. Nothing is
   # published to gh-pages and no report is posted.

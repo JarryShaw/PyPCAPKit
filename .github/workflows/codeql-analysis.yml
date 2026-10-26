@@ -3,8 +3,19 @@ name: "CodeQL"
 on:
   push:
     branches: [main]
+  # #2243, the owner's option B: a docs-only or test-only pull request skips
+  # the scan. util/classify_changes.py's docs and tests, by docs.github.com's
+  # "Avoiding unnecessary scans of pull requests"; the config leaves tests/ out
+  # of the database anyway (#2130), so such a diff scans as its base does. A
+  # path filter rather than the `changes` job, as no ruleset requires a check
+  # of this workflow, so a run that never starts holds nothing pending. A
+  # push and the schedule have no filter.
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'tests/**'
+      - '**.md'
   schedule:
     - cron: '0 2 * * 6'
 

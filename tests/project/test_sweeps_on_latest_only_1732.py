@@ -468,7 +468,11 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         self.assertNotIn('concurrency', self.own)
 
     def test_it_skips_a_docs_only_diff_as_test_does(self) -> None:
-        """unit-tests.yml's ``changes`` script, byte for byte, gating the job as it gates ``test``."""
+        """unit-tests.yml's ``changes`` script, byte for byte, gating the job as it gates ``test``.
+
+        #2243: and skipping a test-only diff, as ``test-ktlo`` does.
+
+        """
         def classify(spec: 'dict[str, Any]') -> 'str':
             return next(entry['run'] for entry in spec['jobs']['changes']['steps'] if entry.get('id') == 'classify')
         self.assertEqual(classify(self.own), classify(self.unit))
@@ -479,8 +483,9 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         self.assertEqual(spec['if'],
                          "${{ !cancelled() && needs.changes.result == 'success' && "
                          "needs.python-versions.result == 'success' && needs.current.outputs.current != 'false' && "
-                         "needs.changes.outputs.code != 'false' }}")
+                         "needs.changes.outputs.code != 'false' && needs.changes.outputs.test-only != 'true' }}")
         self.assertIn("needs.changes.outputs.code != 'false'", self.unit['jobs']['test']['if'])
+        self.assertIn("needs.changes.outputs.test-only != 'true'", self.unit['jobs']['test-ktlo']['if'])
 
     def test_nothing_waits_on_it(self) -> None:
         """No ``workflow_run`` names it but a reporter's, nothing calls it, and no ``needs:`` anywhere names its job.
