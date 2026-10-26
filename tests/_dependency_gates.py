@@ -345,19 +345,20 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'both its headers and its shared library, and its pre-generated pcap.c does '
             'not build against the Python 3.12+ C API at all (measured, see the PyPCAP '
             'extra in pyproject.toml). So the extra carries a '
-            "\"python_version < '3.12'\" marker: adding it would mean a toolchain step on "
-            'the 3.10 and 3.11 legs and nothing at all on the other three. #738 records '
-            'the same exclusion, if less precisely -- pypcap needs the headers, pcap-ct '
-            'below does not. The flag also requires pcap._pcap to be *absent*, which is '
-            "how it tells upstream pypcap from pcap-ct; see this module's docstring.\n\n"
-            "#751's ruling was to try building it in CI rather than declining it forever "
-            '-- "try to build and if the CI is not a good suit, then we ripe it" -- so '
-            'the new pypcap-parity job now installs a toolchain plus libpcap headers and '
-            'attempts it on the 3.10/3.11 legs the marker allows. integration and gate '
-            'stay dark deliberately: the ruling on #751 was a dedicated job, not one '
-            "more install line on either of those two. If pypcap-parity's build step "
-            'turns out not to be a good fit for CI, the fix is deleting that job and '
-            'widening this exclusion to name it too, with the failing run linked.'
+            "\"python_version < '3.12'\" marker: installing it takes a toolchain step, "
+            'and only Python 3.10 and 3.11 can use the result. #738 records the same '
+            'exclusion, if less precisely -- pypcap needs the headers, pcap-ct below does '
+            'not. The flag also requires pcap._pcap to be *absent*, which is how it tells '
+            "upstream pypcap from pcap-ct; see this module's docstring.\n\n"
+            "The owner's ruling on #751 is to build it in CI rather than decline it, and to "
+            'drop the build if CI proves a poor fit for it. pypcap-parity installs a '
+            'toolchain plus libpcap headers and builds it on Python 3.11, '
+            "pypcap-parity-ktlo on 3.10, and engine-tests' PyPCAP cell builds it on 3.10 "
+            'and 3.11 and records 3.12 onwards as not installable. integration and gate '
+            'stay dark deliberately: the ruling on #751 is a dedicated job, not one more '
+            "install line on either. If pypcap-parity's build step does not fit CI, the "
+            'fix is deleting that job and widening this exclusion to name it too, with '
+            'the failing run linked.'
         ),
     ),
     'HAS_PCAP_CT': Exclusion(
@@ -367,66 +368,57 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'and libpcap both publish py3-none-any wheels. Two other reasons stand, '
             'though. Both are published only as pre-releases, which is why '
             'pyproject.toml keeps them out of the all extra -- and its ctypes loader '
-            'still calls find_library("pcap"), so a system libpcap has to be present on '
-            'the runner at run time. A green install would therefore not imply the '
-            'engine can start.\n\n'
-            "#751's dedicated engine-tests job now takes this: it installs PCAP_CT and a "
-            'system libpcap (apt-get libpcap0.8) on its own PCAP_CT matrix cell, across '
-            'the same 3.11-3.15 (plus the non-blocking KTLO 3.10 cell, #1633) matrix -- '
-            'rebuilt per #849 as one '
-            'venv per (Python version, engine) pair rather than the one shared venv #751 '
-            'first landed, so PCAP_CT is kept apart from PyPCAP by construction now, not '
-            'merely by convention -- since pypcap and pcap-ct both install a top-level '
-            '``pcap`` module and cannot coexist -- see '
+            'calls find_library("pcap"), so a system libpcap has to be present on the '
+            'runner at run time. A green install would therefore not imply the engine '
+            'can start.\n\n'
+            "#751's dedicated engine-tests job covers it: its PCAP_CT cell installs "
+            'PCAP_CT and a system libpcap (apt-get libpcap0.8) on Python 3.11-3.15, plus '
+            'the non-blocking KTLO 3.10 (#1633), with one venv per Python version and '
+            'engine (#849). PCAP_CT therefore never shares an environment with PyPCAP, '
+            'which matters because pypcap and pcap-ct both install a top-level ``pcap`` '
+            'module and cannot coexist -- see '
             "pcapkit/foundation/engines/_pcap_backend.py's own docstring. test and gate "
             "stay dark on purpose, per #751's ruling that per-engine coverage gets its "
-            'own job rather than one more install line on either. #1958 gave the latest '
-            'legs every engine pip can install there, and PCAP_CT alone needs that '
-            "system libpcap, which engine-tests' PCAP_CT cell installs and runs on latest."
+            'own job rather than one more install line on either. The latest legs '
+            'install every engine pip can install there (#1958); PCAP_CT alone also '
+            "needs that system libpcap, which engine-tests' PCAP_CT cell installs, "
+            'latest included.'
         ),
     ),
     'HAS_PYPCAPFILE': Exclusion(
         dark={'test': ('pcapfile',), 'integration': ('pcapfile',), 'gate': ('pcapfile',)},
         reason=(
-            'Not, any longer, because the tests fail: the two bugs that made installing '
-            'the extra turn 7 skips into 7 failures are fixed (#747 in the toolkit, #748 '
-            'in the engine), which is what #745 excluded this flag "pending". The '
-            'remaining obstacle is the marker. PyPCAPFile is declared '
+            'Not because the gated tests fail: with the extra installed they pass (#747 '
+            'in the toolkit, #748 in the engine, the defects #745 excluded this flag '
+            '"pending" on). What keeps it dark is the marker. PyPCAPFile is declared '
             "\"pypcapfile; python_version < '3.12'\", because released 0.12.0 imports the "
-            'imp module that 3.12 removed, so the extra resolves to nothing on three of '
-            'the five matrix legs. Adding it would satisfy this guard -- which does not '
-            'model markers -- while 3.12, 3.13 and 3.14 went on skipping: two legs of '
-            'real coverage bought with exactly the false confidence #745 exists to '
-            "remove.\n\n"
-            "#751's ruling was to take that trade: engine-tests installs PyPCAPFile on its "
-            'own PyPCAPFile cell, covering the 10 HAS_PYPCAPFILE methods in '
-            'test_pypcapfile_unit.py (plus test_pypcapfile_engine.py) genuinely on every '
-            "one of the matrix's Python versions rather than only two of five -- #849's "
-            "rebuild is exactly what closes the partial-coverage problem this paragraph "
-            'used to describe: on 3.10/3.11 the cell installs the ordinary extra, and on '
-            "3.12-3.15, where pyproject.toml's marker would resolve it to nothing, the "
-            "install step installs the raw pypcapfile distribution instead (expect: "
-            "unsupported), deliberately bypassing the marker so the tests run for real and "
-            "assert the engine's own version-aware decline (see this workflow's own "
-            'engine-tests comment). pypcap-parity does the same for the other 6 methods in '
-            'test_new_engine_parity_runtime.py, on the two legs its own marker allows. This '
-            'guard still does not evaluate markers by itself -- it takes selection and '
-            'extras from the YAML, not from what a given cell resolves to -- but for this '
-            'flag the workflow now does the marker-bypassing work directly, so the guard '
-            "\"models markers\" caveat this paragraph used to carry no longer describes a "
-            'real gap for PyPCAPFile specifically; it stays true in general (see this '
-            "module's docstring) for any extra whose own marker is left unbypassed. test, "
-            "integration and gate stay dark on purpose, per #751's ruling that per-engine "
-            'coverage gets its own job rather than one more install line on any of the '
-            'three.'
+            'imp module that 3.12 removed, so the extra resolves to nothing on Python 3.12 '
+            'onwards. Adding it to test would satisfy this guard -- which does not model '
+            'markers -- while every leg from 3.12 up went on skipping: partial coverage '
+            'bought with exactly the false confidence #745 exists to remove.\n\n'
+            "#751's ruling covers it with a dedicated job instead. engine-tests' "
+            'PyPCAPFile cell runs the HAS_PYPCAPFILE methods in test_pypcapfile_unit.py '
+            '(plus test_pypcapfile_engine.py) on every Python it runs, 3.10 to 3.15 (#849): '
+            "on 3.10 and 3.11 it installs the ordinary extra, and on 3.12 onwards, where "
+            "pyproject.toml's marker would resolve it to nothing, it installs the raw "
+            'pypcapfile distribution instead (expect: unsupported), bypassing the marker so '
+            "the tests run for real and assert the engine's own version-aware decline (see "
+            "this workflow's own engine-tests comment). pypcap-parity and "
+            'pypcap-parity-ktlo do the same for the gated methods in '
+            'test_new_engine_parity_runtime.py, on 3.11 and 3.10, which the marker allows. '
+            'This guard takes selection and extras from the YAML, not from what a given '
+            "cell resolves to, so in general it does not model markers (see this module's "
+            'docstring); for PyPCAPFile the workflow bypasses the marker itself, so that '
+            'caveat leaves no gap here. test, integration and gate stay dark on purpose, '
+            "per #751's ruling that per-engine coverage gets its own job rather than one "
+            'more install line on any of them.'
         ),
     ),
     'HAS_MYPY': Exclusion(
         dark={'test': ('mypy',), 'gate': ('mypy',)},
         reason=(
-            'The one entry here that is not a missing *runtime* dependency, and the only '
-            'one whose fix is not an install line. mypy is a type checker: the single '
-            'method it gates runs mypy over the generated '
+            'Not a missing *runtime* dependency, and not a gap an install line fixes. '
+            'mypy is a type checker: the method it gates runs mypy over the generated '
             'pcapkit/const/reg/apptype/apptype.py and requires a clean result (#770), '
             'which is a lint question asked from a unit test rather than a code path '
             'pcapkit executes. It belongs to the lint tier accordingly -- a Pipfile '
@@ -443,10 +435,9 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'guard without changing what runs anywhere. What the gate buys instead is that '
             'the check runs wherever mypy happens to be importable -- a developer '
             "checkout, `make mypy`'s own environment -- and skips *visibly* where it is "
-            'not. Visibly is the whole point of #779: the gate was an inline '
-            'try/except ImportError skipTest until then, which works but is invisible to '
-            'this module by construction, since _gates_of() walks a decorator list and '
-            'never a function body. That is the dark-test hazard #745 exists to stop.\n\n'
+            'not. Visibly is the whole point of #779: an inline try/except ImportError '
+            'skipTest works but is invisible to this module by construction, since '
+            '_gates_of() walks a decorator list and never a function body. That is the dark-test hazard #745 exists to stop.\n\n'
             'The sibling isort check (#766) had the identical invisible shape and was '
             'fixed the other way -- a HAS_ISORT gate plus isort in the test extra, so it '
             'is a satisfied gate with no entry here. The two rulings disagree for a '
@@ -459,21 +450,18 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'This entry is therefore narrow: it is not a precedent that a gate on a lint '
             'tool gets excluded, only that a gate duplicating an existing lint.yml check '
             'does.\n\n'
-            'test and gate are exactly the two jobs whose selection reaches '
-            'tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the ignore-shape '
-            'leg and the whole-suite one. engine-tests used to be a third, back when its '
-            "one shared venv mirrored test's ignore-shape exactly; #849's rebuild to one "
-            "explicit TEST_PATHS list per matrix.engine cell means none of the five now "
-            'names tests/vendor/ at all, so engine-tests no longer reaches this gate and '
-            'has dropped out of this entry\'s dark dict accordingly -- not widened or '
-            'narrowed against a gap that is still there, but genuinely gone, the case '
+            'test and gate are the jobs whose selection reaches '
+            'tests/vendor/test_vendor_reg_apptype_generator_unit.py -- test by its '
+            'ignore shape, gate by running the whole suite. engine-tests runs one '
+            'explicit TEST_PATHS list per matrix.engine cell (#849), and none names '
+            'tests/vendor/, so it never reaches this gate; integration and pypcap-parity '
+            'select by fixture tier and never collect that module. That is why none of '
+            'them is listed, and '
             ':meth:`~tests.test_tier_guard.DependencyGateCoverageTests\
-.test_each_exclusion_still_describes_a_gap_that_is_really_there` exists to catch if this '
-            'entry is not kept in step with it. integration and pypcap-parity select by '
-            'fixture tier and never collect that module, which is why they are not listed. '
-            'If a lint extra '
-            'is ever declared in pyproject.toml, the right change is to delete this entry '
-            'and let the gap close on its own rather than to widen it.'
+.test_each_exclusion_still_describes_a_gap_that_is_really_there` fails if that '
+            'stops being true. If a lint extra is ever declared in pyproject.toml, the '
+            'right change is to delete this entry and let the gap close on its own rather '
+            'than to widen it.'
         ),
     ),
     'HAS_PYLINT': Exclusion(
