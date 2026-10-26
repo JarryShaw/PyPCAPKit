@@ -460,6 +460,30 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         self.assertIsInstance(proto._import_next_layer(99, 3), Raw)
         self.assertEqual(set(DummyProtocol.__proto__), {7, 8})
 
+    def test_make_pack_raises_struct_error_for_every_size(self) -> None:
+        # #2291: a size with no struct format code leaked the errors of
+        # int.to_bytes instead of the StructError the other sizes raise.
+        DummyProtocol, _, _ = self._make_protocol_class()
+        from pcapkit.utilities.exceptions import StructError
+
+        cases = (
+            (2 ** 24, {'size': 3}),                 # too big
+            (-1, {'size': 3}),                      # negative, unsigned
+            (2 ** 23, {'size': 3, 'signed': True}),  # too big, signed
+            (1.5, {'size': 3}),                     # not an integer
+            (None, {'size': 5}),                    # not an integer
+            (1, {'size': 0}),                       # no room at all
+            (1, {'size': -1}),                      # negative size
+            (1, {'size': 3.0}),                     # size is not an integer
+        )
+        for integer, kwargs in cases:
+            with self.subTest(integer=integer, **kwargs):
+                with self.assertRaises(StructError):
+                    DummyProtocol._make_pack(integer, **kwargs)
+        with self.assertRaises(StructError):
+            DummyProtocol._make_index(2 ** 24, pack=True, size=3)
+        self.assertEqual(DummyProtocol._make_pack(-2, size=3, signed=True), b'\xff\xff\xfe')
+
     def test_make_payload_branches(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
         from pcapkit.protocols.misc.null import NoPayload
