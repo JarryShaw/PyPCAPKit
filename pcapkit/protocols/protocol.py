@@ -1767,8 +1767,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Raises:
             StructError: If the buffer is empty, whatever ``quiet`` says, or if
-                unpack (:func:`struct.unpack`) failed, and :exc:`struct.error`
-                raised, without ``quiet``.
+                fewer than ``size`` octets were read, without ``quiet``.
 
         """
         endian = '<' if lilendian else '>'
@@ -1788,6 +1787,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise StructError('unpack: empty buffer', quiet=True, eof=True)
 
         if kind is None:
+            # A short read fails here as :func:`struct.unpack` makes it fail
+            # for the sizes that have a format code (#2279).
+            if len(mem) < size and not quiet:
+                raise StructError(f'{self.__class__.__name__}: unpack failed')
             end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
             buf = int.from_bytes(mem, end, signed=signed)
         else:

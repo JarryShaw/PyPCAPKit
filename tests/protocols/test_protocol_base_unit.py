@@ -234,6 +234,25 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolNotImplemented):
             DummyProtocol._make_index('missing')
 
+    def test_read_unpack_short_read_fails_for_every_size(self) -> None:
+        # #2279: a size with no struct format code read a short buffer as a
+        # smaller integer instead of failing as sizes 1, 2, 4 and 8 do.
+        DummyProtocol, _, _ = self._make_protocol_class()
+        from pcapkit.utilities.exceptions import StructError
+
+        proto = DummyProtocol(packet=b'\x01')
+        for size in (2, 3, 4, 5, 8):
+            for signed in (False, True):
+                with self.subTest(size=size, signed=signed):
+                    proto._file = io.BytesIO(bytes(range(1, size)))
+                    with self.assertRaises(StructError) as context:
+                        proto._read_unpack(size, signed=signed)
+                    self.assertFalse(context.exception.eof)
+
+                    proto._file = io.BytesIO(bytes(range(1, size)))
+                    self.assertEqual(proto._read_unpack(size, signed=signed, quiet=True),
+                                     int.from_bytes(bytes(range(1, size)), 'big', signed=signed))
+
     def test_register_analyze_and_next_layer_paths(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
         from pcapkit.corekit.module import ModuleDescriptor
