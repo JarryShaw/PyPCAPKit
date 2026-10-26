@@ -801,7 +801,7 @@
 
 <span class="c1">#: PyShark's text for a boolean field -&gt; its value. tshark 4.x spells one ``'True'``/``'False'``</span>
 <span class="c1">#: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6</span>
-<span class="c1">#: on tshark 4.6.9); ``'1'``/``'0'`` is the spelling this module first parsed (:issue:`1514`).</span>
+<span class="c1">#: on tshark 4.6.9); ``'1'``/``'0'`` is accepted as well (:issue:`1514`).</span>
 <span class="n">_BOOLEAN_FIELD</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'1'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'0'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">'True'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'False'</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>  <span class="c1"># type: dict[str, bool]</span>
 
 
@@ -1011,8 +1011,8 @@
 <span class="sd">    Note:</span>
 <span class="sd">        tshark reports no ``ip.dst`` behind an LSRR or SSRR option whose route</span>
 <span class="sd">        data is no whole number of addresses ("Suboption would go past end of</span>
-<span class="sd">        option"), measured with tshark 4.6.9. Reading it raised a bare</span>
-<span class="sd">        :exc:`AttributeError` out of :func:`tcp_traceflow`, which ended the</span>
+<span class="sd">        option"), measured with tshark 4.6.9. Reading it unchecked raises a bare</span>
+<span class="sd">        :exc:`AttributeError` out of :func:`tcp_traceflow`, which would end the</span>
 <span class="sd">        extraction (:issue:`1671`).</span>
 
 <span class="sd">    """</span>

@@ -1096,10 +1096,10 @@
 <span class="sd">        Length less its 20 framing octets, and never below zero.</span>
 
 <span class="sd">    ``secrets_length`` is a 32-bit wire field. Read as declared, a length past</span>
-<span class="sd">    the block read the trailing Block Total Length and the blocks after it as</span>
-<span class="sd">    secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` the</span>
-<span class="sd">    read raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside</span>
-<span class="sd">    the block's schema, which ended the whole extraction (:issue:`1980`). This</span>
+<span class="sd">    the block would read the trailing Block Total Length and the blocks after it</span>
+<span class="sd">    as secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`</span>
+<span class="sd">    the read would raise :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">    from inside the block's schema, ending the whole extraction (:issue:`1980`). This</span>
 <span class="sd">    is the Secrets Data counterpart of :func:`captured_area`: the block keeps its</span>
 <span class="sd">    declared ``secrets_length``, the secrets are the octets the block holds, and</span>
 <span class="sd">    the padding and option area are sized from those octets.</span>

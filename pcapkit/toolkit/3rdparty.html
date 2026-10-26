@@ -1363,7 +1363,7 @@ the engine could not extend – carries none, and is handed on as it is.</p>
 resolution and its original length would be lost between the reader and
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.packet2frame" title="pcapkit.toolkit.dpkt.packet2frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet2frame()</span></code></a>. The engine’s readers yield a <a class="reference internal" href="#pcapkit.toolkit.dpkt.Timestamp" title="pcapkit.toolkit.dpkt.Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code></a> or a
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.DecimalTimestamp" title="pcapkit.toolkit.dpkt.DecimalTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalTimestamp</span></code></a> instead, which <em>is</em> the value <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> yields –
-so a stored frame’s timestamp is exactly what it was before – and also
+so a stored frame’s timestamp is unchanged by it – and also
 carries what would otherwise be lost. Reassembly and flow tracing are handed a plain
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> of it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1501">#1501</a>): of its exact value, since <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s
 own for a microsecond PCAP rounds twice (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>; see
@@ -1670,8 +1670,8 @@ and 4.6.0, after every field <a class="reference internal" href="#pcapkit.toolki
 <p class="admonition-title">Note</p>
 <p>tshark reports no <code class="docutils literal notranslate"><span class="pre">ip.dst</span></code> behind an LSRR or SSRR option whose route
 data is no whole number of addresses (“Suboption would go past end of
-option”), measured with tshark 4.6.9. Reading it raised a bare
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> out of <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>, which ended the
+option”), measured with tshark 4.6.9. Reading it unchecked raises a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> out of <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>, which would end the
 extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1671">#1671</a>).</p>
 </div>
 </dd></dl>

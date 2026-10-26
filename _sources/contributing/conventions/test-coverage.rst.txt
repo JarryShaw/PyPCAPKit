@@ -39,7 +39,9 @@ known-failure table keep their cases in a generator, beside the captures it also
    * - :file:`tests/protocols/test_dispatch_registry_unit.py`
      - :file:`examples/generators/dispatch.py`
      - every ``__proto__`` entry dispatches to the class ``PINNED_TARGETS`` names;
-       known failures in ``KNOWN_DEGRADED`` (:issue:`496`)
+       known degrades in ``DispatchRegistryTests.KNOWN_DEGRADED``, which the
+       generator's own ``KNOWN_DEGRADED`` mirrors for its command-line report
+       (:issue:`496`)
 
 The rules those tables carry:
 
@@ -56,7 +58,8 @@ The rules those tables carry:
    Routing a case around a defect hides it: the generator's ``HIP_COPIES`` once put two
    parameters in every HIP packet, so the unrepresentable length of a lone one
    (:issue:`651`) was never constructed.
-   ``KNOWN_DEGRADED`` entries have a different shape -- a fragment and a reason -- and
+   ``KNOWN_DEGRADED`` entries have a different shape -- the fragments of the probe's
+   ``'error'`` value the entry accepts, any one of which may match, and a reason -- and
    they record why the probe's placeholder payload cannot reach the target, not a
    defect to fix, so the name-and-issue rule does not apply to them.
 *  **A regression is fixed; a pre-existing defect is recorded.** A case that a change

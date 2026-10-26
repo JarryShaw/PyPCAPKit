@@ -488,7 +488,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.link.vlan` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding</span>
-<span class="sd">the tag layout shared by every VLAN tag [*]_. The two concrete tags live in</span>
+<span class="sd">the tag layout shared by every VLAN tag [*]_. The concrete tags live in</span>
 <span class="sd">modules of their own, since they are reached through different registry indices</span>
 <span class="sd">-- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag</span>
 <span class="sd">(``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad</span>
@@ -521,7 +521,7 @@
 <span class="sd">would nest one ``c_tag`` inside another, leaving nothing in the output to say</span>
 <span class="sd">which of the two was the service tag.</span>
 
-<span class="sd">Two distinct EtherTypes also means two distinct</span>
+<span class="sd">Two distinct EtherTypes also mean two distinct</span>
 <span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the</span>
 <span class="sd">project's rule for when protocols get separate modules: siblings that *share* an</span>
 <span class="sd">index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares</span>

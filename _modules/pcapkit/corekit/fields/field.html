@@ -792,8 +792,9 @@
 <span class="sd">        :attr:`~object.__dict__` shallow-updated from this one.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Every ``__call__`` override in this module calls ``self.__copy__()``</span>
-<span class="sd">            directly rather than :func:`copy.copy(self) &lt;copy.copy&gt;`.</span>
+<span class="sd">            Every ``__call__`` in :mod:`pcapkit.corekit.fields` copies through</span>
+<span class="sd">            ``self.__copy__()`` -- directly, or by way of ``super().__call__`` --</span>
+<span class="sd">            rather than :func:`copy.copy(self) &lt;copy.copy&gt;`.</span>
 <span class="sd">            :func:`copy.copy` still has to *find* this method before it can call</span>
 <span class="sd">            it -- ``getattr(cls, '__copy__', None)`` -- and that lookup alone</span>
 <span class="sd">            was profiled at 55,846 calls (~1.7% of an</span>
@@ -801,8 +802,8 @@
 <span class="sd">            ``examples/captures/http.pcap``, one per field</span>
 <span class="sd">            per packet, all from this exact path. Calling ``__copy__``</span>
 <span class="sd">            directly is exactly what :func:`copy.copy` would have done once it</span>
-<span class="sd">            found it, so this changes nothing about *when* a field is copied or</span>
-<span class="sd">            what the copy contains -- only the redundant dispatch is removed.</span>
+<span class="sd">            found it, so a field is copied at the same points and to the same</span>
+<span class="sd">            contents either way -- only the redundant dispatch is skipped.</span>
 <span class="sd">            See GitHub issue :issue:`730`.</span>
 
 <span class="sd">        Returns:</span>
@@ -943,7 +944,7 @@
         <span class="c1"># ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --</span>
         <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
         <span class="c1"># declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a</span>
-        <span class="c1"># length short of what ``buffer`` holds is provably bogus: the padding</span>
+        <span class="c1"># length that ``buffer`` falls short of is provably bogus: the padding</span>
         <span class="c1"># cannot recover data that was never in the buffer, only zero-fill for</span>
         <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
         <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
@@ -998,7 +999,7 @@
 
         <span class="c1"># A shortfall no larger than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is padded</span>
         <span class="c1"># without consulting the budget, and is not charged to it either. That is</span>
-        <span class="c1"># the load-bearing half of this fix rather than a concession in it: it is</span>
+        <span class="c1"># load-bearing rather than a concession: it is</span>
         <span class="c1"># what keeps the answer a function of *this* read rather than of</span>
         <span class="c1"># everything read before it. No shortfall a 16-bit wire length can produce</span>
         <span class="c1"># -- which is every shortfall a snapshot-truncated capture, a truncated</span>
@@ -1009,8 +1010,8 @@
         <span class="c1"># not tallied against it. A snapshot-truncated capture of offload-sized</span>
         <span class="c1"># frames pads some 935 octets for every octet it reads, all of it in this</span>
         <span class="c1"># band; charging that to the same ledger would exhaust it within a few</span>
-        <span class="c1"># frames and refuse the next large shortfall -- reintroducing exactly the</span>
-        <span class="c1"># history-dependence the band exists to remove.</span>
+        <span class="c1"># frames and refuse the next large shortfall -- making the answer depend on</span>
+        <span class="c1"># history, which is exactly what the band exists to prevent.</span>
         <span class="n">shortfall</span><span class="p">,</span> <span class="n">ratio</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_SHORTFALL</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ZERO_PAD_BUDGET_RATIO</span>
         <span class="k">if</span> <span class="n">shortfall</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">shortfall</span><span class="p">:</span>
             <span class="c1"># NOTE: ``-1`` for either term of the allowance lifts the budget.</span>

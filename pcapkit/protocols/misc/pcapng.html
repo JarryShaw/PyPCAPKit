@@ -875,8 +875,11 @@ does not distinguish them, but a PCAP-NG block carries a trailer.
 <dd><p>Section context of current PCAP-NG block.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – On a Section Header Block, which has no section
-    context of its own.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the block holds no section context: a block
+    given <code class="docutils literal notranslate"><span class="pre">ctx=None</span></code>, or a Section Header Block, which starts a
+    section rather than reading one, unless the
+    <a class="reference internal" href="../../foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> engine read
+    it and assigned it the section it opens.</p>
 </dd>
 </dl>
 <div class="versionadded">
@@ -977,12 +980,12 @@ should be <code class="docutils literal notranslate"><span class="pre">{protocol
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – protocol code as in <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></p></li>
 <li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – module descriptor or a
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass</p></li>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
-    class, or not a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+    class, or not a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If this link type is
@@ -4261,7 +4264,7 @@ from, if any, are written back verbatim, as for
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 and <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 Each value is a <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the
-module and class, or a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+module and class, or a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -7572,10 +7575,10 @@ Length less its 20 framing octets, and never below zero.</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> is a 32-bit wire field. Read as declared, a length past
-the block read the trailing Block Total Length and the blocks after it as
-secrets, and past <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> the
-read raised <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> from inside
-the block’s schema, which ended the whole extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1980">#1980</a>). This
+the block would read the trailing Block Total Length and the blocks after it
+as secrets, and past <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a>
+the read would raise <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a>
+from inside the block’s schema, ending the whole extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1980">#1980</a>). This
 is the Secrets Data counterpart of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.captured_area" title="pcapkit.protocols.schema.misc.pcapng.captured_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">captured_area()</span></code></a>: the block keeps its
 declared <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code>, the secrets are the octets the block holds, and
 the padding and option area are sized from those octets.

@@ -527,7 +527,7 @@
 <span class="sd">       turns up on the wire but names none of these -- the extendability the</span>
 <span class="sd">       owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a</span>
 <span class="sd">       FEAT value absent from the RFC's list means in the CSV table, the owner</span>
-<span class="sd">       said that if the expected handling is our current approach, as industry</span>
+<span class="sd">       said that if the expected handling is this registry's approach, as industry</span>
 <span class="sd">       convention has it, the registry stays extendable as is, and then approved</span>
 <span class="sd">       declaring the registry's keywords as real members with ``_missing_``</span>
 <span class="sd">       still covering the rest. No custom ``__new__`` here, so the base's</span>
@@ -606,7 +606,7 @@
 <span class="sd">        recommendation, while some of this registry's codes are registered in</span>
 <span class="sd">        lower case -- measured on the IANA CSV: ``base``, ``feat``, ``hist``,</span>
 <span class="sd">        ``nat6`` and ``secu``, against all-upper-case keywords for the rest,</span>
-<span class="sd">        with none mixed. Without this override ``get('BASE')`` raised</span>
+<span class="sd">        with none mixed. Without this override ``get('BASE')`` raises</span>
 <span class="sd">        :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.</span>
 
 <span class="sd">        The obvious objection, answered: :rfc:`5797` uses case *presentationally*</span>
@@ -627,9 +627,9 @@
 <span class="sd">        own precedence -- name before value -- and its non-minting ``str``</span>
 <span class="sd">        path both survive: nothing here calls ``cls(key)``, so a key matching</span>
 <span class="sd">        no member, folded or not, still raises rather than growing the</span>
-<span class="sd">        registry. ``get('ZZ-NOT-REAL')`` therefore still raises</span>
-<span class="sd">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an</span>
-<span class="sd">        unregistered member, exactly as before.</span>
+<span class="sd">        registry. ``get('ZZ-NOT-REAL')`` therefore raises</span>
+<span class="sd">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` yields an</span>
+<span class="sd">        unregistered member.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Name or value to look up. A non-``str`` key is passed</span>
@@ -710,12 +710,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CommandType</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Type of "kind" of command, based on :rfc:`959#section-4`.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as</span>
-<span class="sd">    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its</span>
-<span class="sd">    own to reconcile with the base -- and its own :meth:`_missing_` range</span>
-<span class="sd">    guard below is untouched, since :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that</span>
-<span class="sd">    hook.</span>
+<span class="sd">    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="sd">    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines no</span>
+<span class="sd">    ``get`` of its own, so ``get``/``get_all`` are the base's, and its own</span>
+<span class="sd">    :meth:`_missing_` range guard below stands as written, since</span>
+<span class="sd">    :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that hook.</span>
 
 <span class="sd">    """</span>
 
@@ -750,10 +749,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ConformanceRequirement</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Expectation for support in modern FTP implementations.</span>
 
-<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="sd">    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this</span>
-<span class="sd">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
-<span class="sd">    with the base.</span>
+<span class="sd">    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="sd">    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines</span>
+<span class="sd">    neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="sd">    """</span>
 
@@ -1130,8 +1128,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># NOTE: unreachable only by the ``str`` annotation, which a caller</span>
-            <span class="c1"># at run time need not honour -- this is the path GitHub issue</span>
-            <span class="c1"># #1824 fixed.</span>
+            <span class="c1"># at run time need not honour (GitHub issue #1824).</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
@@ -1139,14 +1136,13 @@
             <span class="c1"># else ``key`` exactly as given -- never ``name`` -- so an</span>
             <span class="c1"># unregistered member's value is the caller's own casing, the</span>
             <span class="c1"># same convention :meth:`_unregistered_member` documents and</span>
-            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
+            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` follows</span>
             <span class="c1"># unchanged. Two calls naming the same command in different</span>
             <span class="c1"># case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build</span>
             <span class="c1"># results that are *not* equal -- each is exactly what its own</span>
-            <span class="c1"># caller passed. Minting instead returned, through the</span>
+            <span class="c1"># caller passed. Minting instead would return, through the</span>
             <span class="c1"># ``_member_map_`` cache, the *first* casing seen for every later</span>
-            <span class="c1"># call regardless of case; that is the one observable behaviour</span>
-            <span class="c1"># change in GitHub issue #860's conversion.</span>
+            <span class="c1"># call regardless of case (GitHub issue #860).</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># pylint: disable=no-member</span></div>
 

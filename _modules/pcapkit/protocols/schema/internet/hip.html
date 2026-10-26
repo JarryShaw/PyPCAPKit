@@ -1135,8 +1135,8 @@
     <span class="c1">#: order", so the width is stated twice and inferred from neither.</span>
     <span class="c1">#: :rfc:`5201#section-5.2.3` gives the same 4 + 8 layout, so there is no</span>
     <span class="c1">#: version under which four octets is right, and both codes that reach this</span>
-    <span class="c1">#: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- are</span>
-    <span class="c1">#: affected. With the four ``reserved`` octets the contents are 12 octets,</span>
+    <span class="c1">#: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- take</span>
+    <span class="c1">#: the eight. With the four ``reserved`` octets the contents are 12 octets,</span>
     <span class="c1">#: which :rfc:`7401` Section 5.2.1's arithmetic pads to a 16-octet record.</span>
     <span class="n">counter</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
     <span class="c1">#: Padding.</span>

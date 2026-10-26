@@ -573,8 +573,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        field: Field instance.</span>
 <span class="sd">        condition: Field condition function (this function should return a bool</span>
-<span class="sd">            value and accept the current packet :class:`pcapkit.corekit.infoclass.Info`</span>
-<span class="sd">            as its only argument).</span>
+<span class="sd">            value and accept the current packet data as its only argument).</span>
 
 <span class="sd">    """</span>
 
@@ -1116,9 +1115,8 @@
 <span class="sd">        declare a given field -- see</span>
 <span class="sd">        :func:`pcapkit.corekit.fields.byteorder.packet_byteorder` and</span>
 <span class="sd">        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`</span>
-<span class="sd">        for why that distinction matters, and note that both already</span>
-<span class="sd">        hand-roll this exact fallback and so are unaffected by (and do not</span>
-<span class="sd">        need to route through) this function.</span>
+<span class="sd">        for why that distinction matters; both hand-roll this exact fallback</span>
+<span class="sd">        themselves rather than route through this function.</span>
 
 <span class="sd">        Nothing written through the returned mapping reaches ``packet``,</span>
 <span class="sd">        because the returned mapping *is* a copy: a nested schema can set --</span>
@@ -1146,22 +1144,22 @@
 <span class="sd">        :class:`~abc.ABCMeta` at all because :class:`dict` is not an</span>
 <span class="sd">        :class:`~abc.ABCMeta`-based class. That also settles a suspicion,</span>
 <span class="sd">        raised on :issue:`439`, that a :class:`~collections.ChainMap` here</span>
-<span class="sd">        corrupted the :class:`~abc.ABCMeta` cache :class:`Schema</span>
+<span class="sd">        would corrupt the :class:`~abc.ABCMeta` cache :class:`Schema</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclasses shared on CPython</span>
 <span class="sd">        &lt;= 3.10. The suspicion is *probably* wrong, and this code cannot</span>
 <span class="sd">        test it: the cache keys on the **exact type queried**, so asking about a</span>
 <span class="sd">        :class:`~collections.ChainMap` instance caches lookups for</span>
 <span class="sd">        :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning</span>
 <span class="sd">        observed in :issue:`439` came from ordinary code asking</span>
-<span class="sd">        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` has</span>
-<span class="sd">        been fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own</span>
-<span class="sd">        ``_abc_impl``. Against that, swapping the ``ChainMap`` for a plain</span>
-<span class="sd">        literal on CPython 3.10 once moved</span>
+<span class="sd">        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` is</span>
+<span class="sd">        fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own</span>
+<span class="sd">        ``_abc_impl``. Against that, on CPython 3.10 choosing between a</span>
+<span class="sd">        ``ChainMap`` and a plain literal here was observed to flip</span>
 <span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
-<span class="sd">        between passing and failing, both ways; the likeliest reading is that</span>
-<span class="sd">        it changed which types flowed through unrelated :func:`isinstance`</span>
-<span class="sd">        calls rather than causing the corruption. It does not affect</span>
-<span class="sd">        correctness either way.</span>
+<span class="sd">        between passing and failing, in both directions; the likeliest reading</span>
+<span class="sd">        is that the choice changes which types flow through unrelated</span>
+<span class="sd">        :func:`isinstance` calls rather than causing the corruption. It does</span>
+<span class="sd">        not affect correctness either way.</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">}</span></div>

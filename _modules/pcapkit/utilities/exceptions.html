@@ -486,9 +486,9 @@
 
 <span class="sd">.. module:: pcapkit.utilities.exceptions</span>
 
-<span class="sd">:mod:`pcapkit.utilities.exceptions` refined built-in exceptions.</span>
-<span class="sd">Make it possible to show only user error stack information [*]_,</span>
-<span class="sd">when exception raised on user's operation.</span>
+<span class="sd">:mod:`pcapkit.utilities.exceptions` holds refined built-in exceptions,</span>
+<span class="sd">which make it possible to show only user error stack information [*]_</span>
+<span class="sd">when an exception is raised on user's operation.</span>
 
 <span class="sd">.. [*] See |tbtrim|_ project for Pythonic implementation.</span>
 
@@ -885,7 +885,7 @@
 <span class="c1"># A generic, external marker -- "some pcapkit instance's hook is active" -- for</span>
 <span class="c1"># a caller that only has :func:`sys.excepthook` and no reference to a particular</span>
 <span class="c1"># loaded copy of this module. Diagnostic only: :func:`_install_excepthook`'s own</span>
-<span class="c1"># guard below does *not* use this, and must not go back to doing so. The marker</span>
+<span class="c1"># guard below does *not* use this, and must not. The marker</span>
 <span class="c1"># is a plain :obj:`True`, identical on every reloaded copy of this function, so</span>
 <span class="c1"># it cannot tell "my own instance's hook" from "some *other* instance's" --</span>
 <span class="c1"># which is exactly the distinction the guard needs and a shared value cannot</span>
@@ -1379,9 +1379,9 @@
 <span class="sd">    of a schema's read was derived by measuring what is actually left in the</span>
 <span class="sd">    stream -- rather than declared by the caller -- and that measurement came</span>
 <span class="sd">    back zero. This is the frame reader's "no more packets" signal, so it</span>
-<span class="sd">    subclasses :exc:`EOFError` rather than replacing it: existing ``except</span>
-<span class="sd">    (EOFError, StopIteration)`` handlers keep working unchanged, and a caller</span>
-<span class="sd">    that wants to be more specific can catch this instead.</span>
+<span class="sd">    subclasses :exc:`EOFError` rather than replacing it: an ``except</span>
+<span class="sd">    (EOFError, StopIteration)`` handler catches it, and a caller that wants to</span>
+<span class="sd">    be more specific can catch this instead.</span>
 
 <span class="sd">    A *declared* zero length -- a nested schema legitimately sized to have</span>
 <span class="sd">    nothing to read -- is a different situation and does not raise this.</span>
@@ -1448,8 +1448,8 @@
 <span class="sd">    the in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s</span>
 <span class="sd">    name miss as :exc:`KeyError` -- :class:`~pcapkit.const.http.method.Method`'s</span>
 <span class="sd">    ``get`` catches it in order to build an unregistered member, so for that one</span>
-<span class="sd">    a failed name lookup is part of a successful call -- and every one of them</span>
-<span class="sd">    keeps catching.</span>
+<span class="sd">    a failed name lookup is part of a successful call -- so every one of them</span>
+<span class="sd">    catches this as well.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Distinct from :exc:`~pcapkit.utilities.exceptions.MissingKeyError`,</span>

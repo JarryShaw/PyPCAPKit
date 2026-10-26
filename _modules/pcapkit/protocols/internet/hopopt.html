@@ -865,7 +865,8 @@
         <span class="c1"># NOTE: No options is not the same as no options area. The header is at</span>
         <span class="c1"># least 8 octets, 2 of them the fixed part, so the remaining 6 must be</span>
         <span class="c1"># padding options. Passing the empty list through the same path produces</span>
-        <span class="c1"># them; returning ``[], 0`` would declare an 8-octet header and emit 2.</span>
+        <span class="c1"># them; returning ``[], 0`` would emit the 2 fixed octets alone, under a</span>
+        <span class="c1"># ``Hdr Ext Len`` that ``(0 - 6) // 8`` makes ``-1``.</span>
         <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hopopt_options</span><span class="p">(</span>
             <span class="n">options</span> <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[])</span>
 
@@ -1899,8 +1900,8 @@
 <span class="sd">            the alignment is computed from ``offset`` rather than from the</span>
 <span class="sd">            length of the option just emitted. Aligning each option to 8 octets</span>
 <span class="sd">            on its own leaves the options area a multiple of 8, whereas</span>
-<span class="sd">            :meth:`read` sizes it as ``hdr_ext_len * 8 + 6``, six short of a</span>
-<span class="sd">            multiple of 8; the header would declare 6 octets more than it</span>
+<span class="sd">            :meth:`read` sizes it as ``hdr_ext_len * 8 + 6``, two short of a</span>
+<span class="sd">            multiple of 8; the header would declare 2 octets fewer than it</span>
 <span class="sd">            carried.</span>
 
 <span class="sd">            A ``PadN`` option spends two octets on its own type and</span>
@@ -1943,7 +1944,7 @@
 <span class="sd">            The returned length is that of the options area alone, the value</span>
 <span class="sd">            :meth:`make` derives the ``Hdr Ext Len`` field from. Since the two</span>
 <span class="sd">            octets of the fixed header precede it, an options area is well</span>
-<span class="sd">            formed only when it is 6 octets short of a multiple of 8 --</span>
+<span class="sd">            formed only when it is 2 octets short of a multiple of 8 --</span>
 <span class="sd">            including when it holds no real options at all, in which case it is</span>
 <span class="sd">            6 octets of pure padding rather than empty.</span>
 

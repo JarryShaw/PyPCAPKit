@@ -704,7 +704,7 @@
 <span class="sd">            One read may return fewer octets than asked for at any point -- a pipe hands</span>
 <span class="sd">            over what has been written so far, a raw stream what one system call returned</span>
 <span class="sd">            -- and only an empty one means the stream has ended. Taking the first answer</span>
-<span class="sd">            for all there is ended a capture at a chunk boundary (:issue:`1586`), so this</span>
+<span class="sd">            for all there is would end a capture at a chunk boundary (:issue:`1586`), so this</span>
 <span class="sd">            reads until ``minimum`` octets are in hand. Past that it does not wait:</span>
 <span class="sd">            ``read1``, where the stream has it, returns what is already there. A</span>
 <span class="sd">            non-blocking stream's :obj:`None` stops the reading. No one read asks for</span>
@@ -825,7 +825,7 @@
 <span class="sd">            :meth:`io.BytesIO.read`, ``read1`` or ``readline``. On GraalPy those can hand</span>
 <span class="sd">            back :obj:`bytes` that share the memory of a :class:`io.BytesIO` whose buffer</span>
 <span class="sd">            is exported, as this one's is, so the next :meth:`_write_buffer`, which writes</span>
-<span class="sd">            through the view, changed octets that had already been returned</span>
+<span class="sd">            through the view, would change octets that had already been returned</span>
 <span class="sd">            (:issue:`1963`). A slice of the view, copied, is a copy on every interpreter.</span>
 
 <span class="sd">        """</span>

@@ -738,11 +738,11 @@
 <span class="c1">#: fix for :issue:`841`, is whether a label is the final concrete assigned name or only</span>
 <span class="c1">#: a notation for readers; the ruling on :issue:`775` kept ``Registered by Xerox`` out</span>
 <span class="c1">#: of this set on that test, because a proprietary protocol may expose no name</span>
-<span class="c1">#: of its own, so the company name serves as its name. :issue:`775`'s final round</span>
-<span class="c1">#: converts it too, so this set does not decide *whether* a range registers --</span>
-<span class="c1">#: only *how its name is spelled*: these keep the bare label with no hex</span>
-<span class="c1">#: suffix, since the label itself already says nothing was assigned, while</span>
-<span class="c1">#: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.</span>
+<span class="c1">#: of its own, so the company name serves as its name. :issue:`775` settled on</span>
+<span class="c1">#: an unregistered member for that range too, so this set does not decide</span>
+<span class="c1">#: *whether* a range registers -- only *how its name is spelled*: these keep the</span>
+<span class="c1">#: bare label with no hex suffix, since the label itself already says nothing</span>
+<span class="c1">#: was assigned, while ``Registered by Xerox`` keeps a hex-suffixed name.</span>
 <span class="n">UNASSIGNED_RANGE_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
     <span class="s1">'Experimental'</span><span class="p">,</span>
     <span class="s1">'Dynamically Assigned Socket Numbers'</span><span class="p">,</span>
@@ -802,7 +802,7 @@
         <span class="c1"># NOTE: the range names are emitted raw, spaces and all, rather than</span>
         <span class="c1"># through ``safe_name``, because that is what the scrape did and what</span>
         <span class="c1"># the shipped constant file contains; sanitising them here would rename</span>
-        <span class="c1"># every member ``_missing_`` extends the enumeration with; see #507.</span>
+        <span class="c1"># every member ``_missing_`` builds for a range; see #507.</span>
         <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">RANGES</span><span class="p">:</span>
             <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
             <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>

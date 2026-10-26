@@ -533,8 +533,8 @@ once:</p>
 <code class="docutils literal notranslate"><span class="pre">PyShark</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAPFile</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> are not core addons, so
 they are on demand – one extra at a time, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[Scapy]</span></code> and so
 on. This holds however easy they are to install, and it is what the ruling
-changed: some of them used to be in <code class="docutils literal notranslate"><span class="pre">all</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> <strong>were already excluded for installability</strong>, which the
+changed: the 1.4 <code class="docutils literal notranslate"><span class="pre">all</span></code> carried some of them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> <strong>are also excluded for installability</strong>, a reason the
 ruling leaves untouched. <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> is an sdist-only C extension needing a
 compiler and the libpcap development files; <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> and <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> are
 published only as pre-releases, and <code class="docutils literal notranslate"><span class="pre">all</span></code> should not be how somebody acquires a
@@ -832,11 +832,15 @@ gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </sp
 </section>
 <section id="milestones-and-the-project-board">
 <h2>Milestones and the Project Board<a class="headerlink" href="#milestones-and-the-project-board" title="Link to this heading">¶</a></h2>
-<p><strong>Milestones are release lines</strong>, titled by minor version (<code class="docutils literal notranslate"><span class="pre">1.4</span></code>, <code class="docutils literal notranslate"><span class="pre">1.5</span></code>). An issue
-or pull request belongs to the line it ships in: the open milestone collects work
-targeting the next release, and it is closed when that release’s final tag is cut,
+<p><strong>Milestones are release lines</strong>, titled by minor version (<code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.4</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.5</span></code>). An issue or pull request belongs to the line it ships in: the
+open milestone collects work targeting the next release, and it is closed when that release’s final tag is cut,
 with <code class="docutils literal notranslate"><span class="pre">due_on</span></code> set to the tag date. Work closed without shipping – an unmerged pull
-request, an issue closed as not planned – takes no milestone. The closed milestones
+request, an issue closed as not planned – takes no milestone.
+<code class="file docutils literal notranslate"><span class="pre">.github/workflows/milestone.yml</span></code> gives an item the open milestone as it opens,
+and settles it as the item closes; a milestone already set by hand to another
+release is kept, and a manual run backfills the items without one
+(<a class="reference internal" href="../workflows.html"><span class="doc">GitHub Actions Workflows</span></a>). The closed milestones
 were backfilled from merge and close dates against the release tags, so an item that
 landed just before a tag may sit one line early.</p>
 <p><strong>The project board records state that the labels drop.</strong> The state labels above are

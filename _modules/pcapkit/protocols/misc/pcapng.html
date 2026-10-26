@@ -1190,7 +1190,7 @@
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: PCAP-NG context manager.</span>
+        <span class="c1">#: Section context of the block; see :attr:`section_context`.</span>
         <span class="n">_ctx</span><span class="p">:</span> <span class="s1">'Optional[Context]'</span>
 
         <span class="c1">#: PCAP-NG block type.</span>
@@ -1237,7 +1237,7 @@
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: and :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
-    <span class="c1">#: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
+    <span class="c1">#: module and class, or a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
@@ -1456,8 +1456,11 @@
 <span class="w">        </span><span class="sd">"""Section context of current PCAP-NG block.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: On a Section Header Block, which has no section</span>
-<span class="sd">                context of its own.</span>
+<span class="sd">            UnsupportedCall: If the block holds no section context: a block</span>
+<span class="sd">                given ``ctx=None``, or a Section Header Block, which starts a</span>
+<span class="sd">                section rather than reading one, unless the</span>
+<span class="sd">                :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` engine read</span>
+<span class="sd">                it and assigned it the section it opens.</span>
 
 <span class="sd">        .. versionadded:: 1.5.0</span>
 
@@ -1559,11 +1562,11 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
-<span class="sd">                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
+<span class="sd">                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this link type is</span>
@@ -2047,7 +2050,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sect</span> <span class="o">=</span> <span class="n">sct</span>
         <span class="c1">#: int: Block index number.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="n">num</span>
-        <span class="c1">#: pcapkit.foundation.engines.pcapng.Context: Context of the PCAP-NG file.</span>
+        <span class="c1">#: pcapkit.foundation.engines.pcapng.Context: Section context of the PCAP-NG file.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="n">ctx</span>
         <span class="c1">#: collections.Counter: Counter for option types.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>  <span class="c1"># type: Counter[Enum_OptionType]</span>

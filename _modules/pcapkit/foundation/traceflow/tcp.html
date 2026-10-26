@@ -613,7 +613,7 @@
 
 <span class="sd">        It is **off by default** because buffering every traced payload is a cost</span>
 <span class="sd">        tracing does not otherwise pay, and tracing's per-packet cost is something</span>
-<span class="sd">        this package has deliberately driven down. Nothing is reassembled, parsed</span>
+<span class="sd">        this package deliberately keeps low. Nothing is reassembled, parsed</span>
 <span class="sd">        or retained unless it is asked for.</span>
 
 <span class="sd">    """</span>
@@ -747,8 +747,8 @@
         <span class="c1"># A SYN arriving on a flow whose teardown has already been observed is a</span>
         <span class="c1"># *new* connection reusing the endpoints, and the only signal that proves</span>
         <span class="c1"># the previous one can receive nothing further. It is what finalises a</span>
-        <span class="c1"># bidirectional flow mid-capture; everything else is flushed by</span>
-        <span class="c1"># :meth:`submit` at the end of the capture.</span>
+        <span class="c1"># bidirectional flow mid-capture; everything else is finalised by</span>
+        <span class="c1"># :meth:`finish` at the end of the capture.</span>
         <span class="c1">#</span>
         <span class="c1"># The state test matters. A SYN alone does not mean "new connection" --</span>
         <span class="c1"># the peer's SYN-ACK carries the flag too, and it belongs to the flow the</span>
@@ -967,10 +967,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The flow's :term:`index &lt;trace.tcp.index&gt;` entry.</span>
 
-<span class="sd">        Called once per flow, from the one place that can prove a flow is over --</span>
-<span class="sd">        a new connection superseding it, or :meth:`submit` at the end of the</span>
-<span class="sd">        capture. Registering the flow here rather than at teardown is what keeps</span>
-<span class="sd">        the acknowledgement that completes a close inside the flow it belongs to.</span>
+<span class="sd">        Called once per flow, from where a flow can be proved over -- a new</span>
+<span class="sd">        connection superseding it, or :meth:`finish` at the end of the capture --</span>
+<span class="sd">        or, tracing unidirectionally, on that direction's FIN. Registering a</span>
+<span class="sd">        bidirectional flow here rather than at teardown is what keeps the</span>
+<span class="sd">        acknowledgement that completes a close inside the flow it belongs to.</span>
 
 <span class="sd">        """</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>

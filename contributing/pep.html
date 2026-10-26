@@ -673,7 +673,7 @@ than in each maker separately.</p>
 <p>It wants a registry of its own rather than
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>, which is
 only ever called at a layer boundary and appends to the frame’s protocol chain.
-An MLD address record inside a mobility option did not follow MH on the wire,
+An MLD address record inside a mobility option does not follow MH on the wire,
 so putting it in that chain would make <code class="docutils literal notranslate"><span class="pre">layer=</span></code> and <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> limits
 behave wrongly. Changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> also changes what existing captures dump to, so
@@ -747,7 +747,7 @@ RARP, IPv4, IPv6, IPX and both VLAN tags.</p></li>
 <a class="reference internal" href="../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a> and
 <a class="reference internal" href="../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a>, out of
 a registry carrying every IANA service name: TCP 20 to FTP-DATA and 21 to FTP,
-ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.</p></li>
+ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TPv2.</p></li>
 <li><p><a class="reference internal" href="../pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
 – the values in <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a>: PPIDs 60 and 66, each to
 <a class="reference internal" href="../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>. Every other DATA chunk
@@ -850,8 +850,8 @@ them again: <a class="reference internal" href="../pcapkit/corekit/infoclass.htm
 suspect – is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 <code class="docutils literal notranslate"><span class="pre">%s</span></code>. The IO-batching idea the thread proposed was never the bottleneck.</p>
-<p>The larger wins this section listed, all outside the parse path, have landed in
-full or in part:</p>
+<p>The larger costs this section listed all lie outside the parse path, and each is
+addressed in full or in part:</p>
 <ul class="simple">
 <li><p><strong>The flow dumper reopens its output file once per frame</strong>, in
 <a class="reference internal" href="../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">__call__</span></code>. It does not
@@ -870,11 +870,11 @@ read, rather than running
 measured at 86% of the IP-reassembly cost plus a 133 ms garbage-collection
 bill. Whether unfragmented frames should be emitted at all is the design
 question that is left, and it is worth settling deliberately.</p></li>
-<li><p><strong>Done.</strong> Every option was parsed twice – 2274 schema unpacks for 1137
-options, the pre-parse always discarded, about 15% of a PCAP-NG extraction.
-<a class="reference internal" href="../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> reads only the base
-schema’s type field to choose the option schema, rather than unpacking the
-whole base schema and throwing it away.</p></li>
+<li><p><strong>Done.</strong> <a class="reference internal" href="../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> reads only
+the base schema’s type field to choose the option schema, rather than unpacking
+the whole base schema and throwing it away. Unpacking it parsed every option
+twice – 2274 schema unpacks for 1137 options, the pre-parse always discarded,
+about 15% of a PCAP-NG extraction.</p></li>
 </ul>
 <p>Some traps for anyone benchmarking this library. <code class="docutils literal notranslate"><span class="pre">reassembly=True</span></code> and
 <code class="docutils literal notranslate"><span class="pre">trace=True</span></code> are <strong>no-ops</strong> without <code class="docutils literal notranslate"><span class="pre">ip=</span></code>/<code class="docutils literal notranslate"><span class="pre">tcp=</span></code>, so a benchmark that passes
@@ -885,10 +885,10 @@ process inflates them by up to 73%, so each shape wants its own interpreter.</p>
 <h2>Recursive Dissection, With a Depth Limit<a class="headerlink" href="#recursive-dissection-with-a-depth-limit" title="Link to this heading">¶</a></h2>
 <p><strong>Decided, open to revisit.</strong> Each layer dissects the next from inside
 its own parse, so dissecting a frame recurses once per layer, at 9 to 12 Python
-frames a layer. Deep nesting – IP in IP, stacked 802.1Q tags, long chains of
-IPv6 extension headers – used to exhaust the recursion limit and leave the rest
-of the frame raw, silently, at a depth that varied with the interpreter and the
-caller’s stack (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
+frames a layer. Without a bound, deep nesting – IP in IP, stacked 802.1Q tags,
+long chains of IPv6 extension headers – exhausts the recursion limit and leaves the
+rest of the frame raw, silently, at a depth that varies with the interpreter and
+the caller’s stack (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
 <p>Recursion stays, with a counted bound:
 <a class="reference internal" href="../pcapkit/utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> caps a frame at 64 layers by
 default, and <a class="reference internal" href="../pcapkit/utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> caps one
@@ -1065,9 +1065,9 @@ Anyone wanting to run the tests wants the repository, which is where they are.</
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as
 <code class="docutils literal notranslate"><span class="pre">'%Y-%m-%dT%H:%M:%S.%fZ'</span></code>, always with six fractional digits, and
-<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>
-failed on every <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report with <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span>
-<span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. The upstream defect is
+<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so without the workaround
+below <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a> fails on every <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report with
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. The upstream defect is
 <a class="reference external" href="https://github.com/JarryShaw/DictDumper/issues/122">JarryShaw/DictDumper#122</a>.
 <a class="reference internal" href="../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common.make_dumper()</span></code></a> works around it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1448">#1448</a>): it
 writes each date in UTC to whole seconds, as <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.dump" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.dump()</span></code></a> does. The

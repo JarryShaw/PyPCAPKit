@@ -610,7 +610,7 @@
 <span class="sd">    PCAP-NG specification defines a section: an interface ID counts the Interface</span>
 <span class="sd">    Description Blocks of its own section only. `Scapy`_'s reader keeps appending</span>
 <span class="sd">    to one table across Section Header Blocks, so a later section's interface 0</span>
-<span class="sd">    resolved to the first section's, with its link type and resolution (:issue:`1522`).</span>
+<span class="sd">    resolves to the first section's, with its link type and resolution (:issue:`1522`).</span>
 
 <span class="sd">    And it dates packets that `Scapy`_ misdates. A Simple Packet</span>
 <span class="sd">    Block has no timestamp, and `Scapy`_ leaves its packet with the time it was</span>
@@ -664,7 +664,7 @@
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_Uncapped</span><span class="p">(</span><span class="n">PcapReader</span><span class="p">):</span>
         <span class="c1"># ``sniff`` calls ``recv()``, and Scapy's default ``size`` of ``MTU``</span>
-        <span class="c1"># cut every record to 65,535 octets (#1717); an explicit one is kept</span>
+        <span class="c1"># cuts every record to 65,535 octets (#1717); an explicit one is kept</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">_CAPLEN_MAX</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

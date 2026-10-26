@@ -658,8 +658,7 @@ instead of updating the current instance.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_TC</span></code>]</span>) – Field instance.</p></li>
 <li><p><strong>condition</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]</span>) – Field condition function (this function should return a bool
-value and accept the current packet <a class="reference internal" href="../infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass.Info</span></code></a>
-as its only argument).</p></li>
+value and accept the current packet data as its only argument).</p></li>
 </ul>
 </dd>
 </dl>
@@ -1072,9 +1071,8 @@ outer schema specifically rather than whichever schema happens to
 declare a given field – see
 <a class="reference internal" href="byteorder.html#pcapkit.corekit.fields.byteorder.packet_byteorder" title="pcapkit.corekit.fields.byteorder.packet_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.byteorder.packet_byteorder()</span></code></a> and
 <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.BlockType.post_process" title="pcapkit.protocols.schema.misc.pcapng.BlockType.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>
-for why that distinction matters, and note that both already
-hand-roll this exact fallback and so are unaffected by (and do not
-need to route through) this function.</p>
+for why that distinction matters; both hand-roll this exact fallback
+themselves rather than route through this function.</p>
 <p>Nothing written through the returned mapping reaches <code class="docutils literal notranslate"><span class="pre">packet</span></code>,
 because the returned mapping <em>is</em> a copy: a nested schema can set –
 or shadow – a name also declared by the enclosing schema without the
@@ -1099,21 +1097,21 @@ is needed at the call site, and it cannot interact with
 <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a> at all because <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> is not an
 <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a>-based class. That also settles a suspicion,
 raised on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/439">#439</a>, that a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.ChainMap" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChainMap</span></code></a> here
-corrupted the <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a> cache <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> subclasses shared on CPython
+would corrupt the <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a> cache <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> subclasses shared on CPython
 &lt;= 3.10. The suspicion is <em>probably</em> wrong, and this code cannot
 test it: the cache keys on the <strong>exact type queried</strong>, so asking about a
 <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.ChainMap" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChainMap</span></code></a> instance caches lookups for
 <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.ChainMap" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChainMap</span></code></a> and not for <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, the poisoning
 observed in <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/439">#439</a> came from ordinary code asking
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> about a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/439">#439</a> has
-been fixed directly – every <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> subclass gets its own
-<code class="docutils literal notranslate"><span class="pre">_abc_impl</span></code>. Against that, swapping the <code class="docutils literal notranslate"><span class="pre">ChainMap</span></code> for a plain
-literal on CPython 3.10 once moved
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> about a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/439">#439</a> is
+fixed directly – every <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> subclass gets its own
+<code class="docutils literal notranslate"><span class="pre">_abc_impl</span></code>. Against that, on CPython 3.10 choosing between a
+<code class="docutils literal notranslate"><span class="pre">ChainMap</span></code> and a plain literal here was observed to flip
 <code class="docutils literal notranslate"><span class="pre">test_pcapng_remaining_constructor_branches_and_custom_dispatch</span></code>
-between passing and failing, both ways; the likeliest reading is that
-it changed which types flowed through unrelated <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a>
-calls rather than causing the corruption. It does not affect
-correctness either way.</p>
+between passing and failing, in both directions; the likeliest reading
+is that the choice changes which types flow through unrelated
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> calls rather than causing the corruption. It does
+not affect correctness either way.</p>
 </div>
 </dd></dl>
 

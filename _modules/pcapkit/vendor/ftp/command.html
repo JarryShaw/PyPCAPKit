@@ -565,7 +565,7 @@
 <span class="s1">       turns up on the wire but names none of these -- the extendability the</span>
 <span class="s1">       owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a</span>
 <span class="s1">       FEAT value absent from the RFC's list means in the CSV table, the owner</span>
-<span class="s1">       said that if the expected handling is our current approach, as industry</span>
+<span class="s1">       said that if the expected handling is this registry's approach, as industry</span>
 <span class="s1">       convention has it, the registry stays extendable as is, and then approved</span>
 <span class="s1">       declaring the registry's keywords as real members with ``_missing_``</span>
 <span class="s1">       still covering the rest. No custom ``__new__`` here, so the base's</span>
@@ -614,7 +614,7 @@
 <span class="s1">        recommendation, while some of this registry's codes are registered in</span>
 <span class="s1">        lower case -- measured on the IANA CSV: ``base``, ``feat``, ``hist``,</span>
 <span class="s1">        ``nat6`` and ``secu``, against all-upper-case keywords for the rest,</span>
-<span class="s1">        with none mixed. Without this override ``get('BASE')`` raised</span>
+<span class="s1">        with none mixed. Without this override ``get('BASE')`` raises</span>
 <span class="s1">        :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.</span>
 
 <span class="s1">        The obvious objection, answered: :rfc:`5797` uses case *presentationally*</span>
@@ -635,9 +635,9 @@
 <span class="s1">        own precedence -- name before value -- and its non-minting ``str``</span>
 <span class="s1">        path both survive: nothing here calls ``cls(key)``, so a key matching</span>
 <span class="s1">        no member, folded or not, still raises rather than growing the</span>
-<span class="s1">        registry. ``get('ZZ-NOT-REAL')`` therefore still raises</span>
-<span class="s1">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an</span>
-<span class="s1">        unregistered member, exactly as before.</span>
+<span class="s1">        registry. ``get('ZZ-NOT-REAL')`` therefore raises</span>
+<span class="s1">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` yields an</span>
+<span class="s1">        unregistered member.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Name or value to look up. A non-``str`` key is passed</span>
@@ -708,12 +708,11 @@
 <span class="s1">class CommandType(EnumLookup, IntFlag):</span>
 <span class="s1">    """Type of "kind" of command, based on :rfc:`959#section-4`.</span>
 
-<span class="s1">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="s1">    issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as</span>
-<span class="s1">    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its</span>
-<span class="s1">    own to reconcile with the base -- and its own :meth:`_missing_` range</span>
-<span class="s1">    guard below is untouched, since :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that</span>
-<span class="s1">    hook.</span>
+<span class="s1">    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="s1">    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines no</span>
+<span class="s1">    ``get`` of its own, so ``get``/``get_all`` are the base's, and its own</span>
+<span class="s1">    :meth:`_missing_` range guard below stands as written, since</span>
+<span class="s1">    :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that hook.</span>
 
 <span class="s1">    """</span>
 
@@ -742,10 +741,9 @@
 <span class="s1">class ConformanceRequirement(EnumLookup, IntEnum):</span>
 <span class="s1">    """Expectation for support in modern FTP implementations.</span>
 
-<span class="s1">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
-<span class="s1">    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this</span>
-<span class="s1">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
-<span class="s1">    with the base.</span>
+<span class="s1">    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue</span>
+<span class="s1">    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines</span>
+<span class="s1">    neither ``get`` nor ``_missing_`` of its own.</span>
 
 <span class="s1">    """</span>
 
@@ -927,8 +925,7 @@
 <span class="s1">        """</span>
 <span class="s1">        if not isinstance(key, str):</span>
 <span class="s1">            # NOTE: unreachable only by the ``str`` annotation, which a caller</span>
-<span class="s1">            # at run time need not honour -- this is the path GitHub issue</span>
-<span class="s1">            # #1824 fixed.</span>
+<span class="s1">            # at run time need not honour (GitHub issue #1824).</span>
 <span class="s1">            return super().get(key)  # type: ignore[unreachable]</span>
 <span class="s1">        name = key.upper()</span>
 <span class="s1">        if name not in cls._member_map_:  # pylint: disable=no-member</span>
@@ -936,14 +933,13 @@
 <span class="s1">            # else ``key`` exactly as given -- never ``name`` -- so an</span>
 <span class="s1">            # unregistered member's value is the caller's own casing, the</span>
 <span class="s1">            # same convention :meth:`_unregistered_member` documents and</span>
-<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
+<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` follows</span>
 <span class="s1">            # unchanged. Two calls naming the same command in different</span>
 <span class="s1">            # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build</span>
 <span class="s1">            # results that are *not* equal -- each is exactly what its own</span>
-<span class="s1">            # caller passed. Minting instead returned, through the</span>
+<span class="s1">            # caller passed. Minting instead would return, through the</span>
 <span class="s1">            # ``_member_map_`` cache, the *first* casing seen for every later</span>
-<span class="s1">            # call regardless of case; that is the one observable behaviour</span>
-<span class="s1">            # change in GitHub issue #860's conversion.</span>
+<span class="s1">            # call regardless of case (GitHub issue #860).</span>
 <span class="s1">            return cls._unregistered_member(default if default is not None else key, name)</span>
 <span class="s1">        return cls._member_map_[name]  # pylint: disable=no-member</span>
 
@@ -1009,9 +1005,9 @@
 <span class="sd">            :class:`Command`'s enumeration fields, and every distinct</span>
 <span class="sd">            per-command keyword the ``FEAT code`` column names --</span>
 <span class="sd">            :class:`~pcapkit.const.ftp.command.FEATCode` must declare these as real members (GitHub</span>
-<span class="sd">            issue :issue:`860`), rather than the old approach of minting one as an</span>
-<span class="sd">            incidental side effect the first time a :class:`Command` row</span>
-<span class="sd">            referencing it was evaluated at import time.</span>
+<span class="sd">            issue :issue:`860`), rather than minting one as an incidental side</span>
+<span class="sd">            effect the first time a :class:`Command` row referencing it is</span>
+<span class="sd">            evaluated at import time.</span>
 
 <span class="sd">        """</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>

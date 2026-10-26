@@ -1074,7 +1074,7 @@ setup, so their output opens with the header record dumped above and
 <dd><p>Create the output writer.</p>
 <p>The built-in engines call this at their global-header step. The PCAP
 engine passes the header’s fields as <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>,
-<code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>:
+<code class="docutils literal notranslate"><span class="pre">nanosecond</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>:
 <a class="reference internal" href="../dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a> writes its own global header from
 them, and the other writers ignore them. The PCAP-NG engine passes none.
 <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> calls it again, without arguments, after the engine has
@@ -1504,7 +1504,7 @@ then it calls <a class="reference internal" href="#pcapkit.foundation.extraction
 class owns it</em> – the rule of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a>, as <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._owns_input" title="pcapkit.foundation.extraction.Extractor._owns_input"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_owns_input()</span></code></a> writes
 it down and <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a> and the backstops already follow. A stream
 the caller supplied stays open for the caller to close, so leaving the
-block no longer closes it behind the caller’s back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1999">#1999</a>).</p>
+block does not close it behind the caller’s back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1999">#1999</a>).</p>
 <p>For a caller’s non-seekable stream, the stream this class owns is the
 <a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> wrapped around it, and that
 wrapper is closed; it was built with <code class="docutils literal notranslate"><span class="pre">stream_closing</span></code> off, so closing
@@ -1646,10 +1646,10 @@ reports end of stream at once. So an extraction over a file that is still
 being appended to ends at the data present when it got there, rather than
 following the writer. That is a deliberate narrowing, and it is measured:
 a file gaining its last record 0.6s in yields five of its six frames here,
-where the unbounded retry of <code class="docutils literal notranslate"><span class="pre">6c3d1b0d9</span></code> yielded all six. Unbounded
-retrying is the defect <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/620">#620</a> reports, so <em>some</em> stopping rule had
-to be chosen, and a timed grace period would only make the cut-off
-intermittent rather than absent.
+where an unbounded retry yields all six. Unbounded retrying is the defect
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/620">#620</a> reports, so <em>some</em> stopping rule had to be chosen, and a
+timed grace period would only make the cut-off intermittent rather than
+absent.
 Following a growing file wants a deliberate policy of its own; see the
 note in <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code>.</p>
 <div class="admonition warning">

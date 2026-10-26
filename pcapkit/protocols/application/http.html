@@ -675,12 +675,12 @@ the <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> becomes under
 <a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>. The nine-octet frame header is therefore
 never used to <em>identify</em> HTTP/2 ahead of HTTP/1: as identification it misfires on
-binary HTTP/1 bodies, which is precisely how garbage text was classified HTTP/2 to
-begin with. A bare frame is parsed as HTTP/2 only by the fall-through below, and only
-if its header is one a conforming sender could write (see <code class="docutils literal notranslate"><span class="pre">_test_http2_frame()</span></code>): a
-frame type <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> defines, no undefined flag, and a stream that type may be sent
-on. Nine zero octets – a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame on stream 0, a protocol error under
-<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a> – are not guessed as HTTP/2.</p></li>
+binary HTTP/1 bodies, and classifies garbage text as HTTP/2. A bare frame is parsed
+as HTTP/2 only by the fall-through below, and only if its header is one a conforming
+sender could write (see <code class="docutils literal notranslate"><span class="pre">_test_http2_frame()</span></code>): a frame type <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> defines,
+no undefined flag, and a stream that type may be sent on. Nine zero octets – a
+<code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame on stream 0, a protocol error under <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a> – are not
+guessed as HTTP/2.</p></li>
 </ul>
 </div>
 </dd></dl>

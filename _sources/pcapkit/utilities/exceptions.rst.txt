@@ -3,9 +3,9 @@ User Defined Exceptions
 
 .. module:: pcapkit.utilities.exceptions
 
-:mod:`pcapkit.utilities.exceptions` refined built-in exceptions.
-Make it possible to show only user error stack information [*]_,
-when exception raised on user's operation.
+:mod:`pcapkit.utilities.exceptions` holds refined built-in exceptions,
+which make it possible to show only user error stack information [*]_
+when an exception is raised on user's operation.
 
 Loud and Quiet Errors
 ---------------------

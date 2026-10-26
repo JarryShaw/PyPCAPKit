@@ -664,8 +664,8 @@
             <span class="c1"># contributes only the annotations it declares itself, on every</span>
             <span class="c1"># Python version: below 3.10 (bpo-43901), ``__annotations__`` of a</span>
             <span class="c1"># class declaring none is its nearest base's, so a field-less</span>
-            <span class="c1"># subclass read Info's ``__finalised__``, ``__additional__`` and</span>
-            <span class="c1"># ``__excluded__`` as its fields (#1692). See</span>
+            <span class="c1"># subclass would read Info's ``__finalised__``, ``__additional__``</span>
+            <span class="c1"># and ``__excluded__`` as its fields (#1692). See</span>
             <span class="c1"># :func:`~pcapkit.utilities.compat.get_annotations`.</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">get_annotations</span><span class="p">(</span><span class="n">cls_</span><span class="p">)):</span>
                 <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
@@ -773,8 +773,8 @@
 <span class="sd">                __additional__ = ['e', 'f']</span>
 
 <span class="sd">            print(A.__additional__)  # ['a', 'b']</span>
-<span class="sd">            print(B.__additional__)  # ['a', 'b', 'c', 'd']</span>
-<span class="sd">            print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']</span>
+<span class="sd">            print(B.__additional__)  # ['c', 'd', 'a', 'b']</span>
+<span class="sd">            print(C.__additional__)  # ['e', 'f', 'c', 'd', 'a', 'b']</span>
 
 <span class="sd">    """</span>
 
@@ -980,8 +980,8 @@
         <span class="c1"># ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it</span>
         <span class="c1"># finalises, and a subclass reading that state through inheritance was</span>
         <span class="c1"># never finalised itself -- it would keep the ``__excluded__`` it copied</span>
-        <span class="c1"># at declaration, without the names ``info_final`` adds, which once</span>
-        <span class="c1"># leaked ``__map__``, ``__map_reverse__`` and ``__multi__`` from</span>
+        <span class="c1"># at declaration, without the names ``info_final`` adds, which would</span>
+        <span class="c1"># leak ``__map__``, ``__map_reverse__`` and ``__multi__`` from</span>
         <span class="c1"># ``to_dict()`` (GitHub issue #1490). The inner one: an ancestor hand-marked bare</span>
         <span class="c1"># ``@final`` passes its marker to every subclass declared before it</span>
         <span class="c1"># landed, and ``getattr`` would blame such a subclass for a mismarking</span>
@@ -1334,9 +1334,9 @@
 <span class="sd">    :mod:`~pcapkit.corekit.multidict` classes are Werkzeug's, kept verbatim,</span>
 <span class="sd">    and Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
 <span class="sd">    defines ``__eq__`` but no ``__ne__``: ``!=`` falls back to :obj:`dict`'s,</span>
-<span class="sd">    which compares the internal buckets, so two equal exports compared</span>
+<span class="sd">    which compares the internal buckets, so two equal exports would compare</span>
 <span class="sd">    ``!=`` as well as ``==`` -- and, since ``__eq__`` compares the values with</span>
-<span class="sd">    ``!=``, two exports holding a nested export compared unequal</span>
+<span class="sd">    ``!=``, two exports holding a nested export would compare unequal</span>
 <span class="sd">    (:issue:`1484`). Its copies, deep copies and pickles stay of this class, as</span>
 <span class="sd">    Werkzeug's build them from ``type(self)``, and :meth:`__repr__` writes it as</span>
 <span class="sd">    the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it is.</span>
@@ -1557,8 +1557,8 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="c1"># NOTE: MultiDict's ``__eq__`` is :obj:`dict`'s, which compares the</span>
         <span class="c1"># internal storage, so against an OrderedMultiDict -- whose values sit</span>
-        <span class="c1"># in buckets -- it answered False where the OrderedMultiDict, asked the</span>
-        <span class="c1"># other way round, answered True. The ordered side decides, as it does</span>
+        <span class="c1"># in buckets -- it answers False where the OrderedMultiDict, asked the</span>
+        <span class="c1"># other way round, answers True. The ordered side decides, as it does</span>
         <span class="c1"># for a bare MultiDict, which Python asks it first for being its</span>
         <span class="c1"># subclass (#1484).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
@@ -1635,8 +1635,8 @@
 
     <span class="c1"># NOTE: as for :class:`MultiInfo`, the mapping protocol is bound back to</span>
     <span class="c1"># OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and</span>
-    <span class="c1"># dict's compares the internal buckets, so two equal option lists compared</span>
-    <span class="c1"># ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports</span>
+    <span class="c1"># dict's compares the internal buckets, so two equal option lists would</span>
+    <span class="c1"># compare ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports</span>
     <span class="c1"># (#1484).</span>
     <span class="fm">__getitem__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__getitem__</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>

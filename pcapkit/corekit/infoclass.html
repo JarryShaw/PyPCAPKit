@@ -960,8 +960,8 @@ included fields from the subclass attributes.</p>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'e'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b']</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b', 'c', 'd']</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['a', 'b', 'c', 'd', 'e', 'f']</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['c', 'd', 'a', 'b']</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>  <span class="c1"># ['e', 'f', 'c', 'd', 'a', 'b']</span>
 </pre></div>
 </div>
 </div>
@@ -1121,9 +1121,9 @@ each key.</p></li>
 <a class="reference internal" href="multidict.html#module-pcapkit.corekit.multidict" title="pcapkit.corekit.multidict"><code class="xref py py-mod docutils literal notranslate"><span class="pre">multidict</span></code></a> classes are Werkzeug’s, kept verbatim,
 and Werkzeug’s <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>
 defines <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> but no <code class="docutils literal notranslate"><span class="pre">__ne__</span></code>: <code class="docutils literal notranslate"><span class="pre">!=</span></code> falls back to <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>’s,
-which compares the internal buckets, so two equal exports compared
+which compares the internal buckets, so two equal exports would compare
 <code class="docutils literal notranslate"><span class="pre">!=</span></code> as well as <code class="docutils literal notranslate"><span class="pre">==</span></code> – and, since <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> compares the values with
-<code class="docutils literal notranslate"><span class="pre">!=</span></code>, two exports holding a nested export compared unequal
+<code class="docutils literal notranslate"><span class="pre">!=</span></code>, two exports holding a nested export would compare unequal
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1484">#1484</a>). Its copies, deep copies and pickles stay of this class, as
 Werkzeug’s build them from <code class="docutils literal notranslate"><span class="pre">type(self)</span></code>, and <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict.__repr__" title="pcapkit.corekit.infoclass._OrderedMultiDict.__repr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> writes it as
 the <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> it is.</p>

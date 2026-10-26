@@ -1015,12 +1015,12 @@
 <span class="sd">              :exc:`~pcapkit.utilities.exceptions.ProtocolError` becomes under</span>
 <span class="sd">              :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame header is therefore</span>
 <span class="sd">              never used to *identify* HTTP/2 ahead of HTTP/1: as identification it misfires on</span>
-<span class="sd">              binary HTTP/1 bodies, which is precisely how garbage text was classified HTTP/2 to</span>
-<span class="sd">              begin with. A bare frame is parsed as HTTP/2 only by the fall-through below, and only</span>
-<span class="sd">              if its header is one a conforming sender could write (see ``_test_http2_frame()``): a</span>
-<span class="sd">              frame type :rfc:`9113` defines, no undefined flag, and a stream that type may be sent</span>
-<span class="sd">              on. Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error under</span>
-<span class="sd">              :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.</span>
+<span class="sd">              binary HTTP/1 bodies, and classifies garbage text as HTTP/2. A bare frame is parsed</span>
+<span class="sd">              as HTTP/2 only by the fall-through below, and only if its header is one a conforming</span>
+<span class="sd">              sender could write (see ``_test_http2_frame()``): a frame type :rfc:`9113` defines,</span>
+<span class="sd">              no undefined flag, and a stream that type may be sent on. Nine zero octets -- a</span>
+<span class="sd">              ``DATA`` frame on stream 0, a protocol error under :rfc:`9113#section-6.1` -- are not</span>
+<span class="sd">              guessed as HTTP/2.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: Positive identification, before any parse attempt. The preface is</span>
@@ -1109,7 +1109,7 @@
         <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` re-raises a</span>
         <span class="c1"># negative-length template as</span>
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.ProtocolError` -- so the</span>
-        <span class="c1"># suppression only guards whatever path is not yet known to do likewise.</span>
+        <span class="c1"># suppression only guards whatever path is not known to do likewise.</span>
         <span class="c1">#</span>
         <span class="c1"># Suppressing it on the *first* arm is wrong: nine byte patterns over</span>
         <span class="c1"># lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTP``, so</span>

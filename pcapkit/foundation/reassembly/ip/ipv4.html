@@ -570,8 +570,8 @@ seconds” – an initial lower bound that a later fragment’s TTL raises,
 up to the 4.25-minute TTL ceiling, not a 15-second deadline. It is ruled
 out here: the recommendation is superseded, and TTL is not in
 <a class="reference internal" href="ip.html#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> at all, so the
-fragment model would have to grow a field to express a scheme the current
-requirement asks implementations not to use.</p>
+fragment model would have to grow a field to express a scheme RFC 1122
+asks implementations not to use.</p>
 <p>60 seconds is the low end of RFC 1122’s range, and it makes IPv4 agree
 with the 60 seconds <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6 – so one
 timestamp-driven eviction path serves both, which is the whole reason the

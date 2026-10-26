@@ -565,12 +565,11 @@ leaves the type out of it. The type stays importable by its dotted path there, f
 annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it is only <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that does not offer it. The
 <code class="docutils literal notranslate"><span class="pre">__all__</span></code> there does name <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>, the abstract
 base every sentinel type shares, since that is no sentinel’s own type. A private
-sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in neither, which is what private means here – dropping
-its leading underscore did not add it to either list, and
+sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in neither, which is what private means here, and
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are documented on
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html"><span class="doc">the sentinels API page</span></a> as private and not for
-public use rather than left off it, since the name alone no longer says so.</p>
+public use rather than left off it, since nothing in the name says so.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Every sentinel type subclasses <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>, the public

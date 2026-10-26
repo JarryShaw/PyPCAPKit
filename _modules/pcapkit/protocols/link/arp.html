@@ -934,9 +934,10 @@
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: checked before the ``htype`` dispatch, for the same reason as</span>
-        <span class="c1"># in ``_make_proto_resolve``: without it a ``bool`` reaches the MAC</span>
-        <span class="c1"># pattern or falls through unchanged, and fails later as a</span>
-        <span class="c1"># ``TypeError`` (#2166).</span>
+        <span class="c1"># in ``_make_proto_resolve``: without it a ``bool`` gets the generic</span>
+        <span class="c1"># ``ProtocolError`` the branches below raise for any non-address,</span>
+        <span class="c1"># rather than the ``FieldValueError`` ``_make_proto_resolve`` raises</span>
+        <span class="c1"># for one (#2166).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid hardware address: must not be a bool, '</span>
@@ -1011,8 +1012,8 @@
         <span class="c1"># NOTE: checked before the ``ptype`` dispatch, for the placement reason</span>
         <span class="c1"># ``_reject_bool`` in ``pcapkit.corekit.fields.ipaddress`` gives: the</span>
         <span class="c1"># non-IP branches below never reach ``parse_ip_address``, so without it</span>
-        <span class="c1"># a ``bool`` falls through them unchanged and fails later as a</span>
-        <span class="c1"># ``TypeError`` from ``len()`` (#2166).</span>
+        <span class="c1"># a ``bool`` gets their generic ``ProtocolError`` rather than the</span>
+        <span class="c1"># ``FieldValueError`` the IP branches raise for it (#2166).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address: must not be a bool, '</span>

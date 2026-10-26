@@ -768,13 +768,13 @@
             <span class="c1"># else ``key`` exactly as given -- never its upper-cased form --</span>
             <span class="c1"># so an unregistered member's value is the caller's own casing,</span>
             <span class="c1"># the same convention :meth:`_unregistered_member` documents and</span>
-            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` already followed.</span>
+            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` follows.</span>
             <span class="c1"># The name is always the canonical upper-case form, matching</span>
             <span class="c1"># :meth:`_missing_` and every registered member's own name. Two</span>
             <span class="c1"># calls naming the same method in different case, e.g.</span>
             <span class="c1"># ``get('frob')`` and ``get('FROB')``, therefore build results</span>
             <span class="c1"># that are *not* equal -- each is exactly what its own caller</span>
-            <span class="c1"># passed, per GitHub issue #860's conversion away from minting.</span>
+            <span class="c1"># passed, since ``get`` does not mint (GitHub issue #860).</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
 
 

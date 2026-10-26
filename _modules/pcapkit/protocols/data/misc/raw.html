@@ -511,7 +511,8 @@
 
     <span class="c1">#: Original enumeration of this protocol.</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
-    <span class="c1">#: error instance when parsing packet data</span>
+    <span class="c1">#: Message saying why the packet data is kept raw, if any: the error its</span>
+    <span class="c1">#: parse raised, or the dissection limit it is past.</span>
     <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[Exception]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

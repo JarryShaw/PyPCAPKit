@@ -542,16 +542,16 @@ may <em>grow</em>:</p>
 subclassing that base in turn for use by the mutable ones. So a <strong>closed</strong> set
 inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
 directly and is never handed a <code class="docutils literal notranslate"><span class="pre">register</span></code> it would have to refuse; an <strong>open</strong>
-registry inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> exactly as before.</p>
+registry inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>.</p>
 <p>What settled the split is the owner’s own second thought about carrying <code class="docutils literal notranslate"><span class="pre">register</span></code>
 on the base: if the base carries <code class="docutils literal notranslate"><span class="pre">register</span></code>, there is no principled reason for it
 not to carry <code class="docutils literal notranslate"><span class="pre">register_alias</span></code> as well, and the ruling would be the worse for it.
 Following that through leaves <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> holding only
 a few methods, too thin to justify a second class – so the two tiers collapse into one,
 which is the opposite of what was ruled.</p>
-<p><strong>Both tiers are plain classes, and that is load-bearing.</strong> Inserting a parent above
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> leaves the member data type exactly where
-it was – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
+<p><strong>Both tiers are plain classes, and that is load-bearing.</strong> The parent above
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> leaves the member data type with the enum
+base – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
 <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from the enum base. Had either tier subclassed
 <code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> in order to “be an enum”, it would have become the member type
 itself and broken <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and flag registries at once.</p>
@@ -818,15 +818,15 @@ to make a lookup work – which is what keeps
 resolvable.</p>
 <p>And a folding override carries <strong>only</strong> the fold.
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol.get" title="pcapkit.const.reg.apptype.apptype.TransportProtocol.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code></a> is
-the worked example: since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>, forwards <code class="docutils literal notranslate"><span class="pre">default</span></code> verbatim
-and delegates to <code class="docutils literal notranslate"><span class="pre">super().get()</span></code>, and that is all it does. It used to convert the base’s
-name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> as well, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s ruling
-retired that; the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> refusal to extend the class at all is untouched by the
-retirement, since only the exception class moved. <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> went further and was
+the worked example: it lowers <code class="docutils literal notranslate"><span class="pre">key</span></code>, forwards <code class="docutils literal notranslate"><span class="pre">default</span></code> verbatim and delegates to
+<code class="docutils literal notranslate"><span class="pre">super().get()</span></code>, and that is all it does. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s ruling retired the conversion
+of the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> that it also carried;
+the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> refusal to extend the class at all is untouched by the retirement,
+since only the exception class moved. <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> went further and was
 deleted: conversion was the <em>only</em> thing it added over the base, so once that went there
 was nothing left for an override to hold, and the class inherits
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> unchanged. <strong>An override that would now be
-empty is deleted, not kept as a pass-through</strong> – a <code class="docutils literal notranslate"><span class="pre">get</span></code> that only calls
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> unchanged. <strong>An override left with nothing
+to add is deleted, not kept as a pass-through</strong> – a <code class="docutils literal notranslate"><span class="pre">get</span></code> that only calls
 <code class="docutils literal notranslate"><span class="pre">super().get()</span></code> reads as though it were doing something, and the next reader has to diff
 it against the base to find out that it is not.</p>
 </section>
@@ -1004,10 +1004,9 @@ inherits <code class="docutils literal notranslate"><span class="pre">get</span>
 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a> never carried a
 <code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they had no string lookup to fold.
 <a class="reference internal" href="../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a> had one when this audit
-was taken and no longer does: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented it onto
+was taken and inherits <code class="docutils literal notranslate"><span class="pre">get</span></code> unchanged: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> re-parented it onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> retired the exception
-conversion that was the override’s only remaining job, so it inherits <code class="docutils literal notranslate"><span class="pre">get</span></code>
-unchanged.</p></td>
+conversion that was the override’s only remaining job.</p></td>
 <td><p><strong>case-sensitive</strong> – conforms</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel" title="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WireGuardKeyLabel</span></code></a></p></td>
@@ -1090,7 +1089,8 @@ exact name-or-value hit straight through. Measure the base on a registry that do
 <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>,
 <a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
-<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>,
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> and
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
 measures the override rather than the base. The unconditionally clean witness is
 <code class="docutils literal notranslate"><span class="pre">tests/corekit/test_enum_lookup_base_unit.py</span></code>’s own <code class="docutils literal notranslate"><span class="pre">_Str</span></code>, a purpose-built

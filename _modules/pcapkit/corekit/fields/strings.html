@@ -678,7 +678,7 @@
 
         <span class="c1"># NOTE: A negative length is resolved from the *encoded* octets, not from</span>
         <span class="c1"># the character count -- the ``Ns`` template counts octets, so counting</span>
-        <span class="c1"># characters truncated any text that does not encode one octet per</span>
+        <span class="c1"># characters would truncate any text that does not encode one octet per</span>
         <span class="c1"># character.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>

@@ -644,11 +644,11 @@ not have to work out which case they are in.</p>
 <p>Each is deliberate. Do not “fix” any of them.</p>
 <p><strong>A parsing base may live in another subpackage.</strong>
 <a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#module-pcapkit.protocols.application.rarp" title="pcapkit.protocols.application.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.rarp</span></code></a> imports
-<a class="reference internal" href="../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a> from <a class="reference internal" href="../../pcapkit/protocols/link/arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.arp</span></code></a>. This
-is the first <code class="docutils literal notranslate"><span class="pre">application/</span> <span class="pre">→</span> <span class="pre">link/</span></code> dependency in the package, and it is the honest
-consequence of letting layer and parser disagree.</p>
+<a class="reference internal" href="../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a> from <a class="reference internal" href="../../pcapkit/protocols/link/arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.arp</span></code></a>. That
+<code class="docutils literal notranslate"><span class="pre">application/</span> <span class="pre">→</span> <span class="pre">link/</span></code> dependency is the honest consequence of letting layer and
+parser disagree.</p>
 <p><strong>The dispatch tier is decoupled from the subpackage.</strong> A protocol’s subpackage says
-nothing about which registry reaches it, and the move did not touch any dispatch key:</p>
+nothing about which registry reaches it, and no dispatch key depends on it:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>

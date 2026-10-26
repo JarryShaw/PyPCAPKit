@@ -198,7 +198,7 @@ What is left, and why:
   It wants a registry of its own rather than
   :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
   only ever called at a layer boundary and appends to the frame's protocol chain.
-  An MLD address record inside a mobility option did not follow MH on the wire,
+  An MLD address record inside a mobility option does not follow MH on the wire,
   so putting it in that chain would make ``layer=`` and ``protocol=`` limits
   behave wrongly. Changing the parsed shape from :obj:`bytes` to
   :class:`~pcapkit.protocols.misc.raw.Raw` also changes what existing captures dump to, so
@@ -276,7 +276,7 @@ complaint and yields nothing useful.
   :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` and
   :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`, out of
   a registry carrying every IANA service name: TCP 20 to FTP-DATA and 21 to FTP,
-  ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
+  ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TPv2.
 * :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   -- the values in :attr:`SCTP.__proto__
   <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to
@@ -386,8 +386,8 @@ suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 ``%s``. The IO-batching idea the thread proposed was never the bottleneck.
 
-The larger wins this section listed, all outside the parse path, have landed in
-full or in part:
+The larger costs this section listed all lie outside the parse path, and each is
+addressed in full or in part:
 
 * **The flow dumper reopens its output file once per frame**, in
   :class:`~pcapkit.dumpkit.pcap.PCAPIO`'s ``__call__``. It does not
@@ -407,11 +407,11 @@ full or in part:
   measured at 86% of the IP-reassembly cost plus a 133 ms garbage-collection
   bill. Whether unfragmented frames should be emitted at all is the design
   question that is left, and it is worth settling deliberately.
-* **Done.** Every option was parsed twice -- 2274 schema unpacks for 1137
-  options, the pre-parse always discarded, about 15% of a PCAP-NG extraction.
-  :class:`~pcapkit.corekit.fields.collections.OptionField` reads only the base
-  schema's type field to choose the option schema, rather than unpacking the
-  whole base schema and throwing it away.
+* **Done.** :class:`~pcapkit.corekit.fields.collections.OptionField` reads only
+  the base schema's type field to choose the option schema, rather than unpacking
+  the whole base schema and throwing it away. Unpacking it parsed every option
+  twice -- 2274 schema unpacks for 1137 options, the pre-parse always discarded,
+  about 15% of a PCAP-NG extraction.
 
 Some traps for anyone benchmarking this library. ``reassembly=True`` and
 ``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
@@ -423,10 +423,10 @@ Recursive Dissection, With a Depth Limit
 
 **Decided, open to revisit.** Each layer dissects the next from inside
 its own parse, so dissecting a frame recurses once per layer, at 9 to 12 Python
-frames a layer. Deep nesting -- IP in IP, stacked 802.1Q tags, long chains of
-IPv6 extension headers -- used to exhaust the recursion limit and leave the rest
-of the frame raw, silently, at a depth that varied with the interpreter and the
-caller's stack (:issue:`1604`, :issue:`1610`).
+frames a layer. Without a bound, deep nesting -- IP in IP, stacked 802.1Q tags,
+long chains of IPv6 extension headers -- exhausts the recursion limit and leaves the
+rest of the frame raw, silently, at a depth that varies with the interpreter and
+the caller's stack (:issue:`1604`, :issue:`1610`).
 
 Recursion stays, with a counted bound:
 :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` caps a frame at 64 layers by
@@ -622,9 +622,9 @@ Anyone wanting to run the tests wants the repository, which is where they are.
 
    ``dictdumper``'s ``PLIST`` writer formats every :class:`~datetime.datetime` as
    ``'%Y-%m-%dT%H:%M:%S.%fZ'``, always with six fractional digits, and
-   :mod:`plistlib`'s ``<date>`` pattern admits none, so :func:`plistlib.load`
-   failed on every ``format='plist'`` report with ``AttributeError: 'NoneType'
-   object has no attribute 'groupdict'``. The upstream defect is
+   :mod:`plistlib`'s ``<date>`` pattern admits none, so without the workaround
+   below :func:`plistlib.load` fails on every ``format='plist'`` report with
+   ``AttributeError: 'NoneType' object has no attribute 'groupdict'``. The upstream defect is
    `JarryShaw/DictDumper#122 <https://github.com/JarryShaw/DictDumper/issues/122>`__.
    :func:`pcapkit.dumpkit.common.make_dumper` works around it (:issue:`1448`): it
    writes each date in UTC to whole seconds, as :func:`plistlib.dump` does. The

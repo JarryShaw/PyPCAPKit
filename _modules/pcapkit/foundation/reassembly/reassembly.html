@@ -503,8 +503,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="c1"># NB: declared above the ``TYPE_CHECKING`` block, not below it, so that</span>
-<span class="c1"># ``CallbackFn`` can name ``_DT`` outright. As a quoted forward reference it was</span>
-<span class="c1"># resolvable only from this module's namespace, and every module that spells</span>
+<span class="c1"># ``CallbackFn`` can name ``_DT`` outright. As a quoted forward reference it would</span>
+<span class="c1"># resolve only from this module's namespace, and every module that spells</span>
 <span class="c1"># ``CallbackFn`` in an annotation -- ``pcapkit.foundation.registry.foundation``</span>
 <span class="c1"># does -- has to evaluate the alias in its own.</span>
 <span class="c1"># packet</span>

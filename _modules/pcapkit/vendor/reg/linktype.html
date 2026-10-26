@@ -570,8 +570,8 @@
         <span class="c1"># through ``sink`` (see item 2 in #852), but its *expanded* values</span>
         <span class="c1"># still have to count here: a single-value row can legitimately</span>
         <span class="c1"># duplicate one of the values a range expands to, and missing that</span>
-        <span class="c1"># would silently under-count the duplicate the same way the</span>
-        <span class="c1"># word-only rule did before #852.</span>
+        <span class="c1"># would silently under-count the duplicate the same way a</span>
+        <span class="c1"># word-only rule would (#852).</span>
         <span class="c1">#</span>
         <span class="c1"># The single-value branch accepts whatever ``int()`` accepts --</span>
         <span class="c1"># a leading sign, PEP 515 underscores -- rather than the narrower</span>

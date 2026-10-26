@@ -894,9 +894,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_null</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return :data:`NULL`, for a pickle written before :issue:`1842`.</span>
 
-<span class="sd">    ``NullType.__reduce__`` used to name this function, so such a pickle</span>
-<span class="sd">    calls it to load. Nothing here calls it any more; it stays so that those</span>
-<span class="sd">    pickles keep loading, as :data:`NULL` itself.</span>
+<span class="sd">    Such a pickle of :data:`NULL` names this function, so loading one calls</span>
+<span class="sd">    it. Nothing in the package calls it; it exists so that those pickles keep</span>
+<span class="sd">    loading, as :data:`NULL` itself.</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">NULL</span>

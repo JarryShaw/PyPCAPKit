@@ -1175,7 +1175,7 @@ still unmints for a keyword that
 turns up on the wire but names none of these – the extendability the
 owner conditionally asked to keep on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>: unsure what a
 FEAT value absent from the RFC’s list means in the CSV table, the owner
-said that if the expected handling is our current approach, as industry
+said that if the expected handling is this registry’s approach, as industry
 convention has it, the registry stays extendable as is, and then approved
 declaring the registry’s keywords as real members with <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
 still covering the rest. No custom <code class="docutils literal notranslate"><span class="pre">__new__</span></code> here, so the base’s
@@ -1295,7 +1295,7 @@ letters when transmitting the feature response.”</em> A caller feeding a
 recommendation, while some of this registry’s codes are registered in
 lower case – measured on the IANA CSV: <code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">feat</span></code>, <code class="docutils literal notranslate"><span class="pre">hist</span></code>,
 <code class="docutils literal notranslate"><span class="pre">nat6</span></code> and <code class="docutils literal notranslate"><span class="pre">secu</span></code>, against all-upper-case keywords for the rest,
-with none mixed. Without this override <code class="docutils literal notranslate"><span class="pre">get('BASE')</span></code> raised
+with none mixed. Without this override <code class="docutils literal notranslate"><span class="pre">get('BASE')</span></code> raises
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, which is the defect GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s audit found.</p>
 <p>The obvious objection, answered: <span class="target" id="index-106"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html"><strong>RFC 5797</strong></a> uses case <em>presentationally</em>
 to tell a real keyword from a placeholder – <em>“defined FEAT keywords
@@ -1314,9 +1314,9 @@ placeholder <code class="docutils literal notranslate"><span class="pre">base</s
 own precedence – name before value – and its non-minting <code class="docutils literal notranslate"><span class="pre">str</span></code>
 path both survive: nothing here calls <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>, so a key matching
 no member, folded or not, still raises rather than growing the
-registry. <code class="docutils literal notranslate"><span class="pre">get('ZZ-NOT-REAL')</span></code> therefore still raises
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> while <code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> still yields an
-unregistered member, exactly as before.</p>
+registry. <code class="docutils literal notranslate"><span class="pre">get('ZZ-NOT-REAL')</span></code> therefore raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> while <code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> yields an
+unregistered member.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1387,12 +1387,11 @@ values <a class="reference internal" href="#pcapkit.const.ftp.command.FEATCode.g
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.command.</span></span><span class="sig-name descname"><span class="pre">CommandType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#CommandType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.CommandType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code></p>
 <p>Type of “kind” of command, based on <span class="target" id="index-107"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4"><strong>RFC 959 Section 4</strong></a>.</p>
-<p>Re-parented onto <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2. Pure re-parenting as far as
-<code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> are concerned – this class defines no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its
-own to reconcile with the base – and its own <a class="reference internal" href="#pcapkit.const.ftp.command.CommandType._missing_" title="pcapkit.const.ftp.command.CommandType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> range
-guard below is untouched, since <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> does not touch that
-hook.</p>
+<p>Built on <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, which finished <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2. This class defines no
+<code class="docutils literal notranslate"><span class="pre">get</span></code> of its own, so <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">get_all</span></code> are the base’s, and its own
+<a class="reference internal" href="#pcapkit.const.ftp.command.CommandType._missing_" title="pcapkit.const.ftp.command.CommandType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> range guard below stands as written, since
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> does not touch that hook.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.CommandType.undefined">
 <span class="sig-name descname"><span class="pre">undefined</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.ftp.command.CommandType.undefined" title="Link to this definition">¶</a></dt>
@@ -1437,10 +1436,9 @@ hook.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.command.</span></span><span class="sig-name descname"><span class="pre">ConformanceRequirement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#ConformanceRequirement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.ConformanceRequirement" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>Expectation for support in modern FTP implementations.</p>
-<p>Re-parented onto <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub
-issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, finishing <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2 – pure re-parenting, since this
-class defines neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own to reconcile
-with the base.</p>
+<p>Built on <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> per GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>, which finished <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>’s phase 2. This class defines
+neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.ConformanceRequirement.M">
 <span class="sig-name descname"><span class="pre">M</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.ftp.command.ConformanceRequirement.M" title="Link to this definition">¶</a></dt>

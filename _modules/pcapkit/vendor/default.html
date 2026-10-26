@@ -821,7 +821,7 @@
 <span class="sd">          ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are.</span>
 
 <span class="sd">        Any other segment, including text outside the brackets, is returned</span>
-<span class="sd">        verbatim and in order, as :func:`re.split` on the brackets alone did.</span>
+<span class="sd">        verbatim and in order, as :func:`re.split` on the brackets alone gives it.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            text: Raw reference cell.</span>
@@ -1093,11 +1093,10 @@
 <span class="sd">        raising. So the escape is rejected outright, rather than trusted to</span>
 <span class="sd">        produce a harmless-looking wrong path.</span>
 
-<span class="sd">        This is a classmethod, not an instance method, deliberately: nothing</span>
-<span class="sd">        in the body ever needed instance state -- it only ever consulted</span>
-<span class="sd">        ``type(self)``, so ``cls`` is exactly that, with no instance required</span>
-<span class="sd">        to obtain it. That lets a caller resolve a crawler's destination</span>
-<span class="sd">        *without* instantiating it, and so without triggering</span>
+<span class="sd">        This is a classmethod, not an instance method, deliberately: the body</span>
+<span class="sd">        needs no instance state, only the crawler's class, which ``cls`` is</span>
+<span class="sd">        with no instance required to obtain it. That lets a caller resolve a</span>
+<span class="sd">        crawler's destination *without* instantiating it, and so without triggering</span>
 <span class="sd">        :meth:`Vendor.__init__`'s network fetch, render and write --</span>
 <span class="sd">        the pre-run snapshot that ``run()`` in :mod:`pcapkit.vendor.__main__`</span>
 <span class="sd">        takes (GitHub issue :issue:`872`) is exactly such a caller. Every crawler defined in this</span>
@@ -1264,10 +1263,10 @@
                             <span class="c1"># NOTE: whatever stopped the prompt, ``input()`` is no</span>
                             <span class="c1"># longer waiting -- and this loop only waits because</span>
                             <span class="c1"># ``input()`` does, so the file it waits for can never</span>
-                            <span class="c1"># arrive. Discarding the exception, as this used to,</span>
-                            <span class="c1"># left a ``while True`` that printed three lines per</span>
-                            <span class="c1"># iteration at full speed: 26.7 million lines and 2.6 GB</span>
-                            <span class="c1"># measured in #522. The terminal this started on can</span>
+                            <span class="c1"># arrive. Discarding the exception would leave a</span>
+                            <span class="c1"># ``while True`` printing three lines per iteration at</span>
+                            <span class="c1"># full speed: 26.7 million lines and 2.6 GB measured in</span>
+                            <span class="c1"># #522. The terminal this started on can</span>
                             <span class="c1"># still go away mid-wait -- a closed ``stdin`` raises</span>
                             <span class="c1"># :exc:`ValueError`, a dropped one :exc:`EOFError`, a</span>
                             <span class="c1"># vanished :data:`sys.stdin` :exc:`RuntimeError` -- so the</span>

@@ -555,7 +555,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            error: Parsing errors if any.</span>
+<span class="sd">            error: Message saying why the data is kept raw, if any.</span>
 <span class="sd">            alias: Original enumeration of the unknown protocol.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -606,14 +606,14 @@
                       <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Post initialisation hook.</span>
 
-<span class="sd">        When :mod:`pcapkit` meets a malformed packet, the original parsing</span>
-<span class="sd">        error instance is given as ``error``.</span>
+<span class="sd">        When :mod:`pcapkit` meets a malformed packet, or a layer past a</span>
+<span class="sd">        dissection limit, the message saying so is given as ``error``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            error: Parsing error if any (for parsing), an :class:`Exception`</span>
-<span class="sd">                instance or :obj:`None`.</span>
+<span class="sd">            error: Message saying why the data is kept raw, if any (for</span>
+<span class="sd">                parsing), a :obj:`str` or :obj:`None`.</span>
 <span class="sd">            alias: Original enumeration of the unknown protocol, an :obj:`int`</span>
 <span class="sd">                or :obj:`None`.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>

@@ -1391,7 +1391,7 @@ padding is added only at the end if the header is not aligned.</p>
 <p>The returned length is that of the options area alone, the value
 <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.make" title="pcapkit.protocols.internet.hopopt.HOPOPT.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> derives the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> field from. Since the two
 octets of the fixed header precede it, an options area is well
-formed only when it is 6 octets short of a multiple of 8 –
+formed only when it is 2 octets short of a multiple of 8 –
 including when it holds no real options at all, in which case it is
 6 octets of pure padding rather than empty.</p>
 </div>

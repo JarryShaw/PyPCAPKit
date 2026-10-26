@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/exceptions.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
-<meta name="description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
+<meta property="og:description" content="pcapkit.utilities.exceptions holds refined built-in exceptions, which make it possible to show only user error stack information* when an exception is raised on user’s operation. Loud and Quiet Err..." />
+<meta name="description" content="pcapkit.utilities.exceptions holds refined built-in exceptions, which make it possible to show only user error stack information* when an exception is raised on user’s operation. Loud and Quiet Err..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Warnings" href="warnings.html"><link rel="prev" title="Module Utilities" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -498,9 +498,9 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.utilities.exceptions">
 <span id="user-defined-exceptions"></span><h1>User Defined Exceptions<a class="headerlink" href="#module-pcapkit.utilities.exceptions" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> refined built-in exceptions.
-Make it possible to show only user error stack information <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
-when exception raised on user’s operation.</p>
+<p><a class="reference internal" href="#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> holds refined built-in exceptions,
+which make it possible to show only user error stack information <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>
+when an exception is raised on user’s operation.</p>
 <section id="loud-and-quiet-errors">
 <h2>Loud and Quiet Errors<a class="headerlink" href="#loud-and-quiet-errors" title="Link to this heading">¶</a></h2>
 <p>Raising a <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> is, by default, a
@@ -989,9 +989,9 @@ derive from different builtins.</p>
 of a schema’s read was derived by measuring what is actually left in the
 stream – rather than declared by the caller – and that measurement came
 back zero. This is the frame reader’s “no more packets” signal, so it
-subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a> rather than replacing it: existing <code class="docutils literal notranslate"><span class="pre">except</span>
-<span class="pre">(EOFError,</span> <span class="pre">StopIteration)</span></code> handlers keep working unchanged, and a caller
-that wants to be more specific can catch this instead.</p>
+subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a> rather than replacing it: an <code class="docutils literal notranslate"><span class="pre">except</span>
+<span class="pre">(EOFError,</span> <span class="pre">StopIteration)</span></code> handler catches it, and a caller that wants to
+be more specific can catch this instead.</p>
 <p>A <em>declared</em> zero length – a nested schema legitimately sized to have
 nothing to read – is a different situation and does not raise this.</p>
 <p><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> and
@@ -1051,8 +1051,8 @@ circumstances, and raise it from this module rather than as a builtin.</p>
 the in-library call sites catch <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s
 name miss as <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> – <a class="reference internal" href="../const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>’s
 <code class="docutils literal notranslate"><span class="pre">get</span></code> catches it in order to build an unregistered member, so for that one
-a failed name lookup is part of a successful call – and every one of them
-keeps catching.</p>
+a failed name lookup is part of a successful call – so every one of them
+catches this as well.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Distinct from <a class="reference internal" href="#pcapkit.utilities.exceptions.MissingKeyError" title="pcapkit.utilities.exceptions.MissingKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a>,

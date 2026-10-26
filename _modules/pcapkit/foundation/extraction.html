@@ -1627,7 +1627,7 @@
 
 <span class="sd">        The built-in engines call this at their global-header step. The PCAP</span>
 <span class="sd">        engine passes the header's fields as ``protocol``, ``byteorder``,</span>
-<span class="sd">        ``nanosecond``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
+<span class="sd">        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:</span>
 <span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from</span>
 <span class="sd">        them, and the other writers ignore them. The PCAP-NG engine passes none.</span>
 <span class="sd">        :meth:`run` calls it again, without arguments, after the engine has</span>
@@ -2155,7 +2155,7 @@
 <span class="sd">        class owns it* -- the rule of :issue:`610`, as :meth:`_owns_input` writes</span>
 <span class="sd">        it down and :meth:`_cleanup` and the backstops already follow. A stream</span>
 <span class="sd">        the caller supplied stays open for the caller to close, so leaving the</span>
-<span class="sd">        block no longer closes it behind the caller's back (:issue:`1999`).</span>
+<span class="sd">        block does not close it behind the caller's back (:issue:`1999`).</span>
 
 <span class="sd">        For a caller's non-seekable stream, the stream this class owns is the</span>
 <span class="sd">        :class:`~pcapkit.corekit.io.SeekableReader` wrapped around it, and that</span>
@@ -2319,10 +2319,10 @@
 <span class="sd">        being appended to ends at the data present when it got there, rather than</span>
 <span class="sd">        following the writer. That is a deliberate narrowing, and it is measured:</span>
 <span class="sd">        a file gaining its last record 0.6s in yields five of its six frames here,</span>
-<span class="sd">        where the unbounded retry of ``6c3d1b0d9`` yielded all six. Unbounded</span>
-<span class="sd">        retrying is the defect :issue:`620` reports, so *some* stopping rule had</span>
-<span class="sd">        to be chosen, and a timed grace period would only make the cut-off</span>
-<span class="sd">        intermittent rather than absent.</span>
+<span class="sd">        where an unbounded retry yields all six. Unbounded retrying is the defect</span>
+<span class="sd">        :issue:`620` reports, so *some* stopping rule had to be chosen, and a</span>
+<span class="sd">        timed grace period would only make the cut-off intermittent rather than</span>
+<span class="sd">        absent.</span>
 <span class="sd">        Following a growing file wants a deliberate policy of its own; see the</span>
 <span class="sd">        note in :file:`docs/source/changelog/1.5.0.rst`.</span>
 

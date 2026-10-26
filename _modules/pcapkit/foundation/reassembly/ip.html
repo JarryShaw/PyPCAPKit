@@ -646,8 +646,8 @@
 
         <span class="c1"># initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet</span>
         <span class="c1"># block of the data buffer, its partial last block included -- 8191</span>
-        <span class="c1"># covered octets 0 to 65527 only, so a fragment reaching octet 65528,</span>
-        <span class="c1"># e.g. at the largest Fragment Offset, indexed past it (#1565)</span>
+        <span class="c1"># would cover octets 0 to 65527 only, so a fragment reaching octet 65528,</span>
+        <span class="c1"># e.g. at the largest Fragment Offset, would index past it (#1565)</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>

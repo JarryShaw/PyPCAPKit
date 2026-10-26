@@ -538,7 +538,9 @@ known-failure table keep their cases in a generator, beside the captures it also
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_registry_unit.py</span></code></p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch.py</span></code></p></td>
 <td><p>every <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> entry dispatches to the class <code class="docutils literal notranslate"><span class="pre">PINNED_TARGETS</span></code> names;
-known failures in <code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>)</p></td>
+known degrades in <code class="docutils literal notranslate"><span class="pre">DispatchRegistryTests.KNOWN_DEGRADED</span></code>, which the
+generator’s own <code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> mirrors for its command-line report
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>)</p></td>
 </tr>
 </tbody>
 </table>
@@ -558,7 +560,8 @@ issue that tracks it.
 Routing a case around a defect hides it: the generator’s <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> once put two
 parameters in every HIP packet, so the unrepresentable length of a lone one
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>) was never constructed.
-<code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> entries have a different shape – a fragment and a reason – and
+<code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> entries have a different shape – the fragments of the probe’s
+<code class="docutils literal notranslate"><span class="pre">'error'</span></code> value the entry accepts, any one of which may match, and a reason – and
 they record why the probe’s placeholder payload cannot reach the target, not a
 defect to fix, so the name-and-issue rule does not apply to them.</p></li>
 <li><p><strong>A regression is fixed; a pre-existing defect is recorded.</strong> A case that a change
