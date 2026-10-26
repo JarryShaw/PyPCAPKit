@@ -237,7 +237,7 @@ class FTPUnitTests(unittest.TestCase):
         )
 
     def test_ftp_data_channel_name_is_stable(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP_DATA
+        from pcapkit.protocols.application.ftp_data import FTP_DATA
 
         ftp_data = object.__new__(FTP_DATA)
 

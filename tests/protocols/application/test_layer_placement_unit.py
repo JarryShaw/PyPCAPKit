@@ -7,7 +7,8 @@ what encapsulates it, with the IETF as the single source of truth.
 §7.2.2 and confines the internet layer to IP, ICMP and IGMP at §4.1;
 :rfc:`1122#section-1.1.3` lists RARP in the application layer while ARP sits in the
 Link Layer chapter at §2.3.2. The rule and its citations are written down at
-:doc:`/contributing/conventions/protocol-layer-placement`.
+:doc:`/contributing/conventions/protocol-layer-placement`. ``FTP_DATA`` follows the
+same convention with ``Raw`` as its parsing base (#2285).
 
 These are pinned separately, because each can break independently:
 
@@ -51,6 +52,11 @@ def rarp_request() -> bytes:
     """A RARP request, 28 octets, operation 3."""
     return bytes.fromhex('0001' '0800' '06' '04' '0003' '001122334455' '00000000'
                          '66778899aabb' '0a000001')
+
+
+def tcp(sport: 'int', dport: 'int', payload: bytes = b'') -> bytes:
+    """Wrap ``payload`` in a minimal 20-octet TCP header."""
+    return struct.pack('!HHIIBBHHH', sport, dport, 0, 0, 0x50, 0x18, 8192, 0, 0) + payload
 
 
 def ipv4(proto: 'int', payload: bytes) -> bytes:
@@ -127,6 +133,33 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
         # DRARP inherits the pair unchanged
         self.assertEqual(DRARP.__bases__, (RARP,))
+
+    def test_ftp_data_subclasses_both_application_and_raw_in_that_order(self) -> None:
+        """``FTP_DATA`` follows the convention: layer base first, then ``Raw`` (#2285)."""
+        from pcapkit.protocols.application.application import Application
+        from pcapkit.protocols.application.ftp_data import FTP_DATA
+        from pcapkit.protocols.misc.raw import Raw
+
+        self.assertEqual(FTP_DATA.__bases__, (Application, Raw))
+        self.assertEqual(FTP_DATA.__layer__, 'Application')
+        self.assertEqual(FTP_DATA(b'binary-file-contents').layer, 'Application')
+
+    def test_ftp_data_still_parses_and_rebuilds_as_raw(self) -> None:
+        """The ``Application`` base leaves ``Raw``'s parsing and rebuild untouched."""
+        from pcapkit.protocols.application.ftp_data import FTP_DATA
+        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.utilities.exceptions import IntError
+
+        packet = FTP_DATA(b'binary-file-contents')
+        self.assertEqual(packet.info.packet, b'binary-file-contents')
+        self.assertEqual(str(packet.protochain), 'FTP_DATA')
+        self.assertIsInstance(packet.payload, NoPayload)
+        self.assertEqual(bytes(FTP_DATA.from_data(packet.info)), b'binary-file-contents')
+        self.assertEqual(FTP_DATA(packet=b'abc').data, b'abc')
+
+        # reached by TCP port 20, a port is no index: ``Application``'s refusal
+        with self.assertRaises(IntError):
+            FTP_DATA.__index__()
 
     def test_link_owns_layer_but_raw_does_not(self) -> None:
         """The mechanism the ordering convention rests on, asserted directly."""
@@ -342,6 +375,25 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                     nofile=True, store=True, engine='pcapkit', **kwargs)
                 self.addCleanup(extraction.__del__)
                 self.assertEqual(str(extraction.frame[0].protochain), chain)
+
+    def test_layer_application_extraction_terminates_at_ftp_data(self) -> None:
+        """``layer='application'`` and ``layer=FTP_DATA`` both stop at FTP_DATA (#2285)."""
+        import pcapkit
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.application.ftp_data import FTP_DATA
+
+        path = make_pcap(LinkType.IPV4, ipv4(6, tcp(50000, 20, b'binary-file-contents')))
+        for layer in ('application', FTP_DATA):
+            with self.subTest(layer=layer):
+                extraction = pcapkit.extract(fin=path, nofile=True, store=True,
+                                             engine='pcapkit', layer=layer)
+                self.addCleanup(extraction.__del__)
+                frame = extraction.frame[0]
+                self.assertEqual(str(frame.protochain), 'IPv4:TCP:FTP_DATA')
+
+                ftp_data = frame.payload.payload.payload
+                self.assertIsInstance(ftp_data, FTP_DATA)
+                self.assertTrue(ftp_data._sigterm, "'application' must terminate at FTP_DATA")
 
     def test_unlimited_extraction_is_unchanged(self) -> None:
         frame = self.extract_ipv4_ospf()

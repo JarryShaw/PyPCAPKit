@@ -42,7 +42,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph application [Application Layer]
-           Application --> HTTP & FTP & NGAP & OSPF & RARP
+           Application --> HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -145,7 +145,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click h1 "application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP"
        click h2 "application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
        click FTP "application/ftp.html#pcapkit.protocols.application.ftp.FTP"
-       click FTP_DATA "application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA"
+       click FTP_DATA "application/ftp_data.html#pcapkit.protocols.application.ftp_data.FTP_DATA"
        click NGAP "application/ngap.html#pcapkit.protocols.application.ngap.NGAP"
        click OSPF "application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.RARP"

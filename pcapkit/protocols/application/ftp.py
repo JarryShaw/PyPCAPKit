@@ -7,9 +7,9 @@
 :mod:`pcapkit.protocols.application.ftp` contains
 :class:`~pcapkit.protocols.application.ftp.FTP`,
 which implements an extractor for File Transfer Protocol
-(FTP) [*]_, and
-:class:`~pcapkit.protocols.application.ftp.FTP_DATA`
-for its data channel.
+(FTP) [*]_, the control channel; the data channel is
+:class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, in
+:mod:`pcapkit.protocols.application.ftp_data`.
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 
@@ -20,6 +20,13 @@ for its data channel.
    with no argument and a multi-line reply, whole in one segment or not,
    parse and rebuild as captured (:issue:`1238`, :issue:`1239`,
    :issue:`1240`, :issue:`1241`, :issue:`1303`, :issue:`1333`).
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.application.ftp.FTP_DATA``, with no alias. The class
+   moved to :mod:`pcapkit.protocols.application.ftp_data`, since TCP port 20
+   dispatches it and port 21 the control channel -- two protocols, so two
+   modules (:issue:`2285`).
 
 """
 import re
@@ -32,7 +39,6 @@ from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ftp import FTP as Data_FTP
 from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
-from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
@@ -43,7 +49,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-__all__ = ['FTP', 'FTP_DATA']
+__all__ = ['FTP']
 
 # regex for FTP, per :rfc:`959#section-4` (replies) and :rfc:`959#section-5`
 # (commands): a command is ``<command> [<SP> <argument>] <CRLF>``, a reply line is
@@ -322,17 +328,3 @@ class FTP(Application[Data_FTP, Schema_FTP],
             except (LookupError, UnicodeError):
                 pass
         return args.decode('latin-1'), 'latin-1'
-
-
-class FTP_DATA(Raw):
-    """This class implements FTP data channel transmission."""
-
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    # name of current protocol
-    @property
-    def name(self) -> 'Literal["FTP_DATA"]':  # type: ignore[override]
-        """Name of current protocol."""
-        return 'FTP_DATA'

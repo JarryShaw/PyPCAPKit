@@ -182,7 +182,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        * - Port Number
          - Protocol
        * - 20
-         - :class:`pcapkit.protocols.application.ftp.FTP_DATA`
+         - :class:`pcapkit.protocols.application.ftp_data.FTP_DATA`
        * - 21
          - :class:`pcapkit.protocols.application.ftp.FTP`
        * - 80
@@ -362,7 +362,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # connection preface, then an HTTP/1 start line) and trial-parses
             # only as a last resort. UDP's table binds the same class for the
             # same ports.
-            20: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP_DATA'),
+            20: ModuleDescriptor('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),

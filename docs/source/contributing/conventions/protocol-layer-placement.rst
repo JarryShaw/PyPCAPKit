@@ -140,8 +140,8 @@ the MRO, so whichever base owns it *earliest* wins:
 :obj:`None` from :class:`~pcapkit.protocols.protocol.ProtocolBase` -- so a class
 naming both :class:`~pcapkit.protocols.application.application.Application` and
 :class:`~pcapkit.protocols.misc.raw.Raw` reports ``'Application'`` in either base order.
-:class:`~pcapkit.protocols.application.ftp.FTP_DATA` names
-:class:`~pcapkit.protocols.misc.raw.Raw` alone, so its ``__layer__`` is :obj:`None`.
+So :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, declared
+``class FTP_DATA(Application, Raw)``, reports ``'Application'``.
 :class:`~pcapkit.protocols.link.arp.ARP`'s chain reaches
 :class:`~pcapkit.protocols.link.link.Link`, which **does** own it, so
 ``class RARP(ARP, Application)`` would report ``'Link'`` and be wrong.

@@ -657,7 +657,7 @@ PINNED_TARGETS = {
     'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext', 'IPv6_Ext'),
 
     # -- TCP.__proto__ (port) --------------------------------------------------
-    'tcp/20': ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
+    'tcp/20': ('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
     # below.
