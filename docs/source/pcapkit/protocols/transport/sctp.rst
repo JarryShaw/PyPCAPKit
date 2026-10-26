@@ -55,6 +55,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_sctp_causes
    .. automethod:: _make_sctp_causes
    .. automethod:: _make_sctp_cause
+   .. automethod:: _make_param_types
 
    .. automethod:: _read_chunk_donone
    .. automethod:: _read_chunk_data

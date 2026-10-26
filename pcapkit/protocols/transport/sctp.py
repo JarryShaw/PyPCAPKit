@@ -1257,6 +1257,37 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             return padded
         return padded - max(sizes[-1] - items[-1].length, 0)
 
+    def _make_param_types(self, types: 'Optional[list[Enum_Parameter | int]]') -> 'list[Enum_Parameter]':
+        """Resolve a list of parameter types.
+
+        Shared by :meth:`_make_param_addrtypes` and
+        :meth:`_make_cause_missing_param`, whose ``types`` both list
+        parameter types.
+
+        Args:
+            types: parameter types, each given as a
+                :class:`~pcapkit.const.sctp.parameter.Parameter` or an
+                :obj:`int`
+
+        Returns:
+            The :class:`~pcapkit.const.sctp.parameter.Parameter` for each
+            item.
+
+        Raises:
+            ProtocolError: If an item is a :obj:`bool`, or is neither a
+                :class:`~pcapkit.const.sctp.parameter.Parameter` nor an
+                :obj:`int` (:issue:`2288`).
+
+        """
+        types_value = []  # type: list[Enum_Parameter]
+        for item in types or []:
+            # NOTE: ``bool`` is an ``int`` subclass, so ``Parameter.get``
+            # would look ``True`` up as parameter type 1 (#2288).
+            if isinstance(item, bool) or not isinstance(item, int):
+                raise ProtocolError(f'{self.alias}: invalid parameter type: {item!r}')
+            types_value.append(Enum_Parameter.get(item))
+        return types_value
+
     def _read_chunk_donone(self, schema: 'Schema_UnknownChunk', *, chunks: 'Chunks') -> 'Data_UnknownChunk':  # pylint: disable=unused-argument
         """Read SCTP chunk of an unsupported type.
 
@@ -2998,12 +3029,15 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed parameter schema.
 
+        Raises:
+            ProtocolError: If an item of ``types`` is not a parameter type,
+                as :meth:`_make_param_types` checks.
+
         """
         if param is not None:
             types = list(param.types)
 
-        types_value = [Enum_Parameter.get(item) if isinstance(item, int) else item
-                       for item in types or []]
+        types_value = self._make_param_types(types)
 
         return Schema_SupportedAddressTypesParameter(
             type=code,
@@ -3561,6 +3595,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed error cause schema.
 
+        Raises:
+            ProtocolError: If an item of ``types`` is not a parameter type,
+                as :meth:`_make_param_types` checks.
+
         Note:
             The count of missing parameters is derived from ``types`` rather
             than taken as an argument, so that it cannot disagree with the list
@@ -3570,8 +3608,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         if cause is not None:
             types = list(cause.types)
 
-        types_value = [Enum_Parameter.get(item) if isinstance(item, int) else item
-                       for item in types or []]
+        types_value = self._make_param_types(types)
 
         return Schema_MissingMandatoryParameterCause(
             code=code,
