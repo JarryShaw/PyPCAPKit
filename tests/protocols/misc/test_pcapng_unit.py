@@ -4051,7 +4051,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         self.assertGreater(len(frames), 0.98 * (len(self.whole) + 1))
         self.assertLess(len(failures), 16)
 
-    def test_every_level_that_still_fails_fails_for_a_reason_of_its_own(self) -> None:
+    def test_every_failing_cut_fails_for_a_reason_of_its_own(self) -> None:
         """The handful left are all cuts that reach the section header itself.
 
         None of them costs a frame that was in the file: a cut that deep has

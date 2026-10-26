@@ -75,7 +75,7 @@ REJECTED_FRAMES = (
 #: frames of unknown type.
 FUZZ_SEED = 1141
 FUZZ_COUNT = 5000
-PRE_FIX_HTTP2_LABELS = 566
+UNCHECKED_GUESS_HTTP2_LABELS = 566
 
 
 def _fuzz_buffers() -> 'list[bytes]':
@@ -158,7 +158,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
             if http.version == '2':  # type: ignore[attr-defined]
                 labels.append(data)
 
-        self.assertLess(len(labels), PRE_FIX_HTTP2_LABELS // 4)
+        self.assertLess(len(labels), UNCHECKED_GUESS_HTTP2_LABELS // 4)
         for data in labels:
             with self.subTest(frame=data[:9].hex()):
                 self.assertEqual(data[3], 0x0)

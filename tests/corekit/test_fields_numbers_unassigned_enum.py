@@ -396,7 +396,7 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
         finally:
             close_extractor(extractor)
 
-    def test_an_unassigned_block_type_no_longer_costs_the_extraction(self) -> None:
+    def test_an_unassigned_block_type_does_not_cost_the_extraction(self) -> None:
         """The issue's repro, with a packet block behind the unknown one.
 
         Without the fix, ``Extractor`` raises ``ValueError: 28 is

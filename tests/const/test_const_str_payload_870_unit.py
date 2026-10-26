@@ -101,7 +101,7 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
                 self.assertEqual(member, member.value)
                 self.assertEqual(len(str(member)), len(member.value))
 
-    def test_registered_and_unregistered_members_are_now_consistent(self) -> None:
+    def test_registered_and_unregistered_members_both_carry_their_value(self) -> None:
         """The inconsistency #870 reported: with #869's fix to the
         unregistered half alone, ``str(Method('frob')) == 'frob'`` while
         ``str(Method.GET) == ''``. With #870's fix to the registered half,

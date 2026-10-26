@@ -305,7 +305,7 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                 found = sorted(leg['python-version'] for leg in legs(name, job_id) if is_ktlo(leg))
                 self.assertEqual(found, sorted(versions))
 
-    def test_37_to_39_run_where_setup_python_still_builds_them(self) -> None:
+    def test_each_runner_pinned_version_runs_on_its_pinned_runner(self) -> None:
         """No Ubuntu 26.04 build of any, which ``ubuntu-latest`` serves."""
         for name, job_id, _ in KTLO_LEGS:
             spec = job(name, job_id)

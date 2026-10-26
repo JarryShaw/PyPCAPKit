@@ -307,7 +307,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertEqual(ospf.layer, 'Application')
         self.assertFalse(ospf._sigterm, "'link' must no longer terminate at OSPF")
 
-    def test_layer_application_extraction_now_terminates_at_ospf(self) -> None:
+    def test_layer_application_extraction_terminates_at_ospf(self) -> None:
         """The flip side: ``layer='application'`` matches at OSPF."""
         frame = self.extract_ipv4_ospf(layer='application')
         self.assertEqual(str(frame.protochain), 'IPv4:OSPFv2:Raw')

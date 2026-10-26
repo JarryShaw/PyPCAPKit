@@ -106,7 +106,7 @@ ISSUE_647_OUTLIERS = (
 #: resolves the same way but does not *register* -- its bare ``Unassigned``
 #: goes through ``_unregistered_member``, so the resolution is not
 #: permanent; see
-#: :meth:`ConstEnumRegisterFallbackTests.test_protection_authority_now_
+#: :meth:`ConstEnumRegisterFallbackTests.test_protection_authority_
 #: resolves_without_extending`. The name is kept for both because this set's
 #: own test only checks "does it raise", not "does it grow".
 EXPECTED_TO_REGISTER = frozenset({
@@ -589,7 +589,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
         does not share Flag semantics with ``Flags``
         (:class:`ConstFlagCompositeTests` above) and ``CommandType``; its own,
         negative, assertions live in
-        :meth:`test_transport_protocol_no_longer_composes` below.
+        :meth:`test_transport_protocol_does_not_compose` below.
         """
         from pcapkit.const.ftp.command import CommandType
 
@@ -598,7 +598,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             CommandType(0x08)
 
-    def test_transport_protocol_no_longer_composes(self) -> None:
+    def test_transport_protocol_does_not_compose(self) -> None:
         """GitHub issue #808: without an ``IntFlag`` base, nothing composes.
 
         Guards against the ``IntFlag`` shape, under which, with power-of-two
@@ -687,7 +687,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         # Every test here may register members on module-global classes.
         purge_modules(['pcapkit'])
 
-    def test_a_string_registry_no_longer_registers_an_unknown_name(self) -> None:
+    def test_a_string_registry_does_not_register_an_unknown_name(self) -> None:
         from pcapkit.const.ftp.command import Command, FEATCode
         from pcapkit.const.http.method import Method
 
@@ -743,7 +743,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         # probe would not resolve to ``Method.GET`` at all; that behaviour
         # is pinned on its own in
         # :mod:`tests.const.test_const_enum_no_mint`
-        # (``BespokeGetUnchangedTests.test_method_get_is_now_case_sensitive``)
+        # (``BespokeGetOverrideTests.test_method_get_is_case_sensitive``)
         # rather than here, where the point is only that the string path
         # bypasses the guard this test is about.
         self.assertIs(Flags.get('SYN'), Flags.SYN)
@@ -777,7 +777,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`'s
         own unbounded ``_missing_`` resolves any non-negative integer too, but
         its label is a bare ``Unassigned``, which the ruling converts; see
-        :meth:`test_protection_authority_now_resolves_without_extending`.
+        :meth:`test_protection_authority_resolves_without_extending`.
         """
         from pcapkit.const.mh.cga_type import CGAType
 
@@ -792,7 +792,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     obj(-1)
 
-    def test_protection_authority_now_resolves_without_extending(self) -> None:
+    def test_protection_authority_resolves_without_extending(self) -> None:
         """The counterpart of :meth:`test_the_auto_extending_integer_
         registries_still_extend`. Resolves any non-negative integer, but does
         not mint a permanent member (#775/#847): a bare ``Unassigned`` is a
@@ -814,7 +814,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ProtectionAuthority(-1)
 
-    def test_apptype_no_longer_registers_an_unassigned_port(self) -> None:
+    def test_apptype_does_not_register_an_unassigned_port(self) -> None:
         """GitHub issue #584's machinery, with no mint at ``_missing_``'s
         fallthrough or at :meth:`AppType.get`'s own second mint site (GitHub
         issue #860 step 2 PR 2, on the same ruling this class's docstring
@@ -822,8 +822,8 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         would leave a permanent ``PORT_65000_tcp`` member every process keeps
         forever; it resolves to an equal-but-not-identical unregistered one
         instead,
-        the same shape as :meth:`test_a_string_registry_no_longer_
-        registers_an_unknown_name` above."""
+        the same shape as :meth:`test_a_string_registry_does_not_
+        register_an_unknown_name` above."""
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
 
         before = len(AppType.__registries__[TransportProtocol.tcp].__members__)
@@ -836,7 +836,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertIsNot(first, second)
 
-    def test_transport_protocol_can_no_longer_be_extended_at_runtime(self) -> None:
+    def test_transport_protocol_cannot_be_extended_at_runtime(self) -> None:
         """Maintainer ruling on PR #836: extension refused, not renumbered.
 
         The review ruling on PR #836 removes the registration from
@@ -1187,7 +1187,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_the_tcp_flags_template_renders_the_committed_module(self) -> None:
         """The whole file, character for character.
 
-        Mirrors ``test_the_vendor_templates_still_emit_the_fix`` in
+        Mirrors ``test_the_vendor_templates_render_the_committed_modules`` in
         :mod:`tests.const.test_const_enum_lookup`, which does this for the four
         Mobility Header templates. Needs no network: the crawl supplies only the
         enumeration block, which is read back out of the committed module.

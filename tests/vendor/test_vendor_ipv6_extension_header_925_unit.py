@@ -128,7 +128,7 @@ EXPECTED_MEMBERS = (
 #: Protocol Numbers registry cites an author's name, or an extra RFC 4727
 #: citation), which is a known, reported divergence rather than a parsing
 #: defect -- see this suite's
-#: ``test_five_comments_genuinely_diverge_from_the_historical_registry``. The
+#: ``test_the_divergent_comments_differ_from_the_historical_registry``. The
 #: committed const file carries the authoritative registry's text for every
 #: member, which is what
 #: ``test_context_matches_the_committed_const_file_byte_for_byte`` pins.
@@ -260,14 +260,14 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         self.assertNotEqual(naive, 'IPv6_Route')
         self.assertEqual(naive, 'Routing_Header_for_IPv6')
 
-    def test_six_comments_are_unchanged_from_the_historical_registry(self) -> None:
+    def test_the_shared_comments_match_the_historical_registry(self) -> None:
         vendor, lines = self._vendor()
         enum, _ = vendor.process(lines)
         for name, expected_comment in UNCHANGED_COMMENTS.items():
             with self.subTest(name=name):
                 self.assertEqual(_comment_from_enum(enum, name), expected_comment)
 
-    def test_five_comments_genuinely_diverge_from_the_historical_registry(self) -> None:
+    def test_the_divergent_comments_differ_from_the_historical_registry(self) -> None:
         # Documents the divergence rather than hiding it: these five members'
         # *comments* differ from the committed const file because the two
         # registries carry different Reference/Description text for the same

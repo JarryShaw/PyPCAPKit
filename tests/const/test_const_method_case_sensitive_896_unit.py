@@ -52,7 +52,7 @@ keeps the caller's exact casing.
 
 This module also pins the crawler and the generated file against each
 other, the way :mod:`tests.const.test_const_enum_get`'s own
-``test_the_vendor_template_still_emits_the_fix`` does for a different
+``test_the_vendor_template_leaves_get_to_the_base`` does for a different
 registry: :mod:`pcapkit.const` is generated from :mod:`pcapkit.vendor`, so a
 fix applied only to the generated file is silently discarded by the next
 crawl. Unlike that sibling test, :class:`~pcapkit.const.http.method.Method`'s
@@ -222,7 +222,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
         silently carry the case-sensitive change over to ``Command`` too.
         It is also the only pin of GitHub issue #582 (``Command.get('abor')``
         must resolve), which
-        :class:`tests.const.test_const_enum_no_mint.BespokeGetUnchangedTests`
+        :class:`tests.const.test_const_enum_no_mint.BespokeGetOverrideTests`
         relies on rather than repeating.
         """
         from pcapkit.const.ftp.command import Command

@@ -52,14 +52,14 @@ def _ipv6_bytes(next_code: 'int', ext_and_payload: 'bytes') -> 'bytes':
 class ExtensionHeaderBitEmuRemovedTests(unittest.TestCase):
     """There is no ``BIT_EMU``, and the ``ipv6.py`` walk handles 147 cleanly."""
 
-    def test_extension_header_now_has_exactly_eleven_members(self) -> None:
+    def test_extension_header_has_no_bit_emu_member(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 
         names = [member.name for member in ExtensionHeader]
         self.assertEqual(len(names), 11)
         self.assertNotIn('BIT_EMU', names)
 
-    def test_bit_emu_value_no_longer_resolves(self) -> None:
+    def test_bit_emu_value_does_not_resolve(self) -> None:
         # The exact call IPv6._decode_next_layer makes at the
         # top of its extension-header walk loop. With no BIT_EMU member and no
         # _missing_ defined on this generated file (neither EnumLookup nor

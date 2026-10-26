@@ -195,7 +195,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
                 self.assertEqual(len(raw), 4 + contents + (len(raw) - 4 - contents))
                 self.assertEqual(raw[2:4], contents.to_bytes(2, 'big'))
 
-    def test_the_three_plain_shapes_keep_the_octet_counts_main_emitted(self) -> None:
+    def test_the_plain_shapes_pack_their_rfc_octet_counts(self) -> None:
         """n = 1, 2, 5 pack 32, 56 and 128 octets.
 
         These are the shapes where the two defects cancel exactly, and the

@@ -51,7 +51,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(storage.ipv6, ())
         self.assertEqual(storage.tcp, ())
 
-    def test_completion_is_a_string_that_still_reads_as_the_old_bool(self) -> None:
+    def test_completion_is_a_string_that_reads_as_a_bool(self) -> None:
         """The contract ``Datagram.completed`` has to keep as a StrEnum.
 
         Deriving from :class:`~pcapkit.utilities.compat.StrEnum` -- as

@@ -106,7 +106,7 @@ class MPTCPHeaderOffsetTests(unittest.TestCase):
         self.assertEqual(header['length'], len(MP_CAPABLE_OPTION))
         self.assertNotEqual(header['length'], 60)
 
-    def test_subtype_still_decodes_beside_the_corrected_length(self) -> 'None':
+    def test_subtype_decodes_from_the_same_window_as_length(self) -> 'None':
         """``subtype`` reads MP_CAPABLE, from the same window as ``length``.
 
         This is the entry that pins the window's origin, so it is asserted

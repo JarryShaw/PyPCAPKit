@@ -159,7 +159,7 @@ class PerClassImportGuardTests(unittest.TestCase):
         self.assertEqual(unexpected, [], 'drop the whole-package purge, or purge in setUp '
                          'instead of calling reimport_once_per_class (GitHub issue #1538)')
 
-    def test_every_allowed_class_still_pairs_the_two(self) -> None:
+    def test_every_allowed_class_is_found_by_the_scan(self) -> None:
         _, found = scan_tree()
         self.assertEqual(sorted(key for key in ALLOWED if key not in found), [])
 

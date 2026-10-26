@@ -177,7 +177,7 @@ class BaseGetProvenanceTests(unittest.TestCase):
         self.assertNotIsInstance(caught.exception, KeyError)
         self.assertIn('99', str(caught.exception))
 
-    def test_an_unusable_default_reaches_the_same_two(self) -> 'None':
+    def test_an_unusable_default_raises_the_same_key_and_value_errors(self) -> 'None':
         """``default`` naming no registered value falls through to ``key``'s own
         error, so it must reach the caller as the same class -- and must not
         name the default, which is the pin GitHub issue #864 added."""
@@ -225,7 +225,7 @@ class BaseGetProvenanceTests(unittest.TestCase):
         # Still honours ``default``, as the hook's own docstring promises.
         self.assertIs(_Ranged.get(99, 1), _Ranged.low)
 
-    def test_get_all_reports_the_same_two(self) -> 'None':
+    def test_get_all_raises_the_same_key_and_value_errors(self) -> 'None':
         """:meth:`~pcapkit.corekit.enum.EnumLookup.get_all` forwards to
         ``get``, so its documented ``Raises:`` has to move with it."""
         with self.assertRaises(EnumKeyError):
@@ -372,7 +372,7 @@ class TransportProtocolCaseFoldingTests(unittest.TestCase):
         self.assertIs(TransportProtocol.get('tcp'), TransportProtocol.tcp)
         self.assertIs(TransportProtocol.get(1), TransportProtocol.tcp)
 
-    def test_the_override_no_longer_converts_the_name_miss(self) -> 'None':
+    def test_the_override_does_not_convert_the_name_miss(self) -> 'None':
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -450,7 +450,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertIs(Criticality.get(2), Criticality.notify)
         self.assertIs(Criticality.get(Criticality.reject), Criticality.reject)
 
-    def test_a_name_miss_now_reports_in_the_stdlib_shape(self) -> 'None':
+    def test_a_name_miss_reports_in_the_stdlib_shape(self) -> 'None':
         from pcapkit.protocols.application.ngap import Criticality
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -562,7 +562,7 @@ class VendorTemplateParityTests(unittest.TestCase):
     with it -- the next crawl would simply revert it, which is the trap
     ``TransportProtocol.get`` living inside an f-string template sets. The same
     proof shape as ``test_the_tcp_flags_template_renders_the_committed_module``
-    and ``test_the_vendor_templates_still_emit_the_fix``: render the template and
+    and ``test_the_vendor_templates_render_the_committed_modules``: render the template and
     compare against the committed file. Needs no network -- the crawl supplies
     only the enumeration block and the ``_missing_`` branches, neither of which
     the ``get`` region below interpolates, so placeholder arguments render it

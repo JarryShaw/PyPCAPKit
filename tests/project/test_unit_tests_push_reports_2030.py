@@ -609,7 +609,7 @@ class TestTheReport(unittest.TestCase):
                     self.assertEqual(found.status, 'warning')
                     self.assertEqual(found.warned, [f'`{job}`: `{title}`'])
 
-    def test_with_nothing_listed_the_old_install_failures_warn(self) -> None:
+    def test_with_nothing_listed_an_install_failure_warns(self) -> None:
         """Run 39718608950's pypy3.10 install failure warns: nothing lists it as by design (#2040)."""
         outputs, report, _ = self.report('success', check_runs(PYPY, GREEN))
         self.assertEqual(outputs['status'], 'warning')

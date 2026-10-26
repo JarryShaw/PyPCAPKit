@@ -93,7 +93,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
                 info = HTTPv2(io.BytesIO(raw), len(raw)).info
                 self.assertEqual(bytes(HTTPv2(type=info.type, sid=info.sid, frame=info)), raw)
 
-    def test_the_old_header_inclusive_length_is_rejected(self) -> None:
+    def test_a_header_inclusive_length_is_rejected(self) -> None:
         """A fixed-size frame declaring payload + 9 is a size error."""
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError

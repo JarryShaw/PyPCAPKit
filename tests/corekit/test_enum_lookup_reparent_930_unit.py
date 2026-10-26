@@ -86,7 +86,7 @@ __tier__ = 'ALL'
 
 __all__ = [
     'ReparentedBasesTests', 'GetByNameAndValueTests', 'FailedLookupTests',
-    'InheritedQuietnessTests', 'NoMintingTests', 'AllSevenInheritTheBareClassmethodTests',
+    'InheritedQuietnessTests', 'NoMintingTests', 'EachInheritsTheBareClassmethodTests',
     'NonCanonicalKeyConvergenceTests', 'ZeroRemainOutsideEnumLookupTests',
 ]
 
@@ -140,7 +140,7 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_fast_binding_acknowledgment_status(self) -> None:
         """No ``get`` override to pin here (GitHub pull request #940) --
-        :class:`AllSevenInheritTheBareClassmethodTests` covers this class
+        :class:`EachInheritsTheBareClassmethodTests` covers this class
         alongside the others."""
         from aenum import IntEnum
 
@@ -191,7 +191,7 @@ class NoMintingTests(unittest.TestCase):
     """None of these mints on a miss, exercised through ``get`` itself
     rather than only through the static counts above."""
 
-    def test_a_battery_of_lookups_does_not_grow_any_of_the_seven(self) -> None:
+    def test_a_battery_of_lookups_grows_no_registry(self) -> None:
         """None of these mints on a miss -- each is a closed set on the
         bare lookup tier, not the mutating
         :class:`~pcapkit.corekit.enum.EnumRegistry` one. Exercises every
@@ -399,7 +399,7 @@ class InheritedQuietnessTests(unittest.TestCase):
     GitHub issue #933 settled that the two follow house convention and are
     not loud.
 
-    :meth:`test_get_is_now_quiet_on_both_classes` covers ``get`` itself, and
+    :meth:`test_get_is_quiet_on_both_classes` covers ``get`` itself, and
     :meth:`test_get_all_is_new_and_quiet_too` covers ``get_all``, which calls
     this same ``get`` internally -- so a miss reached through ``get_all`` is
     quiet for the same reason ``get`` itself is.
@@ -415,7 +415,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         else:
             sys.tracebacklimit = self._saved_tracebacklimit
 
-    def test_get_is_now_quiet_on_both_classes(self) -> None:
+    def test_get_is_quiet_on_both_classes(self) -> None:
         """The behaviour GitHub issue #930 pins: ``get`` is quiet, matching
         the base, where without the fix it is loud (see the class
         docstring)."""
@@ -486,7 +486,7 @@ class InheritedQuietnessTests(unittest.TestCase):
                 self.assertIs(cls.get('NOT_A_REAL_MEMBER', member), member)
 
 
-class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
+class EachInheritsTheBareClassmethodTests(unittest.TestCase):
     """Each inherits the base's ``classmethod`` outright, none
     declaring a ``get`` of its own.
 
@@ -499,7 +499,7 @@ class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
     own ``__dict__``.
     """
 
-    def test_all_seven_inherit_the_bare_classmethod(self) -> None:
+    def test_each_inherits_the_bare_classmethod(self) -> None:
         from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
         from pcapkit.protocols.internet.esp import ESPStatus
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,

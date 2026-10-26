@@ -813,7 +813,7 @@ class GetOverrideContractTests(unittest.TestCase):
                               'wrong to give it as a delegating override')
         self.assertIsInstance(vars(OptionType)['get'], staticmethod)
         self.assertNotIn('super()', inspect.getsource(vars(OptionType)['get'].__func__),
-                         'OptionType.get now delegates, so the page is wrong to list it '
+                         'OptionType.get delegates to super(), so the page is wrong to list it '
                          'as the surviving staticmethod')
 
         # Execute the outcomes rather than assert the page names them. A grep

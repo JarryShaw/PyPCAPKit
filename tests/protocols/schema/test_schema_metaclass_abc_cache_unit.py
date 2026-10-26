@@ -249,7 +249,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         self.assertFalse(isinstance(ChainMap(), _SharedChild))
         self.assertFalse(isinstance(ChainMap(), _Shared))
 
-    def test_the_pcapng_1248_symptom_no_longer_reproduces(self) -> None:
+    def test_an_end_record_is_not_an_ipv4_or_ipv6_record(self) -> None:
         """The user-facing payoff: a real ``isinstance`` call site, not a probe.
 
         :meth:`NameResolutionBlock.post_process

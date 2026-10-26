@@ -102,7 +102,7 @@ class TestSchemaByteorder(unittest.TestCase):
                 self.assertEqual((header.ts_sec, header.ts_usec), (1, 2))
                 self.assertEqual(header.pack(dict(packet)), raw)
 
-    def test_the_old_import_path_no_longer_imports(self) -> None:
+    def test_the_schema_misc_byteorder_path_does_not_import(self) -> None:
         """#1711: the move leaves no re-export at the old path."""
         with self.assertRaises(ModuleNotFoundError) as ctx:
             importlib.import_module(OLD_PATH)

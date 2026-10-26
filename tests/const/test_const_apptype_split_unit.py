@@ -561,7 +561,7 @@ class AppTypeSplitTests(unittest.TestCase):
             with self.subTest(registry=cls.__name__):
                 self.assertNotIn(-1, [member.port for member in cls])
 
-    def test_a_real_port_with_no_transport_no_longer_resolves(self) -> None:
+    def test_a_real_port_with_no_transport_does_not_resolve(self) -> None:
         """The one deliberate behaviour difference from #732's lookup, pinned.
 
         Some registry entries carry a real port with an **empty** transport
@@ -982,7 +982,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(AppType.get(888, proto=UDP.__transport__).svc, 'accessbuilder')
         self.assertEqual(AppType.get(999, proto=UDP.__transport__).svc, 'applix')
 
-    def test_one_transport_protocol_still_resolves_every_port_it_resolved_before(self) -> None:
+    def test_one_transport_protocol_resolves_every_declared_member(self) -> None:
         """The refusal narrows the composite case and nothing else.
 
         Every declared member of every registry, dispatched from the base under its

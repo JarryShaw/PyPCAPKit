@@ -367,7 +367,7 @@ class PySharkToolkitTests(unittest.TestCase):
             toolkit.tcp_traceflow(packet)
         self.assertEqual(ctx.exception.args[0], 'frame.encap_type=Ethernet')
 
-    def test_filter_name_fallback_no_longer_upper_cases_onto_a_member(self) -> None:
+    def test_an_ambiguous_filter_name_raises_rather_than_upper_casing_onto_a_member(self) -> None:
         """A fallback trying ``Enum_LinkType.get(name.upper())`` (#843)
         silently answers ``PPP`` (9) for a ``ppp-with-direction`` capture
         (DLT 204) and ``LAPD`` (203) for a ``linux-lapd`` one (DLT 177).

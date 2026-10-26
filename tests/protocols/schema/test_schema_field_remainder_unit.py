@@ -151,7 +151,7 @@ class TestSchemaFieldRemainder(unittest.TestCase):
         with self.assertRaises(KeyError):
             inner['__remainder__']  # pylint: disable=pointless-statement,unsubscriptable-object
 
-    def test_remainder_that_no_longer_fits_is_dropped(self) -> None:
+    def test_remainder_that_does_not_fit_is_dropped(self) -> None:
         _, outer = _nested_schemas()
 
         data = outer.unpack(RAW, len(RAW), None).to_dict()

@@ -1876,7 +1876,7 @@ class DependencyGateSelectionTests(unittest.TestCase):
             with self.subTest(job=name):
                 self.assertEqual(section, job_section(text, name))
 
-    def test_each_job_selection_is_one_of_the_three_recognised_shapes(self) -> None:
+    def test_each_job_selection_is_a_recognised_shape(self) -> None:
         """A new shape has to fail here rather than be guessed at.
 
         These are recognised: subtract ``--ignore`` flags from the whole suite
@@ -2116,7 +2116,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
             unexplained, [],
             '\n\n'.join(_dependency_gates.describe_gap(gap) for gap in unexplained))
 
-    def test_the_four_gates_737_and_740_fixed_are_covered_on_every_job_reaching_them(self) -> None:
+    def test_the_dpkt_crypto_emoji_and_pycrate_gates_are_covered_on_every_job_reaching_them(self) -> None:
         """What this guard exists to stop regressing, named one flag at a time.
 
         #737 added ``DPKT`` and #740 added ``crypto``, ``cli`` and ``NGAP`` to

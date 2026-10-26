@@ -179,7 +179,7 @@ class VendorMissingBodyTests(unittest.TestCase):
                                         f'``_missing_``, which re-enters ``_missing_`` '
                                         f'for the same value; see GitHub issue #866')
 
-    def test_the_two_regressed_crawlers_emit_a_single_returning_line(self) -> None:
+    def test_the_record_and_secrets_type_crawlers_emit_a_single_returning_line(self) -> None:
         """The specific pair from #866, pinned by name.
 
         Kept alongside the general sweeps because these are the crawlers #866

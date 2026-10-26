@@ -473,7 +473,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 
-    def test_the_family_is_exactly_the_eight_known_members(self) -> None:
+    def test_the_family_is_exactly_the_known_members(self) -> None:
         """Importing :mod:`pcapkit.protocols.internet` must turn up exactly
         :attr:`KNOWN_MEMBERS`. This is what keeps the per-subclass tests below
         from passing vacuously on a walk that discovered nothing.
@@ -639,7 +639,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                 self.assertTrue(issubclass(klass, IPv6_Ext))
                 self.assertTrue(issubclass(klass, Internet))
 
-    def test_esp_extension_mode_is_no_longer_dead(self) -> None:
+    def test_esp_extension_mode_guards_payload_protocol_and_protochain(self) -> None:
         """GitHub issue #895: ``ESP`` accepted ``extension=``, stored it in
         ``_extf`` and never read it. Subclassing the base makes ``_extf``
         load-bearing for
@@ -765,7 +765,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
         self.assertEqual(object.__new__(IPv6_Ext).__length_hint__(), 8)
 
-    def test_next_is_now_shared_by_every_subclass(self) -> None:
+    def test_next_is_shared_by_every_subclass(self) -> None:
         """Every subclass inherits the base's ``next`` property (#917) --
         without it, reading one raises :exc:`AttributeError` -- which is sound
         because :rfc:`8200#section-4.1` puts a Next Header octet first in every

@@ -1412,7 +1412,7 @@ class HTTPUnitTests(unittest.TestCase):
         schema modules that share the pattern. See
         ``test_guess_version_reports_unknown_version_for_a_short_payload`` for
         the outer-header case, and
-        ``test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
+        ``test_guess_version_does_not_leak_a_bare_struct_error_for_an_inner_field_shortfall``
         below for the inner one.
 
         It is also unnecessary: nothing reaches a :exc:`struct.error` through
@@ -1453,7 +1453,7 @@ class HTTPUnitTests(unittest.TestCase):
                     with self.assertRaises(struct.error):
                         HTTP(io.BytesIO(raw), len(raw))
 
-    def test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
+    def test_guess_version_does_not_leak_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
         """A buffer that clears nine octets must not crash one field further in.
 
         #799's ``httpv2.HTTP.unpack`` guard only protects the fixed nine-octet
@@ -1577,7 +1577,7 @@ class HTTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_http_header(b'BAD nope nope\r\nHost: example')
 
-    def test_method_get_is_now_case_sensitive(self) -> None:
+    def test_method_get_is_case_sensitive(self) -> None:
         """``Method.get`` must not resolve a mixed-case method to the registered
         member of another casing -- GitHub issue #896.
 
