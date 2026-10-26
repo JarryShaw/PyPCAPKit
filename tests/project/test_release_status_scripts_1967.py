@@ -617,7 +617,13 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                         self.assertNotIn(line, step.get('run', ''))
 
     def test_the_scripts_need_only_util_and_python_3_8(self) -> None:
-        """The sparse checkout holds :file:`util/`, and the image's ``python3`` nothing installed."""
+        """The sparse checkout holds :file:`util/`, and the image's ``python3`` nothing installed.
+
+        ``feature_version`` is best-effort on a newer interpreter, so the 3.8
+        compat leg's ``Compile the 3.8-floor util scripts`` is the authoritative
+        check (#2206).
+
+        """
         allowed = {'__future__', 'argparse', 'os', 'subprocess', 'sys', 'typing', '_actions', 'util'}
         for name in ('release_status.py',):
             with self.subTest(script=name):

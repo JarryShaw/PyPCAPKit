@@ -1439,6 +1439,16 @@ pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.8's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
+Their project tests parse these scripts and the helper with ``ast.parse(...,
+feature_version=(3, 8))``, which is best-effort on a newer interpreter, so the
+authoritative check is ``Compile the 3.8-floor util scripts`` in
+``python-compatibility.yml``'s ``compatibility`` job: on the 3.8 leg alone, it runs
+``python -m compileall -q`` over the scripts those tests hold to 3.8, at the job's
+``ANNOTATION_LEVEL``, beside ``Verify package``'s compile of :mod:`pcapkit`
+(:issue:`2206`). A script held to a later floor, as :file:`util/python_versions.py`
+is to 3.11 for ``tomllib``, is left out, and
+:file:`tests/project/test_compat_util_floor_2206.py` fails when the step's list and
+the tests' differ.
 
 The scripts a person runs as well, or alone, sit beside the CI-only ones in
 :file:`util/` rather than in a directory of their own (:pr:`2050`).

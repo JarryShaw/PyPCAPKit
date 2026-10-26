@@ -114,6 +114,12 @@ class TestStandardLibraryOnly(unittest.TestCase):
         self.source = HELPER.read_text(encoding='utf-8')
 
     def test_it_parses_as_python_3_8(self) -> None:
+        """Best-effort on a newer interpreter, as ``feature_version`` is (#2206).
+
+        The 3.8 compat leg's ``Compile the 3.8-floor util scripts`` is the
+        authoritative check.
+
+        """
         ast.parse(self.source, filename=str(HELPER), feature_version=FLOOR)
 
     def test_it_imports_only_what_3_8_has(self) -> None:
