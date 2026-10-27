@@ -2755,6 +2755,11 @@ Fixed
 * HIP's ``ECHO_RESPONSE_UNSIGNED`` maker builds an ``EchoResponseUnsignedParameter``
   schema, where it built the request's; the octets were already right (:issue:`2170`,
   :pr:`2188`).
+* PCAP-NG's ``make(block=<bytes>)`` parses the block out of the raw octets, as a
+  block read from a capture is, where every block type raised a bare
+  ``AttributeError`` (``'bytes' object has no attribute 'length'``) from
+  :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG.read`; octets that hold no block raise
+  :exc:`.ProtocolError` (:issue:`2354`).
 
 pcapkit.toolkit
 ---------------

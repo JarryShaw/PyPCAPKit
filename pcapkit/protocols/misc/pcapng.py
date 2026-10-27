@@ -1261,6 +1261,23 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             the packet data is not available in the current instance.
 
         """
+        # NOTE: A block given to ``make()`` as raw :obj:`bytes` is packed
+        # verbatim, so the made header holds those octets where :meth:`read`
+        # expects the block schema.  Parse the block back out of the packed
+        # octets instead, as a block read from a capture would be, so that
+        # ``make(block=<bytes>)`` builds the block the octets describe, or
+        # fails with a :exc:`ProtocolError` when they describe none, as
+        # :meth:`Protocol.unpack <pcapkit.protocols.protocol.Protocol.unpack>`
+        # does for a raw item it cannot parse (#2354).
+        header = cast('Optional[Schema_PCAPNG]', self.__header__)
+        block = cast('object', header.block) if header is not None else None
+        if isinstance(block, bytes):
+            self.__header__ = None  # type: ignore[assignment]
+            try:
+                return self.unpack(length, **kwargs)
+            except (BaseError, struct.error) as error:  # pylint: disable=no-member
+                raise ProtocolError(f'{type(self).__name__}: malformed raw block given to make(): {error}') from error
+
         if cast('Optional[Schema_PCAPNG]', self.__header__) is None:
             packet = kwargs.get('__packet__', {})  # packet data
 
