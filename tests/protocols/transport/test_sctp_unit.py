@@ -160,6 +160,36 @@ class SCTPUnitTests(unittest.TestCase):
         self.assertEqual(schema.dstport.port, 38412)
         self.assertEqual(schema.pack()[:4], b'\x26\xab\x96\x0c')
 
+    def test_parameter_type_lists_refuse_a_bool_and_a_non_int(self) -> None:
+        """#2288: both makers resolve ``types`` through one shared check.
+
+        ``bool`` is an :obj:`int` subclass, and a ``Parameter`` member, an
+        :obj:`int`, a :obj:`str` or a :obj:`float` need distinct handling, so
+        every type in the list is checked by the same helper.
+
+        """
+        from pcapkit.const.sctp.cause_code import CauseCode
+        from pcapkit.const.sctp.parameter import Parameter
+        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = SCTP.__new__(SCTP)
+        makers = (
+            (SCTP._make_param_addrtypes, Parameter.Supported_Address_Types),
+            (SCTP._make_cause_missing_param, CauseCode.Missing_Mandatory_Parameter),
+        )
+        for maker, code in makers:
+            for item in (True, False, '5', 5.0, None):
+                with self.subTest(maker=maker.__name__, item=item):
+                    with self.assertRaises(ProtocolError) as ctx:
+                        maker(proto, code, types=[Parameter.IPv4_Address, item])
+                    self.assertEqual(str(ctx.exception), f'SCTP: invalid parameter type: {item!r}')
+
+            # An ``int`` and a ``Parameter`` resolve to their Parameter member.
+            with self.subTest(maker=maker.__name__, item='valid'):
+                self.assertEqual(maker(proto, code, types=[5, Parameter.IPv6_Address]).types,
+                                 [Parameter.IPv4_Address, Parameter.IPv6_Address])
+
     def test_checksum_is_the_little_endian_crc32c_of_the_zeroed_packet(self) -> None:
         import struct
 
