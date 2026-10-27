@@ -166,7 +166,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
         return ftp
 
     def make(self,
-             cmmd: 'Optional[Enum_Command | str | bytes]' = None,
+             cmmd: 'Optional[Enum_Command | str | bytes | bytearray]' = None,
              code: 'Optional[Enum_ReturnCode | int | str | bytes]' = None,
              args: 'Optional[str | bytes]' = None,
              more: 'bool' = False,
@@ -186,7 +186,9 @@ class FTP(Application[Data_FTP, Schema_FTP],
         which keeps the case the command was read in.
 
         Args:
-            cmmd: FTP command.
+            cmmd: FTP command, a :class:`str` (an
+                :class:`~pcapkit.const.ftp.command.Command` member is one),
+                :class:`bytes` or :class:`bytearray`.
             code: FTP status code.
             args: Optional FTP command arguments and/or status messages.
             more: More status messages to follow for response packets.
@@ -202,17 +204,20 @@ class FTP(Application[Data_FTP, Schema_FTP],
 
         Raises:
             ProtocolError: If neither or both of ``cmmd`` and ``code`` are
-                given, or if ``lines`` are given other than as the rest of a
-                multi-line reply.
+                given, if ``cmmd`` is not a :class:`str`, :class:`bytes` or
+                :class:`bytearray` (a :obj:`bool` included), or if ``lines``
+                are given other than as the rest of a multi-line reply.
 
         """
         if cmmd is not None and code is None:
-            if isinstance(cmmd, bytes):
-                prefix = cmmd
+            # NOTE: ``Command`` is a ``StrEnum``, so a member takes the ``str``
+            # branch; anything else is the wrong type (#2290).
+            if isinstance(cmmd, (bytes, bytearray)):
+                prefix = bytes(cmmd)
             elif isinstance(cmmd, str):
                 prefix = cmmd.encode()
             else:
-                prefix = cmmd.value
+                raise ProtocolError(f'FTP: invalid command: must be a str, bytes or bytearray, not {cmmd!r}')
             if raw_cmmd is not None and raw_cmmd.upper() == prefix.upper():
                 prefix = raw_cmmd
 
