@@ -878,6 +878,69 @@ ESP has already laid the groundwork, but the checksum half needs the IP
 pseudo-header class defined first, and that is worth doing deliberately rather
 than as a side effect of a checksum patch.
 
+Deterministic Construction Arguments
+------------------------------------
+
+This is meant to open a broader run of proposals for the construction
+(``make()``) workflow in general rather than stand alone -- more will be added
+under that heading as they get scoped, and the concrete item ready to write
+down now is making a ``make()`` call's own argument list deterministic.
+
+:meth:`~pcapkit.protocols.protocol.Protocol._make_index` is where that is not
+currently true. A number of ``make()`` methods accept a plain ``str``
+enum-member name for a field and resolve it by frame-introspecting the
+caller's locals for a conventional four-argument group -- ``X``,
+``X_default``, ``X_namespace`` and ``X_reversed`` -- looking for the one
+argument whose own default is an enum member, and taking that member's class
+as the namespace to search. The actual contract of a ``make()`` call is
+therefore not fully visible from its own signature: knowing what a bare
+string resolves against means knowing the convention and trusting that every
+call site followed it exactly, rather than reading it off the call itself.
+That gap is exactly how this round's bug family happened. :issue:`2356` is
+the walk coming up empty because the relevant argument's own default is
+``None``, leaving nothing to anchor a namespace to; :issue:`2394` is the same
+inference failing by a different route -- the name is a loop variable over a
+*list* parameter rather than a scalar argument, so the walk's
+``isinstance(value, str)`` check can never see it. Both were fixed narrowly,
+by naming the correct enum explicitly at each affected call site rather than
+touching the inference, so the mechanism is exactly as fragile as it was
+before and just as liable to the same shape of defect at the next call site
+that does not fit its assumptions precisely.
+
+The owner's proposed direction -- recorded here, and explicitly **not**
+scheduled for 1.5.0 -- removes the inference rather than patching it again.
+``make()`` would require an actual enum value, or an ``int`` where one is
+already accepted, for these fields, with no implicit string-to-enum
+resolution performed inside ``make()`` itself. In its place, a small public
+wrapper would take the same four-argument group explicitly -- name, default,
+namespace, reversed -- and *resolve* a string name to its enum member on
+request, so a caller holding a bare string calls that helper first and passes
+the resolved value into ``make()``. That mirrors how a finalised
+:class:`~pcapkit.corekit.infoclass.Info` or
+:class:`~pcapkit.protocols.schema.schema.Schema` already settles its
+constructor's keyword set once, when
+:func:`~pcapkit.corekit.infoclass.info_final` or
+:func:`~pcapkit.protocols.schema.schema.schema_final` is applied at
+class-definition time, rather than inferring it afresh at every call --
+:attr:`~pcapkit.protocols.protocol.Protocol.__own_make_keywords__`
+(:issue:`2358`) settles the same kind of question explicitly rather than
+inferring it, though for a different question: which keywords a ``make()``
+override owns, not what the names passed to it resolve against.
+
+The trade-off is real and worth stating rather than glossed over. Accepting a
+bare string for these fields is a pattern used throughout the docs and the
+examples, so dropping the inference is a likely-breaking change at every
+``make()`` call site that currently relies on it -- not a one-line fix.
+Deciding that scope -- which call sites change, whether string acceptance is
+dropped outright or only the silent-inference path behind it, and what the
+wrapper is named and where it lives -- is itself design work, which is
+exactly why this belongs on this page rather than as a quick issue. Done, it
+removes the root cause of the :issue:`2356`/:issue:`2394` family rather than
+leaving its next instance to be found and patched the same way.
+
+Sequenced for **wave 2 or 3**, alongside the other open design questions
+above -- it is not blocked on anything, only on someone scoping it.
+
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
 
@@ -1169,3 +1232,11 @@ IP family, serving both the parsing and the constructing path, rather than a
 back-reference from a parsed protocol to its parent. So that half is not blocked
 on an open design question -- only on someone defining that class, which is a
 bounded piece of work and the natural first step.
+
+**Queued for wave 2 or 3 — deterministic construction arguments.** See
+`Deterministic Construction Arguments`_ above: dropping ``make()``'s implicit
+string-to-enum inference for an explicit resolution helper is a likely-breaking
+change at every call site that relies on it today, so scoping it -- which call
+sites change, and how much of string acceptance goes with the inference -- is
+deliberate design work rather than something to fold into the next defect fix
+on this family.
