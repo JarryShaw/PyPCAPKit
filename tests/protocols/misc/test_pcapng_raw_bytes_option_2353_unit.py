@@ -129,6 +129,34 @@ class RawBytesOptionTest(unittest.TestCase):
                                                   (OptionType.if_name, {'name': 'eth0'})]))
 
 
+    def test_byte_order_tiers_are_pinned(self) -> 'None':
+        """``_byte`` set by an earlier SHB build takes precedence over the
+        host byte order, and the host byte order is used on a fresh instance
+        with no context."""
+        from unittest import mock
+
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        block = {'linktype': 1, 'snaplen': 0x40000}
+
+        with self.subTest(tier='_byte'):
+            instance = PCAPNG(num=0, sct=1, ctx=None, type=0x0A0D0D0A,
+                              block={'byteorder': 'big'})
+            with self.assertRaises(ProtocolError):
+                instance.make(0x00000001, kind='Interface Description Block',
+                              block=dict(block, options=[_raw_option(2, b'eth0', 'big'),
+                                                         (OptionType.if_name, {'name': 'eth0'})]))
+
+        with self.subTest(tier='host'):
+            with mock.patch.object(sys, 'byteorder', 'big'):
+                with self.assertRaises(ProtocolError):
+                    PCAPNG(num=1, sct=1, ctx=None, type=0x00000001,
+                           block=dict(block, options=[_raw_option(2, b'eth0', 'big'),
+                                                      (OptionType.if_name, {'name': 'eth0'})]))
+
+
 class RawBytesRecordTest(unittest.TestCase):
     """Test making an NRB with a raw ``bytes`` record item."""
 
