@@ -386,14 +386,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         # snapshot length cut short the latter exceeds what the file holds, and
         # handing it over is the declared-length-exceeds-available-octets fault.
         #
-        # The schemas count their fields down from this length, so it is what
-        # lets a truncation be noticed: a frame cut inside its IPv4 header
-        # leaves IPv4 fewer octets than its header, and the count running below
-        # zero issues a ``SchemaWarning`` (``packet length < 0``). Handed the
-        # on-wire length, IPv4 would be told of octets the file does not hold
-        # and the truncation would pass silently.
-        # ``test_truncated_ipv4_header_warns_whatever_the_on_wire_length`` pins it
-        # (#2236).
+        # A frame cut inside its IPv4 header keeps IPv4 as ``Raw``, whose
+        # ``error`` names the cut, for either length: the trial parse of IPv4
+        # raises, and its ``packet length < 0`` warnings go with the layer
+        # (#2308). As the dissection does not tell the two apart,
+        # ``test_truncated_ipv4_header_is_raw_with_its_error`` pins the argument
+        # where it is passed (#2236).
         return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
 
     def make(self,

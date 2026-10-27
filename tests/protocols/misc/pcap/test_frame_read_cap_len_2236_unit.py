@@ -3,11 +3,12 @@
 
 This pins the length argument :meth:`Frame.read
 <pcapkit.protocols.misc.pcap.frame.Frame.read>` passes to ``_decode_next_layer``
-(#2236). The dissector is handed ``frame.cap_len``, the octets present, so a
-frame the snapshot length cut inside its IPv4 header reports the truncation as a
-:class:`~pcapkit.utilities.warnings.SchemaWarning` ``packet length < 0``. Handed
-the on-wire ``frame.len`` instead, the schema believes the octets it lacks are
-there and the truncation passes silently.
+(#2236): ``frame.cap_len``, the octets present, never the on-wire ``frame.len``.
+A frame the snapshot length cut inside its IPv4 header keeps IPv4 as
+:class:`~pcapkit.protocols.misc.raw.Raw`, whose ``error`` names the cut, and the
+trial parse's ``packet length < 0`` warnings go with the layer (#2308). The
+dissection reads the same for either length, so the argument is read where it
+is passed.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -17,6 +18,7 @@ inside each test, after :func:`~tests._support.reimport_once_per_class`.
 import io
 import struct
 import unittest
+import unittest.mock
 import warnings
 
 from tests._support import reimport_once_per_class
@@ -42,29 +44,31 @@ class TestFrameReadCapLen(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def schema_warnings(self, orig_len: 'int') -> 'list[str]':
-        """The :class:`SchemaWarning` messages from parsing the record for ``orig_len``."""
+    def test_truncated_ipv4_header_is_raw_with_its_error(self) -> None:
+        """The cut IPv4 header is kept as ``Raw`` naming the cut, with no warning.
+
+        IPv4 is handed the 10 octets Ethernet leaves of the captured 24, short
+        of its 20-octet header, so the trial parse raises and is replaced. Its
+        warnings, ``packet length < 0`` down to ``-10``, describe the IPv4 layer
+        the result does not have, and are dropped with it.
+        """
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.raw import Raw
         from pcapkit.utilities.warnings import SchemaWarning
 
-        with warnings.catch_warnings(record=True) as caught:
+        decode = unittest.mock.patch.object(Frame, '_decode_next_layer', autospec=True,
+                                            side_effect=Frame._decode_next_layer)  # pylint: disable=protected-access
+        with warnings.catch_warnings(record=True) as caught, decode as spy:
             warnings.simplefilter('always')
-            frame = Frame(io.BytesIO(_record(orig_len)), num=1, header=Header(GLOBAL).info)
-        self.assertEqual(frame.info.cap_len, len(PACKET))
-        self.assertEqual(frame.info.len, orig_len)
-        return [str(item.message) for item in caught if issubclass(item.category, SchemaWarning)]
+            frame = Frame(io.BytesIO(_record(ORIG_LEN)), num=1, header=Header(GLOBAL).info)
+        self.assertEqual((frame.info.cap_len, frame.info.len), (len(PACKET), ORIG_LEN))
+        self.assertEqual(spy.call_args.args[3], len(PACKET))
 
-    def test_truncated_ipv4_header_warns_whatever_the_on_wire_length(self) -> None:
-        """The cut IPv4 header warns, the same as for an uncut frame of the same octets.
-
-        IPv4 is handed the 10 octets Ethernet leaves of the captured 24, so its
-        header runs the remaining length to ``-10``. Were the on-wire 154 handed
-        over instead, IPv4 would be told of 140 octets and warn of nothing.
-        """
-        truncated = self.schema_warnings(ORIG_LEN)
-        self.assertIn('packet length < 0: -10', truncated)
-        self.assertEqual(truncated, self.schema_warnings(len(PACKET)))
+        ipv4 = frame.payload.payload
+        self.assertIsInstance(ipv4, Raw)
+        self.assertEqual(ipv4.info.error, 'IPv4: header length 20 runs past the end of the data (10 octets)')
+        self.assertEqual([str(item.message) for item in caught if issubclass(item.category, SchemaWarning)], [])
 
 
 if __name__ == '__main__':
