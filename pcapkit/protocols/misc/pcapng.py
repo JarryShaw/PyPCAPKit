@@ -336,6 +336,29 @@ def _unassigned_member(enum_cls: 'Type[_FlagsEnum]', value: 'int') -> '_FlagsEnu
     return obj
 
 
+def _block_type_name(block_type: 'Enum_BlockType') -> 'str':
+    """Return the name of a block type, for an option's placement message.
+
+    Args:
+        block_type: The block type to name.
+
+    Returns:
+        The block type's name, e.g. ``Enhanced_Packet_Block``.
+
+    Note:
+        ``block_type`` is looked up rather than having its :attr:`~enum.Enum.name`
+        read directly, because :attr:`PCAPNG._type <PCAPNG._type>` is only an
+        :class:`~pcapkit.const.pcapng.block_type.BlockType` on the parse path.
+        On the make path :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
+        returns a plain :obj:`int`, which the assignment in
+        :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>` only
+        :func:`~typing.cast` to the enumeration, so reading ``.name`` off it
+        there raises :exc:`AttributeError` (:issue:`2301`).
+
+    """
+    return Enum_BlockType(block_type).name
+
+
 class PacketDirection(EnumLookup, enum.IntEnum):
     """Packet direction for ``epb_flags`` options.
 
@@ -3114,7 +3137,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [opt_endofopt] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 0:
             raise ProtocolError(f'PCAP-NG: [opt_endofopt] invalid length (expected 0, got {schema.length})')
 
@@ -3199,10 +3222,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
 
         option = Data_IF_NameOption(
             type=schema.type,
@@ -3225,10 +3248,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
 
         option = Data_IF_DescriptionOption(
             type=schema.type,
@@ -3251,7 +3274,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_IPv4addr] invalid length (expected 8, got {schema.length})')
 
@@ -3276,7 +3299,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if schema.length != 17:
             raise ProtocolError(f'PCAP-NG: [if_IPv6addr] invalid length (expected 17, got {schema.length})')
 
@@ -3301,10 +3324,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 6:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] invalid length (expected 6, got {schema.length})')
 
@@ -3329,10 +3352,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] invalid length (expected 8, got {schema.length})')
 
@@ -3357,10 +3380,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_speed] invalid length (expected 8, got {schema.length})')
 
@@ -3385,10 +3408,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 1:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] invalid length (expected 1, got {schema.length})')
 
@@ -3413,10 +3436,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [if_tzone] invalid length (expected 4, got {schema.length})')
 
@@ -3451,10 +3474,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length < 1:
             raise ProtocolError(f'PCAP-NG: [if_filter] invalid length (expected 1+, got {schema.length})')
 
@@ -3480,10 +3503,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
 
         option = Data_IF_OSOption(
             type=schema.type,
@@ -3506,10 +3529,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 1:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] invalid length (expected 1, got {schema.length})')
 
@@ -3534,10 +3557,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] invalid length (expected 8, got {schema.length})')
 
@@ -3562,10 +3585,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
 
         option = Data_IF_HardwareOption(
             type=schema.type,
@@ -3588,10 +3611,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] invalid length (expected 8, got {schema.length})')
 
@@ -3616,10 +3639,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] invalid length (expected 8, got {schema.length})')
 
@@ -3644,10 +3667,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [epb_flags] invalid length (expected 4, got {schema.length})')
 
@@ -3686,7 +3709,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_hash] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         option = Data_EPB_HashOption(
             type=schema.type,
@@ -3710,10 +3733,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] invalid length (expected 8, got {schema.length})')
 
@@ -3738,10 +3761,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [epb_packetid] invalid length (expected 8, got {schema.length})')
 
@@ -3766,10 +3789,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [epb_queue] invalid length (expected 4, got {schema.length})')
 
@@ -3794,7 +3817,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if schema.length < 1:
             raise ProtocolError(f'PCAP-NG: [epb_verdict] invalid length (expected 1+, got {schema.length})')
 
@@ -3820,10 +3843,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
 
         option = Data_NS_DNSNameOption(
             type=schema.type,
@@ -3846,10 +3869,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] invalid length (expected 4, got {schema.length})')
 
@@ -3874,10 +3897,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 16:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] invalid length (expected 16, got {schema.length})')
 
@@ -3902,10 +3925,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] invalid length (expected 8, got {schema.length})')
 
@@ -3934,10 +3957,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] invalid length (expected 8, got {schema.length})')
 
@@ -3966,10 +3989,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] invalid length (expected 8, got {schema.length})')
 
@@ -3994,10 +4017,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] invalid length (expected 8, got {schema.length})')
 
@@ -4022,10 +4045,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] invalid length (expected 8, got {schema.length})')
 
@@ -4050,10 +4073,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] invalid length (expected 8, got {schema.length})')
 
@@ -4078,10 +4101,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] invalid length (expected 8, got {schema.length})')
 
@@ -4106,10 +4129,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Packet_Block:
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be in Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
-                                f'but {self._opt[schema.type] + 1} found.')
+                                f'not {self._opt[schema.type] + 1}')
         if schema.length != 4:
             raise ProtocolError(f'PCAP-NG: [pack_flags] invalid length (expected 4, got {schema.length})')
 
@@ -4148,7 +4171,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Packet_Block:
             raise ProtocolError(f'PCAP-NG: [pack_hash] option must be in Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         option = Data_PACK_HashOption(
             type=schema.type,
@@ -5204,7 +5227,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [opt_endofopt] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         return Schema_EndOfOption(
             type=type,
@@ -5280,10 +5303,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             name = option.name
@@ -5311,10 +5334,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             description = option.description
@@ -5342,7 +5365,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         if option is not None:
             interface = option.interface
@@ -5370,7 +5393,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         if option is not None:
             interface = option.interface
@@ -5398,10 +5421,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             interface = option.interface
@@ -5429,10 +5452,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             interface = option.interface
@@ -5460,10 +5483,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             speed = option.speed
@@ -5491,10 +5514,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             resolution = option.resolution
@@ -5510,7 +5533,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 resl = int(math.log2(resolution))
             else:
                 raise ProtocolError(f'PCAP-NG: [if_tsresol] option resolution must be power of 10 or 2, '
-                                    f'but {resolution} found.')
+                                    f'not {resolution}')
 
         return Schema_IF_TSResolOption(
             type=type,
@@ -5539,10 +5562,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             tzone = option.timezone
@@ -5555,7 +5578,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             tzone_val = int(tzone.utcoffset(None).total_seconds())
         else:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option timezone must be int, timedelta or timezone, '
-                                f'but {builtins.type(tzone).__name__} found.')
+                                f'not {builtins.type(tzone).__name__}')
 
         return Schema_IF_TZoneOption(
             type=type,
@@ -5588,10 +5611,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             filter_val = option.code
@@ -5625,10 +5648,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             os = option.os
@@ -5656,10 +5679,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             fcs_length = option.fcs_length
@@ -5687,10 +5710,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             offset = option.offset
@@ -5718,10 +5741,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             hardware = option.hardware
@@ -5749,10 +5772,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             speed = option.speed
@@ -5780,10 +5803,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be in Interface Description Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             speed = option.speed
@@ -5851,10 +5874,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             direction_val = option.direction
@@ -5925,7 +5948,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_hash] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         if option is not None:
             algo_val = option.algorithm
@@ -5958,10 +5981,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             drop_count = option.drop_count
@@ -5989,10 +6012,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packet_id = option.packet_id
@@ -6020,10 +6043,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             queue_id = option.queue_id
@@ -6059,7 +6082,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
             raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         # NOTE: No only-one guard: the specification allows ``epb_verdict`` to
         # appear multiple times, and the parser accepts every occurrence.
 
@@ -6094,10 +6117,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             name = option.name
@@ -6125,10 +6148,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             ip = option.ip
@@ -6156,10 +6179,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             ip = option.ip
@@ -6187,10 +6210,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             timestamp = option.timestamp_epoch
@@ -6220,10 +6243,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             timestamp = option.timestamp_epoch
@@ -6253,10 +6276,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packets = option.packets
@@ -6284,10 +6307,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packets = option.packets
@@ -6315,10 +6338,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packets = option.packets
@@ -6346,10 +6369,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packets = option.packets
@@ -6377,10 +6400,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be in Interface Statistics Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             packets = option.packets
@@ -6448,10 +6471,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Packet_Block:
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be in Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
-                                f'but {self._opt[type] + 1} found.')
+                                f'not {self._opt[type] + 1}')
 
         if option is not None:
             direction_val = option.direction
@@ -6522,7 +6545,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         if self._type != Enum_BlockType.Packet_Block:
             raise ProtocolError(f'PCAP-NG: [pack_hash] option must be in Packet Block, '
-                                f'but found in {self._type} block.')
+                                f'not {_block_type_name(self._type)}')
 
         if option is not None:
             algo_val = option.algorithm

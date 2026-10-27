@@ -246,7 +246,7 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     elif magic in (_SWAPPED_BYTE_ORDER_MAGIC, 0x0C000000):
         field._byteorder = 'little'
     else:
-        raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
+        raise ProtocolError(f'PCAP-NG: unknown byte-order magic: {magic:#x}')
     packet['byteorder'] = field._byteorder
 
 
@@ -1370,7 +1370,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
         elif magic == _SWAPPED_BYTE_ORDER_MAGIC or (magic == 0x0C000000 and self.length == GENERIC_BLOCK_MINIMUM):
             self.byteorder = 'little'
         else:
-            raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
+            raise ProtocolError(f'PCAP-NG: unknown byte-order magic: {magic:#x}')
         return self
 
     if TYPE_CHECKING:

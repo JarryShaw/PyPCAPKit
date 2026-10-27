@@ -186,7 +186,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
             with self.subTest(order=order):
                 context = self._context(order)
                 with self.assertRaisesRegex(ProtocolError,
-                                            r'\[if_name\] option must be only one, but 2 found'):
+                                            r'\[if_name\] option must be only one, not 2'):
                     PCAPNG(num=2, sct=1, ctx=context,
                            type=BlockType.Interface_Description_Block,
                            block={'linktype': 1, 'snaplen': 0xFFFF,
@@ -209,7 +209,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         for order in ('little', 'big'):  # type: Literal['little', 'big']
             with self.subTest(order=order):
                 with self.assertRaisesRegex(ProtocolError,
-                                            r'\[if_name\] option must be only one, but 2 found'):
+                                            r'\[if_name\] option must be only one, not 2'):
                     PCAPNG(num=2, sct=1, ctx=None,
                            type=BlockType.Interface_Description_Block,
                            block={'linktype': 1, 'snaplen': 0xFFFF,
@@ -245,7 +245,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
                                              (OptionType.if_name, {'name': 'eth1'})]})
 
         with self.assertRaisesRegex(ProtocolError,
-                                    r'\[if_name\] option must be only one, but 2 found'):
+                                    r'\[if_name\] option must be only one, not 2'):
             build(sys.byteorder)
 
         block = build(other)
@@ -277,7 +277,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
                                  int(BlockType.Interface_Description_Block).to_bytes(4, order))
 
                 with self.assertRaisesRegex(ProtocolError,
-                                            r'\[if_name\] option must be only one, but 2 found'):
+                                            r'\[if_name\] option must be only one, not 2'):
                     PCAPNG(num=2, sct=1, ctx=self._context(order),
                            type=BlockType.Interface_Description_Block,
                            block={'linktype': 1, 'snaplen': 0xFFFF,
@@ -313,7 +313,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
                                  int(BlockType.Interface_Description_Block).to_bytes(4, order))
 
                 with self.assertRaisesRegex(ProtocolError,
-                                            r'\[if_name\] option must be only one, but 2 found'):
+                                            r'\[if_name\] option must be only one, not 2'):
                     PCAPNG(num=2, sct=1, ctx=None,
                            type=BlockType.Interface_Description_Block,
                            block={'linktype': 1, 'snaplen': 0xFFFF,

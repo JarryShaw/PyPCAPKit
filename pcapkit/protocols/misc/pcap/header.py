@@ -367,14 +367,14 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         """
         if lilendian is not None and bigendian is not None and lilendian == bigendian:
-            raise EndianError('unresolved byte order')
+            raise EndianError('PCAP: unresolved byte order')
         if bigendian is not None:
             byteorder = 'big' if bigendian else 'little'
         elif lilendian is not None:
             byteorder = 'little' if lilendian else 'big'
 
         if byteorder not in ('little', 'big'):
-            raise EndianError(f"unknown byte order: {byteorder!r}")
+            raise EndianError(f'PCAP: unknown byte order: {byteorder!r}')
 
         magic_number = _DECLARED_MAGIC[(byteorder, nanosecond)]
         return magic_number, (byteorder == 'little')
