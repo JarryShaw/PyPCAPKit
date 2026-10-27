@@ -94,8 +94,9 @@ __all__ = [
     'HIP_RouteDstParameter', 'HIP_HIPTransportModeParameter', 'HIP_HIPMACParameter',
     'HIP_HIPMAC2Parameter', 'HIP_HIPSignature2Parameter', 'HIP_HIPSignatureParameter',
     'HIP_EchoRequestUnsignedParameter', 'HIP_EchoResponseUnsignedParameter', 'HIP_RelayFromParameter',
-    'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
-    'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
+    'HIP_RelayToParameter', 'HIP_OverlayTTLParameter', 'HIP_RouteViaParameter',
+    'HIP_FromParameter', 'HIP_RVSHMACParameter', 'HIP_ViaRVSParameter',
+    'HIP_RelayHMACParameter',
 
     # Hop-by-Hop Options
     'HOPOPT',

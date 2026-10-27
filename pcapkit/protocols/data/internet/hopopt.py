@@ -149,7 +149,7 @@ class CALIPSOOption(Option):
 
     if TYPE_CHECKING:
         #: Compartment bitmap.
-        cmpt_bitmap: 'bytes'
+        cmpt_bitmap: 'tuple[int, ...]'
 
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes', pad: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 

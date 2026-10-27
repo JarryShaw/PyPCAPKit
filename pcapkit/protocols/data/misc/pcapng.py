@@ -807,6 +807,9 @@ class SystemdJournalExportBlock(PCAPNG):
     data: 'tuple[OrderedMultiInfo[str, str | bytes], ...]'
 
     if TYPE_CHECKING:
+        #: Malformed entry kept as captured, present only for such a block.
+        entry_raw: 'bytes'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int',
                      data: 'tuple[OrderedMultiDict[str, str | bytes], ...]') -> 'None': ...
 

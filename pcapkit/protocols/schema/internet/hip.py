@@ -53,8 +53,9 @@ __all__ = [
     'RouteDstParameter', 'HIPTransportModeParameter', 'HIPMACParameter',
     'HIPMAC2Parameter', 'HIPSignature2Parameter', 'HIPSignatureParameter',
     'EchoRequestUnsignedParameter', 'EchoResponseUnsignedParameter', 'RelayFromParameter',
-    'RelayToParameter', 'RouteViaParameter', 'FromParameter',
-    'RVSHMACParameter', 'RelayHMACParameter',
+    'RelayToParameter', 'OverlayTTLParameter', 'RouteViaParameter',
+    'FromParameter', 'RVSHMACParameter', 'ViaRVSParameter',
+    'RelayHMACParameter',
 ]
 
 if TYPE_CHECKING:

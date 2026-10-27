@@ -47,6 +47,7 @@ from pcapkit.protocols.data.internet.hip import \
     NATTraversalModeParameter as HIP_NATTraversalModeParameter
 from pcapkit.protocols.data.internet.hip import NotificationParameter as HIP_NotificationParameter
 from pcapkit.protocols.data.internet.hip import OverlayIDParameter as HIP_OverlayIDParameter
+from pcapkit.protocols.data.internet.hip import OverlayTTLParameter as HIP_OverlayTTLParameter
 from pcapkit.protocols.data.internet.hip import PayloadMICParameter as HIP_PayloadMICParameter
 from pcapkit.protocols.data.internet.hip import PuzzleParameter as HIP_PuzzleParameter
 from pcapkit.protocols.data.internet.hip import R1CounterParameter as HIP_R1CounterParameter
@@ -70,6 +71,7 @@ from pcapkit.protocols.data.internet.hip import \
 from pcapkit.protocols.data.internet.hip import \
     TransportFormatListParameter as HIP_TransportFormatListParameter
 from pcapkit.protocols.data.internet.hip import UnassignedParameter as HIP_UnassignedParameter
+from pcapkit.protocols.data.internet.hip import ViaRVSParameter as HIP_ViaRVSParameter
 
 # Hop-by-Hop Options
 from pcapkit.protocols.data.internet.hopopt import HOPOPT
@@ -396,8 +398,9 @@ __all__ = [
     'HIP_RouteDstParameter', 'HIP_HIPTransportModeParameter', 'HIP_HIPMACParameter',
     'HIP_HIPMAC2Parameter', 'HIP_HIPSignature2Parameter', 'HIP_HIPSignatureParameter',
     'HIP_EchoRequestUnsignedParameter', 'HIP_EchoResponseUnsignedParameter', 'HIP_RelayFromParameter',
-    'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
-    'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
+    'HIP_RelayToParameter', 'HIP_OverlayTTLParameter', 'HIP_RouteViaParameter',
+    'HIP_FromParameter', 'HIP_RVSHMACParameter', 'HIP_ViaRVSParameter',
+    'HIP_RelayHMACParameter',
 
     # Hop-by-Hop Options
     'HOPOPT',

@@ -394,7 +394,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             return ipaddress.IPv6Address(addr)
         return addr.hex()
 
-    def _make_addr_resolve(self, addr: 'str | bytes', htype: 'int') -> 'bytes':
+    def _make_addr_resolve(self, addr: 'str | bytes | bytearray', htype: 'int') -> 'bytes':
         """Resolve hardware address according to protocol.
 
         Arguments:
