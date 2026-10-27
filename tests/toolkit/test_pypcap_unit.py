@@ -64,6 +64,10 @@ class PyPCAPToolkitTests(unittest.TestCase):
                 with self.assertRaises(UnsupportedCall) as caught:
                     call()
                 self.assertIn('no protocol dissection', str(caught.exception))
+                # the engine's own name leads the message, spelled as
+                # ``PyPCAP.__engine_name__`` spells it (#2304)
+                self.assertTrue(str(caught.exception).startswith('PyPCAP: '),
+                                str(caught.exception))
 
     def test_module_exports_the_documented_surface(self) -> None:
         from pcapkit.toolkit import pypcap

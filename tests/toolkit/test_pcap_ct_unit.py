@@ -77,6 +77,10 @@ class PCAP_CTToolkitTests(unittest.TestCase):
                 # an oversight rather than as a property of a libpcap binding
                 self.assertIn('no protocol dissection', str(caught.exception))
                 self.assertIn('pcap-ct', str(caught.exception))
+                # the engine's own name leads the message, spelled as
+                # ``PCAP_CT.__engine_name__`` spells it (#2304)
+                self.assertTrue(str(caught.exception).startswith('PCAP_CT: '),
+                                str(caught.exception))
 
     def test_module_exports_the_documented_surface(self) -> None:
         from pcapkit.toolkit import pcap_ct

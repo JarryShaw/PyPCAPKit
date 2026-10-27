@@ -498,8 +498,9 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 self.assertIsNone(tcp_reassembly(packet, count=count))
                 self.assertIsNone(tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count))
         self.assertEqual([str(item.message) for item in caught if item.category is AttributeWarning], [
-            f"Frame {count}: TCP over IPv6 is left out of TCP reassembly and flow tracing, as 'pypcapfile' "
-            'has no IPv6 decoder; later such frames of this capture are left out without another warning'
+            f"PyPCAPFile: frame {count}: TCP over IPv6 is left out of TCP reassembly and flow tracing, "
+            "as 'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "
+            'without another warning'
             for count in (3, 4)])
 
     def test_either_tcp_adapter_alone_warns_of_tcp_over_ipv6(self) -> None:
@@ -516,8 +517,9 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                     for count in (1, 2):
                         self.assertIsNone(adapter(make_packet(ipv6_frame(6), header=header), count=count,
                                                   **kwargs))
-                self.assertEqual([(item.category, str(item.message)[:37]) for item in caught],
-                                 [(AttributeWarning, 'Frame 1: TCP over IPv6 is left out of')])
+                self.assertEqual([(item.category, str(item.message)[:49]) for item in caught],
+                                 [(AttributeWarning,
+                                   'PyPCAPFile: frame 1: TCP over IPv6 is left out of')])
 
     def test_tcp_over_ipv6_is_read_off_a_whole_ipv6_header_only(self) -> None:
         # #1513: the Next Header of an IPv6 frame, whose 40-octet header was captured
@@ -578,7 +580,8 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 record = Record(ctypes.pointer(header))
                 record.packet = ipv6_frame(6)
                 self.assertIsNone(tcp_reassembly(record, count=count))
-        self.assertEqual([str(item.message)[:8] for item in caught], ['Frame 1:', 'Frame 3:'])
+        self.assertEqual([str(item.message)[:20] for item in caught],
+                         ['PyPCAPFile: frame 1:', 'PyPCAPFile: frame 3:'])
 
     def test_the_captures_warned_of_tcp_over_ipv6_are_bounded(self) -> None:
         from pcapkit.toolkit import pypcapfile as toolkit
@@ -593,7 +596,8 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 toolkit.tcp_reassembly(make_packet(ipv6_frame(6), header=header), count=1)
             toolkit.tcp_reassembly(make_packet(ipv6_frame(6), header=headers[0]), count=2)   # forgotten
             toolkit.tcp_reassembly(make_packet(ipv6_frame(6), header=headers[-1]), count=3)  # remembered
-        self.assertEqual([str(item.message)[:8] for item in caught], ['Frame 1:'] * 33 + ['Frame 2:'])
+        self.assertEqual([str(item.message)[:20] for item in caught],
+                         ['PyPCAPFile: frame 1:'] * 33 + ['PyPCAPFile: frame 2:'])
         self.assertEqual(len(toolkit._ipv6_tcp_warned), 32)  # pylint: disable=protected-access
 
 

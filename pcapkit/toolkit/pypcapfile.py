@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
@@ -76,6 +77,13 @@ __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
 ]
+
+#: Message prefix shared by every message below, read off
+#: :attr:`PyPCAPFile.__engine_name__
+#: <pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_name__>` rather
+#: than spelled out, so the engine cannot be renamed there and still be named
+#: the old way here (:issue:`2304`).
+_ENGINE = PyPCAPFile.__engine_name__
 
 #: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.
 IPV4_FLAG_DF = 0b010
@@ -163,7 +171,7 @@ def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
 
     """
     if not isinstance(value, bytes):
-        raise ProtocolError(f'invalid PyPCAPFile IPv4 address: {value!r}')
+        raise ProtocolError(f'{_ENGINE}: invalid IPv4 address: {value!r}')
     try:
         if len(value) != 4:
             # Dotted-decimal ASCII text, the actual PyPCAPFile 0.12.0 form --
@@ -172,7 +180,7 @@ def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
             return ipaddress.IPv4Address(value.decode('ascii'))
         return ipaddress.IPv4Address(value)
     except (ValueError, UnicodeDecodeError) as error:
-        raise ProtocolError(f'invalid PyPCAPFile IPv4 address: {value!r}') from error
+        raise ProtocolError(f'{_ENGINE}: invalid IPv4 address: {value!r}') from error
 
 
 def _parse_mac_address(value: 'Any') -> 'str':
@@ -201,14 +209,14 @@ def _parse_mac_address(value: 'Any') -> 'str':
 
     """
     if not isinstance(value, (bytes, bytearray)):
-        raise ProtocolError(f'invalid PyPCAPFile MAC address: {value!r}')
+        raise ProtocolError(f'{_ENGINE}: invalid MAC address: {value!r}')
     raw = bytes(value)
     if len(raw) == 6:
         return raw.hex(':')
     try:
         return raw.decode('ascii')
     except UnicodeDecodeError as error:
-        raise ProtocolError(f'invalid PyPCAPFile MAC address: {value!r}') from error
+        raise ProtocolError(f'{_ENGINE}: invalid MAC address: {value!r}') from error
 
 
 def _maybe_unhex(value: 'bytes') -> 'bytes':
@@ -410,9 +418,9 @@ def _decline_ipv6_tcp(packet: 'Packet', count: 'int') -> 'None':
     _ipv6_tcp_warned[key] = anchor
     while config.IPV6_TCP_WARNED_LIMIT != -1 and len(_ipv6_tcp_warned) > config.IPV6_TCP_WARNED_LIMIT:
         _ipv6_tcp_warned.popitem(last=False)
-    warn(f"Frame {count}: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "
-         "'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "
-         'without another warning', AttributeWarning, stacklevel=stacklevel())
+    warn(f'{_ENGINE}: frame {count}: TCP over IPv6 is left out of TCP reassembly and flow '
+         "tracing, as 'pypcapfile' has no IPv6 decoder; later such frames of this capture are "
+         'left out without another warning', AttributeWarning, stacklevel=stacklevel())
 
 
 def _transport(ipv4: 'IP') -> 'Optional[bytes]':
@@ -747,7 +755,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.
 
     """
-    raise UnsupportedCall('IPv6 reassembly is not supported by the PyPCAPFile engine: '
+    raise UnsupportedCall(f'{_ENGINE}: IPv6 reassembly is not supported: '
                           "'pypcapfile' has no IPv6 decoder, so no IPv6 fragment header "
                           'can be read')
 

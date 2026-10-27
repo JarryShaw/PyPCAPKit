@@ -39,6 +39,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
@@ -55,11 +56,18 @@ from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=rede
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
 
+#: Message prefix shared by every message below, read off
+#: :attr:`Scapy.__engine_name__
+#: <pcapkit.foundation.engines.scapy.Scapy.__engine_name__>` rather than spelled
+#: out, so the engine cannot be renamed there and still be named the old way
+#: here (:issue:`2304`).
+_ENGINE = Scapy.__engine_name__
+
 try:
     import scapy
 except ModuleNotFoundError:
     scapy = None
-    warn("dependency package 'Scapy' not found",
+    warn(f"{_ENGINE}: dependency package 'scapy' not found",
          ScapyWarning, stacklevel=stacklevel())
 
 if TYPE_CHECKING:
