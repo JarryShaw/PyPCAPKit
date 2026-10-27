@@ -232,6 +232,18 @@ class RegistrarCodeCheckTests(unittest.TestCase):
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
                                             codes=(wrong,))
 
+    def test_number_registrars_reject_a_bool(self) -> None:
+        """A :class:`bool` is an :class:`int` subclass, but never a port or PPID (#2269)."""
+        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import RegistryError
+
+        for name, _, targets, extra in NUMBER_REGISTRARS:
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                                            codes=(True, False))
+        with self.assertRaisesRegex(RegistryError, r'^code must be an int or a member of AppType, not True$'):
+            registrars._check_code(True, registrars.Enum_AppType, number=True)
+
 
 if __name__ == '__main__':
     unittest.main()
