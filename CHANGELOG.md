@@ -19,6 +19,7 @@ Preceded by `1.5.0a1` (2026-09-15), `1.5.0b1` to `1.5.0b3` (all 2026-09-19) and 
 - **a breaking change to** `ExtensionHeader`: it is generated from IANA's IPv6 Extension Header Types registry rather than the Protocol Numbers registry's flag, and the two disagree on 147 (`BIT-EMU`) ([#925](https://github.com/JarryShaw/PyPCAPKit/issues/925), [#926](https://github.com/JarryShaw/PyPCAPKit/pull/926)).
 - the TCP and UDP `AppType` registries load on first use rather than at import ([#1538](https://github.com/JarryShaw/PyPCAPKit/issues/1538), [#1560](https://github.com/JarryShaw/PyPCAPKit/pull/1560)).
 - **a breaking change to** `LLACode`: `Wilcard` is spelled `Wildcard` and `MH` is `MN`, the names [RFC 5568](https://datatracker.ietf.org/doc/html/rfc5568) gives codes 0 and 2, with no alias for either old name ([#1848](https://github.com/JarryShaw/PyPCAPKit/issues/1848), [#1872](https://github.com/JarryShaw/PyPCAPKit/pull/1872)).
+- **a breaking change to** `tcp.flags.Flags`: each member is its wire mask in the flags field, `FIN` `0x001` up to `AE` `0x100`, rather than `1 << offset` in IANA's most-significant-first bit numbering, which put `FIN` at `0x8000`. `int(tcp.connection)` of a SYN/ACK is `0x012`, as the header carries it, not `0x4800`, and `Flags(0x12)` is `SYN | ACK`. The range guard narrows to the 12-bit flags field, `0 <= value <= 0xFFF`. Code that stored or compared the old integers has to change; membership tests and names are unaffected ([#2310](https://github.com/JarryShaw/PyPCAPKit/issues/2310)).
 
 #### Fixed
 

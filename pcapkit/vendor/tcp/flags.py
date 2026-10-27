@@ -104,11 +104,13 @@ class Flags(Vendor):
     """TCP Header Flags"""
 
     #: Value limit checker. The registry indexes *bit offsets* 4 through 15,
-    #: but the members it generates are ``1 << offset``, so the value domain a
-    #: lookup has to accept is the 16-bit field those bits live in -- a
+    #: counted from the most significant end of the 16-bit Data Offset/flags
+    #: word, and the members it generates are their wire masks,
+    #: ``1 << (15 - offset)`` (:issue:`2310`). So the value domain a lookup has
+    #: to accept is the low 12 bits of that word, the flags field -- a
     #: composite such as ``SYN | ACK`` is a legitimate value and only the
     #: composite path reaches :meth:`~pcapkit.const.tcp.flags.Flags._missing_`.
-    FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFF'
+    FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFF'
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/tcp-parameters/tcp-header-flags.csv'
 
@@ -146,7 +148,10 @@ class Flags(Vendor):
             name = DATA.get(int(code), dscp.split(' (')[0]).replace('Reserved for future use', 'Reserved')
             renm = self.rename(name or 'Unassigned', code, original=dscp)
 
-            pres = f"{renm} = 1 << {code}"
+            # NOTE: IANA numbers the bits from the most significant end of the
+            # 16-bit Data Offset/flags word, so the wire mask of offset ``n`` is
+            # ``1 << (15 - n)`` -- FIN, at offset 15, is the low bit (#2310).
+            pres = f"{renm} = 1 << {15 - int(code)}"
             sufs = f'#: {desc}'
 
             # if len(pres) > 74:

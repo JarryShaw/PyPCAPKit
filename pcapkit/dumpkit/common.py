@@ -220,16 +220,18 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         plausible member name, so a consumer splitting the rendering on ``::``
         cannot tell it from a member genuinely so named -- and ``NONE`` *is* a
         declared name elsewhere in the library. And the defect is not confined to
-        zero: ``Flags(1)``, ``Flags(8)`` and ``Flags(15)`` are every bit as
-        nameless, so a guard written against ``value == 0`` would fix one case
-        and leave the rest.
+        zero: a registry whose field has undeclared bits, such as
+        :class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`, is
+        every bit as nameless at ``1`` or ``8``, so a guard written against
+        ``value == 0`` would fix one case and leave the rest.
 
         The fallback is the value's own decimal spelling, which is what the
         enumeration libraries themselves already use for an undeclared residue:
-        ``Flags(2057).name`` is ``'ACK|9'``, naming the declared bit and giving
-        the leftovers as one number. A wholly-undeclared value is that same
-        rendering with no declared bit to precede it, so ``Flags(9)`` becomes
-        ``'Flags::9 [9]'`` and ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also
+        ``BindingUpdateFlag(32777).name`` is ``'A|9'``, naming the declared bit
+        and giving the leftovers as one number. A wholly-undeclared value is that
+        same rendering with no declared bit to precede it, so
+        ``BindingUpdateFlag(9)`` becomes ``'BindingUpdateFlag::9 [9]'`` and
+        ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also
         cannot be mistaken for a member name, since a Python identifier may not
         begin with a digit.
 

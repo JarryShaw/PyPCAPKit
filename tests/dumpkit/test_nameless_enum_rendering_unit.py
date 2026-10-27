@@ -31,8 +31,8 @@ class StdFlags(enum.IntFlag):
 
     """
 
-    ACK = 2048
-    SYN = 16384
+    ACK = 16
+    SYN = 2
 
 
 class AnnotatedFlags(enum.IntFlag):
@@ -85,10 +85,10 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     the literal four characters ``None`` into the name half.
 
     The fallback is the value's own decimal spelling -- ``'Flags::0 [0]'``,
-    ``'Flags::8 [8]'`` -- chosen for reasons these tests pin:
+    ``'BindingUpdateFlag::8 [8]'`` -- chosen for reasons these tests pin:
 
     * It is what the enumeration libraries themselves already use for an
-      undeclared residue. ``Flags(2057).name`` is ``'ACK|9'``, naming the
+      undeclared residue. ``BindingUpdateFlag(32777).name`` is ``'A|9'``, naming the
       declared bit and giving the leftovers as one decimal number; a
       wholly-undeclared value is that rendering with no declared bit in front.
     * It cannot be confused with a member name, because a Python identifier may
@@ -101,7 +101,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     The values probed are derived from each enumeration's own declared bits
     rather than written down, which is #702. A literal such as ``65536`` is
     ``0x10000`` -- one bit past the sixteen-bit field
-    :class:`~pcapkit.const.tcp.flags.Flags` bounds its
+    :class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag` bounds its
     :meth:`~enum.Enum._missing_` to. That guard is correct, so the probe has to
     respect it: a value the registry is right to refuse cannot also be a value
     the dumper renders. Every one of the library's flag registries carries such
@@ -121,20 +121,25 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         Covers the nameless zero *and* every non-zero nameless value the
         registry admits, because a fix that special-cased zero would pass on
-        ``Flags(0)`` alone and still emit ``'Flags::None [8]'`` in place of
-        ``'Flags::8 [8]'``.
+        ``registry(0)`` alone and still emit ``'BindingUpdateFlag::None [8]'``
+        in place of ``'BindingUpdateFlag::8 [8]'``.
+
+        :class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag` is the
+        :mod:`aenum` registry swept: :class:`~pcapkit.const.tcp.flags.Flags`
+        declares every bit of its field, so zero is its only nameless value
+        (#2310).
 
         Both libraries are swept from the same derivation, so this is still the
         demonstration that the rendering is not an :mod:`aenum` quirk -- stdlib
         :class:`enum.IntFlag` spells a wholly-undeclared value the same way.
 
         """
-        from pcapkit.const.tcp.flags import Flags
+        from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
         from pcapkit.dumpkit.common import make_dumper
 
         dumper = make_dumper(BaseDumper)()
 
-        for registry, library in ((Flags, 'aenum'), (StdFlags, 'enum')):
+        for registry, library in ((BindingUpdateFlag, 'aenum'), (StdFlags, 'enum')):
             values = _nameless_values(registry)
             # Without this the loop below could sweep nothing at all and still
             # report a pass, which is how a derived probe set rots silently
@@ -156,22 +161,23 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     def test_named_members_are_untouched(self) -> None:
         """The control. Only the name half of a *nameless* member gets the fallback.
 
-        ``Flags(2049)`` matters most here: its name is ``'ACK|1'``, so it needs
-        no fallback, and it is the precedent the fallback follows. If the guard
+        ``BindingUpdateFlag(32769)`` matters most here: its name is ``'A|1'``,
+        so it needs no fallback, and it is the precedent the fallback follows. If the guard
         were written as "compose the name from the value" rather than "use the
         value when there is no name", this is the assertion that would catch
         it.
 
         """
+        from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
         from pcapkit.const.tcp.flags import Flags
         from pcapkit.dumpkit.common import make_dumper
 
         dumper = make_dumper(BaseDumper)()
 
-        self.assertEqual(dumper.object_hook(Flags.ACK), 'Flags::ACK [2048]')
-        self.assertEqual(dumper.object_hook(Flags.SYN | Flags.ACK), 'Flags::ACK|SYN [18432]')
-        self.assertEqual(dumper.object_hook(Flags(2049)), 'Flags::ACK|1 [2049]')
-        self.assertEqual(dumper.object_hook(Flags(2057)), 'Flags::ACK|9 [2057]')
+        self.assertEqual(dumper.object_hook(Flags.ACK), 'Flags::ACK [16]')
+        self.assertEqual(dumper.object_hook(Flags.SYN | Flags.ACK), 'Flags::ACK|SYN [18]')
+        self.assertEqual(dumper.object_hook(BindingUpdateFlag(32769)), 'BindingUpdateFlag::A|1 [32769]')
+        self.assertEqual(dumper.object_hook(BindingUpdateFlag(32777)), 'BindingUpdateFlag::A|9 [32777]')
 
         # An explicitly declared zero keeps its declared name, which is the
         # clearest demonstration that the guard keys on the *name* and not on the
@@ -192,6 +198,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         bracketed half.
 
         """
+        from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
         from pcapkit.const.tcp.flags import Flags
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
         from pcapkit.dumpkit.common import make_dumper
@@ -200,15 +207,15 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         multidict = MultiDict()
         multidict.add(Flags(0), 'flagless')
-        multidict.add(Flags(8), 'undeclared-bit')
+        multidict.add(BindingUpdateFlag(8), 'undeclared-bit')
         multidict.add(Flags.ACK, 'acknowledged')
 
         converted = dumper.object_hook(multidict)
         self.assertEqual(converted['Flags::0 [0]'], ['flagless'])
-        self.assertEqual(converted['Flags::8 [8]'], ['undeclared-bit'])
-        self.assertEqual(converted['Flags::ACK [2048]'], ['acknowledged'])
+        self.assertEqual(converted['BindingUpdateFlag::8 [8]'], ['undeclared-bit'])
+        self.assertEqual(converted['Flags::ACK [16]'], ['acknowledged'])
         self.assertNotIn('Flags::None [0]', converted)
-        self.assertNotIn('Flags::None [8]', converted)
+        self.assertNotIn('BindingUpdateFlag::None [8]', converted)
 
         ordered = OrderedMultiDict()
         ordered.add(Flags(0), 'first')
@@ -306,8 +313,8 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         Every flag registry bounds its :meth:`~enum.Enum._missing_` to
         the width of its own field, and the widths differ: three bits for
         :class:`~pcapkit.const.ftp.command.CommandType`, eight for the other
-        Mobility Header flags, sixteen for ``BindingUpdateFlag`` and
-        :class:`~pcapkit.const.tcp.flags.Flags`. One literal therefore cannot
+        Mobility Header flags, twelve for :class:`~pcapkit.const.tcp.flags.Flags`
+        and sixteen for ``BindingUpdateFlag``. One literal therefore cannot
         mean "past the field" for all of them, which is the whole reason
         :func:`_field_mask` derives it per registry.
 
@@ -400,8 +407,8 @@ def _declared_bits(registry: 'FlagRegistry') -> int:
 
     Iteration over a flag enumeration yields the canonical single-bit members,
     skipping a zero member and any alias, which is what makes this the registry's
-    *declared bits* rather than a member count: ``Flags`` declares twelve members
-    from ``1 << 4`` upwards, so this is ``0xFFF0``.
+    *declared bits* rather than a member count: ``Flags`` declares every bit
+    of its 12-bit field, so this is ``0xFFF``.
 
     Args:
         registry: The flag enumeration to inspect.
@@ -422,7 +429,7 @@ def _field_mask(registry: 'FlagRegistry') -> int:
     Every flag registry in the library bounds its :meth:`~enum.Enum._missing_`
     to the field its declared bits live in, and for every one of them that bound
     is exactly the smallest all-ones mask covering every declared bit --
-    ``0xFFFF`` for ``Flags``' ``1 << 4 .. 1 << 15``, ``0xFF`` for the eight-bit
+    ``0xFFF`` for ``Flags``' ``1 << 0 .. 1 << 11``, ``0xFF`` for the eight-bit
     Mobility Header flags, ``0x07`` for the three-bit
     :class:`~pcapkit.const.ftp.command.CommandType`.
 
@@ -458,8 +465,7 @@ def _nameless_values(registry: 'FlagRegistry') -> 'tuple[int, ...]':
     multi-bit case, and it is the largest value the field admits with no declared
     bit in it, which is what a hand-written probe such as ``9``, or the
     out-of-range ``65536``, reaches for. Returning every subset would be exhaustive
-    and is not worth 8192 subtests for :class:`StdFlags`' thirteen undeclared
-    bits.
+    and is not worth a subtest per subset for a wide field with few declared bits.
 
     Nothing out of range is returned, which is #702: the values are all masked
     into the registry's own field, so a registry that legitimately refuses

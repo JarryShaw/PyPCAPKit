@@ -1607,8 +1607,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         segment rather than a number for a flagless one alone.
 
         The name half of that string is the value's own decimal spelling -- the same
-        spelling the enumeration library uses for an undeclared residue, as in
-        ``Flags(2049).name == 'ACK|1'`` -- because
+        spelling the enumeration library uses for an undeclared residue -- because
         :func:`~pcapkit.dumpkit.common.make_dumper`'s hook guards a nameless composite
         member rather than interpolating its ``o.name`` of ``None`` (#648).
 
@@ -1685,7 +1684,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         rendered = hook(None, proto.info.connection)
         self.assertEqual(rendered, 'Flags::0 [0]')
         self.assertNotIn('None', rendered)
-        self.assertEqual(hook(None, Enum_Flags.ACK), 'Flags::ACK [2048]')
+        self.assertEqual(hook(None, Enum_Flags.ACK), 'Flags::ACK [16]')
 
 
 if __name__ == '__main__':

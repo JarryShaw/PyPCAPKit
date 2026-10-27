@@ -201,25 +201,27 @@ class _PreConversionFlags(IntFlag):
     hand-copied ``get`` (omitted here -- irrelevant to ``_missing_``) and this
     ``_missing_``, copied verbatim. Kept inline rather than fetched from git
     history so :class:`TCPFlagsConversionTests` runs offline and the
-    comparison is exact rather than approximate.
+    comparison is exact rather than approximate. The member values and the
+    range check track the generated module's, wire masks in the 12-bit flags
+    field since #2310.
     """
 
-    Reserved_4 = 1 << 4
-    Reserved_5 = 1 << 5
-    Reserved_6 = 1 << 6
-    AE = 1 << 7
-    CWR = 1 << 8
-    ECE = 1 << 9
-    URG = 1 << 10
-    ACK = 1 << 11
-    PSH = 1 << 12
-    RST = 1 << 13
-    SYN = 1 << 14
-    FIN = 1 << 15
+    Reserved_4 = 1 << 11
+    Reserved_5 = 1 << 10
+    Reserved_6 = 1 << 9
+    AE = 1 << 8
+    CWR = 1 << 7
+    ECE = 1 << 6
+    URG = 1 << 5
+    ACK = 1 << 4
+    PSH = 1 << 3
+    RST = 1 << 2
+    SYN = 1 << 1
+    FIN = 1 << 0
 
     @classmethod
     def _missing_(cls, value: 'Any') -> 'Any':
-        if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
+        if not (isinstance(value, int) and 0 <= value <= 0xFFF):
             raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         return super()._missing_(value)
 
@@ -276,14 +278,14 @@ class TCPFlagsConversionTests(unittest.TestCase):
         :class:`~aenum.Flag` machinery exactly as it did when ``Flags``
         inherited from ``IntFlag`` directly. Swept rather than sampled at a
         few boundary values, across every declared member, every boundary of
-        the 16-bit field the range check bounds, and several composites,
+        the 12-bit field the range check bounds, and several composites,
         so a widened or narrowed range check would be caught here rather
         than only in the composite-specific tests in
         ``tests/const/test_const_enum_builtin_parity.py``.
         """
         from pcapkit.const.tcp.flags import Flags
 
-        probes = [0, 1, 0xF, 0x10, 0xFFFF, 0x10000, -1, -0x10000,
+        probes = [0, 1, 0xF, 0x10, 0xFFF, 0x1000, 0xFFFF, 0x10000, -1, -0x1000,
                   1 << 70, 0xFFF0]
         for member in _PreConversionFlags:
             probes.append(int(member))

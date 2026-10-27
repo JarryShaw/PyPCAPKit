@@ -543,7 +543,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
     ``FLAG = 'isinstance(value, int) and 4 <= value <= 15'`` checker in
     :mod:`pcapkit.vendor.tcp.flags` would have done had the template ever
     interpolated it: those are *bit offsets*, and the values they generate are
-    ``1 << offset``.
+    the wire masks ``1 << (15 - offset)`` (#2310).
     """
 
     def setUp(self) -> None:
@@ -565,18 +565,15 @@ class ConstFlagCompositeTests(unittest.TestCase):
         every = 0
         for member in Flags:
             every |= int(member)
-        self.assertEqual(every, 0xFFF0)
+        self.assertEqual(every, 0xFFF)
         self.assertEqual(int(Flags(every)), every)
 
-        # One past the 16-bit field the registry indexes bits of.
-        for beyond in (0x10000, -1, -0x10000, UNRESOLVABLE):
+        # One past the 12-bit flags field, where the data offset begins, and
+        # the values outside any width.
+        for beyond in (0x1000, 0x10000, -1, -0x1000, UNRESOLVABLE):
             with self.subTest(value=beyond):
                 with self.assertRaises(ValueError):
                     Flags(beyond)
-
-        # An unassigned low bit is in range and still composes, rather than
-        # being rejected: bits 0-3 of that field are the data offset.
-        self.assertEqual(int(Flags(1)), 1)
 
     def test_the_other_flag_registry_composes(self) -> None:
         """``CommandType`` composes; ``TransportProtocol`` is not in this group.
@@ -717,11 +714,11 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         broken either would fail rather than merely go unmeasured.
 
         The fallback is probed with a two-part check: a *registered* default
-        (``1 << 14``, ``SYN``) is genuinely consulted and resolves, while
+        (``1 << 1``, ``SYN``) is genuinely consulted and resolves, while
         ``Flags.get(UNRESOLVABLE, 0)`` raises the same original-key error as
         no default at all. ``0`` is in-bounds for ``Flags``'s own
-        ``_missing_`` (``0 <= value <= 0xFFFF``), but it is not a *registered*
-        ``Flags`` member (``Flags``'s smallest declared value is ``1 << 4``),
+        ``_missing_`` (``0 <= value <= 0xFFF``), but it is not a *registered*
+        ``Flags`` member (``Flags``'s smallest declared value is ``1 << 0``),
         and GitHub issue #864 restricts ``default`` to a plain
         ``_value2member_map_`` lookup -- the same accepted cost as an
         unassigned integer range, here on an :class:`~aenum.IntFlag` registry
@@ -748,12 +745,12 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
 
         # Integer paths, which do.
         self.assertIs(TransportProtocol.get(1), TransportProtocol.tcp)
-        self.assertIs(Flags.get(1 << 14), Flags.SYN)
+        self.assertIs(Flags.get(1 << 1), Flags.SYN)
 
         # And the fallback the guard's ValueError is what triggers: GitHub issue
         # #584's ``get(key, default)``, which an EnumError would have walked past.
         # A registered default is genuinely consulted and resolves.
-        self.assertIs(Flags.get(UNRESOLVABLE, 1 << 14), Flags.SYN)
+        self.assertIs(Flags.get(UNRESOLVABLE, 1 << 1), Flags.SYN)
         # ``0`` is not a registered ``Flags`` member (GitHub issue #864), so
         # it does not resolve either -- the original key's error propagates,
         # the same as omitting the default outright.
@@ -1227,26 +1224,30 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         """The template's checker, and why a bit-offset one could not be kept.
 
         A ``Flags.FLAG`` of ``4 <= value <= 15`` covers the *offsets* the IANA
-        registry indexes, while the members it generates are ``1 << offset``.
-        The template never interpolated it, so it was never wrong in practice;
-        interpolating it unchanged would have rejected every composite, every
-        single member above bit 3, and ``Flags(0)``.
+        registry indexes, while the members it generates are their wire masks,
+        ``1 << (15 - offset)`` (#2310). The template never interpolated it, so
+        it was never wrong in practice; interpolating it unchanged would have
+        rejected ``FIN``, ``SYN``, every member from ``ACK`` up, most
+        composites, and ``Flags(0)``.
         """
         from pcapkit.vendor.tcp.flags import Flags as VendorFlags
 
         checker = VendorFlags.FLAG
-        self.assertIn('0xFFFF', checker)
+        self.assertRegex(checker, r'<= 0xFFF$')
 
         from pcapkit.const.tcp.flags import Flags
 
+        old = 'isinstance(value, int) and 4 <= value <= 15'
         for member in Flags:
             value = int(member)
             with self.subTest(member=member.name):
                 self.assertTrue(eval(checker, {'value': value}),  # pylint: disable=eval-used
                                 f'the checker rejects its own member {member.name}={value}')
-                self.assertFalse(eval('isinstance(value, int) and 4 <= value <= 15',
-                                      {'value': value}),  # pylint: disable=eval-used
-                                 f'the old checker accepted {member.name}={value}')
+        for value in (0, int(Flags.FIN), int(Flags.SYN | Flags.ACK), int(Flags.CWR)):
+            with self.subTest(value=hex(value)):
+                self.assertTrue(eval(checker, {'value': value}))  # pylint: disable=eval-used
+                self.assertFalse(eval(old, {'value': value}),  # pylint: disable=eval-used
+                                 f'the old checker accepted {value:#x}')
 
     def test_self_check_of_the_repr_percent_format_walk(self) -> None:
         """:func:`percent_format_lines_in_repr` against its own fixtures.
