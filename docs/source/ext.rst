@@ -74,7 +74,7 @@ The protocol classes :mod:`pcapkit` ships:
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp.FTP`                                      |
 +                                                                  + FTP Family     +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.application.ftp.FTP_DATA`                                 |
+|                                                                  |                | :class:`pcapkit.protocols.application.ftp_data.FTP_DATA`                            |
 + Application Layer                                                +----------------+-----------------------+-------------------------------------------------------------+
 | (:class:`~pcapkit.protocols.application.application.Application` |                | :class:`pcapkit.protocols.application.http.HTTP`                                    |
 + subclasses)                                                      +                +-----------------------+-------------------------------------------------------------+

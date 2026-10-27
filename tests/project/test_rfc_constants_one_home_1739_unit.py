@@ -291,7 +291,7 @@ NOT_A_COPY = {
     ('pcapkit/protocols/transport/tcp.py', 'bytes(20)'):
         'an MP_JOIN SYN/ACK HMAC default of 20 octets',
     ('pcapkit/protocols/transport/tcp.py',
-     "{20: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP_DATA')}"):
+     "{20: ModuleDescriptor('pcapkit.protocols.application.ftp_data', 'FTP_DATA')}"):
         'the FTP data port, not the minimum header length',
     ('pcapkit/protocols/transport/tcp.py', 'schema.length not in (4, 12, 20, 22, 24)'):
         'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',

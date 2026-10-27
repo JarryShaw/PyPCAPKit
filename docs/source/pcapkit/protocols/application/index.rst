@@ -18,6 +18,7 @@ function rather than encapsulation, see
    httpv1
    httpv2
    ftp
+   ftp_data
    ngap
    ospf
    rarp

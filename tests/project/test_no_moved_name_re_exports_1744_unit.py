@@ -54,6 +54,7 @@ PURE = (
     ('pcapkit.foundation.reassembly.data', 'DeferredPacket'),
     ('pcapkit.foundation.reassembly.data.data', 'DeferredPacket'),
     ('pcapkit.foundation.traceflow.data.data', 'DeferredPacket'),
+    ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
     ('pcapkit.protocols.application.ngap', 'ProcedureCode'),
     ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
@@ -80,6 +81,9 @@ SHIPPED = (
      'pcapkit/corekit/fields/field.py', 'pcapkit/corekit/fields/field.rst'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp',
      'pcapkit/protocols/internet/mh.py', 'pcapkit/protocols/internet/mh.rst'),
+    ('pcapkit.protocols.application.ftp', 'FTP_DATA',
+     'pcapkit/protocols/application/ftp.py',
+     'pcapkit/protocols/application/ftp.rst'),
 )
 
 

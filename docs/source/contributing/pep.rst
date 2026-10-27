@@ -301,7 +301,7 @@ Some wanted only a table entry, because the dissector was already there:
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
   ``__index__`` raises on both, which is correct: neither is reached through a
   link-layer EtherType.
-* **Done.** :class:`~pcapkit.protocols.application.ftp.FTP_DATA` is bound at TCP
+* **Done.** :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA` is bound at TCP
   port 20 (IANA ``ftp-data``). It is a thin
   :class:`~pcapkit.protocols.misc.raw.Raw` subclass, so this buys the payload a
   *name* rather than a parse -- which is the right answer for a data channel
