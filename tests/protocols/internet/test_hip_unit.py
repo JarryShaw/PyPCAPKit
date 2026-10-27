@@ -640,7 +640,7 @@ class HIPUnitTests(unittest.TestCase):
         ).suite_id, (HITSuite.ECDSA_SHA_384,))
         self.assertEqual(proto._read_param_cert(
             hip_schema.CertParameter(type=Parameter.CERT, len=8,
-                                     cert_group=Group.NIST_P_256,
+                                     cert_group=7,
                                      cert_count=1, cert_id=2,
                                      cert_type=Certificate.X_509_v3,
                                      cert=b'cert'),
@@ -679,13 +679,21 @@ class HIPUnitTests(unittest.TestCase):
             options=options,
         ).opaque, b'us')
 
-        self.assertEqual(proto._read_param_reg_info(
+        # The octets are kept verbatim; the durations follow
+        # :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds, so the
+        # ``Max Lifetime`` octet 72 is two seconds (#2281).
+        reg_info = proto._read_param_reg_info(
             hip_schema.RegInfoParameter(type=Parameter.REG_INFO, len=3,
-                                        min_lifetime=1, max_lifetime=2,
+                                        min_lifetime=0, max_lifetime=72,
                                         reg_info=[Registration.RENDEZVOUS]),
             version=2,
             options=options,
-        ).lifetime.max, datetime.timedelta(seconds=2))
+        )
+        self.assertEqual(reg_info.lifetime.max, datetime.timedelta(seconds=2))
+        self.assertEqual(reg_info.lifetime.max_exponent, 72)
+        # Octet 0 is the RFC's own special zero-second value.
+        self.assertEqual(reg_info.lifetime.min, datetime.timedelta(0))
+        self.assertEqual(reg_info.lifetime.min_exponent, 0)
         self.assertEqual(proto._read_param_reg_request(
             hip_schema.RegRequestParameter(type=Parameter.REG_REQUEST, len=2,
                                            lifetime=3,
@@ -693,13 +701,16 @@ class HIPUnitTests(unittest.TestCase):
             version=2,
             options=options,
         ).reg_type, (Registration.RELAY_UDP_HIP,))
-        self.assertEqual(proto._read_param_reg_response(
+        # Octet 80 is ``2^((80 - 64)/8)`` = 4 seconds (#2281).
+        reg_response = proto._read_param_reg_response(
             hip_schema.RegResponseParameter(type=Parameter.REG_RESPONSE, len=2,
-                                            lifetime=4,
+                                            lifetime=80,
                                             reg_response=[Registration.RELAY_UDP_ESP]),
             version=2,
             options=options,
-        ).lifetime, datetime.timedelta(seconds=4))
+        )
+        self.assertEqual(reg_response.lifetime, datetime.timedelta(seconds=4))
+        self.assertEqual(reg_response.lifetime_exponent, 80)
         reg_failed = proto._read_param_reg_failed(
             hip_schema.RegFailedParameter(type=Parameter.REG_FAILED, len=2,
                                           failure_type=RegistrationFailure.Insufficient_resources,
@@ -810,11 +821,12 @@ class HIPUnitTests(unittest.TestCase):
             version=2,
             options=options,
         ).port, 10502)
+        # A hop count, not a duration (#2282).
         self.assertEqual(proto._read_param_overlay_ttl(
             hip_schema.OverlayTTLParameter(type=Parameter.OVERLAY_TTL, len=4, ttl=30),
             version=2,
             options=options,
-        ).ttl, datetime.timedelta(seconds=30))
+        ).ttl, 30)
         self.assertTrue(proto._read_param_route_via(
             hip_schema.RouteViaParameter(type=Parameter.ROUTE_VIA, len=20,
                                          flags={'symmetric': 1, 'must_follow': 0, 'reserved': 0},
@@ -1116,7 +1128,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_cert(
             Parameter.CERT,
             version=2,
-            cert_group=Group.NIST_P_256,
+            cert_group=7,
             cert_count=1,
             cert_id=2,
             cert_type=Certificate.X_509_v3,
@@ -1271,7 +1283,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_overlay_ttl(
             Parameter.OVERLAY_TTL,
             version=2,
-            ttl=datetime.timedelta(seconds=30),
+            ttl=30,
         ).ttl, 30)
         self.assertTrue(proto._make_param_route_via(
             Parameter.ROUTE_VIA,
@@ -1568,7 +1580,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_cert(
             Parameter.CERT,
             hip_data.CertParameter(type=Parameter.CERT, critical=False,
-                                   length=12, cert_group=Group.NIST_P_256,
+                                   length=12, cert_group=7,
                                    cert_count=1, cert_id=2,
                                    cert_type=Certificate.X_509_v3,
                                    cert=b'cert'),
@@ -1590,34 +1602,37 @@ class HIPUnitTests(unittest.TestCase):
             version=2,
         ).opaque, b'ers')
 
-        lifetime = hip_data.Lifetime(min=dt1, max=dt2)
+        # The exponent octets on the data model are what a rebuild writes back,
+        # not the decoded durations beside them (#2281).
+        lifetime = hip_data.Lifetime(min_exponent=64, max_exponent=72,
+                                     min=dt1, max=dt2)
         self.assertEqual(proto._make_param_reg_info(
             Parameter.REG_INFO,
             hip_data.RegInfoParameter(type=Parameter.REG_INFO, critical=False,
                                       length=8, lifetime=lifetime,
                                       reg_type=(Registration.RENDEZVOUS,)),
             version=2,
-        ).max_lifetime, 2)
+        ).max_lifetime, 72)
         self.assertEqual(proto._make_param_reg_info(Parameter.REG_INFO,
                                                     version=2).reg_info, [])
         self.assertEqual(proto._make_param_reg_request(
             Parameter.REG_REQUEST,
             hip_data.RegRequestParameter(type=Parameter.REG_REQUEST,
                                          critical=False, length=8,
-                                         lifetime=dt1,
+                                         lifetime_exponent=64, lifetime=dt1,
                                          reg_type=(Registration.RELAY_UDP_HIP,)),
             version=2,
-        ).lifetime, 1)
+        ).lifetime, 64)
         self.assertEqual(proto._make_param_reg_request(Parameter.REG_REQUEST,
                                                        version=2).reg_request, [])
         self.assertEqual(proto._make_param_reg_response(
             Parameter.REG_RESPONSE,
             hip_data.RegResponseParameter(type=Parameter.REG_RESPONSE,
                                           critical=False, length=8,
-                                          lifetime=dt1,
+                                          lifetime_exponent=64, lifetime=dt1,
                                           reg_type=(Registration.RELAY_UDP_ESP,)),
             version=2,
-        ).lifetime, 1)
+        ).lifetime, 64)
         self.assertEqual(proto._make_param_reg_response(Parameter.REG_RESPONSE,
                                                         version=2).reg_response, [])
         self.assertEqual(proto._make_param_reg_failed(
@@ -1692,13 +1707,15 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_transaction_id(
             Parameter.TRANSACTION_ID,
             hip_data.TransactionIDParameter(type=Parameter.TRANSACTION_ID,
-                                            critical=False, length=8, id=88),
+                                            critical=False, length=8, id=88,
+                                            id_len=4),
             version=2,
         ).id, 88)
         self.assertEqual(proto._make_param_overlay_id(
             Parameter.OVERLAY_ID,
             hip_data.OverlayIDParameter(type=Parameter.OVERLAY_ID,
-                                        critical=False, length=8, id=99),
+                                        critical=False, length=8, id=99,
+                                        id_len=4),
             version=2,
         ).id, 99)
         flags = hip_data.Flags(symmetric=True, must_follow=True, reserved=0)
@@ -1783,7 +1800,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_overlay_ttl(
             Parameter.OVERLAY_TTL,
             hip_data.OverlayTTLParameter(type=Parameter.OVERLAY_TTL,
-                                         critical=False, reserved=bytes(2), length=8, ttl=dt1),
+                                         critical=False, reserved=bytes(2), length=8, ttl=1),
             version=2,
         ).ttl, 1)
         self.assertTrue(proto._make_param_route_via(

@@ -1060,8 +1060,14 @@ class HITSuiteListParameter(Parameter, code=Enum_Parameter.HIT_SUITE_LIST):
 class CertParameter(Parameter, code=Enum_Parameter.CERT):
     """Header schema for HIP ``CERT`` parameters."""
 
-    #: Certificate group.
-    cert_group: 'Enum_Group' = EnumField(length=1, namespace=Enum_Group)
+    #: Certificate group -- the "Group ID grouping multiple related CERT
+    #: parameters" of :rfc:`8002#section-2`. A plain octet, not a registry
+    #: value: that section puts the CERT group namespace under local
+    #: management by the sending host, so there is nothing to look it up in.
+    #: It was an :class:`~pcapkit.corekit.fields.numbers.EnumField` over the
+    #: Diffie-Hellman group registry, which read a group of ``7`` back as the
+    #: curve name ``NIST_P_256``. See :issue:`2283`.
+    cert_group: 'int' = UInt8Field()
     #: Certificate count.
     cert_count: 'int' = UInt8Field()
     #: Certificate ID.
@@ -1074,7 +1080,7 @@ class CertParameter(Parameter, code=Enum_Parameter.CERT):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', cert_group: 'Enum_Group', cert_count: 'int',
+        def __init__(self, type: 'Enum_Parameter', len: 'int', cert_group: 'int', cert_count: 'int',
                      cert_id: 'int', cert_type: 'Enum_Certificate', cert: 'bytes') -> 'None': ...
 
 

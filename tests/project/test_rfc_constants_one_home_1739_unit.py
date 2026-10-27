@@ -353,7 +353,11 @@ UNRELATED = {
     'pcapkit/protocols/application/ospf.py': ((24, 65535), 'OSPF header length and field bounds'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
-    'pcapkit/protocols/internet/hip.py': ((6, 12, 16, 20, 32, 40), 'HIP parameter fields and sizes'),
+    'pcapkit/protocols/internet/hip.py': ((6, 12, 16, 20, 32, 40, 65535),
+                                          'HIP parameter fields and sizes; 65535 bounds the '
+                                          'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '
+                                          'may declare (#2271), as it does in the schema module, '
+                                          'and is not an IP total length'),
     'pcapkit/protocols/schema/internet/hip.py': ((12, 16, 20, 65535),
                                                 'HIP parameter fields, sizes and bit-fields'),
     'pcapkit/protocols/internet/hopopt.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),

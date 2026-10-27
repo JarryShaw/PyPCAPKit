@@ -1869,6 +1869,117 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return echo_request_signed
 
+    @staticmethod
+    def _read_registration_lifetime(octet: 'int') -> 'timedelta':
+        """Decode a registration ``Lifetime`` octet into a duration.
+
+        :rfc:`8003#section-4.1` encodes the registration lifetimes of
+        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the
+        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used
+        to request and grant cancellation, and any other value stands for
+        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds
+        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which
+        :class:`~datetime.timedelta` holds, so -- unlike
+        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is
+        never :obj:`None`.
+
+        Reading the octet as a count of seconds instead reported every duration
+        wrongly: an octet of ``64``, which is one second, read as 64 seconds.
+        See :issue:`2281`.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime.
+
+        """
+        if not octet:
+            return datetime.timedelta(0)
+        return datetime.timedelta(seconds=2 ** ((octet - 64) / 8))
+
+    @staticmethod
+    def _make_registration_lifetime(code: 'Enum_Parameter', version: 'int',
+                                    lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a registration ``Lifetime`` octet.
+
+        The inverse of :meth:`_read_registration_lifetime`, rounding down to the
+        nearest representable octet as :meth:`_make_puzzle_lifetime` does for
+        ``PUZZLE``. A duration of zero is the one exact case:
+        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is a negative duration, or encodes to
+                a value the one-octet field cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        if seconds < 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} is not a non-negative number of seconds')
+        # Zero is the RFC's own special case, so it is encoded rather than
+        # rejected -- which is where this parts company with
+        # ``_make_puzzle_lifetime``, whose field has no such value. Written as a
+        # truth test rather than ``== 0`` because ``seconds`` may be a float.
+        if not seconds:
+            return 0
+
+        octet = math.floor(math.log2(seconds) * 8 + 64)
+
+        # ``UInt8Field`` wraps rather than raising (``300`` packs as ``0x2c``), so
+        # an out-of-range lifetime would otherwise be written as some other
+        # valid-looking duration.
+        if not 1 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    def _make_lifetime_octet(self, code: 'Enum_Parameter', version: 'int',
+                             exponent: 'Optional[int]',
+                             lifetime: 'timedelta | int | float') -> 'int':
+        """Resolve a registration ``Lifetime`` octet from either input form.
+
+        An explicit ``exponent`` is the octet and wins, as a parsed parameter's
+        is; otherwise ``lifetime`` is a duration and
+        :meth:`_make_registration_lifetime` encodes it. Shared by the three
+        :rfc:`8003` makers, which between them carry four such octets.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            exponent: the ``Lifetime`` octet itself, if any
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded.
+
+        """
+        if exponent is None:
+            return self._make_registration_lifetime(code, version, lifetime)
+        if not 0 <= exponent <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{exponent} is outside the one-octet Lifetime field')
+        return exponent
+
     def _read_param_reg_info(self, schema: 'Schema_RegInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_INFO`` parameter.
@@ -1903,8 +2014,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
             lifetime=Data_Lifetime(
-                min=datetime.timedelta(seconds=schema.min_lifetime),
-                max=datetime.timedelta(seconds=schema.max_lifetime),
+                # The octets are the round-trip source; the durations are
+                # decoded from them per :rfc:`8003#section-4.1` (#2281).
+                min_exponent=schema.min_lifetime,
+                max_exponent=schema.max_lifetime,
+                min=self._read_registration_lifetime(schema.min_lifetime),
+                max=self._read_registration_lifetime(schema.max_lifetime),
             ),
             reg_type=tuple(schema.reg_info),
         )
@@ -1943,7 +2058,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
-            lifetime=datetime.timedelta(seconds=schema.lifetime),
+            lifetime_exponent=schema.lifetime,
+            lifetime=self._read_registration_lifetime(schema.lifetime),
             reg_type=tuple(schema.reg_request),
         )
         return reg_request
@@ -1981,7 +2097,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type=schema.type,
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
-            lifetime=datetime.timedelta(seconds=schema.lifetime),
+            lifetime_exponent=schema.lifetime,
+            lifetime=self._read_registration_lifetime(schema.lifetime),
             reg_type=tuple(schema.reg_response),
         )
         return reg_response
@@ -2346,6 +2463,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
             id=schema.id,
+            # Keep the declared width, which ``schema.id`` alone cannot carry
+            # and which ``length`` cannot recover: ``parameter_total_len``
+            # pads, so ``Length`` 1 through 4 all give 8 (#2271).
+            id_len=schema.len,
         )
         return transaction_id
 
@@ -2381,6 +2502,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
             id=schema.id,
+            # The declared width, for the reason ``_read_param_transaction_id``
+            # gives (#2271).
+            id_len=schema.len,
         )
         return overlay_id
 
@@ -2834,7 +2958,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=parameter_total_len(schema.len),
             reserved=schema.reserved,
-            ttl=datetime.timedelta(seconds=schema.ttl),
+            # A hop count, not a duration -- see ``OverlayTTLParameter.ttl``
+            # in :mod:`pcapkit.protocols.data.internet.hip` (#2282).
+            ttl=schema.ttl,
         )
         return overlay_ttl
 
@@ -3283,7 +3409,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         """
         def _make_locator(locator: 'Optional[Data_Locator]' = None, *,
                           traffic: 'int' = 0,
-                          type: 'int' = 0,
+                          type: 'Optional[int]' = None,
                           preferred: 'bool' = False,
                           reserved: 'int' = 0,
                           lifetime: 'timedelta | int' = 0,
@@ -3295,7 +3421,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Args:
                 locator: locator data
                 traffic: traffic type
-                type: locator type
+                type: locator type; derived from ``spi`` when not given --
+                    ``1`` with an ``spi``, ``0`` without
                 preferred: preferred flag
                 reserved: the 7 reserved high-order bits of the flags octet
                 lifetime: lifetime
@@ -3305,6 +3432,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
             Returns:
                 HIP locator schema.
+
+            Raises:
+                ProtocolError: If ``locator`` holds neither an
+                    :class:`~ipaddress.IPv6Address` nor a
+                    :class:`~pcapkit.protocols.data.internet.hip.LocatorData`,
+                    or if an explicit ``type`` contradicts ``spi``.
 
             """
             if locator is not None:
@@ -3337,6 +3470,21 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 # would give.
                 ip_val = parse_ip_address(
                     ip, f'HIPv{version}: [ParamNo {code}] invalid locator', version=6)
+
+                # ``Locator Type`` and the presence of an SPI are one fact
+                # written twice: :rfc:`8046#section-4.2` makes Type 0 a bare
+                # IPv6 address and Type 1 "the concatenation of an ESP SPI
+                # (first 32 bits) followed by an IPv6 address". ``Locator
+                # Length`` follows from the choice, and ``locator_value_selector``
+                # accepts only the two consistent pairs, so leaving ``type`` at
+                # a default of 0 while an ``spi`` set the length to 5 made the
+                # public ``spi=`` path raise (#2276). Deriving it keeps
+                # the caller from restating what ``spi`` already says.
+                if type is None:
+                    type = 0 if spi is None else 1
+                elif (type == 1) != (spi is not None):
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid locator type: '
+                                        f'{type!r} does not match spi {spi!r}')
 
                 if spi is None:
                     length = 4
@@ -3820,7 +3968,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: The parameter is **NOT** supported outside HIPv1.
+
         """
+        # ``HIP_TRANSFORM`` is :rfc:`5201#section-5.2.7` only -- :rfc:`7401`
+        # replaced it with ``HIP_CIPHER`` -- and the gate mirrors
+        # :meth:`_read_param_hip_transform`'s. Without it the maker built
+        # octets its own reader rejects (#2275), where
+        # :meth:`_make_param_hip_cipher` refuses the opposite mismatch.
+        if version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
         if param is not None:
             suite_id = cast('list[Enum_Suite]', param.suite_id)
         else:
@@ -4105,7 +4264,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 )
                 algorithm = Enum_HIAlgorithm.EdDSA
             else:
-                raise ProtocolError(f'[HIPv{version}] invalid curve: {hi_curve!r}')
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid curve: {hi_curve!r}')
         else:
             if isinstance(hi, Data_HostIdentity):
                 hi_len = 2 + len(hi.pubkey)
@@ -4128,7 +4287,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     )
                     algorithm = Enum_HIAlgorithm.EdDSA
                 else:
-                    raise ProtocolError(f'[HIPv{version}] invalid curve: {hi.curve!r}')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid curve: {hi.curve!r}')
             elif isinstance(hi, Schema_HostIdentity):
                 hi_len = 2 + len(hi.pub_key)
                 hi_data = hi
@@ -4197,10 +4356,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_cert(self, code: 'Enum_Parameter', param: 'Optional[Data_CertParameter]' = None, *,  # pylint: disable=unused-argument
                          version: 'int',
-                         cert_group: 'Enum_Group | StdlibEnum | AenumEnum | str | int' = Enum_Group.NIST_P_256,
-                         cert_group_default: 'Optional[int]' = None,
-                         cert_group_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         cert_group_reversed: 'bool' = False,
+                         cert_group: 'int' = 0,
                          cert_count: 'int' = 0,
                          cert_id: 'int' = 0,
                          cert_type: 'Enum_Certificate | StdlibEnum | AenumEnum | str | int' = Enum_Certificate.X_509_v3,
@@ -4215,10 +4371,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            cert_group: certificate group
-            cert_group_default: default certificate group
-            cert_group_namespace: certificate group namespace
-            cert_group_reversed: reverse certificate group namespace
+            cert_group: certificate group ID -- an arbitrary number, locally
+                managed by the sender per :rfc:`8002#section-2`
             cert_count: certificate count
             cert_id: certificate ID
             cert_type: certificate type
@@ -4231,6 +4385,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        .. versionchanged:: 1.5.0
+
+           ``cert_group`` is a plain :obj:`int` and defaults to ``0``; the
+           ``cert_group_default``, ``cert_group_namespace`` and
+           ``cert_group_reversed`` arguments are gone, since they existed only
+           to look the value up in the Diffie-Hellman group registry that
+           :rfc:`8002` does not define for it (:issue:`2283`).
+
         """
         if param is not None:
             group = param.cert_group
@@ -4239,8 +4401,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             type = param.cert_type
             cert = param.cert
         else:
-            group = self._make_index(cert_group, cert_group_default, namespace=cert_group_namespace,  # type: ignore[assignment]
-                                     reversed=cert_group_reversed, pack=False)
+            group = cert_group
             count = cert_count
             id = cert_id
             type = self._make_index(cert_type, cert_type_default, namespace=cert_type_namespace,  # type: ignore[assignment]
@@ -4328,8 +4489,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_reg_info(self, code: 'Enum_Parameter', param: 'Optional[Data_RegInfoParameter]' = None, *,  # pylint: disable=unused-argument
                              version: 'int',
-                             min_lifetime: 'int | timedelta' = 0,
-                             max_lifetime: 'int | timedelta' = 0xf,
+                             min_lifetime: 'timedelta | int | float' = 0,
+                             max_lifetime: 'timedelta | int | float' = 0xf,
+                             min_lifetime_exponent: 'Optional[int]' = None,
+                             max_lifetime_exponent: 'Optional[int]' = None,
                              reg_info: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
                              reg_info_default: 'Optional[int]' = None,
                              reg_info_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -4341,8 +4504,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            min_lifetime: minimum lifetime
-            max_lifetime: maximum lifetime
+            min_lifetime: minimum lifetime, encoded to the nearest lower
+                ``Min Lifetime`` octet; ignored when
+                ``min_lifetime_exponent`` is given
+            max_lifetime: maximum lifetime, encoded to the nearest lower
+                ``Max Lifetime`` octet; ignored when
+                ``max_lifetime_exponent`` is given
+            min_lifetime_exponent: the ``Min Lifetime`` octet itself,
+                ``lifetime`` in :rfc:`8003#section-4.1`'s
+                ``2^((lifetime - 64)/8)`` seconds
+            max_lifetime_exponent: the ``Max Lifetime`` octet itself
             reg_info: registration information list
             reg_info_default: default registration information
             reg_info_namespace: registration information namespace
@@ -4352,11 +4523,25 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If either exponent does not fit one octet, or either
+                lifetime cannot be encoded; see
+                ``_make_registration_lifetime``.
+
+        .. versionchanged:: 1.5.0
+
+           ``min_lifetime`` and ``max_lifetime`` are durations encoded per
+           :rfc:`8003#section-4.1` rather than octets written verbatim, and the
+           new ``min_lifetime_exponent`` and ``max_lifetime_exponent`` take the
+           octets directly (:issue:`2281`).
+
         """
         if param is not None:
             reg_type = cast('list[Enum_Registration]', param.reg_type)
-            min_lt = math.floor(param.lifetime.min.total_seconds())
-            max_lt = math.floor(param.lifetime.max.total_seconds())
+            if min_lifetime_exponent is None:
+                min_lifetime_exponent = param.lifetime.min_exponent
+            if max_lifetime_exponent is None:
+                max_lifetime_exponent = param.lifetime.max_exponent
         else:
             if reg_info is None:
                 reg_info = []
@@ -4366,8 +4551,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reg_type.append(self._make_index(reg, reg_info_default, namespace=reg_info_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_info_reversed, pack=False))
 
-            min_lt = min_lifetime if isinstance(min_lifetime, int) else math.floor(min_lifetime.total_seconds())
-            max_lt = max_lifetime if isinstance(max_lifetime, int) else math.floor(max_lifetime.total_seconds())
+        min_lt = self._make_lifetime_octet(code, version, min_lifetime_exponent, min_lifetime)
+        max_lt = self._make_lifetime_octet(code, version, max_lifetime_exponent, max_lifetime)
 
         return Schema_RegInfoParameter(
             type=code,
@@ -4379,7 +4564,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_reg_request(self, code: 'Enum_Parameter', param: 'Optional[Data_RegRequestParameter]' = None, *,  # pylint: disable=unused-argument
                                 version: 'int',
-                                lifetime: 'int | timedelta' = 0,
+                                lifetime: 'timedelta | int | float' = 0,
+                                lifetime_exponent: 'Optional[int]' = None,
                                 reg_request: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
                                 reg_request_default: 'Optional[int]' = None,
                                 reg_request_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -4391,7 +4577,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            lifetime: lifetime
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime``
+                octet; ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
+                :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
             reg_request: registration request list
             reg_request_default: default registration request
             reg_request_namespace: registration request namespace
@@ -4401,10 +4590,22 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded; see
+                ``_make_registration_lifetime``.
+
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is a duration encoded per :rfc:`8003#section-4.1`
+           rather than an octet written verbatim, and the new
+           ``lifetime_exponent`` takes the octet directly (:issue:`2281`).
+
         """
         if param is not None:
             reg_type = cast('list[Enum_Registration]', param.reg_type)
-            lt = math.floor(param.lifetime.total_seconds())
+            if lifetime_exponent is None:
+                lifetime_exponent = param.lifetime_exponent
         else:
             if reg_request is None:
                 reg_request = []
@@ -4414,7 +4615,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reg_type.append(self._make_index(reg, reg_request_default, namespace=reg_request_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_request_reversed, pack=False))
 
-            lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
+        lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
 
         return Schema_RegRequestParameter(
             type=code,
@@ -4425,7 +4626,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_reg_response(self, code: 'Enum_Parameter', param: 'Optional[Data_RegResponseParameter]' = None, *,  # pylint: disable=unused-argument
                                  version: 'int',
-                                 lifetime: 'int | timedelta' = 0,
+                                 lifetime: 'timedelta | int | float' = 0,
+                                 lifetime_exponent: 'Optional[int]' = None,
                                  reg_response: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
                                  reg_response_default: 'Optional[int]' = None,
                                  reg_response_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -4437,7 +4639,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            lifetime: lifetime
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime``
+                octet; ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
+                :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
             reg_response: registration response list
             reg_response_default: default registration response
             reg_response_namespace: registration response namespace
@@ -4447,10 +4652,22 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded; see
+                ``_make_registration_lifetime``.
+
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is a duration encoded per :rfc:`8003#section-4.1`
+           rather than an octet written verbatim, and the new
+           ``lifetime_exponent`` takes the octet directly (:issue:`2281`).
+
         """
         if param is not None:
             reg_type = cast('list[Enum_Registration]', param.reg_type)
-            lt = math.floor(param.lifetime.total_seconds())
+            if lifetime_exponent is None:
+                lifetime_exponent = param.lifetime_exponent
         else:
             if reg_response is None:
                 reg_response = []
@@ -4460,7 +4677,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reg_type.append(self._make_index(reg, reg_response_default, namespace=reg_response_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_response_reversed, pack=False))
 
-            lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
+        lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
 
         return Schema_RegResponseParameter(
             type=code,
@@ -4795,9 +5012,67 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             mic=mic,
         )
 
+    @staticmethod
+    def _make_identifier_width(code: 'Enum_Parameter', version: 'int',
+                               id_len: 'Optional[int]', identifier: 'int') -> 'int':
+        """Resolve the on-wire width of an opaque ``Identifier`` field.
+
+        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
+        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of
+        the Identifier, in octets" over an otherwise opaque value, so the width
+        is a property of the identifier as issued and not of the number that
+        happens to be in it. It is resolved here in that order of authority:
+
+        1. an explicit ``id_len`` argument, which is what a parsed parameter
+           carries on :attr:`TransactionIDParameter.id_len
+           <pcapkit.protocols.data.internet.hip.TransactionIDParameter.id_len>`;
+        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 2 can lose a leading zero octet, and it is the only case
+        where the width is genuinely unknowable -- a from-scratch build with
+        nothing declaring it. Using it unconditionally re-serialised a
+        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),
+        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``
+        against :issue:`653`.
+
+        A width of ``0`` is accepted rather than rejected: it is what case 2
+        yields for the default identifier of ``0``, and what a ``Length = 0``
+        parameter parses back to, so refusing it would fail callers that pass no
+        value at all.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            id_len: declared field width in octets, if any
+            identifier: the identifier that must fit
+
+        Returns:
+            The width of the ``Identifier`` field, in octets.
+
+        Raises:
+            ProtocolError: If the declared width is negative, too narrow for
+                ``identifier``, or beyond what the 2-octet ``Length`` field can
+                hold.
+
+        """
+        if id_len is None:
+            return math.ceil(identifier.bit_length() / 8)
+
+        # ``UInt16Field`` wraps rather than raising, so an out-of-range width
+        # would otherwise be written as some other valid-looking ``Length``.
+        if not 0 <= id_len <= 0xFFFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
+                                f'{id_len} is outside the two-octet Length field')
+        if identifier.bit_length() > id_len * 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
+                                f'{id_len} octets cannot hold {identifier!r}')
+        return id_len
+
     def _make_param_transaction_id(self, code: 'Enum_Parameter', param: 'Optional[Data_TransactionIDParameter]' = None, *,  # pylint: disable=unused-argument
                                    version: 'int',
                                    id: 'int' = 0,
+                                   id_len: 'Optional[int]' = None,
                                    **kwargs: 'Any') -> 'Schema_TransactionIDParameter':
         """Make HIP ``TRANSACTION_ID`` parameter.
 
@@ -4806,24 +5081,38 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             id: transaction ID
+            id_len: on-wire width of ``Identifier``, in octets; defaults to the
+                width ``param`` was parsed with, or to ``id``'s own bit length
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If the width of ``Identifier`` is invalid; see
+                ``_make_identifier_width``.
+
+        .. versionchanged:: 1.5.0
+
+           New ``id_len`` argument, so that an identifier with leading zero
+           octets rebuilds at the width it was read with (:issue:`2271`).
+
         """
         if param is not None:
             id = param.id
+            if id_len is None:
+                id_len = param.id_len
 
         return Schema_TransactionIDParameter(
             type=code,
-            len=math.ceil(id.bit_length() / 8),
+            len=self._make_identifier_width(code, version, id_len, id),
             id=id,
         )
 
     def _make_param_overlay_id(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayIDParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
                                id: 'int' = 0,
+                               id_len: 'Optional[int]' = None,
                                **kwargs: 'Any') -> 'Schema_OverlayIDParameter':
         """Make HIP ``OVERLAY_ID`` parameter.
 
@@ -4832,18 +5121,31 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             id: overlay ID
+            id_len: on-wire width of ``Identifier``, in octets; defaults to the
+                width ``param`` was parsed with, or to ``id``'s own bit length
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If the width of ``Identifier`` is invalid; see
+                ``_make_identifier_width``.
+
+        .. versionchanged:: 1.5.0
+
+           New ``id_len`` argument, so that an identifier with leading zero
+           octets rebuilds at the width it was read with (:issue:`2271`).
+
         """
         if param is not None:
             id = param.id
+            if id_len is None:
+                id_len = param.id_len
 
         return Schema_OverlayIDParameter(
             type=code,
-            len=math.ceil(id.bit_length() / 8),
+            len=self._make_identifier_width(code, version, id_len, id),
             id=id,
         )
 
@@ -5220,7 +5522,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayTTLParameter]' = None, *,  # pylint: disable=unused-argument
                                 version: 'int',
-                                ttl: 'int | timedelta' = 0,
+                                ttl: 'int' = 0,
                                 reserved: 'bytes' = b'\x00\x00',
                                 **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
         """Make HIP ``OVERLAY_TTL`` parameter.
@@ -5229,7 +5531,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            ttl: overlay time-to-live (TTL) value
+            ttl: overlay time-to-live (TTL), as a count of remaining overlay
+                hops rather than a duration -- see
+                :attr:`OverlayTTLParameter.ttl
+                <pcapkit.protocols.data.internet.hip.OverlayTTLParameter.ttl>`
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
@@ -5237,12 +5542,17 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        .. versionchanged:: 1.5.0
+
+           ``ttl`` is a hop count rather than a duration, and no longer accepts
+           a :class:`~datetime.timedelta` (:issue:`2282`).
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
-            ttl_val = math.floor(param.ttl.total_seconds())
+            ttl_val = param.ttl
         else:
-            ttl_val = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+            ttl_val = ttl
 
         return Schema_OverlayTTLParameter(
             reserved=reserved,
