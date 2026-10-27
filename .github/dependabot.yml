@@ -26,3 +26,7 @@ updates:
     directory: "/" # Dependabot reads .github/workflows from the repository root
     schedule:
       interval: "weekly"
+    groups: # codeql-action now refuses to run unless every step in a workflow
+      codeql-action: # (init, autobuild, analyze) is on the same version (#2384-#2386)
+        patterns:
+          - "github/codeql-action/*"

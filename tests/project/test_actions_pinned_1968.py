@@ -16,6 +16,9 @@ are not actions fetched by tag, so they are left alone.
   composite action under :file:`.github`, since YAML drops the comment.
 * :class:`TestDependabotUpdatesTheActions` checks :file:`.github/dependabot.yml`
   watches the ``github-actions`` ecosystem from the repository root.
+* :class:`TestDependabotGroupsTheCodeQLSteps` checks that entry groups the
+  ``github/codeql-action`` steps, which refuse to run at mixed versions
+  (#2384-#2386), and groups nothing else.
 * :class:`TestDependabotCoversEveryManifest` checks the owner's ruling on #1968:
   ``pip`` over the root, :file:`docs` and :file:`examples/benchmark`, and
   neither :file:`conda` nor a ``docker`` entry, as Dependabot cannot update
@@ -62,6 +65,12 @@ DEPENDABOT = ROOT / '.github' / 'dependabot.yml'
 PYUP = ROOT / '.pyup.yml'
 #: The directories the ``pip`` entry watches, in the owner's ruling on #1968.
 PIP_DIRECTORIES = ['/', '/docs', '/examples/benchmark']
+#: The ecosystem whose dependencies are the ``uses:`` references.
+ACTIONS = 'github-actions'
+#: The group holding the CodeQL Action's steps (#2384-#2386), under that ecosystem.
+CODEQL_GROUP = 'codeql-action'
+#: The action whose steps that group holds, without the step's sub-path.
+CODEQL = 'github/codeql-action'
 
 
 def updates() -> 'dict[str, dict[str, Any]]':
@@ -81,6 +90,45 @@ def files() -> 'list[pathlib.Path]':
     for name in ('action.yml', 'action.yaml'):
         found.extend(sorted((ROOT / '.github').rglob(name)))
     return found
+
+
+def groups(ecosystem: 'str') -> 'dict[str, Any]':
+    """The ``groups`` an entry declares, by group name, empty where it declares none."""
+    return updates()[ecosystem].get('groups') or {}
+
+
+def references() -> 'set[str]':
+    """Every non-local action a ``uses:`` under :file:`.github` names, without its commit.
+
+    These are the dependency names Dependabot's ``github-actions`` ecosystem
+    matches a group's ``patterns`` against, the step's sub-path included:
+    ``github/codeql-action/init`` rather than ``github/codeql-action``.
+
+    """
+    found = set()
+    for path in files():
+        for match in USES.finditer(path.read_text(encoding='utf-8')):
+            ref = match['ref'].strip('\'"')
+            if not ref.startswith(('./', 'docker://')):
+                found.add(ref.partition('@')[0])
+    return found
+
+
+def grouped(name: 'str', patterns: 'list[str]') -> 'list[str]':
+    """Which of ``patterns`` claim the dependency ``name``.
+
+    dependabot-core matches a group's pattern with ``WildcardMatcher.match?``,
+    which folds case on both sides and turns each ``*`` into ``.*``, treating
+    every other character -- ``?`` and ``[...]`` included -- as literal:
+    ``github/codeql-action/*`` claims ``github/codeql-action/init`` and a bare
+    ``*`` claims every action in the tree, but ``github/codeql-action/[a-z]*``
+    claims nothing, since dependabot-core reads the brackets as a literal
+    substring rather than a character class.
+
+    """
+    return [pattern for pattern in patterns
+            if re.fullmatch('.*'.join(re.escape(part) for part in pattern.lower().split('*')),
+                            name.lower(), re.S)]
 
 
 def unpinned(text: 'str') -> 'list[str]':
@@ -157,6 +205,64 @@ class TestDependabotUpdatesTheActions(unittest.TestCase):
         self.assertRegex(entry.group(0), r'(?m)^\s*directory:\s*"/"')  # type: ignore[union-attr]
         self.assertRegex(entry.group(0), r'(?m)^\s*interval:\s*"\w+"')  # type: ignore[union-attr]
 
+
+class TestDependabotGroupsTheCodeQLSteps(unittest.TestCase):
+    """The ``github/codeql-action`` steps bump in one pull request (#2384-#2386).
+
+    ``Initialize CodeQL`` persists a configuration tagged with the version that
+    wrote it, and a later step of the action refuses to read one a different
+    version wrote: ``Loaded a configuration file for version '4.39.0', but
+    running version '4.39.1'.`` So an ungrouped bump of a single step leaves the
+    ``Analyze`` job red whichever step moved -- measured on #2384 and #2386,
+    where ``Autobuild`` refused and ``Perform CodeQL Analysis`` never ran, and on
+    #2385, where ``Perform CodeQL Analysis`` refused. The error says so itself:
+    *If you are using Dependabot to manage dependency updates, you can configure
+    a dependency group to update all* ``github/codeql-action`` *steps at the same
+    time.*
+
+    The group has to sit under ``github-actions``, since no other ecosystem sees
+    an action, and its patterns have to claim every step the workflows use and no
+    other action: a wider pattern batches unrelated bumps into the same pull
+    request, which is what reviewing one action at a time avoids.
+
+    """
+
+    def test_the_actions_entry_declares_the_group(self) -> None:
+        self.assertIn(CODEQL_GROUP, groups(ACTIONS))
+
+    def test_no_other_ecosystem_declares_it(self) -> None:
+        """``pip`` reads a manifest, never a ``uses:``, so a group there groups nothing."""
+        for ecosystem in updates():
+            if ecosystem != ACTIONS:
+                with self.subTest(ecosystem=ecosystem):
+                    self.assertNotIn(CODEQL_GROUP, groups(ecosystem))
+
+    def test_the_patterns_claim_every_step_the_workflows_use(self) -> None:
+        """A pattern that has gone stale, by a typo or by a step added beside it."""
+        patterns = groups(ACTIONS)[CODEQL_GROUP]['patterns']
+        steps = sorted(name for name in references() if name.startswith(f'{CODEQL}/'))
+        self.assertTrue(steps, f'no workflow uses {CODEQL}, so the group holds nothing')
+        for name in steps:
+            with self.subTest(action=name):
+                self.assertTrue(grouped(name, patterns))
+
+    def test_the_patterns_claim_nothing_else(self) -> None:
+        patterns = groups(ACTIONS)[CODEQL_GROUP]['patterns']
+        for name in sorted(references()):
+            if not name.startswith(f'{CODEQL}/'):
+                with self.subTest(action=name):
+                    self.assertEqual(grouped(name, patterns), [])
+
+    def test_every_step_is_pinned_to_one_release(self) -> None:
+        """What the group is there to keep true, read from the pins themselves."""
+        pins = {}
+        for path in files():
+            for match in _workflows.PINNED.finditer(path.read_text(encoding='utf-8')):
+                if match['action'].startswith(f'{CODEQL}/'):
+                    pins[match['action']] = (match['sha'], match['version'])
+        self.assertEqual(sorted(pins), sorted(name for name in references()
+                                              if name.startswith(f'{CODEQL}/')))
+        self.assertEqual(len(set(pins.values())), 1, f'the steps disagree on a release: {pins}')
 
 
 class TestDependabotCoversEveryManifest(unittest.TestCase):
