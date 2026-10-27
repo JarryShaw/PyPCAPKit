@@ -675,6 +675,8 @@ flow label itself.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
 </pre></div>
 </div>
+<p>On an IPv6 flow every <code class="docutils literal notranslate"><span class="pre">:</span></code> in it is replaced by <code class="docutils literal notranslate"><span class="pre">.</span></code>, since a
+Windows file name cannot carry one.</p>
 <p>It is built from the packet that <strong>opened</strong> the flow, not from the
 canonical buffer ID, so the label names the initiator first. The
 reverse half of a bidirectional
@@ -831,7 +833,7 @@ returned unchanged.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Whether a teardown was observed – a <strong>FIN from both endpoints</strong>, the
 polite close of <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a>, or a <strong>RST</strong> from either, the
-abrupt one of <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.2"><strong>RFC 9293 Section 3.5.2</strong></a>.</p>
+abrupt one of <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.3"><strong>RFC 9293 Section 3.5.3</strong></a>.</p>
 </dd>
 </dl>
 <p>This is not the same as “nothing more will arrive on these endpoints”: the
@@ -848,7 +850,7 @@ SYN-ACK, which is a question the flag alone cannot answer.</p>
 <dt id="term-trace.tcp.packet">trace.tcp.packet<a class="headerlink" href="#term-trace.tcp.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong>
 (<a class="reference internal" href="traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.dump" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.dump</span></code></a>)
 is as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tract_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trace_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
     <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                     <span class="c1"># data link type from global header</span>
     <span class="n">index</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                <span class="c1"># frame number</span>
     <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>                       <span class="c1"># extracted frame info</span>
@@ -864,7 +866,8 @@ is as follows:</p>
     <span class="n">dst</span><span class="o">=</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                             <span class="c1"># destination IP</span>
     <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                    <span class="c1"># TCP source port</span>
     <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                    <span class="c1"># TCP destination port</span>
-    <span class="n">timestamp</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">,</span>        <span class="c1"># frame timestamp</span>
+    <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>             <span class="c1"># frame timestamp</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1018,7 +1021,7 @@ interface the packet was captured on.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.rst">
 <span class="sig-name descname"><span class="pre">rst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.rst" title="Link to this definition">¶</a></dt>
 <dd><p>TCP reset (RST) flag. A connection can end abruptly as well as politely
-(<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.2"><strong>RFC 9293 Section 3.5.2</strong></a>), and the tracer cannot notice that unless the
+(<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.3"><strong>RFC 9293 Section 3.5.3</strong></a>), and the tracer cannot notice that unless the
 flag reaches it, otherwise a reset connection looks merely idle and a later
 connection reusing the same endpoints merges into it.</p>
 </dd></dl>
@@ -1170,7 +1173,7 @@ and the final acknowledgement out of the flow.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.reset" title="Link to this definition">¶</a></dt>
 <dd><p>Whether a TCP <strong>RST</strong> has been seen on this flow. A reset ends the
-connection at once (<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.2"><strong>RFC 9293 Section 3.5.2</strong></a>), where a polite close needs
+connection at once (<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.5.3"><strong>RFC 9293 Section 3.5.3</strong></a>), where a polite close needs
 a FIN from each side, so it is tracked as a flag rather than per endpoint.</p>
 </dd></dl>
 

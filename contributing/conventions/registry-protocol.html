@@ -917,13 +917,12 @@ sensitive”</em>, then defers to <em>“the definitions of specific labels”</
 RFC 5797 §2 above is. Note also that the §2 sentence is wrapped across a
 line break in the RFC’s text file, at <code class="docutils literal notranslate"><span class="pre">case-</span></code> / <code class="docutils literal notranslate"><span class="pre">insensitive</span></code>, so a
 line-oriented grep for the phrase finds nothing.</p></td>
-<td><p><strong>case-insensitive</strong> – was a defect; <code class="docutils literal notranslate"><span class="pre">get</span></code> folds</p></td>
+<td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code> folds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>)</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></p></td>
 <td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
 <td><p><em>“The method token is case-sensitive.”</em> Explicitly the opposite of limb 1.</p></td>
-<td><p><strong>case-sensitive</strong> – was a defect, fixed by
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
+<td><p><strong>case-sensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code> does not fold (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>

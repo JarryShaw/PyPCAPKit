@@ -759,9 +759,10 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, or is</span>
-<span class="sd">                :obj:`bytes` that are not exactly 8 octets long; or if</span>
-<span class="sd">                ``packet_length`` is not an :obj:`int` in ``0..65535``.</span>
+<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, is</span>
+<span class="sd">                :obj:`bytes` that are not exactly 8 octets long, or is a</span>
+<span class="sd">                :obj:`dict` missing a required key; or if ``packet_length``</span>
+<span class="sd">                is not an :obj:`int` in ``0..65535``.</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
@@ -959,8 +960,9 @@
 <span class="sd">            Authentication schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, or is</span>
-<span class="sd">                :obj:`bytes` that are not exactly 8 octets long.</span>
+<span class="sd">            ProtocolError: If ``auth_data`` is of an invalid type, is</span>
+<span class="sd">                :obj:`bytes` that are not exactly 8 octets long, or is a</span>
+<span class="sd">                :obj:`dict` missing a required key.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">):</span>

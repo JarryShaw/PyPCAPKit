@@ -694,8 +694,9 @@
 <span class="sd">    Used by the ``reg_request``, ``reg_response`` and ``reg_failed`` fields of</span>
 <span class="sd">    :class:`RegRequestParameter`, :class:`RegResponseParameter` and</span>
 <span class="sd">    :class:`RegFailedParameter` respectively, each of which follows a single</span>
-<span class="sd">    ``lifetime`` octet with a list of registration type octets sized by the</span>
-<span class="sd">    remainder of the parameter.</span>
+<span class="sd">    prefix octet (the ``lifetime`` of the first two, the ``failure_type`` of</span>
+<span class="sd">    the last) with a list of registration type octets sized by the remainder</span>
+<span class="sd">    of the parameter.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pkt: Parameter unpacked schema.</span>
@@ -705,7 +706,7 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FieldValueError: If the parameter's ``Length`` on the wire is too</span>
-<span class="sd">            short to hold the ``lifetime`` octet already read, which would</span>
+<span class="sd">            short to hold the prefix octet already read, which would</span>
 <span class="sd">            otherwise underflow the list length below zero.</span>
 
 <span class="sd">    """</span>
@@ -756,8 +757,7 @@
 <span class="sd">    two-octet ``reserved`` or ``port`` field with a list of items sized by</span>
 <span class="sd">    the remainder of the parameter.</span>
 
-<span class="sd">    :class:`TransportFormatListParameter` looks like another call site --</span>
-<span class="sd">    same ``pkt['len'] - 2`` expression -- but is not: see</span>
+<span class="sd">    :class:`TransportFormatListParameter` is not a call site: see</span>
 <span class="sd">    :func:`transport_format_list_len` for why it has no such prefix to</span>
 <span class="sd">    subtract.</span>
 
@@ -1082,9 +1082,10 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Reserved, "zero when sent, ignored when received" (:rfc:`7402#section-5.1.1`).</span>
-    <span class="c1">#: Read as a value rather than as padding, so that re-serialising a parsed</span>
-    <span class="c1">#: parameter reproduces the octets it arrived with.</span>
+    <span class="c1">#: Reserved. :rfc:`7402#section-5.1.1` draws it in the diagram but gives</span>
+    <span class="c1">#: it no description in the field list that follows. Read as a value rather</span>
+    <span class="c1">#: than as padding, so that re-serialising a parsed parameter reproduces the</span>
+    <span class="c1">#: octets it arrived with.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Key management index.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -1201,11 +1202,11 @@
     <span class="c1">#: ``field.length`` octets off the stream and hands only those to</span>
     <span class="c1">#: :meth:`ListField.unpack</span>
     <span class="c1">#: &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;`, so a ``Length``</span>
-    <span class="c1">#: in locator units would offer a set of *n* plain IPv6 locators ``4n``</span>
-    <span class="c1">#: octets of a ``24n``-octet contents, parse one truncated locator and leave</span>
-    <span class="c1">#: the rest of the record unconsumed. With ``Length`` a byte count the</span>
-    <span class="c1">#: budget is the contents, and each locator bills the 8 + ``Locator</span>
-    <span class="c1">#: Length`` * 4 octets it actually consumed.</span>
+    <span class="c1">#: summed from the locators' ``Locator Length`` values would offer a set</span>
+    <span class="c1">#: of *n* plain IPv6 locators ``4n`` octets of a ``24n``-octet contents,</span>
+    <span class="c1">#: parse one truncated locator and leave the rest of the record unconsumed.</span>
+    <span class="c1">#: With ``Length`` a byte count the budget is the contents, and each locator</span>
+    <span class="c1">#: bills the 8 + ``Locator Length`` * 4 octets it actually consumed.</span>
     <span class="n">locators</span><span class="p">:</span> <span class="s1">'list[Locator]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">],</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">Locator</span><span class="p">),</span>
@@ -1222,8 +1223,8 @@
     <span class="c1">#: overwrites it before ``padding`` is reached.</span>
     <span class="c1">#:</span>
     <span class="c1">#: The shadowed ``len`` is 4 for any IPv6 locator, so a padding read off</span>
-    <span class="c1">#: ``pkt['len']`` directly would append exactly four octets whatever the</span>
-    <span class="c1">#: locator count.</span>
+    <span class="c1">#: ``pkt['len']`` directly would append no padding at all whatever the</span>
+    <span class="c1">#: locator count, where a set of plain IPv6 locators needs four octets.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">locator_set_padding_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1288,7 +1289,8 @@
     <span class="c1">#: Reserved octet -- "zero when sent, ignored when received"</span>
     <span class="c1">#: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).</span>
     <span class="c1">#: This octet is *not* a lifetime: only ``PUZZLE`` carries one, at the same</span>
-    <span class="c1">#: offset, and only :rfc:`7401#section-5.2.4` defines the ``2^(value - 32)``</span>
+    <span class="c1">#: offset, and only the ``PUZZLE`` section (:rfc:`7401#section-5.2.4`, and</span>
+    <span class="c1">#: :rfc:`5201#section-5.2.4` identically) defines the ``2^(value - 32)``</span>
     <span class="c1">#: seconds encoding that goes in it.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Opaque data.</span>
@@ -1801,18 +1803,18 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RegFailedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">REG_FAILED</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for HIP ``REG_FAILED`` parameters."""</span>
 
-    <span class="c1">#: Lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Registration failure type.</span>
+    <span class="n">failure_type</span><span class="p">:</span> <span class="s1">'Enum_RegistrationFailure'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RegistrationFailure</span><span class="p">)</span>
     <span class="c1">#: Registration types.</span>
-    <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'list[Enum_RegistrationFailure]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+    <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'list[Enum_Registration]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="n">registration_type_list_len</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RegistrationFailure</span><span class="p">),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Registration</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">parameter_padding_len</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'list[Enum_RegistrationFailure]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">failure_type</span><span class="p">:</span> <span class="s1">'Enum_RegistrationFailure'</span><span class="p">,</span> <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'list[Enum_Registration]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

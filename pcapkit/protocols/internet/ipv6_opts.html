@@ -1432,6 +1432,10 @@ padding octets <em>after</em> the two octets of the option header</p></li>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> but <code class="docutils literal notranslate"><span class="pre">length</span></code> is not
+<code class="docutils literal notranslate"><span class="pre">0</span></code>; a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option is made instead.</p>
+</dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1594,6 +1598,10 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> – If a scale exceeds <code class="docutils literal notranslate"><span class="pre">255</span></code>, too large for its
+one-octet field.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -1624,6 +1632,10 @@ length of <code class="docutils literal notranslate"><span class="pre">tid</span
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed option schema; an unassigned option schema if <code class="docutils literal notranslate"><span class="pre">opt</span></code>
 is a Quick-Start option parsed as unassigned, see <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the QS function is neither a Quick-Start Request
+    nor a Report of Approved Rate.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2003,7 +2015,7 @@ so that a <code class="docutils literal notranslate"><span class="pre">Pad1</spa
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption.cmpt_len">
 <span class="sig-name descname"><span class="pre">cmpt_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">cmpt_len&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption.cmpt_len" title="Link to this definition">¶</a></dt>
-<dd><p>Compartment length.</p>
+<dd><p>Compartment length, in 32-bit words.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2044,7 +2056,7 @@ without consuming them, so that <a class="reference internal" href="#pcapkit.pro
 choose the schema which then reads the option properly. Its <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
 offsets are therefore bit offsets into the <em>option</em>, not into any one field
 of it: <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> is octet 1, i.e. bits 8 to 15, and the mode bit is
-the first bit of octet 2 [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html#section-8.1"><strong>RFC 6621 Section 8.1</strong></a>].</p>
+the first bit of octet 2 [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html#section-6.1.1"><strong>RFC 6621 Section 6.1.1</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts._SMFDPDOption.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDTestFlag" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDTestFlag"><span class="pre">SMFDPDTestFlag</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ForwardMatchField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts._SMFDPDOption.test" title="Link to this definition">¶</a></dt>
@@ -2547,7 +2559,7 @@ number that was received from the MPL Seed.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags.drop">
 <span class="sig-name descname"><span class="pre">drop</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags.drop" title="Link to this definition">¶</a></dt>
 <dd><p>Verification flag. <code class="docutils literal notranslate"><span class="pre">0</span></code> indicates that the MPL Option
-conforms to this specification.</p>
+conforms to <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7731.html"><strong>RFC 7731</strong></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2887,7 +2899,13 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.CALIPSOOption.cmpt_len">
 <span class="sig-name descname"><span class="pre">cmpt_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.CALIPSOOption.cmpt_len" title="Link to this definition">¶</a></dt>
-<dd><p>Compartment length.</p>
+<dd><p>four times the <code class="docutils literal notranslate"><span class="pre">Cmpt</span> <span class="pre">Length</span></code>
+field, which counts 32-bit words.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Compartment bitmap length, in octets</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2943,7 +2961,13 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.SMFIdentificationBasedDPDOption.tid_len">
 <span class="sig-name descname"><span class="pre">tid_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.SMFIdentificationBasedDPDOption.tid_len" title="Link to this definition">¶</a></dt>
-<dd><p>TaggerID length.</p>
+<dd><p>the TaggerID length in octets minus
+one, or <code class="docutils literal notranslate"><span class="pre">0</span></code> when there is no TaggerID [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html#section-6.1.1"><strong>RFC 6621 Section 6.1.1</strong></a>].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">TidLen</span></code> field as on the wire</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3034,7 +3058,7 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption.rate">
 <span class="sig-name descname"><span class="pre">rate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption.rate" title="Link to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">40</span> <span class="pre">*</span> <span class="pre">2</span> <span class="pre">**</span> <span class="pre">N</span></code> for the Rate Request or
-Rate Report field <code class="docutils literal notranslate"><span class="pre">N</span></code>, or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">N</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>
+Rate Report field <code class="docutils literal notranslate"><span class="pre">N</span></code>, or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">N</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> (<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>
 Section 3.1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -3131,7 +3155,7 @@ Section 3.1).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs">
 <span class="sig-name descname"><span class="pre">sub_tlvs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs" title="Link to this definition">¶</a></dt>
-<dd><p>Sub-TLVs [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
+<dd><p>Sub-TLVs [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
 </dd></dl>
 
 </dd></dl>

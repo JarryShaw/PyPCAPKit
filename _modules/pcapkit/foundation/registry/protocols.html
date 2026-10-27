@@ -1687,8 +1687,9 @@
 <span class="sd">            ``name``. A composite such as ``tcp | udp``, or its string form</span>
 <span class="sd">            ``'tcp|udp'``, names two and is refused for the same reason: one call</span>
 <span class="sd">            registers under one transport protocol.</span>
-<span class="sd">        pcapkit.utilities.exceptions.ProtocolError: Raised lazily, from</span>
+<span class="sd">        pcapkit.utilities.exceptions.ProtocolError: Raised from</span>
 <span class="sd">            :attr:`ModuleDescriptor.klass &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;`,</span>
+<span class="sd">            which the port-keyed registry resolves before storing the entry,</span>
 <span class="sd">            when ``module`` is a :class:`str` and either ``class_`` names no</span>
 <span class="sd">            attribute of it, or ``class_`` was never given at all -- the</span>
 <span class="sd">            latter distinguished from the former rather than reported as a</span>
@@ -2048,7 +2049,7 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__</span>
+<span class="c1"># NOTE: pcapkit.protocols.application.httpv2.HTTP.__frame__</span>
 <div class="viewcode-block" id="register_http_frame">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_http_frame">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'HTTP_Frame'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>

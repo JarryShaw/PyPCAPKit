@@ -591,8 +591,9 @@
 <span class="w">        </span><span class="sd">"""Engine name.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            This instance property is not what a class attribute lookup</span>
+<span class="sd">            reaches: on the class, the metaclass property of the same name</span>
+<span class="sd">            answers instead, with the same value.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__engine_name__'</span><span class="p">):</span>
@@ -604,8 +605,9 @@
 <span class="w">        </span><span class="sd">"""Engine module name.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            This instance property is not what a class attribute lookup</span>
+<span class="sd">            reaches: on the class, the metaclass property of the same name</span>
+<span class="sd">            answers instead, with the same value.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__engine_module__'</span><span class="p">):</span>

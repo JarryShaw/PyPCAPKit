@@ -33,6 +33,7 @@ and extracts parameters from a PCAP file.
    .. autoproperty:: reassembly
    .. autoproperty:: trace
    .. autoproperty:: engine
+   .. autoproperty:: magic_number
 
    .. automethod:: register_dumper
    .. automethod:: register_engine

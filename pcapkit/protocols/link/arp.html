@@ -704,10 +704,16 @@ not given.</p></li>
 <dd class="field-odd"><p>Constructed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If a packed hardware address is not <code class="docutils literal notranslate"><span class="pre">hlen</span></code> octets
-    long (with <code class="docutils literal notranslate"><span class="pre">hlen</span></code> not given and <code class="docutils literal notranslate"><span class="pre">htype</span></code> Ethernet, not 6
-    octets long), or a packed protocol address is not <code class="docutils literal notranslate"><span class="pre">plen</span></code>
-    octets long.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">spa</span></code> or <code class="docutils literal notranslate"><span class="pre">tpa</span></code> is rejected by
+    <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP._make_proto_resolve" title="pcapkit.protocols.link.arp.ARP._make_proto_resolve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_proto_resolve()</span></code></a>, e.g. a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">sha</span></code> or <code class="docutils literal notranslate"><span class="pre">tha</span></code> is rejected by
+    <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP._make_addr_resolve" title="pcapkit.protocols.link.arp.ARP._make_addr_resolve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_addr_resolve()</span></code></a>, or <code class="docutils literal notranslate"><span class="pre">spa</span></code> or <code class="docutils literal notranslate"><span class="pre">tpa</span></code> by
+    <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP._make_proto_resolve" title="pcapkit.protocols.link.arp.ARP._make_proto_resolve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_proto_resolve()</span></code></a>; if a packed hardware address is
+    not <code class="docutils literal notranslate"><span class="pre">hlen</span></code> octets long (with <code class="docutils literal notranslate"><span class="pre">hlen</span></code> not given and
+    <code class="docutils literal notranslate"><span class="pre">htype</span></code> Ethernet, not 6 octets long), or a packed protocol
+    address is not <code class="docutils literal notranslate"><span class="pre">plen</span></code> octets long.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -871,7 +877,7 @@ directly, because <a class="reference external" href="https://docs.python.org/3/
 either constructor accepts without complaint: <code class="docutils literal notranslate"><span class="pre">addr=True</span></code> would
 pack as <code class="docutils literal notranslate"><span class="pre">00000001</span></code> (IPv4) or <code class="docutils literal notranslate"><span class="pre">::1</span></code> (IPv6) with no exception and
 no warning.</p>
-<p>The description below uses <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#type.__name__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__class__.__name__</span></code></a> rather than <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.alias</span></code></a>, even though the
+<p>The messages are prefixed with <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#type.__name__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__class__.__name__</span></code></a> rather than <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.alias</span></code></a>, even though the
 latter is this project’s usual choice: <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP.alias" title="pcapkit.protocols.link.arp.ARP.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> here reads
 <code class="docutils literal notranslate"><span class="pre">self._acnm</span></code>, which <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP.read" title="pcapkit.protocols.link.arp.ARP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> only assigns once the operation
 code is known, and this method runs from <a class="reference internal" href="#pcapkit.protocols.link.arp.ARP.make" title="pcapkit.protocols.link.arp.ARP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> – before

@@ -137,7 +137,8 @@ Environment Variables
 
 .. envvar:: PCAPKIT_DEVMODE
 
-   If set to ``1``, :mod:`pcapkit` will run in development mode.
+   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
+   will run in development mode.
 
    .. seealso::
 
@@ -145,7 +146,8 @@ Environment Variables
 
 .. envvar:: PCAPKIT_VERBOSE
 
-   If set to ``1``, :mod:`pcapkit` will run with verbose output.
+   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
+   will run with verbose output.
 
    .. seealso::
 
@@ -153,8 +155,8 @@ Environment Variables
 
 .. envvar:: PCAPKIT_SPHINX
 
-   If set to ``1``, :mod:`pcapkit` will run with Sphinx additional
-   typing hints and docstrings support.
+   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
+   will run with Sphinx additional typing hints and docstrings support.
 
    .. seealso::
 

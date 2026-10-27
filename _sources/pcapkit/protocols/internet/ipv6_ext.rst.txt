@@ -8,10 +8,12 @@ IPv6-Ext - IPv6 Extension Header
 only, which plays a double role. It is the shared **base class** of every
 IPv6 extension header this package implements, supplying the
 ``extension``-mode contract: the guards that make
-:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload`,
-:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol` and
+:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload` and
 :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain`
-unavailable on a header parsed as part of an IPv6 chain. It also implements a
+unavailable on a header parsed as part of an IPv6 chain. Each subclass guards
+its own ``protocol`` the same way; this class's
+:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol` deliberately
+does not. It also implements a
 **generic** extractor for IPv6 extension headers [*]_, standing in whenever a
 header's own dedicated parser is unavailable or has failed. :rfc:`6564#section-4`
 requires, with an RFC 2119 **MUST**, that any IPv6 extension header defined since
@@ -157,20 +159,23 @@ left, then read only what is left. See
 :func:`pcapkit.protocols.schema.misc.pcapng.bounded_area` and
 :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
 
-This class follows that convention's *warning*
-(:class:`~pcapkit.utilities.warnings.SchemaWarning`) and deliberately diverges
-on the *action*. Clipping is right when the declared length only governs how
-much of the current object to read, since there is always a well-defined
-"what is left" to fall back to. Here the declared length also decides *where
-the next header starts*; a clipped skip distance points at whatever bytes
-end the buffer, which are not a header. Continuing from there would
-fabricate a layer and record a false entry in
+This class follows that convention's *warning* -- a
+:class:`~pcapkit.utilities.warnings.SchemaWarning`, as
+:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area` emits -- and
+deliberately diverges on the *action*. Clipping is right when the declared
+length only governs how much of the current object to read, since there is
+always a well-defined "what is left" to fall back to. Here the declared length
+also decides *where the next header starts*; a clipped skip distance points at
+whatever bytes end the buffer, which are not a header. Continuing from there
+would fabricate a layer and record a false entry in
 :class:`~pcapkit.corekit.protochain.ProtoChain`, which reads as a parsed fact
-rather than a guess. So :meth:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read` warns in the same
-wording as the sites above, then **stops the walk**: this instance absorbs
-every remaining octet and reports :data:`None` for ``next``, which the
-caller's loop already reads as "no more extension headers". The chain ends
-honestly at the bad header instead of inventing what follows it.
+rather than a guess. So :meth:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read`
+warns in the same form as
+:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area`, then **stops the
+walk**: this instance absorbs every remaining octet and reports :data:`None`
+for ``next``, which the caller's loop already reads as "no more extension
+headers". The chain ends honestly at the bad header instead of inventing what
+follows it.
 
 Header Schemas
 --------------

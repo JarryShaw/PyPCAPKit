@@ -768,12 +768,14 @@
 <span class="sd">    &lt;pcapkit.corekit.fields.strings._TextField.__call__&gt;` builds its</span>
 <span class="sd">    :mod:`struct` template as ``f'{length}s'`` unconditionally, so a negative</span>
 <span class="sd">    length becomes the format ``'-8s'`` and :func:`struct.calcsize` raises a bare</span>
-<span class="sd">    :exc:`struct.error`; a negative :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">    length reaches :meth:`io.RawIOBase.read` and raises a bare :exc:`ValueError`.</span>
-<span class="sd">    Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell</span>
-<span class="sd">    either from a bug in its own code, and neither is an :exc:`EOFError`, so</span>
-<span class="sd">    neither is caught by the frame loop -- one malformed block would therefore</span>
-<span class="sd">    cost the whole extraction.</span>
+<span class="sd">    :exc:`struct.error`. That is not one of :mod:`pcapkit.utilities.exceptions`,</span>
+<span class="sd">    so a caller cannot tell it from a bug in its own code, and it is not an</span>
+<span class="sd">    :exc:`EOFError`, so the frame loop does not catch it -- one malformed block</span>
+<span class="sd">    would therefore cost the whole extraction. A negative</span>
+<span class="sd">    :class:`~pcapkit.corekit.fields.misc.SchemaField` length fails silently</span>
+<span class="sd">    instead: :meth:`SchemaField.unpack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.misc.SchemaField.unpack&gt;` reads it as no declared</span>
+<span class="sd">    length, and sizes the nested schema by whatever is left of the stream.</span>
 
 <span class="sd">    Two shapes reach here. A Block Total Length below the block's own fixed-field</span>
 <span class="sd">    floor -- 28 octets for a Section Header Block, 20 for an Interface</span>
@@ -1240,9 +1242,10 @@
 <span class="sd">        or not those four octets were there to read --</span>
 <span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
 <span class="sd">        zero-pads a short read rather than refusing it. A tail of one, two or</span>
-<span class="sd">        three octets therefore arrives here negative, and</span>
-<span class="sd">        :meth:`io.RawIOBase.read` would raise a bare ``ValueError``. The floor is a</span>
-<span class="sd">        backstop: :meth:`PCAPNG._check_block_floor</span>
+<span class="sd">        three octets therefore arrives here negative, which</span>
+<span class="sd">        :meth:`SchemaField.unpack &lt;pcapkit.corekit.fields.misc.SchemaField.unpack&gt;`</span>
+<span class="sd">        would read as no declared length, sizing the block by whatever is left</span>
+<span class="sd">        of the stream. The floor is a backstop: :meth:`PCAPNG._check_block_floor</span>
 <span class="sd">        &lt;pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor&gt;` reports that</span>
 <span class="sd">        tail as end-of-stream before it gets here, and on the packing path</span>
 <span class="sd">        :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` seeds</span>
@@ -1453,7 +1456,7 @@
 
 <span class="sd">    Important:</span>
 <span class="sd">        This class is specifically designed for :class:`~pcapkit.const.pcapng.option_type.OptionType`</span>
-<span class="sd">        as it is actually a :class:`~enum.StrEnum` class.</span>
+<span class="sd">        as it is actually an ``aenum.StrEnum`` class.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1590,8 +1593,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
 
-<span class="sd">        This method validates the two block lengths and raises</span>
-<span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError` if they are not</span>
+<span class="sd">        This method compares the two block lengths and issues a</span>
+<span class="sd">        :class:`~pcapkit.utilities.warnings.ProtocolWarning` if they are not</span>
 <span class="sd">        equal.</span>
 
 <span class="sd">        Args:</span>
@@ -2115,7 +2118,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">IF_TSResolOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``if_tsresol`` options."""</span>
 
-    <span class="c1">#: Interface timestamp resolution, in units per second.</span>
+    <span class="c1">#: Interface timestamp resolution, as the option encodes it: the base flag</span>
+    <span class="c1">#: and the exponent, from which :attr:`resolution` is computed.</span>
     <span class="n">tsresol</span><span class="p">:</span> <span class="s1">'ResolutionData'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'flag'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'resolution'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>

@@ -700,8 +700,6 @@
 <span class="c1">#: warn exactly once each.</span>
 <span class="c1">#:</span>
 <span class="c1">#: .. versionadded:: 1.5.0</span>
-<span class="c1">#:</span>
-<span class="c1">#:    Moved from ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT`` (:issue:`1726`).</span>
 <span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'IPV6_TCP_WARNED_LIMIT'</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'each capture remembered pins one of its packets in memory'</span><span class="p">))</span>
 
@@ -813,10 +811,10 @@
 <span class="c1">#: been parsed before it. A guard whose answer moves with history is not a guard.</span>
 <span class="c1">#:</span>
 <span class="c1">#: 65,536 is what removes that. It is the whole span of a 16-bit wire length</span>
-<span class="c1">#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and</span>
-<span class="c1">#: a PCAP-NG option all declare their size -- so no shortfall that one of those</span>
-<span class="c1">#: can produce is subject to the budget at all, and every one of them is padded</span>
-<span class="c1">#: unconditionally. Measured: the largest legitimate single</span>
+<span class="c1">#: field -- which is how an IPv4 datagram, an IPv6 payload and a PCAP-NG option</span>
+<span class="c1">#: all declare their size, and a TCP or IPv4 option's 8-bit length declares less</span>
+<span class="c1">#: -- so no shortfall that one of those can produce is subject to the budget at</span>
+<span class="c1">#: all, and every one of them is padded unconditionally. Measured: the largest legitimate single</span>
 <span class="c1">#: shortfall found anywhere was 65,495 octets, from a snapshot-truncated</span>
 <span class="c1">#: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total</span>
 <span class="c1">#: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a</span>

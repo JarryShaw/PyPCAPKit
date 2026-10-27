@@ -884,14 +884,12 @@
         <span class="c1"># snapshot length cut short the latter exceeds what the file holds, and</span>
         <span class="c1"># handing it over is the declared-length-exceeds-available-octets fault.</span>
         <span class="c1">#</span>
-        <span class="c1"># The schemas count their fields down from this length, so it is what</span>
-        <span class="c1"># lets a truncation be noticed: a frame cut inside its IPv4 header</span>
-        <span class="c1"># leaves IPv4 fewer octets than its header, and the count running below</span>
-        <span class="c1"># zero issues a ``SchemaWarning`` (``packet length &lt; 0``). Handed the</span>
-        <span class="c1"># on-wire length, IPv4 would be told of octets the file does not hold</span>
-        <span class="c1"># and the truncation would pass silently.</span>
-        <span class="c1"># ``test_truncated_ipv4_header_warns_whatever_the_on_wire_length`` pins it</span>
-        <span class="c1"># (#2236).</span>
+        <span class="c1"># A frame cut inside its IPv4 header keeps IPv4 as ``Raw``, whose</span>
+        <span class="c1"># ``error`` names the cut, for either length: the trial parse of IPv4</span>
+        <span class="c1"># raises, and its ``packet length &lt; 0`` warnings go with the layer</span>
+        <span class="c1"># (#2308). As the dissection does not tell the two apart,</span>
+        <span class="c1"># ``test_truncated_ipv4_header_is_raw_with_its_error`` pins the argument</span>
+        <span class="c1"># where it is passed (#2236).</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">cap_len</span><span class="p">)</span></div>
 
 

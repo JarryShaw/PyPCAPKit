@@ -793,8 +793,8 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the version is not 4, or if ``ihl`` declares</span>
-<span class="sd">                more header than the data holds.</span>
+<span class="sd">            ProtocolError: If the version is not 4, if ``ihl`` declares</span>
+<span class="sd">                more header than the data holds, or if an option is malformed.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -966,7 +966,8 @@
 <span class="sd">            reserved: Reserved flag bit, i.e. the high-order bit of the flags.</span>
 <span class="sd">            df: Don't fragment flag.</span>
 <span class="sd">            mf: More fragments flag.</span>
-<span class="sd">            offset: Fragment offset.</span>
+<span class="sd">            offset: Fragment offset, in the 8-octet units of the wire field;</span>
+<span class="sd">                the parsed ``offset`` is in octets, see :meth:`_make_data`.</span>
 <span class="sd">            ttl: Time to live of the packet.</span>
 <span class="sd">            protocol: Payload protocol of the packet.</span>
 <span class="sd">            protocol_default: Default value of ``protocol``.</span>
@@ -2278,6 +2279,9 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``option`` is not given and ``timestamp`` is</span>
+<span class="sd">                neither a :obj:`list` nor a :obj:`dict`, which includes the</span>
+<span class="sd">                default :data:`None`.</span>
 <span class="sd">            FieldValueError: If an address is a :obj:`bool` or is not a valid</span>
 <span class="sd">                IPv4 address.</span>
 

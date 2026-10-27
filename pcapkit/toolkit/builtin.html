@@ -513,7 +513,8 @@ cannot be used for it. The TCP adapters here and in
 <p>A frame can be reassembled if it contains an IPv4 layer
 (<a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>) and the <strong>DF</strong>
 (<a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Flags.df" title="pcapkit.protocols.data.internet.ipv4.Flags.df"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.flags.df</span></code></a>) flag is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. In an IP-in-IP tunnel, the layer is the first that is a fragment
+(see <a class="reference internal" href="#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>frame</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span>) – PCAP frame.</p>
@@ -539,7 +540,8 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <p>A frame can be reassembled if it contains an IPv6 layer
 (<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>) and an IPv6 Fragment header
 (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
-<a class="reference internal" href="../protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>).</p>
+<a class="reference internal" href="../protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>). In an IP-in-IP tunnel,
+the layer is the first that has one (see <a class="reference internal" href="#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>frame</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span>) – PCAP frame.</p>
@@ -652,6 +654,38 @@ segment, as it does without one.</p>
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pcap._fragment">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap.</span></span><span class="sig-name descname"><span class="pre">_fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap.html#_fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap._fragment" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the IPv4 or IPv6 layer of a frame that IP reassembly reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span>) – PCAP frame or PCAP-NG block.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a>[<a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> | <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>]</span>) – <a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> or
+<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, the layer to fetch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a> | <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The first <code class="docutils literal notranslate"><span class="pre">version</span></code> layer, from the outside in, that is a fragment –
+for IPv4, one with <strong>MF</strong> set or a non-zero Fragment Offset, for IPv6,
+one with an IPv6 Fragment header; with none, the outermost <code class="docutils literal notranslate"><span class="pre">version</span></code>
+layer; with no <code class="docutils literal notranslate"><span class="pre">version</span></code> layer, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In an IP-in-IP tunnel (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2003.html"><strong>RFC 2003</strong></a>, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>, <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4213.html"><strong>RFC 4213</strong></a>) either
+datagram may be the fragmented one: the inner, each fragment of it
+carried whole by the tunnel, or the tunnel’s own, whose first fragment
+alone carries the inner header. Each is reassembled on its own header
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2307">#2307</a>). A frame of no tunnel has one layer to choose from.</p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcap.TCPSegment">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap.</span></span><span class="sig-name descname"><span class="pre">TCPSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srcport</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dstport</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap.html#TCPSegment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap.TCPSegment" title="Link to this definition">¶</a></dt>
@@ -735,7 +769,8 @@ cannot be used for it.</p>
 <p>A frame can be reassembled if it contains an IPv4 layer
 (<a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>) and the <strong>DF</strong>
 (<a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Flags.df" title="pcapkit.protocols.data.internet.ipv4.Flags.df"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.flags.df</span></code></a>) flag is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. In an IP-in-IP tunnel, the layer is the first that is a fragment
+(see <a class="reference internal" href="#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap._fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>frame</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></span>) – PCAP-NG frame.</p>
@@ -760,8 +795,9 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <dd><p>Make data for IPv6 reassembly.</p>
 <p>A frame can be reassembled if it contains an IPv6 layer
 (<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>) and an IPv6 Fragment header
-(<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
-<a class="reference internal" href="../protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>).</p>
+(<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
+<a class="reference internal" href="../protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>). In an IP-in-IP tunnel,
+the layer is the first that has one (see <a class="reference internal" href="#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap._fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>frame</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a></span>) – PCAP-NG frame.</p>

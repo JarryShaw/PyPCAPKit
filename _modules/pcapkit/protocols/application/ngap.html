@@ -497,8 +497,11 @@
 <span class="sd">It runs over SCTP and is named by the DATA chunk's *payload protocol</span>
 <span class="sd">identifier* rather than by a port, so :class:`NGAP` is registered on</span>
 <span class="sd">:attr:`SCTP.__proto__ &lt;pcapkit.protocols.transport.sctp.SCTP.__proto__&gt;` under</span>
-<span class="sd">PPID 60 (``NG_Application_Protocol``) and PPID 66</span>
-<span class="sd">(``NGAP_over_DTLS_over_SCTP``); see</span>
+<span class="sd">PPID 60</span>
+<span class="sd">(:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol`)</span>
+<span class="sd">and PPID 66</span>
+<span class="sd">(:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP`);</span>
+<span class="sd">see</span>
 <span class="sd">:func:`pcapkit.foundation.registry.protocols.register_sctp`.</span>
 
 <span class="sd">An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded</span>
@@ -554,7 +557,7 @@
 <span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
 
-<span class="sd">* **PPID 66 payloads are not decoded.** ``NGAP_over_DTLS_over_SCTP`` wraps the</span>
+<span class="sd">* **PPID 66 payloads are not decoded.** NGAP over DTLS over SCTP wraps the</span>
 <span class="sd">  ``NGAP-PDU`` in a DTLS record, and :mod:`pcapkit` implements no DTLS, so the</span>
 <span class="sd">  bytes reaching :meth:`NGAP.read` are not an APER encoding. The PPID is</span>
 <span class="sd">  registered so that it is *named* rather than anonymous; the payload itself</span>

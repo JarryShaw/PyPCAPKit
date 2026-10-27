@@ -2892,10 +2892,10 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            :rfc:`5568` reserves the whole first octet of the message data; the</span>
-<span class="sd">            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``</span>
-<span class="sd">            and ``6``, are added by :rfc:`5949#section-6.1.2`. All of these flags</span>
-<span class="sd">            are registered in the IANA *Handover Acknowledge Flags* registry,</span>
-<span class="sd">            hence all are parsed here.</span>
+<span class="sd">            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``,</span>
+<span class="sd">            ``6``, ``131`` and ``132``, are added by :rfc:`5949#section-6.1.2`.</span>
+<span class="sd">            All of these flags are registered in the IANA *Handover Acknowledge</span>
+<span class="sd">            Flags* registry, hence all are parsed here.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed message type schema.</span>
@@ -3475,10 +3475,13 @@
 <span class="sd">        Length fields"* -- so the whole option, which is what every</span>
 <span class="sd">        ``_read_opt_*`` below reports back as the parsed option's own</span>
 <span class="sd">        ``.length``, is two octets more. The read-side call sites share this</span>
-<span class="sd">        helper so the arithmetic lives in one place; a ``Pad1`` option -- the</span>
-<span class="sd">        one option with no ``Option Length`` field at all -- is its sole</span>
-<span class="sd">        exception (see the ``Note:`` on :meth:`_read_opt_pad` below). Do NOT</span>
-<span class="sd">        drop the ``+ 2``.</span>
+<span class="sd">        helper so the arithmetic lives in one place. The exceptions are the</span>
+<span class="sd">        options whose ``Option Length`` is not that octet count: a ``Pad1``</span>
+<span class="sd">        option, which has no ``Option Length`` field at all (see the ``Note:``</span>
+<span class="sd">        on :meth:`_read_opt_pad` below), the BADF option, whose length leaves</span>
+<span class="sd">        out its SPI (see :meth:`_read_opt_badf`), and the multicast mobility</span>
+<span class="sd">        and acknowledgement options, whose length counts 32-bit words (see</span>
+<span class="sd">        :meth:`_read_opt_mcast`). Do NOT drop the ``+ 2``.</span>
 
 <span class="sd">        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility</span>
 <span class="sd">        option, whose Option Type and Option Length are one octet each. It</span>

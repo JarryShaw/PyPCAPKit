@@ -785,17 +785,16 @@ defect <a class="extlink-issue reference external" href="https://github.com/Jarr
 length is the only thing on the wire that carries the family – must
 convert the argument itself, and that conversion happens <strong>before</strong>
 the schema, so it launders a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> into an
-<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that the guard added for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>
-in <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> can then only see as a
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a> guard in
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> can then only see as a
 legitimate address: <code class="docutils literal notranslate"><span class="pre">True</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> become <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code> /
 <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> – or <code class="docutils literal notranslate"><span class="pre">::1</span></code> / <code class="docutils literal notranslate"><span class="pre">::</span></code> where the wire format fixes the
 family as IPv6 – without complaint.</p>
 <p>Routing every one of them through here rather than giving each its own
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a> added
-exactly such a check to <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a>, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>
-was the same defect surviving at every site that had not been thought
-of. A guard that has to be remembered per call site is a guard that
-will be forgotten at the next one.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> carries exactly
+such a check (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>), and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a> is the same defect at
+every site that lacks one. A guard that has to be remembered per call
+site is a guard that will be forgotten at the next one.</p>
 <p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rejection is the <strong>first</strong> statement here, ahead of any
 dispatch on the value’s type, for the placement reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>
 gives and <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a> repeats.</p>
@@ -816,8 +815,8 @@ without losing the subtype-aware message that is the point of it. Both
 exception classes derive from
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> <em>and</em> <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>,
 so the difference is invisible to <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">BaseError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span>
-<span class="pre">ValueError</span></code>, and nothing in the library catches either one
-specifically.</p>
+<span class="pre">ValueError</span></code>, and no call of this function or of a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> in the
+library sits inside an <code class="docutils literal notranslate"><span class="pre">except</span></code> for either one specifically.</p>
 </div>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0.</span></p>

@@ -139,7 +139,7 @@ which is automatically generating :class:`pcapkit.const.pcapng.tls_key_label.TLS
 
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options
-.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-flags
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-optio
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block

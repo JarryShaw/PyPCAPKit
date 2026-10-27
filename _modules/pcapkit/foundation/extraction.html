@@ -1336,11 +1336,9 @@
 <span class="sd">        * pcap-ct driver: :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT`</span>
 <span class="sd">        * PyPCAPFile driver: :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`</span>
 
-<span class="sd">        Warns:</span>
-<span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not</span>
-<span class="sd">                available: its dependency is not installed, its</span>
-<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
-<span class="sd">                rules it out, or the supplied engine is unknown.</span>
+<span class="sd">        Note:</span>
+<span class="sd">            An unavailable engine is not reported here: :meth:`__init__` settles</span>
+<span class="sd">            the engine, and warns about it, before calling this method.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the selected engine cannot read the input's format --</span>
@@ -1782,9 +1780,9 @@
 <span class="sd">                :class:`~pcapkit.corekit.context.ContextRegistry`, a single</span>
 <span class="sd">                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,</span>
 <span class="sd">                or any iterable of contexts. The channel is honoured by the</span>
-<span class="sd">                ``default``, ``pcap`` and ``pcapng`` engines, which parse with</span>
-<span class="sd">                :mod:`pcapkit`'s own protocol implementations; the third party</span>
-<span class="sd">                engines ignore it.</span>
+<span class="sd">                :term:`default engine`, whose PCAP and PCAP-NG readers parse</span>
+<span class="sd">                with :mod:`pcapkit`'s own protocol implementations; the third</span>
+<span class="sd">                party engines ignore it.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:</span>
@@ -1800,7 +1798,9 @@
 <span class="sd">                engine first, which supports PCAP output.</span>
 
 <span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the requested extraction</span>
-<span class="sd">                engine is not available, cf. :meth:`run`.</span>
+<span class="sd">                engine is not available: its dependency is not installed, its</span>
+<span class="sd">                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
+<span class="sd">                rules it out, or the supplied engine is unknown.</span>
 <span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
 <span class="sd">                requested while the extraction engine is PyShark.</span>
 

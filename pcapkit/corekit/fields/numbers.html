@@ -1021,7 +1021,22 @@ as it is actually an <code class="docutils literal notranslate"><span class="pre
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a port outside this field’s width,
+    i.e. <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code> for the two-octet TCP, UDP and SCTP
+    ports.</p>
+</dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NumberField.pre_process()</span></code></a> masks a value to the field’s width
+rather than range-checking it, so without this check a schema built
+directly would write port <code class="docutils literal notranslate"><span class="pre">70000</span></code> as <code class="docutils literal notranslate"><span class="pre">0x1170</span></code> and <code class="docutils literal notranslate"><span class="pre">-1</span></code> as
+<code class="docutils literal notranslate"><span class="pre">0xffff</span></code>. A port is a whole field with no bits to carry outside
+its width, so the check costs no wire value its round trip: every
+port <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField.post_process" title="pcapkit.corekit.fields.numbers.PortEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> can return is in range. The bound is the
+one <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField.post_process" title="pcapkit.corekit.fields.numbers.PortEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> tests. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1137,6 +1152,13 @@ discarding it would make <code class="docutils literal notranslate"><span class=
 unsigned field whose values only look wrong once the high bit is set
 – see GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/545">#545</a>. Omitting it, or passing the sign the
 class already fixes, stays legal.</p>
+<p>Packing does not range-check a value: <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> masks it to
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> bits, so e.g. <code class="docutils literal notranslate"><span class="pre">70000</span></code> in a two-octet field packs
+as <code class="docutils literal notranslate"><span class="pre">0x1170</span></code> and <code class="docutils literal notranslate"><span class="pre">-1</span></code> as <code class="docutils literal notranslate"><span class="pre">0xffff</span></code>, with no error or warning. This
+is the documented contract a parsed value’s round trip relies on
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1488">#1488</a>). A range check belongs in the protocol’s <code class="docutils literal notranslate"><span class="pre">make</span></code> or in
+a field whose values have a range of their own, such as
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>).</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.NumberField.bit_length">

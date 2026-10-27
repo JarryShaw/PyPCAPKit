@@ -526,7 +526,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">_beholding</span><span class="p">,</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
@@ -747,8 +747,9 @@
 <span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;` found there,</span>
 <span class="sd">        plus :data:`OUT_OF_BAND_KEYWORDS`. :obj:`None` if ``cls`` *itself* sets</span>
 <span class="sd">        ``__keywords__`` to :obj:`None`, meaning its keywords cannot be enumerated</span>
-<span class="sd">        and are not to be checked -- inherited :obj:`None` does not count, for the</span>
-<span class="sd">        reason given at the read below.</span>
+<span class="sd">        and are not to be checked -- inherited :obj:`None` does not count, as</span>
+<span class="sd">        :attr:`ProtocolBase.__keywords__</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;` explains.</span>
 
 <span class="sd">    The union is deliberately wider than the signature of ``cls.make``, because</span>
 <span class="sd">    a keyword reaching ``make`` is not necessarily *for* ``make``:</span>
@@ -1001,7 +1002,7 @@
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
     <span class="c1">#: and :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
-    <span class="c1">#: module and class, or a :class:`Protocol` subclass.</span>
+    <span class="c1">#: module and class, or a :class:`ProtocolBase` subclass.</span>
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>
@@ -1273,9 +1274,9 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods. This is useful when the packet</span>
+<span class="sd">            data is not available in the current instance.</span>
 
 <span class="sd">            The octets are built from ``kwargs`` alone, through :meth:`make`;</span>
 <span class="sd">            the instance's own parsed or constructed state is not read. A bare</span>
@@ -1348,9 +1349,9 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods. This is useful when the packet</span>
+<span class="sd">            data is not available in the current instance.</span>
 
 <span class="sd">            When :attr:`self.__header__ &lt;Protocol.__header__&gt;` is already set,</span>
 <span class="sd">            by :meth:`from_schema` or by the :meth:`pack` call that</span>
@@ -1464,7 +1465,7 @@
 <span class="sd">        3. If ``value`` is :obj:`str`, the method will attempt to search for</span>
 <span class="sd">           the existing registered protocol class from</span>
 <span class="sd">           :data:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,</span>
-<span class="sd">           return the value itself.</span>
+<span class="sd">           return the value in upper case alone.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Protocol class or name.</span>
@@ -1964,9 +1965,10 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If any unrecognised class keyword is given.</span>
 
-<span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
+<span class="sd">        This method is called when a subclass of :class:`ProtocolBase` is defined.</span>
 <span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
-<span class="sd">        attribute of the subclass, and, if ``code`` is given, to register the</span>
+<span class="sd">        and :attr:`self.__data__ &lt;pcapkit.protocols.protocol.Protocol.__data__&gt;`</span>
+<span class="sd">        attributes of the subclass, and, if ``code`` is given, to register the</span>
 <span class="sd">        subclass into the next-layer dispatch :term:`registry` (or registries) that</span>
 <span class="sd">        ``code`` names -- e.g. :attr:`Link.__proto__</span>
 <span class="sd">        &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`.</span>
@@ -2332,7 +2334,9 @@
 <span class="sd">            Unpacked data upon success</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            StructError: If unpack (:func:`struct.unpack`) failed, and :exc:`struct.error` raised.</span>
+<span class="sd">            StructError: If the buffer is empty, whatever ``quiet`` says, or if</span>
+<span class="sd">                unpack (:func:`struct.unpack`) failed, and :exc:`struct.error`</span>
+<span class="sd">                raised, without ``quiet``.</span>
 
 <span class="sd">        """</span>
         <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
@@ -2839,9 +2843,9 @@
 <span class="sd">            Current protocol with next layer extracted.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
-<span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
-<span class="sd">            store the next layer protocol name. :meth:`Info.to_dict</span>
+<span class="sd">            The method adds a ``__next_type__`` key to ``dict_`` to store the</span>
+<span class="sd">            next layer protocol type, and a ``__next_name__`` key to store the</span>
+<span class="sd">            next layer protocol name. :meth:`Info.to_dict</span>
 <span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries both, so that</span>
 <span class="sd">            :meth:`_make_payload` dispatches a :obj:`dict` rebuild on them,</span>
 <span class="sd">            while the dumpers and ``repr`` leave them out (:issue:`2003`).</span>
@@ -2942,8 +2946,13 @@
 <span class="sd">            an Ethernet frame of 10 octets (:issue:`1580`) -- and reported as the</span>
 <span class="sd">            parse ends when it is kept, still inside the guard that catches them</span>
 <span class="sd">            under an ``error`` filter. A layer kept with its header cut short</span>
-<span class="sd">            still warns. A layer captured at least as long as its hint cannot be</span>
-<span class="sd">            replaced, and is parsed holding nothing, even inside one that holds.</span>
+<span class="sd">            still warns. The held warnings of a parse that raises are dropped</span>
+<span class="sd">            too when :func:`~pcapkit.corekit.decorators.beholder` replaces the</span>
+<span class="sd">            layer, as it does around :meth:`_import_next_layer`, since the</span>
+<span class="sd">            replacement's ``error`` reports the failure (:issue:`2308`); outside</span>
+<span class="sd">            it, they are reported as the error leaves. A layer captured at least</span>
+<span class="sd">            as long as its hint cannot be replaced, and is parsed holding</span>
+<span class="sd">            nothing, even inside one that holds.</span>
 
 <span class="sd">            A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:</span>
 <span class="sd">            it and the rest of the frame are kept as</span>
@@ -2977,7 +2986,14 @@
         <span class="n">token</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">(</span><span class="n">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">captured</span><span class="p">))</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
-                <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="c1"># NOTE: Under ``beholder`` the layer that raised is replaced,</span>
+                    <span class="c1"># so its warnings go with it; outside it, the error reaches</span>
+                    <span class="c1"># the caller and they are reported as it leaves (#2308).</span>
+                    <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="n">_beholding</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                    <span class="k">raise</span>
 
                 <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
@@ -3050,7 +3066,8 @@
 
 <span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
 <span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
-<span class="sd">        attribute of the subclass.</span>
+<span class="sd">        and :attr:`self.__data__ &lt;pcapkit.protocols.protocol.Protocol.__data__&gt;`</span>
+<span class="sd">        attributes of the subclass.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            When ``schema`` and/or ``data`` is not specified, the method will first</span>

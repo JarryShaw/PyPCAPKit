@@ -607,9 +607,9 @@ ID – cf. <a class="reference internal" href="../corekit/context.html#module-pc
 <a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a>, a single
 <a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a>, a mapping,
 or any iterable of contexts. The channel is honoured by the
-<code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">pcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcapng</span></code> engines, which parse with
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own protocol implementations; the third party
-engines ignore it.</p></li>
+<a class="reference internal" href="../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a>, whose PCAP and PCAP-NG readers parse
+with <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own protocol implementations; the third
+party engines ignore it.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
@@ -627,7 +627,9 @@ requested engine that is unavailable falls back to the default
 engine first, which supports PCAP output.</p>
 </li>
 <li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.EngineWarning</span></code></a> – If the requested extraction
-engine is not available, cf. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>.</p></li>
+engine is not available: its dependency is not installed, its
+<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>
+rules it out, or the supplied engine is unknown.</p></li>
 <li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.AttributeWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">trace_analyse</span></code> is
 requested while the extraction engine is PyShark.</p></li>
 </ul>
@@ -734,6 +736,12 @@ flow tracing is disabled, where 1.1.0 built the record regardless.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.engine">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">engine</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><span class="pre">EngineBase</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.extraction._P" title="pcapkit.foundation.extraction._P"><span class="pre">_P</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.engine" title="Link to this definition">¶</a></dt>
 <dd><p>PCAP extraction engine.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.magic_number">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">magic_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.magic_number" title="Link to this definition">¶</a></dt>
+<dd><p>Magic number of input PCAP file.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -942,20 +950,19 @@ different driver method:</p>
 <li><p>pcap-ct driver: <a class="reference internal" href="engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap_ct.PCAP_CT</span></code></a></p></li>
 <li><p>PyPCAPFile driver: <a class="reference internal" href="engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a></p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An unavailable engine is not reported here: <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__init__" title="pcapkit.foundation.extraction.Extractor.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> settles
+the engine, and warns about it, before calling this method.</p>
+</div>
 <dl class="field-list simple">
-<dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.EngineWarning</span></code></a> – If the extraction engine is not
-available: its dependency is not installed, its
-<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>
-rules it out, or the supplied engine is unknown.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the selected engine cannot read the input’s format –
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the selected engine cannot read the input’s format –
     for the <a class="reference internal" href="../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a>, if it is neither PCAP nor PCAP-NG – or if
     the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>

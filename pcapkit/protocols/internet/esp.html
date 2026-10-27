@@ -758,8 +758,11 @@ when <code class="docutils literal notranslate"><span class="pre">encrypt</span>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and no Security
-    Association is available for <code class="docutils literal notranslate"><span class="pre">spi</span></code>, or if <code class="docutils literal notranslate"><span class="pre">pad_len</span></code> does
-    not satisfy the algorithm’s alignment requirement.</p>
+    Association is available for <code class="docutils literal notranslate"><span class="pre">spi</span></code>, if <code class="docutils literal notranslate"><span class="pre">pad_len</span></code> is
+    outside <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">255</span></code> or does not satisfy the algorithm’s
+    alignment requirement, or if
+    <a class="reference internal" href="#pcapkit.protocols.internet.esp.SecurityAssociation.encrypt" title="pcapkit.protocols.internet.esp.SecurityAssociation.encrypt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SecurityAssociation.encrypt()</span></code></a> rejects <code class="docutils literal notranslate"><span class="pre">iv</span></code> or cannot
+    run without <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1700,7 +1703,7 @@ supported.</strong> The high-order 32 bits of an ESN are not transmitted, and a
 stateless parser cannot recover them; they are required both for the ICV
 computation and for the AEAD associated data. An ESN protected packet
 therefore fails the integrity check <em>cleanly</em> rather than being decoded.</p></li>
-<li><p><strong>Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.</strong>
+<li><p><strong>Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.</strong>
 TFC padding is indistinguishable from real payload without inspecting the
 inner protocol’s own length field, so it is handed to the next layer as
 part of the plaintext.</p></li>
@@ -1922,14 +1925,16 @@ byte of the packet that ESP owns.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.esp.ESP.payload_data">
 <span class="sig-name descname"><span class="pre">payload_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.esp.ESP.payload_data" title="Link to this definition">¶</a></dt>
 <dd><p>Payload data exactly as transmitted – ciphertext, prefixed by any
-cryptographic synchronisation data (IV) – excluding the ICV.</p>
+cryptographic synchronisation data (IV) – excluding the ICV whenever
+<a class="reference internal" href="#pcapkit.protocols.data.internet.esp.ESP.icv" title="pcapkit.protocols.data.internet.esp.ESP.icv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">icv</span></code></a> holds it.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.esp.ESP.icv">
 <span class="sig-name descname"><span class="pre">icv</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.esp.ESP.icv" title="Link to this definition">¶</a></dt>
-<dd><p>Integrity check value as transmitted; empty when absent, or when no
-Security Association was available to say how long it is.</p>
+<dd><p>Integrity check value as transmitted; empty when absent, when no
+Security Association was available to say how long it is, or when the
+packet is shorter than the ICV its Security Association declares.</p>
 </dd></dl>
 
 <dl class="py attribute">

@@ -715,8 +715,8 @@
 <span class="sd">        IANA methods whose member *name* differs from their *value* --</span>
 <span class="sd">        ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and</span>
 <span class="sd">        ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``, a hyphen being unusable</span>
-<span class="sd">        in a Python identifier -- which :meth:`_missing_` (and so the</span>
-<span class="sd">        constructor) also finds by value.</span>
+<span class="sd">        in a Python identifier -- which the constructor also finds by</span>
+<span class="sd">        value, before it falls back to :meth:`_missing_`.</span>
 
 <span class="sd">        It is a :class:`classmethod`, as the base is, because a</span>
 <span class="sd">        zero-argument ``super()`` needs a first argument to bind</span>

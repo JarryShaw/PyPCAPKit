@@ -53,6 +53,7 @@ hierarchy:
 
    The ``tree`` output (also selected as ``text`` and ``txt``) is a lossy,
    human-readable view, and nothing reads it back. It renders ``''``, ``b''``,
-   :data:`None` and ``{}`` all as ``NIL``, and writes a newline inside a string
-   as is, breaking the layout. Use ``json`` or ``plist`` (also selected as
+   :data:`None` and ``{}`` all as ``NIL``, writes a newline inside a short
+   string as is, breaking the layout, and rewraps a longer one, turning its
+   newlines into spaces. Use ``json`` or ``plist`` (also selected as
    ``xml``) where the report has to round-trip.

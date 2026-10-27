@@ -518,10 +518,11 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.data.data.Deferred`, and not shared</span>
 <span class="sd">        with it. That one postpones a single ``analyze()`` call over bytes already</span>
 <span class="sd">        in hand; this postpones a *submit* over a reassembler's buffers. The</span>
-<span class="sd">        reassembly and flow tracing subpackages are siblings and neither should</span>
-<span class="sd">        depend on the other, so the few lines are written in each rather than one</span>
-<span class="sd">        importing the other -- the same reason their ``data/data.py`` modules</span>
-<span class="sd">        mirror each other instead of merging.</span>
+<span class="sd">        reassembly and flow tracing subpackages are siblings, and the flow tracer</span>
+<span class="sd">        reaches the reassembler only lazily, when ``analyse`` asks for one, so the</span>
+<span class="sd">        few lines are written in each rather than one importing the other -- the</span>
+<span class="sd">        same reason their ``data/data.py`` modules mirror each other instead of</span>
+<span class="sd">        merging.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        reassembly: The flow's own</span>

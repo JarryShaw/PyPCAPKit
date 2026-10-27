@@ -1169,8 +1169,8 @@ keywords generated after them (data-driven, not hand-picked; see
 <a class="reference internal" href="../vendor/ftp.html#pcapkit.vendor.ftp.command.Command.process" title="pcapkit.vendor.ftp.command.Command.process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code></a>) – rather than
 minting the per-command ones at import time as an incidental side
 effect of building <a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s own rows. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>:
-that import-time mutation was the same defect shape <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> removed
-from <a class="reference internal" href="pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterType</span></code></a>. <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+that import-time mutation is the same defect shape <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> rules
+out on <a class="reference internal" href="pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterType</span></code></a>. <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
 still unmints for a keyword that
 turns up on the wire but names none of these – the extendability the
 owner conditionally asked to keep on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>: unsure what a

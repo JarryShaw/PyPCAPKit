@@ -1820,8 +1820,9 @@
 <span class="sd">        forward reference whose target is defined only *after* the first</span>
 <span class="sd">        :meth:`Info.from_dict` call stays one-way for the life of the process.</span>
 <span class="sd">        That is accepted rather than fixed: :meth:`Info.from_dict` runs per</span>
-<span class="sd">        parsed packet (see :meth:`IPv4._read_ipv4_options</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options&gt;`), and</span>
+<span class="sd">        parsed packet (see :meth:`IPv4.read</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`, which builds its ToS</span>
+<span class="sd">        field with it), and</span>
 <span class="sd">        re-resolving the annotations on every call to catch a case that does</span>
 <span class="sd">        not arise in this package costs far more than it saves.</span>
 

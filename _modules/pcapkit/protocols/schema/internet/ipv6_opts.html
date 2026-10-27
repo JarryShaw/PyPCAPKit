@@ -580,7 +580,7 @@
         <span class="c1">#: number that was received from the MPL Seed.</span>
         <span class="nb">max</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Verification flag. ``0`` indicates that the MPL Option</span>
-        <span class="c1">#: conforms to this specification.</span>
+        <span class="c1">#: conforms to :rfc:`7731`.</span>
         <span class="n">drop</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Reserved bits (``rsv``).</span>
         <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span></div>
@@ -844,7 +844,7 @@
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
     <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
-    <span class="c1">#: Compartment length.</span>
+    <span class="c1">#: Compartment length, in 32-bit words.</span>
     <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Sens level.</span>
     <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
@@ -877,7 +877,7 @@
 <span class="sd">    choose the schema which then reads the option properly. Its ``namespace``</span>
 <span class="sd">    offsets are therefore bit offsets into the *option*, not into any one field</span>
 <span class="sd">    of it: ``Opt Data Len`` is octet 1, i.e. bits 8 to 15, and the mode bit is</span>
-<span class="sd">    the first bit of octet 2 [:rfc:`6621#section-8.1`].</span>
+<span class="sd">    the first bit of octet 2 [:rfc:`6621#section-6.1.1`].</span>
 
 <span class="sd">    """</span>
 

@@ -940,8 +940,8 @@
         <span class="c1"># NOTE: ``length`` is frequently wire-derived -- resolved by a</span>
         <span class="c1"># ``_length_callback`` against the very packet being parsed, per</span>
         <span class="c1"># :meth:`Field.__call__` below, or by a schema's own selector building a</span>
-        <span class="c1"># field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s</span>
-        <span class="c1"># ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --</span>
+        <span class="c1"># field from a value it just read off the wire (e.g. HIP's</span>
+        <span class="c1"># ``host_id_hi_selector`` returning ``BytesField(length=pkt['hi_len'])``) --</span>
         <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
         <span class="c1"># declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a</span>
         <span class="c1"># length that ``buffer`` falls short of is provably bogus: the padding</span>

@@ -557,9 +557,9 @@ A code that fails is never skipped.</p></li>
 entry records the status, a failure-detail fragment narrow enough to match one
 site, and the defect: the function, class or method that causes it, by name, and the
 issue that tracks it.
-Routing a case around a defect hides it: the generator’s <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> once put two
-parameters in every HIP packet, so the unrepresentable length of a lone one
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>) was never constructed.
+Routing a case around a defect hides it: a generator that puts two parameters in
+every HIP packet never constructs the unrepresentable length of a lone one
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>), which is why the generator’s <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> is one.
 <code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> entries have a different shape – the fragments of the probe’s
 <code class="docutils literal notranslate"><span class="pre">'error'</span></code> value the entry accepts, any one of which may match, and a reason – and
 they record why the probe’s placeholder payload cannot reach the target, not a

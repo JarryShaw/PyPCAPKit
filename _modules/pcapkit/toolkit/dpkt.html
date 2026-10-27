@@ -1047,15 +1047,61 @@
 
 
 
+<div class="viewcode-block" id="_fragment">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt._fragment">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP | IP6]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the IPv4 or IPv6 layer of a DPKT packet that IP reassembly reads.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, i.e. the outermost layer.</span>
+<span class="sd">        version: ``4`` or ``6``, the IP version of the layer to fetch.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The first layer of that version, from the network layer in, that is a</span>
+<span class="sd">        fragment -- for IPv4, one with **MF** set or a non-zero fragment</span>
+<span class="sd">        offset, for IPv6, one with an IPv6 Fragment header; with none, the</span>
+<span class="sd">        network layer if it is of that version; otherwise :data:`None`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        As with :func:`pcapkit.toolkit.pcap._fragment`, either datagram of an</span>
+<span class="sd">        IP-in-IP tunnel may be the fragmented one, and each is reassembled on</span>
+<span class="sd">        its own header (:issue:`2307`). An IPv6 layer is the one with extension</span>
+<span class="sd">        headers. The walk goes on past an IP layer only where its payload</span>
+<span class="sd">        protocol is IPv4 or IPv6, i.e. a tunnel, so a datagram an ICMP error</span>
+<span class="sd">        quotes, which `DPKT`_ decodes as an IP layer below the ICMP one, is not</span>
+<span class="sd">        walked to.</span>
+
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+    <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">network</span>  <span class="c1"># type: Any</span>
+    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">layer</span>
+        <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">mf</span> <span class="ow">or</span> <span class="n">layer</span><span class="o">.</span><span class="n">offset</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">layer</span>
+        <span class="c1"># ``IP6.p`` is the protocol after the extension headers</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">(</span><span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">network</span></div>
+
+
+
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv4_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                     <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
-<span class="sd">    A packet can be reassembled if its network layer is IPv4 (:class:`dpkt.ip.IP`) --</span>
-<span class="sd">    one carried in IPv6 is not read -- whose header was captured whole, and the **DF**</span>
-<span class="sd">    (:attr:`dpkt.ip.IP.df`) flag is :data:`False`.</span>
+<span class="sd">    A packet can be reassembled if it has an IPv4 layer (:class:`dpkt.ip.IP`) whose</span>
+<span class="sd">    header was captured whole, and the **DF** (:attr:`dpkt.ip.IP.df`) flag is</span>
+<span class="sd">    :data:`False`. The layer is the first that is a fragment, or with none, the network</span>
+<span class="sd">    layer if it is IPv4 (see :func:`_fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
@@ -1081,11 +1127,11 @@
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
 <span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
-<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
-<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
-<span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
-<span class="sd">        packet itself is left untouched either way.</span>
+<span class="sd">        which a zeroed checksum comes back recomputed, along with the Total</span>
+<span class="sd">        Length -- :func:`attach_buffer` is what makes them the wire's again.</span>
+<span class="sd">        They are that re-serialisation too where |dpkt|_'s own lengths</span>
+<span class="sd">        misplace the layer in the record, as behind some stacks of VLAN tags</span>
+<span class="sd">        (:issue:`1646`). The packet itself is left untouched either way.</span>
 
 <span class="sd">        The header is the IHL's octets, and the payload ends at the Total</span>
 <span class="sd">        Length, or at the end of the frame for a zero one. A Total Length</span>
@@ -1101,9 +1147,7 @@
 <span class="sd">       with ``packet`` alone fails.</span>
 
 <span class="sd">    """</span>
-    <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-    <span class="c1"># an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``</span>
-    <span class="n">ipv4</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="n">network</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IP]'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>     <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1151,9 +1195,10 @@
                     <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
 
-<span class="sd">    A packet can be reassembled if its network layer is IPv6 (:class:`dpkt.ip6.IP6`) --</span>
-<span class="sd">    one carried in IPv4 is not read -- and has an IPv6 Fragment header</span>
-<span class="sd">    (:rfc:`2460#section-4.5`, i.e., :class:`dpkt.ip6.IP6FragmentHeader`).</span>
+<span class="sd">    A packet can be reassembled if it has an IPv6 layer (:class:`dpkt.ip6.IP6`) with an</span>
+<span class="sd">    IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,</span>
+<span class="sd">    :class:`dpkt.ip6.IP6FragmentHeader`). The layer is the first that has one (see</span>
+<span class="sd">    :func:`_fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
@@ -1171,7 +1216,7 @@
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
 <span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
-<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
+<span class="sd">        which a zeroed TCP, UDP or ICMPv6 checksum comes back recomputed --</span>
 <span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
 <span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
 <span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
@@ -1186,8 +1231,7 @@
 <span class="sd">       with ``packet`` alone fails.</span>
 
 <span class="sd">    """</span>
-    <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-    <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IP6]'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># dpkt keeps each extension header under its protocol number, so 44 is a</span>
         <span class="c1"># Fragment header; the dict's value type cannot say so</span>
@@ -1283,15 +1327,15 @@
 <span class="sd">        reassembled; otherwise :data:`None`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        The header is sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
-<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
-<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
-<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
-<span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
-<span class="sd">        packet itself is left untouched either way.</span>
+<span class="sd">        it is the captured one, and the payload is the segment data |dpkt|_</span>
+<span class="sd">        itself read from the frame. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its header is then |dpkt|_'s serialisation of the TCP</span>
+<span class="sd">        layer, which recomputes nothing. It is that serialisation too where</span>
+<span class="sd">        |dpkt|_'s own lengths misplace the layer in the record, as behind some</span>
+<span class="sd">        stacks of VLAN tags (:issue:`1646`). The packet itself is left untouched</span>
+<span class="sd">        either way.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
@@ -1365,15 +1409,15 @@
 <span class="sd">        traced; otherwise :data:`None`.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The header and payload are sliced out of the record octets</span>
+<span class="sd">        The header is sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
-<span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
-<span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
-<span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
-<span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
-<span class="sd">        packet itself is left untouched either way.</span>
+<span class="sd">        it is the captured one, and the payload is the segment data |dpkt|_</span>
+<span class="sd">        itself read from the frame. A packet built by hand carries no such</span>
+<span class="sd">        buffer, and its header is then |dpkt|_'s serialisation of the TCP</span>
+<span class="sd">        layer, which recomputes nothing. It is that serialisation too where</span>
+<span class="sd">        |dpkt|_'s own lengths misplace the layer in the record, as behind some</span>
+<span class="sd">        stacks of VLAN tags (:issue:`1646`). The packet itself is left untouched</span>
+<span class="sd">        either way.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>

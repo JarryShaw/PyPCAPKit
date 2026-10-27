@@ -527,10 +527,12 @@
     <span class="c1">#: byte of the packet that ESP owns.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Payload data exactly as transmitted -- ciphertext, prefixed by any</span>
-    <span class="c1">#: cryptographic synchronisation data (IV) -- excluding the ICV.</span>
+    <span class="c1">#: cryptographic synchronisation data (IV) -- excluding the ICV whenever</span>
+    <span class="c1">#: :attr:`icv` holds it.</span>
     <span class="n">payload_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Integrity check value as transmitted; empty when absent, or when no</span>
-    <span class="c1">#: Security Association was available to say how long it is.</span>
+    <span class="c1">#: Integrity check value as transmitted; empty when absent, when no</span>
+    <span class="c1">#: Security Association was available to say how long it is, or when the</span>
+    <span class="c1">#: packet is shorter than the ICV its Security Association declares.</span>
     <span class="n">icv</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Outcome of the decryption and integrity check.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'ESPStatus'</span>

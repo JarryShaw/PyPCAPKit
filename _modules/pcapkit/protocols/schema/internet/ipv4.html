@@ -544,7 +544,7 @@
 
         <span class="c1">#: IP version.</span>
         <span class="n">version</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: Internet header length.</span>
+        <span class="c1">#: Internet header length, in 32-bit words.</span>
         <span class="n">ihl</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
@@ -568,7 +568,7 @@
         <span class="n">df</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: More fragments flag.</span>
         <span class="n">mf</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: Fragment offset.</span>
+        <span class="c1">#: Fragment offset, in 8-octet units.</span>
         <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
@@ -577,7 +577,7 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">TSFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Timestamp flags field."""</span>
 
-        <span class="c1">#: Timestamp overflow flag.</span>
+        <span class="c1">#: Overflow count.</span>
         <span class="n">oflw</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Timestamp type flag.</span>
         <span class="n">flag</span><span class="p">:</span> <span class="nb">int</span></div>

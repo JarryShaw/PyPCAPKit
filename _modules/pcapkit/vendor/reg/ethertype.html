@@ -519,13 +519,10 @@
     <span class="c1">#: Row labels that the historical Neil Sembower list itself marks as</span>
     <span class="c1">#: carrying no real assignment -- a company holding the block but naming</span>
     <span class="c1">#: nothing (``DEC Unassigned``), or a range the list says is dead/invalid</span>
-    <span class="c1">#: outright -- rather than a proprietary protocol's real name. The owner's</span>
-    <span class="c1">#: first ruling on :issue:`775`/:issue:`841` held these out as the only rows to</span>
-    <span class="c1">#: resolve to</span>
-    <span class="c1">#: :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, on the</span>
-    <span class="c1">#: theory that a proprietary protocol's company name IS</span>
-    <span class="c1">#: the final concrete name for every other row. :issue:`775` settled on</span>
-    <span class="c1">#: resolving every row alike, so this set does not decide *whether* a</span>
+    <span class="c1">#: outright -- rather than a proprietary protocol's real name. Every range</span>
+    <span class="c1">#: row resolves alike, through</span>
+    <span class="c1">#: :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`</span>
+    <span class="c1">#: (:issue:`775`, :issue:`841`), so this set does not decide *whether* a</span>
     <span class="c1">#: row registers -- only *how its name is spelled*: these keep the</span>
     <span class="c1">#: bare label with no hex suffix, since the label itself already says</span>
     <span class="c1">#: nothing was assigned, while every other row keeps a hex-suffixed</span>

@@ -1304,7 +1304,7 @@ pull-request jobs created later in a merge wave. Its <code class="docutils liter
 <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so the cells still run when <code class="docutils literal notranslate"><span class="pre">test</span></code> fails, and a red cell still
 fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
 Release) wait on. The cost is wall time: the push run, and those workflows, finish
-about one slowest cell later, about 6 min before any queue wait (estimate).</p></li>
+about one slowest cell later, plus any queue wait.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> has no <code class="docutils literal notranslate"><span class="pre">DPKT</span></code> cell. Its only path would be
 <code class="file docutils literal notranslate"><span class="pre">tests/toolkit/test_dpkt_unit.py</span></code>, which <code class="docutils literal notranslate"><span class="pre">test</span></code> runs with <code class="docutils literal notranslate"><span class="pre">DPKT</span></code> installed
 on every leg. What that gives up is the file in a venv holding only <code class="docutils literal notranslate"><span class="pre">test</span></code> and
@@ -1356,7 +1356,8 @@ runs under, such as <code class="file docutils literal notranslate"><span class=
 <td><p>skipped</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
-<td><p>the project pins’ plain-unittest run and the docs readers</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> and the root-level modules under plain unittest, a half
+per step, and the docs readers</p></td>
 <td><p>the project pins</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>: <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, <code class="docutils literal notranslate"><span class="pre">windows</span></code></p></td>
@@ -1900,7 +1901,9 @@ and a <code class="docutils literal notranslate"><span class="pre">tests/project
 that import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> are no pins either; those the tiers send to <code class="docutils literal notranslate"><span class="pre">latest</span></code> run
 on <code class="docutils literal notranslate"><span class="pre">test</span></code>’s <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg, under coverage.</p>
 <p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs the pins under pytest, with <code class="docutils literal notranslate"><span class="pre">test</span></code>’s flags, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
-on every pull request and every push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> needs it.
+on every push to <code class="docutils literal notranslate"><span class="pre">main</span></code> and every pull request but a docs-only one, which runs
+<code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> under plain unittest instead (see <a class="reference internal" href="#light-pull-requests-2243">Light Pull Requests
+(#2243)</a>), and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> needs it.
 Every <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">experimental</span></code> leg passes each pin as an
 <code class="docutils literal notranslate"><span class="pre">--ignore</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>’s coverage leg included, which measures only <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>.
 <code class="docutils literal notranslate"><span class="pre">latest</span></code> asks <code class="docutils literal notranslate"><span class="pre">project_pin_paths()</span></code> at run time, and every other leg
@@ -2111,8 +2114,8 @@ before theirs, and <code class="file docutils literal notranslate"><span class="
 setup-python. <code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, before
 setup-python, <code class="docutils literal notranslate"><span class="pre">build</span></code> on conda’s base <code class="docutils literal notranslate"><span class="pre">python</span></code> under the login shell, from
 <code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">upload</span></code> on setup-python’s. A project
-pin runs each on the cases the shell it replaced handled and requires the same
-status, output and calls.
+pin runs each, and the step’s inline shell form it must match, on the same cases
+and requires the same status, output and calls.
 <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.8’s syntax,
 since the scripts on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> and on every leg’s interpreter import it.
 Their project tests parse these scripts and the helper with <code class="docutils literal notranslate"><span class="pre">ast.parse(...,</span>
@@ -2150,8 +2153,8 @@ not a vendor refresh (see <a class="reference internal" href="releasing.html"><s
 to regenerate <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, once per leg, and
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, once per cell, and
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, once per half of <code class="file docutils literal notranslate"><span class="pre">tests/project</span></code>.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/run_unittest_leg.py</span> <span class="pre">&lt;directory&gt;</span></code> over the <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>
 directory a change touches, when it moves imports or module state (see
 <a class="reference internal" href="conventions/test-coverage.html"><span class="doc">Testing a Change</span></a>).</p></td>
@@ -2345,10 +2348,10 @@ and cannot be the source of a data flow.</p>
 <code class="docutils literal notranslate"><span class="pre">py/clear-text-storage-sensitive-data</span></code> call a value secret from its name alone,
 by CodeQL’s <a class="reference external" href="https://github.com/github/codeql/blob/main/shared/concepts/codeql/concepts/internal/SensitiveDataHeuristics.qll">sensitive-data heuristics</a>.
 The tests that build a pcapng Decryption Secrets Block call its bytes
-<code class="docutils literal notranslate"><span class="pre">secrets</span></code>. Through <a class="reference internal" href="../pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> those bytes reached
+<code class="docutils literal notranslate"><span class="pre">secrets</span></code>. Through <a class="reference internal" href="../pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> those bytes reach
 <code class="docutils literal notranslate"><span class="pre">logger</span></code> calls in <a class="reference internal" href="../pcapkit/foundation/extraction.html#module-pcapkit.foundation.extraction" title="pcapkit.foundation.extraction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code></a> and the buffer file’s
-write in <a class="reference internal" href="../pcapkit/corekit/io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a>, and each alert’s dismissal was lost whenever
-a pull request moved the line it named. The alert on the <code class="docutils literal notranslate"><span class="pre">logger</span></code> call in
+write in <a class="reference internal" href="../pcapkit/corekit/io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a>, and with <code class="file docutils literal notranslate"><span class="pre">tests</span></code> analysed, a dismissal of
+each such alert is lost whenever a pull request moves the line it names. The alert on the <code class="docutils literal notranslate"><span class="pre">logger</span></code> call in
 <a class="reference internal" href="../pcapkit/utilities/warnings.html#module-pcapkit.utilities.warnings" title="pcapkit.utilities.warnings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code></a> begins in <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself, at the block’s
 <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> field, the spec’s name for it, so it is still raised and still
 dismissed by hand. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_codeql_config_2130.py</span></code> pins the

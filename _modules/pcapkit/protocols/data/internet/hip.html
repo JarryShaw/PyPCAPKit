@@ -574,7 +574,8 @@
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span>
     <span class="c1">#: Critical flag.</span>
     <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: Content length.</span>
+    <span class="c1">#: Parameter length, in octets -- the whole record, including ``Type``,</span>
+    <span class="c1">#: ``Length`` and ``Padding`` (:rfc:`7401#section-5.2.1`).</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -620,7 +621,7 @@
     <span class="n">version_fixed</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Checksum.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Control</span>
+    <span class="c1">#: Control.</span>
     <span class="n">control</span><span class="p">:</span> <span class="s1">'Control'</span>
     <span class="c1">#: Sender's host identity tag.</span>
     <span class="n">shit</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -951,7 +952,7 @@
 
     <span class="c1">#: The two reserved octets, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Mode IDs</span>
+    <span class="c1">#: Mode IDs.</span>
     <span class="n">mode_id</span><span class="p">:</span> <span class="s1">'tuple[NATTraversal, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1183,15 +1184,25 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.RegFailedParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RegFailedParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_FAILED`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_FAILED`` parameter.</span>
 
-    <span class="c1">#: Registration lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       ``lifetime`` is replaced by :attr:`failure_type`, with no alias, and</span>
+<span class="sd">       :attr:`reg_type` holds :class:`~pcapkit.const.hip.registration.Registration`</span>
+<span class="sd">       values: ``REG_FAILED`` carries a Failure Type octet ahead of its</span>
+<span class="sd">       registration types and no lifetime (:rfc:`8003#section-4.5`,</span>
+<span class="sd">       :issue:`2309`).</span>
+
+<span class="sd">    """</span>
+
     <span class="c1">#: Registration failure type.</span>
-    <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[RegistrationFailure, ...]'</span>
+    <span class="n">failure_type</span><span class="p">:</span> <span class="s1">'RegistrationFailure'</span>
+    <span class="c1">#: Registration types that failed with :attr:`failure_type`.</span>
+    <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[RegistrationFailure, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">failure_type</span><span class="p">:</span> <span class="s1">'RegistrationFailure'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1313,7 +1324,7 @@
 
     <span class="c1">#: The three reserved octets, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Next header</span>
+    <span class="c1">#: Next header.</span>
     <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span>
     <span class="c1">#: Payload data.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span>

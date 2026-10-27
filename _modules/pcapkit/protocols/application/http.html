@@ -521,8 +521,9 @@
 <span class="c1">#: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --</span>
 <span class="c1">#: by sending exactly these 24 octets, and the sequence is *designed* to be</span>
 <span class="c1">#: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose</span>
-<span class="c1">#: method ``PRI`` is reserved and permanently unregistered, so no valid HTTP/1</span>
-<span class="c1">#: message can begin with it and a prefix compare cannot false-positive on one.</span>
+<span class="c1">#: method ``PRI`` is registered as one no actual client uses</span>
+<span class="c1">#: (:rfc:`7540#section-11.6`), so no genuine HTTP/1 message begins with it and a</span>
+<span class="c1">#: prefix compare cannot false-positive on one.</span>
 <span class="c1">#: That makes it a positive identification rather than a heuristic, which is why</span>
 <span class="c1">#: :meth:`HTTP._guess_version` tests it before attempting any parse.</span>
 <span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
@@ -833,7 +834,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            version: Version of HTTP.</span>
 <span class="sd">            preface: Whether the HTTP/2 connection preface goes ahead of the</span>
-<span class="sd">                frame; :meth:`~pcapkit.protocols.protocol.Protocol.pack` writes it.</span>
+<span class="sd">                frame; :meth:`pack` writes it.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -974,7 +975,7 @@
 <span class="sd">        Trying each version in turn and taking whichever parser does not object</span>
 <span class="sd">        answers "did a parser accept this?" where the question is "what is</span>
 <span class="sd">        this?": the HTTP/2 preface reads as a frame whose declared length is</span>
-<span class="sd">        5,265,993 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at</span>
+<span class="sd">        5,263,945 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at</span>
 <span class="sd">        all can be accepted the same way.</span>
 
 <span class="sd">        Args:</span>

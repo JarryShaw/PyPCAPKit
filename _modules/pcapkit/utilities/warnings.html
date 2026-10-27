@@ -501,11 +501,11 @@
 <span class="sd">   exactly as they govern any other library's (see below for the one wrinkle in</span>
 <span class="sd">   naming a category on the command line).</span>
 
-<span class="sd">The counts are the same in development mode as outside it;</span>
-<span class="sd">:data:`~pcapkit.utilities.logging.DEVMODE` and</span>
-<span class="sd">:data:`~pcapkit.utilities.logging.VERBOSE` change how much detail the log record</span>
-<span class="sd">carries, never how many records there are. Constructing a warning class is not</span>
-<span class="sd">an act of reporting one, and has no side effects at all.</span>
+<span class="sd">The counts are the same in development mode as outside it:</span>
+<span class="sd">:data:`~pcapkit.utilities.logging.DEVMODE` changes where the log records go, and</span>
+<span class="sd">:data:`~pcapkit.utilities.logging.VERBOSE` how much detail they carry, never how</span>
+<span class="sd">many records there are. Constructing a warning class is not an act of reporting</span>
+<span class="sd">one, and has no side effects at all.</span>
 
 <span class="sd">To silence :mod:`pcapkit` warnings, filter them like any other category::</span>
 
@@ -724,11 +724,11 @@
 <span class="sd">    Every :func:`warn` call inside the block is held, with the frame it is</span>
 <span class="sd">    attributed to. On leaving the block they are reported in order, with the</span>
 <span class="sd">    same message and category and attributed to the same frame on both</span>
-<span class="sd">    channels, unless :attr:`discard` was set, in which case they are dropped. A</span>
-<span class="sd">    block left by an :exc:`Exception` reports them whatever :attr:`discard`</span>
-<span class="sd">    says; one left by any other :exc:`BaseException` -- :exc:`KeyboardInterrupt`,</span>
-<span class="sd">    :exc:`SystemExit`, :exc:`GeneratorExit` -- drops them, so that a filter</span>
-<span class="sd">    turning them into errors cannot replace it.</span>
+<span class="sd">    channels, unless :attr:`discard` was set, in which case they are dropped,</span>
+<span class="sd">    whether the block ends or is left by an :exc:`Exception`. A block left by any</span>
+<span class="sd">    other :exc:`BaseException` -- :exc:`KeyboardInterrupt`, :exc:`SystemExit`,</span>
+<span class="sd">    :exc:`GeneratorExit` -- drops them whatever :attr:`discard` says, so that a</span>
+<span class="sd">    filter turning them into errors cannot replace it.</span>
 
 <span class="sd">    The line named is the frame's line when the block is left. For the frame</span>
 <span class="sd">    :func:`~pcapkit.utilities.exceptions.stacklevel` names -- the caller of</span>
@@ -742,8 +742,9 @@
 <span class="sd">    :meth:`ProtocolBase._parse_next_layer</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase._parse_next_layer&gt;` uses this for the</span>
 <span class="sd">    trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.Raw` when the</span>
-<span class="sd">    header was not captured: the warnings describe a layer the result does not</span>
-<span class="sd">    have (:issue:`1580`).</span>
+<span class="sd">    header was not captured, or that :func:`~pcapkit.corekit.decorators.beholder`</span>
+<span class="sd">    replaces when it raises: the warnings describe a layer the result does not</span>
+<span class="sd">    have (:issue:`1580`, :issue:`2308`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Nothing here touches ``warnings.filters`` or a module's</span>
@@ -797,9 +798,7 @@
                 <span class="n">_HELD</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">outer</span><span class="p">)</span>
 
         <span class="n">held</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_held</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_held</span><span class="p">,</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discard</span> <span class="ow">and</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discard</span> <span class="ow">or</span> <span class="p">(</span><span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">)):</span>
             <span class="k">return</span>
         <span class="k">for</span> <span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">held</span><span class="p">:</span>
             <span class="n">_replay</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
@@ -965,9 +964,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ConfigWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Configuration warning.</span>
 
-<span class="sd">    Reported by :mod:`pcapkit.utilities.config` for an environment variable that</span>
-<span class="sd">    is invalid, and so falls back to its default, or that lifts a limit past its</span>
-<span class="sd">    default.</span>
+<span class="sd">    Reported for an environment variable that is invalid, and so falls back to</span>
+<span class="sd">    its default, or that lifts a limit past its default: by the readers of</span>
+<span class="sd">    :mod:`pcapkit.utilities.config`, and by this module for the flags</span>
+<span class="sd">    :mod:`pcapkit.utilities.logging` reads.</span>
 
 <span class="sd">    .. versionadded:: 1.5.0</span>
 

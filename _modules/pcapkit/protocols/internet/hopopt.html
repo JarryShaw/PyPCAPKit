@@ -2070,6 +2070,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If ``code`` is ``Pad1`` but ``length`` is not</span>
+<span class="sd">                ``0``; a ``PadN`` option is made instead.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`Data_PadOption.length</span>
 <span class="sd">            &lt;pcapkit.protocols.data.internet.hopopt.Option.length&gt;` counts the</span>
@@ -2390,6 +2394,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If a scale exceeds ``255``, too large for its</span>
+<span class="sd">                one-octet field.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">psntp</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">psntp</span>
@@ -2465,6 +2473,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema; an unassigned option schema if ``opt``</span>
 <span class="sd">            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the QS function is neither a Quick-Start Request</span>
+<span class="sd">                nor a Report of Approved Rate.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">Data_UnassignedOption</span><span class="p">):</span>

@@ -3247,7 +3247,8 @@
         <span class="n">collapsed</span> <span class="o">=</span> <span class="s1">'_'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stripped</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
         <span class="n">replaced</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\W'</span><span class="p">,</span> <span class="s1">'_'</span><span class="p">,</span> <span class="n">collapsed</span><span class="p">)</span>
         <span class="n">identifier</span> <span class="o">=</span> <span class="s1">'_'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">replaced</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)))</span>
-        <span class="c1"># NOTE: matches process()'s own keyword guard below -- a name that</span>
+        <span class="c1"># NOTE: matches the keyword guard AppType.process applies at generation</span>
+        <span class="c1"># time in pcapkit.vendor.reg.apptype.apptype -- a name that</span>
         <span class="c1"># sanitises to a reserved word is not usable as an attribute as is,</span>
         <span class="c1"># and a trailing underscore is the same fix the generator already</span>
         <span class="c1"># applies to a statically declared member with the same problem.</span>

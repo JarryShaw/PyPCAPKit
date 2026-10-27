@@ -558,8 +558,9 @@ therefore keyed by PPID rather than by port number, and is populated through
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">NGAP</span><span class="p">)</span>  <span class="c1"># equivalent, PPID given as a plain integer</span>
 </pre></div>
 </div>
-<p>By default, PPIDs 60 (<code class="docutils literal notranslate"><span class="pre">NG_Application_Protocol</span></code>) and 66
-(<code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code>) are registered to
+<p>By default, PPIDs 60 (<code class="docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span></code>)
+and 66 (<code class="docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span></code>) are
+registered to
 <a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>, and every other PPID
 resolves to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 <p>Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
@@ -1109,10 +1110,12 @@ leaves <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCT
 <p class="admonition-title">Note</p>
 <p>No alignment fix-up happens here, unlike
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP._make_tcp_options" title="pcapkit.protocols.transport.tcp.TCP._make_tcp_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_tcp_options</span></code></a>: every
-chunk schema carries its own trailing
-<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, computed from
-the chunk’s own <code class="docutils literal notranslate"><span class="pre">length</span></code>, so a chunk pads itself to the four-byte
-boundary required by <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a>.</p>
+chunk pads itself to the four-byte boundary required by
+<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a>. A chunk without a nested list carries its
+own trailing <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>,
+computed from the chunk’s own <code class="docutils literal notranslate"><span class="pre">length</span></code>; one with a nested
+parameter or error cause list folds its padding into that list, see
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.nested_length" title="pcapkit.protocols.schema.transport.sctp.nested_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">nested_length()</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -4559,8 +4562,9 @@ stay aligned.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of padding bytes, clamped to the number of bytes left in the
-enclosing structure, since <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> allows the final
-padding of a packet to be omitted. When packing, it is clamped as well
+enclosing structure, so that a final chunk captured without (all of)
+its padding still parses, although <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> has the
+sender pad every chunk. When packing, it is clamped as well
 to the <code class="docutils literal notranslate"><span class="pre">__padding__</span></code> width <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.pre_pack_padding" title="pcapkit.protocols.schema.transport.sctp.pre_pack_padding"><code class="xref py py-func docutils literal notranslate"><span class="pre">pre_pack_padding()</span></code></a> hands over, so a
 final chunk captured without (all of) its padding rebuilds without it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1474">#1474</a>).</p>

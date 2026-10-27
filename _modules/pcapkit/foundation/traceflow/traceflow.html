@@ -662,8 +662,8 @@
 <span class="w">        </span><span class="sd">"""Protocol name of current flow tracing object.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            The same value is also available as a class attribute,</span>
+<span class="sd">            from the property of the same name on :class:`TraceFlowMeta`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__protocol_name__'</span><span class="p">):</span>
@@ -675,8 +675,8 @@
 <span class="w">        </span><span class="sd">"""Protocol of current flow tracing object.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            The same value is also available as a class attribute,</span>
+<span class="sd">            from the property of the same name on :class:`TraceFlowMeta`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__protocol_type__'</span><span class="p">):</span>
@@ -821,7 +821,8 @@
                 <span class="k">raise</span> <span class="n">FileExists</span><span class="p">(</span><span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
 
         <span class="n">dumper</span> <span class="o">=</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="c1"># NOTE: as above -- make_dumper()'s subclass is always called 'DictDumper'.</span>
+        <span class="c1"># NOTE: logs ``output``, not ``dumper`` -- make_dumper()'s subclass is</span>
+        <span class="c1"># always called 'DictDumper'.</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'flow tracing output root </span><span class="si">%s</span><span class="s1">, format </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span>
 

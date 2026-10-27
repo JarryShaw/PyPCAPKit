@@ -680,8 +680,8 @@
         <span class="c1">#</span>
         <span class="c1"># ``FrameType.Flags`` itself declares no members, and from Python 3.11</span>
         <span class="c1"># the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse</span>
-        <span class="c1"># ``Flags(0)`` outright with ``TypeError: &lt;flag 'Flags'&gt; has no members</span>
-        <span class="c1"># defined`` (3.10 and earlier hand back a pseudo-member instead), so</span>
+        <span class="c1"># ``Flags(0)`` outright with a ``TypeError`` that it has no members</span>
+        <span class="c1"># (3.10 and earlier hand back a pseudo-member instead), so</span>
         <span class="c1"># the frame schemas that inherit it unchanged -- ``UnassignedFrame``,</span>
         <span class="c1"># ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and</span>
         <span class="c1"># ``WindowUpdateFrame`` -- keep the plain ``int``, which is what their</span>

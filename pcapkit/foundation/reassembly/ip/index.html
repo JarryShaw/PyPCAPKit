@@ -571,19 +571,20 @@ that replaces <code class="docutils literal notranslate"><span class="pre">RCVBT
    IF (FO = 0 AND MF = 0) {
       IF (buffer with BUFID is allocated) {
          flush all reassembly for this BUFID;
-         Submit datagram to next step;
-         DONE.
       }
+      Submit datagram to next step;
+      DONE.
    }
 
    IF (no buffer with BUFID is allocated) {
       allocate reassembly resources with BUFID;
       TIMER &lt;- TLB;
       TDL &lt;- 0;
-      put data from fragment into data buffer with BUFID
-         [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-      set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
    }
+
+   put data from fragment into data buffer with BUFID
+      [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+   set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
 
    IF (MF = 0) {
       TDL &lt;- TL-(IHL*4)+(FO*8)
@@ -619,6 +620,10 @@ reported as a separate incomplete datagram; this is intended (<a class="extlink-
 timeout after its first-arriving fragment, on the capture’s clock – 60
 seconds by default, per <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> for IPv4 and
 <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> for IPv6.</p></li>
+<li><p>A buffer flushed by an unfragmented datagram reusing its <code class="docutils literal notranslate"><span class="pre">BUFID</span></code> is
+reported as an incomplete datagram rather than discarded.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TDL</span></code> starts at <code class="docutils literal notranslate"><span class="pre">-1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">0</span></code>, so that a datagram carrying no
+data can complete (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1359">#1359</a>).</p></li>
 <li><p>Only the final fragment’s partial last <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block is set. A non-final
 fragment carries a multiple of 8 octets, so one ending mid-block was cut or
 is malformed, and setting its last block would complete the datagram with

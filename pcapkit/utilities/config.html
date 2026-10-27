@@ -719,7 +719,7 @@ about for TCP over IPv6, <span class="target" id="index-22"></span><a class="ref
 oldest is forgotten first. Up to this many captures read at the same time
 warn exactly once each.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -851,10 +851,10 @@ same legitimate 54-octet frame parsed to one result on 37 of 40 calls and to
 another on calls 26, 33 and 39, because whether it fit depended on what had
 been parsed before it. A guard whose answer moves with history is not a guard.</p>
 <p>65,536 is what removes that. It is the whole span of a 16-bit wire length
-field – which is how an IP header, an IPv6 payload, a TCP or IPv4 option and
-a PCAP-NG option all declare their size – so no shortfall that one of those
-can produce is subject to the budget at all, and every one of them is padded
-unconditionally. Measured: the largest legitimate single
+field – which is how an IPv4 datagram, an IPv6 payload and a PCAP-NG option
+all declare their size, and a TCP or IPv4 option’s 8-bit length declares less
+– so no shortfall that one of those can produce is subject to the budget at
+all, and every one of them is padded unconditionally. Measured: the largest legitimate single
 shortfall found anywhere was 65,495 octets, from a snapshot-truncated
 offload-sized frame (100 frames at <code class="docutils literal notranslate"><span class="pre">incl_len</span></code> 54 declaring an IPv4 total
 length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a

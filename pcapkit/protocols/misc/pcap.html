@@ -660,7 +660,11 @@ width (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileError" title="pcapkit.utilities.exceptions.FileError"><strong>FileError</strong></a> – If the magic number is invalid.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileError" title="pcapkit.utilities.exceptions.FileError"><strong>FileError</strong></a> – If the magic number is invalid. Parsing does not get
+    this far with one: the schema’s
+    <code class="xref py py-func docutils literal notranslate"><span class="pre">magic_number_callback()</span></code>
+    raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for it
+    while the header is unpacked.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -719,6 +723,9 @@ width (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.header.Header._read_protos">
 <span class="sig-name descname"><span class="pre">_read_protos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/header.html#Header._read_protos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.header.Header._read_protos" title="Link to this definition">¶</a></dt>
 <dd><p>Read next layer protocol type.</p>
+<p>Reads <code class="docutils literal notranslate"><span class="pre">size</span></code> octets as an unsigned integer in the file’s byte order
+(<a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.Header.byteorder" title="pcapkit.protocols.misc.pcap.header.Header.byteorder"><code class="xref py py-attr docutils literal notranslate"><span class="pre">byteorder</span></code></a>), falling back to little-endian before <a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.Header.read" title="pcapkit.protocols.misc.pcap.header.Header.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
+has set it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2312">#2312</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – buffer size</p>

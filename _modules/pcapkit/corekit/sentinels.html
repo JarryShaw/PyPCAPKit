@@ -974,8 +974,8 @@
 <span class="sd">    then reads :data:`False` where it once read :data:`True`.</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` is such a</span>
 <span class="sd">    consumer but is not affected: its fallback is guarded by</span>
-<span class="sd">    ``default not in cls._value2member_map_`` (added by GitHub issue</span>
-<span class="sd">    :issue:`864` to stop ``default`` minting a new member), and a</span>
+<span class="sd">    ``default not in cls._value2member_map_`` (the GitHub issue</span>
+<span class="sd">    :issue:`864` guard that stops ``default`` minting a new member), and a</span>
 <span class="sd">    :class:`NoDefaultType` instance, stale or fresh, is never a registered</span>
 <span class="sd">    enum value, so the guard reads :data:`True` for it either way and ``get``</span>
 <span class="sd">    re-raises the original lookup error regardless of which</span>
@@ -993,7 +993,7 @@
 <span class="sd">    docstring note on why it declines to memoise a resolved class, and</span>
 <span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
 <span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
-<span class="sd">    deliberately to pin the fix for exactly that class of bug. A *future*</span>
+<span class="sd">    deliberately to guard against exactly that class of bug. A *future*</span>
 <span class="sd">    comparison site written the vulnerable way -- a bare ``is NO_DEFAULT``</span>
 <span class="sd">    with no independent guard behind it -- would reproduce it. Nothing in</span>
 <span class="sd">    this package reloads :mod:`pcapkit.corekit.sentinels` after import, but</span>

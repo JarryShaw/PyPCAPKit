@@ -735,8 +735,8 @@
         <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
         <span class="c1"># mapping rather than a dissected frame -- which the flow-tracing adapters</span>
         <span class="c1"># of several engines do -- still fails naming ``packet``.</span>
-        <span class="c1"># :mod:`pcapkit.foundation.extraction` substitutes a</span>
-        <span class="c1"># dict-capable trace format on the strength of that error.</span>
+        <span class="c1"># :mod:`pcapkit.foundation.extraction` cites that error when it</span>
+        <span class="c1"># substitutes a dict-capable trace format for those engines up front.</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">packet</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">frame_info</span>
         <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_frac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">)</span>

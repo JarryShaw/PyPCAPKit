@@ -511,8 +511,11 @@ data models report with:
 It runs over SCTP and is named by the DATA chunk’s <em>payload protocol
 identifier</em> rather than by a port, so <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> is registered on
 <a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> under
-PPID 60 (<code class="docutils literal notranslate"><span class="pre">NG_Application_Protocol</span></code>) and PPID 66
-(<code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code>); see
+PPID 60
+(<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span></code></a>)
+and PPID 66
+(<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span></code></a>);
+see
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_sctp()</span></code></a>.</p>
 <p>An SCTP DATA chunk that names NGAP carries exactly one <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>, encoded
 in <strong>aligned PER</strong> (ALIGNED PACKED ENCODING RULES, <abbr>APER</abbr>). There is no
@@ -696,7 +699,7 @@ surfaced as first-class fields on
 <section id="known-limitations">
 <h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>PPID 66 payloads are not decoded.</strong> <code class="docutils literal notranslate"><span class="pre">NGAP_over_DTLS_over_SCTP</span></code> wraps the
+<li><p><strong>PPID 66 payloads are not decoded.</strong> NGAP over DTLS over SCTP wraps the
 <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> in a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements no DTLS, so the
 bytes reaching <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.read" title="pcapkit.protocols.application.ngap.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NGAP.read()</span></code></a> are not an APER encoding. The PPID is
 registered so that it is <em>named</em> rather than anonymous; the payload itself

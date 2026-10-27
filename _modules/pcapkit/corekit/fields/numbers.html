@@ -651,6 +651,14 @@
 <span class="sd">        -- see GitHub issue :issue:`545`. Omitting it, or passing the sign the</span>
 <span class="sd">        class already fixes, stays legal.</span>
 
+<span class="sd">        Packing does not range-check a value: :meth:`pre_process` masks it to</span>
+<span class="sd">        :attr:`bit_length` bits, so e.g. ``70000`` in a two-octet field packs</span>
+<span class="sd">        as ``0x1170`` and ``-1`` as ``0xffff``, with no error or warning. This</span>
+<span class="sd">        is the documented contract a parsed value's round trip relies on</span>
+<span class="sd">        (:issue:`1488`). A range check belongs in the protocol's ``make`` or in</span>
+<span class="sd">        a field whose values have a range of their own, such as</span>
+<span class="sd">        :class:`PortEnumField` (:issue:`2314`).</span>
+
 <span class="sd">    """</span>
 
     <span class="n">__length__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
@@ -1617,6 +1625,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``value`` is a port outside this field's width,</span>
+<span class="sd">                i.e. ``0``-``65535`` for the two-octet TCP, UDP and SCTP</span>
+<span class="sd">                ports.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            :meth:`NumberField.pre_process` masks a value to the field's width</span>
+<span class="sd">            rather than range-checking it, so without this check a schema built</span>
+<span class="sd">            directly would write port ``70000`` as ``0x1170`` and ``-1`` as</span>
+<span class="sd">            ``0xffff``. A port is a whole field with no bits to carry outside</span>
+<span class="sd">            its width, so the check costs no wire value its round trip: every</span>
+<span class="sd">            port :meth:`post_process` can return is in range. The bound is the</span>
+<span class="sd">            one :meth:`post_process` tests. See GitHub issue :issue:`2314`.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># NOTE: imported here rather than at module level, as</span>
         <span class="c1"># :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested</span>
@@ -1625,6 +1647,11 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AppType</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">port</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid value: port </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is outside '</span>
+                <span class="sa">f</span><span class="s1">'0-</span><span class="si">{</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="mi">8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">.'</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 
 

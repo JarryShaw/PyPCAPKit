@@ -75,7 +75,8 @@ their row says otherwise:
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
 +=================================================================+===============================================================+
-| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly -- disabled with an                             |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly, and no ``trace_analyse``, since it reports     |
+|                                                                 | dissected fields rather than octets -- each disabled with an  |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | no protocol dissection at all, hence no reassembly and no     |

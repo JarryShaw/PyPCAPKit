@@ -664,8 +664,8 @@
 <span class="w">        </span><span class="sd">"""Protocol name of current reassembly object.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            The same value is also available as a class attribute,</span>
+<span class="sd">            from the property of the same name on :class:`ReassemblyMeta`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__protocol_name__'</span><span class="p">):</span>
@@ -677,8 +677,8 @@
 <span class="w">        </span><span class="sd">"""Protocol of current reassembly object.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This property is not available as a class</span>
-<span class="sd">            attribute.</span>
+<span class="sd">            The same value is also available as a class attribute,</span>
+<span class="sd">            from the property of the same name on :class:`ReassemblyMeta`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__protocol_type__'</span><span class="p">):</span>
@@ -774,10 +774,10 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The clock only advances when *this* reassembly object is fed, since</span>
 <span class="sd">            a packet handed to it is the only evidence an offline parser has that</span>
-<span class="sd">            capture time has moved on. For IPv4 and TCP that is nearly every</span>
-<span class="sd">            frame of the relevant protocol; for IPv6 it is only the fragments,</span>
-<span class="sd">            so an IPv6 buffer that stalls and is followed by no further IPv6</span>
-<span class="sd">            fragment is reported as</span>
+<span class="sd">            capture time has moved on. For TCP that is every segment, for IPv4</span>
+<span class="sd">            every frame whose **DF** flag is clear, and for IPv6 only the</span>
+<span class="sd">            fragments, so an IPv6 buffer that stalls and is followed by no</span>
+<span class="sd">            further IPv6 fragment is reported as</span>
 <span class="sd">            :attr:`Completion.PARTIAL &lt;pcapkit.foundation.reassembly.data.data.Completion.PARTIAL&gt;`</span>
 <span class="sd">            at the end of the capture. That is the honest answer: the capture</span>
 <span class="sd">            never shows that the deadline passed. A caller with an outside</span>

@@ -713,16 +713,18 @@
 <span class="sd">        plausible member name, so a consumer splitting the rendering on ``::``</span>
 <span class="sd">        cannot tell it from a member genuinely so named -- and ``NONE`` *is* a</span>
 <span class="sd">        declared name elsewhere in the library. And the defect is not confined to</span>
-<span class="sd">        zero: ``Flags(1)``, ``Flags(8)`` and ``Flags(65536)`` are every bit as</span>
-<span class="sd">        nameless, so a guard written against ``value == 0`` would fix one case</span>
-<span class="sd">        and leave the rest.</span>
+<span class="sd">        zero: a registry whose field has undeclared bits, such as</span>
+<span class="sd">        :class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`, is</span>
+<span class="sd">        every bit as nameless at ``1`` or ``8``, so a guard written against</span>
+<span class="sd">        ``value == 0`` would fix one case and leave the rest.</span>
 
 <span class="sd">        The fallback is the value's own decimal spelling, which is what the</span>
 <span class="sd">        enumeration libraries themselves already use for an undeclared residue:</span>
-<span class="sd">        ``Flags(2057).name`` is ``'ACK|9'``, naming the declared bit and giving</span>
-<span class="sd">        the leftovers as one number. A wholly-undeclared value is that same</span>
-<span class="sd">        rendering with no declared bit to precede it, so ``Flags(9)`` becomes</span>
-<span class="sd">        ``'Flags::9 [9]'`` and ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also</span>
+<span class="sd">        ``BindingUpdateFlag(32777).name`` is ``'A|9'``, naming the declared bit</span>
+<span class="sd">        and giving the leftovers as one number. A wholly-undeclared value is that</span>
+<span class="sd">        same rendering with no declared bit to precede it, so</span>
+<span class="sd">        ``BindingUpdateFlag(9)`` becomes ``'BindingUpdateFlag::9 [9]'`` and</span>
+<span class="sd">        ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also</span>
 <span class="sd">        cannot be mistaken for a member name, since a Python identifier may not</span>
 <span class="sd">        begin with a digit.</span>
 

@@ -659,15 +659,17 @@ so interpolating it unguarded would put the literal four characters
 plausible member name, so a consumer splitting the rendering on <code class="docutils literal notranslate"><span class="pre">::</span></code>
 cannot tell it from a member genuinely so named – and <code class="docutils literal notranslate"><span class="pre">NONE</span></code> <em>is</em> a
 declared name elsewhere in the library. And the defect is not confined to
-zero: <code class="docutils literal notranslate"><span class="pre">Flags(1)</span></code>, <code class="docutils literal notranslate"><span class="pre">Flags(8)</span></code> and <code class="docutils literal notranslate"><span class="pre">Flags(65536)</span></code> are every bit as
-nameless, so a guard written against <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">==</span> <span class="pre">0</span></code> would fix one case
-and leave the rest.</p>
+zero: a registry whose field has undeclared bits, such as
+<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.binding_update_flag.BindingUpdateFlag" title="pcapkit.const.mh.binding_update_flag.BindingUpdateFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingUpdateFlag</span></code></a>, is
+every bit as nameless at <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">8</span></code>, so a guard written against
+<code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">==</span> <span class="pre">0</span></code> would fix one case and leave the rest.</p>
 <p>The fallback is the value’s own decimal spelling, which is what the
 enumeration libraries themselves already use for an undeclared residue:
-<code class="docutils literal notranslate"><span class="pre">Flags(2057).name</span></code> is <code class="docutils literal notranslate"><span class="pre">'ACK|9'</span></code>, naming the declared bit and giving
-the leftovers as one number. A wholly-undeclared value is that same
-rendering with no declared bit to precede it, so <code class="docutils literal notranslate"><span class="pre">Flags(9)</span></code> becomes
-<code class="docutils literal notranslate"><span class="pre">'Flags::9</span> <span class="pre">[9]'</span></code> and <code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. It also
+<code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag(32777).name</span></code> is <code class="docutils literal notranslate"><span class="pre">'A|9'</span></code>, naming the declared bit
+and giving the leftovers as one number. A wholly-undeclared value is that
+same rendering with no declared bit to precede it, so
+<code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag(9)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'BindingUpdateFlag::9</span> <span class="pre">[9]'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. It also
 cannot be mistaken for a member name, since a Python identifier may not
 begin with a digit.</p>
 <p>This is <em>not</em> an <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> quirk. A stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntFlag</span></code></a> built

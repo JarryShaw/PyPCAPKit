@@ -554,7 +554,7 @@
     <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span>
     <span class="c1">#: Destination address.</span>
     <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span>
-    <span class="c1">#: IP protocol identifier.</span>
+    <span class="c1">#: IP identification.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Payload protocol type.</span>
     <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransType'</span>
@@ -640,10 +640,9 @@
         <span class="c1"># ``bytes`` payload and a parsed ``packet``, and an incomplete one with a</span>
         <span class="c1"># tuple of fragments and ``packet=None``, but that correlation does not hold:</span>
         <span class="c1"># under ``strict=False`` an *incomplete* datagram is reported as one</span>
-        <span class="c1"># contiguous ``bytes`` with its holes zero-filled, and analysed, because</span>
-        <span class="c1"># that is the payload buffer as it stands -- which is what</span>
-        <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream</span>
-        <span class="c1"># from. Overloads keyed on a literal cannot be selected from a ``completed``</span>
+        <span class="c1"># contiguous ``bytes`` -- its holes zero-filled, or only the prefix up to</span>
+        <span class="c1"># the first hole while the total length is unknown -- and analysed.</span>
+        <span class="c1"># Overloads keyed on a literal cannot be selected from a ``completed``</span>
         <span class="c1"># computed at runtime anyway, so they would make the reassemblers' own calls</span>
         <span class="c1"># untypeable while promising a correlation the code does not keep.</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>

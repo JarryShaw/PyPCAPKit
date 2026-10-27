@@ -735,8 +735,15 @@ when omitted.</p></li>
 <dd class="field-odd"><p>Constructed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">dst</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (see
-    <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="pcapkit.corekit.fields.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>).</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">dst</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (see
+    <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="pcapkit.corekit.fields.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>)
+    and <code class="docutils literal notranslate"><span class="pre">data</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> or a data model; <code class="docutils literal notranslate"><span class="pre">dst</span></code> is not
+    read for any other <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> that do not parse as
+    the routing data of <code class="docutils literal notranslate"><span class="pre">type</span></code>, or is of none of the accepted
+    types.</p></li>
+</ul>
 </dd>
 </dl>
 <div class="versionchanged">
@@ -879,6 +886,9 @@ dropping the offset silently reinterprets the field.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is odd.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -953,6 +963,11 @@ dropping the offset silently reinterprets the field.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code>, <code class="docutils literal notranslate"><span class="pre">Pad</span></code>, <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and
+    <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> do not give a whole number of addresses, at least
+    one (<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-4.2"><strong>RFC 6554 Section 4.2</strong></a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1233,19 +1248,19 @@ The discrepancy with the implementation signature is deliberate
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType" title="pcapkit.protocols.schema.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a></p>
 <p>Header schema for IPv6-Route RPL routing data.</p>
 <div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">cmpr_i</span></code> and <code class="docutils literal notranslate"><span class="pre">cmpr_e</span></code>, now the keys of <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr" title="pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cmpr</span></code></a>
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">cmpr_i</span></code> and <code class="docutils literal notranslate"><span class="pre">cmpr_e</span></code>, which are the keys of <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr" title="pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cmpr</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1456">#1456</a>).</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr">
 <span class="sig-name descname"><span class="pre">cmpr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.CmprInfo" title="pcapkit.protocols.schema.internet.ipv6_route.CmprInfo"><span class="pre">CmprInfo</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">cmpr&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.cmpr" title="Link to this definition">¶</a></dt>
 <dd><p>CmprI and CmprE – two 4-bit counts sharing one octet.</p>
-<p>NOTE: <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> gives <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> as <em>“4-bit
+<p>NOTE: <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> gives <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> as <em>“4-bit
 unsigned integer”</em>, i.e. the high and low nibble of a single octet, so
 they cannot be two <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field" title="pcapkit.corekit.fields.numbers.UInt8Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt8Field</span></code></a>
 (one octet each). Together with <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RPL.pad" title="pcapkit.protocols.schema.internet.ipv6_route.RPL.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pad</span></code></a> below – <code class="docutils literal notranslate"><span class="pre">Pad</span></code>
 (4 bits) plus <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (20 bits) – this is the one 32-bit word the
-diagram in <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> draws, and the same word
+diagram in <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> draws, and the same word
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Route._read_data_type_rpl</span></code></a>’s
 own docstring draws. The split between the two fields falls on the octet
 boundary between <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> and <code class="docutils literal notranslate"><span class="pre">Pad</span></code>, so neither straddles an octet.</p>
@@ -1347,7 +1362,7 @@ instance based on <a class="reference internal" href="#pcapkit.protocols.schema.
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">ipv6_route_data_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdr_ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_route.html#ipv6_route_data_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length" title="Link to this definition">¶</a></dt>
 <dd><p>Length, in octets, of the IPv6-Route type-specific data for a given <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code>.</p>
-<p>Per <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
+<p>Per <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
 Routing header in 8-octet units, not including the first 8 octets”</em> –
 i.e. the total on-the-wire header is <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> octets. Of
 that, the 4 octets of <code class="docutils literal notranslate"><span class="pre">next</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code>/<code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">seg_left</span></code> are not

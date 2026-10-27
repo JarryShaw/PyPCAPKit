@@ -672,6 +672,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the version nibble is not ``2``.</span>
+
 <span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span>
@@ -685,8 +688,8 @@
         <span class="c1"># reports a tunnel and session ID assembled out of octets that are</span>
         <span class="c1"># neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise</span>
         <span class="c1"># yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read</span>
-        <span class="c1"># out of the top half of a Session ID and the first two octets of the PPP</span>
-        <span class="c1"># frame behind it (#548). This is also what keeps the hard-coded</span>
+        <span class="c1"># out of the lower half of a Session ID and the first two octets of the</span>
+        <span class="c1"># PPP frame behind it (#548). This is also what keeps the hard-coded</span>
         <span class="c1"># ``Literal[2]`` of ``version`` true, instead of disagreeing with</span>
         <span class="c1"># ``info.version`` on the same datagram.</span>
         <span class="k">if</span> <span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>

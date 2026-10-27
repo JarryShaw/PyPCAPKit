@@ -899,7 +899,7 @@ the caller supplied parsing context of
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.nanosecond">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nanosecond</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.nanosecond" title="Link to this definition">¶</a></dt>
-<dd><p>Whether the timestamp is in nanoseconds.</p>
+<dd><p>Whether the timestamp resolution is finer than microseconds.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2714,6 +2714,9 @@ stands, and data of any other version is kept as
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.UnknownSecrets" title="pcapkit.protocols.data.misc.pcapng.UnknownSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownSecrets</span></code></a></span></p>
 </dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed decryption secrets data.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -2730,6 +2733,9 @@ stands, and data of any other version is kept as
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog" title="pcapkit.protocols.data.misc.pcapng.TLSKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLog</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed decryption secrets data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3406,7 +3412,8 @@ stands, and data of any other version is kept as
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></span>) – Option type.</p></li>
 <li><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.IF_TZoneOption" title="pcapkit.protocols.data.misc.pcapng.IF_TZoneOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">IF_TZoneOption</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Option data model.</p></li>
-<li><p><strong>tzone</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timezone</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Timezone offset, in seconds.</p></li>
+<li><p><strong>tzone</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timezone</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Timezone offset from UTC, as a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timezone</span></code></a>,
+a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> of seconds.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -4800,8 +4807,8 @@ error bits 16-23 that the data model does not name.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.BlockType.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#BlockType.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.BlockType.post_process" title="Link to this definition">¶</a></dt>
 <dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
-<p>This method validates the two block lengths and raises
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> if they are not
+<p>This method compares the two block lengths and issues a
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> if they are not
 equal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -6008,7 +6015,13 @@ only the outer one is the miss-safe
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption.tsresol">
 <span class="sig-name descname"><span class="pre">tsresol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.ResolutionData" title="pcapkit.protocols.schema.misc.pcapng.ResolutionData"><span class="pre">ResolutionData</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">tsresol&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption.tsresol" title="Link to this definition">¶</a></dt>
-<dd><p>Interface timestamp resolution, in units per second.</p>
+<dd><p>the base flag
+and the exponent, from which <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption.resolution" title="pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption.resolution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">resolution</span></code></a> is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Interface timestamp resolution, as the option encodes it</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6993,7 +7006,7 @@ an integer value and accept the current packet as its only argument.</p></li>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>This class is specifically designed for <a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>
-as it is actually a <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a> class.</p>
+as it is actually an <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code> class.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.OptionEnumField.pre_process">
@@ -7414,9 +7427,10 @@ declares, and it is decremented by four for <a class="reference internal" href="
 or not those four octets were there to read –
 <a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.unpack" title="pcapkit.corekit.fields.field.FieldBase.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code></a>
 zero-pads a short read rather than refusing it. A tail of one, two or
-three octets therefore arrives here negative, and
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase.read" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.RawIOBase.read()</span></code></a> would raise a bare <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. The floor is a
-backstop: <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor" title="pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._check_block_floor</span></code></a> reports that
+three octets therefore arrives here negative, which
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField.unpack" title="pcapkit.corekit.fields.misc.SchemaField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.unpack</span></code></a>
+would read as no declared length, sizing the block by whatever is left
+of the stream. The floor is a backstop: <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor" title="pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._check_block_floor</span></code></a> reports that
 tail as end-of-stream before it gets here, and on the packing path
 <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> seeds
 <code class="docutils literal notranslate"><span class="pre">__length__</span></code> as <code class="docutils literal notranslate"><span class="pre">-1</span></code> for “unknown”, which
@@ -7478,12 +7492,13 @@ set to anything. Nothing else makes the difference non-negative, and the field
 layer does not either: <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings._TextField.__call__" title="pcapkit.corekit.fields.strings._TextField.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_TextField.__call__</span></code></a> builds its
 <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template as <code class="docutils literal notranslate"><span class="pre">f'{length}s'</span></code> unconditionally, so a negative
 length becomes the format <code class="docutils literal notranslate"><span class="pre">'-8s'</span></code> and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> raises a bare
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>; a negative <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-length reaches <a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase.read" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.RawIOBase.read()</span></code></a> and raises a bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.
-Neither is one of <a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>, so a caller cannot tell
-either from a bug in its own code, and neither is an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so
-neither is caught by the frame loop – one malformed block would therefore
-cost the whole extraction.</p>
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>. That is not one of <a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>,
+so a caller cannot tell it from a bug in its own code, and it is not an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so the frame loop does not catch it – one malformed block
+would therefore cost the whole extraction. A negative
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> length fails silently
+instead: <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField.unpack" title="pcapkit.corekit.fields.misc.SchemaField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.unpack</span></code></a> reads it as no declared
+length, and sizes the nested schema by whatever is left of the stream.</p>
 <p>Two shapes reach here. A Block Total Length below the block’s own fixed-field
 floor – 28 octets for a Section Header Block, 20 for an Interface
 Description Block, 16 for a Custom Block – makes the area negative directly.
@@ -8183,7 +8198,8 @@ option area holds any (<a class="extlink-issue reference external" href="https:/
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock.data">
 <span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.OrderedMultiInfo" title="pcapkit.corekit.infoclass.OrderedMultiInfo"><span class="pre">OrderedMultiInfo</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock.data" title="Link to this definition">¶</a></dt>
-<dd><p>Journal entry.</p>
+<dd><p>Journal entries; empty for a malformed block, whose entry is then kept
+as captured under <code class="docutils literal notranslate"><span class="pre">entry_raw</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1406">#1406</a>).</p>
 </dd></dl>
 
 </dd></dl>

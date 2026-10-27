@@ -583,7 +583,7 @@ connection preface, its 24 octets are recorded as <code class="docutils literal 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">1</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">2</span></span></code></span>]</span>) – Version of HTTP.</p></li>
 <li><p><strong>preface</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the HTTP/2 connection preface goes ahead of the
-frame; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> writes it.</p></li>
+frame; <code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code> writes it.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -629,7 +629,7 @@ that <a class="reference internal" href="#pcapkit.protocols.application.http.HTT
 Trying each version in turn and taking whichever parser does not object
 answers “did a parser accept this?” where the question is “what is
 this?”: the HTTP/2 preface reads as a frame whose declared length is
-5,265,993 (<code class="docutils literal notranslate"><span class="pre">b'PRI'</span></code> as a 24-bit integer), and text that is not HTTP at
+5,263,945 (<code class="docutils literal notranslate"><span class="pre">b'PRI'</span></code> as a 24-bit integer), and text that is not HTTP at
 all can be accepted the same way.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -779,8 +779,9 @@ here either, matching the parser, which raises on fewer than three.</p>
 HTTP/2 connection – with prior knowledge, over TLS, or after an upgrade –
 by sending exactly these 24 octets, and the sequence is <em>designed</em> to be
 identifiable without parsing: it is a well-formed HTTP/1.1 request line whose
-method <code class="docutils literal notranslate"><span class="pre">PRI</span></code> is reserved and permanently unregistered, so no valid HTTP/1
-message can begin with it and a prefix compare cannot false-positive on one.
+method <code class="docutils literal notranslate"><span class="pre">PRI</span></code> is registered as one no actual client uses
+(<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7540.html#section-11.6"><strong>RFC 7540 Section 11.6</strong></a>), so no genuine HTTP/1 message begins with it and a
+prefix compare cannot false-positive on one.
 That makes it a positive identification rather than a heuristic, which is why
 <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> tests it before attempting any parse.</p>
 </dd></dl>

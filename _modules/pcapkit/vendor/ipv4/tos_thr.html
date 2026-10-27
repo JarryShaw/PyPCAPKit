@@ -514,6 +514,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ToSThroughput</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""ToS (DS Field) Throughput"""</span>
 
+    <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 1'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[int, str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>

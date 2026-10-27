@@ -815,8 +815,8 @@ override can be undone (<a class="extlink-issue reference external" href="https:
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the version is not 4, or if <code class="docutils literal notranslate"><span class="pre">ihl</span></code> declares
-    more header than the data holds.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the version is not 4, if <code class="docutils literal notranslate"><span class="pre">ihl</span></code> declares
+    more header than the data holds, or if an option is malformed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -852,7 +852,8 @@ override can be undone (<a class="extlink-issue reference external" href="https:
 <li><p><strong>reserved</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Reserved flag bit, i.e. the high-order bit of the flags.</p></li>
 <li><p><strong>df</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Don’t fragment flag.</p></li>
 <li><p><strong>mf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – More fragments flag.</p></li>
-<li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Fragment offset.</p></li>
+<li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Fragment offset, in the 8-octet units of the wire field;
+the parsed <code class="docutils literal notranslate"><span class="pre">offset</span></code> is in octets, see <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_data" title="pcapkit.protocols.internet.ipv4.IPv4._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_data()</span></code></a>.</p></li>
 <li><p><strong>ttl</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Time to live of the packet.</p></li>
 <li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Payload protocol of the packet.</p></li>
 <li><p><strong>protocol_default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Default value of <code class="docutils literal notranslate"><span class="pre">protocol</span></code>.</p></li>
@@ -1607,8 +1608,13 @@ the slots left over up to <code class="docutils literal notranslate"><span class
 <dd class="field-odd"><p>Constructed option schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an address is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or is not a valid
-    IPv4 address.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">option</span></code> is not given and <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is
+    neither a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> nor a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, which includes the
+    default <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an address is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or is not a valid
+    IPv4 address.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -2433,7 +2439,7 @@ than as padding, so that whatever the sender put there is written back.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.VerIHLField.ihl">
 <span class="sig-name descname"><span class="pre">ihl</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.VerIHLField.ihl" title="Link to this definition">¶</a></dt>
-<dd><p>Internet header length.</p>
+<dd><p>Internet header length, in 32-bit words.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2471,7 +2477,7 @@ than as padding, so that whatever the sender put there is written back.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.Flags.offset">
 <span class="sig-name descname"><span class="pre">offset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.Flags.offset" title="Link to this definition">¶</a></dt>
-<dd><p>Fragment offset.</p>
+<dd><p>Fragment offset, in 8-octet units.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2484,7 +2490,7 @@ than as padding, so that whatever the sender put there is written back.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.TSFlags.oflw">
 <span class="sig-name descname"><span class="pre">oflw</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.TSFlags.oflw" title="Link to this definition">¶</a></dt>
-<dd><p>Timestamp overflow flag.</p>
+<dd><p>Overflow count.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2660,7 +2666,7 @@ leftover octets are read as a further, fabricated option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.IPv4.hdr_len">
 <span class="sig-name descname"><span class="pre">hdr_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.IPv4.hdr_len" title="Link to this definition">¶</a></dt>
-<dd><p>Internet header length.</p>
+<dd><p>Internet header length, in octets.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2690,7 +2696,7 @@ leftover octets are read as a further, fabricated option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.IPv4.offset">
 <span class="sig-name descname"><span class="pre">offset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.IPv4.offset" title="Link to this definition">¶</a></dt>
-<dd><p>Fragment offset.</p>
+<dd><p>Fragment offset, in octets.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2863,7 +2869,7 @@ access it with <a class="reference external" href="https://docs.python.org/3/bui
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.OptionType.change">
 <span class="sig-name descname"><span class="pre">change</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.OptionType.change" title="Link to this definition">¶</a></dt>
-<dd><p>Change flag.</p>
+<dd><p>Copied flag, i.e. whether the option is copied into every fragment.</p>
 </dd></dl>
 
 <dl class="py attribute">

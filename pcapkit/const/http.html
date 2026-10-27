@@ -1135,8 +1135,8 @@ as names (GitHub issue <a class="extlink-issue reference external" href="https:/
 IANA methods whose member <em>name</em> differs from their <em>value</em> –
 <code class="docutils literal notranslate"><span class="pre">BASELINE_CONTROL</span></code> / <code class="docutils literal notranslate"><span class="pre">'BASELINE-CONTROL'</span></code> and
 <code class="docutils literal notranslate"><span class="pre">VERSION_CONTROL</span></code> / <code class="docutils literal notranslate"><span class="pre">'VERSION-CONTROL'</span></code>, a hyphen being unusable
-in a Python identifier – which <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> (and so the
-constructor) also finds by value.</p>
+in a Python identifier – which the constructor also finds by
+value, before it falls back to <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>.</p>
 <p>It is a <code class="xref py py-class docutils literal notranslate"><span class="pre">classmethod</span></code>, as the base is, because a
 zero-argument <code class="docutils literal notranslate"><span class="pre">super()</span></code> needs a first argument to bind
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>). <code class="docutils literal notranslate"><span class="pre">Method.get('X')</span></code> binds the same as it would on a

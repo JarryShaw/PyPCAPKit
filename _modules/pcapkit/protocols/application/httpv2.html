@@ -1800,7 +1800,7 @@
 <div class="viewcode-block" id="HTTP._make_http_rst_stream">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._make_http_rst_stream">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_RSTStreamFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                              <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
+                              <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">NO_ERROR</span><span class="p">,</span>
                               <span class="n">error_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                               <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1809,7 +1809,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame data model.</span>
-<span class="sd">            error: Error code.</span>
+<span class="sd">            error: Error code, ``NO_ERROR`` unless given.</span>
 <span class="sd">            error_default: Default value of error code.</span>
 <span class="sd">            error_namespace: Namespace of error code.</span>
 <span class="sd">            error_reversed: Reversed namespace of error code.</span>
@@ -1817,6 +1817,13 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           ``error`` defaults to ``NO_ERROR``, the code :rfc:`9113#section-7`</span>
+<span class="sd">           gives a condition that is not the result of an error, rather than</span>
+<span class="sd">           ``HTTP_1_1_REQUIRED``, which asks the peer to use HTTP/1.1 instead</span>
+<span class="sd">           (:issue:`2311`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1991,7 +1998,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[Data_GoawayFrame]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">last_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">last_sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                          <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">HTTP_1_1_REQUIRED</span><span class="p">,</span>
+                          <span class="n">error</span><span class="p">:</span> <span class="s1">'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum'</span> <span class="o">=</span> <span class="n">Enum_ErrorCode</span><span class="o">.</span><span class="n">NO_ERROR</span><span class="p">,</span>
                           <span class="n">error_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">error_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                           <span class="n">error_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -2003,7 +2010,7 @@
 <span class="sd">            frame: Frame data model.</span>
 <span class="sd">            last_reserved: Reserved bit of the last stream identifier.</span>
 <span class="sd">            last_sid: Last stream identifier.</span>
-<span class="sd">            error: Error code.</span>
+<span class="sd">            error: Error code, ``NO_ERROR`` unless given.</span>
 <span class="sd">            error_default: Default value of error code.</span>
 <span class="sd">            error_namespace: Namespace of error code.</span>
 <span class="sd">            error_reversed: Reversed namespace of error code.</span>
@@ -2012,6 +2019,13 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed frame schema and updated flags.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           ``error`` defaults to ``NO_ERROR``, the code :rfc:`9113#section-7`</span>
+<span class="sd">           gives a condition that is not the result of an error, rather than</span>
+<span class="sd">           ``HTTP_1_1_REQUIRED``, which asks the peer to use HTTP/1.1 instead</span>
+<span class="sd">           (:issue:`2311`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

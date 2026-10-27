@@ -522,7 +522,8 @@ and at least 20 – lies inside the frame and every IP datagram carrying it (see
 <a class="reference internal" href="#pcapkit.toolkit.scapy._within_datagrams" title="pcapkit.toolkit.scapy._within_datagrams"><code class="xref py py-func docutils literal notranslate"><span class="pre">_within_datagrams()</span></code></a>), and the <strong>DF</strong> (<code class="docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>)
 flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. A zero-length frame has none, though <a class="reference external" href="https://scapy.net">Scapy</a> hands it back
 as an IPv4 layer of defaults at the <code class="docutils literal notranslate"><span class="pre">RAW</span></code> and <code class="docutils literal notranslate"><span class="pre">IPV4</span></code> link types (see
-<a class="reference internal" href="#pcapkit.toolkit.scapy._frame" title="pcapkit.toolkit.scapy._frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code></a>).</p>
+<a class="reference internal" href="#pcapkit.toolkit.scapy._frame" title="pcapkit.toolkit.scapy._frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code></a>). In an IP-in-IP tunnel, the layer is the first that is a
+fragment (see <a class="reference internal" href="#pcapkit.toolkit.scapy._fragment" title="pcapkit.toolkit.scapy._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -552,7 +553,8 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>), in no later IPv4 fragment, and an IPv6 Fragment
 header (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
 <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>) among the extension headers <a class="reference external" href="https://scapy.net">Scapy</a>
-dissects in that layer’s own chain.</p>
+dissects in that layer’s own chain. In an IP-in-IP tunnel, the layer is the first
+that has one (see <a class="reference internal" href="#pcapkit.toolkit.scapy._fragment" title="pcapkit.toolkit.scapy._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -581,8 +583,7 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 no upper-layer header in it (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>), but <a class="reference external" href="https://scapy.net">Scapy</a>
 dissects IPv6 there whatever the fragment offset. And the header and
 addresses handed on are those of the IPv6 layer the Fragment header
-follows, so one inside a packet that layer carries, such as the inner
-packet of 6in6, is not taken.</p>
+follows.</p>
 </div>
 </dd></dl>
 
@@ -826,6 +827,56 @@ off the octets it builds into (<a class="extlink-issue reference external" href=
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._fragment">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._fragment" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the IPv4 or IPv6 layer of a packet that IP reassembly reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">'IP'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IPv6'</span></code>, the layer to fetch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a> | <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The first <code class="docutils literal notranslate"><span class="pre">name</span></code> layer, from the outside in, that is a fragment –
+for IPv4, one with <strong>MF</strong> set or a non-zero fragment offset, for IPv6,
+one with an IPv6 Fragment header (see <a class="reference internal" href="#pcapkit.toolkit.scapy._fragment_header" title="pcapkit.toolkit.scapy._fragment_header"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment_header()</span></code></a>); with
+none, <code class="docutils literal notranslate"><span class="pre">packet[name]</span></code>, the outermost; with no <code class="docutils literal notranslate"><span class="pre">name</span></code> layer,
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As with <a class="reference internal" href="builtin.html#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap._fragment()</span></code></a>, either datagram of an
+IP-in-IP tunnel may be the fragmented one, and each is reassembled on
+its own header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2307">#2307</a>). The datagram an ICMP error quotes is
+of another class, so is not <code class="docutils literal notranslate"><span class="pre">packet[name]</span></code> and is not walked to.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._fragment_header">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_fragment_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_fragment_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._fragment_header" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the IPv6 Fragment header of an IPv6 layer, if any.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ipv6</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a></span>) – Scapy IPv6 layer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6ExtHdrFragment</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The IPv6 Fragment header (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>)
+among the extension headers <a class="reference external" href="https://scapy.net">Scapy</a> dissects in that layer’s own
+chain, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if there is none.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy._tcp_carrier">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_tcp_carrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_tcp_carrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._tcp_carrier" title="Link to this definition">¶</a></dt>
 <dd><p>Fetch the TCP segment of a Scapy packet, and the IP layer that carries it.</p>
@@ -941,9 +992,10 @@ cannot be used for it.</p>
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv4_reassembly">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for IPv4 reassembly.</p>
-<p>A packet can be reassembled if its network layer is IPv4 (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip.IP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip.IP</span></code></a>) –
-one carried in IPv6 is not read – whose header was captured whole, and the <strong>DF</strong>
-(<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip.IP.df" title="(in dpkt v1.9)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">dpkt.ip.IP.df</span></code></a>) flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+<p>A packet can be reassembled if it has an IPv4 layer (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip.IP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip.IP</span></code></a>) whose
+header was captured whole, and the <strong>DF</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip.IP.df" title="(in dpkt v1.9)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">dpkt.ip.IP.df</span></code></a>) flag is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. The layer is the first that is a fragment, or with none, the network
+layer if it is IPv4 (see <a class="reference internal" href="#pcapkit.toolkit.dpkt._fragment" title="pcapkit.toolkit.dpkt._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -976,11 +1028,11 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
 buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
-which a zeroed checksum or length comes back recomputed –
-<a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
-in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
-packet itself is left untouched either way.</p>
+which a zeroed checksum comes back recomputed, along with the Total
+Length – <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again.
+They are that re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths
+misplace the layer in the record, as behind some stacks of VLAN tags
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The packet itself is left untouched either way.</p>
 <p>The header is the IHL’s octets, and the payload ends at the Total
 Length, or at the end of the frame for a zero one. A Total Length
 shorter than the IHL leaves the header whole and the payload empty
@@ -1000,9 +1052,10 @@ with <code class="docutils literal notranslate"><span class="pre">packet</span><
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv6_reassembly">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for IPv6 reassembly.</p>
-<p>A packet can be reassembled if its network layer is IPv6 (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6</span></code></a>) –
-one carried in IPv4 is not read – and has an IPv6 Fragment header
-(<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>).</p>
+<p>A packet can be reassembled if it has an IPv6 layer (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6</span></code></a>) with an
+IPv6 Fragment header (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
+<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>). The layer is the first that has one (see
+<a class="reference internal" href="#pcapkit.toolkit.dpkt._fragment" title="pcapkit.toolkit.dpkt._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1027,7 +1080,7 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
 buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
-which a zeroed checksum or length comes back recomputed –
+which a zeroed TCP, UDP or ICMPv6 checksum comes back recomputed –
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
 re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
 in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
@@ -1071,15 +1124,15 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The header and payload are sliced out of the record octets
+<p>The header is sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
-they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
-which a zeroed checksum or length comes back recomputed –
-<a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
-in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
-packet itself is left untouched either way.</p>
+it is the captured one, and the payload is the segment data <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>
+itself read from the frame. A packet built by hand carries no such
+buffer, and its header is then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s serialisation of the TCP
+layer, which recomputes nothing. It is that serialisation too where
+<a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer in the record, as behind some
+stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The packet itself is left untouched
+either way.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1122,15 +1175,15 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The header and payload are sliced out of the record octets
+<p>The header is sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
-they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
-which a zeroed checksum or length comes back recomputed –
-<a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
-in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
-packet itself is left untouched either way.</p>
+it is the captured one, and the payload is the segment data <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>
+itself read from the frame. A packet built by hand carries no such
+buffer, and its header is then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s serialisation of the TCP
+layer, which recomputes nothing. It is that serialisation too where
+<a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer in the record, as behind some
+stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The packet itself is left untouched
+either way.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1348,6 +1401,39 @@ timestamp – one passed by hand, or yielded by a <a class="reference external" 
 the engine could not extend – carries none, and is handed on as it is.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.dpkt._fragment">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">_fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#_fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt._fragment" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the IPv4 or IPv6 layer of a DPKT packet that IP reassembly reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet, i.e. the outermost layer.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">4</span></code> or <code class="docutils literal notranslate"><span class="pre">6</span></code>, the IP version of the layer to fetch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip.IP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip.IP</span></code></a> | <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP6</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The first layer of that version, from the network layer in, that is a
+fragment – for IPv4, one with <strong>MF</strong> set or a non-zero fragment
+offset, for IPv6, one with an IPv6 Fragment header; with none, the
+network layer if it is of that version; otherwise <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As with <a class="reference internal" href="builtin.html#pcapkit.toolkit.pcap._fragment" title="pcapkit.toolkit.pcap._fragment"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap._fragment()</span></code></a>, either datagram of an
+IP-in-IP tunnel may be the fragmented one, and each is reassembled on
+its own header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2307">#2307</a>). An IPv6 layer is the one with extension
+headers. The walk goes on past an IP layer only where its payload
+protocol is IPv4 or IPv6, i.e. a tunnel, so a datagram an ICMP error
+quotes, which <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> decodes as an IP layer below the ICMP one, is not
+walked to.</p>
+</div>
 </dd></dl>
 
 </section>

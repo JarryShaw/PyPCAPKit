@@ -762,10 +762,14 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If a packed hardware address is not ``hlen`` octets</span>
-<span class="sd">                long (with ``hlen`` not given and ``htype`` Ethernet, not 6</span>
-<span class="sd">                octets long), or a packed protocol address is not ``plen``</span>
-<span class="sd">                octets long.</span>
+<span class="sd">            FieldValueError: If ``spa`` or ``tpa`` is rejected by</span>
+<span class="sd">                :meth:`_make_proto_resolve`, e.g. a :obj:`bool`.</span>
+<span class="sd">            ProtocolError: If ``sha`` or ``tha`` is rejected by</span>
+<span class="sd">                :meth:`_make_addr_resolve`, or ``spa`` or ``tpa`` by</span>
+<span class="sd">                :meth:`_make_proto_resolve`; if a packed hardware address is</span>
+<span class="sd">                not ``hlen`` octets long (with ``hlen`` not given and</span>
+<span class="sd">                ``htype`` Ethernet, not 6 octets long), or a packed protocol</span>
+<span class="sd">                address is not ``plen`` octets long.</span>
 
 <span class="sd">        """</span>
         <span class="n">_htype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">htype</span><span class="p">,</span> <span class="n">htype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">htype_namespace</span><span class="p">,</span>
@@ -993,7 +997,7 @@
 <span class="sd">            pack as ``00000001`` (IPv4) or ``::1`` (IPv6) with no exception and</span>
 <span class="sd">            no warning.</span>
 
-<span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
+<span class="sd">            The messages are prefixed with :attr:`self.__class__.__name__</span>
 <span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.alias&gt;`, even though the</span>
 <span class="sd">            latter is this project's usual choice: :attr:`alias` here reads</span>

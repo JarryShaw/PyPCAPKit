@@ -731,10 +731,10 @@ is as follows:</p>
  |     |--&gt; ipv6_frag.id   |
  |     |--&gt; ipv6_frag.next |
  |                         |--&gt; 'TDL' : (int) total data length
- |                         |--&gt; RCVBT : (bytearray) fragment received bit table
- |                         |             |--&gt; (bytes) b'\\x00' -&gt; not received
- |                         |             |--&gt; (bytes) b'\\x01' -&gt; received
- |                         |             |--&gt; (bytes) ...
+ |                         |--&gt; 'RCVBT' : (bytearray) fragment received bit table
+ |                         |               |--&gt; (bytes) b'\\x00' -&gt; not received
+ |                         |               |--&gt; (bytes) b'\\x01' -&gt; received
+ |                         |               |--&gt; (bytes) ...
  |                         |--&gt; 'index' : (list) list of reassembled packets
  |                         |               |--&gt; (int) packet range number
  |                         |--&gt; 'header' : (bytes) header buffer

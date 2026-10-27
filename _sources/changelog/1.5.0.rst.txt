@@ -5,7 +5,7 @@ The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. New extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
 and a defect programme run through the issue tracker, citing issues and pull
-requests from :pr:`340` to :pr:`2205`.
+requests from :pr:`340` to :pr:`2257`.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` to ``1.5.0b3`` (all 2026-09-19)
 and ``1.5.0b4`` to ``1.5.0b14`` (2026-09-20 to 2026-10-22), dated in UTC and all
@@ -58,8 +58,7 @@ Changed
   output is unchanged (:issue:`804`).
 * ``test_const_enum_no_mint.py``'s ``is_manufactured()`` exemption for the
   hex-suffixed names :pr:`878` (below) preserves moves from a per-*file* to a
-  per-*name-shape* one. The per-file ``HEX_SUFFIXED_NAME_EXEMPT_PATHS`` was
-  shape-blind: rewriting a branch to ``'Xyplex_%d' % value`` -- exactly the
+  per-*name-shape* one. The per-file exemption was shape-blind: rewriting a branch to ``'Xyplex_%d' % value`` -- exactly the
   value-derived shape the predicate exists to flag -- left the sweep green. The check
   now exempts only a ``'..._0x%s' % hex(value)[2:].upper().zfill(4)`` expression, and
   the exact ``exempt_hits == 53`` bound stays. Test-only. Closes :issue:`879`
@@ -91,6 +90,14 @@ Changed
 * **a breaking change to** :class:`~pcapkit.const.mh.lla_code.LLACode`: ``Wilcard`` is
   spelled ``Wildcard`` and ``MH`` is ``MN``, the names :rfc:`5568` gives codes 0 and 2,
   with no alias for either old name (:issue:`1848`, :pr:`1872`).
+* **a breaking change to** :class:`tcp.flags.Flags <pcapkit.const.tcp.flags.Flags>`:
+  each member is its wire mask in the flags field, ``FIN`` ``0x001`` up to ``AE``
+  ``0x100``, rather than ``1 << offset`` in IANA's most-significant-first bit numbering,
+  which put ``FIN`` at ``0x8000``. ``int(tcp.connection)`` of a SYN/ACK is ``0x012``,
+  as the header carries it, not ``0x4800``, and ``Flags(0x12)`` is ``SYN | ACK``. The
+  range guard narrows to the 12-bit flags field, ``0 <= value <= 0xFFF``. Code that
+  stored or compared the old integers has to change; membership tests and names are
+  unaffected (:issue:`2310`).
 
 Fixed
 ~~~~~
@@ -1483,11 +1490,28 @@ Changed
 * **a breaking change to** ``PCAPNG.context``: the block's section
   :class:`~pcapkit.foundation.engines.pcapng.Context`, which it returned from 1.0.0
   through 1.4.x, is :attr:`.PCAPNG.section_context`, with no alias, and ``context`` is
-  the caller supplied :class:`~pcapkit.corekit.context.ContextRegistry` every protocol
+  the caller-supplied :class:`~pcapkit.corekit.context.ContextRegistry` every protocol
   inherits from :class:`.ProtocolBase`, on a Section Header Block too.
-  :attr:`.PCAPNG.section_context` raises :exc:`.UnsupportedCall` on a Section Header
-  Block, as ``context`` did. Code reading ``block.context`` for the section reads
+  :attr:`.PCAPNG.section_context` raises :exc:`.UnsupportedCall` where ``context`` did:
+  on a block that holds no section, such as a Section Header Block the
+  :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` engine has not assigned the section
+  it opens. Code reading ``block.context`` for the section reads
   ``block.section_context`` (:issue:`2172`, :pr:`2205`).
+* **a breaking change to** HIP's ``REG_FAILED`` parameter: its first octet is the
+  Failure Type, and it carries no lifetime (:rfc:`8003#section-4.5`), so
+  :class:`pcapkit.protocols.data.internet.hip.RegFailedParameter` replaces ``lifetime``
+  with ``failure_type``, a :class:`~pcapkit.const.hip.registration_failure.RegistrationFailure`,
+  with no alias, and its ``reg_type`` holds
+  :class:`~pcapkit.const.hip.registration.Registration` values rather than failure
+  types. :meth:`.HIP._make_param_reg_failed` takes ``failure_type`` in place of
+  ``lifetime``, and ``reg_failed`` takes registration types. The octets are unchanged
+  (:issue:`2309`).
+* **a breaking change to** the HTTP/2 ``RST_STREAM`` and ``GOAWAY`` builders: a frame
+  constructed without ``error`` carries ``NO_ERROR`` (``0x0``), the code
+  :rfc:`9113#section-7` gives a condition that is not the result of an error, rather
+  than ``HTTP_1_1_REQUIRED`` (``0xd``), which asks the peer to use HTTP/1.1 instead.
+  A ``make`` that omits ``error`` emits different octets; one that passes it is
+  unchanged (:issue:`2311`).
 
 Fixed
 ~~~~~
@@ -1944,8 +1968,9 @@ Fixed
   seeds ``self.Flags(0)``, as the construct path already did at each of its sites.
   In the dump, ``__value__`` was a JSON *number* for a flagless frame and a *string*
   for every other frame in the same capture; it is consistently a string now,
-  ``"Flags::None [0]"`` where it read ``0``, the same change :issue:`616` made to
-  TCP's ``connection``. The seed is guarded because :class:`.FrameType.Flags` declares
+  ``"Flags::0 [0]"`` (the spelling the :mod:`pcapkit.dumpkit` fix above gives a
+  nameless member) where it read ``0``, the same change :issue:`616` made to TCP's
+  ``connection``. The seed is guarded because :class:`.FrameType.Flags` declares
   no members and, from Python 3.11, a memberless ``enum.Flag`` subclass refuses
   ``Flags(0)``, so the frame schemas that inherit it
   (:class:`~pcapkit.protocols.schema.application.httpv2.UnassignedFrame`,
@@ -2236,7 +2261,7 @@ Fixed
   them byte-identical. So that a resolved unassigned member still pickles,
   ``_unregistered_member`` installs a ``__reduce_ex__`` rebuilding an equivalent
   unregistered member (:issue:`575`).
-* ``httpv2._guess_version`` tried to parse a stream as HTTP/2 and read failure as "not
+* :meth:`.HTTP._guess_version` tried to parse a stream as HTTP/2 and read failure as "not
   HTTP/2", rather than identifying the version first, so a genuine connection preface
   followed by a real ``SETTINGS`` frame raised ``ProtocolError: unknown HTTP version``.
   It now identifies before it parses: a preface is recognised as HTTP/2 outright,
@@ -2395,7 +2420,9 @@ Fixed
   :exc:`.UnknownFieldWarning` and rebuilt every header with the host-default
   ``d4c3b2a1`` magic. ``_make_data`` now returns ``byteorder`` and ``nanosecond``, and
   every byte order and timestamp resolution rebuilds unchanged. ``Header._read_protos``
-  also read four octets whatever ``size`` asked for (:issue:`1125`). And ``_make_magic``
+  also read four octets whatever ``size`` asked for (:issue:`1125`), and read them
+  little-endian in a big-endian file; it now follows the file's byte order
+  (:issue:`2312`). And ``_make_magic``
   honoured ``lilendian`` and ``bigendian`` only as a pair, so ``Header(bigendian=True)``
   wrote ``d4c3b2a1`` on a little-endian host; either flag alone now picks the byte order
   and overrides ``byteorder``, and equal flags still raise :exc:`.EndianError`
@@ -2704,7 +2731,11 @@ Fixed
   address not packed as IPv4 or IPv6 that is none of those and not an ``ipaddress``
   address, raises :exc:`.ProtocolError`, where both failed later with a bare
   ``TypeError``. A ``bytearray`` packs as ``bytes`` (:issue:`2166`, :pr:`2182`,
-  :issue:`2256`).
+  :issue:`2256`, :pr:`2257`).
+* Ethernet's and PCAP-NG's MAC address makers, and PCAP-NG's EUI address maker, raise
+  :exc:`.ProtocolError` for an address that is none of ``str``, ``bytes`` and
+  ``bytearray`` (a ``bool`` included), where they raised a bare ``TypeError``
+  (:issue:`2222`, :pr:`2232`).
 * the Quick-Start rate parses as the ``int`` the IPv4, HOPOPT, IPv6-Opts and TCP data
   models declare, where it was a ``float`` such as ``80.0``, and a TCP Fast Open cookie
   request, the option of length 2, parses with ``cookie`` as ``b''`` rather than
@@ -2850,8 +2881,7 @@ Added
 * :mod:`pcapkit.utilities.datetime`, holding
   :func:`~pcapkit.utilities.datetime.fromtimestamp` and
   :func:`~pcapkit.utilities.datetime.totimestamp`, the timestamp conversions of the
-  capture-timestamp entry under :mod:`pcapkit.protocols` (:pr:`2111`, :pr:`2136`). Its
-  first name, ``pcapkit.utilities.timestamp``, shipped in no release.
+  capture-timestamp entry under :mod:`pcapkit.protocols` (:pr:`2111`, :pr:`2136`).
 
 Changed
 ~~~~~~~
@@ -2979,14 +3009,14 @@ Fixed
   instance-method-only override fails the *class* call ``_snapshot_and_restore``
   makes but not the *instance* call inside ``__init__``, so that target runs
   unprotected and **succeeds silently**. **3.** The
-  ``# pylint: disable=no-else-raise`` pragma is **kept**: the belief that R1720 never
-  applies to ``try``/``except``/``else`` was a message-control artefact
-  (``--disable=all --enable=no-else-raise`` does not re-enable the check the way
-  ``--enable=R`` does), and under the ``Makefile``'s flags, which CI runs, pylint flags
-  the ``else:``, which is deliberate because it makes the backup cleanup unreachable
-  from the ``except``. Left out of scope: an untested ``os.close(fd)`` leak (harmless,
-  since ``copy2`` reopens the path) and the semantically identical unindented form of
-  the same ``else:``. Closes :issue:`875` (:pr:`876`).
+  ``# pylint: disable=no-else-raise`` pragma is **kept**, because it is needed: under
+  the ``Makefile``'s flags, which CI runs, pylint reports R1720 on the ``else:``. A
+  ``--disable=all --enable=no-else-raise`` run reports nothing there, since enabling
+  the one message does not re-enable the check on a ``try``/``except``/``else`` the way
+  ``--enable=R`` does, so such a run cannot show the pragma unneeded. The ``else:`` is
+  deliberate: it makes the backup cleanup unreachable from the ``except``. Left out of
+  scope: an untested ``os.close(fd)`` leak (harmless, since ``copy2`` reopens the path)
+  and the semantically identical unindented form of the same ``else:``. Closes :issue:`875` (:pr:`876`).
 * :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` tracked the Mozilla NSS
   key-log wiki, but ``draft-ietf-opsawg-pcapng-06`` section 4.7 now points at
   ``[I-D.ietf-tls-keylogfile]`` (draft-05), published as :rfc:`9850`, "The SSLKEYLOGFILE
@@ -3270,6 +3300,14 @@ Changed
   entries once the ruleset is updated separately, as a repository setting outside the
   change; the ``Compat`` names are excluded from the replacement. Only
   ``.github/workflows/unit-tests.yml`` changes; no library or test code (:pr:`856`).
+* ``engine-tests`` runs one job per engine, ``Engines (<engine>)``, each looping over
+  its interpreters in fresh virtual environments, in place of :pr:`849`'s job per
+  Python and engine. ``required-checks`` also needs ``changes`` and ``project-tests``:
+  ``project-tests`` must pass on every diff, and a skipped leg passes only where
+  ``changes`` classifies the diff as docs-only (:issue:`1052`, :pr:`1055`), which may
+  skip ``test``, ``integration``, ``engine-tests`` and ``pypcap-parity``, or as
+  test-only, which may skip ``engine-tests`` and ``pypcap-parity`` (:issue:`2243`,
+  :pr:`2244`).
 * the prose the post-:issue:`719` defect wave added or touched, checked against the
   code; no code changes. :attr:`.MesgIDOption.seconds` in the Mobility Header schema
   said seconds since 1970 where it holds an :rfc:`1305` NTP count from 1900;
@@ -3406,9 +3444,9 @@ Fixed
   choosealicense.com's template, whose first line is that title and whose notice reads
   ``Copyright (c) [year], [fullname]``. The licence body is unaltered: the change is confined to the copyright line, and the ``DAMAGE.``
   that :pr:`615` repaired from ``DAMAGE.s`` is still clean (:pr:`630`).
-* ``CITATION.cff`` shipped in no source distribution. ``MANIFEST.in`` has an ``include``
+* ``CITATION.cff`` shipped in no source distribution. ``MANIFEST.in`` had an ``include``
   each for ``README.md``, ``LICENSE`` and ``CHANGELOG.md`` but none for the citation
-  file, and its ``global-include`` patterns (``*.rst``, ``*.py``) cannot match a
+  file, and its ``global-include`` patterns (``*.rst``, ``*.py``) could not match a
   ``.cff``. Removing those ``include`` lines and rebuilding shows ``README.md`` and
   ``LICENSE`` shipping anyway (setuptools adds the latter from ``license_files``,
   recorded as ``License-File: LICENSE`` in ``PKG-INFO``) while ``CHANGELOG.md``

@@ -562,7 +562,7 @@
 
 <div class="viewcode-block" id="follow_tcp_stream">
 <a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extractor options</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
                       <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -571,7 +571,7 @@
 <span class="w">    </span><span class="sd">"""Follow TCP streams.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read; if file not exist, raise</span>
+<span class="sd">        fin: file name to be read; if the file does not exist, raise</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.FileNotFound`</span>
 <span class="sd">        extension: if check and append extensions to output file</span>
 <span class="sd">        verbose: if print verbose output information</span>

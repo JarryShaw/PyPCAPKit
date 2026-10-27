@@ -557,6 +557,10 @@ raised, it logs the error and re-parses the current layer’s payload as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – or as
 <a class="reference internal" href="../protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, if the error is an
 end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
+<p>When <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._parse_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._parse_next_layer</span></code></a> held the
+warnings of the layer that raised, they are dropped with it: they describe a
+layer the result does not have, and the replacement’s <code class="docutils literal notranslate"><span class="pre">error</span></code> reports the
+failure (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have the following signature:</p>

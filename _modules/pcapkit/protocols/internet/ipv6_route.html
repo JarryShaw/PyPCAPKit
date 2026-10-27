@@ -798,7 +798,12 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If ``dst`` is a :obj:`bool` (see</span>
-<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`)</span>
+<span class="sd">                and ``data`` is a :obj:`dict` or a data model; ``dst`` is not</span>
+<span class="sd">                read for any other ``data``.</span>
+<span class="sd">            ProtocolError: If ``data`` is :obj:`bytes` that do not parse as</span>
+<span class="sd">                the routing data of ``type``, or is of none of the accepted</span>
+<span class="sd">                types.</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
@@ -1087,6 +1092,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed route data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``Hdr Ext Len`` is odd.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200</span>
         <span class="c1"># #section-4.4`), not octets. Each 16-octet address costs 2 of those</span>
@@ -1188,6 +1196,11 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed route data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``Hdr Ext Len``, ``Pad``, ``CmprI`` and</span>
+<span class="sd">                ``CmprE`` do not give a whole number of addresses, at least</span>
+<span class="sd">                one (:rfc:`6554#section-4.2`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units</span>

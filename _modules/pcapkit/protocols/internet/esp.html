@@ -628,7 +628,7 @@
 <span class="sd">  stateless parser cannot recover them; they are required both for the ICV</span>
 <span class="sd">  computation and for the AEAD associated data. An ESN protected packet</span>
 <span class="sd">  therefore fails the integrity check *cleanly* rather than being decoded.</span>
-<span class="sd">* **Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.**</span>
+<span class="sd">* **Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.**</span>
 <span class="sd">  TFC padding is indistinguishable from real payload without inspecting the</span>
 <span class="sd">  inner protocol's own length field, so it is handed to the next layer as</span>
 <span class="sd">  part of the plaintext.</span>
@@ -1800,8 +1800,11 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``encrypt`` is :data:`True` and no Security</span>
-<span class="sd">                Association is available for ``spi``, or if ``pad_len`` does</span>
-<span class="sd">                not satisfy the algorithm's alignment requirement.</span>
+<span class="sd">                Association is available for ``spi``, if ``pad_len`` is</span>
+<span class="sd">                outside ``0`` to ``255`` or does not satisfy the algorithm's</span>
+<span class="sd">                alignment requirement, or if</span>
+<span class="sd">                :meth:`SecurityAssociation.encrypt` rejects ``iv`` or cannot</span>
+<span class="sd">                run without |cryptography|_.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">encrypt</span><span class="p">:</span>

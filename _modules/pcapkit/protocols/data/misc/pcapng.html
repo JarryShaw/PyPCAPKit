@@ -1442,7 +1442,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SystemdJournalExportBlock</span><span class="p">(</span><span class="n">PCAPNG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""</span>
 
-    <span class="c1">#: Journal entry.</span>
+    <span class="c1">#: Journal entries; empty for a malformed block, whose entry is then kept</span>
+    <span class="c1">#: as captured under ``entry_raw`` (:issue:`1406`).</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">'tuple[OrderedMultiInfo[str, str | bytes], ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

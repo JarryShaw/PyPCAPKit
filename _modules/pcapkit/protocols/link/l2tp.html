@@ -529,10 +529,13 @@
 <span class="sd">session header is, in :rfc:`3931` §4.1.1.1's own words, *"free of any restrictions</span>
 <span class="sd">imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw</span>
 <span class="sd">32-bit Session ID and carries **no version nibble at all**, so there is nothing a</span>
-<span class="sd">v2 parser could test to recognise that the datagram is not its own. Measured,</span>
+<span class="sd">v2 parser could test to recognise that the datagram is not its own. Without the</span>
+<span class="sd">version check in :meth:`L2TPv2.read &lt;pcapkit.protocols.link.l2tpv2.L2TPv2.read&gt;`,</span>
 <span class="sd">that binding reports ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``</span>
-<span class="sd">for a v3-over-IP datagram: a complete header assembled out of the top half of a</span>
-<span class="sd">Session ID and the first two octets of the PPP frame behind it. 115 is a missing</span>
+<span class="sd">for a v3-over-IP datagram: a complete header assembled out of a Session ID and</span>
+<span class="sd">the first two octets of the PPP frame behind it. The check refuses that datagram</span>
+<span class="sd">only because its Session ID does not put ``2`` in the nibble; one that does</span>
+<span class="sd">parses as v2. 115 is a missing</span>
 <span class="sd">*class*, not a missing registration, and until that class exists an undissected</span>
 <span class="sd">payload is the honest answer.</span>
 

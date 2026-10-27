@@ -639,7 +639,8 @@
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
     <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Compartment length.</span>
+    <span class="c1">#: Compartment bitmap length, in octets: four times the ``Cmpt Length``</span>
+    <span class="c1">#: field, which counts 32-bit words.</span>
     <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Sensitivity level.</span>
     <span class="n">level</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -674,7 +675,8 @@
 
     <span class="c1">#: TaggerID type.</span>
     <span class="n">tid_type</span><span class="p">:</span> <span class="s1">'TaggerID'</span>
-    <span class="c1">#: TaggerID length.</span>
+    <span class="c1">#: ``TidLen`` field as on the wire: the TaggerID length in octets minus</span>
+    <span class="c1">#: one, or ``0`` when there is no TaggerID [:rfc:`6621#section-6.1.1`].</span>
     <span class="n">tid_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: TaggerID.</span>
     <span class="n">tid</span><span class="p">:</span> <span class="s1">'Optional[bytes | IPv4Address | IPv6Address]'</span>

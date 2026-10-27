@@ -774,7 +774,7 @@
     <span class="c1">#: positional-only, ``def __new__(mcls, name, bases, namespace, /,</span>
     <span class="c1">#: **kwargs)``), so a class keyword spelled the same as any of them binds</span>
     <span class="c1">#: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple</span>
-    <span class="c1">#: values for argument '...'``. ``namespace`` collided this way, which is why</span>
+    <span class="c1">#: values for argument '...'``. ``namespace`` collides this way, which is why</span>
     <span class="c1">#: :mod:`pcapkit.protocols.schema.misc.pcapng`'s :class:`~pcapkit.protocols.schema.misc.pcapng.Option` subclasses</span>
     <span class="c1">#: spell it ``ns=`` instead.</span>
     <span class="c1">#:</span>
@@ -863,7 +863,19 @@
 <div class="viewcode-block" id="Schema">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Schema for protocol headers."""</span>
+<span class="w">    </span><span class="sd">"""Schema for protocol headers.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Building a schema directly does not range-check its field values. A</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.numbers.NumberField` masks an</span>
+<span class="sd">        out-of-range integer to its width on packing, so e.g. ``70000`` in a</span>
+<span class="sd">        two-octet field packs as ``0x1170``. The range checks live in each</span>
+<span class="sd">        protocol's :meth:`~pcapkit.protocols.protocol.Protocol.make`, and in a</span>
+<span class="sd">        field whose values have a range of their own, such as</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.numbers.PortEnumField`. See GitHub issue</span>
+<span class="sd">        :issue:`2314`.</span>
+
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of name conflicts with builtin methods (original names to</span>
@@ -943,8 +955,8 @@
 <span class="w">        </span><span class="sd">"""Create a new instance.</span>
 
 <span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
-<span class="sd">        the same signature as specified in class variables' type annotations,</span>
-<span class="sd">        which is inspired by :pep:`557` (:mod:`dataclasses`).</span>
+<span class="sd">        one keyword parameter per field in :attr:`__fields__`, which is</span>
+<span class="sd">        inspired by :pep:`557` (:mod:`dataclasses`).</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Whether ``cls`` still needs finalising is read from its *own*</span>
@@ -1203,12 +1215,12 @@
                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Create a new instance.</span>
 
-<span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>
+<span class="sd">        * If ``dict_`` is a mapping, then does:</span>
 <span class="sd">          ``for k in dict_: self[k] = dict_[k]``.</span>
-<span class="sd">        * If ``dict_`` is present and has no ``.keys()`` method, then does:</span>
+<span class="sd">        * If ``dict_`` is present and not a mapping, then does:</span>
 <span class="sd">          ``for k, v in dict_: self[k] = v``.</span>
-<span class="sd">        * If ``dict_`` is not present, then does:</span>
-<span class="sd">          ``for k, v in kwargs.items(): self[k] = v``.</span>
+<span class="sd">        * In either case, and if ``dict_`` is not present, this is followed</span>
+<span class="sd">          by: ``for k, v in kwargs.items(): self[k] = v``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dict\_: Source data.</span>
@@ -1229,7 +1241,7 @@
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Schema` objects into :obj:`dict` if</span>
 <span class="sd">            they are the direct value of the :class:`Schema` object's attribute.</span>
-<span class="sd">            Should such :class:`Schema` objects be nested within other data,</span>
+<span class="sd">            Should such :class:`Schema` objects be nested within other data</span>
 <span class="sd">            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we</span>
 <span class="sd">            leave them intact rather than converting them into :obj:`dict`.</span>
 
@@ -1540,9 +1552,9 @@
 <span class="sd">            Unpacked data as :class:`Schema`.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a ``__length__`` key in ``packet`` to record the length</span>
-<span class="sd">            of the remaining data, which is used to determine the length of</span>
-<span class="sd">            the payload field.</span>
+<span class="sd">            A ``__length__`` key in ``packet`` records the length of the</span>
+<span class="sd">            remaining data, which is used to determine the length of the</span>
+<span class="sd">            payload field.</span>
 
 <span class="sd">            When this schema is nested -- unpacked through a</span>
 <span class="sd">            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than</span>
@@ -2033,8 +2045,9 @@
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol instance, just parsed.</span>
 
-<span class="sd">    Called by the layer base classes once a parse is done. When the data ended</span>
-<span class="sd">    inside one of the header's fields, ``info`` gains the ``__short_read__``</span>
+<span class="sd">    Called by the layer base classes, and by the PCAP global</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.</span>
+<span class="sd">    When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``</span>
 <span class="sd">    record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can</span>
 <span class="sd">    cut the rebuild back to what was captured (:issue:`1458`). The key is listed</span>
 <span class="sd">    in :attr:`Data.__included__ &lt;pcapkit.protocols.data.data.Data.__included__&gt;`,</span>

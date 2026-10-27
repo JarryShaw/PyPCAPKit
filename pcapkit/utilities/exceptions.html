@@ -596,8 +596,8 @@ error sets <a class="reference external" href="https://docs.python.org/3/library
 <dt class="sig sig-object py" id="pcapkit.utilities.exceptions.BaseError.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#BaseError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.BaseError.__init__" title="Link to this definition">¶</a></dt>
 <dd><p>Log the error, unless it is quiet, and initialise the exception.</p>
-<p>A loud error logs at <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> and, unless <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code> is set,
-installs the terse exception hooks; the class docstring says when an error is
+<p>A loud error logs at <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> and, unless <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code> turns
+development mode on, installs the terse exception hooks; the class docstring says when an error is
 quiet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

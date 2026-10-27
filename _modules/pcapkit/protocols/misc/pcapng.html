@@ -913,9 +913,9 @@
 <span class="c1"># ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This</span>
 <span class="c1"># module does not re-export it under the unaliased name (#1744).</span>
 <span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set</span>
-<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a</span>
-<span class="c1"># registry, so filing it under :mod:`pcapkit.const` would misrepresent it as</span>
-<span class="c1"># one. The ``Enum_*`` alias convention covers imports of const enums, so it does</span>
+<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7, Decryption Secrets Block, says</span>
+<span class="c1"># the label "is one of" four names), not a registry, so filing it under</span>
+<span class="c1"># :mod:`pcapkit.const` would misrepresent it as one. The ``Enum_*`` alias convention covers imports of const enums, so it does</span>
 <span class="c1"># not apply to a local definition.</span>
 
 
@@ -1481,7 +1481,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nanosecond</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Whether the timestamp is in nanoseconds."""</span>
+<span class="w">        </span><span class="sd">"""Whether the timestamp resolution is finer than microseconds."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_resolution</span> <span class="o">&gt;</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
 
     <span class="nd">@property</span>
@@ -1922,11 +1922,9 @@
             <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with</span>
             <span class="c1"># a bare ``ValueError: read length must be non-negative or -1``. That</span>
             <span class="c1"># would cost the whole extraction rather than the one truncated</span>
-            <span class="c1"># block, the opposite of the `#431</span>
-            <span class="c1"># &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation</span>
-            <span class="c1"># for damaged input. ``_read_fileng`` stops at the end of the file, so</span>
-            <span class="c1"># the octets it returned are the authority on where the block really</span>
-            <span class="c1"># finishes.</span>
+            <span class="c1"># block, the opposite of the #431 accommodation for damaged input.</span>
+            <span class="c1"># ``_read_fileng`` stops at the end of the file, so the octets it</span>
+            <span class="c1"># returned are the authority on where the block really finishes.</span>
             <span class="n">read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">read</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length '</span>
@@ -2381,10 +2379,11 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: UTC, not the host's timezone, is the default in both branches</span>
         <span class="c1"># below. A capture carries no timezone of its own unless it says so, and</span>
-        <span class="c1"># draft-ietf-opsawg-pcapng-02 §4.3 defines the block timestamp as an</span>
-        <span class="c1"># offset from 1970-01-01 00:00:00 UTC with no timezone term at all, so</span>
-        <span class="c1"># substituting the *reading* machine's zone would make the same file</span>
-        <span class="c1"># parse to different instants on different hosts. ``_get_resolution``</span>
+        <span class="c1"># draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,</span>
+        <span class="c1"># defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC</span>
+        <span class="c1"># with no timezone term at all, so substituting the *reading* machine's</span>
+        <span class="c1"># zone would make the same file parse to different instants on different</span>
+        <span class="c1"># hosts. ``_get_resolution``</span>
         <span class="c1"># and ``_get_offset`` fall back to the format's own defaults in this</span>
         <span class="c1"># situation; this is the matching one.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2444,8 +2443,9 @@
             <span class="c1"># ``tzone.utcoffset(None)`` added. The block</span>
             <span class="c1"># timestamp is an offset from the UNIX epoch, so it is</span>
             <span class="c1"># timezone-independent by definition (draft-ietf-opsawg-pcapng-02</span>
-            <span class="c1"># §4.3 spells out the arithmetic and has no timezone term), and the</span>
-            <span class="c1"># same draft §4.2 says of ``if_tzone`` that it "SHOULD NOT be used"</span>
+            <span class="c1"># section 4.3, Enhanced Packet Block, spells out the arithmetic and</span>
+            <span class="c1"># has no timezone term), and the same draft's section 4.2, Interface</span>
+            <span class="c1"># Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"</span>
             <span class="c1"># and of ``if_tsoffset`` that it is "not intended to be used as an</span>
             <span class="c1"># offset between local time and UTC". A shifted epoch would also</span>
             <span class="c1"># contradict ``ts_datetime`` below, which is built from the</span>
@@ -4852,7 +4852,7 @@
             <span class="c1"># NOTE: The padding to 32 bits, if it is not all zeros (#1437).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-            <span class="c1"># record option data</span>
+            <span class="c1"># record name resolution record data</span>
             <span class="n">records</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
             <span class="c1"># break when ``nrb_record_end`` is reached</span>
@@ -4964,6 +4964,9 @@
 <span class="sd">            schema: Parsed secret schema.</span>
 <span class="sd">            block: Parsed PCAP-NG decryption secrets block.</span>
 
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed decryption secrets data.</span>
+
 <span class="sd">        """</span>
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_UnknownSecrets</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -4980,6 +4983,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed secret schema.</span>
 <span class="sd">            block: Parsed PCAP-NG decryption secrets block.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed decryption secrets data.</span>
 
 <span class="sd">        """</span>
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_TLSKeyLog</span><span class="p">(</span>
@@ -5655,8 +5661,9 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">data</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Option'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="c1"># NOTE: Unlike every other block, a custom block has no ``OptionField``</span>
-        <span class="c1"># to name an option registry: :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`</span>
+        <span class="c1"># NOTE: Unlike every other block that carries options, a custom block</span>
+        <span class="c1"># has no ``OptionField`` to name an option registry:</span>
+        <span class="c1"># :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`</span>
         <span class="c1"># spans the custom data, its padding and the options as one opaque blob,</span>
         <span class="c1"># since only the owner of the private enterprise number knows where the</span>
         <span class="c1"># custom data ends. Its options are therefore resolved in the generic</span>
@@ -6265,7 +6272,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            tzone: Timezone offset, in seconds.</span>
+<span class="sd">            tzone: Timezone offset from UTC, as a :class:`~datetime.timezone`,</span>
+<span class="sd">                a :class:`~datetime.timedelta` or an :obj:`int` of seconds.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>

@@ -516,16 +516,16 @@
 <span class="c1">###############################################################################</span>
 <span class="c1"># NOTE: this crawler does not crawl: the registry below is maintained by hand;</span>
 <span class="c1"># see #518. It is the same failure, on the same article and the same removal</span>
-<span class="c1"># revision, that retired the sibling socket crawler in #507.</span>
+<span class="c1"># revision, that keeps the sibling socket crawler maintained by hand (#507).</span>
 <span class="c1">#</span>
 <span class="c1"># Its source was the packet-type table in</span>
 <span class="c1"># https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure,</span>
 <span class="c1"># and two separate things broke that. Wikipedia answers ``requests``'</span>
 <span class="c1"># default ``python-requests/&lt;version&gt;`` User-Agent with HTTP 403 (measured</span>
 <span class="c1"># 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent, 200</span>
-<span class="c1"># and 114117 bytes for a descriptive one). That half is fixed in</span>
-<span class="c1"># ``Vendor._request``, which sends the descriptive agent</span>
-<span class="c1"># :func:`~pcapkit.vendor.default.get_user_agent` builds -- but it only gets the</span>
+<span class="c1"># and 114117 bytes for a descriptive one). ``Vendor._request`` answers that</span>
+<span class="c1"># half by sending the descriptive agent</span>
+<span class="c1"># :func:`~pcapkit.vendor.default.get_user_agent` builds -- but that only gets the</span>
 <span class="c1"># crawler as far as a page that does not hold the data. The table was deleted</span>
 <span class="c1"># from the article on 2026-08-25, in revision 1371327031 ("deleted some</span>
 <span class="c1"># irrelevant technical tables"), leaving the live page (revision 1372814585)</span>
@@ -536,8 +536,7 @@
 <span class="c1"># Pointing ``LINK`` at the last revision that still carries the table</span>
 <span class="c1"># (``oldid=1368657333``, re-measured 2026-09-19: 200, 118834 bytes, 4</span>
 <span class="c1"># ``wikitable``s, ``table[1]`` headers ``['Value', 'Meaning/Protocol']``, 8 body</span>
-<span class="c1"># rows) would have worked, and running the crawler's original ``process()``</span>
-<span class="c1"># against it</span>
+<span class="c1"># rows) would have worked, and scraping it with a table-reading ``process()``</span>
 <span class="c1"># reproduces the committed constant file byte for byte. It is still the wrong</span>
 <span class="c1"># fix: a network fetch pinned to a frozen snapshot is all of the fragility of a</span>
 <span class="c1"># crawler with none of the freshness, and it would go on selecting a table by</span>
@@ -561,9 +560,8 @@
 <span class="c1">#: Maps a packet type to the enumeration name it takes and the comment rendered</span>
 <span class="c1">#: above it. Names go through :meth:`~Vendor.rename`, so the generated member is</span>
 <span class="c1">#: the :meth:`~Vendor.safe_name` of the first element; comments are stored as the</span>
-<span class="c1">#: scrape rendered them, reStructuredText markup and all, since the prose-mangling</span>
-<span class="c1">#: the crawler's original ``process()`` did to Wikipedia's cell text has no source</span>
-<span class="c1">#: left to mangle.</span>
+<span class="c1">#: scrape rendered them, reStructuredText markup and all, since no Wikipedia</span>
+<span class="c1">#: cell text remains for a scraping ``process()`` to rework.</span>
 <span class="c1">#:</span>
 <span class="c1">#: Every value below is independently corroborated by Wireshark's IPX dissector,</span>
 <span class="c1">#: ``epan/dissectors/packet-ipx.h`` (fetched 2026-09-19), which defines</span>

@@ -29,9 +29,10 @@ channel**:
    category on the command line, noted below).
 
 The counts are the same in development mode as outside it:
-:envvar:`PCAPKIT_DEVMODE` and :envvar:`PCAPKIT_VERBOSE` change how much detail
-the log record carries, never how many records there are. Constructing a warning
-class is not an act of reporting one -- it emits nothing and has no side effects.
+:envvar:`PCAPKIT_DEVMODE` changes where the log records go, and
+:envvar:`PCAPKIT_VERBOSE` how much detail they carry, never how many records
+there are. Constructing a warning class is not an act of reporting one -- it
+emits nothing and has no side effects.
 
 A next layer captured shorter than its length hint is parsed on trial, and
 replaced with :class:`~pcapkit.protocols.misc.raw.Raw` when its header was not

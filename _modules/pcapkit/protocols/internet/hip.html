@@ -531,6 +531,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.notify_message</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotifyMessage</span> <span class="k">as</span> <span class="n">Enum_NotifyMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Enum_Parameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.registration_failure</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistrationFailure</span> <span class="k">as</span> <span class="n">Enum_RegistrationFailure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
@@ -699,8 +700,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.esp_transform_suite</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESPTransformSuite</span> <span class="k">as</span> <span class="n">Enum_ESPTransformSuite</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.nat_traversal</span><span class="w"> </span><span class="kn">import</span> <span class="n">NATTraversal</span> <span class="k">as</span> <span class="n">Enum_NATTraversal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.registration</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registration</span> <span class="k">as</span> <span class="n">Enum_Registration</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.registration_failure</span><span class="w"> </span><span class="kn">import</span> \
-        <span class="n">RegistrationFailure</span> <span class="k">as</span> <span class="n">Enum_RegistrationFailure</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.suite</span><span class="w"> </span><span class="kn">import</span> <span class="n">Suite</span> <span class="k">as</span> <span class="n">Enum_Suite</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span> <span class="k">as</span> <span class="n">Enum_Transport</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
@@ -2319,7 +2318,7 @@
                          <span class="n">options</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CertParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HIP ``CERT`` parameter.</span>
 
-<span class="sd">        Structure of HIP ``CERT`` parameter [:rfc:`7401`]:</span>
+<span class="sd">        Structure of HIP ``CERT`` parameter [:rfc:`8002`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -2577,7 +2576,7 @@
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 <span class="sd">           |             Type              |             Length            |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |   Lifetime    |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |</span>
+<span class="sd">           | Failure Type  |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 <span class="sd">           |      ...      |     ...       |  Reg Type #n  |               |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +</span>
@@ -2597,7 +2596,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
+            <span class="n">failure_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">failure_type</span><span class="p">,</span>
             <span class="n">reg_type</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">reg_failed</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">reg_failed</span></div>
@@ -3682,7 +3681,7 @@
 
 <span class="sd">        Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:</span>
 
-<span class="sd">        .. code-block::</span>
+<span class="sd">        .. code-block:: text</span>
 
 <span class="sd">            0                   1                   2                   3</span>
 <span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
@@ -3825,7 +3824,7 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
-<span class="sd">            reserved: reserved octets, zero when sent (:rfc:`7402#section-5.1.1`)</span>
+<span class="sd">            reserved: reserved octets (:rfc:`7402#section-5.1.1`)</span>
 <span class="sd">            index: KEYMAT index</span>
 <span class="sd">            old_spi: old SPI</span>
 <span class="sd">            new_spi: new SPI</span>
@@ -4025,8 +4024,9 @@
 <span class="w">        </span><span class="sd">"""Encode a ``PUZZLE`` ``Lifetime`` octet.</span>
 
 <span class="sd">        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``</span>
-<span class="sd">        seconds -- and it is the *only* place either RFC defines that encoding, so</span>
-<span class="sd">        it applies to ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is</span>
+<span class="sd">        seconds -- and the ``PUZZLE`` section is the only place either RFC defines</span>
+<span class="sd">        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to</span>
+<span class="sd">        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is</span>
 <span class="sd">        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.</span>
 
 <span class="sd">        Args:</span>
@@ -4727,6 +4727,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If neither ``hi`` nor ``param`` is given and</span>
+<span class="sd">                ``hi_curve`` is not an ECDSA, ECDSA_LOW or EdDSA curve, or if</span>
+<span class="sd">                ``hi`` is a :class:`~pcapkit.protocols.data.internet.hip.HostIdentity`</span>
+<span class="sd">                whose ``curve`` is none of those.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hi</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">hi</span>
@@ -5154,23 +5160,35 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_reg_failed">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_reg_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_RegFailedParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                               <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                               <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'Optional[list[Enum_RegistrationFailure | StdlibEnum | AenumEnum | str | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">failure_type</span><span class="p">:</span> <span class="s1">'Enum_RegistrationFailure | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">Enum_RegistrationFailure</span><span class="o">.</span><span class="n">Registration_requires_additional_credentials</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                               <span class="n">failure_type_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">failure_type_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                               <span class="n">failure_type_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                               <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                <span class="n">reg_failed_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                <span class="n">reg_failed_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                <span class="n">reg_failed_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RegFailedParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``REG_FAILED`` parameter.</span>
 
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           ``lifetime`` is replaced by ``failure_type``, with no alias, and</span>
+<span class="sd">           ``reg_failed`` takes registration types rather than failure types</span>
+<span class="sd">           (:issue:`2309`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            code: parameter code</span>
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
-<span class="sd">            lifetime: lifetime</span>
-<span class="sd">            reg_failed: registration failure list</span>
-<span class="sd">            reg_failed_default: default registration failure</span>
-<span class="sd">            reg_failed_namespace: registration failure namespace</span>
-<span class="sd">            reg_failed_reversed: reverse registration failure namespace</span>
+<span class="sd">            failure_type: registration failure type</span>
+<span class="sd">            failure_type_default: default registration failure type</span>
+<span class="sd">            failure_type_namespace: registration failure type namespace</span>
+<span class="sd">            failure_type_reversed: reverse registration failure type namespace</span>
+<span class="sd">            reg_failed: list of registration types that failed</span>
+<span class="sd">            reg_failed_default: default registration type</span>
+<span class="sd">            reg_failed_namespace: registration type namespace</span>
+<span class="sd">            reg_failed_reversed: reverse registration type namespace</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -5178,9 +5196,12 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">reg_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_RegistrationFailure]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">reg_type</span><span class="p">)</span>
-            <span class="n">lt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="n">failure</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">failure_type</span>
+            <span class="n">reg_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Enum_Registration]'</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">reg_type</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">failure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">failure_type</span><span class="p">,</span> <span class="n">failure_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">failure_type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">failure_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">reg_failed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">reg_failed</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -5189,12 +5210,10 @@
                 <span class="n">reg_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">reg_failed_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">reg_failed_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
                                                  <span class="nb">reversed</span><span class="o">=</span><span class="n">reg_failed_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
-            <span class="n">lt</span> <span class="o">=</span> <span class="n">lifetime</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
-
         <span class="k">return</span> <span class="n">Schema_RegFailedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">reg_type</span><span class="p">),</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">lt</span><span class="p">,</span>
+            <span class="n">failure_type</span><span class="o">=</span><span class="n">failure</span><span class="p">,</span>
             <span class="n">reg_failed</span><span class="o">=</span><span class="n">reg_type</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -5865,7 +5884,8 @@
 <span class="sd">            protocol_default: default transport protocol</span>
 <span class="sd">            protocol_namespace: transport protocol namespace</span>
 <span class="sd">            protocol_reversed: reverse transport protocol namespace</span>
-<span class="sd">            address: relay address</span>
+<span class="sd">            address: the address the relay server received the relayed</span>
+<span class="sd">                packet from (:rfc:`5770`)</span>
 <span class="sd">            reserved: the reserved octet, truncated or</span>
 <span class="sd">                zero-filled to 1 octet</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -5916,7 +5936,8 @@
 <span class="sd">            protocol_default: default transport protocol</span>
 <span class="sd">            protocol_namespace: transport protocol namespace</span>
 <span class="sd">            protocol_reversed: reverse transport protocol namespace</span>
-<span class="sd">            address: relay address</span>
+<span class="sd">            address: the address the relay server forwards the packet to</span>
+<span class="sd">                (:rfc:`5770`)</span>
 <span class="sd">            reserved: the reserved octet, truncated or</span>
 <span class="sd">                zero-filled to 1 octet</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -6042,7 +6063,8 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
-<span class="sd">            address: relay address</span>
+<span class="sd">            address: the original source address of the relayed packet</span>
+<span class="sd">                (:rfc:`8004`)</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>

@@ -1456,8 +1456,9 @@ is used, which names exactly the registry the member lives in. A bare
     <code class="docutils literal notranslate"><span class="pre">name</span></code>. A composite such as <code class="docutils literal notranslate"><span class="pre">tcp</span> <span class="pre">|</span> <span class="pre">udp</span></code>, or its string form
     <code class="docutils literal notranslate"><span class="pre">'tcp|udp'</span></code>, names two and is refused for the same reason: one call
     registers under one transport protocol.</p></li>
-<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>pcapkit.utilities.exceptions.ProtocolError</strong></a> – Raised lazily, from
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>pcapkit.utilities.exceptions.ProtocolError</strong></a> – Raised from
     <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a>,
+    which the port-keyed registry resolves before storing the entry,
     when <code class="docutils literal notranslate"><span class="pre">module</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> and either <code class="docutils literal notranslate"><span class="pre">class_</span></code> names no
     attribute of it, or <code class="docutils literal notranslate"><span class="pre">class_</span></code> was never given at all – the
     latter distinguished from the former rather than reported as a

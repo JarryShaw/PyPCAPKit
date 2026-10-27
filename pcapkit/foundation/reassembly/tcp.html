@@ -641,7 +641,7 @@ abandoned it under the reassembly timeout</p></li>
 fragmentation one, and the numbers that look like candidates are not
 reassembly timeouts: the Maximum Segment Lifetime of
 <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4.1"><strong>RFC 9293 Section 3.4.1</strong></a> bounds how long a <em>segment</em> may linger in the
-network, and the user timeout of <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.8.3"><strong>RFC 9293 Section 3.8.3</strong></a> aborts a
+network, and the user timeout of <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10.8"><strong>RFC 9293 Section 3.10.8</strong></a> aborts a
 connection whose data goes unacknowledged. Picking either as a default
 would silently discard buffered stream data on captures that are merely
 idle – a long-lived connection with a two-minute lull is ordinary, while
@@ -1024,9 +1024,10 @@ once per <code class="docutils literal notranslate"><span class="pre">BUFID</spa
 its own <code class="docutils literal notranslate"><span class="pre">isn</span></code> – <code class="docutils literal notranslate"><span class="pre">raw[n]</span></code> holds the octet with sequence number
 <code class="docutils literal notranslate"><span class="pre">isn</span> <span class="pre">+</span> <span class="pre">n</span></code>, and <code class="docutils literal notranslate"><span class="pre">isn</span></code> is revised downwards whenever a segment turns
 up below the data already buffered, so it is not necessarily the
-connection’s own initial sequence number.
-<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> is the
-one place that converts between the two.</p>
+connection’s own initial sequence number. Each ACK’s <code class="docutils literal notranslate"><span class="pre">gap</span></code> and
+<code class="docutils literal notranslate"><span class="pre">conflict</span></code> lists are kept in sequence numbers too;
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> turns
+the <code class="docutils literal notranslate"><span class="pre">gap</span></code> entries into offsets into <code class="docutils literal notranslate"><span class="pre">raw</span></code> when it reports the buffer.</p>
 </dd>
 </dl>
 </section>

@@ -579,9 +579,9 @@
 <span class="sd">   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That</span>
 <span class="sd">   has no ``next`` field, so the walk in</span>
 <span class="sd">   :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
-<span class="sd">   would crash on it (GitHub issue :issue:`891`). This module registers itself</span>
-<span class="sd">   for that code instead (see the bottom of the module), so dispatch reaches a</span>
-<span class="sd">   working generic parser directly. The registration is global, shared by</span>
+<span class="sd">   would crash on it (GitHub issue :issue:`891`). This module registers this</span>
+<span class="sd">   class for that code instead (see the bottom of the module), so dispatch</span>
+<span class="sd">   reaches a working generic parser directly. The registration is global, shared by</span>
 <span class="sd">   every :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so</span>
 <span class="sd">   :meth:`__post_init__` gates on ``version == 6`` to keep it from also</span>
 <span class="sd">   activating for an IPv4 payload that carries protocol number 140; see its</span>
@@ -606,20 +606,22 @@
 <span class="sd">:func:`pcapkit.protocols.schema.misc.pcapng.bounded_area` and</span>
 <span class="sd">:meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.</span>
 
-<span class="sd">This class follows that convention's *warning*</span>
-<span class="sd">(:class:`~pcapkit.utilities.warnings.SchemaWarning`) and deliberately diverges</span>
-<span class="sd">on the *action*. Clipping is right when the declared length only governs how</span>
-<span class="sd">much of the current object to read, since there is always a well-defined</span>
-<span class="sd">"what is left" to fall back to. Here the declared length also decides *where</span>
-<span class="sd">the next header starts*; a clipped skip distance points at whatever bytes</span>
-<span class="sd">end the buffer, which are not a header. Continuing from there would</span>
-<span class="sd">fabricate a layer and record a false entry in</span>
+<span class="sd">This class follows that convention's *warning* -- a</span>
+<span class="sd">:class:`~pcapkit.utilities.warnings.SchemaWarning`, as</span>
+<span class="sd">:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area` emits -- and</span>
+<span class="sd">deliberately diverges on the *action*. Clipping is right when the declared</span>
+<span class="sd">length only governs how much of the current object to read, since there is</span>
+<span class="sd">always a well-defined "what is left" to fall back to. Here the declared length</span>
+<span class="sd">also decides *where the next header starts*; a clipped skip distance points at</span>
+<span class="sd">whatever bytes end the buffer, which are not a header. Continuing from there</span>
+<span class="sd">would fabricate a layer and record a false entry in</span>
 <span class="sd">:class:`~pcapkit.corekit.protochain.ProtoChain`, which reads as a parsed fact</span>
-<span class="sd">rather than a guess. So :meth:`read` warns in the same wording as the sites</span>
-<span class="sd">above, then **stops the walk**: this instance absorbs every remaining octet</span>
-<span class="sd">and reports :data:`None` for ``next``, which the caller's loop already reads</span>
-<span class="sd">as "no more extension headers". The chain ends honestly at the bad header</span>
-<span class="sd">instead of inventing what follows it.</span>
+<span class="sd">rather than a guess. So :meth:`read` warns in the same form as</span>
+<span class="sd">:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area`, then **stops the</span>
+<span class="sd">walk**: this instance absorbs every remaining octet and reports :data:`None`</span>
+<span class="sd">for ``next``, which the caller's loop already reads as "no more extension</span>
+<span class="sd">headers". The chain ends honestly at the bad header instead of inventing what</span>
+<span class="sd">follows it.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
@@ -644,9 +646,10 @@
     <span class="k">class</span><span class="w"> </span><span class="nc">_NextHeaderData</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The one field every IPv6 extension header's data model carries.</span>
 
-<span class="sd">        :rfc:`8200#section-4.1` puts a Next Header octet first in every</span>
-<span class="sd">        extension header, and every implemented one records it under this</span>
-<span class="sd">        name -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member</span>
+<span class="sd">        :rfc:`8200#section-4` identifies each extension header by the Next</span>
+<span class="sd">        Header field of the header before it, and every implemented one</span>
+<span class="sd">        records its own Next Header under this name, ESP from its decrypted</span>
+<span class="sd">        trailer -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member</span>
 <span class="sd">        rather than a fallback-role-only one. Narrower than</span>
 <span class="sd">        :class:`~pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext` on</span>
 <span class="sd">        purpose: ``length`` is deliberately absent, because</span>
@@ -692,8 +695,8 @@
 <span class="sd">       :class:`~pcapkit.protocols.internet.mh.MH`,</span>
 <span class="sd">       :class:`~pcapkit.protocols.internet.ah.AH` and</span>
 <span class="sd">       :class:`~pcapkit.protocols.internet.esp.ESP`), which is what the</span>
-<span class="sd">       ``_extf`` guards on :attr:`payload`, :attr:`protocol` and</span>
-<span class="sd">       :attr:`protochain` are for.</span>
+<span class="sd">       ``_extf`` guards on :attr:`payload` and :attr:`protochain`, and each</span>
+<span class="sd">       subclass's own on ``protocol``, are for.</span>
 
 <span class="sd">    It is generic in its data and schema types, like</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ipsec.IPsec`, another base in this</span>
@@ -744,8 +747,9 @@
 <span class="sd">        &lt;pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.alias&gt;` and</span>
 <span class="sd">        :attr:`IPv6_Opts.alias &lt;pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias&gt;`,</span>
 <span class="sd">        for the same reason: :meth:`IPv6._decode_next_layer</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;` builds the</span>
-<span class="sd">        packet-dict key with ``self.alias.lstrip('IPv6-').lower()``, and</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;` keys the</span>
+<span class="sd">        packet dict through ``IPv6._exthdr_key``, which is</span>
+<span class="sd">        ``alias.lstrip('IPv6-').lower()``, and</span>
 <span class="sd">        :meth:`str.lstrip` strips a character *set*, not a prefix. The default</span>
 <span class="sd">        (class-name) alias ``'IPv6_Ext'`` would strip to ``'_Ext'`` and key the</span>
 <span class="sd">        dict as ``_ext``; the hyphen makes every leading character (``I``,</span>
@@ -978,14 +982,17 @@
 <span class="sd">            **Declared, and keyword-only**, each for its own reason.</span>
 
 <span class="sd">            These keywords stay *declared*, unlike :meth:`read`'s own,</span>
-<span class="sd">            because ``_check_construction_keywords()``</span>
-<span class="sd">            builds its allowlist from :func:`inspect.signature` of ``make``.</span>
-<span class="sd">            Hiding them in ``**kwargs`` **breaks construction**: a plain</span>
+<span class="sd">            because ``_check_construction_keywords()`` builds its allowlist</span>
+<span class="sd">            from the :func:`inspect.signature` of ``make`` and the other</span>
+<span class="sd">            construction methods of every class in the MRO, plus any</span>
+<span class="sd">            ``__keywords__``. Hiding them in ``**kwargs`` **breaks</span>
+<span class="sd">            construction**: a plain</span>
 <span class="sd">            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises</span>
 <span class="sd">            ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The</span>
-<span class="sd">            ``__keywords__`` escape hatch would cover that, but it is unioned</span>
-<span class="sd">            down the MRO, so it would widen the allowlist, and weaken that</span>
-<span class="sd">            misspelling check, for every subclass too.</span>
+<span class="sd">            ``__keywords__`` escape hatch would cover that too, with no</span>
+<span class="sd">            difference for subclasses: signatures and ``__keywords__`` are</span>
+<span class="sd">            both unioned down the MRO, so every subclass's allowlist takes</span>
+<span class="sd">            these names either way.</span>
 
 <span class="sd">            They are keyword-*only* because this class is also a base and each</span>
 <span class="sd">            subclass's ``make`` puts different names in the same positions. As</span>

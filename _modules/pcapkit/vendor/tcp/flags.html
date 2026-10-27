@@ -588,11 +588,13 @@
 <span class="w">    </span><span class="sd">"""TCP Header Flags"""</span>
 
     <span class="c1">#: Value limit checker. The registry indexes *bit offsets* 4 through 15,</span>
-    <span class="c1">#: but the members it generates are ``1 &lt;&lt; offset``, so the value domain a</span>
-    <span class="c1">#: lookup has to accept is the 16-bit field those bits live in -- a</span>
+    <span class="c1">#: counted from the most significant end of the 16-bit Data Offset/flags</span>
+    <span class="c1">#: word, and the members it generates are their wire masks,</span>
+    <span class="c1">#: ``1 &lt;&lt; (15 - offset)`` (:issue:`2310`). So the value domain a lookup has</span>
+    <span class="c1">#: to accept is the low 12 bits of that word, the flags field -- a</span>
     <span class="c1">#: composite such as ``SYN | ACK`` is a legitimate value and only the</span>
     <span class="c1">#: composite path reaches :meth:`~pcapkit.const.tcp.flags.Flags._missing_`.</span>
-    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 0xFFFF'</span>
+    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 0xFFF'</span>
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/tcp-parameters/tcp-header-flags.csv'</span>
 
@@ -630,7 +632,10 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">dscp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ('</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'Reserved for future use'</span><span class="p">,</span> <span class="s1">'Reserved'</span><span class="p">)</span>
             <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">'Unassigned'</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">dscp</span><span class="p">)</span>
 
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = 1 &lt;&lt; </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">"</span>
+            <span class="c1"># NOTE: IANA numbers the bits from the most significant end of the</span>
+            <span class="c1"># 16-bit Data Offset/flags word, so the wire mask of offset ``n`` is</span>
+            <span class="c1"># ``1 &lt;&lt; (15 - n)`` -- FIN, at offset 15, is the low bit (#2310).</span>
+            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = 1 &lt;&lt; </span><span class="si">{</span><span class="mi">15</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span>
 
             <span class="c1"># if len(pres) &gt; 74:</span>

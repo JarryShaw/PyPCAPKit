@@ -777,8 +777,8 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Log the error, unless it is quiet, and initialise the exception.</span>
 
-<span class="sd">        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` is set,</span>
-<span class="sd">        installs the terse exception hooks; the class docstring says when an error is</span>
+<span class="sd">        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` turns</span>
+<span class="sd">        development mode on, installs the terse exception hooks; the class docstring says when an error is</span>
 <span class="sd">        quiet.</span>
 
 <span class="sd">        Args:</span>

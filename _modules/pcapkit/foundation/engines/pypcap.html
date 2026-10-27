@@ -754,6 +754,9 @@
 <span class="sd">                  and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
 <span class="sd">                  is provided as the PyPCAP engine does not</span>
 <span class="sd">                  support such operations.</span>
+<span class="sd">                * if :attr:`self.extractor._exctx &lt;pcapkit.foundation.extraction.Extractor._exctx&gt;`</span>
+<span class="sd">                  is provided, as the PyPCAP engine does not parse with :mod:`pcapkit`'s</span>
+<span class="sd">                  own protocol implementations.</span>
 <span class="sd">                * if reassembly and/or flow tracing is enabled, as the PyPCAP</span>
 <span class="sd">                  engine performs no protocol dissection and so cannot support</span>
 <span class="sd">                  either operation.</span>
@@ -774,6 +777,12 @@
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">'none'</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">'null'</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(engine=pypcap)' does not support protocol and layer threshold; "</span>
                  <span class="sa">f</span><span class="s2">"'layer=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="si">}</span><span class="s2">' and 'protocol=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="si">}</span><span class="s2">' ignored"</span><span class="p">,</span>
+                 <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(engine=pypcap)' does not parse with pcapkit's own protocol "</span>
+                 <span class="s2">"implementations, so the parsing context supplied through "</span>
+                 <span class="s2">"'context=' is ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PCAP</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>

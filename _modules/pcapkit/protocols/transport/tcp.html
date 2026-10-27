@@ -1013,10 +1013,10 @@
         <span class="c1"># segment whose flags octet is all zero: the ``|=`` below is the only promotion and</span>
         <span class="c1"># never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:</span>
         <span class="c1"># argument of type 'int' is not a container or iterable``. A segment with any flag</span>
-        <span class="c1"># set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` with no</span>
-        <span class="c1"># ``_missing_`` of its own, so ``Enum_Flags(0)`` is a valid flagless member that</span>
-        <span class="c1"># compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`</span>
-        <span class="c1"># advertises.</span>
+        <span class="c1"># set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` whose</span>
+        <span class="c1"># ``_missing_`` accepts any value in the 12-bit flags field, ``0`` to ``0xFFF``,</span>
+        <span class="c1"># so ``Enum_Flags(0)`` is a valid flagless member that compares equal to ``0`` and</span>
+        <span class="c1"># ORs as usual. This is the type :attr:`connection` advertises.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -2775,6 +2775,8 @@
 <span class="sd">            ProtocolNotImplemented: If an option argument given by name, an</span>
 <span class="sd">                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is</span>
 <span class="sd">                not in its namespace and has no default.</span>
+<span class="sd">            FieldValueError: If an ADD_ADDR ``addr`` is a :obj:`bool` or not a</span>
+<span class="sd">                valid IP address.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            The options are emitted in the given order, ``NOP`` and ``EOOL``</span>
@@ -3947,6 +3949,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``hmac`` is not 8 octets, or is given together</span>
 <span class="sd">                with ``echo`` set.</span>
+<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` or not a valid IP</span>
+<span class="sd">                address.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :rfc:`8684` section 3.4.1 allows an ADD_ADDR without the truncated</span>

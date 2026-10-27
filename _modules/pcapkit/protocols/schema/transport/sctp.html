@@ -584,8 +584,9 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Number of padding bytes, clamped to the number of bytes left in the</span>
-<span class="sd">        enclosing structure, since :rfc:`9260#section-3.2` allows the final</span>
-<span class="sd">        padding of a packet to be omitted. When packing, it is clamped as well</span>
+<span class="sd">        enclosing structure, so that a final chunk captured without (all of)</span>
+<span class="sd">        its padding still parses, although :rfc:`9260#section-3.2` has the</span>
+<span class="sd">        sender pad every chunk. When packing, it is clamped as well</span>
 <span class="sd">        to the ``__padding__`` width :func:`pre_pack_padding` hands over, so a</span>
 <span class="sd">        final chunk captured without (all of) its padding rebuilds without it</span>
 <span class="sd">        (:issue:`1474`).</span>

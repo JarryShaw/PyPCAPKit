@@ -565,8 +565,8 @@
     <span class="c1"># reserved to mean unknown and all, respectively." The same sentence</span>
     <span class="c1"># reserves all-ones -- 0xFFFF, to mean "all" -- and this table has no entry</span>
     <span class="c1"># for that; ``_missing_`` resolves 0xFFFF through the "Dynamically Assigned"</span>
-    <span class="c1"># range instead. Adding it would change the generated file, so it is left as</span>
-    <span class="c1"># a follow-up rather than done here.</span>
+    <span class="c1"># range instead. Adding it would change the generated file, so it is left</span>
+    <span class="c1"># out.</span>
     <span class="mh">0x0000</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Unspecified'</span><span class="p">,</span> <span class="s2">"Unspecified socket; this is IPX's own default for the dst/src socket field."</span><span class="p">),</span>
 
     <span class="c1"># Sockets in the "Registered by Xerox" range below. These are formally</span>
@@ -605,14 +605,14 @@
     <span class="c1"># it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456</span>
     <span class="c1"># Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have</span>
     <span class="c1"># never been in this enumeration, and 0x9004 is independently reserved by</span>
-    <span class="c1"># :rfc:`1634` line 552 -- "The socket number 0x9004 is a Novell reserved</span>
-    <span class="c1"># socket number for exclusive use with IPX WAN protocol exchange" -- and by</span>
-    <span class="c1"># the two RFCs it obsoletes: :rfc:`1551` line 532 word for word, and</span>
-    <span class="c1"># :rfc:`1362` line 253 with "information exchange" for "protocol exchange".</span>
-    <span class="c1"># So they are known omissions with good sourcing, not rows nobody noticed.</span>
-    <span class="c1"># Adding them would add members to the generated file and so give up the</span>
-    <span class="c1"># byte-identity proof #507 rests on, which makes them a follow-up rather</span>
-    <span class="c1"># than part of it.</span>
+    <span class="c1"># :rfc:`1634#section-4`, "Information Exchange Packet Formats" -- "The</span>
+    <span class="c1"># socket number 0x9004 is a Novell reserved socket number for exclusive use</span>
+    <span class="c1"># with IPX WAN protocol exchange" -- and by the same section of the two RFCs</span>
+    <span class="c1"># it obsoletes: :rfc:`1551` word for word, and :rfc:`1362` with</span>
+    <span class="c1"># "information exchange" for "protocol exchange". So they are known</span>
+    <span class="c1"># omissions with good sourcing, not rows nobody noticed. Adding them would</span>
+    <span class="c1"># add members to the generated file and so give up the byte-identity proof</span>
+    <span class="c1"># #507 rests on.</span>
     <span class="c1">#</span>
     <span class="c1"># Some of the rows below also depart from Novell's own wording: Novell writes</span>
     <span class="c1"># "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and</span>

@@ -549,7 +549,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span><span class="p">,</span> <span class="n">TCP</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span><span class="p">,</span> <span class="n">IPv6ExtHdrFragment</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -961,6 +961,74 @@
 
 
 
+<div class="viewcode-block" id="_fragment_header">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._fragment_header">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fragment_header</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IPv6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6ExtHdrFragment | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the IPv6 Fragment header of an IPv6 layer, if any.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv6: Scapy IPv6 layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The IPv6 Fragment header (:class:`scapy.layers.inet6.IPv6ExtHdrFragment`)</span>
+<span class="sd">        among the extension headers `Scapy`_ dissects in that layer's own</span>
+<span class="sd">        chain, or :data:`None` if there is none.</span>
+
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">,</span> <span class="n">_IPv6ExtHdr</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">_IPv6ExtHdr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">):</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">return</span> <span class="n">header</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="_fragment">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._fragment">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP | IPv6 | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the IPv4 or IPv6 layer of a packet that IP reassembly reads.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        name: ``'IP'`` or ``'IPv6'``, the layer to fetch.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The first ``name`` layer, from the outside in, that is a fragment --</span>
+<span class="sd">        for IPv4, one with **MF** set or a non-zero fragment offset, for IPv6,</span>
+<span class="sd">        one with an IPv6 Fragment header (see :func:`_fragment_header`); with</span>
+<span class="sd">        none, ``packet[name]``, the outermost; with no ``name`` layer,</span>
+<span class="sd">        :data:`None`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        As with :func:`pcapkit.toolkit.pcap._fragment`, either datagram of an</span>
+<span class="sd">        IP-in-IP tunnel may be the fragmented one, and each is reassembled on</span>
+<span class="sd">        its own header (:issue:`2307`). The datagram an ICMP error quotes is</span>
+<span class="sd">        of another class, so is not ``packet[name]`` and is not walked to.</span>
+
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">outermost</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP | IPv6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">IP</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'IP'</span> <span class="k">else</span> <span class="n">IPv6</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">outermost</span>  <span class="c1"># type: Packet</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">NoPayload</span><span class="p">):</span>
+        <span class="c1"># an exact match, as ``packet[name]`` is, so a quoted datagram is not one</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="ow">is</span> <span class="n">kind</span><span class="p">:</span>  <span class="c1"># pylint: disable=unidiomatic-typecheck</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">IP</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">MF</span> <span class="ow">or</span> <span class="n">layer</span><span class="o">.</span><span class="n">frag</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">layer</span>
+            <span class="k">elif</span> <span class="n">_fragment_header</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">layer</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">layer</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">return</span> <span class="n">outermost</span></div>
+
+
+
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.ipv4_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
@@ -972,7 +1040,8 @@
 <span class="sd">    :func:`_within_datagrams`), and the **DF** (``scapy.layers.inet.IP.flags.DF``)</span>
 <span class="sd">    flag is :data:`False`. A zero-length frame has none, though `Scapy`_ hands it back</span>
 <span class="sd">    as an IPv4 layer of defaults at the ``RAW`` and ``IPV4`` link types (see</span>
-<span class="sd">    :func:`_frame`).</span>
+<span class="sd">    :func:`_frame`). In an IP-in-IP tunnel, the layer is the first that is a</span>
+<span class="sd">    fragment (see :func:`_fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
@@ -986,8 +1055,7 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ipv4</span> <span class="o">:=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP | None'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'IP'</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DF</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>  <span class="c1"># a zero-length frame (#1676)</span>
@@ -1044,7 +1112,8 @@
 <span class="sd">    (:class:`scapy.layers.inet6.IPv6`), in no later IPv4 fragment, and an IPv6 Fragment</span>
 <span class="sd">    header (:rfc:`2460#section-4.5`, i.e.,</span>
 <span class="sd">    :class:`scapy.layers.inet6.IPv6ExtHdrFragment`) among the extension headers `Scapy`_</span>
-<span class="sd">    dissects in that layer's own chain.</span>
+<span class="sd">    dissects in that layer's own chain. In an IP-in-IP tunnel, the layer is the first</span>
+<span class="sd">    that has one (see :func:`_fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
@@ -1065,26 +1134,20 @@
 <span class="sd">        no upper-layer header in it (:rfc:`791#section-3.2`), but `Scapy`_</span>
 <span class="sd">        dissects IPv6 there whatever the fragment offset. And the header and</span>
 <span class="sd">        addresses handed on are those of the IPv6 layer the Fragment header</span>
-<span class="sd">        follows, so one inside a packet that layer carries, such as the inner</span>
-<span class="sd">        packet of 6in6, is not taken.</span>
+<span class="sd">        follows.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">scapy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ModuleNotFound</span><span class="p">(</span><span class="s2">"No module named 'scapy'"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">)</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">,</span> <span class="n">_IPv6ExtHdr</span>
 
-    <span class="k">if</span> <span class="s1">'IPv6'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ipv6</span> <span class="o">:=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6 | None'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">above</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">underlayer</span>
         <span class="k">while</span> <span class="n">above</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">above</span><span class="p">,</span> <span class="n">IP</span><span class="p">)</span> <span class="ow">and</span> <span class="n">above</span><span class="o">.</span><span class="n">frag</span><span class="p">:</span>    <span class="c1"># data of a later fragment</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="n">above</span> <span class="o">=</span> <span class="n">above</span><span class="o">.</span><span class="n">underlayer</span>
-        <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>
-        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">,</span> <span class="n">_IPv6ExtHdr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">,</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">):</span>
-            <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">payload</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">,</span> <span class="n">IPv6ExtHdrFragment</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ipv6_frag</span> <span class="o">:=</span> <span class="n">_fragment_header</span><span class="p">(</span><span class="n">ipv6</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>                        <span class="c1"># dismiss not fragmented packet</span>
 
         <span class="c1"># NOTE: ``len()`` of a Scapy layer spans that layer and everything after</span>

@@ -40,7 +40,7 @@ Terminology
 
        .. code-block:: python
 
-          tract_dict = dict(
+          trace_dict = dict(
               protocol=data_link,                     # data link type from global header
               index=frame.info.number,                # frame number
               frame=frame.info,                       # extracted frame info
@@ -56,7 +56,8 @@ Terminology
               dst=ip.dst,                             # destination IP
               srcport=tcp.srcport,                    # TCP source port
               dstport=tcp.dstport,                    # TCP destination port
-              timestamp=frame.info.time_epoch,        # frame timestamp
+              timestamp=float(
+                  frame.info.time_epoch),             # frame timestamp
           )
 
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Packet`

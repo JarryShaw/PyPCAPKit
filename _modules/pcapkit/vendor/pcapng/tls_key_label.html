@@ -607,10 +607,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields and missing fields. ``RSA`` is prepended by</span>
 <span class="sd">            hand -- see :data:`RSA_COMMENT` -- since it has no row in the</span>
-<span class="sd">            registry itself. The second element is always empty: this</span>
-<span class="sd">            registry does not mint an ``_missing_`` (see</span>
-<span class="sd">            :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`'s own</span>
-<span class="sd">            docstring for why), so there is nothing to render there.</span>
+<span class="sd">            registry itself. The second element is always empty: the</span>
+<span class="sd">            generated :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`</span>
+<span class="sd">            has no ``_missing_`` -- its constructor refuses every value no</span>
+<span class="sd">            member carries -- so there is nothing to render there.</span>
 
 <span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[</span>

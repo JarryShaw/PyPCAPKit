@@ -627,7 +627,11 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FileError: If the magic number is invalid.</span>
+<span class="sd">            FileError: If the magic number is invalid. Parsing does not get</span>
+<span class="sd">                this far with one: the schema's</span>
+<span class="sd">                :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback`</span>
+<span class="sd">                raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for it</span>
+<span class="sd">                while the header is unpacked.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -836,6 +840,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read next layer protocol type.</span>
 
+<span class="sd">        Reads ``size`` octets as an unsigned integer in the file's byte order</span>
+<span class="sd">        (:attr:`byteorder`), falling back to little-endian before :meth:`read`</span>
+<span class="sd">        has set it (:issue:`2312`).</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: buffer size</span>
 
@@ -843,7 +851,7 @@
 <span class="sd">            Link layer protocol enumeration.</span>
 
 <span class="sd">        """</span>
-        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_byte'</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'little'</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span></div>
 

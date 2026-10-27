@@ -505,9 +505,9 @@ automatically generated from the <a class="reference internal" href="../vendor/i
 <p>Nearly every <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> below departs from <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> in one deliberate way, and it
 is the behaviour to know about before using any of them: looking one up by a value
 it does not define does <strong>not</strong> raise. Its <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override returns a
-member-like object for a value inside the registry’s valid range, named for the
-unassigned or reserved band it falls in. Only a value outside that range, or of the
-wrong type, raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+member-like object for a value that falls in one of the registry’s unassigned or
+reserved bands, named for that band. Only a value no band covers, or of the wrong
+type, raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
 <p>In almost every registry that object is <strong>not</strong> installed: the registry does not
 grow, and a second lookup of the same value returns an equal but distinct object.
 Some behave otherwise, and <a class="reference internal" href="../../contributing/conventions/mint-criterion.html#mint-criterion"><span class="std std-ref">Minting an Unrecognised Value</span></a> gives the full split:</p>
@@ -528,14 +528,14 @@ and iteration are unchanged.</p></li>
 </ul>
 <p>That is what makes the enumerations usable against live capture data, where a
 protocol number assigned after this release was generated is a routine
-occurrence rather than an error. It also means an enumeration member is not a
+occurrence rather than an error. It also means an enumeration is not a
 closed set: an unassigned value resolves to a member that is, apart from
 <a class="reference internal" href="mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, absent from iteration and <code class="docutils literal notranslate"><span class="pre">__members__</span></code>,
 and whether a repeat lookup returns the same object varies by registry, so compare such
 members by value, not identity.</p>
 <p>The common form of the override is generated – see <a class="reference internal" href="../vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>,
 whose template emits it – while the valid range and the names of the unassigned
-bands are per-registry, taken from that registry’s own IANA data. The individual
+bands are per-registry, taken from that registry’s own source data. The individual
 overrides are therefore not documented per class.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>

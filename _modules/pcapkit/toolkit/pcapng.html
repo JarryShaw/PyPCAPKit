@@ -500,14 +500,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_segment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fragment</span><span class="p">,</span> <span class="n">tcp_segment</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span><span class="p">,</span> <span class="n">Packet</span>
 
@@ -523,7 +524,8 @@
 <span class="sd">    A frame can be reassembled if it contains an IPv4 layer</span>
 <span class="sd">    (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and the **DF**</span>
 <span class="sd">    (:attr:`IPv4.flags.df &lt;pcapkit.protocols.data.internet.ipv4.Flags.df&gt;`) flag is</span>
-<span class="sd">    :data:`False`.</span>
+<span class="sd">    :data:`False`. In an IP-in-IP tunnel, the layer is the first that is a fragment</span>
+<span class="sd">    (see :func:`pcapkit.toolkit.pcap._fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP-NG frame.</span>
@@ -536,8 +538,7 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'IPv4'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IPv4'</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ipv4</span> <span class="o">:=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv4]'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">IPv4</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ipv4_info</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">info</span>
         <span class="k">if</span> <span class="n">ipv4_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented frame</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -572,7 +573,8 @@
 <span class="sd">    A frame can be reassembled if it contains an IPv6 layer</span>
 <span class="sd">    (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and an IPv6 Fragment header</span>
 <span class="sd">    (:rfc:`2460#section-4.5`, i.e.,</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`). In an IP-in-IP tunnel,</span>
+<span class="sd">    the layer is the first that has one (see :func:`pcapkit.toolkit.pcap._fragment`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP-NG frame.</span>
@@ -585,8 +587,7 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'IPv6'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ipv6</span> <span class="o">:=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv6]'</span><span class="p">,</span> <span class="n">_fragment</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">IPv6</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ipv6_info</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">info</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ipv6_frag</span> <span class="o">:=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>  <span class="c1"># type: ignore[call-overload]</span>
             <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span>

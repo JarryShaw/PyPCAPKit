@@ -545,7 +545,7 @@
     <span class="c1">#: TCP finish (FIN) flag.</span>
     <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: TCP reset (RST) flag. A connection can end abruptly as well as politely</span>
-    <span class="c1">#: (:rfc:`9293#section-3.5.2`), and the tracer cannot notice that unless the</span>
+    <span class="c1">#: (:rfc:`9293#section-3.5.3`), and the tracer cannot notice that unless the</span>
     <span class="c1">#: flag reaches it, otherwise a reset connection looks merely idle and a later</span>
     <span class="c1">#: connection reusing the same endpoints merges into it.</span>
     <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
@@ -617,7 +617,7 @@
     <span class="c1">#: and the final acknowledgement out of the flow.</span>
     <span class="n">fin</span><span class="p">:</span> <span class="s1">'set[tuple[_AT, int]]'</span>
     <span class="c1">#: Whether a TCP **RST** has been seen on this flow. A reset ends the</span>
-    <span class="c1">#: connection at once (:rfc:`9293#section-3.5.2`), where a polite close needs</span>
+    <span class="c1">#: connection at once (:rfc:`9293#section-3.5.3`), where a polite close needs</span>
     <span class="c1">#: a FIN from each side, so it is tracked as a flag rather than per endpoint.</span>
     <span class="n">reset</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler,</span>

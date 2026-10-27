@@ -569,20 +569,18 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtensionHeader</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""IPv6 Extension Header Types"""</span>
 
-    <span class="c1">#: Keyword-style names carried over from this crawler's *previous* data</span>
-    <span class="c1">#: source, keyed by protocol number. The Protocol Numbers registry</span>
-    <span class="c1">#: (``protocol-numbers-1.csv``, this crawler's :attr:`LINK` before GitHub</span>
-    <span class="c1">#: issue :issue:`925`) paired each of these headers with a short ``Keyword``</span>
-    <span class="c1">#: column value, e.g. ``IPv6-Route`` for header 43. The registry</span>
-    <span class="c1">#: :attr:`LINK` points at -- IANA's authoritative *IPv6 Extension</span>
-    <span class="c1">#: Header Types* registry -- has no such column, only a verbose</span>
-    <span class="c1">#: ``Description`` (``Routing Header for IPv6`` for the same header), so</span>
-    <span class="c1">#: deriving names the same way :meth:`process` does for every other</span>
-    <span class="c1">#: 3-column registry (see e.g.</span>
-    <span class="c1">#: :class:`~pcapkit.vendor.ipv6.router_alert.RouterAlert`)</span>
-    <span class="c1">#: would silently rename these members. This mapping keeps</span>
-    <span class="c1">#: the shorter names instead; any header not listed here falls back to a</span>
-    <span class="c1">#: name derived from its description.</span>
+    <span class="c1">#: Keyword-style names taken from the *Protocol Numbers* registry</span>
+    <span class="c1">#: (``protocol-numbers-1.csv``), keyed by protocol number. That registry</span>
+    <span class="c1">#: pairs each of these headers with a short ``Keyword`` column value, e.g.</span>
+    <span class="c1">#: ``IPv6-Route`` for header 43. The registry :attr:`LINK` points at --</span>
+    <span class="c1">#: IANA's authoritative *IPv6 Extension Header Types* registry -- has no</span>
+    <span class="c1">#: such column, only a verbose ``Description`` (``Routing Header for</span>
+    <span class="c1">#: IPv6`` for the same header), so deriving names the same way</span>
+    <span class="c1">#: :meth:`process` does for every other 3-column registry (see e.g.</span>
+    <span class="c1">#: :class:`~pcapkit.vendor.ipv6.router_alert.RouterAlert`) would give</span>
+    <span class="c1">#: these members long description-derived names (GitHub issue</span>
+    <span class="c1">#: :issue:`925`). This mapping keeps the shorter names instead; any header</span>
+    <span class="c1">#: not listed here falls back to a name derived from its description.</span>
     <span class="n">NAMES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="mi">0</span><span class="p">:</span> <span class="s1">'HOPOPT'</span><span class="p">,</span>
         <span class="mi">43</span><span class="p">:</span> <span class="s1">'IPv6-Route'</span><span class="p">,</span>

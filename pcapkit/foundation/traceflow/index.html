@@ -591,10 +591,11 @@ reads
 <a class="reference internal" href="../reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.data.data.Deferred</span></code></a>, and not shared
 with it. That one postpones a single <code class="docutils literal notranslate"><span class="pre">analyze()</span></code> call over bytes already
 in hand; this postpones a <em>submit</em> over a reassembler’s buffers. The
-reassembly and flow tracing subpackages are siblings and neither should
-depend on the other, so the few lines are written in each rather than one
-importing the other – the same reason their <code class="docutils literal notranslate"><span class="pre">data/data.py</span></code> modules
-mirror each other instead of merging.</p>
+reassembly and flow tracing subpackages are siblings, and the flow tracer
+reaches the reassembler only lazily, when <code class="docutils literal notranslate"><span class="pre">analyse</span></code> asks for one, so the
+few lines are written in each rather than one importing the other – the
+same reason their <code class="docutils literal notranslate"><span class="pre">data/data.py</span></code> modules mirror each other instead of
+merging.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

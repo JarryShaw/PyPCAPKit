@@ -645,19 +645,18 @@
 <span class="sd">        length is the only thing on the wire that carries the family -- must</span>
 <span class="sd">        convert the argument itself, and that conversion happens **before**</span>
 <span class="sd">        the schema, so it launders a :obj:`bool` into an</span>
-<span class="sd">        :class:`~ipaddress.IPv4Address` that the guard added for :issue:`491`</span>
-<span class="sd">        in :meth:`_IPAddressField.pre_process` can then only see as a</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address` that the :issue:`491` guard in</span>
+<span class="sd">        :meth:`_IPAddressField.pre_process` can then only see as a</span>
 <span class="sd">        legitimate address: ``True`` / ``False`` become ``0.0.0.1`` /</span>
 <span class="sd">        ``0.0.0.0`` -- or ``::1`` / ``::`` where the wire format fixes the</span>
 <span class="sd">        family as IPv6 -- without complaint.</span>
 
 <span class="sd">        Routing every one of them through here rather than giving each its own</span>
-<span class="sd">        :func:`isinstance` check is the whole point: :issue:`469` added</span>
-<span class="sd">        exactly such a check to :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;`, and :issue:`491`</span>
-<span class="sd">        was the same defect surviving at every site that had not been thought</span>
-<span class="sd">        of. A guard that has to be remembered per call site is a guard that</span>
-<span class="sd">        will be forgotten at the next one.</span>
+<span class="sd">        :func:`isinstance` check is the whole point: :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` carries exactly</span>
+<span class="sd">        such a check (:issue:`469`), and :issue:`491` is the same defect at</span>
+<span class="sd">        every site that lacks one. A guard that has to be remembered per call</span>
+<span class="sd">        site is a guard that will be forgotten at the next one.</span>
 
 <span class="sd">        The :obj:`bool` rejection is the **first** statement here, ahead of any</span>
 <span class="sd">        dispatch on the value's type, for the placement reason :issue:`469`</span>
@@ -682,8 +681,8 @@
 <span class="sd">        exception classes derive from</span>
 <span class="sd">        :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,</span>
 <span class="sd">        so the difference is invisible to ``except BaseError`` and ``except</span>
-<span class="sd">        ValueError``, and nothing in the library catches either one</span>
-<span class="sd">        specifically.</span>
+<span class="sd">        ValueError``, and no call of this function or of a ``_make_*`` in the</span>
+<span class="sd">        library sits inside an ``except`` for either one specifically.</span>
 
 <span class="sd">    .. versionadded:: 1.5.0</span>
 

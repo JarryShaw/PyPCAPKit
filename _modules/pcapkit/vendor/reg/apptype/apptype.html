@@ -1170,7 +1170,8 @@
 <span class="s1">        collapsed = '_'.join(stripped.split())</span>
 <span class="s1">        replaced = re.sub(r'</span><span class="se">\\</span><span class="s1">W', '_', collapsed)</span>
 <span class="s1">        identifier = '_'.join(filter(None, replaced.split('_')))</span>
-<span class="s1">        # NOTE: matches process()'s own keyword guard below -- a name that</span>
+<span class="s1">        # NOTE: matches the keyword guard AppType.process applies at generation</span>
+<span class="s1">        # time in pcapkit.vendor.reg.apptype.apptype -- a name that</span>
 <span class="s1">        # sanitises to a reserved word is not usable as an attribute as is,</span>
 <span class="s1">        # and a trailing underscore is the same fix the generator already</span>
 <span class="s1">        # applies to a statically declared member with the same problem.</span>
@@ -1496,8 +1497,9 @@
 <span class="w">    </span><span class="sd">"""One registry entry, as grouped by :meth:`AppType.records`.</span>
 
 <span class="sd">    IANA's CSV carries one row per ``(service, port, transport)`` triple, so a</span>
-<span class="sd">    service on both TCP and UDP is two rows that become one member. This is what</span>
-<span class="sd">    they are merged into.</span>
+<span class="sd">    service on both TCP and UDP is two rows that become one entry, which each of</span>
+<span class="sd">    those transports' registries then renders as a member of its own. This is</span>
+<span class="sd">    what they are merged into.</span>
 
 <span class="sd">    Every field a merge has to grow is a container, appended to in place, because</span>
 <span class="sd">    :class:`~pcapkit.corekit.infoclass.Info` refuses attribute assignment. That is</span>
@@ -1506,7 +1508,8 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Service name, as IANA spells it.</span>
+    <span class="c1">#: Service name, lower-cased, or one derived from the description where</span>
+    <span class="c1">#: IANA names none.</span>
     <span class="n">svc</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Port number as text, or ``'-1'`` where IANA assigned none.</span>
     <span class="n">port</span><span class="p">:</span> <span class="s1">'str'</span>

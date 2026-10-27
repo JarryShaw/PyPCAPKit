@@ -323,7 +323,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    interface rather than 1.3.0.
 
    Every attribute this engine touches -- the ``pcap.pcap(name=..., promisc=...)``
-   constructor, ``pcap.pcap.datalink``, ``snaplen``, iteration yielding
+   constructor, ``pcap.pcap.datalink``, iteration yielding
    ``(timestamp, bytes)``, and ``pcap.pcap.close`` -- is present on both and
    behaves identically, byte for byte and timestamp for timestamp, on
    ``pcap-ct`` 1.3.0b3 against ``pypcap`` 1.3.0 -- a statement about those

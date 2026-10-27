@@ -605,8 +605,8 @@ following objects and functions:</p>
 </div>
 <p>It also exports <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>,
 <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> as the
-standard library has them. Their fallbacks were for interpreters below Python 3.8,
-which 1.5.0 no longer installs on (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
+standard library has them, with no fallback, since 1.5.0 requires Python 3.8 or
+later (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.compat.final">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">final</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/typing.html#final"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.final" title="Link to this definition">¶</a></dt>
@@ -646,7 +646,7 @@ on 3.8 and 3.9.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/functools.html#cached_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.cached_property" title="Link to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> itself.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>No longer a backport below Python 3.8, which 1.5.0 no longer installs on
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>No longer a backport below Python 3.8, which 1.5.0 does not install on
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
 </div>
 </dd></dl>

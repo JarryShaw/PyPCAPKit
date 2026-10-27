@@ -720,6 +720,9 @@
 
 <span class="sd">               f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'</span>
 
+<span class="sd">            On an IPv6 flow every ``:`` in it is replaced by ``.``, since a</span>
+<span class="sd">            Windows file name cannot carry one.</span>
+
 <span class="sd">            It is built from the packet that **opened** the flow, not from the</span>
 <span class="sd">            canonical buffer ID, so the label names the initiator first. The</span>
 <span class="sd">            reverse half of a bidirectional</span>
@@ -764,8 +767,8 @@
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
             <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="c1"># ``:`` is a path separator on Windows and a drive separator</span>
-                <span class="c1"># elsewhere in the tooling, so an IPv6 label cannot carry it</span>
+                <span class="c1"># ``:`` cannot appear in a Windows file name, where it separates</span>
+                <span class="c1"># the drive letter, so an IPv6 label cannot carry it</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
             <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique_label</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'new TCP flow </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
@@ -966,7 +969,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Whether a teardown was observed -- a **FIN from both endpoints**, the</span>
 <span class="sd">            polite close of :rfc:`9293#section-3.6`, or a **RST** from either, the</span>
-<span class="sd">            abrupt one of :rfc:`9293#section-3.5.2`.</span>
+<span class="sd">            abrupt one of :rfc:`9293#section-3.5.3`.</span>
 
 <span class="sd">        This is not the same as "nothing more will arrive on these endpoints": the</span>
 <span class="sd">        acknowledgement that completes a four-way close, and any duplicate of it,</span>

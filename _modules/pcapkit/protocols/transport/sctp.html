@@ -809,8 +809,9 @@
 <span class="sd">       &gt;&gt;&gt; SCTP.register(PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)</span>
 <span class="sd">       &gt;&gt;&gt; SCTP.register(60, NGAP)  # equivalent, PPID given as a plain integer</span>
 
-<span class="sd">    By default, PPIDs 60 (``NG_Application_Protocol``) and 66</span>
-<span class="sd">    (``NGAP_over_DTLS_over_SCTP``) are registered to</span>
+<span class="sd">    By default, PPIDs 60 (``PayloadProtocolIdentifier_3GPP_NG_Application_Protocol``)</span>
+<span class="sd">    and 66 (``PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP``) are</span>
+<span class="sd">    registered to</span>
 <span class="sd">    :class:`~pcapkit.protocols.application.ngap.NGAP`, and every other PPID</span>
 <span class="sd">    resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
 
@@ -1565,10 +1566,12 @@
 <span class="sd">            No alignment fix-up happens here, unlike</span>
 <span class="sd">            :meth:`TCP._make_tcp_options</span>
 <span class="sd">            &lt;pcapkit.protocols.transport.tcp.TCP._make_tcp_options&gt;`: every</span>
-<span class="sd">            chunk schema carries its own trailing</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.strings.PaddingField`, computed from</span>
-<span class="sd">            the chunk's own ``length``, so a chunk pads itself to the four-byte</span>
-<span class="sd">            boundary required by :rfc:`9260#section-3.2`.</span>
+<span class="sd">            chunk pads itself to the four-byte boundary required by</span>
+<span class="sd">            :rfc:`9260#section-3.2`. A chunk without a nested list carries its</span>
+<span class="sd">            own trailing :class:`~pcapkit.corekit.fields.strings.PaddingField`,</span>
+<span class="sd">            computed from the chunk's own ``length``; one with a nested</span>
+<span class="sd">            parameter or error cause list folds its padding into that list, see</span>
+<span class="sd">            :func:`~pcapkit.protocols.schema.transport.sctp.nested_length`.</span>
 
 <span class="sd">        """</span>
         <span class="n">chunks_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Chunk | bytes]</span>
@@ -2674,7 +2677,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_sack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_SACKChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="n">cum_tsn_ack</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                         <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>  <span class="c1"># minimum permitted by [RFC 9260]</span>
+                         <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>  <span class="c1"># the INIT minimum [RFC 9260]; a SACK may advertise less</span>
                          <span class="n">gap_blocks</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_GapAckBlock | Data_GapAckBlock | tuple[int, int]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                          <span class="n">dup_tsn</span><span class="p">:</span> <span class="s1">'Optional[list[int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SACKChunk'</span><span class="p">:</span>

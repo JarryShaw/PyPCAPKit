@@ -503,10 +503,12 @@
 only, which plays a double role. It is the shared <strong>base class</strong> of every
 IPv6 extension header this package implements, supplying the
 <code class="docutils literal notranslate"><span class="pre">extension</span></code>-mode contract: the guards that make
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> and
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a>
-unavailable on a header parsed as part of an IPv6 chain. It also implements a
+unavailable on a header parsed as part of an IPv6 chain. Each subclass guards
+its own <code class="docutils literal notranslate"><span class="pre">protocol</span></code> the same way; this class’s
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a> deliberately
+does not. It also implements a
 <strong>generic</strong> extractor for IPv6 extension headers <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, standing in whenever a
 header’s own dedicated parser is unavailable or has failed. <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html#section-4"><strong>RFC 6564 Section 4</strong></a>
 requires, with an RFC 2119 <strong>MUST</strong>, that any IPv6 extension header defined since
@@ -571,8 +573,8 @@ class keywords implement it.</p></li>
 <a class="reference internal" href="mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a>,
 <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
 <a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>), which is what the
-<code class="docutils literal notranslate"><span class="pre">_extf</span></code> guards on <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a> are for.</p></li>
+<code class="docutils literal notranslate"><span class="pre">_extf</span></code> guards on <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a>, and each
+subclass’s own on <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, are for.</p></li>
 </ol>
 <p>It is generic in its data and schema types, like
 <a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>, another base in this
@@ -613,8 +615,9 @@ makes each subclass’s own <code class="docutils literal notranslate"><span cla
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>.</p>
 <p>Hyphenated, like <a class="reference internal" href="ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.alias" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Frag.alias</span></code></a> and
 <a class="reference internal" href="ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Opts.alias</span></code></a>,
-for the same reason: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a> builds the
-packet-dict key with <code class="docutils literal notranslate"><span class="pre">self.alias.lstrip('IPv6-').lower()</span></code>, and
+for the same reason: <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a> keys the
+packet dict through <code class="docutils literal notranslate"><span class="pre">IPv6._exthdr_key</span></code>, which is
+<code class="docutils literal notranslate"><span class="pre">alias.lstrip('IPv6-').lower()</span></code>, and
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str.lstrip" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.lstrip()</span></code></a> strips a character <em>set</em>, not a prefix. The default
 (class-name) alias <code class="docutils literal notranslate"><span class="pre">'IPv6_Ext'</span></code> would strip to <code class="docutils literal notranslate"><span class="pre">'_Ext'</span></code> and key the
 dict as <code class="docutils literal notranslate"><span class="pre">_ext</span></code>; the hyphen makes every leading character (<code class="docutils literal notranslate"><span class="pre">I</span></code>,
@@ -776,14 +779,17 @@ verbatim ahead of <code class="docutils literal notranslate"><span class="pre">p
 <p class="admonition-title">Note</p>
 <p><strong>Declared, and keyword-only</strong>, each for its own reason.</p>
 <p>These keywords stay <em>declared</em>, unlike <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>’s own,
-because <code class="docutils literal notranslate"><span class="pre">_check_construction_keywords()</span></code>
-builds its allowlist from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> of <code class="docutils literal notranslate"><span class="pre">make</span></code>.
-Hiding them in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> <strong>breaks construction</strong>: a plain
+because <code class="docutils literal notranslate"><span class="pre">_check_construction_keywords()</span></code> builds its allowlist
+from the <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> of <code class="docutils literal notranslate"><span class="pre">make</span></code> and the other
+construction methods of every class in the MRO, plus any
+<code class="docutils literal notranslate"><span class="pre">__keywords__</span></code>. Hiding them in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> <strong>breaks
+construction</strong>: a plain
 <code class="docutils literal notranslate"><span class="pre">IPv6_Ext(next=...,</span> <span class="pre">len=...,</span> <span class="pre">data=...,</span> <span class="pre">payload=...)</span></code> raises
 <code class="docutils literal notranslate"><span class="pre">UnsupportedCall:</span> <span class="pre">IPv6_Ext:</span> <span class="pre">unexpected</span> <span class="pre">keyword(s)</span></code>. The
-<code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that, but it is unioned
-down the MRO, so it would widen the allowlist, and weaken that
-misspelling check, for every subclass too.</p>
+<code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that too, with no
+difference for subclasses: signatures and <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> are
+both unioned down the MRO, so every subclass’s allowlist takes
+these names either way.</p>
 <p>They are keyword-<em>only</em> because this class is also a base and each
 subclass’s <code class="docutils literal notranslate"><span class="pre">make</span></code> puts different names in the same positions. As
 positional parameters they draw pylint <code class="docutils literal notranslate"><span class="pre">arguments-renamed</span></code>
@@ -1013,20 +1019,23 @@ is warn-and-clip: emit a warning naming what was declared against what is
 left, then read only what is left. See
 <a class="reference internal" href="../misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.bounded_area" title="pcapkit.protocols.schema.misc.pcapng.bounded_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.bounded_area()</span></code></a> and
 <a class="reference internal" href="../misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.read" title="pcapkit.protocols.misc.pcapng.PCAPNG.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.read()</span></code></a>.</p>
-<p>This class follows that convention’s <em>warning</em>
-(<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning" title="pcapkit.utilities.warnings.SchemaWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaWarning</span></code></a>) and deliberately diverges
-on the <em>action</em>. Clipping is right when the declared length only governs how
-much of the current object to read, since there is always a well-defined
-“what is left” to fall back to. Here the declared length also decides <em>where
-the next header starts</em>; a clipped skip distance points at whatever bytes
-end the buffer, which are not a header. Continuing from there would
-fabricate a layer and record a false entry in
+<p>This class follows that convention’s <em>warning</em> – a
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning" title="pcapkit.utilities.warnings.SchemaWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaWarning</span></code></a>, as
+<a class="reference internal" href="../misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.bounded_area" title="pcapkit.protocols.schema.misc.pcapng.bounded_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">bounded_area()</span></code></a> emits – and
+deliberately diverges on the <em>action</em>. Clipping is right when the declared
+length only governs how much of the current object to read, since there is
+always a well-defined “what is left” to fall back to. Here the declared length
+also decides <em>where the next header starts</em>; a clipped skip distance points at
+whatever bytes end the buffer, which are not a header. Continuing from there
+would fabricate a layer and record a false entry in
 <a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>, which reads as a parsed fact
-rather than a guess. So <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> warns in the same
-wording as the sites above, then <strong>stops the walk</strong>: this instance absorbs
-every remaining octet and reports <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for <code class="docutils literal notranslate"><span class="pre">next</span></code>, which the
-caller’s loop already reads as “no more extension headers”. The chain ends
-honestly at the bad header instead of inventing what follows it.</p>
+rather than a guess. So <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
+warns in the same form as
+<a class="reference internal" href="../misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.bounded_area" title="pcapkit.protocols.schema.misc.pcapng.bounded_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">bounded_area()</span></code></a>, then <strong>stops the
+walk</strong>: this instance absorbs every remaining octet and reports <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
+for <code class="docutils literal notranslate"><span class="pre">next</span></code>, which the caller’s loop already reads as “no more extension
+headers”. The chain ends honestly at the bad header instead of inventing what
+follows it.</p>
 </section>
 <section id="module-pcapkit.protocols.schema.internet.ipv6_ext">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.internet.ipv6_ext" title="Link to this heading">¶</a></h2>
