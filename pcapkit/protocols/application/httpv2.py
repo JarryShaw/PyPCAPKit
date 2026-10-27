@@ -335,7 +335,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
              flags: 'Flags' = 0,  # type: ignore[assignment]
              reserved: 'int' = 0,
              sid: 'int' = 0,
-             frame: 'bytes | Data_HTTP | Schema_FrameType | dict[str, Any]' = b'',
+             frame: 'Optional[bytes | Data_HTTP | Schema_FrameType | dict[str, Any]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
@@ -349,7 +349,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 constructor derives from ``frame``.
             reserved: Reserved bit of the frame header.
             sid: Stream ID of HTTP/2 frame.
-            frame: Frame data of HTTP/2 frame.
+            frame: Frame data of HTTP/2 frame. Omitting it, i.e. :data:`None`,
+                builds the frame type's own default payload, exactly as ``{}``
+                does. An explicit :obj:`bytes` value, ``b''`` included, is
+                packed as raw octets instead.
             payload: Octets after the frame, e.g. the next frame.
             **kwargs: Arbitrary keyword arguments.
 
@@ -358,14 +361,25 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         .. versionchanged:: 1.5.0
 
-           ``reserved`` is a new parameter before ``sid``, so a 1.4.x
-           positional argument meant for ``sid`` or ``frame`` lands one
-           parameter early (:issue:`1246`).
+           * ``reserved`` is a new parameter before ``sid``, so a 1.4.x
+             positional argument meant for ``sid`` or ``frame`` lands one
+             parameter early (:issue:`1246`).
+           * ``frame`` defaults to :data:`None` and dispatches to the frame
+             type's constructor, since the former ``b''`` default is shorter
+             than the payload a frame type of fixed or minimum size needs, so
+             such a frame could not be built at all (:issue:`2274`).
 
         """
         type_val = cast('Enum_Frame',
                         self._make_index(type, type_default, namespace=type_namespace,
                                          reversed=type_reversed, pack=False))
+
+        if frame is None:
+            # A frame type whose payload is of fixed or minimum size cannot be
+            # built from empty octets, so an omitted frame dispatches to that
+            # type's own constructor, as ``{}`` does (#2274). An explicit
+            # ``b''`` stays raw.
+            frame = {}
 
         if isinstance(frame, bytes):
             frame_val = frame  # type: bytes | Schema_FrameType
@@ -1298,15 +1312,22 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             settings: Settings, as raw octets, an
                 :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, a plain
                 :obj:`dict` of identifier to value or a list of
-                ``(identifier, value)`` pairs.
+                ``(identifier, value)`` pairs. :data:`None`, the default,
+                carries no parameters at all.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
 
         Raises:
-            ProtocolError: If ``settings`` is not :obj:`bytes`, a :obj:`dict`
-                or a :obj:`list`, :data:`None` (the default) included.
+            ProtocolError: If ``settings`` is not :obj:`bytes`, a :obj:`dict`,
+                a :obj:`list` or :data:`None`.
+
+        .. versionchanged:: 1.5.0
+
+           ``settings`` of :data:`None`, the default, builds a ``SETTINGS``
+           frame with no parameters, which :rfc:`9113#section-6.5` permits,
+           rather than being rejected (:issue:`2274`).
 
         """
         if frame is not None:
@@ -1317,8 +1338,13 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if ack:
             flags |= Schema_SettingsFrame.Flags.ACK
 
-        if isinstance(settings, bytes):
-            settings_val = settings  # type: bytes | list[Schema_SettingPair]
+        if settings is None:
+            # A SETTINGS frame carrying no parameters is valid (RFC 9113
+            # §6.5), so the default builds one rather than being rejected
+            # (#2274).
+            settings_val = []  # type: bytes | list[Schema_SettingPair]
+        elif isinstance(settings, bytes):
+            settings_val = settings
         elif isinstance(settings, dict):
             settings_val = []
             # A plain ``dict`` has no ``multi`` keyword (#2223).
