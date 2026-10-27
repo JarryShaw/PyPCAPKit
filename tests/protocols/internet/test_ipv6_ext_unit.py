@@ -312,6 +312,31 @@ class IPv6ExtUnitTests(unittest.TestCase):
             IPv6_Ext(io.BytesIO(raw), len(raw), version=4, extension=True,
                      alias=int(ExtensionHeader.HOPOPT))
 
+    def test_version_gate_message_is_in_the_house_form(self) -> None:
+        """GitHub issue #2302: the gate said ``only valid for IPv6, got
+        version=4``, which carries the prefix but not the
+        ``<prefix>: <lowercase description>: ... <value>`` tail #2232 and
+        #2257 gave the rest of the library, and never named the version it
+        wanted. Both the issue's own bare-bytes call and the stream form are
+        pinned whole, since the two reach the gate by different routes.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        expected = 'IPv6_Ext: invalid version: must be 6, not 4'
+
+        with self.assertRaises(ProtocolError) as context:
+            IPv6_Ext(b'\x06\x00\x00\x00\x00\x00\x00\x00', version=4)
+        self.assertEqual(str(context.exception), expected)
+
+        raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
+        with self.assertRaises(ProtocolError) as context:
+            IPv6_Ext(io.BytesIO(raw), len(raw), version=4, extension=True,
+                     alias=int(ExtensionHeader.HOPOPT))
+        self.assertEqual(str(context.exception), expected)
+
     def test_shim6_registration_does_not_leak_into_ipv4_parsing(self) -> None:
         """GitHub issue #891: registering ``IPv6_Ext``
         into the shared ``Internet.__proto__`` for Shim6 must not make an
