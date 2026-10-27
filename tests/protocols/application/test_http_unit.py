@@ -2316,8 +2316,10 @@ class HTTPUnitTests(unittest.TestCase):
                             settings=OrderedMultiDict([(Setting.MAX_FRAME_SIZE, 16384)])),
         )
         self.assertEqual(settings_dict_schema.settings[0].id, Setting.MAX_FRAME_SIZE)
+        settings_none_schema, _ = proto._make_http_settings(settings=None)
+        self.assertEqual(list(settings_none_schema.settings), [])
         with self.assertRaises(ProtocolError):
-            proto._make_http_settings(settings=None)
+            proto._make_http_settings(settings=42)
 
         push_schema, push_flags = proto._make_http_push_promise(
             end_headers=True,

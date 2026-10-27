@@ -8,10 +8,11 @@ HTTP/1.1 instead. Both default to ``NO_ERROR`` (``0x0``), the code
 :rfc:`9113#section-7` gives a condition that is not the result of an error.
 An explicit ``error`` is still honoured.
 
-Each frame is built with ``frame={}``, because the default ``frame=b''`` does
-not build these fixed-payload frames at all (#2274). Every case builds its own
-octets in memory and reads no capture. Classes are imported inside each test,
-after :func:`~tests._support.reimport_once_per_class`.
+Each frame is built with ``frame={}``, which dispatches to the frame type's own
+constructor; since #2274 the default ``frame=None`` takes that dispatch too, so
+it builds the same octets. Every case builds its own octets in memory and reads
+no capture. Classes are imported inside each test, after
+:func:`~tests._support.reimport_once_per_class`.
 
 """
 
