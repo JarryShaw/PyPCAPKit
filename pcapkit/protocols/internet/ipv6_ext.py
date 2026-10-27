@@ -584,8 +584,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             :class:`~pcapkit.protocols.internet.ah.AH` and
             :class:`~pcapkit.protocols.internet.esp.ESP` both default to
             ``version=4`` and are valid under IPv4, so an unconditional gate
-            would reject them (``ProtocolError: ESP: only valid for IPv6, got
-            version=4``).
+            would reject them (``ProtocolError: ESP: invalid version: must be
+            6, not 4``).
 
             The gate exists because this class is registered into
             :attr:`Internet.__proto__
@@ -608,7 +608,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         """
         if self.__data__ is Data_IPv6_Ext and version != 6:
             raise ProtocolError(
-                f'{self.__class__.__name__}: only valid for IPv6, got version={version}')
+                f'{self.__class__.__name__}: invalid version: must be 6, not {version!r}')
 
         #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
