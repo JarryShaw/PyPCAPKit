@@ -127,6 +127,19 @@ class TestLoopback(unittest.TestCase):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
                 Loopback(**kwargs)
 
+    def test_make_rejects_a_family_that_is_not_an_int(self) -> None:
+        # #2289: a bool is an int and packs as family 1; a non-int fails the
+        # range comparison or ``to_bytes`` with a bare ``TypeError`` or
+        # ``AttributeError``. Each must raise ``ProtocolError``.
+        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for family in (True, False, '2', 2.0, None):
+            with self.subTest(family=family):
+                with self.assertRaises(ProtocolError) as ctx:
+                    Loopback(family=family)
+                self.assertEqual(str(ctx.exception), f'Loopback: invalid address family: {family!r}')
+
     def test_registered_for_null_and_loop(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
