@@ -12,7 +12,7 @@ from pcapkit.protocols.data.protocol import Protocol
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import Any, Optional
+    from typing import Any
 
     from typing_extensions import Literal
 
@@ -305,12 +305,12 @@ class RROption(Option):
     #: Pointer.
     pointer: 'int'
     #: Route, i.e. the address slots before the pointer.
-    route: 'Optional[tuple[IPv4Address, ...]]'
+    route: 'tuple[IPv4Address, ...]'
     #: Address slots at or beyond the pointer.
     remaining: 'tuple[IPv4Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]', remaining: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'tuple[IPv4Address, ...]', remaining: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -337,12 +337,12 @@ class SSROption(Option):
     #: Pointer.
     pointer: 'int'
     #: Route, i.e. the address slots before the pointer.
-    route: 'Optional[tuple[IPv4Address, ...]]'
+    route: 'tuple[IPv4Address, ...]'
     #: Address slots at or beyond the pointer.
     remaining: 'tuple[IPv4Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]', remaining: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'tuple[IPv4Address, ...]', remaining: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

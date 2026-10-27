@@ -3023,7 +3023,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return via_rvs
 
-    def _read_param_relay_hmac(self, schema: 'Schema_RelayHMACParameter', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_relay_hmac(self, schema: 'Schema_RelayHMACParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_RelayHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_HMAC`` parameter.
 

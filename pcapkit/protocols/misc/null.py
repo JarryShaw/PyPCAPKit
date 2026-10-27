@@ -64,6 +64,13 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
 
+    # protocol chain of current instance
+    @property
+    def protochain(self) -> 'None':  # type: ignore[override]
+        """Protocol chain of current instance, which an empty payload does not
+        have."""
+        return None
+
     ##########################################################################
     # Methods.
     ##########################################################################

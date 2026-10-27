@@ -2734,7 +2734,7 @@ class PACK_FlagsOption(_PACK_Option, code=Enum_OptionType.pack_flags):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'PACKFlags') -> 'None': ...
 
 
 @schema_final

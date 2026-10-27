@@ -413,7 +413,7 @@ class SMFHashBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.H_DPD):
     #: Hash assist value (HAV).
     hav: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption':
+    def post_process(self, packet: 'dict[str, Any]') -> 'SMFHashBasedDPDOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -423,7 +423,7 @@ class SMFHashBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.H_DPD):
             Revised schema.
 
         """
-        ret = super().post_process(packet)  # type: SMFIdentificationBasedDPDOption
+        ret = super().post_process(packet)  # type: SMFHashBasedDPDOption
         ret.mode = Enum_SMFDPDMode.H_DPD
         return ret
 
