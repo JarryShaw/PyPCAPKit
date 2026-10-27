@@ -75,7 +75,7 @@ def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'No
     declared = (MAGIC_NUMBER.get(bytes(magic_number))
                 if isinstance(magic_number, (bytes, bytearray, memoryview)) else None)
     if declared is None:
-        raise ProtocolError('invalid magic number')
+        raise ProtocolError(f'PCAP: invalid magic number: {magic_number!r}')
     field._byteorder = declared[0]
 
 

@@ -2139,8 +2139,9 @@ Fixed
   key at ``-1`` for "unknown". Ships labelled breaking: well-formed captures are
   byte-identical, but any truncated PCAP-NG now yields the frames before the cut where
   it raised, the last of which may carry zero-padded octets, and some short-file depths
-  move from ``ProtocolError: unknown byteorder magic`` to :exc:`.StreamEOFError`. The
-  :pr:`683` drift :issue:`685` tracks is unchanged (:issue:`678`).
+  move from ``ProtocolError: PCAP-NG: unknown byte-order magic`` to
+  :exc:`.StreamEOFError`. The :pr:`683` drift :issue:`685` tracks is unchanged
+  (:issue:`678`).
 * HIP's ``R1_COUNTER``/``R1_Counter`` parameter packed 12 octets where
   :rfc:`7401#section-5.2.3` requires 16, and ``LOCATOR_SET`` declared its ``Length``
   in 4-octet units where :rfc:`7401#section-5.2.1`'s ``Length`` is a byte count --

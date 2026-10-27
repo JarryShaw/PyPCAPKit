@@ -161,7 +161,8 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         octets = struct.pack('<II', 0x0A0D0D0A, 16) + struct.pack('<I', 12) + struct.pack('<I', 16)
-        with self.assertRaisesRegex(ProtocolError, r'^unknown byteorder magic: 0xc000000$'):
+        with self.assertRaisesRegex(ProtocolError,
+                                    r'^PCAP-NG: unknown byte-order magic: 0xc000000$'):
             self._parse(octets, self._kwargs(octets, '<'))
 
     def test_extraction_continues_past_short_shb_and_idb(self) -> None:

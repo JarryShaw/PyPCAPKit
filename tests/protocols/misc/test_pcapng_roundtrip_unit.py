@@ -127,7 +127,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
-        with self.assertRaisesRegex(ProtocolError, r'\[if_name\] option must be only one, but 2 found'):
+        with self.assertRaisesRegex(ProtocolError, r'\[if_name\] option must be only one, not 2'):
             PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                    block={'linktype': 1, 'snaplen': 65535,
                           'options': [(OptionType.if_name, {'name': 'eth0'}),
