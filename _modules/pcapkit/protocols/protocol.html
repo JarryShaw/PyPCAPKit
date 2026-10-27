@@ -2335,8 +2335,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            StructError: If the buffer is empty, whatever ``quiet`` says, or if</span>
-<span class="sd">                unpack (:func:`struct.unpack`) failed, and :exc:`struct.error`</span>
-<span class="sd">                raised, without ``quiet``.</span>
+<span class="sd">                fewer than ``size`` octets were read, without ``quiet``.</span>
 
 <span class="sd">        """</span>
         <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&lt;'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'&gt;'</span>
@@ -2356,6 +2355,10 @@
             <span class="k">raise</span> <span class="n">StructError</span><span class="p">(</span><span class="s1">'unpack: empty buffer'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eof</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># A short read fails here as :func:`struct.unpack` makes it fail</span>
+            <span class="c1"># for the sizes that have a format code (#2279).</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">StructError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unpack failed'</span><span class="p">)</span>
             <span class="n">end</span> <span class="o">=</span> <span class="s1">'little'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'big'</span>  <span class="c1"># type: Literal['little', 'big']</span>
             <span class="n">buf</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

@@ -803,6 +803,10 @@ against member values as well as names (<a class="extlink-issue reference extern
 raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>): <code class="docutils literal notranslate"><span class="pre">get(42)</span></code> and <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> raised
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> from <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> raised
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p>
+<p><a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method._missing_</span></code></a> also checks a
+folded <code class="docutils literal notranslate"><span class="pre">value</span></code> against member values, not only names, so a hyphenated method such
+as <code class="docutils literal notranslate"><span class="pre">'baseline-control'</span></code> resolves to <a class="reference internal" href="#pcapkit.const.http.method.Method.BASELINE_CONTROL" title="pcapkit.const.http.method.Method.BASELINE_CONTROL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Method.BASELINE_CONTROL</span></code></a>, with the
+registered <code class="docutils literal notranslate"><span class="pre">safe</span></code> and <code class="docutils literal notranslate"><span class="pre">idempotent</span></code>, in any case (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2284">#2284</a>).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method">
@@ -1214,7 +1218,9 @@ every one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item. Matched case-insensitively against
-the canonical upper-case member names – deliberately unlike
+the canonical upper-case member names, then against member
+values, so <code class="docutils literal notranslate"><span class="pre">'baseline-control'</span></code> resolves to
+<code class="docutils literal notranslate"><span class="pre">BASELINE_CONTROL</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2284">#2284</a>) – deliberately unlike
 <a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, which is case-<strong>sensitive</strong> per
 <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>. The split was ruled deliberate on
 GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>; GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> is the pointer between

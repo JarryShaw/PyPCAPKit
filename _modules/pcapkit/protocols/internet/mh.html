@@ -10523,7 +10523,7 @@
 <div class="viewcode-block" id="MH._make_opt_lmaa">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_lmaa">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_lmaa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_LMAAddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">code</span><span class="p">:</span> <span class="s1">'LMAAddressCode | StdlibEnum | AenumEnum | str | int'</span> <span class="o">=</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">IPv6_LMAA</span><span class="p">,</span>
+                       <span class="n">code</span><span class="p">:</span> <span class="s1">'Optional[LMAAddressCode | StdlibEnum | AenumEnum | str | int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">code_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">code_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                        <span class="n">code_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -10536,7 +10536,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            code: Option code, see</span>
-<span class="sd">                :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.</span>
+<span class="sd">                :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`. If not</span>
+<span class="sd">                given, the code of the address family of ``address``.</span>
 <span class="sd">            code_default: Default option code.</span>
 <span class="sd">            code_namespace: Option code namespace.</span>
 <span class="sd">            code_reversed: Reverse option code namespace.</span>
@@ -10548,17 +10549,27 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an explicit ``code`` is not the code</span>
+<span class="sd">                :rfc:`5949#section-6.2.2` gives the address family of</span>
+<span class="sd">                ``address`` (:issue:`2280`).</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            The option length is derived from the address family rather than from</span>
-<span class="sd">            ``code``, so that the two cannot be emitted disagreeing.</span>
+<span class="sd">            ``code``, so that the two cannot be emitted disagreeing. A data model</span>
+<span class="sd">            passed as ``option`` keeps its code as captured, even where it</span>
+<span class="sd">            disagrees with the family, so that the capture rebuilds byte for byte.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
-            <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>  <span class="c1"># type: Optional[int]</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
+        <span class="k">elif</span> <span class="n">code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">code_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">code_namespace</span><span class="p">,</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code_default</span><span class="p">,</span>
+                                        <span class="n">namespace</span><span class="o">=</span><span class="n">code_namespace</span> <span class="k">if</span> <span class="n">code_namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">LMAAddressCode</span><span class="p">,</span>
                                         <span class="nb">reversed</span><span class="o">=</span><span class="n">code_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
@@ -10574,6 +10585,17 @@
         <span class="c1"># ``address=True`` as ``2906010000000001``.</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
             <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: RFC 5949 ties each code to one address family, so a code the</span>
+        <span class="c1"># caller did not choose is the family's own, and one they did choose has</span>
+        <span class="c1"># to agree with it (#2280). A data model passed as ``option`` skips the</span>
+        <span class="c1"># check, so that a captured mismatch still rebuilds byte for byte.</span>
+        <span class="n">family_code</span> <span class="o">=</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">IPv4_LMAA</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">IPv6_LMAA</span>
+        <span class="k">if</span> <span class="n">code_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">family_code</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">option</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code_val</span> <span class="o">!=</span> <span class="n">family_code</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid code: '</span>
+                                <span class="sa">f</span><span class="s1">'code does not match address family: </span><span class="si">{</span><span class="n">code_val</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_LMAAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>

@@ -2755,6 +2755,12 @@ Fixed
 * HIP's ``ECHO_RESPONSE_UNSIGNED`` maker builds an ``EchoResponseUnsignedParameter``
   schema, where it built the request's; the octets were already right (:issue:`2170`,
   :pr:`2188`).
+* **a breaking change to** PCAP-NG's Interface Description Block maker: ``snaplen``
+  defaults to 0, which the PCAP-NG specification reads as no limit, where its default of
+  ``2**64 - 1`` was truncated to ``0xFFFFFFFF`` by the 32-bit SnapLen field and the made
+  ``info`` disagreed with the octets. A block made without ``snaplen`` writes 0 there,
+  and a ``snaplen`` outside ``0`` to ``0xFFFFFFFF`` raises :exc:`.ProtocolError` where it
+  was truncated silently (:issue:`2278`).
 
 pcapkit.toolkit
 ---------------

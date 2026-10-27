@@ -1044,13 +1044,15 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a member of ``kind`` and, with</span>
 <span class="sd">            ``number``, not an :class:`int` either. A member of another enum is</span>
-<span class="sd">            rejected even where an :class:`int` is accepted.</span>
+<span class="sd">            rejected even where an :class:`int` is accepted, and so is a</span>
+<span class="sd">            :class:`bool`, which would otherwise key ``0`` or ``1``</span>
+<span class="sd">            (:issue:`2269`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
         <span class="k">return</span>
     <span class="n">member</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">number</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">member</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">member</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">expected</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'an int or a member of </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">number</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'a member of </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span>
     <span class="k">if</span> <span class="n">member</span><span class="p">:</span>
@@ -1679,7 +1681,8 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        pcapkit.utilities.exceptions.RegistryError: If ``code`` is neither an</span>
-<span class="sd">            :class:`int` nor an :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
+<span class="sd">            :class:`int` (a :class:`bool` is not accepted, even though it is one)</span>
+<span class="sd">            nor an :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
 <span class="sd">            member, e.g. a member of another enum; if no transport protocol is</span>
 <span class="sd">            given for a bare :class:`int`; if one of those given (member or name)</span>
 <span class="sd">            names no port-keyed registry; or if a ``str`` matches no</span>
@@ -1847,7 +1850,8 @@
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` nor an</span>
+<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
+<span class="sd">            is not accepted, even though it is one) nor an</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a</span>
 <span class="sd">            member of another enum.</span>
 
@@ -1969,7 +1973,8 @@
 <span class="sd">        class\_: class name</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` nor an</span>
+<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
+<span class="sd">            is not accepted, even though it is one) nor an</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a</span>
 <span class="sd">            member of another enum.</span>
 
@@ -2024,7 +2029,8 @@
 <span class="sd">        association. See :rfc:`9260#section-3.3.1`.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` nor a</span>
+<span class="sd">        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`</span>
+<span class="sd">            is not accepted, even though it is one) nor a</span>
 <span class="sd">            :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
 <span class="sd">            member, e.g. a member of the</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.sctp.SCTP` port enum.</span>

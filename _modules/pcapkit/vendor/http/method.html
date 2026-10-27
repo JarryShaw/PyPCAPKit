@@ -703,7 +703,9 @@
 
 <span class="s1">        Args:</span>
 <span class="s1">            value: Value to get enum item. Matched case-insensitively against</span>
-<span class="s1">                the canonical upper-case member names -- deliberately unlike</span>
+<span class="s1">                the canonical upper-case member names, then against member</span>
+<span class="s1">                values, so ``'baseline-control'`` resolves to</span>
+<span class="s1">                ``BASELINE_CONTROL`` (:issue:`2284`) -- deliberately unlike</span>
 <span class="s1">                :meth:`get`, which is case-**sensitive** per</span>
 <span class="s1">                :rfc:`9110#section-9.1`. The split was ruled deliberate on</span>
 <span class="s1">                GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between</span>
@@ -716,6 +718,8 @@
 <span class="s1">        name = value.upper()</span>
 <span class="s1">        if name in cls._member_map_:</span>
 <span class="s1">            return cls._member_map_[name]</span>
+<span class="s1">        if name in cls._value2member_map_:</span>
+<span class="s1">            return cls._value2member_map_[name]</span>
 <span class="s1">        return cls._unregistered_member(value, name)</span>
 <span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
 

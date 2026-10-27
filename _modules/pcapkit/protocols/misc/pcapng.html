@@ -5231,7 +5231,7 @@
                         <span class="n">linktype_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">linktype_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                         <span class="n">linktype_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">,</span>
+                        <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                         <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_InterfaceDescriptionBlock'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG interface description block (IDB).</span>
@@ -5242,12 +5242,24 @@
 <span class="sd">            linktype_default: Default value of link layer protocol type.</span>
 <span class="sd">            linktype_namespace: Namespace of link layer protocol type.</span>
 <span class="sd">            linktype_reversed: Reversed flag for link layer protocol type namespace.</span>
-<span class="sd">            snaplen: Snap length.</span>
+<span class="sd">            snaplen: Snap length, an unsigned 32-bit value; 0, the default,</span>
+<span class="sd">                means no limit.</span>
 <span class="sd">            options: Block options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed block schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``snaplen`` is outside ``0`` to ``0xFFFFFFFF``,</span>
+<span class="sd">                which the 32-bit SnapLen field would truncate (:issue:`2278`).</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           ``snaplen``'s default changed from ``0xFFFF_FFFF_FFFF_FFFF`` -- which</span>
+<span class="sd">           the 32-bit field silently truncated to ``0xFFFFFFFF`` -- to ``0``,</span>
+<span class="sd">           and a value outside the field's range now raises instead of being</span>
+<span class="sd">           truncated (:issue:`2278`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'block_raw'</span><span class="p">):</span>
@@ -5259,6 +5271,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">linktype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">linktype</span><span class="p">,</span> <span class="n">linktype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">linktype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                             <span class="nb">reversed</span><span class="o">=</span><span class="n">linktype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">snaplen</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF_FFFF</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: </span><span class="si">{</span><span class="n">snaplen</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'if'</span><span class="p">)</span>

@@ -2270,7 +2270,7 @@
 <span class="sd">            timestamp: list of timestamps, i.e. the slots before the pointer, or</span>
 <span class="sd">                a mapping of the addresses to their timestamps; an address may</span>
 <span class="sd">                be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`</span>
-<span class="sd">                accepts for IPv4</span>
+<span class="sd">                accepts for IPv4; :data:`None` is an empty list</span>
 <span class="sd">            remaining: raw 32-bit words for the slots at or beyond the pointer;</span>
 <span class="sd">                the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -2280,8 +2280,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``option`` is not given and ``timestamp`` is</span>
-<span class="sd">                neither a :obj:`list` nor a :obj:`dict`, which includes the</span>
-<span class="sd">                default :data:`None`.</span>
+<span class="sd">                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`.</span>
 <span class="sd">            FieldValueError: If an address is a :obj:`bool` or is not a valid</span>
 <span class="sd">                IPv4 address.</span>
 
@@ -2318,6 +2317,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">remainder</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span>  <span class="c1"># type: ignore[assignment]</span>
                 <span class="n">counts</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>  <span class="c1"># 9 is the maximum number of timestamps</span>
@@ -2355,7 +2356,8 @@
                         <span class="n">flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span>  <span class="c1"># type: ignore[assignment]</span>
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid timestamp value: </span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid timestamp value: '</span>
+                                    <span class="sa">f</span><span class="s1">'must be a list or a dict, not </span><span class="si">{</span><span class="n">timestamp</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
             <span class="c1"># NOTE: Every slot of the option is written, the empty ones as zero.</span>

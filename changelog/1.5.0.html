@@ -3260,6 +3260,12 @@ is registered (<a class="extlink-issue reference external" href="https://github.
 <li><p>HIP’s <code class="docutils literal notranslate"><span class="pre">ECHO_RESPONSE_UNSIGNED</span></code> maker builds an <code class="docutils literal notranslate"><span class="pre">EchoResponseUnsignedParameter</span></code>
 schema, where it built the request’s; the octets were already right (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2170">#2170</a>,
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2188">#2188</a>).</p></li>
+<li><p><strong>a breaking change to</strong> PCAP-NG’s Interface Description Block maker: <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>
+defaults to 0, which the PCAP-NG specification reads as no limit, where its default of
+<code class="docutils literal notranslate"><span class="pre">2**64</span> <span class="pre">-</span> <span class="pre">1</span></code> was truncated to <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code> by the 32-bit SnapLen field and the made
+<code class="docutils literal notranslate"><span class="pre">info</span></code> disagreed with the octets. A block made without <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> writes 0 there,
+and a <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> outside <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code> raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> where it
+was truncated silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2278">#2278</a>).</p></li>
 </ul>
 </section>
 </section>
