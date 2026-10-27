@@ -1498,6 +1498,12 @@ Changed
   types. :meth:`.HIP._make_param_reg_failed` takes ``failure_type`` in place of
   ``lifetime``, and ``reg_failed`` takes registration types. The octets are unchanged
   (:issue:`2309`).
+* **a breaking change to** the HTTP/2 ``RST_STREAM`` and ``GOAWAY`` builders: a frame
+  constructed without ``error`` carries ``NO_ERROR`` (``0x0``), the code
+  :rfc:`9113#section-7` gives a condition that is not the result of an error, rather
+  than ``HTTP_1_1_REQUIRED`` (``0xd``), which asks the peer to use HTTP/1.1 instead.
+  A ``make`` that omits ``error`` emits different octets; one that passes it is
+  unchanged (:issue:`2311`).
 
 Fixed
 ~~~~~

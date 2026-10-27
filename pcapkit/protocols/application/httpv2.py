@@ -1251,7 +1251,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         ), cast('Flags', 0)
 
     def _make_http_rst_stream(self, frame: 'Optional[Data_RSTStreamFrame]' = None, *,
-                              error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.HTTP_1_1_REQUIRED,
+                              error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.NO_ERROR,
                               error_default: 'Optional[int]' = None,
                               error_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                               error_reversed: 'bool' = False,
@@ -1260,7 +1260,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Args:
             frame: Frame data model.
-            error: Error code.
+            error: Error code, ``NO_ERROR`` unless given.
             error_default: Default value of error code.
             error_namespace: Namespace of error code.
             error_reversed: Reversed namespace of error code.
@@ -1268,6 +1268,13 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Constructed frame schema and updated flags.
+
+        .. versionchanged:: 1.5.0
+
+           ``error`` defaults to ``NO_ERROR``, the code :rfc:`9113#section-7`
+           gives a condition that is not the result of an error, rather than
+           ``HTTP_1_1_REQUIRED``, which asks the peer to use HTTP/1.1 instead
+           (:issue:`2311`).
 
         """
         if frame is not None:
@@ -1430,7 +1437,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
     def _make_http_goaway(self, frame: 'Optional[Data_GoawayFrame]' = None, *,
                           last_reserved: 'int' = 0,
                           last_sid: 'int' = 0,
-                          error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.HTTP_1_1_REQUIRED,
+                          error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.NO_ERROR,
                           error_default: 'Optional[int]' = None,
                           error_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                           error_reversed: 'bool' = False,
@@ -1442,7 +1449,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             frame: Frame data model.
             last_reserved: Reserved bit of the last stream identifier.
             last_sid: Last stream identifier.
-            error: Error code.
+            error: Error code, ``NO_ERROR`` unless given.
             error_default: Default value of error code.
             error_namespace: Namespace of error code.
             error_reversed: Reversed namespace of error code.
@@ -1451,6 +1458,13 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Constructed frame schema and updated flags.
+
+        .. versionchanged:: 1.5.0
+
+           ``error`` defaults to ``NO_ERROR``, the code :rfc:`9113#section-7`
+           gives a condition that is not the result of an error, rather than
+           ``HTTP_1_1_REQUIRED``, which asks the peer to use HTTP/1.1 instead
+           (:issue:`2311`).
 
         """
         if frame is not None:
