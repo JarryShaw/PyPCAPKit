@@ -1258,14 +1258,20 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
+            A block handed to :meth:`make` as raw :obj:`bytes` is written back
+            verbatim past the Block Type, so the schema :meth:`make` returns
+            holds the octets rather than the block's fields. Those octets are
+            parsed here, off the buffer :meth:`pack` has just filled, which is
+            what a reader of the file would do with them (:issue:`2354`).
+
         """
-        if cast('Optional[Schema_PCAPNG]', self.__header__) is None:
+        header = cast('Optional[Schema_PCAPNG]', self.__header__)
+        if header is None or isinstance(header.block, bytes):
             packet = kwargs.get('__packet__', {})  # packet data
 
-            # NOTE: Reached on the parsing path only, with no flag needed: the
-            # construction path sets ``__header__`` from ``make`` while packing
-            # its own buffer, so the branch above is already false there. A
-            # ``_read`` guard would be a branch that can never be taken.
+            # NOTE: A tail too short for any block is refused here, on the
+            # construction path as on the parsing one: a caller's raw octets
+            # are no more trustworthy than a file's.
             self._check_block_floor(length)
 
             if self._ctx is not None:
@@ -1636,12 +1642,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         passes that check and is caught here instead.
 
         Note:
-            This runs on the parsing path only, since :meth:`unpack` reaches it
-            only when no schema has been built yet and the construction path
-            builds one from :meth:`make` while packing its own buffer. That is
-            what it should do: a constructed block short enough to trip this floor
-            is already reported by :meth:`read`'s own Block Total Length check,
-            which names the length and so says more than an end-of-stream would.
+            This runs on both of :meth:`unpack`'s paths. On the parsing path the
+            tail is what the file has left to read; on the construction path it is
+            the octets of a block handed to :meth:`make` as raw :obj:`bytes`, which
+            :meth:`unpack` parses off the buffer :meth:`pack` has just filled
+            (:issue:`2354`) -- a caller's octets are no more trustworthy than a
+            file's. Octets too short for this floor are therefore refused here
+            rather than by :meth:`read`'s own Block Total Length check, which sees
+            only what gets past the floor and so names an impossible *declared*
+            length, never a tail too short to declare one.
 
             Measuring an undeclared length needs the stream to seek, and nothing
             guards that here because :meth:`__post_init__` has already called
