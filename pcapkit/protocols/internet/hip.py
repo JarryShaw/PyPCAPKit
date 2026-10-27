@@ -95,6 +95,7 @@ from pcapkit.protocols.data.internet.hip import \
 from pcapkit.protocols.data.internet.hip import NotificationParameter as Data_NotificationParameter
 from pcapkit.protocols.data.internet.hip import OverlayIDParameter as Data_OverlayIDParameter
 from pcapkit.protocols.data.internet.hip import OverlayTTLParameter as Data_OverlayTTLParameter
+from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
 from pcapkit.protocols.data.internet.hip import PayloadMICParameter as Data_PayloadMICParameter
 from pcapkit.protocols.data.internet.hip import PuzzleParameter as Data_PuzzleParameter
 from pcapkit.protocols.data.internet.hip import R1CounterParameter as Data_R1CounterParameter
@@ -221,7 +222,6 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.suite import Suite as Enum_Suite
     from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
@@ -409,6 +409,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          and the two fixed header bits (:issue:`1313`, :issue:`1314`,
          :issue:`1323`, :issue:`1328`, :issue:`1365`, :issue:`1417`,
          :issue:`1459`).
+       * A ``(code, data)`` pair rebuilds from the parsed data model rather
+         than from its fields as keyword arguments, which dropped every field
+         whose constructor keyword is spelled differently (:issue:`2352`).
 
     """
 
@@ -639,7 +642,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              controls_reserved: 'int' = 0,
              shit: 'int' = 0,
              rhit: 'int' = 0,
-             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
+             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HIP':
         """Make (construct) packet data.
@@ -3056,9 +3059,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return relay_hmac
 
-    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter', *,
+    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
                         version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
         """Make HIP parameter.
+
+        A ``(code, value)`` pair carries either a mapping of keyword arguments
+        for the parameter's constructor, or a parsed
+        :class:`~pcapkit.protocols.data.internet.hip.Parameter` data model,
+        which goes to the constructor positionally through
+        :meth:`_make_hip_param_data` rather than expanded as keyword arguments
+        (:issue:`2352`).
 
         Args:
             parameters: HIP parameters
@@ -3085,7 +3095,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     parameters_list.append(schema_packed)
                     total_length += len(schema_packed)
                 else:
-                    code, args = cast('tuple[Enum_Parameter, dict[str, Any]]', schema)
+                    code, args = cast('tuple[Enum_Parameter, Data_Parameter | dict[str, Any]]',
+                                      schema)
                     name = self._lookup_registry(self.__parameter__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_param_{name}'
@@ -3094,7 +3105,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     else:
                         meth = name[1]
 
-                    data = meth(code, version=version, **args)  # type: Schema_Parameter
+                    if isinstance(args, Data_Parameter):
+                        data = self._make_hip_param_data(meth, code, args,
+                                                         version=version)  # type: Schema_Parameter
+                    else:
+                        data = meth(code, version=version, **args)
                     data_packed = data.pack()
 
                     parameters_list.append(data)
@@ -3111,16 +3126,42 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             else:
                 meth = name[1]
 
-            data = meth(code, param, version=version)
-            # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
-            padding = getattr(param, 'padding', None)
-            if isinstance(padding, bytes) and 'padding' in data.__fields__:
-                data.padding = padding
+            data = self._make_hip_param_data(meth, code, param, version=version)
             data_packed = data.pack()
 
             parameters_list.append(data)
             total_length += len(data_packed)
         return parameters_list, total_length
+
+    def _make_hip_param_data(self, meth: 'ParameterConstructor', code: 'Enum_Parameter',
+                             param: 'Data_Parameter', *,
+                             version: 'int') -> 'Schema_Parameter':
+        """Make a HIP parameter from the data model its reader produced.
+
+        The parsed parameter goes to ``meth`` **positionally**. Expanding it as
+        keyword arguments instead would drop every field whose constructor
+        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in
+        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as
+        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).
+
+        Args:
+            meth: Parameter constructor.
+            code: Parameter code.
+            param: Parsed parameter data model.
+            version: HIP protocol version.
+
+        Returns:
+            HIP parameter schema.
+
+        .. versionadded:: 1.5.0
+
+        """
+        data = meth(code, param, version=version)
+        # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
+        padding = getattr(param, 'padding', None)
+        if isinstance(padding, bytes) and 'padding' in data.__fields__:
+            data.padding = padding
+        return data
 
     def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
