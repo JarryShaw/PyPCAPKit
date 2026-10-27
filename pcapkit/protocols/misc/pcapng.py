@@ -64,6 +64,7 @@ from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.fields.byteorder import packet_byteorder
 from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.infoclass import OrderedMultiInfo
 from pcapkit.corekit.io import advance
@@ -1456,6 +1457,27 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         self._make_index(type, type_default, namespace=type_namespace,
                                          reversed=type_reversed, pack=False))
         self._type = type_val
+
+        # NOTE: An option or record handed over as raw octets has its type code
+        # read back out of them -- by ``_make_pcapng_options`` and
+        # ``_make_nrb_records`` -- in the byte order the block is written in. So
+        # the byte order has to be settled before the block maker runs, not only
+        # after it as ``pack`` settles it, and settled the way ``pack`` settles
+        # it, so that the code read matches the octets emitted. Settling it here
+        # covers every block maker: ``_make_block_shb`` and
+        # ``_make_block_systemd`` settle their own, and without this the rest
+        # read an attribute that is not there (#2353). A section header block
+        # overrides this from its own Byte-Order Magic, it being the block that
+        # starts the section read here.
+        #
+        # ``or {}`` rather than a ``get`` default because ``__packet__`` may be
+        # handed over explicitly as :data:`None`, which is what
+        # :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+        # takes for "no packet data" as well.
+        if self._ctx is not None:
+            self._byte = self._ctx.section.byteorder
+        else:
+            self._byte = packet_byteorder(kwargs.get('__packet__') or {})
 
         if isinstance(block, bytes):
             block_val = block  # type: bytes | Schema_BlockType
