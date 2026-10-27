@@ -5008,13 +5008,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if isinstance(options, bytes):
             return [options], len(options)
 
+        byteorder = getattr(self, '_byte', None)
+        if byteorder is None:
+            byteorder = self._ctx.section.byteorder if self._ctx is not None else sys.byteorder
+
         has_endofopt = False
         total_length = 0
         if isinstance(options, list):
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
-                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
+                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], byteorder, signed=False),
                                                namespace=namespace)
                     if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                         has_endofopt = True
