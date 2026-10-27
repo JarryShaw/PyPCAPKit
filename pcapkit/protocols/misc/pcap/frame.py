@@ -55,10 +55,11 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from decimal import Decimal
-    from typing import IO, Any, DefaultDict, Optional, Type
+    from typing import IO, Any, ClassVar, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
     from pcapkit.protocols.schema.schema import Schema
 
@@ -114,6 +115,17 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_pcap` checks its own --
+    #: :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` keeps a registry of its own,
+    #: keyed by the same enum, and so declares the same pairing rather than
+    #: sharing this one (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_LinkType, False)
 
     ##########################################################################
     # Properties.

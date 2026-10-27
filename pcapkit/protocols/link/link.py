@@ -25,9 +25,11 @@ from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, DefaultDict, Optional, Type
+    from typing import IO, Any, ClassVar, DefaultDict, Optional, Type
 
     from typing_extensions import Literal, Self
+
+    from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['Link']
 
@@ -98,6 +100,18 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx',  'IPX'),
         },
     )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_ethertype` checks
+    #: its own -- :class:`~pcapkit.protocols.link.ethernet.Ethernet`, which shares
+    #: this registry, is therefore checked as :class:`Link` is, while
+    #: :class:`~pcapkit.protocols.link.loopback.Loopback`, which keeps one of its
+    #: own, declares its own pairing or none at all (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_EtherType, False)
 
     ##########################################################################
     # Properties.

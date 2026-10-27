@@ -225,13 +225,14 @@ if TYPE_CHECKING:
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import (IO, Any, Callable, Counter, DefaultDict, Optional, Tuple, Type, TypeVar,
-                        Union)
+    from typing import (IO, Any, Callable, ClassVar, Counter, DefaultDict, Optional, Tuple, Type,
+                        TypeVar, Union)
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.protocols.schema.misc.pcapng import Option as Schema_Option
     from pcapkit.protocols.schema.schema import Schema
@@ -750,6 +751,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_pcapng` checks its own --
+    #: :class:`~pcapkit.protocols.misc.pcap.frame.Frame` keeps a registry of its own,
+    #: keyed by the same enum, and so declares the same pairing rather than
+    #: sharing this one (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_LinkType, False)
 
     #: Block type to method mapping. A :obj:`str` value names the
     #: ``_read_block_${name}`` and ``_make_block_${name}`` methods, which fall

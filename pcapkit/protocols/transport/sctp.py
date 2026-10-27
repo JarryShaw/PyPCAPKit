@@ -161,12 +161,13 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Optional, Sequence, Type, TypeVar
+    from typing import Any, Callable, ClassVar, DefaultDict, Optional, Sequence, Type, TypeVar
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype import AppType as Enum_AppType
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.transport.sctp import Chunk as Data_Chunk
     from pcapkit.protocols.data.transport.sctp import ErrorCause as Data_ErrorCause
@@ -470,6 +471,16 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP over DTLS
         },
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_sctp` checks its own
+    #: -- a bare :class:`int` is accepted because the registry is keyed by
+    #: payload protocol identifier, which is a number in its own right (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_PayloadProtocolIdentifier, True)
 
     #: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and
     #: :meth:`_make_sctp_chunks`. A :class:`str` value names the methods
