@@ -92,7 +92,9 @@ class IPv6(IP):
        The reassembled ``header`` leaves out the Fragment header and carries
        its Next Header, per :rfc:`8200#section-4.5`, whichever engine fed it;
        1.4.x kept the Fragment header on the ``default`` and ``pcapng``
-       engines (:issue:`415`).
+       engines (:issue:`415`). An atomic fragment is reassembled in
+       isolation, without flushing a buffer that shares its BUFID
+       (:issue:`2270`).
 
     """
 
@@ -123,6 +125,13 @@ class IPv6(IP):
     #: :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`,
     #: which reports the condition in its log record instead.
     __timeout__ = 60.0
+
+    #: bool: An atomic fragment, one with fragment offset zero and **M**
+    #: clear, is reassembled on its own and leaves the buffer its BUFID names
+    #: untouched: :rfc:`6946#section-4` says it "MUST" be processed in
+    #: isolation and that the fragments queued under that BUFID "MUST NOT" be
+    #: discarded (:issue:`2270`).
+    __isolate_atomic__ = True
 
     ##########################################################################
     # Methods.
