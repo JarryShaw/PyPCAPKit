@@ -2089,10 +2089,26 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             builds is defined as an offset from the UNIX epoch, and the read
             side applies no timezone shift for it to mirror.
 
+            Which clock a defaulted ``timestamp`` is read to follows the
+            resolution of the interface ``interface_id`` names, not
+            :attr:`self.nanosecond <nanosecond>`. That property resolves its
+            interface through the parsed data model, which a block being made
+            has not got, so reading it here would make a ``make`` that names
+            no ``timestamp`` -- of an Enhanced Packet Block, an obsolete
+            Packet Block or an Interface Statistics Block -- raise
+            :exc:`AttributeError` on ``_info`` (:issue:`2362`).
+
+        .. versionchanged:: 1.5.0
+
+           A defaulted ``timestamp`` no longer reads
+           :attr:`self.nanosecond <nanosecond>`, so it no longer requires a
+           parsed data model (:issue:`2362`).
+
         """
         with localcontext(prec=64):
+            resolution = self._get_resolution(interface_id)
             if timestamp is None:
-                if self.nanosecond:
+                if resolution > RESOLUTION[False]:
                     timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
                 else:
                     timestamp = decimal.Decimal(time.time())
@@ -2102,7 +2118,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 timestamp = decimal.Decimal(timestamp)
 
             ts_info = int(
-                (timestamp - self._get_offset(interface_id)) * self._get_resolution(interface_id)
+                (timestamp - self._get_offset(interface_id)) * resolution
             )
         return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
