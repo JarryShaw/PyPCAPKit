@@ -348,8 +348,13 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
             header_line = b'%s %s HTTP/%s\r\n' % (meth, uri_val, version)
         elif method is None and status is not None:
-            status_code = self._make_index(status, status_default, namespace=status_namespace,
-                                           reversed=status_reversed, pack=False)
+            # NOTE: ``status`` defaults to :data:`None`, so ``_make_index`` has no
+            # enum default to infer the namespace of a :obj:`str` member name from;
+            # name it here rather than leave the name unresolvable (#2356).
+            status_code = self._make_index(
+                status, status_default,
+                namespace=status_namespace if status_namespace is not None else Enum_StatusCode,
+                reversed=status_reversed, pack=False)
             status_code_val = int(status_code)
 
             if message is None:
