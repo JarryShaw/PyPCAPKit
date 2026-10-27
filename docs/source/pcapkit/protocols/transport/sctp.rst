@@ -139,6 +139,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
    .. autoattribute:: __chunk__
       :no-value:
    .. autoattribute:: __parameter__

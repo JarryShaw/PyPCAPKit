@@ -28,10 +28,11 @@ from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Optional, Type
+    from typing import IO, Any, ClassVar, Optional, Type
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.data.data import Data
 
 __all__ = ['Internet']
@@ -137,6 +138,18 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf', 'OSPF'),
         },
     )
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_transtype` checks
+    #: its own -- a subclass sharing this registry is therefore checked as
+    #: :class:`Internet` is, while :class:`~pcapkit.protocols.internet.ipx.IPX`,
+    #: which keeps one of its own, declares its own pairing or none at all
+    #: (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_TransType, False)
 
     #: int: How many IPv6 extension headers in a row the next layer follows:
     #: this layer's place in such a chain, or how many headers

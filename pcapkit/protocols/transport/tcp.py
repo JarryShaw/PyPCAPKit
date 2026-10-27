@@ -43,6 +43,7 @@ import datetime
 import math
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
@@ -141,13 +142,13 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Optional, Type
+    from typing import Any, Callable, ClassVar, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.apptype import AppType as Enum_AppType
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
@@ -368,6 +369,17 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
         },
     )
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_tcp` checks its own
+    #: -- a bare :class:`int` is accepted because the registry is keyed by
+    #: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+    #: member carries one (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 
     #: Option code to method mapping, see :meth:`_read_tcp_options` and
     #: :meth:`_make_tcp_options`. A :class:`str` value names the methods

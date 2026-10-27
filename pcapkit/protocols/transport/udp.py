@@ -25,6 +25,7 @@ Octets      Bits        Name                    Description
 import collections
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
@@ -33,11 +34,11 @@ from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
 from pcapkit.protocols.transport.transport import Transport
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, ClassVar, Optional, Type
 
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.apptype import AppType as Enum_AppType
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -115,6 +116,17 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
         },
     )
+
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is a valid key there too. Declared by the
+    #: class *owning* the registry, and read from it by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: ``code=`` key is checked exactly as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_udp` checks its own
+    #: -- a bare :class:`int` is accepted because the registry is keyed by
+    #: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+    #: member carries one (:issue:`2268`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 
     ##########################################################################
     # Properties.

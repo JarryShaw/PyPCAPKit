@@ -194,6 +194,8 @@ which implements an extractor for PCAP-NG file format [*]_, and the
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
    .. autoattribute:: __block__
       :no-value:
    .. autoattribute:: __option__

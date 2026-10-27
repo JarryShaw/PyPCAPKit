@@ -131,6 +131,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
    .. autoattribute:: __option__
       :no-value:
    .. autoattribute:: __mp_option__

@@ -236,13 +236,51 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         """A :class:`bool` is an :class:`int` subclass, but never a port or PPID (#2269)."""
         from pcapkit.foundation.registry import protocols as registrars
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.utilities.exceptions import RegistryError
 
         for name, _, targets, extra in NUMBER_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
                                             codes=(True, False))
-        with self.assertRaisesRegex(RegistryError, r'^code must be an int or a member of AppType, not True$'):
-            registrars._check_code(True, registrars.Enum_AppType, number=True)
+        with self.assertRaisesRegex(RegistryError, r'^TCP: code must be an int or a member of AppType, not True$'):
+            registrars._check_code(True, registrars.Enum_AppType, TCP, number=True)
+
+    def test_every_rejection_names_the_destination_registry(self) -> None:
+        """The message says *whose* registry rejected the key (#2268).
+
+        Each registrar hands
+        :func:`~pcapkit.foundation.registry.protocols._check_code` the protocol
+        class whose registry the key is destined for, and the shared message
+        leads with its name -- several registrars are typed on the same enum, so
+        the enum alone does not say which one refused. The class expected here is
+        the first one listed above for that registrar, which for the two
+        registrars writing into a pair of registries keyed alike
+        (``register_linktype``, ``register_apptype``) is the one the check names.
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import RegistryError
+
+        def parser(*args: 'object', **kwargs: 'object') -> None: ...
+
+        cases = []  # type: list[tuple[str, str, object, tuple[object, ...], dict[str, object]]]
+        for name, proto, schema in METHOD_REGISTRARS:
+            cases.append((name, resolve(proto).__name__, self._wrong_code(name),
+                          ((parser, parser),), {'schema': resolve(schema)}))
+        for name, targets in MODULE_REGISTRARS:
+            cases.append((name, resolve(targets[0]).__name__, self._wrong_code(name), (Raw,), {}))
+        for name, number, targets, extra in NUMBER_REGISTRARS:
+            # these four take a plain int, so only a member of another enum is wrong
+            cases.append((name, resolve(targets[0]).__name__, LinkType(number),
+                          (Raw, *extra), {}))
+
+        for name, expected, code, args, kwargs in cases:
+            with self.subTest(registrar=name):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    with self.assertRaisesRegex(RegistryError, rf'^{expected}: code must be '):
+                        getattr(registrars, name)(code, *args, **kwargs)
 
 
 if __name__ == '__main__':

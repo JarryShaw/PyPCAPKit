@@ -423,25 +423,6 @@ _CODE_DESTINATIONS: 'dict[Type[EnumRegistry], tuple[Type[ProtocolBase], ...]]' =
     Enum_LinkType: (Frame, PCAPNG),
 }
 
-#: Key type of each ``__proto__`` dispatch registry a ``code=`` target can name.
-#:
-#: Maps the class owning the registry to the enum its typed registrar checks
-#: ``code`` against, and whether a bare :class:`int` is a valid key there too --
-#: the same :func:`_check_code` arguments that registrar passes. A destination is
-#: looked up by the class it inherits ``__proto__`` from, so a subclass sharing
-#: :class:`Link`'s registry is checked as :class:`Link` is, while one keeping a
-#: registry of its own, such as :class:`~pcapkit.protocols.link.loopback.Loopback`,
-#: names no entry here and is not checked (:issue:`2268`).
-_DESTINATION_KINDS: 'dict[Type[ProtocolBase], tuple[Type[EnumRegistry], bool]]' = {
-    Link: (Enum_EtherType, False),  # type: ignore[type-abstract]
-    Internet: (Enum_TransType, False),  # type: ignore[type-abstract]
-    Frame: (Enum_LinkType, False),
-    PCAPNG: (Enum_LinkType, False),
-    TCP: (Enum_AppType, True),
-    UDP: (Enum_AppType, True),
-    SCTP: (Enum_PayloadProtocolIdentifier, True),
-}
-
 
 def _iter_code_targets(code: 'Any') -> 'Iterator[tuple[Type[ProtocolBase], Any]]':
     """Flatten a ``code=`` argument into ``(destination, key)`` pairs.
@@ -549,18 +530,34 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
             an enum member's type names no known destination registry --
             inference refuses rather than guesses; or if a key is not of the
             type its destination's registry is keyed by, as its typed registrar
-            would reject it, e.g. ``{Frame: TransType.ICMP}``. Every target is
-            checked before any is registered, so a rejected ``code`` leaves
-            every registry as it was (:issue:`2268`).
+            would reject it, e.g. ``{Frame: TransType.ICMP}``. What a registry is
+            keyed by is read from the
+            :attr:`__proto_key__ <pcapkit.protocols.link.link.Link.__proto_key__>`
+            declared by the class owning it, so a destination sharing another's
+            registry is checked as its owner is, and one whose owner declares no
+            pairing is not checked. Every target is checked before any is
+            registered, so a rejected ``code`` leaves every registry as it was
+            (:issue:`2268`).
 
     """
     targets = list(_iter_code_targets(code))
     for destination, key in targets:
         owner = next((klass for klass in getattr(destination, '__mro__', ())
                       if '__proto__' in vars(klass)), None)
-        if owner in _DESTINATION_KINDS:
-            kind, number = _DESTINATION_KINDS[owner]
-            _check_code(key, kind, number=number)
+        if owner is None:
+            continue
+
+        # NOTE: the pairing is read out of the owner's own ``vars()`` rather than
+        # with ``getattr``, which walks the MRO and would hand a class keeping a
+        # registry of its own its parent's pairing --
+        # :attr:`Loopback.__proto__ <pcapkit.protocols.link.loopback.Loopback.__proto__>`
+        # is keyed by address family rather than by EtherType, so inheriting
+        # :class:`Link`'s would reject every key it does accept. A class is
+        # checked against the registry it owns, or not at all.
+        pairing = vars(owner).get('__proto_key__')
+        if pairing is not None:
+            kind, number = pairing
+            _check_code(key, kind, owner, number=number)
 
     for destination, key in targets:
         destination.register(key, protocol)
@@ -568,7 +565,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
                      destination.__name__, key)
 
 
-def _check_code(code: 'Any', kind: 'type', *, number: 'bool' = False) -> 'None':
+def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
+                number: 'bool' = False) -> 'None':
     """Reject a registration key that is not a member of the registrar's enum.
 
     Each registrar typed on one enum calls this before touching any registry,
@@ -582,6 +580,10 @@ def _check_code(code: 'Any', kind: 'type', *, number: 'bool' = False) -> 'None':
     Args:
         code: Registration key handed to the registrar.
         kind: Enum the registrar is typed on.
+        target: Protocol class whose registry ``code`` is destined for, named in
+            the error message so a rejection says *whose* registry rejected the
+            key rather than only what it wanted -- the registrars share one
+            message, and several of them are typed on the same enum.
         number: Whether a bare :class:`int` is a valid key too, as for the
             registrars keyed on a port number or a payload protocol identifier.
 
@@ -600,8 +602,9 @@ def _check_code(code: 'Any', kind: 'type', *, number: 'bool' = False) -> 'None':
         return
     expected = f'an int or a member of {kind.__name__}' if number else f'a member of {kind.__name__}'
     if member:
-        raise RegistryError(f'code must be {expected}, not a member of {type(code).__name__}: {code!r}')
-    raise RegistryError(f'code must be {expected}, not {code!r}')
+        raise RegistryError(f'{target.__name__}: code must be {expected}, not a member of '
+                            f'{type(code).__name__}: {code!r}')
+    raise RegistryError(f'{target.__name__}: code must be {expected}, not {code!r}')
 
 
 ###############################################################################
@@ -646,7 +649,10 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
             subclass.
 
     """
-    _check_code(code, Enum_LinkType)
+    # NOTE: this writes into both Frame's and PCAP-NG's registries, which are
+    # keyed alike, so the key check is the same for either and Frame names it.
+    # :func:`register_pcap` and :func:`register_pcapng` name one each.
+    _check_code(code, Enum_LinkType, Frame)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -691,7 +697,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
             subclass.
 
     """
-    _check_code(code, Enum_LinkType)
+    _check_code(code, Enum_LinkType, Frame)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -735,7 +741,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
             subclass.
 
     """
-    _check_code(code, Enum_LinkType)
+    _check_code(code, Enum_LinkType, PCAPNG)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -784,7 +790,7 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
             subclass.
 
     """
-    _check_code(code, Enum_EtherType)
+    _check_code(code, Enum_EtherType, Link)  # type: ignore[type-abstract]
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -833,7 +839,7 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
             subclass.
 
     """
-    _check_code(code, Enum_TransType)
+    _check_code(code, Enum_TransType, Internet)  # type: ignore[type-abstract]
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -870,7 +876,7 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code, IPv4_OptionNumber)
+    _check_code(code, IPv4_OptionNumber, IPv4)
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv4 option parser function')
 
@@ -904,7 +910,7 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
             is a name with no matching ``_read_param_*`` method.
 
     """
-    _check_code(code, HIP_Parameter)
+    _check_code(code, HIP_Parameter, HIP)
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
         raise RegistryError('method must be a valid HIP parameter parser function')
 
@@ -938,7 +944,7 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code, IPv6_Option)
+    _check_code(code, IPv6_Option, HOPOPT)
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid HOPOPT option parser function')
 
@@ -972,7 +978,7 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code, IPv6_Option)
+    _check_code(code, IPv6_Option, IPv6_Opts)
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
@@ -1006,7 +1012,7 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
             is a name with no matching ``_read_data_type_*`` method.
 
     """
-    _check_code(code, IPv6_Routing)
+    _check_code(code, IPv6_Routing, IPv6_Route)
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
@@ -1040,7 +1046,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
             is a name with no matching ``_read_msg_*`` method.
 
     """
-    _check_code(code, MH_Packet)
+    _check_code(code, MH_Packet, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
         raise RegistryError('method must be a valid MH message type parser function')
 
@@ -1074,7 +1080,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
             is a name with no matching ``_read_opt_*`` method.
 
     """
-    _check_code(code, MH_Option)
+    _check_code(code, MH_Option, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid MH option parser function')
 
@@ -1113,7 +1119,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
        that take one (:issue:`516`).
 
     """
-    _check_code(code, MH_CGAExtension)
+    _check_code(code, MH_CGAExtension, MH)
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid MH CGA extension function')
 
@@ -1227,7 +1233,12 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
        protocol per argument, with no alias (:issue:`806`).
 
     """
-    _check_code(code, Enum_AppType, number=True)
+    # NOTE: which of TCP's and UDP's registries this writes into depends on
+    # ``*transport``, which is resolved below -- after this check, so a bad
+    # ``code`` is still reported before a bad transport protocol. The two are
+    # keyed alike, so the check itself is the same for either and TCP names it.
+    # :func:`register_tcp` and :func:`register_udp` name one each.
+    _check_code(code, Enum_AppType, TCP, number=True)
 
     # NOTE: ``class_`` sits at the sibling position -- positional, ahead of
     # ``*transport`` -- per maintainer ruling, so a third positional that is
@@ -1356,7 +1367,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
             member of another enum.
 
     """
-    _check_code(code, Enum_AppType, number=True)
+    _check_code(code, Enum_AppType, TCP, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
@@ -1395,7 +1406,7 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
             is a name with no matching ``_read_mode_*`` method.
 
     """
-    _check_code(code, TCP_Option)
+    _check_code(code, TCP_Option, TCP)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
         raise RegistryError('method must be a TCP option parser function')
 
@@ -1429,7 +1440,7 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
             is a name with no matching ``_read_mptcp_*`` method.
 
     """
-    _check_code(code, TCP_MPTCPOption)
+    _check_code(code, TCP_MPTCPOption, TCP)
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
         raise RegistryError('method must be a MPTCP option parser function')
 
@@ -1470,7 +1481,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
             member of another enum.
 
     """
-    _check_code(code, Enum_AppType, number=True)
+    _check_code(code, Enum_AppType, UDP, number=True)
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
@@ -1524,7 +1535,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
             :class:`~pcapkit.const.reg.apptype.sctp.SCTP` port enum.
 
     """
-    _check_code(code, Enum_PayloadProtocolIdentifier, number=True)
+    _check_code(code, Enum_PayloadProtocolIdentifier, SCTP, number=True)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -1566,7 +1577,7 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
             is a name with no matching ``_read_http_*`` method.
 
     """
-    _check_code(code, HTTP_Frame)
+    _check_code(code, HTTP_Frame, HTTPv2)
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
         raise RegistryError('method must be a frame parser function')
 
@@ -1605,7 +1616,7 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
             is a name with no matching ``_read_block_*`` method.
 
     """
-    _check_code(code, PCAPNG_BlockType)
+    _check_code(code, PCAPNG_BlockType, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
         raise RegistryError('method must be a block parser function')
 
@@ -1639,7 +1650,7 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
             is a name with no matching ``_read_option_*`` method.
 
     """
-    _check_code(code, PCAPNG_OptionType)
+    _check_code(code, PCAPNG_OptionType, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
         raise RegistryError('method must be a option parser function')
 
@@ -1673,7 +1684,7 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
             is a name with no matching ``_read_record_*`` method.
 
     """
-    _check_code(code, PCAPNG_RecordType)
+    _check_code(code, PCAPNG_RecordType, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
         raise RegistryError('method must be a name resolution record parser function')
 
@@ -1707,7 +1718,7 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
             is a name with no matching ``_read_secrets_*`` method.
 
     """
-    _check_code(code, PCAPNG_SecretsType)
+    _check_code(code, PCAPNG_SecretsType, PCAPNG)
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
         raise RegistryError('method must be a decryption secrets parser function')
 
