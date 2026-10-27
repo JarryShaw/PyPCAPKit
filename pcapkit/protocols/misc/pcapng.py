@@ -4478,7 +4478,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         linktype_default: 'Optional[int]' = None,
                         linktype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                         linktype_reversed: 'bool' = False,
-                        snaplen: 'int' = 0xFFFF_FFFF_FFFF_FFFF,
+                        snaplen: 'int' = 0,
                         options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
                         **kwargs: 'Any') -> 'Schema_InterfaceDescriptionBlock':
         """Make PCAP-NG interface description block (IDB).
@@ -4489,12 +4489,24 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             linktype_default: Default value of link layer protocol type.
             linktype_namespace: Namespace of link layer protocol type.
             linktype_reversed: Reversed flag for link layer protocol type namespace.
-            snaplen: Snap length.
+            snaplen: Snap length, an unsigned 32-bit value; 0, the default,
+                means no limit.
             options: Block options.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed block schema.
+
+        Raises:
+            ProtocolError: If ``snaplen`` is outside ``0`` to ``0xFFFFFFFF``,
+                which the 32-bit SnapLen field would truncate (:issue:`2278`).
+
+        .. versionchanged:: 1.5.0
+
+           ``snaplen``'s default changed from ``0xFFFF_FFFF_FFFF_FFFF`` -- which
+           the 32-bit field silently truncated to ``0xFFFFFFFF`` -- to ``0``,
+           and a value outside the field's range now raises instead of being
+           truncated (:issue:`2278`).
 
         """
         if block is not None and hasattr(block, 'block_raw'):
@@ -4506,6 +4518,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         else:
             linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[assignment]
                                             reversed=linktype_reversed, pack=False)
+        if not 0 <= snaplen <= 0xFFFF_FFFF:
+            raise ProtocolError(f'PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: {snaplen!r}')
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='if')
