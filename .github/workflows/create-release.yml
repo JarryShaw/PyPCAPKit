@@ -446,9 +446,12 @@ jobs:
           # ``action.yml``), so no ``env:`` names one.
           token: ${{ steps.app_token.outputs.token || secrets.GITHUB_TOKEN }}
 
-      # #1634: the same check ``tag``, ``pypi`` and ``conda`` make before they
-      # publish under this tag. Here it catches the tag having existed already
-      # at another commit, which ``action-gh-release`` silently reuses.
+      # #1634: the same check ``pypi`` and ``conda`` make before they publish
+      # under this tag. ``tag`` has no such step: its "Create Tag" makes the
+      # equivalent comparison inline, ``git rev-parse`` on the tags its own
+      # checkout fetched, without ``release_tags.resolve``'s fetch of the tag.
+      # Here the check catches the tag having existed already at another commit, which
+      # ``action-gh-release`` silently reuses.
       - name: Check the release tags name this run's commit
         env:
           PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
