@@ -2883,9 +2883,21 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             data = opt.data
 
+        # NOTE: The length is sized from what the schema actually writes, not
+        # from ``data``'s own width (#2272). ``Schema_MPTCPUnknown`` always packs
+        # three octets of header -- ``kind``, ``length`` and the subtype/flags
+        # octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as
+        # its body, so the option is never shorter than 3 octets -- the smallest
+        # Multipath TCP option :rfc:`8684` section 3 permits. The former
+        # ``2 + len(data)`` declared 2 for ``data=b''`` while still packing those
+        # three octets, and the segment could not be read back:
+        # ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which went
+        # negative and raised ``ProtocolError: Field data resolved to a negative
+        # length``. For every non-empty ``data`` the two expressions agree, so
+        # this only changes the empty case.
         return Schema_MPTCPUnknown(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=2 + len(data),
+            length=3 + len(data[1:]),
             test={
                 'subtype': subtype.value,
                 'data': data[0] & 0x0F if data else 0,

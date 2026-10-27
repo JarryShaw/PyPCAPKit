@@ -730,7 +730,16 @@ class _MPTCP(Schema):
         """
         ret = self.data
 
-        ret.option = Enum_Option.Multipath_TCP
+        # NOTE: Only attributes that the construction path sets too are assigned
+        # here, so that a schema parsed off the wire carries exactly the same
+        # attributes as one built in memory by ``TCP._make_mode_mp`` (#2293). An
+        # earlier revision also set ``ret.option = Enum_Option.Multipath_TCP``,
+        # which no maker mirrored and nothing ever read: ``MPTCP`` declares no
+        # ``option`` field, and its real ``kind`` field already carries
+        # ``Multipath_TCP``. ``subtype`` is the one attribute that genuinely has
+        # to be assigned on both paths -- see the NOTE on :class:`MPTCP` for why
+        # it cannot be a field -- and ``TCP._make_mode_mp`` makes the matching
+        # assignment for construction.
         ret.length = self.test['length']
         ret.subtype = Enum_MPTCPOption.get(packet['test']['subtype'])
 
