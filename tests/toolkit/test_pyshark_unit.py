@@ -517,7 +517,7 @@ class PySharkFlagTests(unittest.TestCase):
                 with self.assertRaises(ProtocolError) as ctx:
                     toolkit._parse_flag(value, 'tcp.flags_fin')
                 self.assertEqual(str(ctx.exception),
-                                 f'invalid PyShark boolean field tcp.flags_fin: {value!r}')
+                                 f'PyShark: invalid boolean field tcp.flags_fin: {value!r}')
 
     def test_tcp_traceflow_reads_tshark_4_flags(self) -> None:
         from pcapkit.toolkit import pyshark as toolkit
@@ -587,7 +587,8 @@ class PySharkTraceFieldTests(unittest.TestCase):
         packet.frame_info.time_epoch = LayerField('Jul 14, 2017')
         with self.assertRaises(ProtocolError) as ctx:
             toolkit.tcp_traceflow(packet)
-        self.assertEqual(str(ctx.exception), "invalid PyShark frame.time_epoch: 'Jul 14, 2017'")
+        self.assertEqual(str(ctx.exception),
+                         "PyShark: invalid frame.time_epoch: 'Jul 14, 2017'")
 
     def test_seq_and_ack_are_absolute(self) -> None:
         """tshark's ``tcp.seq``/``tcp.ack`` are relative by default; the
@@ -776,7 +777,7 @@ class PySharkCommentedPacketTests(unittest.TestCase):
         packet.layers = packet.layers[1:]
         with self.assertRaises(ProtocolError) as ctx:
             toolkit.tcp_traceflow(packet)
-        self.assertEqual(str(ctx.exception), 'PyShark packet 12 has no frame layer')
+        self.assertEqual(str(ctx.exception), 'PyShark: packet 12 has no frame layer')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

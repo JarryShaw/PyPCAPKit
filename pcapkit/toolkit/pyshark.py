@@ -19,6 +19,7 @@ import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.foundation.engines.pyshark import PyShark
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.utilities.exceptions import MissingKeyError, ProtocolError
 
@@ -28,6 +29,13 @@ if TYPE_CHECKING:
     from pyshark.packet.packet import Packet
 
 __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAME_TO_LINKTYPE']
+
+#: Message prefix shared by every message below, read off
+#: :attr:`PyShark.__engine_name__
+#: <pcapkit.foundation.engines.pyshark.PyShark.__engine_name__>` rather than
+#: spelled out, so the engine cannot be renamed there and still be named the old
+#: way here (:issue:`2304`).
+_ENGINE = PyShark.__engine_name__
 
 #: ``frame.encap_type`` -- Wireshark's internal ``WTAP_ENCAP_*`` number, which |pyshark|_
 #: exposes as ``packet.frame_info.encap_type`` -- to the matching
@@ -343,7 +351,7 @@ def _parse_flag(value: 'Any', name: 'str') -> 'bool':
         flag = _BOOLEAN_FIELD.get(str(value))
         if flag is not None:
             return flag
-    raise ProtocolError(f'invalid PyShark boolean field {name}: {value!r}')
+    raise ProtocolError(f'{_ENGINE}: invalid boolean field {name}: {value!r}')
 
 
 def _parse_epoch(value: 'Any') -> 'float':
@@ -362,7 +370,7 @@ def _parse_epoch(value: 'Any') -> 'float':
     try:
         return float(decimal.Decimal(str(value)))
     except decimal.InvalidOperation:
-        raise ProtocolError(f'invalid PyShark frame.time_epoch: {value!r}') from None
+        raise ProtocolError(f'{_ENGINE}: invalid frame.time_epoch: {value!r}') from None
 
 
 def _absolute(tcp: 'Any', name: 'str') -> 'int':
@@ -600,7 +608,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         # first layer that is not the frame layer.
         frame = _frame_layer(packet)
         if frame is None:
-            raise ProtocolError(f'PyShark packet {packet.number} has no frame layer')
+            raise ProtocolError(f'{_ENGINE}: packet {packet.number} has no frame layer')
         encap_type = getattr(frame, 'encap_type', None)
         if encap_type is None:
             name = [layer for layer in packet.layers if layer is not frame][0].layer_name
