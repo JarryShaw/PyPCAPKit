@@ -156,9 +156,13 @@ class TestIPv4RoundTrip(unittest.TestCase):
             option = self.parse(header('8204ab90')).info.options[OptionNumber.SEC]
         self.assertEqual(option.flags, (ProtectionAuthority.GENSER, ProtectionAuthority.NSA))
 
-        # The low-order bit set on the final octet promises another octet.
-        with self.assertWarnsRegex(ProtocolWarning, 'field termination indicator not set'):
+        # The low-order bit set on the final octet promises another octet, and
+        # the warning names the bit that is set rather than one that is not
+        # (#2295). ``0x91`` is 145.
+        with self.assertWarns(ProtocolWarning) as caught:
             self.parse(header('8204ab91'))
+        self.assertEqual(str(caught.warning), 'IPv4: [OptNo 130] invalid format: '
+                                              'field termination indicator set on the final octet: 145')
 
     def test_timestamp_keeps_the_high_order_bit(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
