@@ -41,13 +41,13 @@ class Integrity(EnumRegistry, IntEnum):
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA1_96`.
     HMAC_SHA1_96 = 2
 
-    #: AUTH_DES_MAC [UNSPECIFIED] (DEPRECATED [:rfc:`8247`])
+    #: AUTH_DES_MAC (DEPRECATED [:rfc:`8247`])
     AUTH_DES_MAC = 3
 
     #: Alias of :attr:`Integrity.AUTH_DES_MAC`.
     DES_MAC = 3
 
-    #: AUTH_KPDK_MD5 [UNSPECIFIED] (DEPRECATED [:rfc:`8247`])
+    #: AUTH_KPDK_MD5 (DEPRECATED [:rfc:`8247`])
     AUTH_KPDK_MD5 = 4
 
     #: Alias of :attr:`Integrity.AUTH_KPDK_MD5`.
