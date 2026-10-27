@@ -67,6 +67,8 @@ Internal Definitions below.
       :no-value:
    .. autoattribute:: __keywords__
       :no-value:
+   .. autoattribute:: __own_make_keywords__
+      :no-value:
 
    .. autoattribute:: __schema__
       :no-value:
@@ -234,6 +236,7 @@ Internal Definitions
    .. py:attribute:: __layer__
                      __proto__
                      __keywords__
+                     __own_make_keywords__
                      __schema__
                      __header__
                      _data
@@ -252,7 +255,8 @@ Internal Definitions
       :no-contents-entry:
 
       :attr:`~Protocol.__layer__`, :attr:`~Protocol.__proto__`,
-      :attr:`~Protocol.__keywords__`, :attr:`~Protocol.__schema__`,
+      :attr:`~Protocol.__keywords__`, :attr:`~Protocol.__own_make_keywords__`,
+      :attr:`~Protocol.__schema__`,
       :attr:`~Protocol.__header__`, :attr:`~Protocol._data`,
       :attr:`~Protocol._file`, :attr:`~Protocol._info`,
       :attr:`~Protocol._next`, :attr:`~Protocol._protos`,

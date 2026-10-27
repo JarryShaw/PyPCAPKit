@@ -236,6 +236,12 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
     """
 
+    #: Every subclass overrides :meth:`make` with its own fields and forwards
+    #: nothing to this one, so this class's ``len`` and ``data`` are accepted
+    #: only by this class itself. Without the marker, a subclass whose ``make``
+    #: does not declare them would accept and then drop them (:issue:`2286`).
+    __own_make_keywords__ = True
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -500,10 +506,14 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             construction**: a plain
             ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises
             ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The
-            ``__keywords__`` escape hatch would cover that too, with no
-            difference for subclasses: signatures and ``__keywords__`` are
-            both unioned down the MRO, so every subclass's allowlist takes
-            these names either way.
+            ``__keywords__`` escape hatch would cover that too, but a set
+            there is unioned down the MRO, so every subclass would accept
+            these names and drop them. A ``make`` signature can be kept from
+            subclasses instead: this class sets
+            :attr:`ProtocolBase.__own_make_keywords__
+            <pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__>`,
+            so a subclass that overrides ``make`` accepts ``len`` or ``data``
+            only where its own ``make`` declares it (:issue:`2286`).
 
             They are keyword-*only* because this class is also a base and each
             subclass's ``make`` puts different names in the same positions. As
