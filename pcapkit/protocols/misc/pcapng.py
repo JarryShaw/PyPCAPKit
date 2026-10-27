@@ -4797,7 +4797,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             secrets_type_default: Default value of decryption secrets type.
             secrets_type_namespace: Namespace of decryption secrets type.
             secrets_type_reversed: Reversed flag for namespace of decryption secrets type.
-            secrets_data: Decryption secrets data.
+            secrets_data: Decryption secrets data. Raw :obj:`bytes` are read as
+                the Secrets Data of a parsed block are, through the schema
+                registered for ``secrets_type`` (:issue:`2273`).
             options: Block options.
             **kwargs: Arbitrary keyword arguments.
 
@@ -4816,7 +4818,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                                                 reversed=secrets_type_reversed, pack=False)
 
         if isinstance(secrets_data, bytes):
-            secrets_data_val = secrets_data  # type: bytes | Schema_DSBSecrets
+            from pcapkit.protocols.schema.misc.pcapng import dsb_secrets_selector
+
+            # NOTE: Read through the schema the parse side selects, as the
+            # block's Secrets Data is read, since :meth:`read` consumes a
+            # secrets schema rather than raw octets; the schema packs back to
+            # exactly ``secrets_data`` (#2273).
+            secrets_data_val = cast('Schema_DSBSecrets', dsb_secrets_selector({
+                'secrets_type': secrets_type_val,
+                'secrets_length': len(secrets_data),
+                'length': len(secrets_data) + BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block],
+            }).unpack(secrets_data, {}))
         elif isinstance(secrets_data, (dict, Data_DSBSecrets)):
             name = self._lookup_registry(self.__secrets__, secrets_type_val)
             if isinstance(name, str):
