@@ -6477,13 +6477,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if isinstance(records, bytes):
             return [records], len(records)
 
+        byteorder = getattr(self, '_byte', None)
+        if byteorder is None:
+            byteorder = self._ctx.section.byteorder if self._ctx is not None else sys.byteorder
+
         has_record_end = False
         total_length = 0
         if isinstance(records, list):
             records_list = []  # type: list[Schema_NameResolutionRecord | bytes]
             for schema in records:
                 if isinstance(schema, bytes):
-                    code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
+                    code = Enum_RecordType.get(int.from_bytes(schema[0:2], byteorder, signed=False))
                     if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True
                         continue
