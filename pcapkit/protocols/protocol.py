@@ -1915,7 +1915,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         if kind is None:
             end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
-            buf = integer.to_bytes(size, end, signed=signed)
+            # ``int.to_bytes`` raises these where ``struct.pack`` raises
+            # ``struct.error`` for the other sizes (#2291).
+            try:
+                buf = integer.to_bytes(size, end, signed=signed)
+            except (AttributeError, OverflowError, TypeError, ValueError) as error:
+                raise StructError(f'{cls.__name__}: pack failed') from error
         else:
             try:
                 fmt = f'{endian}{kind}'
@@ -1993,6 +1998,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Raises:
             ProtocolNotImplemented: If ``name`` is **NOT** in ``namespace``
                 and ``default`` is :data:`None`.
+            StructError: If ``pack`` is :data:`True` and the index could not be
+                packed into ``size`` octets.
 
         Note:
             If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,
