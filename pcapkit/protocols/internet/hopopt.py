@@ -1744,7 +1744,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             tid_len = len(tid_bytes)
 
             if tid_type is not None:
-                tid_kind = self._make_index(tid_type, tid_type_default, namespace=tid_type_namespace,
+                # NOTE: ``tid_type`` defaults to ``None``, so a :obj:`str` name has to be
+                # resolved against TaggerID when no namespace is given (#2356).
+                tid_type_ns = tid_type_namespace if tid_type_namespace is not None else Enum_TaggerID
+                tid_kind = self._make_index(tid_type, tid_type_default, namespace=tid_type_ns,
                                             reversed=tid_type_reversed, pack=False)
             elif tid_len == 0:
                 tid_kind = Enum_TaggerID.NULL
@@ -2054,7 +2057,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             seed = opt.seed_id
 
         if seed_type is not None:
-            kind = self._make_index(seed_type, seed_type_default, namespace=seed_type_namespace,
+            # NOTE: ``seed_type`` defaults to ``None``, so a :obj:`str` name has to be
+            # resolved against SeedID when no namespace is given (#2356).
+            seed_type_ns = seed_type_namespace if seed_type_namespace is not None else Enum_SeedID
+            kind = self._make_index(seed_type, seed_type_default, namespace=seed_type_ns,
                                     reversed=seed_type_reversed, pack=False)
         elif seed is None or isinstance(seed, ipaddress.IPv6Address):
             kind = Enum_SeedID.IPV6_SOURCE_ADDRESS

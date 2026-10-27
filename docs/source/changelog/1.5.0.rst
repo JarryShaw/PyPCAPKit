@@ -2755,6 +2755,11 @@ Fixed
 * HIP's ``ECHO_RESPONSE_UNSIGNED`` maker builds an ``EchoResponseUnsignedParameter``
   schema, where it built the request's; the octets were already right (:issue:`2170`,
   :pr:`2188`).
+* The MPL option's ``seed_type`` and the SMF_DPD option's ``tid_type`` makers (of
+  both HOPOPT and IPv6-Opts), and the HTTP/1.* start line's ``status``, resolve a
+  ``str`` enum name against their own enum when no ``..._namespace`` is given,
+  where the ``None`` default made a name raise :exc:`.ProtocolNotImplemented`
+  (:issue:`2356`).
 
 pcapkit.toolkit
 ---------------
