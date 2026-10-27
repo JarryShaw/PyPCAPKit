@@ -224,7 +224,7 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
         return IPv6_Reassembly(strict=strict, timeout=timeout)
     if protocol == 'TCP':
         return TCP_Reassembly(strict=strict, timeout=timeout)
-    raise FormatError(f'Unsupported reassembly protocol: {protocol}')
+    raise FormatError(f'unsupported reassembly protocol: {protocol!r}')
 
 
 def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
@@ -261,4 +261,4 @@ def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
     if protocol == 'TCP':
         return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder,
                              nanosecond=nanosecond, bidirectional=bidirectional)
-    raise FormatError(f'Unsupported flow tracing protocol: {protocol}')
+    raise FormatError(f'unsupported flow tracing protocol: {protocol!r}')

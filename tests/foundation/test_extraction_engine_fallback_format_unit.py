@@ -102,7 +102,7 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
             self.assertEqual(extractor.format, 'pcap')
             self.assertEqual(_read(os.path.join(tmp, 'out.pcap')), _read(fin))
         self.assertEqual([str(m) for m in caught if isinstance(m, EngineWarning)],
-                         ['unsupported extraction engine: no-such-engine; using default engine instead'])
+                         ["unsupported extraction engine: 'no-such-engine'; using default engine instead"])
 
     def test_trace_format_is_kept(self) -> None:
         from pcapkit.utilities.warnings import FormatWarning

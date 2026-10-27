@@ -320,7 +320,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         """
         output, ext = cls.__output__[fmt]
         if ext is None:
-            warn(f'Unsupported output format: {fmt}; disabled file output feature',
+            warn(f'unsupported output format: {fmt!r}; disabled file output feature',
                  FormatWarning, stacklevel=stacklevel())
         if isinstance(output, ModuleDescriptor):
             output = output.klass
