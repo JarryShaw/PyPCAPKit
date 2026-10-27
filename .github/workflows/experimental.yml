@@ -68,7 +68,7 @@ jobs:
         continue-on-error: true
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         continue-on-error: true
         with:
@@ -200,7 +200,7 @@ jobs:
           latest=$(python3 -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))")
           echo "paths=$latest" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         continue-on-error: true
         timeout-minutes: 5
@@ -237,7 +237,7 @@ jobs:
       # with (builders/ubuntu-python-builder.psm1). No `cache:` and
       # `--no-cache-dir`, so the leg's pip cache is untouched. A failure here
       # leaves the tests to run unwatched.
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: watcher-python
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: true
@@ -653,7 +653,7 @@ jobs:
         id: checkout
         continue-on-error: true
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         if: ${{ steps.checkout.outcome == 'success' }}
         continue-on-error: true
