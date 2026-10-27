@@ -508,10 +508,22 @@ class HITSuiteListParameter(Parameter):
 
 @info_final
 class CertParameter(Parameter):
-    """Data model for HIP ``CERT`` parameter."""
+    """Data model for HIP ``CERT`` parameter.
 
-    #: Certificate group.
-    cert_group: 'Group'
+    .. versionchanged:: 1.5.0
+
+       :attr:`cert_group` is an :obj:`int` rather than a
+       :class:`~pcapkit.const.hip.group.Group` (:issue:`2283`).
+
+    """
+
+    #: Certificate group -- :rfc:`8002#section-2`'s "Group ID grouping
+    #: multiple related CERT parameters". An arbitrary number, since that
+    #: section leaves the CERT group namespace to each sending host, so no
+    #: registry stands behind it; it used to decode through the
+    #: Diffie-Hellman group registry and report a group of ``7`` as the curve
+    #: ``NIST_P_256``. See :issue:`2283`.
+    cert_group: 'int'
     #: Certificate count.
     cert_count: 'int'
     #: Certificate ID.
@@ -522,7 +534,7 @@ class CertParameter(Parameter):
     cert: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cert_group: 'Group', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cert_group: 'int', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -559,20 +571,45 @@ class EchoRequestSignedParameter(Parameter):
 
 @info_final
 class Lifetime(Data):
-    """Data model for registration lifetime."""
+    """Data model for registration lifetime.
 
-    #: Minimum lifetime.
+    .. versionchanged:: 1.5.0
+
+       New required fields ``min_exponent`` and ``max_exponent``, and
+       :attr:`min` and :attr:`max` follow :rfc:`8003#section-4.1`'s exponential
+       encoding rather than reading the octet as a count of seconds
+       (:issue:`2281`).
+
+    """
+
+    #: The ``Min Lifetime`` octet as it appears on the wire. It is what
+    #: re-serialising writes back, since most of the 256 octets have no exact
+    #: :class:`~datetime.timedelta`.
+    min_exponent: 'int'
+    #: The ``Max Lifetime`` octet as it appears on the wire.
+    max_exponent: 'int'
+    #: Minimum lifetime, decoded from :attr:`min_exponent` per
+    #: :rfc:`8003#section-4.1`.
     min: 'timedelta'
-    #: Maximum lifetime.
+    #: Maximum lifetime, decoded from :attr:`max_exponent` per
+    #: :rfc:`8003#section-4.1`.
     max: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, min: 'timedelta', max: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, min_exponent: 'int', max_exponent: 'int', min: 'timedelta', max: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class RegInfoParameter(Parameter):
-    """Data model for HIP ``REG_INFO`` parameter."""
+    """Data model for HIP ``REG_INFO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       :attr:`lifetime` carries the raw octets alongside the durations, and the
+       durations follow :rfc:`8003#section-4.1` -- see
+       :class:`Lifetime` (:issue:`2281`).
+
+    """
 
     #: Registration lifetime.
     lifetime: 'Lifetime'
@@ -585,28 +622,55 @@ class RegInfoParameter(Parameter):
 
 @info_final
 class RegRequestParameter(Parameter):
-    """Data model for HIP ``REG_REQUEST`` parameter."""
+    """Data model for HIP ``REG_REQUEST`` parameter.
 
-    #: Registration lifetime.
+    .. versionchanged:: 1.5.0
+
+       New required field ``lifetime_exponent``, and :attr:`lifetime` follows
+       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the
+       octet as a count of seconds (:issue:`2281`).
+
+    """
+
+    #: The ``Lifetime`` octet as it appears on the wire. :rfc:`8003#section-4.1`
+    #: makes a non-zero octet an exponent standing for ``2^((lifetime - 64)/8)``
+    #: seconds, and this is that octet. It is what re-serialising writes back,
+    #: since most of the 256 octets have no exact
+    #: :class:`~datetime.timedelta`.
+    lifetime_exponent: 'int'
+    #: Registration lifetime, decoded from :attr:`lifetime_exponent` per
+    #: :rfc:`8003#section-4.1`.
     lifetime: 'timedelta'
     #: Registration type.
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime_exponent: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class RegResponseParameter(Parameter):
-    """Data model for HIP ``REG_RESPONSE`` parameter."""
+    """Data model for HIP ``REG_RESPONSE`` parameter.
 
-    #: Registration lifetime.
+    .. versionchanged:: 1.5.0
+
+       New required field ``lifetime_exponent``, and :attr:`lifetime` follows
+       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the
+       octet as a count of seconds (:issue:`2281`).
+
+    """
+
+    #: The ``Lifetime`` octet as it appears on the wire, for the reason
+    #: :attr:`RegRequestParameter.lifetime_exponent` gives.
+    lifetime_exponent: 'int'
+    #: Registration lifetime, decoded from :attr:`lifetime_exponent` per
+    #: :rfc:`8003#section-4.1`.
     lifetime: 'timedelta'
     #: Registration type.
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime_exponent: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -743,24 +807,48 @@ class PayloadMICParameter(Parameter):
 
 @info_final
 class TransactionIDParameter(Parameter):
-    """Data model for HIP ``TRANSACTION_ID`` parameter."""
+    """Data model for HIP ``TRANSACTION_ID`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``id_len`` (:issue:`2271`).
+
+    """
 
     #: Identifier.
     id: 'int'
+    #: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,
+    #: which :rfc:`6078#section-4.4` gives as the "Length of the Identifier, in
+    #: octets" for what is otherwise an opaque value. Declared rather than
+    #: recomputed from :meth:`int.bit_length`, which cannot see a leading zero
+    #: octet: without it a parameter read with ``Length = 4`` re-serialised as
+    #: ``Length = 1``. Same class of bug as :issue:`653`; see :issue:`2271`.
+    id_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int', id_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class OverlayIDParameter(Parameter):
-    """Data model for HIP ``OVERLAY_ID`` parameter."""
+    """Data model for HIP ``OVERLAY_ID`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``id_len`` (:issue:`2271`).
+
+    """
 
     #: Identifier.
     id: 'int'
+    #: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,
+    #: which :rfc:`6079#section-6.1` gives as the "Length of the Identifier, in
+    #: octets" for what is otherwise an opaque value. Declared for the reason
+    #: :attr:`TransactionIDParameter.id_len` gives. See :issue:`2271`.
+    id_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int', id_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -941,17 +1029,22 @@ class OverlayTTLParameter(Parameter):
 
     .. versionchanged:: 1.5.0
 
-       New required field ``reserved`` (:issue:`1223`).
+       New required field ``reserved`` (:issue:`1223`), and :attr:`ttl` is an
+       :obj:`int` rather than a :class:`~datetime.timedelta` (:issue:`2282`).
 
     """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
-    #: TTL value.
-    ttl: 'timedelta'
+    #: TTL value -- "the number of overlay hops this packet has left"
+    #: (:rfc:`6079#section-6.2`), decremented by one per overlay hop. A count,
+    #: not a duration, so it is a plain :obj:`int`: reading it as
+    #: ``timedelta(seconds=ttl)`` reported a 5-hop budget as five seconds.
+    #: See :issue:`2282`.
+    ttl: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', ttl: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
