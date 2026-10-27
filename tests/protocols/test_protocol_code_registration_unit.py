@@ -148,7 +148,7 @@ class ProtocolCodeOptInTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class RegisterProtocolCodeInferenceTests(unittest.TestCase):
-    """Unit tests for ``register_protocol_code``/its enum-type inference table.
+    """Unit tests for ``register_protocol_code``/the ``__proto_dest__`` it reads.
 
     Every destination class's ``register`` classmethod is mocked, so none of
     these touch a real, process-wide ``__proto__`` table.
@@ -306,7 +306,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         register.assert_called_once_with(TransType.IGMP, FakeProtocol)
 
     def test_unknown_enum_type_refuses_rather_than_guessing(self) -> None:
-        """An enum type absent from the inference table raises, not a silent no-op.
+        """An enum type declaring no ``__proto_dest__`` raises, not a silent no-op.
 
         ``AppType`` is deliberately not a live ``__proto__`` key type --
         ``register_apptype`` converts it to a port ``int`` before storing --
@@ -675,6 +675,184 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link` and
                 with self.assertRaisesRegex(RegistryError,
                                             rf'^{destination.__name__}: code must be '):
                     register_protocol_code(Raw, {destination: key})
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class ProtoDestDeclarationTests(unittest.TestCase):
+    """``__proto_dest__``, the declaration #2392 replaced the lookup table with.
+
+    Inference used to read a private lookup table in
+    :mod:`pcapkit.foundation.registry.protocols`, keyed by enum type. #2392
+    moves it onto the enumeration registry classes, mirroring what the same
+    issue did in the other direction with ``__proto_key__``. These pin the
+    declarations themselves; the ``register_protocol_code`` behaviour they drive
+    is pinned by :class:`RegisterProtocolCodeInferenceTests` above, which is
+    unchanged by the move and is the point.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    #: ``enum registry -> the destination class(es) it names``, as dotted paths
+    #: so the expectation does not import what it is checking.
+    EXPECTED = (
+        ('pcapkit.const.reg.ethertype', 'EtherType',
+         (('pcapkit.protocols.link.link', 'Link'),)),
+        ('pcapkit.const.reg.transtype', 'TransType',
+         (('pcapkit.protocols.internet.internet', 'Internet'),)),
+        ('pcapkit.const.sctp.payload_protocol_identifier', 'PayloadProtocolIdentifier',
+         (('pcapkit.protocols.transport.sctp', 'SCTP'),)),
+        ('pcapkit.const.reg.linktype', 'LinkType',
+         (('pcapkit.protocols.misc.pcap.frame', 'Frame'),
+          ('pcapkit.protocols.misc.pcapng', 'PCAPNG'))),
+    )
+
+    def test_each_registry_declares_the_destinations_it_keys(self) -> None:
+        """Resolved, and in order -- ``LinkType`` still fans out to both formats.
+
+        A declaration is read off the class's own :func:`vars`, since an
+        enumeration that inherited one would be declaring nothing.
+        """
+        import importlib
+
+        for module, name, expected in self.EXPECTED:
+            with self.subTest(registry=name):
+                klass = getattr(importlib.import_module(module), name)
+                declared = vars(klass).get('__proto_dest__')
+                self.assertIsNotNone(declared, f'{name} declares no __proto_dest__')
+                self.assertEqual(
+                    [(entry.klass.__module__, entry.klass.__name__) for entry in declared],
+                    [tuple(pair) for pair in expected])
+
+    def test_the_declarations_name_classes_lazily_rather_than_importing_them(self) -> None:
+        """:mod:`pcapkit.const` must not import :mod:`pcapkit.protocols`.
+
+        That is why #2392 declares a
+        :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than the class:
+        ``const`` sits strictly below ``protocols``, so holding a real class
+        reference would make the import circular. Pinned on the generated source
+        as well as on the value, since a regeneration is what would reintroduce
+        it.
+        """
+        import importlib
+        import pathlib
+
+        from pcapkit.corekit.module import ModuleDescriptor
+
+        for module, name, _ in self.EXPECTED:
+            with self.subTest(registry=name):
+                imported = importlib.import_module(module)
+                klass = getattr(imported, name)
+                for entry in vars(klass)['__proto_dest__']:
+                    self.assertIsInstance(entry, ModuleDescriptor)
+                    self.assertNotIsInstance(entry, type)
+
+                source = pathlib.Path(
+                    imported.__file__  # type: ignore[arg-type]
+                ).read_text(encoding='utf-8')
+                self.assertNotIn('from pcapkit.protocols', source)
+                self.assertNotIn('import pcapkit.protocols', source)
+
+    def test_only_these_registries_declare_a_destination(self) -> None:
+        """Every other generated enumeration is untouched by the template change.
+
+        The template renders nothing for a crawler that declares no
+        ``PROTO_DEST``, so a declaration appearing anywhere else means either a
+        crawler gained one by accident or a generated file was hand-edited --
+        and ``code=`` would then infer a destination for an enumeration that
+        keys no ``__proto__``.
+        """
+        import importlib
+        import pkgutil
+
+        import pcapkit.const as constpkg
+        from pcapkit.corekit.enum import EnumRegistry
+
+        declaring = set()
+        for info in pkgutil.walk_packages(constpkg.__path__, prefix='pcapkit.const.'):
+            module = importlib.import_module(info.name)
+            for attr in vars(module).values():
+                if (isinstance(attr, type) and issubclass(attr, EnumRegistry)
+                        and '__proto_dest__' in vars(attr)):
+                    declaring.add(f'{attr.__module__}.{attr.__name__}')
+
+        self.assertEqual(declaring,
+                         {f'{module}.{name}' for module, name, _ in self.EXPECTED})
+
+    def test_an_enum_declaring_none_refuses_with_the_same_error(self) -> None:
+        """Both shapes of "no declaration": absent, and present but empty.
+
+        The real case is the absent one -- ``AppType``, covered by
+        :meth:`RegisterProtocolCodeInferenceTests.\
+test_unknown_enum_type_refuses_rather_than_guessing`. The empty one is the
+        template's own default, which a crawler could reach by declaring an
+        empty ``PROTO_DEST``, so it must refuse rather than register nothing and
+        report success.
+        """
+        from aenum import IntEnum
+
+        from pcapkit.corekit.enum import EnumRegistry
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.utilities.exceptions import RegistryError
+
+        class Undeclared(EnumRegistry, IntEnum):
+            """[Undeclared] An enumeration naming no destination."""
+
+            SPAM = 1
+
+        class DeclaredEmpty(EnumRegistry, IntEnum):
+            """[DeclaredEmpty] An enumeration naming an empty set of destinations."""
+
+            __proto_dest__ = ()
+
+            SPAM = 1
+
+        class FakeProtocol:
+            pass
+
+        for klass in (Undeclared, DeclaredEmpty):
+            with self.subTest(registry=klass.__name__):
+                with self.assertRaises(RegistryError) as caught:
+                    register_protocol_code(FakeProtocol, klass.SPAM)
+                self.assertIn('no destination registry is known', str(caught.exception))
+                self.assertIn(klass.__name__, str(caught.exception))
+
+    def test_an_unresolvable_declaration_fails_loudly(self) -> None:
+        """A bad path raises rather than registering nothing and reporting success.
+
+        The real declarations are hand-written, so this is defensive -- but
+        the failure it guards against is the quiet kind: a typo'd class name that
+        merely skipped its registration would leave the protocol unreachable with
+        nothing said, which is #548's shape exactly.
+        """
+        from aenum import IntEnum
+
+        from pcapkit.corekit.enum import EnumRegistry
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        class Mistyped(EnumRegistry, IntEnum):
+            """[Mistyped] An enumeration naming a class that does not exist."""
+
+            __proto_dest__ = (ModuleDescriptor('pcapkit.protocols.link.link', 'Linkk'),)
+
+            SPAM = 1
+
+        class Unimportable(EnumRegistry, IntEnum):
+            """[Unimportable] An enumeration naming a module that does not exist."""
+
+            __proto_dest__ = (ModuleDescriptor('pcapkit.protocols.link.no_such_module', 'Link'),)
+
+            SPAM = 1
+
+        class FakeProtocol:
+            pass
+
+        with self.assertRaises(ProtocolError):
+            register_protocol_code(FakeProtocol, Mistyped.SPAM)
+        with self.assertRaises(ModuleNotFoundError):
+            register_protocol_code(FakeProtocol, Unimportable.SPAM)
 
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ which is automatically generating :class:`pcapkit.const.sctp.payload_protocol_id
 
 import sys
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['PayloadProtocolIdentifier']
@@ -23,6 +24,10 @@ class PayloadProtocolIdentifier(Vendor):
     FLAG = 'isinstance(value, int) and 0 <= value <= 4294967295'
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/sctp-parameters/sctp-parameters-25.csv'
+
+    #: Destination of a bare ``PayloadProtocolIdentifier`` member; see
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.transport.sctp', 'SCTP'),)
 
 
 if __name__ == '__main__':

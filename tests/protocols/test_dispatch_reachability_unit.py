@@ -14,11 +14,10 @@ reachable from no table. This module walks it from the class side instead -- eve
 :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns an enum member
 is *claiming* to be reachable under that code, so the claim is checked.
 
-Which registry a code belongs in is not restated here. It is read from
-:data:`~pcapkit.foundation.registry.protocols._CODE_DESTINATIONS`, the enum
-type -> destination table that backs ``code=`` (#570), so the audit and the
-registration mechanism cannot drift apart: an enum type added to that table
-gets audited here the same day.
+Which registry a code belongs in is not restated here. It is read off the enum
+type's own ``__proto_dest__``, the declaration that backs ``code=`` (#570,
+#2392), so the audit and the registration mechanism cannot drift apart: an enum
+type that declares one gets audited here the same day.
 
 Nothing is parsed and no capture under :file:`examples/captures/` is read, so
 this belongs to the unit tier.
@@ -88,7 +87,6 @@ def audit() -> 'tuple[list[Gap], int]':
 
     """
     import pcapkit.protocols as protopkg
-    from pcapkit.foundation.registry.protocols import _CODE_DESTINATIONS
     from pcapkit.protocols.protocol import ProtocolBase
 
     # Import every protocol module, or ``__subclasses__`` sees only whatever
@@ -108,11 +106,11 @@ def audit() -> 'tuple[list[Gap], int]':
         if code is None:
             continue  # an abstract base, reached by nothing
 
-        destinations = _CODE_DESTINATIONS.get(type(code))
-        if destinations is None:
+        descriptors = getattr(type(code), '__proto_dest__', None)
+        if not descriptors:
             continue  # no registry is keyed by this enum type
 
-        for destination in destinations:
+        for destination in (descriptor.klass for descriptor in descriptors):
             entry = destination.__proto__.get(code)
             module, name = _resolve(entry) if entry is not None else (None, None)
 

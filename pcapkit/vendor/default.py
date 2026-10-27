@@ -32,7 +32,9 @@ from pcapkit.utilities.warnings import VendorRequestWarning, warn
 
 if TYPE_CHECKING:
     from collections import Counter
-    from typing import Callable, Optional
+    from typing import Any, Callable, Optional
+
+    from pcapkit.corekit.module import ModuleDescriptor
 
 __all__ = ['Vendor']
 
@@ -70,8 +72,62 @@ DISTRIBUTION = 'pypcapkit'
 #: under ``[project.urls]`` in :file:`pyproject.toml`.
 PROJECT_URL = 'https://github.com/JarryShaw/PyPCAPKit'
 
+#: Import line the generated module needs for a non-empty ``__proto_dest__``.
+#: :data:`LINE` renders it only when the crawler declares
+#: :attr:`Vendor.PROTO_DEST`, so an enumeration naming no destination keeps the
+#: import block it had. The trailing newline lives here rather than in the
+#: f-string because an f-string replacement field may not contain a backslash
+#: before Python 3.12, and this package still builds on 3.8.
+PROTO_DEST_IMPORT = 'from pcapkit.corekit.module import ModuleDescriptor\n'
+
+
+def render_proto_dest(descriptors: 'tuple[ModuleDescriptor[Any], ...]') -> 'str':
+    """Render the generated class's ``__proto_dest__`` declaration.
+
+    :data:`LINE` calls this with the crawler's :attr:`Vendor.PROTO_DEST`. It is
+    a function rather than an expression inside the f-string for the reason
+    :data:`PROTO_DEST_IMPORT` gives: the block it returns contains newlines,
+    which an f-string replacement field cannot spell before Python 3.12.
+
+    Args:
+        descriptors: The crawler's :attr:`Vendor.PROTO_DEST`.
+
+    Returns:
+        The declaration, indented as a class body and followed by a blank line,
+        or the empty string when ``descriptors`` is empty -- which is what keeps
+        the template's output byte-identical for every enumeration that names no
+        destination.
+
+    """
+    if not descriptors:
+        return ''
+    entries = ''.join(f"        ModuleDescriptor({module!r}, {name!r}),\n"
+                      for module, name in descriptors)
+    return ('    #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by\n'
+            '    #: this enumeration, read by\n'
+            '    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`\n'
+            '    #: to resolve a bare member of it into its destination(s). The classes are\n'
+            '    #: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`\n'
+            '    #: references rather than imported, because :mod:`pcapkit.const` sits below\n'
+            '    #: :mod:`pcapkit.protocols` and importing one from here would be circular.\n'
+            '    __proto_dest__ = (\n'
+            f'{entries}'
+            '    )\n'
+            '\n')
+
+
 #: Default constant template of enumeration registry from IANA CSV.
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
+#:
+#: ``DEST`` is the crawler's :attr:`Vendor.PROTO_DEST` and defaults to empty, so
+#: a caller that renders an enumeration keying no ``__proto__`` -- every one
+#: outside the handful :issue:`2392` names -- passes six arguments as before.
+#:
+#: NOTE: the type comment says ``Callable[..., str]`` rather than spelling the
+#: parameters out, because mypy cannot infer a lambda's type against an explicit
+#: ``Callable[[...], ...]`` once the lambda carries a default (measured: one
+#: extra ``Cannot infer type of lambda`` error). The parameters are documented in
+#: ``docs/source/pcapkit/vendor/default.rst`` instead.
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL, DEST=(): f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
@@ -89,7 +145,7 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum{', extend_enum' if 'extend_enum(' in MISS else ''}
 
 from pcapkit.corekit.enum import EnumRegistry
-from pcapkit.utilities.exceptions import EnumValueError
+{PROTO_DEST_IMPORT if DEST else ''}from pcapkit.utilities.exceptions import EnumValueError
 
 if TYPE_CHECKING:
     from typing import Any
@@ -100,7 +156,7 @@ __all__ = ['{NAME}']
 class {NAME}(EnumRegistry, IntEnum):
     """[{NAME}] {DOCS}"""
 
-    {ENUM}
+{render_proto_dest(DEST)}    {ENUM}
 
     @classmethod
     def _validate_value(cls, value: 'Any') -> 'None':
@@ -136,7 +192,7 @@ class {NAME}(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
         {'' if (test := ''.join(MISS.splitlines()[-1:])).startswith('return') or test[8:].startswith('return') else 'return super()._missing_(value)'}
-'''.strip()  # type: Callable[[str, str, str, str, str, str], str]
+'''.strip()  # type: Callable[..., str]
 
 
 def get_proxies() -> 'dict[str, str]':
@@ -263,6 +319,22 @@ class Vendor(metaclass=VendorMeta):
     FLAG: 'str' = None  # type: ignore[assignment]
     #: Link to registry.
     LINK: 'str' = None  # type: ignore[assignment]
+
+    #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by
+    #: the generated enumeration, rendered into its class body as
+    #: ``__proto_dest__`` -- the declaration
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
+    #: reads to resolve a bare member of that enumeration into its
+    #: destination(s), per :issue:`2392`.
+    #:
+    #: Only the registries that key a ``__proto__`` declare one, and the
+    #: template renders nothing for a crawler that leaves this empty, so every
+    #: other generated module is unaffected. A class is named as a lazy
+    #: :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than imported,
+    #: because :mod:`pcapkit.const` sits below :mod:`pcapkit.protocols`.
+    #:
+    #: .. versionadded:: 1.5.0
+    PROTO_DEST: 'tuple[ModuleDescriptor[Any], ...]' = ()
 
     ###############
     # Processors
@@ -477,7 +549,7 @@ class Vendor(metaclass=VendorMeta):
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum)).strip()
         MISS = '\n        '.join(map(lambda s: s.rstrip(), miss)).strip()
 
-        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS, self.__module__)
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS, self.__module__, self.PROTO_DEST)
 
     def request(self, text: 'Optional[str]' = None) -> 'list[str]':
         """Fetch CSV file.

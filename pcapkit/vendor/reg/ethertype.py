@@ -15,6 +15,7 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.vendor.default import Vendor
 
 if TYPE_CHECKING:
@@ -31,6 +32,10 @@ class EtherType(Vendor):
     FLAG = 'isinstance(value, int) and 0x0000 <= value <= 0xFFFF'
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'
+
+    #: Destination of a bare ``EtherType`` member; see
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.link.link', 'Link'),)
 
     #: Row labels that the historical Neil Sembower list itself marks as
     #: carrying no real assignment -- a company holding the block but naming

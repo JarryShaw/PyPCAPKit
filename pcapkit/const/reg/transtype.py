@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.utilities.exceptions import EnumValueError
 
 if TYPE_CHECKING:
@@ -25,6 +26,17 @@ __all__ = ['TransType']
 
 class TransType(EnumRegistry, IntEnum):
     """[TransType] Transport Layer Protocol Numbers"""
+
+    #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by
+    #: this enumeration, read by
+    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
+    #: to resolve a bare member of it into its destination(s). The classes are
+    #: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`
+    #: references rather than imported, because :mod:`pcapkit.const` sits below
+    #: :mod:`pcapkit.protocols` and importing one from here would be circular.
+    __proto_dest__ = (
+        ModuleDescriptor('pcapkit.protocols.internet.internet', 'Internet'),
+    )
 
     #: IPv6 Hop-by-Hop Option [:rfc:`8200`]
     HOPOPT = 0
