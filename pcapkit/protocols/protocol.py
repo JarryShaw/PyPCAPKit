@@ -1840,12 +1840,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Returns:
             Binary bits (``0``/``1``).
 
+        Raises:
+            StructError: If the buffer is empty, with ``eof`` set as by
+                :meth:`_read_unpack`, or if fewer than ``size`` octets were read.
+
         """
-        bin_ = []  # type: list[str]
-        for _ in range(size):
-            byte = self._file.read(1)
-            bin_.append(bin(ord(byte))[2:].zfill(8))
-        return ''.join(bin_)
+        # ``max`` makes a non-positive size read nothing rather than the
+        # rest of the stream.
+        mem = self._file.read(max(size, 0))
+        if len(mem) < size:
+            if not mem:
+                raise StructError('unpack: empty buffer', quiet=True, eof=True)
+            raise StructError(f'{self.__class__.__name__}: unpack failed')
+        return ''.join(bin(byte)[2:].zfill(8) for byte in mem)
 
     @overload  # pragma: no cover
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...

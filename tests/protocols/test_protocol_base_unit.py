@@ -376,6 +376,28 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         no_stop._exproto = 'raw'
         self.assertFalse(no_stop._check_term_threshold())
 
+    def test_read_binary_raises_struct_error_at_end_of_stream(self) -> None:
+        # #2292: _read_binary called ord() on an empty read and raised
+        # TypeError, where _read_unpack raises StructError.
+        DummyProtocol, _, _ = self._make_protocol_class()
+        from pcapkit.utilities.exceptions import StructError
+
+        proto = DummyProtocol(packet=b'\x01')
+        proto._file = io.BytesIO(b'')
+        with self.assertRaises(StructError) as context:
+            proto._read_binary()
+        self.assertTrue(context.exception.eof)
+
+        proto._file = io.BytesIO(b'\x01')
+        with self.assertRaises(StructError) as context:
+            proto._read_binary(2)
+        self.assertFalse(context.exception.eof)
+
+        proto._file = io.BytesIO(b'\x01\x80\xff')
+        self.assertEqual(proto._read_binary(0), '')
+        self.assertEqual(proto._read_binary(2), '0000000110000000')
+        self.assertEqual(proto._file.read(), b'\xff')
+
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
