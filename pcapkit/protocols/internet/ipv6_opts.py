@@ -1734,8 +1734,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             tid_len = len(tid_bytes)
 
             if tid_type is not None:
-                tid_kind = self._make_index(tid_type, tid_type_default, namespace=tid_type_namespace,
-                                            reversed=tid_type_reversed, pack=False)
+                # NOTE: ``tid_type`` defaults to :data:`None`, so ``_make_index`` has no
+                # enum default to infer the namespace of a :obj:`str` member name from;
+                # name it here rather than leave the name unresolvable (#2356).
+                tid_kind = self._make_index(
+                    tid_type, tid_type_default,
+                    namespace=tid_type_namespace if tid_type_namespace is not None else Enum_TaggerID,
+                    reversed=tid_type_reversed, pack=False)
             elif tid_len == 0:
                 tid_kind = Enum_TaggerID.NULL
             elif tid_len == 4:
@@ -2044,8 +2049,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             seed = opt.seed_id
 
         if seed_type is not None:
-            kind = self._make_index(seed_type, seed_type_default, namespace=seed_type_namespace,
-                                    reversed=seed_type_reversed, pack=False)
+            # NOTE: ``seed_type`` defaults to :data:`None`, so ``_make_index`` has no
+            # enum default to infer the namespace of a :obj:`str` member name from;
+            # name it here rather than leave the name unresolvable (#2356).
+            kind = self._make_index(
+                seed_type, seed_type_default,
+                namespace=seed_type_namespace if seed_type_namespace is not None else Enum_SeedID,
+                reversed=seed_type_reversed, pack=False)
         elif seed is None or isinstance(seed, ipaddress.IPv6Address):
             kind = Enum_SeedID.IPV6_SOURCE_ADDRESS
         else:
