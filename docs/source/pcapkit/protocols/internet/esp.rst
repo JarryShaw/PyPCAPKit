@@ -156,8 +156,8 @@ refuse anything outside them rather than half-working:
    >>> CipherSuite.get('ENCR_3DES')     # but ESP cannot apply it
    Traceback (most recent call last):
      ...
-   pcapkit.utilities.exceptions.ProtocolError: unsupported ESP encryption
-   algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
+   pcapkit.utilities.exceptions.ProtocolError: ESP: unsupported encryption
+   algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
    ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
 
 Decryption requires the optional |cryptography|_ dependency

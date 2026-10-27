@@ -1112,5 +1112,115 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertIn('qualifies it for a base besides', doc)
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class ESPErrorMessageTests(unittest.TestCase):
+    """Every :exc:`ProtocolError` the module raises reads ``ESP: <description>``.
+
+    The other tests here match substrings, so they pass whatever the prefix
+    is. These pin each message whole: the ``ESP:`` prefix and the ``!r`` form
+    of the offending value, as #2232 and #2257 gave Ethernet, PCAP-NG and ARP
+    (#2297).
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def assertMessage(self, expected: str, func, *args, **kwargs) -> None:  # noqa: N802
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError) as ctx:
+            func(*args, **kwargs)
+        self.assertEqual(str(ctx.exception), expected)
+
+    def test_algorithm_lookup(self) -> None:
+        from pcapkit.protocols.internet.esp import (CIPHER_SUITES, INTEGRITY_SUITES, CipherSuite,
+                                                    IntegritySuite)
+
+        ciphers = ', '.join(key.name for key in CIPHER_SUITES)
+        integrities = ', '.join(key.name for key in INTEGRITY_SUITES)
+        self.assertMessage(f"ESP: unsupported encryption algorithm: 'ENCR_3DES'; "
+                           f"pcapkit implements {ciphers}", CipherSuite.get, 'ENCR_3DES')
+        self.assertMessage(f"ESP: unsupported integrity algorithm: 'AUTH_HMAC_MD5_96'; "
+                           f"pcapkit implements {integrities}", IntegritySuite.get, 'HMAC_MD5_96')
+        self.assertMessage("ESP: unknown encryption algorithm: 'ROT13'", CipherSuite.get, 'ROT13')
+        self.assertMessage('ESP: unknown encryption algorithm: -1', CipherSuite.get, -1)
+        self.assertMessage("ESP: unknown integrity algorithm: 'HMAC_SHA3_256'",
+                           IntegritySuite.get, 'HMAC_SHA3_256')
+
+    def test_security_association(self) -> None:
+        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, Integrity,
+                                                    SecurityAssociation)
+
+        self.assertMessage('ESP: invalid SPI: -1', SecurityAssociation, spi=-1)
+        self.assertMessage('ESP: invalid destination: must not be a bool, not True -- '
+                           'pass int(True) if the numeric value is what is wanted',
+                           SecurityAssociation, spi=1, destination=True)
+        self.assertMessage('ESP: invalid integrity algorithm: ENCR_AES_GCM_16 is a combined '
+                           'mode algorithm and provides its own integrity, so '
+                           "'AUTH_HMAC_SHA2_256_128' must not be configured alongside it",
+                           SecurityAssociation, spi=1, encryption=Cipher.AES_GCM_16,
+                           encryption_key=GCM128_KEYMAT, integrity=Integrity.HMAC_SHA2_256_128,
+                           integrity_key=bytes(32))
+        self.assertMessage('ESP: invalid ICV length: -1', SecurityAssociation, spi=1,
+                           icv_length=-1)
+        self.assertMessage('ESP: invalid key: ENCR_AES_CBC needs a key of 16 or 24 or 32 '
+                           'octets, got 15', SecurityAssociation, spi=1,
+                           encryption=Cipher.AES_CBC, encryption_key=bytes(15))
+        self.assertMessage('ESP: invalid salt: ENCR_AES_GCM_16 needs a 4-octet salt, '
+                           'got 2 octets', SecurityAssociation, spi=1,
+                           encryption=Cipher.AES_GCM_16, encryption_key=bytes(16),
+                           salt=b'ab')
+        self.assertMessage("ESP: integrity algorithm computes no ICV: 'NONE'",
+                           SecurityAssociation(spi=1).compute_icv, 1, 1, b'body')
+        self.assertMessage('ESP: not a security association: 1', ESPContext().register, 1)
+
+    def test_missing_cryptography(self) -> None:
+        from pcapkit.protocols.internet import esp as esp_module
+        from pcapkit.protocols.internet.esp import Cipher, SecurityAssociation
+
+        expected = ("ESP: unavailable encryption algorithm: 'ENCR_AES_CBC' needs the optional "
+                    '"cryptography" dependency, which is not installed')
+        with mock.patch.object(esp_module, 'load_cryptography', return_value=None), \
+                mock.patch.object(esp_module, 'warn'):
+            sa = SecurityAssociation(spi=1, encryption=Cipher.AES_CBC,
+                                     encryption_key=CASE5_KEY)
+            self.assertMessage(expected, sa.decrypt, 1, 1, bytes(32), b'')
+            self.assertMessage(expected, sa.encrypt, 1, 1, bytes(16))
+            # the same reason, as the packet's ``error`` and the SA's warning carry it
+            self.assertEqual(sa.unavailable(), f'{expected} (pip install pypcapkit[crypto])')
+
+    @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
+    def test_malformed_payload(self) -> None:
+        from pcapkit.protocols.internet.esp import Cipher, SecurityAssociation
+
+        cbc = SecurityAssociation(spi=1, encryption=Cipher.AES_CBC, encryption_key=CASE5_KEY)
+        gcm = SecurityAssociation(spi=1, encryption=Cipher.AES_GCM_16,
+                                  encryption_key=GCM128_KEYMAT)
+        self.assertMessage('ESP: payload too short: 5 octets, less than the 16-octet '
+                           'ENCR_AES_CBC IV', cbc.decrypt, 1, 1, bytes(5), b'')
+        self.assertMessage('ESP: invalid ciphertext length: 5 octets is not a positive '
+                           'multiple of the 16-octet ENCR_AES_CBC block size',
+                           cbc.decrypt, 1, 1, bytes(21), b'')
+        self.assertMessage('ESP: missing authentication tag: ENCR_AES_GCM_16 requires one, '
+                           'but the packet carries no ICV', gcm.decrypt, 1, 1, bytes(9), b'')
+        self.assertMessage('ESP: invalid IV: ENCR_AES_CBC needs a 16-octet IV, got 2 octets',
+                           cbc.encrypt, 1, 1, bytes(16), b'ab')
+
+    def test_make(self) -> None:
+        from pcapkit.corekit.context import ContextRegistry
+        from pcapkit.protocols.internet.esp import ESP, ESPContext, SecurityAssociation
+
+        registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=0x77)))
+        self.assertMessage('ESP: no security association for SPI 0x00000099; '
+                           'encrypt=True needs one', ESP, spi=0x99, seq=1, encrypt=True,
+                           payload=b'x')
+        self.assertMessage('ESP: invalid pad length: 1 leaves 5 octets, which is not a '
+                           'multiple of the required 4-octet alignment', ESP, spi=0x77, seq=1,
+                           encrypt=True, pad_len=1, payload=bytes(2), __context__=registry)
+        self.assertMessage('ESP: invalid pad length: 256', ESP, spi=0x77, seq=1, encrypt=True,
+                           pad_len=256, payload=bytes(2), __context__=registry)
+
+
 if __name__ == '__main__':
     unittest.main()
