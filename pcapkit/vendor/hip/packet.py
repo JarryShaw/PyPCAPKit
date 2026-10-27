@@ -79,7 +79,7 @@ class Packet(Vendor):
                 start, stop = item[0].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                miss.append(f'    # {desc}')
+                miss.append(f'    #: {desc}')
                 miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
         return enum, miss
 
