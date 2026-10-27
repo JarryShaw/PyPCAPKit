@@ -106,7 +106,7 @@ class HTTPFromDataTests(unittest.TestCase):
         from pcapkit.protocols.application.http import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
-        with self.assertRaisesRegex(ProtocolError, 'invalid HTTP data'):
+        with self.assertRaisesRegex(ProtocolError, '^HTTP: invalid data: '):
             HTTP._make_data({'version': 1})  # type: ignore[arg-type]
 
 

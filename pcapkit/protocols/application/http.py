@@ -298,7 +298,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             elif version == 2:
                 from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             else:
-                raise ProtocolError(f"invalid HTTP version: {version}")
+                raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
             try:
                 http = protocol(self._data, length, **kwargs)
@@ -358,7 +358,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         elif version == 2:
             from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
-            raise ProtocolError(f"invalid HTTP version: {version}")
+            raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
         # NOTE: ``protocol.make`` is an ordinary instance method (the abstract
         # declaration at ``ProtocolBase.make`` takes ``self``, and the
@@ -449,7 +449,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             return {'version': 1, **HTTPv1._make_data(data)}
         if isinstance(data, Data_HTTPv2):
             return {'version': 2, 'preface': bool(data.get('preface')), **HTTPv2._make_data(data)}
-        raise ProtocolError(f"invalid HTTP data: {type(data).__name__}")
+        raise ProtocolError(f'HTTP: invalid data: must be HTTP/1.* or HTTP/2 data, '
+                            f'not {type(data).__name__}')
 
     def _test_preface(self, length: 'int') -> 'bool':
         """Test whether the first ``length`` octets open with the HTTP/2 connection preface.
@@ -632,10 +633,10 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # test rejects only headers that no conforming sender writes, and it
         # gates this guess alone: an explicit ``version=2`` is not affected.
         if not _test_http2_frame(self._data[:length]):
-            raise ProtocolError("unknown HTTP version")
+            raise ProtocolError('HTTP: unknown version')
 
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError, struct.error):
             return HTTPv2(self._data, length, **kwargs)
 
-        raise ProtocolError("unknown HTTP version")
+        raise ProtocolError('HTTP: unknown version')

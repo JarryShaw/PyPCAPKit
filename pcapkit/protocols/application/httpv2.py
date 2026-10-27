@@ -1341,7 +1341,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                     )
                 settings_val.append(temp)
         else:
-            raise ProtocolError(f'HTTP/2 : [Type {Enum_Frame.SETTINGS}] invalid settings')
+            raise ProtocolError(f'HTTP/2: [Type {Enum_Frame.SETTINGS}] invalid settings: '
+                                f'{settings!r}')
 
         return Schema_SettingsFrame(
             settings=settings_val,
