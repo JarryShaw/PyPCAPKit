@@ -114,7 +114,7 @@ jobs:
 
       # Every later step waits on this one's `outcome`, so on a light diff,
       # where it skips, they skip too.
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         if: ${{ needs.changes.outputs.light != 'true' }}
         continue-on-error: ${{ matrix.ktlo == true }}

@@ -115,7 +115,7 @@ jobs:
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -383,7 +383,7 @@ jobs:
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -596,13 +596,13 @@ jobs:
       # Each interpreter is then reachable as `python3.X`. The KTLO ones get a
       # step of their own so that losing one cannot fail the job, first because
       # the last version installed is the default `python`.
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: ${{ needs.python-versions.outputs.engine-ktlo != '' }}
         continue-on-error: true
         with:
           python-version: ${{ needs.python-versions.outputs.engine-ktlo }}
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ needs.python-versions.outputs.engine-supported }}
 
@@ -932,7 +932,7 @@ jobs:
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -1205,7 +1205,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
@@ -1253,7 +1253,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -1329,7 +1329,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
@@ -1406,7 +1406,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ needs.python-versions.outputs.latest }}
           cache: pip
