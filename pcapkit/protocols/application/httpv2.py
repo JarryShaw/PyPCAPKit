@@ -575,7 +575,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if any(header.flags.values()):
-            #raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
             warn(f'HTTP/2: [Type {header.type}] invalid format', ProtocolWarning)
 
         data = Data_UnassignedFrame(

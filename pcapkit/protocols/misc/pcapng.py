@@ -989,7 +989,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def ts_resolution(self) -> 'int':
         """Timestamp resolution of the current block, in units per second."""
         if self._ctx is None:
-            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'",
                  AttributeWarning, stacklevel=stacklevel())
             return DEFAULT_RESOLUTION
@@ -1001,7 +1000,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def ts_offset(self) -> 'int':
         """Timestamp offset of the current block, in seconds."""
         if self._ctx is None:
-            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'",
                  AttributeWarning, stacklevel=stacklevel())
             return 0
@@ -1018,7 +1016,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._ctx is None:
-            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
             return datetime.timezone.utc
@@ -1786,7 +1783,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._ctx is None:
-            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'",
                  AttributeWarning, stacklevel=stacklevel())
             return DEFAULT_RESOLUTION
@@ -1809,7 +1805,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._ctx is None:
-            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_offset'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_offset'",
                  AttributeWarning, stacklevel=stacklevel())
             return 0
@@ -1841,7 +1836,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # and ``_get_offset`` fall back to the format's own defaults in this
         # situation; this is the matching one.
         if self._ctx is None:
-            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
             return datetime.timezone.utc

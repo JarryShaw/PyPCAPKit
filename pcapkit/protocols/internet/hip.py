@@ -1508,7 +1508,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         ciphers = schema.ciphers
         if len(ciphers) > 6:
             warn(f'HIPv{version}: [ParamNo {schema.type}] invalid format', ProtocolWarning)
-            # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
             ciphers = ciphers[:6]
 
         hip_cipher = Data_HIPCipherParameter(

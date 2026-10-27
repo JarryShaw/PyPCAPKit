@@ -1312,14 +1312,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Option.Router_Alert, len=1,
             alert=RouterAlert.Datagram_contains_RSVP_message,
         ))
-        assert_bad(proto._read_opt_calipso, schema.CALIPSOOption(
-            type=Option.CALIPSO, len=7, domain=1, cmpt_len=0,
-            level=3, checksum=b'\x01\x02', bitmap=b'',
-        ))
-        assert_bad(proto._read_opt_calipso, schema.CALIPSOOption(
-            type=Option.CALIPSO, len=8, domain=1, cmpt_len=1,
-            level=3, checksum=b'\x01\x02', bitmap=b'abcd',
-        ))
+        # NOTE: A CALIPSO option too short for its compartment bitmap is
+        # rejected while it is unpacked, by ``calipso_pad_len``, so the reader
+        # keeps no length guard of its own (#2318); see
+        # tests/protocols/test_dead_branches_2318_unit.py.
         bad_smf = schema.SMFHashBasedDPDOption(type=Option.SMF_DPD, len=3, hav=b'\x81\x02\x03')
         object.__setattr__(bad_smf, 'mode', 2)
         assert_bad(proto._read_opt_smf_dpd, bad_smf)

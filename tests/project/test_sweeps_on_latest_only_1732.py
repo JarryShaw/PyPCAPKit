@@ -71,9 +71,6 @@ REPORTERS = ('ci-reports.yml',)
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
 #: The watcher's interpreter and its requests are capped too (#1938).
 CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
-#: The jobs whose result reaches a gate: ``required-checks`` and what it needs, and
-#: ``unittest-ordering``, which runs on main's pushes and gates publishing.
-GATING = ('required-checks', 'unittest-ordering')
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
 #: A ``python`` that appends each argument on a line of ``$ARGS_FILE``, then an

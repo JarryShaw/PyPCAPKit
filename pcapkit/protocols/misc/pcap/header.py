@@ -42,7 +42,7 @@ from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.header import GLOBAL_HEADER_LEN, MAGIC_NUMBER
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
-from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
+from pcapkit.utilities.exceptions import EndianError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -141,11 +141,10 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             Parsed packet data.
 
         Raises:
-            FileError: If the magic number is invalid. Parsing does not get
+            ProtocolError: If the magic number is invalid. Parsing does not get
                 this far with one: the schema's
                 :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback`
-                raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for it
-                while the header is unpacked.
+                raises it while the header is unpacked.
 
         """
         if TYPE_CHECKING:
@@ -154,12 +153,10 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         _magn = schema.magic_number
         # NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic
-        # number is matched rather than rejected as unhashable.
-        _decl = (MAGIC_NUMBER.get(bytes(_magn))
-                 if isinstance(_magn, (bytes, bytearray, memoryview)) else None)
-        if _decl is None:
-            raise FileError(5, 'Unknown file format', self._file.name)  # pylint: disable=no-member
-        self._byte, self._nsec = _decl
+        # number is matched rather than rejected as unhashable. The lookup
+        # cannot miss: ``magic_number_callback`` has already raised for a magic
+        # number this mapping does not hold.
+        self._byte, self._nsec = MAGIC_NUMBER[bytes(_magn)]
 
         header = Data_Header(
             magic_number=Data_MagicNumber(

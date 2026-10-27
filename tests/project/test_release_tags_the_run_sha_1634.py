@@ -1497,11 +1497,10 @@ class TestTheRefusalExplanation(WorkflowMixin, unittest.TestCase):
 #: ``name<TAB>state`` lines; absent, there is no release, and ``release view``
 #: fails as the real one does ("release not found", exit 1, measured with gh
 #: 2.102.0). It answers the ``--json``/``--jq`` pairs the workflows ask --
-#: :data:`ASSETS_JQ`, and ``isDraft`` from ``$GH_DRAFT`` -- and a bare-name
-#: ``assets`` pair no workflow asks. ``release upload`` appends the file as
-#: ``uploaded`` and, like the real one, refuses a name already there unless
-#: ``--clobber`` deletes it first. ``$GH_FAIL`` fails any call. Anything else
-#: exits 96-99.
+#: :data:`ASSETS_JQ`, and ``isDraft`` from ``$GH_DRAFT``. ``release upload``
+#: appends the file as ``uploaded`` and, like the real one, refuses a name
+#: already there unless ``--clobber`` deletes it first. ``$GH_FAIL`` fails any
+#: call. Anything else exits 96-99.
 FAKE_GH = r'''#!/bin/sh
 printf '%s\n' "$*" >> "$GH_LOG"
 [ -z "${GH_FAIL:-}" ] || { echo "$GH_FAIL" >&2; exit 1; }
@@ -1512,7 +1511,6 @@ case "$1 $2" in
     shift 5
     case "$*" in
       '--json assets --jq .assets[] | [.name, .state] | @tsv') cat "$GH_ASSETS" ;;
-      '--json assets --jq .assets[].name') cut -f 1 "$GH_ASSETS" ;;
       '--json isDraft --jq .isDraft') echo "${GH_DRAFT:-false}" ;;
       *) exit 96 ;;
     esac ;;

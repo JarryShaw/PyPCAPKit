@@ -883,7 +883,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                         flags.append(authority)
 
                 if byte & 0x01 == 0 and base < schema.length - 4:
-                    #raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: remaining data')
                     warn(f'{self.alias}: [OptNo {schema.type}] invalid format: remaining data', ProtocolWarning)
 
             if schema.data[-1] & 0x01 == 1:
@@ -1319,7 +1318,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Note:
             An option whose QS function is neither of the two above has no
             defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, see :meth:`_read_opt_unassigned`.
+            it is parsed as one, see :meth:`_read_opt_unassigned`. That
+            dispatch is by the schema's own class, decided from the octets a
+            file read hands it; a
+            :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption`
+            or :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`
+            built directly with an unassigned ``func`` reaches this method
+            regardless, which is why it still raises below rather than
+            returning early.
 
         """
         if isinstance(schema, Schema_UnassignedOption):

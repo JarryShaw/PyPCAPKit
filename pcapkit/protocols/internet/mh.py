@@ -7921,7 +7921,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = getattr(option, 'data', b'')
 
         if type == Enum_Option.Pad1 and length != 0:
-            # raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
             warn(f'{self.alias}: [OptNo {type}] invalid format', ProtocolWarning)
             type = Enum_Option.PadN  # type: ignore[assignment]
 
