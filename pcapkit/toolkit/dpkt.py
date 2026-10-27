@@ -529,13 +529,56 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
     }
 
 
+def _fragment(packet: 'Packet', version: 'int') -> 'Optional[IP | IP6]':
+    """Fetch the IPv4 or IPv6 layer of a DPKT packet that IP reassembly reads.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+        version: ``4`` or ``6``, the IP version of the layer to fetch.
+
+    Returns:
+        The first layer of that version, from the network layer in, that is a
+        fragment -- for IPv4, one with **MF** set or a non-zero fragment
+        offset, for IPv6, one with an IPv6 Fragment header; with none, the
+        network layer if it is of that version; otherwise :data:`None`.
+
+    Note:
+        As with :func:`pcapkit.toolkit.pcap._fragment`, either datagram of an
+        IP-in-IP tunnel may be the fragmented one, and each is reassembled on
+        its own header (:issue:`2307`). An IPv6 layer is the one with extension
+        headers. The walk goes on past an IP layer only where its payload
+        protocol is IPv4 or IPv6, i.e. a tunnel, so a datagram an ICMP error
+        quotes, which `DPKT`_ decodes as an IP layer below the ICMP one, is not
+        walked to.
+
+    """
+    import dpkt  # isort:skip
+
+    network = _network(packet)
+    layer = network  # type: Any
+    while isinstance(layer, (dpkt.ip.IP, dpkt.ip6.IP6)):
+        if isinstance(layer, dpkt.ip6.IP6):
+            if version == 6 and layer.extension_hdrs.get(44) is not None:
+                return layer
+        elif version == 4 and (layer.mf or layer.offset):
+            return layer
+        # ``IP6.p`` is the protocol after the extension headers
+        if getattr(layer, 'p', None) not in (Enum_TransType.IPv4, Enum_TransType.IPv6):
+            break
+        layer = layer.data
+    if network is None or hasattr(network, 'extension_hdrs') is not (version == 6):
+        return None
+    return network
+
+
 def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
-    A packet can be reassembled if its network layer is IPv4 (:class:`dpkt.ip.IP`) --
-    one carried in IPv6 is not read -- whose header was captured whole, and the **DF**
-    (:attr:`dpkt.ip.IP.df`) flag is :data:`False`.
+    A packet can be reassembled if it has an IPv4 layer (:class:`dpkt.ip.IP`) whose
+    header was captured whole, and the **DF** (:attr:`dpkt.ip.IP.df`) flag is
+    :data:`False`. The layer is the first that is a fragment, or with none, the network
+    layer if it is IPv4 (see :func:`_fragment`).
 
     Args:
         packet: DPKT packet.
@@ -581,9 +624,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
        with ``packet`` alone fails.
 
     """
-    network = _network(packet)
-    # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
-    ipv4 = None if hasattr(network, 'extension_hdrs') else network
+    ipv4 = cast('Optional[IP]', _fragment(packet, 4))
     if ipv4 is not None:
         if ipv4.df:     # dismiss not fragmented packet
             return None
@@ -628,9 +669,10 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
-    A packet can be reassembled if its network layer is IPv6 (:class:`dpkt.ip6.IP6`) --
-    one carried in IPv4 is not read -- and has an IPv6 Fragment header
-    (:rfc:`2460#section-4.5`, i.e., :class:`dpkt.ip6.IP6FragmentHeader`).
+    A packet can be reassembled if it has an IPv6 layer (:class:`dpkt.ip6.IP6`) with an
+    IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
+    :class:`dpkt.ip6.IP6FragmentHeader`). The layer is the first that has one (see
+    :func:`_fragment`).
 
     Args:
         packet: DPKT packet.
@@ -663,8 +705,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
        with ``packet`` alone fails.
 
     """
-    network = _network(packet)
-    ipv6 = cast('IP6', network) if hasattr(network, 'extension_hdrs') else None
+    ipv6 = cast('Optional[IP6]', _fragment(packet, 6))
     if ipv6 is not None:
         # dpkt keeps each extension header under its protocol number, so 44 is a
         # Fragment header; the dict's value type cannot say so

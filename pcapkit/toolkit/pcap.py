@@ -21,6 +21,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ip import IP as Protocol_IP
 from pcapkit.protocols.internet.ipv4 import IPv4
+from pcapkit.protocols.internet.ipv6 import IPv6
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.protocol import ProtocolBase
@@ -34,7 +35,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
     from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-    from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
 
@@ -193,13 +193,51 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
     )
 
 
+def _fragment(frame: 'ProtocolBase', version: 'type[IPv4 | IPv6]') -> 'Optional[IPv4 | IPv6]':
+    """Fetch the IPv4 or IPv6 layer of a frame that IP reassembly reads.
+
+    Args:
+        frame: PCAP frame or PCAP-NG block.
+        version: :class:`~pcapkit.protocols.internet.ipv4.IPv4` or
+            :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the layer to fetch.
+
+    Returns:
+        The first ``version`` layer, from the outside in, that is a fragment --
+        for IPv4, one with **MF** set or a non-zero Fragment Offset, for IPv6,
+        one with an IPv6 Fragment header; with none, the outermost ``version``
+        layer; with no ``version`` layer, :data:`None`.
+
+    Note:
+        In an IP-in-IP tunnel (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`) either
+        datagram may be the fragmented one: the inner, each fragment of it
+        carried whole by the tunnel, or the tunnel's own, whose first fragment
+        alone carries the inner header. Each is reassembled on its own header
+        (:issue:`2307`). A frame of no tunnel has one layer to choose from.
+
+    """
+    if version.__name__ not in frame:
+        return None
+    outermost = cast('IPv4 | IPv6', frame[version.__name__])
+    layer = outermost  # type: ProtocolBase
+    while isinstance(layer, ProtocolBase) and not isinstance(layer, NoPayload):
+        if isinstance(layer, IPv4) and version is IPv4:
+            if layer.info.flags.mf or layer.info.offset:
+                return layer
+        elif isinstance(layer, IPv6) and version is IPv6:
+            if Enum_ExtensionHeader.IPv6_Frag in layer.extension_headers:
+                return layer
+        layer = layer.payload
+    return outermost
+
+
 def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     A frame can be reassembled if it contains an IPv4 layer
     (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and the **DF**
     (:attr:`IPv4.flags.df <pcapkit.protocols.data.internet.ipv4.Flags.df>`) flag is
-    :data:`False`.
+    :data:`False`. In an IP-in-IP tunnel, the layer is the first that is a fragment
+    (see :func:`_fragment`).
 
     Args:
         frame: PCAP frame.
@@ -212,8 +250,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
-    if 'IPv4' in frame:
-        ipv4 = cast('IPv4', frame['IPv4'])
+    if (ipv4 := cast('Optional[IPv4]', _fragment(frame, IPv4))) is not None:
         ipv4_info = ipv4.info
         if ipv4_info.flags.df:       # dismiss not fragmented frame
             return None
@@ -244,7 +281,8 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     A frame can be reassembled if it contains an IPv6 layer
     (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and an IPv6 Fragment header
     (:rfc:`2460#section-4.5`, i.e.,
-    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).
+    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`). In an IP-in-IP tunnel,
+    the layer is the first that has one (see :func:`_fragment`).
 
     Args:
         frame: PCAP frame.
@@ -257,8 +295,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
-    if 'IPv6' in frame:
-        ipv6 = cast('IPv6', frame['IPv6'])
+    if (ipv6 := cast('Optional[IPv6]', _fragment(frame, IPv6))) is not None:
         ipv6_info = ipv6.info
         if (ipv6_frag := ipv6.extension_headers.get(  # type: ignore[call-overload]
             Enum_ExtensionHeader.IPv6_Frag

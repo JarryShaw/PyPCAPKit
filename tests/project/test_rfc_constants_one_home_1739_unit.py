@@ -324,6 +324,10 @@ NOT_A_COPY = {
         'the 8-octet value of an if_tsoffset option',
     ('pcapkit/foundation/reassembly/tcp.py', '1 << 24'):
         'a bit width, not a PCAP global header',
+    ('pcapkit/toolkit/dpkt.py', '_fragment(6)'):
+        'the IP version number',
+    ('pcapkit/toolkit/dpkt.py', 'version == 6'):
+        'the IP version number',
     ('pcapkit/toolkit/pcap.py', 'octets[8:12]'):
         "a TCP header's Acknowledgment Number, octets 8 to 12",
     ('pcapkit/toolkit/pypcapfile.py', 'len(raw) == 6'):

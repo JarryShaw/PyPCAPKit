@@ -697,7 +697,8 @@ class ScapyFrameGuardTests(unittest.TestCase):
     def test_ipv6_reassembly_takes_only_its_own_fragment_header(self) -> None:
         # The Fragment header of a packet the IPv6 layer carries, here the inner
         # packet of 6in6, is handed on without the fix with the outer packet's
-        # addresses, and both IPv6 headers as the part before the Fragment header
+        # addresses, and both IPv6 headers as the part before the Fragment header;
+        # the inner packet is the one reassembled, on its own header (#2307)
         from scapy.layers.inet import IP
         from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
         from scapy.layers.l2 import Ether
@@ -706,12 +707,12 @@ class ScapyFrameGuardTests(unittest.TestCase):
         from pcapkit.toolkit import scapy as toolkit
 
         inner = IPv6(src='fd00::1', dst='fd00::2') / IPv6ExtHdrFragment(nh=17, id=7, m=1) / Raw(b'B' * 16)
-        tunnelled = Ether(bytes(self._ether() / IPv6(src='2001:db8::1', dst='2001:db8::2') / inner))
-        self.assertIsNone(toolkit.ipv6_reassembly(tunnelled))
-        # carried in IPv4, the inner packet is the first IPv6 layer, and the Fragment header its own
-        data = toolkit.ipv6_reassembly(Ether(bytes(self._ether() / IP(src='192.0.2.1', dst='198.51.100.1') / inner)))
-        assert data is not None
-        self.assertEqual((str(data.bufid[0]), data.bufid[2], bytes(data.header)), ('fd00::1', 7, bytes(inner)[:40]))
+        for carrier in (IPv6(src='2001:db8::1', dst='2001:db8::2'), IP(src='192.0.2.1', dst='198.51.100.1')):
+            with self.subTest(carrier=carrier.name):
+                data = toolkit.ipv6_reassembly(Ether(bytes(self._ether() / carrier / inner)))
+                assert data is not None
+                self.assertEqual((str(data.bufid[0]), data.bufid[2], bytes(data.header)),
+                                 ('fd00::1', 7, bytes(inner)[:40]))
 
     def test_no_ipv6_fragment_is_read_in_a_later_ipv4_fragment(self) -> None:
         # A later IPv4 fragment's data is a slice of the datagram's payload, with

@@ -27,6 +27,8 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_segment
 
+.. autofunction:: pcapkit.toolkit.pcap._fragment
+
 .. autoclass:: pcapkit.toolkit.pcap.TCPSegment
    :members:
    :show-inheritance:
