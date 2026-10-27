@@ -20,6 +20,10 @@ table, so they keep their directives.
   checks on a sample module which literals count as template text.
 * :class:`TestDocsPages` pins the notes the docs pages carry for the tables (#1884).
 
+The same holds for a release-versioned note written as prose rather than as a
+directive, such as "Before 1.5.0 the class was ..." (#2315), so both scans also
+refuse :data:`RELEASE_PROSE`.
+
 This module is unit-tier and reads no capture.
 
 """
@@ -40,6 +44,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: A version directive, as Sphinx spells it: reST allows any whitespace after the ``..`` (#1902).
 DIRECTIVE = re.compile(r'\.\.\s+version(?:added|changed|removed)::.*')
+
+#: A note dated to a release in prose (#2315): a lead-in such as ``Before`` and
+#: a three-part release number. Python versions are spelled with two parts here.
+RELEASE_PROSE = re.compile(r'\b(?:[Bb]efore|[Ss]ince|[Uu]ntil|[Aa]s of|[Pp]rior to)\s+'
+                           r'(?:(?:PyPCAPKit|pcapkit|version|release)\s+)?v?\d+\.\d+\.\d+')
 
 #: The crawler modules #1884 names, whose templates must carry no directive.
 ISSUE_VENDORS = (
@@ -65,6 +74,7 @@ MOVED_NOTES = (
     ('reg.rst', 'versionchanged:: 1.1.1', 'port number'),
     ('reg.rst', 'versionchanged:: 1.5.0', ':issue:`732`'),
     ('reg.rst', 'versionchanged:: 1.5.0', ':issue:`808`'),
+    ('reg.rst', 'versionchanged:: 1.5.0', 'a bare ``4``'),
     ('tcp.rst', 'versionchanged:: 1.5.0', '16-bit'),
 )
 
@@ -127,11 +137,12 @@ def template_literals(tree: 'ast.Module', crawlers: 'frozenset[str]') -> 'list[a
     return literals
 
 
-def template_directives(tree: 'ast.Module', crawlers: 'frozenset[str]') -> 'list[tuple[int, str]]':
-    """Every directive in the template text, as ``(literal's first line, directive)``."""
+def template_directives(tree: 'ast.Module', crawlers: 'frozenset[str]',
+                        pattern: 're.Pattern[str]' = DIRECTIVE) -> 'list[tuple[int, str]]':
+    """Every ``pattern`` match in the template text, as ``(literal's first line, match)``."""
     return [(node.lineno, match.group().strip())
             for node in template_literals(tree, crawlers)
-            for match in DIRECTIVE.finditer(node.value)]
+            for match in pattern.finditer(node.value)]
 
 
 def _vendor_trees() -> 'dict[pathlib.Path, ast.Module]':
@@ -141,7 +152,7 @@ def _vendor_trees() -> 'dict[pathlib.Path, ast.Module]':
 
 
 class TestGeneratedModules(unittest.TestCase):
-    """No module under :mod:`pcapkit.const` carries a version directive."""
+    """No module under :mod:`pcapkit.const` carries a version note."""
 
     def test_no_const_module_carries_a_directive(self) -> 'None':
         paths = sorted((ROOT / 'pcapkit' / 'const').rglob('*.py'))
@@ -154,9 +165,19 @@ class TestGeneratedModules(unittest.TestCase):
                     found.append(f'{path.relative_to(ROOT)}:{lineno}: {match.group().strip()}')
         self.assertEqual(found, [])
 
+    def test_no_const_module_dates_a_note_to_a_release(self) -> 'None':
+        # #2315: "Before 1.5.0 ..." is a version note in prose.
+        found = []  # type: list[str]
+        for path in sorted((ROOT / 'pcapkit' / 'const').rglob('*.py')):
+            for lineno, line in enumerate(path.read_text(encoding='utf-8').splitlines(), start=1):
+                match = RELEASE_PROSE.search(line)
+                if match is not None:
+                    found.append(f'{path.relative_to(ROOT)}:{lineno}: {match.group()}')
+        self.assertEqual(found, [])
+
 
 class TestVendorTemplates(unittest.TestCase):
-    """No crawler's template text carries a version directive."""
+    """No crawler's template text carries a version note."""
 
     def test_no_template_carries_a_directive(self) -> 'None':
         trees = _vendor_trees()
@@ -165,6 +186,23 @@ class TestVendorTemplates(unittest.TestCase):
                  for path, tree in trees.items()
                  for lineno, directive in template_directives(tree, crawlers)]
         self.assertEqual(found, [])
+
+    def test_no_template_dates_a_note_to_a_release(self) -> 'None':
+        # #2315: "Before 1.5.0 ..." is a version note in prose.
+        trees = _vendor_trees()
+        crawlers = vendor_classes(trees.values())
+        found = [f'{path.relative_to(ROOT)}:{lineno}: {match}'
+                 for path, tree in trees.items()
+                 for lineno, match in template_directives(tree, crawlers, RELEASE_PROSE)]
+        self.assertEqual(found, [])
+
+    def test_release_prose_is_matched(self) -> 'None':
+        for text in ('Before 1.5.0 the class', 'since PyPCAPKit 1.4.1', 'Prior to\nv1.3.0'):
+            with self.subTest(text=text):
+                self.assertIsNotNone(RELEASE_PROSE.search(text))
+        for text in ('from 3.9 only', 'before 3.9', 'RFC 1.5'):
+            with self.subTest(text=text):
+                self.assertIsNone(RELEASE_PROSE.search(text))
 
     def test_the_issue_templates_are_read(self) -> 'None':
         # Guards the scan above against passing because it read nothing.
