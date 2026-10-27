@@ -24,7 +24,7 @@ __all__ = ['MPTCPOption']
 
 
 class MPTCPOption(EnumRegistry, IntEnum):
-    """[MPTCPOption] Multipath TCP options [:rfc:`6824`]"""
+    """[MPTCPOption] Multipath TCP options [:rfc:`8684`]"""
 
     #: Multipath Capable [:rfc:`8684#section-3.1`]
     MP_CAPABLE = 0x0

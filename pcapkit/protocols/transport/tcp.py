@@ -398,7 +398,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Enum_Option.Quick_Start_Response: 'qs',                 # [RFC 4782] Quick-Start Response
             Enum_Option.User_Timeout_Option: 'timeout',             # [RFC 5482] User Timeout Option
             Enum_Option.TCP_Authentication_Option: 'ao',            # [RFC 5925] TCP Authentication Option
-            Enum_Option.Multipath_TCP: 'mp',                        # [RFC 6824] Multipath TCP
+            Enum_Option.Multipath_TCP: 'mp',                        # [RFC 8684] Multipath TCP
             Enum_Option.TCP_Fast_Open_Cookie: 'fastopen',           # [RFC 7413] Fast Open
         },
     )  # type: DefaultDict[int, str | tuple[OptionParser, OptionConstructor]]
@@ -1530,7 +1530,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mode_mp(self, schema: 'Schema_MPTCP', *, options: 'Option') -> 'Data_MPTCP':  # pylint: disable=unused-argument
         """Read Multipath TCP option.
 
-        Structure of ``MP-TCP`` [:rfc:`6824`]:
+        Structure of ``MP-TCP`` [:rfc:`8684`]:
 
         .. code-block:: text
 

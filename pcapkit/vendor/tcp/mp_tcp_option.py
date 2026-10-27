@@ -19,7 +19,7 @@ __all__ = ['MPTCPOption']
 
 
 class MPTCPOption(Vendor):
-    """Multipath TCP options [:rfc:`6824`]"""
+    """Multipath TCP options [:rfc:`8684`]"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
