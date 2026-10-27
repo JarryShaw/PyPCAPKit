@@ -1039,7 +1039,6 @@ class BlockType(EnumSchema[Enum_BlockType]):
         """
         if self.length != self.length2:
             block_type = packet.get('__packet__', {}).get('type', 'N/A')
-            #raise ProtocolError(f'PCAP-NG: [Block {block_type}] block length mismatch: {self.length} != {self.length2}')
             warn(f'PCAP-NG: [Block {block_type}] block length mismatch: {self.length} != {self.length2}',
                  ProtocolWarning, stacklevel=stacklevel())
         return self

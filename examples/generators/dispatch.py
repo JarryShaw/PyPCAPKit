@@ -135,13 +135,16 @@ def _resolve(entry: 'Any') -> 'Any':
 def code_name(code: 'Any', enum: 'Optional[Any]' = None) -> 'str':
     """Render a registry key as a name usable in a test id.
 
-    Most ``__proto__`` tables are keyed entirely by enumeration members, whose
-    own ``.name`` is used directly. ``Link.__proto__`` holds an entry keyed by
-    a bare :class:`int` instead (0x8137 for IPX) -- :func:`_resolve` does not
-    care, since dict lookup does not distinguish an :class:`~enum.IntEnum`
-    member from the plain :class:`int` it equals, but a case label needs a
-    name. ``enum`` is consulted for that one, so the label reads
-    ``Novell_Inc_0x8137`` rather than the opaque ``33079``.
+    Many ``__proto__`` tables are keyed entirely by enumeration members, whose
+    own ``.name`` is used directly. ``Link.__proto__`` and the port tables hold
+    bare :class:`int` keys as well -- :func:`_resolve` does not care, since
+    dict lookup does not distinguish an :class:`~enum.IntEnum` member from the
+    plain :class:`int` it equals, but a case label needs a name. ``enum`` is
+    consulted where an enumeration member equals such a key, which is
+    ``Link.__proto__``'s 0x8137 for IPX, so that label reads
+    ``Novell_Inc_0x8137`` rather than the opaque ``33079``. A port number has
+    no enumeration to consult, so it keeps its plain string form and its family
+    is given no ``enum``.
 
     Args:
         code: Registry key.
@@ -580,16 +583,11 @@ def _link_enum() -> 'Any':
     return EtherType
 
 
-def _internet_enum() -> 'Any':
-    from pcapkit.const.reg.transtype import TransType
-    return TransType
-
-
 #: Every family this module exercises, one per ``__proto__`` table named in
 #: GitHub issue #496, and the loopback table #1574 added.
 FAMILIES = (
     Family('link', _link_registry, _link_build, _link_enum),
-    Family('internet', _internet_registry, _internet_build, _internet_enum),
+    Family('internet', _internet_registry, _internet_build),
     Family('tcp', _tcp_registry, _tcp_build),
     Family('udp', _udp_registry, _udp_build),
     Family('sctp', _sctp_registry, _sctp_build),

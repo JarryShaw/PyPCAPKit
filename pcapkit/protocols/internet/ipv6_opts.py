@@ -757,17 +757,14 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Returns:
             Parsed option data.
 
-        Raises:
-            ProtocolError: If the option is malformed.
+        Note:
+            ``Cmpt Length`` counts 32-bit words and may be odd
+            [:rfc:`5570#section-5.2`]; it only has to fit inside ``Opt Data
+            Len``, which
+            :func:`~pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len`
+            has already checked while the option was unpacked.
 
         """
-        if schema.len < 8 and schema.len % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-        # ``Cmpt Length`` counts 32-bit words and may be odd [:rfc:`5570#section-5.2`];
-        # it only has to fit inside ``Opt Data Len``
-        if schema.len < 8 + schema.cmpt_len * 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
         opt = Data_CALIPSOOption(
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
@@ -918,7 +915,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', *, options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
+    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', *, options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Quick Start option.
 
         Structure of IPv6-Opts Quick-Start option [:rfc:`4782`]:
@@ -962,7 +959,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Note:
             An option whose QS function is neither of the two above has no
             defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, see :meth:`_read_opt_none`.
+            it is parsed as one, see :meth:`_read_opt_none`. That dispatch is
+            by the schema's own class, decided from the octets a file read
+            hands it; a :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption`
+            or :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption`
+            built directly with an unassigned ``func`` reaches this method
+            regardless, which is why it still raises below rather than
+            returning early.
 
         """
         if isinstance(schema, Schema_UnassignedOption):
@@ -1521,7 +1524,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             pad = getattr(opt, 'pad', b'')
 
         if code == Enum_Option.Pad1 and length != 0:
-            #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
             code = Enum_Option.PadN  # type: ignore[assignment]
 

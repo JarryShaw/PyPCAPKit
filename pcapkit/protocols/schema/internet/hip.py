@@ -918,8 +918,6 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
             if not cipher_list:
                 warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                     'missing HIP_CIPHER parameter', ProtocolWarning)
-                # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
-
                 cipher_id = Enum_Cipher(0xffff)
             else:
                 cipher_ids = []  # type: list[Enum_Cipher]
@@ -933,8 +931,6 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
                 if encrypted_index >= len(cipher_ids):
                     warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                         'too many ENCRYPTED parameters', ProtocolWarning)
-                    # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
-
                     cipher_id = Enum_Cipher(0xfffe)
                 else:
                     cipher_id = cipher_ids[encrypted_index]

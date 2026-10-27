@@ -36,7 +36,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         from pcapkit.corekit.version import VersionInfo
         from pcapkit.protocols.misc.pcap.header import Header
         from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
-        from pcapkit.utilities.exceptions import EndianError, FileError
+        from pcapkit.utilities.exceptions import EndianError, ProtocolError
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         header = object.__new__(Header)
@@ -106,19 +106,10 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
             self.assertEqual(reader.nanosecond, nanosecond)
             self.assertEqual(reader.protocol, LinkType.NULL)
 
-        invalid = object.__new__(Header)
-        invalid.__header__ = Schema_Header(
-            magic_number=b'bad!',
-            version_major=2,
-            version_minor=4,
-            thiszone=0,
-            sigfigs=0,
-            snaplen=65535,
-            network=LinkType.NULL,
-        )
-        invalid._file = SimpleNamespace(name='bad.pcap')
-        with self.assertRaises(FileError):
-            invalid.read()
+        # An unknown magic number is rejected while the header is unpacked, by
+        # the schema's ``magic_number_callback`` (#2318).
+        with self.assertRaises(ProtocolError):
+            Header(io.BytesIO(b'bad!' + bytes(20)))
 
         Header.__post_init__(header, byteorder='big', nanosecond=True,
                              snaplen=128, network=LinkType.ETHERNET)
