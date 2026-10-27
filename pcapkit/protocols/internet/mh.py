@@ -9470,7 +9470,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_lmaa(self, type: 'Enum_Option', option: 'Optional[Data_LMAAddressOption]' = None, *,
-                       code: 'LMAAddressCode | StdlibEnum | AenumEnum | str | int' = LMAAddressCode.IPv6_LMAA,
+                       code: 'Optional[LMAAddressCode | StdlibEnum | AenumEnum | str | int]' = None,
                        code_default: 'Optional[int]' = None,
                        code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                        code_reversed: 'bool' = False,
@@ -9483,7 +9483,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             code: Option code, see
-                :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.
+                :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`. If not
+                given, the code of the address family of ``address``.
             code_default: Default option code.
             code_namespace: Option code namespace.
             code_reversed: Reverse option code namespace.
@@ -9495,17 +9496,27 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If an explicit ``code`` is not the code
+                :rfc:`5949#section-6.2.2` gives the address family of
+                ``address`` (:issue:`2280`).
+
         Note:
             The option length is derived from the address family rather than from
-            ``code``, so that the two cannot be emitted disagreeing.
+            ``code``, so that the two cannot be emitted disagreeing. A data model
+            passed as ``option`` keeps its code as captured, even where it
+            disagrees with the family, so that the capture rebuilds byte for byte.
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
-            code_val = int(option.code)
+            code_val = int(option.code)  # type: Optional[int]
             address = option.address
+        elif code is None:
+            code_val = None
         else:
-            code_val = self._make_index(code, code_default, namespace=code_namespace,
+            code_val = self._make_index(code, code_default,
+                                        namespace=code_namespace if code_namespace is not None else LMAAddressCode,
                                         reversed=code_reversed, pack=False)
 
         if isinstance(address, bytes) and len(address) not in (4, 16):
@@ -9521,6 +9532,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # ``address=True`` as ``2906010000000001``.
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid address')
+
+        # NOTE: RFC 5949 ties each code to one address family, so a code the
+        # caller did not choose is the family's own, and one they did choose has
+        # to agree with it (#2280). A data model passed as ``option`` skips the
+        # check, so that a captured mismatch still rebuilds byte for byte.
+        family_code = LMAAddressCode.IPv4_LMAA if addr.version == 4 else LMAAddressCode.IPv6_LMAA
+        if code_val is None:
+            code_val = int(family_code)
+        elif option is None and code_val != family_code:
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid code: '
+                                f'code does not match address family: {code_val}')
 
         return Schema_LMAAddressOption(
             type=type,
