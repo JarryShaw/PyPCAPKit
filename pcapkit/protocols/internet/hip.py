@@ -43,13 +43,18 @@ from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
 from pcapkit.const.hip.group import Group as Enum_Group
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
 from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
+from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
 from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.packet import Packet as Enum_Packet
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration import Registration as Enum_Registration
 from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
+from pcapkit.const.hip.suite import Suite as Enum_Suite
+from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -216,11 +221,6 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal, NotRequired
 
-    from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
-    from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
-    from pcapkit.const.hip.registration import Registration as Enum_Registration
-    from pcapkit.const.hip.suite import Suite as Enum_Suite
-    from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
@@ -3893,6 +3893,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if groups is None:
                 groups = []
 
+            # NOTE: ``group`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if group_namespace is None:
+                group_namespace = Enum_Group
+
             group_id = []
             for group in groups:
                 group_id.append(self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[arg-type]
@@ -3986,6 +3993,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if suites is None:
                 suites = []
 
+            # NOTE: ``suite`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if suite_namespace is None:
+                suite_namespace = Enum_Suite
+
             suite_id = []
             for suite in suites:
                 suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
@@ -4032,6 +4046,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if ciphers is None:
                 ciphers = []
 
+            # NOTE: ``cipher`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if cipher_namespace is None:
+                cipher_namespace = Enum_Cipher
+
             cipher_id = []
             for cipher in ciphers:
                 cipher_id.append(self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[arg-type]
@@ -4075,6 +4096,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         else:
             if modes is None:
                 modes = []
+
+            # NOTE: ``mode`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if mode_namespace is None:
+                mode_namespace = Enum_NATTraversal
 
             mode_id = []
             for mode in modes:
@@ -4343,6 +4371,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if suites is None:
                 suites = []
 
+            # NOTE: ``suite`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if suite_namespace is None:
+                suite_namespace = Enum_HITSuite
+
             suite_id = []
             for suite in suites:
                 suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
@@ -4546,6 +4581,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if reg_info is None:
                 reg_info = []
 
+            # NOTE: ``reg`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if reg_info_namespace is None:
+                reg_info_namespace = Enum_Registration
+
             reg_type = []
             for reg in reg_info:
                 reg_type.append(self._make_index(reg, reg_info_default, namespace=reg_info_namespace,  # type: ignore[arg-type]
@@ -4610,6 +4652,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if reg_request is None:
                 reg_request = []
 
+            # NOTE: ``reg`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if reg_request_namespace is None:
+                reg_request_namespace = Enum_Registration
+
             reg_type = []
             for reg in reg_request:
                 reg_type.append(self._make_index(reg, reg_request_default, namespace=reg_request_namespace,  # type: ignore[arg-type]
@@ -4672,6 +4721,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if reg_response is None:
                 reg_response = []
 
+            # NOTE: ``reg`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if reg_response_namespace is None:
+                reg_response_namespace = Enum_Registration
+
             reg_type = []
             for reg in reg_response:
                 reg_type.append(self._make_index(reg, reg_response_default, namespace=reg_response_namespace,  # type: ignore[arg-type]
@@ -4732,6 +4788,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
             if reg_failed is None:
                 reg_failed = []
+
+            # NOTE: ``reg`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394). ``failure_type`` above is a
+            # scalar whose own default is an enumeration member, so it has been
+            # resolving a member name by inference all along.
+            if reg_failed_namespace is None:
+                reg_failed_namespace = Enum_Registration
 
             reg_type = []
             for reg in reg_failed:
@@ -4854,6 +4919,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if formats is None:
                 formats = []
 
+            # NOTE: ``tf`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394). A transport format is a
+            # parameter code, so the namespace is ``Enum_Parameter`` itself.
+            if format_namespace is None:
+                format_namespace = Enum_Parameter
+
             tf_type = []
             for tf in formats:
                 tf_type.append(self._make_index(tf, format_default, namespace=format_namespace,  # type: ignore[arg-type]
@@ -4897,6 +4970,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         else:
             if suites is None:
                 suites = []
+
+            # NOTE: ``suite`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if suite_namespace is None:
+                suite_namespace = Enum_ESPTransformSuite
 
             suite_id = []
             for suite in suites:
@@ -5227,6 +5307,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         else:
             if modes is None:
                 modes = []
+
+            # NOTE: ``mode`` is a loop variable rather than an argument of this
+            # maker, so ``_make_index`` has no argument default to infer the
+            # namespace of a :obj:`str` member name from; name it here rather than
+            # leave the name unresolvable (#2394).
+            if mode_namespace is None:
+                mode_namespace = Enum_Transport
 
             mode_id = []
             for mode in modes:
