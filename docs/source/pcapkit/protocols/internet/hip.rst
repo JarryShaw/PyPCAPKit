@@ -96,6 +96,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_relay_hmac
 
    .. automethod:: _make_hip_param
+   .. automethod:: _make_hip_param_data
    .. automethod:: _make_param_unassigned
    .. automethod:: _make_param_esp_info
    .. automethod:: _make_param_r1_counter
