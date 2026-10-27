@@ -1239,6 +1239,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             tcp_schema.mptcp_add_address_selector({'length': 9})
 
         inner = tcp_schema.MPTCPUnknown(
+            kind=Option.Multipath_TCP,
             test={'subtype': MPTCPOption.Reserved_for_Private_Use.value, 'data': 1},
             data=b'x',
         )
@@ -1254,7 +1255,13 @@ class TCPUDPUnitTests(unittest.TestCase):
             {'test': {'subtype': MPTCPOption.Reserved_for_Private_Use.value}},
         )
         self.assertIs(processed, inner)
-        self.assertEqual(processed.option, Option.Multipath_TCP)
+        # ``post_process`` assigns only the attributes the construction path assigns too
+        # (#2293). ``option`` is no longer among them: it was never a declared field and
+        # nothing read it, and ``kind`` -- a real field, so set on both paths and the one
+        # actually packed -- already carries the option number. ``kind`` is passed to the
+        # schema above rather than asserted off ``post_process``, which does not set it.
+        self.assertFalse(hasattr(processed, 'option'))
+        self.assertEqual(processed.kind, Option.Multipath_TCP)
         self.assertEqual(processed.length, 3)
         self.assertEqual(processed.subtype, MPTCPOption.Reserved_for_Private_Use)
 
