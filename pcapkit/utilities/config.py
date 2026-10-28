@@ -194,7 +194,7 @@ FRAME_LAYER_LIMIT = read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
 #: Python's recursion limit falls, which depends on the interpreter. Each
 #: header is a layer, so :data:`FRAME_LAYER_LIMIT` applies as well.
 #:
-#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
+#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.Protocol.from_data`
 #: stops where parsing it did, and warns once too (:issue:`1619`), cf.
 #: :meth:`Internet._make_payload
 #: <pcapkit.protocols.internet.internet.Internet._make_payload>`.

@@ -254,7 +254,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         Notes:
             A header the data ends inside keeps that in its
             :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
-            :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilds only what was captured
+            :meth:`~pcapkit.protocols.protocol.Protocol.from_data` rebuilds only what was captured
             (:issue:`1470`).
 
         """

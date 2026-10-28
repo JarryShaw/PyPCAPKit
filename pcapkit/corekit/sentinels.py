@@ -472,7 +472,7 @@ class NoDefaultType(Sentinel):
 
     The hazard is not theoretical elsewhere: reload staleness is a *tracked*
     defect class here for other constructs -- see
-    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own
+    :meth:`pcapkit.protocols.protocol.Protocol._lookup_next_layer`'s own
     docstring note on why it declines to memoise a resolved class, and
     :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
     ``test_no_stale_class_survives_a_module_reload``, which reloads a module

@@ -734,7 +734,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: payload protocol identifier (PPID), as in
                 :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Important:
             SCTP overrides :meth:`Transport.register

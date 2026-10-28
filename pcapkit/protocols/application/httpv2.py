@@ -234,7 +234,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
             ``length`` is resolved against :func:`len` only for *this*
             method's own check, and the *original* argument -- ``None``
-            included -- is what is forwarded to :meth:`Protocol.unpack
+            included -- is what is forwarded to :meth:`ProtocolBase.unpack
             <pcapkit.protocols.protocol.ProtocolBase.unpack>`. Collapsing
             ``None`` to a concrete ``0`` would change what
             :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`'s own
@@ -251,7 +251,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if length is None:
             # ``0 < ... < 9`` rather than ``... < 9``: an exhausted stream
             # (``len(self) == 0``) is left alone, so ``length`` reaches
-            # :meth:`Protocol.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`
+            # :meth:`ProtocolBase.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`
             # still ``None`` and its ``prepare`` decorator raises
             # :exc:`StreamEOFError` as documented above; only a *non-empty*
             # short stream is rejected as malformed here.

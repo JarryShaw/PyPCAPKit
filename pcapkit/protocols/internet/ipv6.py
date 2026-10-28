@@ -447,7 +447,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         """Key an extension header's info is written under in :class:`Data_IPv6`.
 
         Args:
-            alias: :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` of
+            alias: :attr:`~pcapkit.protocols.protocol.Protocol.alias` of
                 the extension header's parser.
 
         Returns:

@@ -56,7 +56,7 @@ The obvious alternative -- give ``_flags`` a class-level default of zero so the 
 always exists -- is worse than the crash, and
 :class:`TCPMPTCPJoinStaleFlagsUnitTests` is the case that shows why.
 
-:meth:`Protocol.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` is public and calls
+:meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>` is public and calls
 ``make``, so an instance that has already *parsed* a segment can be asked to build a
 different one. That instance's ``_flags`` is already set -- to the parsed segment's flags
 -- so a zero default never comes into play for it, and with the options built first it

@@ -108,7 +108,7 @@ This class is reached in these ways:
    ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
    have dedicated classes. When one of *those* raises,
    :func:`~pcapkit.corekit.decorators.beholder`
-   (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
+   (:meth:`ProtocolBase._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
    would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
    ``next`` and crashes the walk as in path 1.
    :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
@@ -299,7 +299,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         In the *fallback* role (this instance parsed this module's own schema)
         this is **not** the base
-        :attr:`Protocol.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`
+        :attr:`ProtocolBase.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`
         meaning ("name of next layer protocol"). On the owner's ruling for
         GitHub issue :issue:`891` it is deliberately repointed at this
         instance's *own* identity, i.e. which header's format it parsed, such as
@@ -324,7 +324,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         data model with no such field (``AttributeError``).
 
         The discriminator is the *class-level*
-        :attr:`~pcapkit.protocols.protocol.ProtocolBase.__data__` rather than an
+        :attr:`~pcapkit.protocols.protocol.Protocol.__data__` rather than an
         :func:`isinstance` test on ``self._info``, because a ``make``-only
         instance has no ``_info`` at all. Reading it would turn
         :attr:`ProtocolBase.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`,
@@ -510,8 +510,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             there is unioned down the MRO, so every subclass would accept
             these names and drop them. A ``make`` signature can be kept from
             subclasses instead: this class sets
-            :attr:`ProtocolBase.__own_make_keywords__
-            <pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__>`,
+            :attr:`Protocol.__own_make_keywords__
+            <pcapkit.protocols.protocol.Protocol.__own_make_keywords__>`,
             so a subclass that overrides ``make`` accepts ``len`` or ``data``
             only where its own ``make`` declares it (:issue:`2286`).
 

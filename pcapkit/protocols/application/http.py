@@ -215,7 +215,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`
     #: identified one and parsed the frame that follows it. They belong to this
     #: packet's header rather than to its payload, so :meth:`read` adds them to
-    #: :attr:`length`; otherwise :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`'s
+    #: :attr:`length`; otherwise :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`'s
     #: ``self._info.__update__(packet=self.packet.payload)`` would slice the
     #: payload from octet 9 of a buffer whose frame starts at octet 24 and report
     #: the tail of the preface as packet payload.
@@ -228,8 +228,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
     #: according to that value, so the correct set of names depends on an
     #: argument. :obj:`None` therefore opts out of the construction keyword check
-    #: that :meth:`ProtocolBase.__init__
-    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs; the
+    #: that :meth:`Protocol.__init__
+    #: <pcapkit.protocols.protocol.Protocol.__init__>` performs; the
     #: versioned classes are checked normally when constructed directly.
     __keywords__ = None
 

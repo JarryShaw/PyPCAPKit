@@ -890,7 +890,7 @@ def sign_wrapped_function(app: 'Sphinx', obj: 'Any', bound_method: bool) -> None
     which for a decorated method is the wrapper. ``sphinx-autodoc-typehints``
     stops unwrapping at a stated ``__signature__``, so it evaluated the
     annotations in the decorator's module. The ``@seekset`` overload of
-    :meth:`~pcapkit.protocols.protocol.ProtocolBase._read_packet` then rendered
+    :meth:`~pcapkit.protocols.protocol.Protocol._read_packet` then rendered
     its return as the bare alias ``Data_Packet``, which only the protocol module
     binds (:issue:`1917`).
 
