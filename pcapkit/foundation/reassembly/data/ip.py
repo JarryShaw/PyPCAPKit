@@ -91,7 +91,12 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: See :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
     #: Placeholder class :attr:`packet` may hold, for
-    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted
+    #: even though :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is
+    #: generic: :meth:`DeferredPacket.__analyse__
+    #: <pcapkit.corekit.packet.DeferredPacket.__analyse__>` tests a value against
+    #: this with :func:`isinstance`, which rejects a parameterized generic with
+    #: :exc:`TypeError`.
     __deferred__ = Deferred
 
     #: How completely the datagram was reassembled, and why reassembly stopped.
@@ -155,7 +160,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # Overloads keyed on a literal cannot be selected from a ``completed``
         # computed at runtime anyway, so they would make the reassemblers' own calls
         # untypeable while promising a correlation the code does not keep.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[TransType]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 @info_final
 class Buffer(Info, Generic[_AT]):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """shared data models for reassembly"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info, info_final
@@ -16,6 +16,9 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase
+
+# registry key an analyser dispatches a reassembled payload on; see ``Deferred``
+_KT = TypeVar('_KT', 'TransType', 'tuple[int, int]')
 
 
 class Completion(EnumLookup, StrEnum):
@@ -103,7 +106,7 @@ class Completion(EnumLookup, StrEnum):
         return self is Completion.COMPLETE
 
 
-class Deferred:
+class Deferred(Generic[_KT]):
     """A postponed analysis of a reassembled payload.
 
     A reassembled datagram's ``packet`` is a second, full parse of the payload
@@ -132,11 +135,48 @@ class Deferred:
     wants the parsed payload still gets exactly the object an eager call would
     produce, and one that does not never pays for it.
 
+    The class is generic because the two reassemblers do *not* dispatch on the
+    same kind of value, and each analyser declares the one it takes. The type
+    parameter is that value's type, so an instance's ``proto`` and the parameter
+    its ``analyze`` expects are the same type rather than a union either call
+    site would have to widen to:
+
+    * :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` builds a
+      ``Deferred[TransType]``. It passes the payload protocol type, a
+      :class:`~pcapkit.const.reg.transtype.TransType` read from the reassembled
+      datagram's **Protocol** / **Next Header** field, to
+      :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`,
+      which looks the next layer up by protocol registry number.
+    * :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` builds a
+      ``Deferred[tuple[int, int]]``. It passes a ``(source, destination)`` port
+      pair, because :meth:`Transport.analyze
+      <pcapkit.protocols.transport.transport.Transport.analyze>` overrides that
+      parameter to one: a reassembled transport-layer payload carries no
+      protocol number, so its application protocol is inferred from the ports.
+
+    Those are the two cases the type parameter is constrained to. The pairing
+    the regression actually produced -- a port pair handed to an analyser
+    declared over :class:`~pcapkit.const.reg.transtype.TransType` -- is
+    rejected, which is the direction a real mismatch takes and the one
+    :issue:`2417` was about.
+
+    Rejecting the *reverse* pairing is not guaranteed by mypy alone, for a
+    reason outside this class: |aenum|_ ships no type stubs, so under
+    ``ignore_missing_imports`` the ``aenum.IntEnum`` base of
+    :class:`~pcapkit.const.reg.transtype.TransType` resolves to ``Any``. A
+    ``TransType`` is therefore accepted where a ``tuple[int, int]`` is
+    expected, and a ``Deferred[TransType]`` built over the port-pair analyser
+    type-checks clean. That is a gap in the dependency's type coverage rather
+    than in the constraint, which would bite both ways were ``TransType`` fully
+    typed; the values the reassemblers really pass are pinned by the tests
+    either way.
+
     Args:
         analyze: The analyser to call, i.e.
             :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
             bound to the reassembly object's protocol.
-        proto: Payload protocol type.
+        proto: What the analyser dispatches the payload on -- the payload
+            protocol type for IP, the port pair for TCP, as above.
         payload: Reassembled payload to parse.
 
     .. versionadded:: 1.5.0
@@ -145,10 +185,16 @@ class Deferred:
 
     __slots__ = ('analyze', 'proto', 'payload')
 
-    def __init__(self, analyze: 'Callable[[TransType, bytes], ProtocolBase]',
-                 proto: 'TransType', payload: 'bytes') -> 'None':
-        self.analyze = analyze
-        self.proto = proto
+    def __init__(self, analyze: 'Callable[[_KT, bytes], ProtocolBase]',
+                 proto: '_KT', payload: 'bytes') -> 'None':
+        # NOTE: the two type-parameterized attributes are annotated on their
+        # assignment, as ``_omd_bucket`` in :mod:`pcapkit.corekit.multidict`
+        # does. A slotted class declares no class-level attributes, so mypy
+        # infers each one from this assignment, and it cannot infer a *class*
+        # attribute's type from a type variable -- it asks for an annotation
+        # instead. ``payload`` needs none: :obj:`bytes` is inferred.
+        self.analyze: 'Callable[[_KT, bytes], ProtocolBase]' = analyze
+        self.proto: '_KT' = proto
         self.payload = payload
 
     def __call__(self) -> 'ProtocolBase':
