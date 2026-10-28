@@ -8,12 +8,12 @@ enumeration a bare member name belongs to from the *default value* of the
 enumeration member resolves a name on its own, and one whose default is
 :data:`None` has nothing to read.
 
-Twelve HIP parameters carry a *list* of enumeration values rather than one, and
+Some HIP parameters carry a *list* of enumeration values rather than one, and
 build it in a loop. The value handed to ``_make_index`` is therefore the loop
 variable, which is no argument of the maker at all, so the inference cannot
 reach the list argument's annotation and a name goes unresolved however the
 list argument is declared. Measured before the fix: the member and integer
-forms of each of these twelve built the correct octets, and the member-name
+forms of every one of them built the correct octets, and the member-name
 form raised ``ProtocolNotImplemented: protocol 'RENDEZVOUS' not implemented``.
 Each maker now names its own enumeration, which is what #2393 did for the
 scalar case -- just ahead of the loop rather than at the call, so that the
@@ -21,7 +21,7 @@ decision is taken once per parameter instead of once per item.
 
 :meth:`HIPListArgumentStrNameTests.test_every_list_argument_maker_has_a_case`
 reads the loop-variable sites off ``hip.py`` itself rather than trusting the
-list of twelve, so a thirteenth parameter added with the same shape cannot land
+list below, so a further parameter added with the same shape cannot land
 without a case here.
 
 Every case builds its own packet in memory and reads no capture. :class:`HIP`
@@ -54,7 +54,7 @@ HIP_BASE = {
 
 #: HIP version each version-bound parameter demands: ``HIP_TRANSFORM`` (577) is
 #: :rfc:`5201` only, as :data:`examples.generators.options.HIP_VERSION` records,
-#: and the rest of the twelve are refused at version 1 or indifferent to it.
+#: and the rest are refused at version 1 or indifferent to it.
 HIP_VERSION = {577: 1}
 
 #: One case per maker: ``{maker: (parameter name, list keyword, enum module and
@@ -96,7 +96,7 @@ CASES = {
     '_make_param_reg_failed': (
         'REG_FAILED', 'reg_failed', 'pcapkit.const.hip.registration.Registration',
         'RENDEZVOUS', {'failure_type': 1}),
-    # The only one of the twelve whose list holds parameter codes rather than a
+    # The only one of these whose list holds parameter codes rather than a
     # namespace of its own, so its enumeration is the same ``Parameter`` the
     # ``code`` argument carries.
     '_make_param_transport_format_list': (
@@ -160,9 +160,9 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
     def test_a_member_name_in_a_list_builds_what_the_member_builds(self) -> None:
         """#2394: the three forms of a list item agree, octet for octet.
 
-        The member-name form raised ``ProtocolNotImplemented`` for all twelve
-        before the fix, while the member and integer forms built these very
-        octets, so this is the fail-without-fix assertion and the
+        The member-name form raised ``ProtocolNotImplemented`` for every maker
+        in ``CASES`` before the fix, while the member and integer forms built
+        these very octets, so this is the fail-without-fix assertion and the
         no-regression one at once.
 
         """
@@ -276,7 +276,7 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         property of the *shape* of the call: the value handed to
         :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` is a name
         that is not an argument of the maker, so nothing is there for the
-        namespace to be inferred from. A thirteenth parameter of that shape
+        namespace to be inferred from. A further parameter of that shape
         would be broken in exactly the same way and is caught here.
 
         """
@@ -302,10 +302,9 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         self.assertEqual(found, set(CASES),
                          'a HIP maker resolves a name that is not one of its own '
                          'arguments and has no case in CASES (#2394)')
-        self.assertEqual(len(found), 12)
 
     def test_the_named_enumerations_are_imported_at_runtime(self) -> None:
-        """#2394: the five enumerations the fix needs are no longer type-only.
+        """#2394: the enumerations the fix needs are no longer type-only.
 
         ``Suite``, ``NATTraversal``, ``Registration``, ``ESPTransformSuite`` and
         ``Transport`` were imported under ``TYPE_CHECKING`` alone, which is why
