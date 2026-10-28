@@ -359,6 +359,12 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``frame`` is none of the forms this maker reads --
+                raw :obj:`bytes`, a :obj:`dict` of frame arguments, an
+                :class:`~pcapkit.protocols.data.application.httpv2.HTTP` data
+                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
+
         .. versionchanged:: 1.5.0
 
            * ``reserved`` is a new parameter before ``sid``, so a 1.4.x
@@ -400,7 +406,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         elif isinstance(frame, Schema):
             frame_val = frame
         else:
-            raise ProtocolError(f'HTTP/2: [Type {type_val}] invalid format')
+            raise ProtocolError(f'HTTP/2: [Type {type_val}] invalid frame: must be bytes, a dict, '
+                                f'an HTTP data model or a Schema, not {frame!r}')
 
         flags_val = {}  # type: dict[str, int]
         for bit in range(8):

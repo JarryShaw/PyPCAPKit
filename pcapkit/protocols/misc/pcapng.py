@@ -1490,6 +1490,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``block`` is none of the forms this maker reads --
+                raw :obj:`bytes`, a :obj:`dict` of block arguments, a
+                :class:`~pcapkit.protocols.data.misc.pcapng.PCAPNG` data model
+                or a :class:`~pcapkit.protocols.schema.schema.Schema`.
+
         """
         type_val = cast('Enum_BlockType',
                         self._make_index(type, type_default, namespace=type_namespace,
@@ -1535,7 +1541,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         elif isinstance(block, Schema):
             block_val = block
         else:
-            raise ProtocolError(f'PCAP-NG: [Type {type_val}] invalid format')
+            raise ProtocolError(f'PCAP-NG: [Type {type_val}] invalid block: must be bytes, a dict, '
+                                f'a PCAPNG data model or a Schema, not {block!r}')
 
         return Schema_PCAPNG(
             type=type_val,
