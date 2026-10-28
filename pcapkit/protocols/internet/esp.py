@@ -597,9 +597,12 @@ class SecurityAssociation:
         if self.integrity is not Integrity.NONE:
             expected = self.integrity_suite.key_size
             if len(self.__integrity_key__) != expected:
-                warn(f'{self.integrity.name} expects a {expected}-octet key, got '
-                     f'{len(self.__integrity_key__)} octets; the ICV will very likely '
-                     f'fail to verify', ProtocolWarning)
+                # NOTE: #2411 -- the ``ESP:`` prefix matters more here than on
+                # the exceptions above: ``warn`` reports the caller's frame, so
+                # the message text is the only thing that names the protocol.
+                warn(f'ESP: invalid integrity key: {self.integrity.name} expects a '
+                     f'{expected}-octet key, got {len(self.__integrity_key__)} octets; '
+                     f'the ICV will very likely fail to verify', ProtocolWarning)
 
         if icv_length is not None and icv_length < 0:
             raise ProtocolError(f'ESP: invalid ICV length: {icv_length!r}')
@@ -1126,7 +1129,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         if association is None:
             return self._make_opaque(
                 spi, seq, total, data, ESPStatus.NO_SA,
-                f'no security association for SPI {spi:#010x}',
+                f'{self.alias}: no security association for SPI {spi:#010x}',
                 version=version, packet=packet, warning=False,
             )
 
@@ -1141,8 +1144,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         if icv_length > len(data):
             return self._make_opaque(
                 spi, seq, total, data, ESPStatus.TRUNCATED,
-                f'ESP payload is {len(data)} octets, shorter than the {icv_length}-octet '
-                f'ICV the security association declares',
+                f'{self.alias}: payload too short: {len(data)} octets, shorter than the '
+                f'{icv_length}-octet ICV the security association declares',
                 version=version, packet=packet,
             )
         body, icv = (data[:len(data) - icv_length], data[len(data) - icv_length:]) \
@@ -1161,8 +1164,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             if not hmac.compare_digest(association.compute_icv(spi, seq, body), icv):
                 return self._make_opaque(
                     spi, seq, total, body, ESPStatus.AUTH_FAILED,
-                    f'integrity check value does not verify for SPI {spi:#010x} '
-                    f'sequence {seq}', icv=icv, version=version, packet=packet,
+                    f'{self.alias}: integrity check value does not verify for SPI '
+                    f'{spi:#010x} sequence {seq}', icv=icv, version=version, packet=packet,
                 )
 
         crypto = load_cryptography()
@@ -1177,8 +1180,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         except invalid_tag:
             return self._make_opaque(
                 spi, seq, total, body, ESPStatus.AUTH_FAILED,
-                f'authentication tag does not verify for SPI {spi:#010x} sequence {seq}; '
-                f'the encryption key is most likely wrong',
+                f'{self.alias}: authentication tag does not verify for SPI {spi:#010x} '
+                f'sequence {seq}; the encryption key is most likely wrong',
                 icv=icv, version=version, packet=packet,
             )
 
@@ -1435,21 +1438,21 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
 
         """
         if len(plaintext) < 2:
-            return (f'decrypted ESP payload for SPI {spi:#010x} is {len(plaintext)} octets, '
-                    f'too short to hold a pad length and next header')
+            return (f'ESP: decrypted payload too short: SPI {spi:#010x} decrypts to '
+                    f'{len(plaintext)} octets, too short to hold a pad length and next header')
 
         pad_len, next_ = plaintext[-2], plaintext[-1]
         if pad_len + 2 > len(plaintext):
-            return (f'decrypted ESP payload for SPI {spi:#010x} declares {pad_len} octets of '
-                    f'padding but holds only {len(plaintext) - 2}; the encryption key is most '
-                    f'likely wrong')
+            return (f'ESP: invalid pad length: the decrypted payload for SPI {spi:#010x} '
+                    f'declares {pad_len} octets of padding but holds only '
+                    f'{len(plaintext) - 2}; the encryption key is most likely wrong')
 
         padding = plaintext[len(plaintext) - 2 - pad_len:len(plaintext) - 2]
         inner = plaintext[:len(plaintext) - 2 - pad_len]
 
         if padding != bytes(range(1, pad_len + 1)):
-            message = (f'padding of the decrypted ESP payload for SPI {spi:#010x} does not '
-                       f'follow the monotonically increasing sequence of RFC 4303 s2.4')
+            message = (f'ESP: invalid padding: the decrypted payload for SPI {spi:#010x} does '
+                       f'not follow the monotonically increasing sequence of RFC 4303 s2.4')
             if association.strict and not association.authenticated:
                 # Nothing authenticated this packet, so the padding pattern
                 # is the only wrong-key signal available.
