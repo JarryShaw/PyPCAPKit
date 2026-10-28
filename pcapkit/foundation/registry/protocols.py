@@ -166,11 +166,11 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`pcapkit.protocols.application.httpv2.HTTP` -- so they all compete
     for the single key ``'HTTP'``. Registering one of them replaces whichever
     was there, and the replacement is observable through every reader of the
-    registry, e.g. :meth:`ProtocolBase.expand_comp
-    <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`, which resolves a
+    registry, e.g. :meth:`Protocol.expand_comp
+    <pcapkit.protocols.protocol.Protocol.expand_comp>`, which resolves a
     bare protocol name through it. Per :issue:`675` the overwrite is reported,
-    matching :meth:`ProtocolBase.register
-    <pcapkit.protocols.protocol.ProtocolBase.register>` and the other
+    matching :meth:`Protocol.register
+    <pcapkit.protocols.protocol.Protocol.register>` and the other
     overwrite-warning registries.
 
     The guard reads "key present **and** incumbent is a different class" --
@@ -194,8 +194,8 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     readers outside this module cannot absorb on their own -- the registry is a
     documented public attribute, and its readers look a bare name up and then
     degrade *silently* on a miss rather than raising, so a re-keying would not
-    announce itself either. :meth:`ProtocolBase.expand_comp
-    <pcapkit.protocols.protocol.ProtocolBase.expand_comp>` falls back to the
+    announce itself either. :meth:`Protocol.expand_comp
+    <pcapkit.protocols.protocol.Protocol.expand_comp>` falls back to the
     name as a plain string, and the ``protocol`` properties on
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
@@ -367,7 +367,7 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
     releasing whatever each target code held before, and followed by a lease
     when the write changed the name, so that registering the code back undoes
     it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined
-    by a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, or
+    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or
     registered directly -- is not leased, so no restore takes it away; one
     showing it through a lease extends that lease to ``targets``.
 

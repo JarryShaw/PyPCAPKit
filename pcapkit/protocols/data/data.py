@@ -19,7 +19,7 @@ class Data(Info):
     The ``__next_name__``, ``__next_type__`` and ``__short_read__`` keys are
     metadata, listed in :attr:`~pcapkit.corekit.infoclass.Info.__included__`
     and :attr:`~pcapkit.corekit.infoclass.Info.__excluded__`:
-    :meth:`Protocol.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
+    :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
     dispatches the payload on the first two and on nothing else, and cuts a
     short read back on the third. :meth:`to_dict` carries them, so that
     ``from_data(info.to_dict())`` rebuilds as ``from_data(info)`` does, while

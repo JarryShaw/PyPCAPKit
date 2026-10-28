@@ -211,19 +211,19 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
     return False
 
 #: Keywords that configure the construction rather than naming a field, and are
-#: therefore consumed by :meth:`ProtocolBase.__init__
-#: <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema layer
+#: therefore consumed by :meth:`Protocol.__init__
+#: <pcapkit.protocols.protocol.Protocol.__init__>` or by the schema layer
 #: instead of by a :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
 #: signature declares them, so :func:`_declared_keywords` cannot find them and
 #: they are listed here.
 #:
 #: ``packet`` is here because the library puts it there itself:
-#: :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`
+#: :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`
 #: injects ``packet=self.packet.payload`` into every parsed ``_info``, so the
-#: default :meth:`ProtocolBase._make_data
-#: <pcapkit.protocols.protocol.ProtocolBase._make_data>` (``data.to_dict()``)
-#: carries it into the keywords that :meth:`ProtocolBase.from_data
-#: <pcapkit.protocols.protocol.ProtocolBase.from_data>` reconstructs from.
+#: default :meth:`Protocol._make_data
+#: <pcapkit.protocols.protocol.Protocol._make_data>` (``data.to_dict()``)
+#: carries it into the keywords that :meth:`Protocol.from_data
+#: <pcapkit.protocols.protocol.Protocol.from_data>` reconstructs from.
 #: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does
 #: not declare a ``packet``, starting with
 #: :class:`~pcapkit.protocols.misc.null.NoPayload`, the innermost layer of every
@@ -242,8 +242,8 @@ OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
 _DECLARED_KEYWORDS = {}  # type: dict[type, Optional[frozenset[str]]]
 
 #: Methods a construction keyword may be destined for. The keywords handed to
-#: :class:`Protocol` reach all of them: :meth:`ProtocolBase.__post_init__
-#: <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` passes the same
+#: :class:`Protocol` reach all of them: :meth:`Protocol.__post_init__
+#: <pcapkit.protocols.protocol.Protocol.__post_init__>` passes the same
 #: ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>` (and
 #: through it to ``make``) *and* to :meth:`unpack
 #: <pcapkit.protocols.protocol.Protocol.unpack>` (and through it to ``read``).
@@ -259,18 +259,18 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
     Returns:
         Names of every keyword-acceptable parameter declared by any of
         :data:`_KEYWORD_CONSUMERS` anywhere in the MRO of ``cls``, plus every
-        entry of :attr:`ProtocolBase.__keywords__
-        <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` found there,
+        entry of :attr:`Protocol.__keywords__
+        <pcapkit.protocols.protocol.Protocol.__keywords__>` found there,
         plus :data:`OUT_OF_BAND_KEYWORDS`. :obj:`None` if ``cls`` *itself* sets
         ``__keywords__`` to :obj:`None`, meaning its keywords cannot be enumerated
         and are not to be checked -- inherited :obj:`None` does not count, as
-        :attr:`ProtocolBase.__keywords__
-        <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` explains.
+        :attr:`Protocol.__keywords__
+        <pcapkit.protocols.protocol.Protocol.__keywords__>` explains.
 
     The union is deliberately wider than the signature of ``cls.make``, because
     a keyword reaching ``make`` is not necessarily *for* ``make``:
-    :meth:`ProtocolBase.__post_init__
-    <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` hands one
+    :meth:`Protocol.__post_init__
+    <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one
     ``**kwargs`` to both the construction and the parse of the packet it has just
     constructed, so a keyword declared by ``read`` travels through ``make`` too.
     :class:`~pcapkit.protocols.internet.hip.HIP` is the live example:
@@ -282,8 +282,8 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
     The walk covers the whole MRO rather than the most derived override of each
     method, so that a subclass declaring its own keyword and forwarding the rest
     to its parent does not make the parent's keywords unreachable. The one
-    exception is a class that sets :attr:`ProtocolBase.__own_make_keywords__
-    <pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__>`: its
+    exception is a class that sets :attr:`Protocol.__own_make_keywords__
+    <pcapkit.protocols.protocol.Protocol.__own_make_keywords__>`: its
     ``make`` counts only while it is the ``make`` of ``cls``, not once a
     subclass overrides it (:issue:`2286`).
 
@@ -364,19 +364,19 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     Args:
         cls: Protocol class being constructed.
         kwargs: Construction keywords to check, the out-of-band ones left out.
-            :meth:`ProtocolBase.__init__
-            <pcapkit.protocols.protocol.ProtocolBase.__init__>` passes those
-            remaining after it has consumed them; :meth:`ProtocolBase.from_data
-            <pcapkit.protocols.protocol.ProtocolBase.from_data>` passes its
+            :meth:`Protocol.__init__
+            <pcapkit.protocols.protocol.Protocol.__init__>` passes those
+            remaining after it has consumed them; :meth:`Protocol.from_data
+            <pcapkit.protocols.protocol.Protocol.from_data>` passes its
             caller's own, less ``_layer``, ``_protocol`` and ``__context__``,
-            before :meth:`ProtocolBase._make_data
-            <pcapkit.protocols.protocol.ProtocolBase._make_data>` adds to them.
+            before :meth:`Protocol._make_data
+            <pcapkit.protocols.protocol.Protocol._make_data>` adds to them.
         strict: Whether an unexpected keyword is an error. :data:`True` for a
             caller's own construction; :data:`False` when the keywords were
-            generated by :meth:`ProtocolBase._make_data
-            <pcapkit.protocols.protocol.ProtocolBase._make_data>` rather than
-            written by anybody -- see :meth:`ProtocolBase.from_data
-            <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+            generated by :meth:`Protocol._make_data
+            <pcapkit.protocols.protocol.Protocol._make_data>` rather than
+            written by anybody -- see :meth:`Protocol.from_data
+            <pcapkit.protocols.protocol.Protocol.from_data>`.
 
     Raises:
         UnsupportedCall: If ``strict`` and any keyword is not among those
@@ -690,7 +690,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             example -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length`
             is the wire's Block Total Length and the captured octets sit ahead of
             the option list and the trailing length field. The payload matters
-            because :meth:`ProtocolBase.__init__` injects it into every parsed
+            because :meth:`Protocol.__init__` injects it into every parsed
             ``_info``, which the dumpers write out.
 
         """
@@ -764,21 +764,21 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Note:
             The ``**kwargs`` here absorbs the keywords that
-            :meth:`ProtocolBase.__post_init__
-            <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` hands to the
+            :meth:`Protocol.__post_init__
+            <pcapkit.protocols.protocol.Protocol.__post_init__>` hands to the
             parse as well as to the construction, so an implementation is not
             expected to declare every keyword it is called with. It is *not* a
             place for a caller to put a keyword no signature declares: building a
             protocol *through its constructor* with such a keyword raises
             :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` from
-            :meth:`ProtocolBase.__init__
-            <pcapkit.protocols.protocol.ProtocolBase.__init__>` (:issue:`617`).
+            :meth:`Protocol.__init__
+            <pcapkit.protocols.protocol.Protocol.__init__>` (:issue:`617`).
 
         Warning:
             **Calling this method directly is not checked**, and still discards an
             undeclared keyword in silence. The check lives in
-            :meth:`ProtocolBase.__init__
-            <pcapkit.protocols.protocol.ProtocolBase.__init__>`, so it covers
+            :meth:`Protocol.__init__
+            <pcapkit.protocols.protocol.Protocol.__init__>`, so it covers
             ``SomeProtocol(...)`` and the :meth:`pack` it leads to, but not
             ``SomeProtocol.make(...)`` on an instance obtained some other way --
             ``object.__new__(cls).make(**kwargs)`` is the idiom, used by this
@@ -1039,7 +1039,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             code: protocol code
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
@@ -2386,7 +2386,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
             zero-fills a field the stream ends inside, so a header parsed from
             too few octets is filled with values that were never on the wire, and
-            :meth:`from_data <ProtocolBase.from_data>` rebuilds them (:issue:`1170`).
+            :meth:`from_data <Protocol.from_data>` rebuilds them (:issue:`1170`).
             Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`
             instead, as an unparseable one is.
 
