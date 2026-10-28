@@ -172,8 +172,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
                 already registered against PCAP frames, naming the displaced
                 entry and its replacement so a caller can tell *what* was lost.
                 Fires only when the incumbent differs from the replacement --
-                see :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 

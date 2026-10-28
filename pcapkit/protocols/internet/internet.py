@@ -192,8 +192,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             pcapkit.utilities.warnings.RegistryWarning: If this protocol number
                 is already registered, naming the displaced entry and its
                 replacement so a caller can tell *what* was lost. Fires only
-                when the incumbent differs from the replacement; see :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                when the incumbent differs from the replacement; see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 
@@ -220,8 +220,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Args:
             data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
-                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
 
         Returns:
             Protocol instance, cut back to what was captured when the header
@@ -343,8 +343,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
-        As :meth:`ProtocolBase._make_payload
-        <pcapkit.protocols.protocol.ProtocolBase._make_payload>`, but the payload
+        As :meth:`Protocol._make_payload
+        <pcapkit.protocols.protocol.Protocol._make_payload>`, but the payload
         is built at its place in its chain of IPv6 extension headers, one past
         this layer's, since it parses its own octets again. So rebuilding a frame
         stops at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` where parsing it did, rather

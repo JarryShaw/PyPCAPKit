@@ -72,8 +72,8 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
 
         .. versionchanged:: 1.5.0
 
-           Narrows :attr:`ProtocolBase.protochain
-           <pcapkit.protocols.protocol.ProtocolBase.protochain>`'s declared
+           Narrows :attr:`Protocol.protochain
+           <pcapkit.protocols.protocol.Protocol.protochain>`'s declared
            type from :class:`~pcapkit.corekit.protochain.ProtoChain` to
            :obj:`None`, the value ``self._protos`` already held here; the fix
            is to the declaration, not the runtime value (:issue:`2317`).

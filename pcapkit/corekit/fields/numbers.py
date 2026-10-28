@@ -730,8 +730,8 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             the registry with ``aenum.extend_enum``, for two reasons: a
             capture carrying many distinct unassigned codes would otherwise grow
             a process-global registry without bound, which is the growth
-            :meth:`ProtocolBase._lookup_registry
-            <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>` exists
+            :meth:`Protocol._lookup_registry
+            <pcapkit.protocols.protocol.Protocol._lookup_registry>` exists
             to avoid; and a stdlib :class:`enum.IntEnum` registry is then
             handled exactly like an ``aenum.IntEnum`` one.
 

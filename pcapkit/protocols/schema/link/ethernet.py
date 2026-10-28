@@ -29,7 +29,7 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
         :obj:`None`; the resolved class is assigned to ``self.protocol``.
 
     Important:
-        The lookup goes through :meth:`ProtocolBase._lookup_next_layer
+        The lookup goes through :meth:`Protocol._lookup_next_layer
         <pcapkit.protocols.protocol.Protocol._lookup_next_layer>` rather than
         subscripting the registry. :attr:`Ethernet.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>` *is*

@@ -551,8 +551,8 @@ class DPKT(EngineBase['DPKTPacket']):
         try:
             packet = protocol(pkt)  # type: DPKTPacket
         except Exception as exc:  # pylint: disable=broad-except
-            # NOTE: Caught broadly, as :meth:`ProtocolBase.analyze
-            # <pcapkit.protocols.protocol.ProtocolBase.analyze>` does: dpkt raises
+            # NOTE: Caught broadly, as :meth:`Protocol.analyze
+            # <pcapkit.protocols.protocol.Protocol.analyze>` does: dpkt raises
             # more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads
             # ``frag_off`` from whatever header follows an IPv6 Fragment header,
             # so a Fragment header followed by ESP or Destination Options raises

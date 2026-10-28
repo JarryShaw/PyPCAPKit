@@ -98,8 +98,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 message names both. An unresolved
                 :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as
                 different from the class it names. See
-                :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor that a restore puts back (:issue:`1504`).
 
@@ -170,7 +170,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Args:
             data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
                 <pcapkit.protocols.protocol.Protocol.from_data>`.
 
         Returns:
@@ -261,7 +261,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Important:
             The port is forwarded **whether or not it is registered**:
-            :meth:`ProtocolBase._import_next_layer
+            :meth:`Protocol._import_next_layer
             <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
             it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
             records it as :attr:`Data_Raw.protocol

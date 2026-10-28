@@ -1290,7 +1290,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """Acronym of corresponding protocol.
 
         Spelled out rather than left to
-        :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
+        :attr:`Protocol.alias <pcapkit.protocols.protocol.Protocol.alias>`'s
         class-name default, because
         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sits
         between this class and that default in the MRO and carries a concrete
