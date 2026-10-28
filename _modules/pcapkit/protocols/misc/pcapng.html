@@ -5657,6 +5657,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed block schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``secrets_data`` is none of the forms this maker</span>
+<span class="sd">                reads -- raw :obj:`bytes`, a :obj:`dict` of secrets arguments, a</span>
+<span class="sd">                :class:`~pcapkit.protocols.data.misc.pcapng.DSBSecrets` data</span>
+<span class="sd">                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.</span>
+
 <span class="sd">        """</span>
         <span class="n">declared</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -5696,7 +5702,8 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secrets_data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">secrets_data_val</span> <span class="o">=</span> <span class="n">secrets_data</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [DSB] secrets </span><span class="si">{</span><span class="n">secrets_type_val</span><span class="si">}</span><span class="s1"> invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [DSB] invalid secrets_data: must be bytes, a dict, '</span>
+                                <span class="sa">f</span><span class="s1">'a DSBSecrets data model or a Schema, not </span><span class="si">{</span><span class="n">secrets_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="c1"># NOTE: Secrets Length excludes the padding to the next 32-bit boundary,</span>
         <span class="c1"># which ``padding_data`` writes and the block length has to include.</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>

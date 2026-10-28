@@ -2504,7 +2504,8 @@
             <span class="n">value</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_UnknownChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -2566,7 +2567,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid data: '</span>
+                                <span class="sa">f</span><span class="s1">'must be at least one octet, not </span><span class="si">{</span><span class="n">data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_DATAChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -2632,7 +2634,8 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
@@ -2696,7 +2699,8 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
@@ -2760,7 +2764,8 @@
             <span class="n">dup_tsn</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">dup_tsn</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_GapAckBlock]</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">gap_blocks</span> <span class="ow">or</span> <span class="p">[]:</span>
@@ -2813,7 +2818,8 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
@@ -2857,7 +2863,8 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">parameters</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameters_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
@@ -2945,7 +2952,8 @@
             <span class="n">cum_tsn_ack</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cum_tsn_ack</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ShutdownChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -2979,7 +2987,8 @@
             <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_ShutdownACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -3015,7 +3024,8 @@
             <span class="n">error</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">error</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">error_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_causes</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
@@ -3060,7 +3070,8 @@
             <span class="n">cookie</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">cookie</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CookieEchoChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -3094,7 +3105,8 @@
             <span class="n">flags</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">flags</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Chunk </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid flags: '</span>
+                                <span class="sa">f</span><span class="s1">'must be one octet, not </span><span class="si">{</span><span class="n">flags</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CookieACKChunk</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -3706,7 +3718,8 @@
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid name: '</span>
+                                <span class="sa">f</span><span class="s1">'must be NUL-terminated, not </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_HostNameAddressParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -4322,7 +4335,8 @@
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">cause</span><span class="o">.</span><span class="n">reserved</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reserved</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid reserved: '</span>
+                                <span class="sa">f</span><span class="s1">'must be two octets, not </span><span class="si">{</span><span class="n">reserved</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_InvalidStreamIdentifierCause</span><span class="p">(</span>
             <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>

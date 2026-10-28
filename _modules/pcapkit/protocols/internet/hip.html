@@ -4123,7 +4123,9 @@
                         <span class="n">ip</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">packed</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid locator: '</span>
+                                        <span class="sa">f</span><span class="s1">'must be an ipaddress.IPv6Address or a LocatorData, '</span>
+                                        <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
                 <span class="n">traffic</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">traffic</span>
                 <span class="nb">type</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">type</span>

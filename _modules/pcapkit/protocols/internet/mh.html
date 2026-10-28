@@ -1968,6 +1968,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is none of the forms this maker reads --</span>
+<span class="sd">                raw :obj:`bytes`, a :obj:`dict` of message arguments, an</span>
+<span class="sd">                :class:`~pcapkit.protocols.data.internet.mh.MH` data model or a</span>
+<span class="sd">                :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema.</span>
+
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
 <span class="sd">           Takes ``reserved`` ahead of ``chksum`` (:issue:`1329`), which shifts</span>
@@ -1997,7 +2003,8 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema_Packet</span><span class="p">):</span>
             <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid data: must be bytes, a dict, '</span>
+                                <span class="sa">f</span><span class="s1">'an MH data model or a Packet schema, not </span><span class="si">{</span><span class="n">data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: The header has to be a multiple of 8 octets, so the message data</span>
         <span class="c1"># needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up</span>
@@ -8837,6 +8844,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If ``length`` is non-zero for a ``Pad1``, which</span>
+<span class="sd">                has no ``Option Length`` field to carry it; the option is made</span>
+<span class="sd">                as a ``PadN`` instead.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`Data_PadOption.length</span>
 <span class="sd">            &lt;pcapkit.protocols.data.internet.mh.Option.length&gt;` counts the</span>
@@ -8855,7 +8867,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid length: must be 0 for a Pad1 option, '</span>
+                 <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="n">length</span><span class="si">!r}</span><span class="s1">; making a PadN'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
@@ -8970,12 +8983,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not a multiple of eight octets, the</span>
+<span class="sd">                length :meth:`_read_opt_bad` accepts for an :rfc:`6275`</span>
+<span class="sd">                authenticator.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid data: '</span>
+                                <span class="sa">f</span><span class="s1">'must be a multiple of eight octets, not </span><span class="si">{</span><span class="n">data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_AuthorizationDataOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -9307,6 +9326,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is not two octets more than a multiple of</span>
+<span class="sd">                four, which is the only length leaving an ``Option Length`` of</span>
+<span class="sd">                ``5 + len(data)`` that :meth:`_read_opt_auth` accepts.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>
@@ -9317,7 +9341,8 @@
                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid data: must be two octets '</span>
+                                <span class="sa">f</span><span class="s1">'more than a multiple of four, not </span><span class="si">{</span><span class="n">data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_AuthOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -9596,6 +9621,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``data`` is empty, since the ``length`` field then</span>
+<span class="sd">                reads as ``0``, which :meth:`_read_opt_badf` rejects.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            The ``length`` field counts the authenticator only, excluding the</span>
 <span class="sd">            SPI, see :meth:`_read_opt_badf`.</span>
@@ -9606,7 +9635,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid data: '</span>
+                                <span class="sa">f</span><span class="s1">'must be at least one octet, not </span><span class="si">{</span><span class="n">data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_BADFOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
