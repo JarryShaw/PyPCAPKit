@@ -111,7 +111,10 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
     #: Placeholder class :attr:`packet` may hold, for
-    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted
+    #: for the reason given on
+    #: :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`'s own
+    #: ``__deferred__``: :func:`isinstance` rejects a parameterized generic.
     __deferred__ = Deferred
 
     #: Original packet identifier.
@@ -147,7 +150,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies
         # here identically: ``strict=False`` reports an incomplete payload buffer as
         # one contiguous ``bytes`` and analyses it.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[tuple[int, int]]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
