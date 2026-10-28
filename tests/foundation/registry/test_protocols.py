@@ -289,7 +289,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         <pcapkit.protocols.transport.transport.Transport.register>` through
         :class:`~pcapkit.protocols.transport.tcp.TCP` and
         :class:`~pcapkit.protocols.transport.udp.UDP` rather than overriding it,
-        and :meth:`ProtocolBase.register
+        and :meth:`Protocol.register
         <pcapkit.protocols.protocol.ProtocolBase.register>` itself, which the
         others shadow.
 

@@ -37,7 +37,7 @@ def detect(value: 'bytes') -> 'str':
         equality on a hash collision. Measured, feeding 20 distinct 1 MB values
         retains 19.1 MB. :data:`~pcapkit.utilities.config.DETECT_CACHE_SIZE` therefore caps the entries
         rather than the footprint, which matters because
-        :meth:`ProtocolBase.decode
+        :meth:`Protocol.decode
         <pcapkit.protocols.protocol.Protocol.decode>` is public and a caller
         may hand it a whole payload. Use :meth:`detect.cache_clear
         <functools.lru_cache.cache_clear>` to release it in a long-running

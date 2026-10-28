@@ -374,7 +374,7 @@ class TransportUnitTests(unittest.TestCase):
         """An unregistered port pair still names the port it could not place.
 
         The port reaches
-        :meth:`ProtocolBase._import_next_layer
+        :meth:`Protocol._import_next_layer
         <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` as
         ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.Raw` records
         as ``Data_Raw.protocol``. Guards against passing :obj:`None`, under which

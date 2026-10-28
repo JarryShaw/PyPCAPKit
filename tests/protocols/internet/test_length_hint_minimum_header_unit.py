@@ -8,7 +8,7 @@ were captured than its ``__length_hint__`` (#1170). ``IPv6_Route`` hinted
 6--7 octets was parsed and rebuilt as a full 8-octet header. ``HOPOPT`` and
 ``IPv6_Opts`` hinted 2 for the same 8-octet minimum. An application layer's
 payload reaches the same guard through
-:meth:`ProtocolBase._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
+:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
 
 """
 from __future__ import annotations

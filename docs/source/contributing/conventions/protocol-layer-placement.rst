@@ -206,7 +206,7 @@ exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so the strict diffe
 :class:`~pcapkit.protocols.protocol.ProtocolBase` is **empty** and every one of them still
 resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. What changes is which
 registry it resolves *to*: ``OSPF.__proto__`` is
-:attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>` rather
+:attr:`Protocol.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>` rather
 than :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, so OSPF does not
 see Link's EtherType entries. That is inert -- nothing reaches OSPF by EtherType, and a
 ``-1`` lookup misses in both registries alike and resolves to

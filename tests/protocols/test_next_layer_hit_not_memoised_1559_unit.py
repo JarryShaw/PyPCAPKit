@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1559: a next-layer hit is resolved, not memoised.
 
-This guards against :meth:`ProtocolBase._lookup_next_layer
+This guards against :meth:`Protocol._lookup_next_layer
 <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` writing the class a
 registered :class:`~pcapkit.corekit.module.ModuleDescriptor` resolved to back
 over that descriptor. That has these consequences, one test each:

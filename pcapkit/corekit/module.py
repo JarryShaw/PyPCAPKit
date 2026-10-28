@@ -60,7 +60,7 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             The module is read from :data:`sys.modules` first, and
             :func:`importlib.import_module` is entered only when it is not
             loaded yet. That matters because this property is on a *per-frame*
-            dispatch path: :meth:`ProtocolBase._lookup_next_layer
+            dispatch path: :meth:`Protocol._lookup_next_layer
             <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>`
             deliberately writes no resolved class back, so every next layer
             lookup resolves its descriptor again -- the one registered for the

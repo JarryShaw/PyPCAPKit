@@ -217,10 +217,10 @@ class HTTPUnitTests(unittest.TestCase):
         ``protocol.make(**kwargs)`` dispatch this issue is actually about.
 
         The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (the implementation behind its
+        :meth:`Protocol.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>` (the implementation behind its
         ``**kwargs``-only overload) calls ``self.pack(**kwargs)``, through
         :meth:`~ProtocolBase.__post_init__`, when built with no ``file``, and
-        :meth:`ProtocolBase.pack` calls
+        :meth:`Protocol.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` calls
         ``target.make(**kwargs)`` on :meth:`~ProtocolBase._packing_target`,
         which while constructing is the instance itself -- a *bound* call on the
         outer ``HTTP`` instance, which is what actually reaches the inner

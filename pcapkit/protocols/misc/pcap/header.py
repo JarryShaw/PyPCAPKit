@@ -287,7 +287,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         Args:
             data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
                 <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         Returns:

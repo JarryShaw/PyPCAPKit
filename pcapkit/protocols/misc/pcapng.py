@@ -908,7 +908,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length field included -- and not a header length. The two are the
             same thing for a protocol whose payload runs to the end of its
             buffer, which is why
-            :attr:`ProtocolBase.length <pcapkit.protocols.protocol.ProtocolBase.length>`
+            :attr:`Protocol.length <pcapkit.protocols.protocol.ProtocolBase.length>`
             does not distinguish them, but a PCAP-NG block carries a trailer.
             :attr:`self.packet <packet>` is overridden accordingly.
 
@@ -938,7 +938,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         octets sit in the *middle* of a packet block, ahead of the option list
         and the trailing Block Total Length, so no single split point expresses
         the shape and the inherited
-        :attr:`ProtocolBase.packet <pcapkit.protocols.protocol.ProtocolBase.packet>`
+        :attr:`Protocol.packet <pcapkit.protocols.protocol.ProtocolBase.packet>`
         -- which reads :attr:`self.length <length>` octets of header and takes
         everything after as payload -- cannot produce it. Since
         :attr:`self.length <length>` is the Block Total Length, that split would
@@ -1110,7 +1110,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
                 :func:`~pcapkit.foundation.registry.protocols.register_linktype`
                 writing to both cannot make either warn about the other. See
-                :meth:`ProtocolBase.register
+                :meth:`Protocol.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 

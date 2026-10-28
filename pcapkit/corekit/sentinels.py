@@ -571,7 +571,7 @@ class AbsentType(Sentinel):
 #: own ``__keywords__`` out of its :attr:`~object.__dict__`, where
 #: :obj:`None` is itself a meaningful value -- the opt-out that says the
 #: class cannot enumerate its keywords, cf.
-#: :attr:`ProtocolBase.__keywords__
+#: :attr:`Protocol.__keywords__
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
 #: :mod:`pcapkit.protocols.protocol`, which imports it from here for exactly
 #: that one read. Private by documentation rather than by a

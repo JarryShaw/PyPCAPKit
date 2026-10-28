@@ -54,7 +54,7 @@ Every one of these registries is a :class:`collections.defaultdict` held on a
 a registry shared by every instance in the process. Nothing here subscripts one:
 :func:`cases` only ever *iterates*, which touches nothing, and :func:`handler` --
 which resolves one particular code, and so cannot iterate -- goes through
-:meth:`ProtocolBase._lookup_registry
+:meth:`Protocol._lookup_registry
 <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>` instead.
 
 IPv4 and HIP are read through :func:`_named_registry`, which returns the
@@ -255,8 +255,9 @@ CAPTURABLE = ('OK', 'RECONSTRUCT', 'MISMATCH')
 #:
 #: * ``'OK'`` -- constructed, parsed, reconstructed, and the octets matched.
 #: * ``'CONSTRUCT'`` -- the constructor raised. Note that
-#:   :meth:`ProtocolBase.__post_init__` packs *and then* unpacks, so a
-#:   ``_read_*`` fault on a perfectly good pack also lands here.
+#:   :meth:`Protocol.__post_init__
+#:   <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` packs *and then*
+#:   unpacks, so a ``_read_*`` fault on a perfectly good pack also lands here.
 #: * ``'PARSE'`` -- the octets would not parse back.
 #: * ``'RECONSTRUCT'`` -- ``_make_*`` could not consume what ``_read_*``
 #:   produced. This is the step a construct-then-parse test cannot see.
@@ -382,7 +383,7 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
     the only thing that would notice a protocol added tomorrow without one. Both
     shapes are a :class:`collections.defaultdict`, so :func:`cases` and
     :func:`handler` cannot tell which one they were given -- and in particular
-    :meth:`ProtocolBase._lookup_registry
+    :meth:`Protocol._lookup_registry
     <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>` still has a
     ``default_factory`` to fall back on.
 

@@ -426,13 +426,16 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 
 
 #: contextvars.ContextVar[int]: How many layers of the frame being dissected
-#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses; see
+#: come before the next one :meth:`Protocol._parse_next_layer
+#: <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` parses; see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _frame_depth = contextvars.ContextVar('_frame_depth', default=0)
 
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
-#: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for
-#: parses the same octets again; see :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
+#: :meth:`Protocol._make_payload
+#: <pcapkit.protocols.protocol.ProtocolBase._make_payload>`, so that the layer
+#: it is rebuilt for parses the same octets again; see
+#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _rebuilding = contextvars.ContextVar('_rebuilding', default=False)
 
 
@@ -446,7 +449,9 @@ def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
     Returns:
         Whether a next layer of ``klass`` parsed from ``captured`` octets may be
         replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by
-        :meth:`ProtocolBase._parse_next_layer`, and so has its warnings held.
+        :meth:`Protocol._parse_next_layer
+        <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>`, and so has
+        its warnings held.
 
     The hint is read from the class, before there is an instance to ask, which
     is enough for every protocol shipped: each returns a constant. A hint that

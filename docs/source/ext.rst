@@ -241,13 +241,13 @@ The following code snippet shows how to create a new protocol class:
    silently wrong field. The accepted set is read from :func:`inspect.signature` -- the union of every
    keyword-taking parameter of ``make``, ``read``, ``pack``, ``unpack``,
    ``__post_init__`` and ``__init__`` anywhere in the class's MRO -- which is
-   wider than ``make`` alone because :meth:`ProtocolBase.__post_init__
+   wider than ``make`` alone because :meth:`Protocol.__post_init__
    <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` hands the same
    ``**kwargs`` to the construction and to the parse, so a keyword only ``read``
    declares still travels through ``make``.
 
    Shapes a signature cannot express are declared on the class instead, via
-   :attr:`ProtocolBase.__keywords__
+   :attr:`Protocol.__keywords__
    <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`:
 
    .. code-block:: python
@@ -271,7 +271,7 @@ The following code snippet shows how to create a new protocol class:
    subclass of a dispatcher is checked normally. Prefer a declared parameter to
    either: it is also what documents the keyword to your callers.
 
-   Parsing is unaffected. :meth:`ProtocolBase.from_data
+   Parsing is unaffected. :meth:`Protocol.from_data
    <pcapkit.protocols.protocol.ProtocolBase.from_data>` checks the keywords its
    caller passes just as strictly, raising
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, but only warns with
@@ -281,7 +281,7 @@ The following code snippet shows how to create a new protocol class:
 
    .. warning::
 
-      The check lives in :meth:`ProtocolBase.__init__
+      The check lives in :meth:`Protocol.__init__
       <pcapkit.protocols.protocol.ProtocolBase.__init__>`, where every producer's
       keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
       leads to -- but **not** a direct ``SomeProtocol.make(...)`` call, which still

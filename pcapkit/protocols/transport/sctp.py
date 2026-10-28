@@ -999,9 +999,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
             does for an unregistered transport type. Resolving it to
             :class:`~pcapkit.protocols.misc.raw.Raw` is
-            :meth:`ProtocolBase._import_next_layer
+            :meth:`Protocol._import_next_layer
             <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
-            through :meth:`ProtocolBase._lookup_next_layer
+            through :meth:`Protocol._lookup_next_layer
             <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`, which
             leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
 

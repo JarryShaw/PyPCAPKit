@@ -121,7 +121,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         Args:
             data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
                 <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         Returns:

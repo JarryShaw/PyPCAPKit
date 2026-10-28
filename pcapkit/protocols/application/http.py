@@ -404,7 +404,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 into the versioned data model its keys belong to -- ``receipt``
                 is HTTP/1.*'s and ``sid`` HTTP/2's -- since this class's own data
                 model carries no version.
-            **kwargs: As :meth:`ProtocolBase.from_data
+            **kwargs: As :meth:`Protocol.from_data
                 <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         Returns:

@@ -252,7 +252,7 @@ class hold_warnings:  # pylint: disable=invalid-name
     error is then raised where the block that kept them is left -- the end of
     the trial parse, inside the guard it was raised in when nothing was held.
 
-    :meth:`ProtocolBase._parse_next_layer
+    :meth:`Protocol._parse_next_layer
     <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` uses this for the
     trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.Raw` when the
     header was not captured, or that :func:`~pcapkit.corekit.decorators.beholder`

@@ -850,7 +850,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # subclass that only adds auto-registration for externally defined
                 # protocols, and no protocol in the library subclasses it. Testing
                 # against it would send any protocol instance -- which is exactly
-                # what :meth:`ProtocolBase._make_payload
+                # what :meth:`Protocol._make_payload
                 # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns,
                 # and what ``make``'s own ``bytes | Protocol | Schema`` signature
                 # advertises -- to the ``ProtocolUnbound`` below instead of packing
@@ -1231,7 +1231,7 @@ class _EnumRegistry(collections.defaultdict):
     The fallback itself is deliberate -- it is how an unknown option, chunk or
     block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this
     subclass keeps returning it and just stops recording it.
-    :meth:`ProtocolBase._lookup_registry
+    :meth:`Protocol._lookup_registry
     <pcapkit.protocols.protocol.Protocol._lookup_registry>`
     does the same for the protocol-layer ``__proto__`` family.
 

@@ -2,7 +2,7 @@
 """GitHub issue #1504: restoring a shipped dispatch entry puts back its descriptor.
 
 Without the fix,
-:meth:`ProtocolBase.register <pcapkit.protocols.protocol.ProtocolBase.register>`
+:meth:`Protocol.register <pcapkit.protocols.protocol.ProtocolBase.register>`
 and its ``Link``, ``Internet``, ``Transport`` (``TCP``, ``UDP``), ``SCTP``,
 ``Frame`` and ``PCAPNG`` overrides resolve a
 :class:`~pcapkit.corekit.module.ModuleDescriptor` argument to its class before

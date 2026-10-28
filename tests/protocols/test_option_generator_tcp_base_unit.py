@@ -22,7 +22,7 @@ default. GitHub issue #602 is three such keys:
   which is the acknowledgement *flag*, not the acknowledgement number
   ``ack_no``. The pair was the wrong way round, and neither half said so.
 
-Issue #617 has :meth:`ProtocolBase.__init__
+Issue #617 has :meth:`Protocol.__init__
 <pcapkit.protocols.protocol.ProtocolBase.__init__>` check a construction keyword
 against the protocol's signatures and raise
 :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one that no signature
@@ -57,7 +57,7 @@ What each check is for
 :meth:`TCPBaseHeaderTests.test_the_header_fields_are_the_ones_expected` and
 :meth:`TCPBaseHeaderTests.test_the_header_octets_are_the_ones_expected`
     The data model and the wire, separately. The data model is what ``make``
-    packed and :meth:`ProtocolBase.__post_init__
+    packed and :meth:`Protocol.__post_init__
     <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` parsed straight
     back, so a field wrong in both directions round-trips through it
     unnoticed; the octets are what the capture actually holds.
@@ -248,7 +248,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         """Constructing with an undeclared keyword raises.
 
         ``make`` ends its signature with ``**kwargs`` and reads nothing out of it,
-        so on its own it would absorb a misspelling; :meth:`ProtocolBase.__init__
+        so on its own it would absorb a misspelling; :meth:`Protocol.__init__
         <pcapkit.protocols.protocol.ProtocolBase.__init__>` checks the keywords
         against the signatures before ``make`` is reached, and refuses a name none
         of them declares (#617). That closes the asymmetry with

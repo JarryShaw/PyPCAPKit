@@ -31,10 +31,10 @@ pins both halves of it in one place.
 What is checked, and what is deliberately not
 ---------------------------------------------
 
-The check runs in :meth:`ProtocolBase.__init__
+The check runs in :meth:`Protocol.__init__
 <pcapkit.protocols.protocol.ProtocolBase.__init__>` rather than in ``make``,
 because ``make`` is not the only consumer of the keywords it is handed:
-:meth:`ProtocolBase.__post_init__
+:meth:`Protocol.__post_init__
 <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` passes one ``**kwargs``
 to the construction *and* to the parse of what it has just constructed, so a
 keyword declared only by ``read`` travels through ``make`` as well.
@@ -57,9 +57,9 @@ These are left alone on purpose, and each has a test saying so:
     field and are consumed before any ``make`` sees them.
 
 And one thing is softened rather than left alone, in :class:`ReconstructionTests`:
-:meth:`ProtocolBase.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
+:meth:`Protocol.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
 warns where a caller would be raised at, because the keywords it spreads came out
-of :meth:`ProtocolBase._make_data
+of :meth:`Protocol._make_data
 <pcapkit.protocols.protocol.ProtocolBase._make_data>` rather than out of anybody's
 editor. Mismatches of exactly that kind have lost fields in silence (#1097), so
 the case there builds its own rather than depending on a real one.
@@ -499,7 +499,7 @@ class ScopeTests(unittest.TestCase):
     def test_a_direct_make_call_is_not_checked(self) -> None:
         """The limitation, recorded rather than left to be discovered.
 
-        The check sits in :meth:`ProtocolBase.__init__
+        The check sits in :meth:`Protocol.__init__
         <pcapkit.protocols.protocol.ProtocolBase.__init__>`, where every producer's
         keywords converge, so ``SomeProtocol(...)`` is covered and a *direct*
         ``SomeProtocol.make(...)`` is not: it still absorbs an undeclared keyword
@@ -531,7 +531,7 @@ class ScopeTests(unittest.TestCase):
         """The keywords that configure the call rather than naming a field.
 
         ``_layer``, ``_protocol``, ``__context__`` and ``__packet__`` are
-        consumed by :meth:`ProtocolBase.__init__
+        consumed by :meth:`Protocol.__init__
         <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema
         layer, so no ``make`` declares them and the check has to know them by
         name. A regression here would refuse a caller that is setting a parse
@@ -556,13 +556,13 @@ class ScopeTests(unittest.TestCase):
     def test_from_data_survives_the_injected_packet_keyword(self) -> None:
         """Rebuilding a parsed packet is not a caller misspelling something.
 
-        :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`
+        :meth:`Protocol.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`
         injects ``packet=self.packet.payload`` into every parsed ``_info``, and the
-        default :meth:`ProtocolBase._make_data
+        default :meth:`Protocol._make_data
         <pcapkit.protocols.protocol.ProtocolBase._make_data>` is ``data.to_dict()``
         -- so ``from_data`` hands ``packet`` to a ``make`` that very often does not
         declare it. :class:`~pcapkit.protocols.misc.null.NoPayload` is the case
-        that matters, because :meth:`ProtocolBase._make_payload
+        that matters, because :meth:`Protocol._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
         innermost layer of every packet: refusing ``packet`` breaks ``from_data``
         for all of them. Measured with ``packet`` not out-of-band::
@@ -641,8 +641,8 @@ class ReconstructionTests(unittest.TestCase):
     def test_from_data_warns_instead_of_raising(self) -> None:
         """A ``_make_data`` key the signature does not take is audible, not fatal.
 
-        :meth:`ProtocolBase.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
-        spreads whatever :meth:`ProtocolBase._make_data
+        :meth:`Protocol.from_data <pcapkit.protocols.protocol.ProtocolBase.from_data>`
+        spreads whatever :meth:`Protocol._make_data
         <pcapkit.protocols.protocol.ProtocolBase._make_data>` returned into
         ``__init__``, so nobody typed those keywords: a mismatch is a defect in the
         protocol's own pair of mappings, and the caller who meets it cannot fix it.
@@ -717,7 +717,7 @@ class SentinelTests(unittest.TestCase):
     answers apart when it reads ``__keywords__`` out of a class
     :attr:`~object.__dict__`: a set of names, the :obj:`None` that declines the
     check, and the key not being there at all. :obj:`None` is taken by the second
-    of those -- :attr:`ProtocolBase.__keywords__
+    of those -- :attr:`Protocol.__keywords__
     <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` is typed
     ``Optional[frozenset[str]]`` and :class:`~pcapkit.protocols.application.http.HTTP`
     sets it -- so the third needs a marker of its own.

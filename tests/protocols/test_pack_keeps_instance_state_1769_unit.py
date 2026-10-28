@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Calling ``pack()`` leaves the instance it is called on as it was. C.f. #1769.
 
-:meth:`ProtocolBase.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` builds
+:meth:`Protocol.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` builds
 a fresh header from its keywords alone. This guards against it assigning that
 header to the instance as well, where a bare
 ``UDP(srcport=1234, dstport=53).pack()`` left ``schema.srcport`` at ``0`` while

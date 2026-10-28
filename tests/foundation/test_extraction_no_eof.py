@@ -75,7 +75,7 @@ the guesses:
 * It is not the parse path's ``except Exception`` handlers absorbing the
   ``SIGALRM``-raised :exc:`TimeoutError`. Those handlers exist -- in
   :mod:`pcapkit.corekit.decorators` and
-  :meth:`ProtocolBase._decode_next_layer
+  :meth:`Protocol._decode_next_layer
   <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` -- and
   :exc:`TimeoutError` is indeed an :exc:`Exception`, but neither is *entered*
   during the spin: :func:`~pcapkit.corekit.decorators.prepare` raises end of

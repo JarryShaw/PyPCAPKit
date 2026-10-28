@@ -33,7 +33,7 @@ The scope is the public registrars in
 (``register_reassembly_*_callback`` and ``register_traceflow_tcp_callback``)
 only append, and offer nothing to undo an append with, so they have no case
 here; nor does ``register_protocol_code``, which funnels into the same
-:meth:`ProtocolBase.register
+:meth:`Protocol.register
 <pcapkit.protocols.protocol.ProtocolBase.register>` the ``register_tcp`` cases
 reach. Class-level registrars with no foundation wrapper are out of scope:
 ``SCTP.register_chunk``, ``register_parameter`` and ``register_cause`` (covered
