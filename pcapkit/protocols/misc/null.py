@@ -68,7 +68,17 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
     @property
     def protochain(self) -> 'None':  # type: ignore[override]
         """Protocol chain of current instance, which an empty payload does not
-        have."""
+        have.
+
+        .. versionchanged:: 1.5.0
+
+           Narrows :attr:`Protocol.protochain
+           <pcapkit.protocols.protocol.ProtocolBase.protochain>`'s declared
+           type from :class:`~pcapkit.corekit.protochain.ProtoChain` to
+           :obj:`None`, the value ``self._protos`` already held here; the fix
+           is to the declaration, not the runtime value (:issue:`2317`).
+
+        """
         return None
 
     ##########################################################################

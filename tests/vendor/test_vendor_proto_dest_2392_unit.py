@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """The ``__proto_dest__`` declaration the default template renders (#2392).
 
-GitHub issue #2392 moves the enum type -> destination pairing out of a private
-lookup table in :mod:`pcapkit.foundation.registry.protocols` and onto the
-enumeration registry classes themselves, as a ``__proto_dest__`` dunder -- the
-mirror of what the same issue did for the opposite direction with
-``__proto_key__``.
+The enum type -> destination pairing lives on the enumeration registry classes
+themselves, as a ``__proto_dest__`` dunder (GitHub issue #2392) -- the mirror
+of ``__proto_key__``, which each destination declares to name the enum its own
+registry is keyed by.
 
 The :file:`pcapkit/const/` modules that carry it are generated, so the
 declaration is made in the crawler
@@ -18,7 +17,7 @@ template side:
   *nothing at all* for an empty :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
 * :class:`TemplateProtoDestTests` -- the same through :data:`LINE`: the import
   line and the class-body declaration both appear when a crawler declares a
-  destination, and the rendered module is byte-identical to the pre-#2392
+  destination, and the rendered module is byte-identical to the committed
   rendering when it does not. That second assertion is the load-bearing one:
   only a handful of registries declare a destination, so a template change that
   touched the other generated modules would rewrite most of :mod:`pcapkit.const`
@@ -53,10 +52,9 @@ VENDOR_DEPS = ('requests', 'bs4')
 #: Whether the crawlers are importable at all.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
-#: ``crawler module -> ((module, class), ...)``, the destinations #2392 settled
-#: on. The same pairings the lookup table held, with ``LinkType`` still
-#: naming two: a link-layer header type keys the next-layer registry of
-#: both capture file formats.
+#: ``crawler module -> ((module, class), ...)``, the destinations the declaring
+#: crawlers name (#2392), with ``LinkType`` naming two: a link-layer header
+#: type keys the next-layer registry of both capture file formats.
 EXPECTED = {
     'pcapkit.vendor.reg.ethertype': (('pcapkit.protocols.link.link', 'Link'),),
     'pcapkit.vendor.reg.transtype': (('pcapkit.protocols.internet.internet', 'Internet'),),
@@ -115,7 +113,7 @@ class RenderProtoDestTests(unittest.TestCase):
         generated module that imported :class:`~pcapkit.protocols.link.link.Link`
         to declare it would be a circular import. The lazy
         :class:`~pcapkit.corekit.module.ModuleDescriptor` is what avoids that,
-        and is why #2392 settled on it.
+        and is why the declaration uses it (#2392).
         """
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.vendor.default import render_proto_dest
@@ -144,12 +142,12 @@ class TemplateProtoDestTests(unittest.TestCase):
                     'pcapkit.vendor.arp.hardware', dest)
 
     def test_no_declaration_leaves_the_rendering_untouched(self) -> None:
-        """The pre-#2392 output, character for character.
+        """The output for a crawler that declares none, character for character.
 
         Pinned against the committed :mod:`pcapkit.const.arp.hardware` rather
         than against a copy of the template: ``arp/hardware`` declares no
-        destination, so its import block and class body must still be what the
-        template rendered before #2392.
+        destination, so its import block and class body are what the template
+        renders with no declaration to add.
         """
         rendered = self._render()
 
@@ -235,7 +233,7 @@ class CrawlerProtoDestTests(unittest.TestCase):
                                  expected)
 
     def test_no_other_crawler_declares_one(self) -> None:
-        """The rest inherit the empty default, so their output is unchanged.
+        """The rest inherit the empty default, so none of their output declares one.
 
         Not a style point: a crawler that gained a destination by accident would
         add an import and an attribute to its generated module on the next

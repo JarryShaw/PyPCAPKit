@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #2406: the makers #2296 did not list name their argument.
+"""GitHub issue #2406: the makers outside #2296's checklist name their argument.
 
-#2296 swept ``_make_*`` guards off the *reader's* text --
-``<alias>: [... N] invalid format`` -- and onto the house form established by
-#2232 and #2257, ``<prefix>: <lowercase description>: must be X, not {value!r}``.
-The maker-side sites below were outside its checklist and kept the generic
-wording:
+The ``_make_*`` guards below carry the house form established by #2232 and
+#2257, ``<prefix>: <lowercase description>: must be X, not {value!r}``, which
+names the keyword at fault and the value passed -- not the *reader's*
+``<alias>: [... N] invalid format``, which describes wire data a maker has not
+parsed. Each sits on the maker side, outside #2296's checklist:
 
 * :meth:`HOPOPT._make_opt_pad
   <pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pad>` and
   :meth:`IPv6_Opts._make_opt_pad
   <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pad>`, the twins of
-  the ``Pad1`` length warning #2296 fixed on :class:`~pcapkit.protocols.internet.mh.MH`;
+  the ``Pad1`` length warning on :class:`~pcapkit.protocols.internet.mh.MH` (#2296);
 * :meth:`HTTP.make <pcapkit.protocols.application.httpv2.HTTP.make>` and
   :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>`, the
   dispatchers whose unsupported-``frame``/``block`` guard is the same shape as
   ``MH.make``'s.
 
-The parse side is deliberately untouched, as in #2296: ``invalid format`` is the
-right thing for a reader to say. :class:`ReadersKeepInvalidFormat` below pins
-that division on the one pair where the reader and the maker guard the very same
-thing -- ``_read_opt_pad`` and ``_make_opt_pad`` both reject a ``Pad1`` carrying
-a non-zero length.
+Readers are deliberately exempt, as in #2296: ``invalid format`` is the right
+thing for a reader to say. :class:`ReadersKeepInvalidFormat` below pins that
+division on the one pair where the reader and the maker guard the very same
+thing -- ``_read_opt_pad`` and ``_make_opt_pad`` guard a ``Pad1`` carrying a
+non-zero length, though only the reader raises; the maker warns and makes a
+``PadN`` instead.
 
 Every message is pinned whole, and every maker's valid input is exercised in the
 same class, so a guard that starts refusing good input regresses here too.
@@ -161,7 +162,7 @@ class HTTPFrameMessage(MakerMessageTestCase):
         from pcapkit.protocols.application.httpv2 import HTTP
 
         # ``frame=None`` dispatches to the frame type's own constructor (#2274)
-        # rather than reaching the guard, so the guard has not widened to it.
+        # rather than reaching the guard, so the guard does not cover it.
         http = self.protocol(HTTP)
         self.assertEqual(http.make(type=Frame.DATA, frame=None).type, Frame.DATA)
 
@@ -209,11 +210,12 @@ class PCAPNGBlockMessage(MakerMessageTestCase):
 
 
 class ReadersKeepInvalidFormat(MakerMessageTestCase):
-    """The parse side still says ``invalid format``, as #2296 asks.
+    """The parse side says ``invalid format``, as #2296 asks.
 
-    ``_read_opt_pad`` and ``_make_opt_pad`` reject the same thing -- a ``Pad1``
-    option carrying a non-zero length -- so the pair is where a sweep over the
-    makers is most likely to catch a reader by accident.
+    ``_read_opt_pad`` and ``_make_opt_pad`` guard the same thing -- a ``Pad1``
+    option carrying a non-zero length -- though only the reader raises; the
+    maker warns and makes a ``PadN`` instead. The pair is where a sweep over
+    the makers is most likely to catch a reader by accident.
 
     """
 

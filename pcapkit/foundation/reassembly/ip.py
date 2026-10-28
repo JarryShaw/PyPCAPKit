@@ -67,9 +67,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
        <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
        (:issue:`477`). An incomplete buffer expires
        after ``timeout`` seconds of capture time, 60 by default for both IPv4
-       and IPv6. A datagram with fragment offset zero and **MF** clear is
-       reported even when its BUFID is already buffered, rather than dropped
-       (:issue:`2270`).
+       and IPv6. A datagram with fragment offset zero and **MF** (**M** in
+       IPv6) clear is reported even when its BUFID is already buffered,
+       rather than dropped (:issue:`2270`).
 
     """
     if TYPE_CHECKING:
@@ -156,8 +156,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # belong to.
         self._dtgram.extend(self.expire(TS))
 
-        # when non-fragmented (possibly discarded) packet received: it is
-        # reassembled on its own, in a buffer of its own (#2270)
+        # a datagram with fragment offset zero and MF clear is reported even
+        # when its BUFID is already buffered, rather than dropped: isolated
+        # from that buffer (IPv6 atomic fragments) or after flushing it first
+        # (IPv4) (#2270)
         isolated = False
         if not FO and not MF:
             if self.__isolate_atomic__:
