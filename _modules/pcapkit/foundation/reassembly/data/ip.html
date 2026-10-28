@@ -582,7 +582,12 @@
     <span class="c1">#: See :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
     <span class="c1">#: Placeholder class :attr:`packet` may hold, for</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted</span>
+    <span class="c1">#: even though :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is</span>
+    <span class="c1">#: generic: :meth:`DeferredPacket.__analyse__</span>
+    <span class="c1">#: &lt;pcapkit.corekit.packet.DeferredPacket.__analyse__&gt;` tests a value against</span>
+    <span class="c1">#: this with :func:`isinstance`, which rejects a parameterized generic with</span>
+    <span class="c1">#: :exc:`TypeError`.</span>
     <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
 
     <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped.</span>
@@ -646,7 +651,7 @@
         <span class="c1"># Overloads keyed on a literal cannot be selected from a ``completed``</span>
         <span class="c1"># computed at runtime anyway, so they would make the reassemblers' own calls</span>
         <span class="c1"># untypeable while promising a correlation the code does not keep.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[TransType]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="Buffer">

@@ -602,7 +602,10 @@
     <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket`.</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
     <span class="c1">#: Placeholder class :attr:`packet` may hold, for</span>
-    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve. Unsubscripted</span>
+    <span class="c1">#: for the reason given on</span>
+    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`'s own</span>
+    <span class="c1">#: ``__deferred__``: :func:`isinstance` rejects a parameterized generic.</span>
     <span class="n">__deferred__</span> <span class="o">=</span> <span class="n">Deferred</span>
 
     <span class="c1">#: Original packet identifier.</span>
@@ -638,7 +641,7 @@
         <span class="c1"># :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies</span>
         <span class="c1"># here identically: ``strict=False`` reports an incomplete payload buffer as</span>
         <span class="c1"># one contiguous ``bytes`` and analyses it.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[tuple[int, int]]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

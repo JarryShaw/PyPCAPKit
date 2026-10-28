@@ -703,7 +703,7 @@
     <span class="c1">#: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`</span>
     <span class="c1">#: identified one and parsed the frame that follows it. They belong to this</span>
     <span class="c1">#: packet's header rather than to its payload, so :meth:`read` adds them to</span>
-    <span class="c1">#: :attr:`length`; otherwise :meth:`ProtocolBase.__init__ &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;`'s</span>
+    <span class="c1">#: :attr:`length`; otherwise :meth:`Protocol.__init__ &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`'s</span>
     <span class="c1">#: ``self._info.__update__(packet=self.packet.payload)`` would slice the</span>
     <span class="c1">#: payload from octet 9 of a buffer whose frame starts at octet 24 and report</span>
     <span class="c1">#: the tail of the preface as packet payload.</span>
@@ -716,8 +716,8 @@
     <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTP.make&gt;`</span>
     <span class="c1">#: according to that value, so the correct set of names depends on an</span>
     <span class="c1">#: argument. :obj:`None` therefore opts out of the construction keyword check</span>
-    <span class="c1">#: that :meth:`ProtocolBase.__init__</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs; the</span>
+    <span class="c1">#: that :meth:`Protocol.__init__</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;` performs; the</span>
     <span class="c1">#: versioned classes are checked normally when constructed directly.</span>
     <span class="n">__keywords__</span> <span class="o">=</span> <span class="kc">None</span>
 

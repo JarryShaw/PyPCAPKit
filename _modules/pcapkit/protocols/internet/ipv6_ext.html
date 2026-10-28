@@ -591,7 +591,7 @@
 <span class="sd">   ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all</span>
 <span class="sd">   have dedicated classes. When one of *those* raises,</span>
 <span class="sd">   :func:`~pcapkit.corekit.decorators.beholder`</span>
-<span class="sd">   (:meth:`Protocol._import_next_layer &lt;pcapkit.protocols.protocol.ProtocolBase._import_next_layer&gt;`)</span>
+<span class="sd">   (:meth:`ProtocolBase._import_next_layer &lt;pcapkit.protocols.protocol.ProtocolBase._import_next_layer&gt;`)</span>
 <span class="sd">   would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses</span>
 <span class="sd">   ``next`` and crashes the walk as in path 1.</span>
 <span class="sd">   :meth:`IPv6._import_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._import_next_layer&gt;`</span>
@@ -784,7 +784,7 @@
 
 <span class="sd">        In the *fallback* role (this instance parsed this module's own schema)</span>
 <span class="sd">        this is **not** the base</span>
-<span class="sd">        :attr:`Protocol.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`</span>
+<span class="sd">        :attr:`ProtocolBase.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`</span>
 <span class="sd">        meaning ("name of next layer protocol"). On the owner's ruling for</span>
 <span class="sd">        GitHub issue :issue:`891` it is deliberately repointed at this</span>
 <span class="sd">        instance's *own* identity, i.e. which header's format it parsed, such as</span>
@@ -809,7 +809,7 @@
 <span class="sd">        data model with no such field (``AttributeError``).</span>
 
 <span class="sd">        The discriminator is the *class-level*</span>
-<span class="sd">        :attr:`~pcapkit.protocols.protocol.ProtocolBase.__data__` rather than an</span>
+<span class="sd">        :attr:`~pcapkit.protocols.protocol.Protocol.__data__` rather than an</span>
 <span class="sd">        :func:`isinstance` test on ``self._info``, because a ``make``-only</span>
 <span class="sd">        instance has no ``_info`` at all. Reading it would turn</span>
 <span class="sd">        :attr:`ProtocolBase.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`,</span>
@@ -1000,8 +1000,8 @@
 <span class="sd">            there is unioned down the MRO, so every subclass would accept</span>
 <span class="sd">            these names and drop them. A ``make`` signature can be kept from</span>
 <span class="sd">            subclasses instead: this class sets</span>
-<span class="sd">            :attr:`ProtocolBase.__own_make_keywords__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__&gt;`,</span>
+<span class="sd">            :attr:`Protocol.__own_make_keywords__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.__own_make_keywords__&gt;`,</span>
 <span class="sd">            so a subclass that overrides ``make`` accepts ``len`` or ``data``</span>
 <span class="sd">            only where its own ``make`` declares it (:issue:`2286`).</span>
 

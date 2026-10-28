@@ -556,7 +556,7 @@ width (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <p class="admonition-title">Notes</p>
 <p>A header the data ends inside keeps that in its
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>, so that
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.from_data" title="pcapkit.protocols.protocol.ProtocolBase.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds only what was captured
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds only what was captured
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1470">#1470</a>).</p>
 </div>
 </dd></dl>
@@ -1171,7 +1171,7 @@ captured.</p>
 <p class="admonition-title">Notes</p>
 <p>The frame index and the global header are context of the PCAP file
 rather than fields of the frame, so they are not returned here: pass
-them to <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.from_data" title="pcapkit.protocols.protocol.ProtocolBase.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> as
+them to <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> as
 <code class="docutils literal notranslate"><span class="pre">num</span></code> and <code class="docutils literal notranslate"><span class="pre">header</span></code>.</p>
 </div>
 </dd></dl>

@@ -694,19 +694,19 @@
     <span class="k">return</span> <span class="kc">False</span>
 
 <span class="c1">#: Keywords that configure the construction rather than naming a field, and are</span>
-<span class="c1">#: therefore consumed by :meth:`ProtocolBase.__init__</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` or by the schema layer</span>
+<span class="c1">#: therefore consumed by :meth:`Protocol.__init__</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;` or by the schema layer</span>
 <span class="c1">#: instead of by a :meth:`make &lt;pcapkit.protocols.protocol.Protocol.make&gt;`. No</span>
 <span class="c1">#: signature declares them, so :func:`_declared_keywords` cannot find them and</span>
 <span class="c1">#: they are listed here.</span>
 <span class="c1">#:</span>
 <span class="c1">#: ``packet`` is here because the library puts it there itself:</span>
-<span class="c1">#: :meth:`ProtocolBase.__init__ &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;`</span>
+<span class="c1">#: :meth:`Protocol.__init__ &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`</span>
 <span class="c1">#: injects ``packet=self.packet.payload`` into every parsed ``_info``, so the</span>
-<span class="c1">#: default :meth:`ProtocolBase._make_data</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._make_data&gt;` (``data.to_dict()``)</span>
-<span class="c1">#: carries it into the keywords that :meth:`ProtocolBase.from_data</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;` reconstructs from.</span>
+<span class="c1">#: default :meth:`Protocol._make_data</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._make_data&gt;` (``data.to_dict()``)</span>
+<span class="c1">#: carries it into the keywords that :meth:`Protocol.from_data</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;` reconstructs from.</span>
 <span class="c1">#: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does</span>
 <span class="c1">#: not declare a ``packet``, starting with</span>
 <span class="c1">#: :class:`~pcapkit.protocols.misc.null.NoPayload`, the innermost layer of every</span>
@@ -725,8 +725,8 @@
 <span class="n">_DECLARED_KEYWORDS</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[type, Optional[frozenset[str]]]</span>
 
 <span class="c1">#: Methods a construction keyword may be destined for. The keywords handed to</span>
-<span class="c1">#: :class:`Protocol` reach all of them: :meth:`ProtocolBase.__post_init__</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` passes the same</span>
+<span class="c1">#: :class:`Protocol` reach all of them: :meth:`Protocol.__post_init__</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` passes the same</span>
 <span class="c1">#: ``**kwargs`` to :meth:`pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;` (and</span>
 <span class="c1">#: through it to ``make``) *and* to :meth:`unpack</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;` (and through it to ``read``).</span>
@@ -744,18 +744,18 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Names of every keyword-acceptable parameter declared by any of</span>
 <span class="sd">        :data:`_KEYWORD_CONSUMERS` anywhere in the MRO of ``cls``, plus every</span>
-<span class="sd">        entry of :attr:`ProtocolBase.__keywords__</span>
-<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;` found there,</span>
+<span class="sd">        entry of :attr:`Protocol.__keywords__</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.__keywords__&gt;` found there,</span>
 <span class="sd">        plus :data:`OUT_OF_BAND_KEYWORDS`. :obj:`None` if ``cls`` *itself* sets</span>
 <span class="sd">        ``__keywords__`` to :obj:`None`, meaning its keywords cannot be enumerated</span>
 <span class="sd">        and are not to be checked -- inherited :obj:`None` does not count, as</span>
-<span class="sd">        :attr:`ProtocolBase.__keywords__</span>
-<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;` explains.</span>
+<span class="sd">        :attr:`Protocol.__keywords__</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.__keywords__&gt;` explains.</span>
 
 <span class="sd">    The union is deliberately wider than the signature of ``cls.make``, because</span>
 <span class="sd">    a keyword reaching ``make`` is not necessarily *for* ``make``:</span>
-<span class="sd">    :meth:`ProtocolBase.__post_init__</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` hands one</span>
+<span class="sd">    :meth:`Protocol.__post_init__</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` hands one</span>
 <span class="sd">    ``**kwargs`` to both the construction and the parse of the packet it has just</span>
 <span class="sd">    constructed, so a keyword declared by ``read`` travels through ``make`` too.</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.hip.HIP` is the live example:</span>
@@ -767,8 +767,8 @@
 <span class="sd">    The walk covers the whole MRO rather than the most derived override of each</span>
 <span class="sd">    method, so that a subclass declaring its own keyword and forwarding the rest</span>
 <span class="sd">    to its parent does not make the parent's keywords unreachable. The one</span>
-<span class="sd">    exception is a class that sets :attr:`ProtocolBase.__own_make_keywords__</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__&gt;`: its</span>
+<span class="sd">    exception is a class that sets :attr:`Protocol.__own_make_keywords__</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.__own_make_keywords__&gt;`: its</span>
 <span class="sd">    ``make`` counts only while it is the ``make`` of ``cls``, not once a</span>
 <span class="sd">    subclass overrides it (:issue:`2286`).</span>
 
@@ -850,19 +850,19 @@
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Protocol class being constructed.</span>
 <span class="sd">        kwargs: Construction keywords to check, the out-of-band ones left out.</span>
-<span class="sd">            :meth:`ProtocolBase.__init__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` passes those</span>
-<span class="sd">            remaining after it has consumed them; :meth:`ProtocolBase.from_data</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;` passes its</span>
+<span class="sd">            :meth:`Protocol.__init__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;` passes those</span>
+<span class="sd">            remaining after it has consumed them; :meth:`Protocol.from_data</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;` passes its</span>
 <span class="sd">            caller's own, less ``_layer``, ``_protocol`` and ``__context__``,</span>
-<span class="sd">            before :meth:`ProtocolBase._make_data</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._make_data&gt;` adds to them.</span>
+<span class="sd">            before :meth:`Protocol._make_data</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._make_data&gt;` adds to them.</span>
 <span class="sd">        strict: Whether an unexpected keyword is an error. :data:`True` for a</span>
 <span class="sd">            caller's own construction; :data:`False` when the keywords were</span>
-<span class="sd">            generated by :meth:`ProtocolBase._make_data</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._make_data&gt;` rather than</span>
-<span class="sd">            written by anybody -- see :meth:`ProtocolBase.from_data</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;`.</span>
+<span class="sd">            generated by :meth:`Protocol._make_data</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._make_data&gt;` rather than</span>
+<span class="sd">            written by anybody -- see :meth:`Protocol.from_data</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedCall: If ``strict`` and any keyword is not among those</span>
@@ -1183,7 +1183,7 @@
 <span class="sd">            example -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length`</span>
 <span class="sd">            is the wire's Block Total Length and the captured octets sit ahead of</span>
 <span class="sd">            the option list and the trailing length field. The payload matters</span>
-<span class="sd">            because :meth:`ProtocolBase.__init__` injects it into every parsed</span>
+<span class="sd">            because :meth:`Protocol.__init__` injects it into every parsed</span>
 <span class="sd">            ``_info``, which the dumpers write out.</span>
 
 <span class="sd">        """</span>
@@ -1269,21 +1269,21 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            The ``**kwargs`` here absorbs the keywords that</span>
-<span class="sd">            :meth:`ProtocolBase.__post_init__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__post_init__&gt;` hands to the</span>
+<span class="sd">            :meth:`Protocol.__post_init__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` hands to the</span>
 <span class="sd">            parse as well as to the construction, so an implementation is not</span>
 <span class="sd">            expected to declare every keyword it is called with. It is *not* a</span>
 <span class="sd">            place for a caller to put a keyword no signature declares: building a</span>
 <span class="sd">            protocol *through its constructor* with such a keyword raises</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` from</span>
-<span class="sd">            :meth:`ProtocolBase.__init__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` (:issue:`617`).</span>
+<span class="sd">            :meth:`Protocol.__init__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;` (:issue:`617`).</span>
 
 <span class="sd">        Warning:</span>
 <span class="sd">            **Calling this method directly is not checked**, and still discards an</span>
 <span class="sd">            undeclared keyword in silence. The check lives in</span>
-<span class="sd">            :meth:`ProtocolBase.__init__</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;`, so it covers</span>
+<span class="sd">            :meth:`Protocol.__init__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`, so it covers</span>
 <span class="sd">            ``SomeProtocol(...)`` and the :meth:`pack` it leads to, but not</span>
 <span class="sd">            ``SomeProtocol.make(...)`` on an instance obtained some other way --</span>
 <span class="sd">            ``object.__new__(cls).make(**kwargs)`` is the idiom, used by this</span>
@@ -1568,7 +1568,7 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
@@ -2981,7 +2981,7 @@
 <span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
 <span class="sd">            zero-fills a field the stream ends inside, so a header parsed from</span>
 <span class="sd">            too few octets is filled with values that were never on the wire, and</span>
-<span class="sd">            :meth:`from_data &lt;ProtocolBase.from_data&gt;` rebuilds them (:issue:`1170`).</span>
+<span class="sd">            :meth:`from_data &lt;Protocol.from_data&gt;` rebuilds them (:issue:`1170`).</span>
 <span class="sd">            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            instead, as an unparseable one is.</span>
 

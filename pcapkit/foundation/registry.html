@@ -821,9 +821,9 @@ implementations <a class="reference internal" href="../protocols/application/htt
 <a class="reference internal" href="../protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv2.HTTP</span></code></a> – so they all compete
 for the single key <code class="docutils literal notranslate"><span class="pre">'HTTP'</span></code>. Registering one of them replaces whichever
 was there, and the replacement is observable through every reader of the
-registry, e.g. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.expand_comp" title="pcapkit.protocols.protocol.ProtocolBase.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.expand_comp</span></code></a>, which resolves a
+registry, e.g. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.expand_comp" title="pcapkit.protocols.protocol.Protocol.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.expand_comp</span></code></a>, which resolves a
 bare protocol name through it. Per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/675">#675</a> the overwrite is reported,
-matching <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code></a> and the other
+matching <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.register" title="pcapkit.protocols.protocol.Protocol.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.register</span></code></a> and the other
 overwrite-warning registries.</p>
 <p>The guard reads “key present <strong>and</strong> incumbent is a different class” –
 presence alone is not enough. This registry’s key is <em>derived</em> from the
@@ -845,7 +845,7 @@ merely reporting it, but it is a registry-format change that the bare-name
 readers outside this module cannot absorb on their own – the registry is a
 documented public attribute, and its readers look a bare name up and then
 degrade <em>silently</em> on a miss rather than raising, so a re-keying would not
-announce itself either. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.expand_comp" title="pcapkit.protocols.protocol.ProtocolBase.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.expand_comp</span></code></a> falls back to the
+announce itself either. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.expand_comp" title="pcapkit.protocols.protocol.Protocol.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.expand_comp</span></code></a> falls back to the
 name as a plain string, and the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> properties on
 <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a> and
 <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a> fall back to

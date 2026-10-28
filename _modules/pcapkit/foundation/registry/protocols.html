@@ -651,11 +651,11 @@
 <span class="sd">    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so they all compete</span>
 <span class="sd">    for the single key ``'HTTP'``. Registering one of them replaces whichever</span>
 <span class="sd">    was there, and the replacement is observable through every reader of the</span>
-<span class="sd">    registry, e.g. :meth:`ProtocolBase.expand_comp</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;`, which resolves a</span>
+<span class="sd">    registry, e.g. :meth:`Protocol.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.expand_comp&gt;`, which resolves a</span>
 <span class="sd">    bare protocol name through it. Per :issue:`675` the overwrite is reported,</span>
-<span class="sd">    matching :meth:`ProtocolBase.register</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` and the other</span>
+<span class="sd">    matching :meth:`Protocol.register</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.register&gt;` and the other</span>
 <span class="sd">    overwrite-warning registries.</span>
 
 <span class="sd">    The guard reads "key present **and** incumbent is a different class" --</span>
@@ -679,8 +679,8 @@
 <span class="sd">    readers outside this module cannot absorb on their own -- the registry is a</span>
 <span class="sd">    documented public attribute, and its readers look a bare name up and then</span>
 <span class="sd">    degrade *silently* on a miss rather than raising, so a re-keying would not</span>
-<span class="sd">    announce itself either. :meth:`ProtocolBase.expand_comp</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;` falls back to the</span>
+<span class="sd">    announce itself either. :meth:`Protocol.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.expand_comp&gt;` falls back to the</span>
 <span class="sd">    name as a plain string, and the ``protocol`` properties on</span>
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
@@ -853,7 +853,7 @@
 <span class="sd">    releasing whatever each target code held before, and followed by a lease</span>
 <span class="sd">    when the write changed the name, so that registering the code back undoes</span>
 <span class="sd">    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined</span>
-<span class="sd">    by a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, or</span>
+<span class="sd">    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or</span>
 <span class="sd">    registered directly -- is not leased, so no restore takes it away; one</span>
 <span class="sd">    showing it through a lease extends that lease to ``targets``.</span>
 

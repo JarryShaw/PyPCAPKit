@@ -721,7 +721,7 @@
 
 <span class="sd">            ``length`` is resolved against :func:`len` only for *this*</span>
 <span class="sd">            method's own check, and the *original* argument -- ``None``</span>
-<span class="sd">            included -- is what is forwarded to :meth:`Protocol.unpack</span>
+<span class="sd">            included -- is what is forwarded to :meth:`ProtocolBase.unpack</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`. Collapsing</span>
 <span class="sd">            ``None`` to a concrete ``0`` would change what</span>
 <span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`'s own</span>
@@ -738,7 +738,7 @@
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ``0 &lt; ... &lt; 9`` rather than ``... &lt; 9``: an exhausted stream</span>
             <span class="c1"># (``len(self) == 0``) is left alone, so ``length`` reaches</span>
-            <span class="c1"># :meth:`Protocol.unpack &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`</span>
+            <span class="c1"># :meth:`ProtocolBase.unpack &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`</span>
             <span class="c1"># still ``None`` and its ``prepare`` decorator raises</span>
             <span class="c1"># :exc:`StreamEOFError` as documented above; only a *non-empty*</span>
             <span class="c1"># short stream is rejected as malformed here.</span>

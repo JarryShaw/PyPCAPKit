@@ -141,7 +141,7 @@ This class is reached in these ways:
    ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
    have dedicated classes. When one of *those* raises,
    :func:`~pcapkit.corekit.decorators.beholder`
-   (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
+   (:meth:`ProtocolBase._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
    would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
    ``next`` and crashes the walk as in path 1.
    :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>` catches

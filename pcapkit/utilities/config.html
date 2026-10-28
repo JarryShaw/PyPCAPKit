@@ -698,7 +698,7 @@ Destination Options header at most twice, so no compliant chain gets close.
 Without the bound, a chain dissected header by header stops wherever
 Python’s recursion limit falls, which depends on the interpreter. Each
 header is a layer, so <a class="reference internal" href="#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> applies as well.</p>
-<p>Rebuilding a frame with <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.from_data" title="pcapkit.protocols.protocol.ProtocolBase.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
+<p>Rebuilding a frame with <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
 stops where parsing it did, and warns once too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>), cf.
 <a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._make_payload" title="pcapkit.protocols.internet.internet.Internet._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._make_payload</span></code></a>.</p>
 <div class="versionadded">
