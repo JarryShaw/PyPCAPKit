@@ -78,6 +78,8 @@ class TCP(AppType):
        * - ``ai-adp``
          - [TCP] AI Agent Discovery Protocol (ADP)
            [draft-pro-adp-agent-discovery-00]
+       * - ``ai-gateway``
+         - [TCP] AI Gateway Local Discovery [draft-su-ai-gateway-discovery-00]
        * - ``airdrop``
          - [TCP] Airdrop
        * - ``airmate``
