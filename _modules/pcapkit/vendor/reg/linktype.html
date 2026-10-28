@@ -499,6 +499,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">bs4</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.vendor.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vendor</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -518,6 +519,16 @@
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0x00000000 &lt;= value &lt;= 0xFFFFFFFF'</span>
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'http://www.tcpdump.org/linktypes.html'</span>
+
+    <span class="c1">#: Destinations of a bare ``LinkType`` member; see</span>
+    <span class="c1">#: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. Two of them, because a</span>
+    <span class="c1">#: link-layer header type keys the next-layer registry of both capture file</span>
+    <span class="c1">#: formats, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
+    <span class="c1">#: already registers into both by hand.</span>
+    <span class="n">PROTO_DEST</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcap.frame'</span><span class="p">,</span> <span class="s1">'Frame'</span><span class="p">),</span>
+        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcapng'</span><span class="p">,</span> <span class="s1">'PCAPNG'</span><span class="p">),</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count field records."""</span>

@@ -515,7 +515,9 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Vendor'</span><span class="p">]</span>
 
@@ -553,8 +555,65 @@
 <span class="c1">#: under ``[project.urls]`` in :file:`pyproject.toml`.</span>
 <span class="n">PROJECT_URL</span> <span class="o">=</span> <span class="s1">'https://github.com/JarryShaw/PyPCAPKit'</span>
 
+<span class="c1">#: Import line the generated module needs for a non-empty ``__proto_dest__``.</span>
+<span class="c1">#: :data:`LINE` renders it only when the crawler declares</span>
+<span class="c1">#: :attr:`Vendor.PROTO_DEST`, so an enumeration naming no destination keeps the</span>
+<span class="c1">#: import block it had. The trailing newline lives here rather than in the</span>
+<span class="c1">#: f-string because an f-string replacement field may not contain a backslash</span>
+<span class="c1">#: before Python 3.12, and this package still builds on 3.8.</span>
+<span class="n">PROTO_DEST_IMPORT</span> <span class="o">=</span> <span class="s1">'from pcapkit.corekit.module import ModuleDescriptor</span><span class="se">\n</span><span class="s1">'</span>
+
+
+<div class="viewcode-block" id="render_proto_dest">
+<a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.render_proto_dest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_proto_dest</span><span class="p">(</span><span class="n">descriptors</span><span class="p">:</span> <span class="s1">'tuple[ModuleDescriptor[Any], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Render the generated class's ``__proto_dest__`` declaration.</span>
+
+<span class="sd">    :data:`LINE` calls this with the crawler's :attr:`Vendor.PROTO_DEST`. It is</span>
+<span class="sd">    a function rather than an expression inside the f-string for the reason</span>
+<span class="sd">    :data:`PROTO_DEST_IMPORT` gives: the block it returns contains newlines,</span>
+<span class="sd">    which an f-string replacement field cannot spell before Python 3.12.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        descriptors: The crawler's :attr:`Vendor.PROTO_DEST`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The declaration, indented as a class body and followed by a blank line,</span>
+<span class="sd">        or the empty string when ``descriptors`` is empty -- which is what keeps</span>
+<span class="sd">        the template's output byte-identical for every enumeration that names no</span>
+<span class="sd">        destination.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptors</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">''</span>
+    <span class="n">entries</span> <span class="o">=</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"        ModuleDescriptor(</span><span class="si">{</span><span class="n">module</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">),</span><span class="se">\n</span><span class="s2">"</span>
+                      <span class="k">for</span> <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">'    #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: this enumeration, read by</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: to resolve a bare member of it into its destination(s). The classes are</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: references rather than imported, because :mod:`pcapkit.const` sits below</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    #: :mod:`pcapkit.protocols` and importing one from here would be circular.</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'    __proto_dest__ = (</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">entries</span><span class="si">}</span><span class="s1">'</span>
+            <span class="s1">'    )</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+
 <span class="c1">#: Default constant template of enumeration registry from IANA CSV.</span>
-<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
+<span class="c1">#:</span>
+<span class="c1">#: ``DEST`` is the crawler's :attr:`Vendor.PROTO_DEST` and defaults to empty, so</span>
+<span class="c1">#: a caller that renders an enumeration keying no ``__proto__`` -- every one</span>
+<span class="c1">#: outside the handful :issue:`2392` names -- passes six arguments as before.</span>
+<span class="c1">#:</span>
+<span class="c1">#: NOTE: the type comment says ``Callable[..., str]`` rather than spelling the</span>
+<span class="c1">#: parameters out, because mypy cannot infer a lambda's type against an explicit</span>
+<span class="c1">#: ``Callable[[...], ...]`` once the lambda carries a default (measured: one</span>
+<span class="c1">#: extra ``Cannot infer type of lambda`` error). The parameters are documented in</span>
+<span class="c1">#: ``docs/source/pcapkit/vendor/default.rst`` instead.</span>
+<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">,</span> <span class="n">DEST</span><span class="o">=</span><span class="p">():</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
 <span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
 <span class="s1">"""</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ['</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
@@ -572,7 +631,7 @@
 <span class="s1">from aenum import IntEnum</span><span class="si">{</span><span class="s1">', extend_enum'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">'extend_enum('</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">MISS</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span>
 
 <span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
-<span class="s1">from pcapkit.utilities.exceptions import EnumValueError</span>
+<span class="si">{</span><span class="n">PROTO_DEST_IMPORT</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">DEST</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s1">from pcapkit.utilities.exceptions import EnumValueError</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Any</span>
@@ -583,7 +642,7 @@
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, IntEnum):</span>
 <span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
-<span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
+<span class="si">{</span><span class="n">render_proto_dest</span><span class="p">(</span><span class="n">DEST</span><span class="p">)</span><span class="si">}</span><span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _validate_value(cls, value: 'Any') -&gt; 'None':</span>
@@ -619,7 +678,7 @@
 <span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
 <span class="s1">        </span><span class="si">{</span><span class="s1">''</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">test</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'return'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">test</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'return'</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'return super()._missing_(value)'</span><span class="si">}</span>
-<span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
+<span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[..., str]</span>
 
 
 <div class="viewcode-block" id="get_proxies">
@@ -757,6 +816,22 @@
     <span class="n">FLAG</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+
+    <span class="c1">#: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by</span>
+    <span class="c1">#: the generated enumeration, rendered into its class body as</span>
+    <span class="c1">#: ``__proto_dest__`` -- the declaration</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`</span>
+    <span class="c1">#: reads to resolve a bare member of that enumeration into its</span>
+    <span class="c1">#: destination(s), per :issue:`2392`.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Only the registries that key a ``__proto__`` declare one, and the</span>
+    <span class="c1">#: template renders nothing for a crawler that leaves this empty, so every</span>
+    <span class="c1">#: other generated module is unaffected. A class is named as a lazy</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than imported,</span>
+    <span class="c1">#: because :mod:`pcapkit.const` sits below :mod:`pcapkit.protocols`.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: .. versionadded:: 1.5.0</span>
+    <span class="n">PROTO_DEST</span><span class="p">:</span> <span class="s1">'tuple[ModuleDescriptor[Any], ...]'</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="c1">###############</span>
     <span class="c1"># Processors</span>
@@ -988,7 +1063,7 @@
         <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n\n</span><span class="s1">    '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">MISS</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">        '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">miss</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PROTO_DEST</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Vendor.request">

@@ -529,6 +529,18 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[LinkType] Link-Layer Header Type Values</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.__proto_dest__">
+<span class="sig-name descname"><span class="pre">__proto_dest__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(('pcapkit.protocols.misc.pcap.frame',</span> <span class="pre">'Frame'),</span> <span class="pre">('pcapkit.protocols.misc.pcapng',</span> <span class="pre">'PCAPNG'))</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.__proto_dest__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol class(es) owning the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch registry keyed by
+this enumeration, read by
+<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+to resolve a bare member of it into its destination(s). The classes are
+named as lazy <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+references rather than imported, because <a class="reference internal" href="index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> sits below
+<a class="reference internal" href="../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> and importing one from here would be circular.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NULL">
 <span class="sig-name descname"><span class="pre">NULL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NULL" title="Link to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code>] BSD loopback encapsulation.</p>
@@ -1964,6 +1976,18 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[EtherType] Ethertype IEEE 802 Numbers</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.__proto_dest__">
+<span class="sig-name descname"><span class="pre">__proto_dest__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(('pcapkit.protocols.link.link',</span> <span class="pre">'Link'),)</span></span><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.__proto_dest__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol class(es) owning the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch registry keyed by
+this enumeration, read by
+<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+to resolve a bare member of it into its destination(s). The classes are
+named as lazy <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+references rather than imported, because <a class="reference internal" href="index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> sits below
+<a class="reference internal" href="../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> and importing one from here would be circular.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00">
 <span class="sig-name descname"><span class="pre">Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">512</span></span><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00" title="Link to this definition">¶</a></dt>
 <dd><p>Formerly XEROX PUP. Invalid as an Ethertype since 1983. Use 0x0A00. [Boggs,
@@ -2988,6 +3012,18 @@ which is automatically generated from <a class="reference internal" href="../ven
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[TransType] Transport Layer Protocol Numbers</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.__proto_dest__">
+<span class="sig-name descname"><span class="pre">__proto_dest__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(('pcapkit.protocols.internet.internet',</span> <span class="pre">'Internet'),)</span></span><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.__proto_dest__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol class(es) owning the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch registry keyed by
+this enumeration, read by
+<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+to resolve a bare member of it into its destination(s). The classes are
+named as lazy <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+references rather than imported, because <a class="reference internal" href="index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> sits below
+<a class="reference internal" href="../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> and importing one from here would be circular.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.HOPOPT">
 <span class="sig-name descname"><span class="pre">HOPOPT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HOPOPT" title="Link to this definition">¶</a></dt>

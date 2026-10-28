@@ -533,6 +533,25 @@ a new vendor generator.</p>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.PROTO_DEST">
+<span class="sig-name descname"><span class="pre">PROTO_DEST</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#pcapkit.vendor.default.Vendor.PROTO_DEST" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol class(es) owning the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch registry keyed by
+the generated enumeration, rendered into its class body as
+<code class="docutils literal notranslate"><span class="pre">__proto_dest__</span></code> – the declaration
+<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+reads to resolve a bare member of that enumeration into its
+destination(s), per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2392">#2392</a>.</p>
+<p>Only the registries that key a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> declare one, and the
+template renders nothing for a crawler that leaves this empty, so every
+other generated module is unaffected. A class is named as a lazy
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> rather than imported,
+because <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> sits below <a class="reference internal" href="../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.count">
 <span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#Vendor.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.count" title="Link to this definition">¶</a></dt>
@@ -887,7 +906,7 @@ where it was taken as off silently.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.LINE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">LINE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FLAG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ENUM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MISS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MODL</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.default.LINE" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">LINE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FLAG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ENUM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MISS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MODL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DEST</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.default.LINE" title="Link to this definition">¶</a></dt>
 <dd><p>Default constant template of enumeration registry from IANA CSV.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -898,10 +917,48 @@ where it was taken as off silently.</p>
 <li><p><strong>ENUM</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – enumeration data (class attributes)</p></li>
 <li><p><strong>MISS</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – missing value handler (default value)</p></li>
 <li><p><strong>MODL</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – module name of the constant enumeration class</p></li>
+<li><p><strong>DEST</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><em>ModuleDescriptor</em></a><em>, </em><em>...</em><em>]</em>) – the crawler’s <a class="reference internal" href="#pcapkit.vendor.default.Vendor.PROTO_DEST" title="pcapkit.vendor.default.Vendor.PROTO_DEST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PROTO_DEST</span></code></a>,
+rendered as the class’s <code class="docutils literal notranslate"><span class="pre">__proto_dest__</span></code>; nothing is rendered when it is
+empty, which is the case for every registry that keys no <code class="docutils literal notranslate"><span class="pre">__proto__</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.vendor.default.PROTO_DEST_IMPORT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">PROTO_DEST_IMPORT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'from</span> <span class="pre">pcapkit.corekit.module</span> <span class="pre">import</span> <span class="pre">ModuleDescriptor\n'</span></span><a class="headerlink" href="#pcapkit.vendor.default.PROTO_DEST_IMPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Import line the generated module needs for a non-empty <code class="docutils literal notranslate"><span class="pre">__proto_dest__</span></code>.
+<a class="reference internal" href="#pcapkit.vendor.default.LINE" title="pcapkit.vendor.default.LINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">LINE</span></code></a> renders it only when the crawler declares
+<a class="reference internal" href="#pcapkit.vendor.default.Vendor.PROTO_DEST" title="pcapkit.vendor.default.Vendor.PROTO_DEST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Vendor.PROTO_DEST</span></code></a>, so an enumeration naming no destination keeps the
+import block it had. The trailing newline lives here rather than in the
+f-string because an f-string replacement field may not contain a backslash
+before Python 3.12, and this package still builds on 3.8.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.vendor.default.render_proto_dest">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">render_proto_dest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#render_proto_dest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.render_proto_dest" title="Link to this definition">¶</a></dt>
+<dd><p>Render the generated class’s <code class="docutils literal notranslate"><span class="pre">__proto_dest__</span></code> declaration.</p>
+<p><a class="reference internal" href="#pcapkit.vendor.default.LINE" title="pcapkit.vendor.default.LINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">LINE</span></code></a> calls this with the crawler’s <a class="reference internal" href="#pcapkit.vendor.default.Vendor.PROTO_DEST" title="pcapkit.vendor.default.Vendor.PROTO_DEST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Vendor.PROTO_DEST</span></code></a>. It is
+a function rather than an expression inside the f-string for the reason
+<a class="reference internal" href="#pcapkit.vendor.default.PROTO_DEST_IMPORT" title="pcapkit.vendor.default.PROTO_DEST_IMPORT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROTO_DEST_IMPORT</span></code></a> gives: the block it returns contains newlines,
+which an f-string replacement field cannot spell before Python 3.12.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>descriptors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span>) – The crawler’s <a class="reference internal" href="#pcapkit.vendor.default.Vendor.PROTO_DEST" title="pcapkit.vendor.default.Vendor.PROTO_DEST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Vendor.PROTO_DEST</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The declaration, indented as a class body and followed by a blank line,
+or the empty string when <code class="docutils literal notranslate"><span class="pre">descriptors</span></code> is empty – which is what keeps
+the template’s output byte-identical for every enumeration that names no
+destination.</p>
 </dd>
 </dl>
 </dd></dl>

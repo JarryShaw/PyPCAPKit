@@ -571,7 +571,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">SCTP_PayloadProtocolIdentifier</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
@@ -891,25 +890,6 @@
             <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span>
 
 
-<span class="c1">#: Destination classes for each enum type a ``code=`` key can carry.</span>
-<span class="c1">#:</span>
-<span class="c1">#: Maps an enum type to the class(es) owning the</span>
-<span class="c1">#: :attr:`ProtocolBase.__proto__ &lt;pcapkit.protocols.protocol.ProtocolBase.__proto__&gt;`</span>
-<span class="c1">#: dispatch registry keyed by that enum type -- the "registry-of-registries" that</span>
-<span class="c1">#: lets ``code=`` infer a destination from a key's own type, per :issue:`514`. It</span>
-<span class="c1">#: is the same targeting :func:`register_ethertype`, :func:`register_transtype`,</span>
-<span class="c1">#: :func:`register_linktype` and :func:`register_sctp` hard-code by hand, in one</span>
-<span class="c1">#: table so :func:`register_protocol_code` can consult it. :class:`~pcapkit.const.reg.linktype.LinkType` naming</span>
-<span class="c1">#: more than one class is deliberate, not ambiguous -- :func:`register_linktype`</span>
-<span class="c1">#: already fans out to each of them.</span>
-<span class="n">_CODE_DESTINATIONS</span><span class="p">:</span> <span class="s1">'dict[Type[EnumRegistry], tuple[Type[ProtocolBase], ...]]'</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">Enum_EtherType</span><span class="p">:</span> <span class="p">(</span><span class="n">Link</span><span class="p">,),</span>
-    <span class="n">Enum_TransType</span><span class="p">:</span> <span class="p">(</span><span class="n">Internet</span><span class="p">,),</span>
-    <span class="n">Enum_PayloadProtocolIdentifier</span><span class="p">:</span> <span class="p">(</span><span class="n">SCTP</span><span class="p">,),</span>
-    <span class="n">Enum_LinkType</span><span class="p">:</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">),</span>
-<span class="p">}</span>
-
-
 <span class="k">def</span><span class="w"> </span><span class="nf">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[Type[ProtocolBase], Any]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Flatten a ``code=`` argument into ``(destination, key)`` pairs.</span>
 
@@ -931,13 +911,29 @@
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
-        <span class="n">destinations</span> <span class="o">=</span> <span class="n">_CODE_DESTINATIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Type[EnumRegistry]'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="n">destinations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># NOTE: read with ``getattr``, not out of the type's own ``vars()`` as</span>
+        <span class="c1"># the ``__proto_key__`` check in ``register_protocol_code`` does. That</span>
+        <span class="c1"># read is deliberately non-inheriting because a protocol subclass can</span>
+        <span class="c1"># own a registry keyed by something other than its parent's -- Loopback</span>
+        <span class="c1"># does. No enum registry can be in that position: declaring a</span>
+        <span class="c1"># destination means having members, and aenum refuses to extend an</span>
+        <span class="c1"># enumeration with members, so none of these registries has a subclass</span>
+        <span class="c1"># and none can gain one. The one enum registry that is subclassed is</span>
+        <span class="c1"># AppType, a memberless base partitioned by transport protocol, and its</span>
+        <span class="c1"># subclass relationship is irrelevant here only because AppType itself</span>
+        <span class="c1"># declares no ``__proto_dest__`` at all -- the inheriting read finds</span>
+        <span class="c1"># nothing to inherit, so none of its parts reaches this branch. A</span>
+        <span class="c1"># class-level destination would in fact be the wrong model for it:</span>
+        <span class="c1"># ``register_apptype`` routes each member to the registry named by that</span>
+        <span class="c1"># member's own transport protocol, which one shared destination for the</span>
+        <span class="c1"># whole family could not express.</span>
+        <span class="n">destinations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="s1">'__proto_dest__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">destinations</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'no destination registry is known for enum type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> '</span>
                 <span class="sa">f</span><span class="s1">'(key </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">); pass an explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">SomeClass: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">destination</span> <span class="ow">in</span> <span class="n">destinations</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">destination</span><span class="p">,</span> <span class="n">code</span>
+        <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">destinations</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">code</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
@@ -967,8 +963,9 @@
 <span class="sd">    ``code`` is normalised into a flat sequence of targets, where each item</span>
 <span class="sd">    is either:</span>
 
-<span class="sd">    * an enum member, whose *type* is looked up in a small table mapping</span>
-<span class="sd">      enum type to the class(es) owning the matching ``__proto__`` --</span>
+<span class="sd">    * an enum member, whose *type* names the class(es) owning the matching</span>
+<span class="sd">      ``__proto__`` in its</span>
+<span class="sd">      :attr:`__proto_dest__ &lt;pcapkit.const.reg.ethertype.EtherType.__proto_dest__&gt;` --</span>
 <span class="sd">      :class:`~pcapkit.const.reg.ethertype.EtherType` to</span>
 <span class="sd">      :class:`~pcapkit.protocols.link.link.Link`,</span>
 <span class="sd">      :class:`~pcapkit.const.reg.transtype.TransType` to</span>
@@ -1015,7 +1012,8 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If a bare :class:`int` (or any other non-enum,</span>
 <span class="sd">            non-mapping value) is given without an explicit destination, or if</span>
-<span class="sd">            an enum member's type names no known destination registry --</span>
+<span class="sd">            an enum member's type declares no</span>
+<span class="sd">            :attr:`__proto_dest__ &lt;pcapkit.const.reg.ethertype.EtherType.__proto_dest__&gt;` --</span>
 <span class="sd">            inference refuses rather than guesses; or if a key is not of the</span>
 <span class="sd">            type its destination's registry is keyed by, as its typed registrar</span>
 <span class="sd">            would reject it, e.g. ``{Frame: TransType.ICMP}``. What a registry is</span>

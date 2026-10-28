@@ -16,6 +16,7 @@ only, which is the base class for all vendor crawlers.
       :no-value:
    .. autoattribute:: LINK
       :no-value:
+   .. autoattribute:: PROTO_DEST
 
    .. automethod:: count
    .. automethod:: process
@@ -76,7 +77,7 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
-.. function:: LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
+.. function:: LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL, DEST=())
 
    Default constant template of enumeration registry from IANA CSV.
 
@@ -86,7 +87,15 @@ Internal Definitions
    :param str ENUM: enumeration data (class attributes)
    :param str MISS: missing value handler (default value)
    :param str MODL: module name of the constant enumeration class
+   :param DEST: the crawler's :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`,
+      rendered as the class's ``__proto_dest__``; nothing is rendered when it is
+      empty, which is the case for every registry that keys no ``__proto__``
+   :type DEST: tuple[~pcapkit.corekit.module.ModuleDescriptor, ...]
    :rtype: str
+
+.. autodata:: pcapkit.vendor.default.PROTO_DEST_IMPORT
+
+.. autofunction:: pcapkit.vendor.default.render_proto_dest
 
 .. autofunction:: pcapkit.vendor.default.get_proxies
 

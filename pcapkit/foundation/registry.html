@@ -882,8 +882,9 @@ time.</p>
 <p><code class="docutils literal notranslate"><span class="pre">code</span></code> is normalised into a flat sequence of targets, where each item
 is either:</p>
 <ul class="simple">
-<li><p>an enum member, whose <em>type</em> is looked up in a small table mapping
-enum type to the class(es) owning the matching <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> –
+<li><p>an enum member, whose <em>type</em> names the class(es) owning the matching
+<code class="docutils literal notranslate"><span class="pre">__proto__</span></code> in its
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType.__proto_dest__" title="pcapkit.const.reg.ethertype.EtherType.__proto_dest__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto_dest__</span></code></a> –
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> to
 <a class="reference internal" href="../protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> to
@@ -931,7 +932,8 @@ and GitHub issue <a class="extlink-issue reference external" href="https://githu
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> (or any other non-enum,
     non-mapping value) is given without an explicit destination, or if
-    an enum member’s type names no known destination registry –
+    an enum member’s type declares no
+    <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType.__proto_dest__" title="pcapkit.const.reg.ethertype.EtherType.__proto_dest__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto_dest__</span></code></a> –
     inference refuses rather than guesses; or if a key is not of the
     type its destination’s registry is keyed by, as its typed registrar
     would reject it, e.g. <code class="docutils literal notranslate"><span class="pre">{Frame:</span> <span class="pre">TransType.ICMP}</span></code>. What a registry is

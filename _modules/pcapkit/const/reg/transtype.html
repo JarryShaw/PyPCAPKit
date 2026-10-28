@@ -498,6 +498,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -510,6 +511,17 @@
 <a class="viewcode-back" href="../../../../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransType</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[TransType] Transport Layer Protocol Numbers"""</span>
+
+    <span class="c1">#: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by</span>
+    <span class="c1">#: this enumeration, read by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`</span>
+    <span class="c1">#: to resolve a bare member of it into its destination(s). The classes are</span>
+    <span class="c1">#: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`</span>
+    <span class="c1">#: references rather than imported, because :mod:`pcapkit.const` sits below</span>
+    <span class="c1">#: :mod:`pcapkit.protocols` and importing one from here would be circular.</span>
+    <span class="n">__proto_dest__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.internet'</span><span class="p">,</span> <span class="s1">'Internet'</span><span class="p">),</span>
+    <span class="p">)</span>
 
     <span class="c1">#: IPv6 Hop-by-Hop Option [:rfc:`8200`]</span>
     <span class="n">HOPOPT</span> <span class="o">=</span> <span class="mi">0</span>
