@@ -138,7 +138,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
@@ -150,7 +150,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
                 replacement so a caller can tell *what* was lost. Fires only
                 when the incumbent differs from the replacement -- see
                 :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.Protocol.register>` for the
+                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor that a restore puts back (:issue:`1504`).
 
@@ -158,7 +158,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
            Takes the protocol as one ``protocol`` argument, a
            :class:`~pcapkit.corekit.module.ModuleDescriptor` or a
-           :class:`~pcapkit.protocols.protocol.Protocol` subclass, in place of
+           :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, in place of
            the ``module`` and ``class_`` names.
 
         """

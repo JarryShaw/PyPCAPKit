@@ -228,6 +228,10 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
+                (:issue:`2287`).
+
         .. versionchanged:: 1.5.0
 
            An out-of-range ``srcport`` or ``dstport`` raises

@@ -200,9 +200,9 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
     :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of
-    :issue:`514` left this key unchanged and recorded the shared namespace as a
-    risk it did not fix, so the collision is reported here rather than
-    resolved.
+    :issue:`514` keeps this key, and its thread records the shared namespace as
+    a risk that design does not resolve, so the collision is reported here
+    rather than fixed.
 
     Args:
         protocol: Protocol class.
@@ -256,10 +256,11 @@ class _NameLease:
     Each code registrar below ends by naming its class in the by-name registry,
     and :mod:`pcapkit.foundation.registry` has no ``unregister``: a code is
     undone by registering the entry it displaced (:issue:`1363`). Without a
-    record of that by-name write, handing a code back restored the code and left
-    the name behind (:issue:`1505`). A lease records what the write displaced and
-    which codes still dispatch to the class, so the last of them to be handed
-    back puts the displaced entry back, or removes the name if it was new.
+    record of that by-name write, handing a code back would restore the code and
+    leave the name behind (:issue:`1505`). A lease records what the write
+    displaced and which codes still dispatch to the class, so the last of them
+    to be handed back puts the displaced entry back, or removes the name if it
+    was new.
 
     A lease is one write, not one class: the same class can hold two leases on
     a name -- e.g. a built-in registered at one port over a custom class
@@ -366,9 +367,9 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
     releasing whatever each target code held before, and followed by a lease
     when the write changed the name, so that registering the code back undoes
     it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined
-    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or registered
-    directly -- is not leased, so no restore takes it away; one showing it
-    through a lease extends that lease to ``targets``.
+    by a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, or
+    registered directly -- is not leased, so no restore takes it away; one
+    showing it through a lease extends that lease to ``targets``.
 
     Args:
         protocol: Protocol class just registered -- and so validated -- at ``targets``.
@@ -565,12 +566,15 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
 
 def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
                 number: 'bool' = False) -> 'None':
-    """Reject a registration key that is not a member of the registrar's enum.
+    """Reject a registration key that is not a member of the enum its
+    destination registry is keyed by.
 
     Each registrar typed on one enum calls this before touching any registry,
-    so a bad ``code`` leaves every registry as it was (:issue:`2186`). The check is on the type,
-    not the value: the registry enums compare equal to their values, so a
-    member of another enum would key the entry of the member it equals, e.g.
+    as does :func:`register_protocol_code` for an inferred or explicitly
+    named destination, so a bad ``code`` leaves every registry as it was
+    (:issue:`2186`). The check is on the type, not the value: the registry
+    enums compare equal to their values, so a member of another enum would
+    key the entry of the member it equals, e.g.
     :attr:`TransType.ICMP <pcapkit.const.reg.transtype.TransType.ICMP>` would
     replace :attr:`LinkType.ETHERNET <pcapkit.const.reg.linktype.LinkType.ETHERNET>`
     (:issue:`2224`).
@@ -580,7 +584,7 @@ def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
         kind: Enum the registrar is typed on.
         target: Protocol class whose registry ``code`` is destined for, named in
             the error message so a rejection says *whose* registry rejected the
-            key rather than only what it wanted -- the registrars share one
+            key rather than only what it wanted -- its callers share one
             message, and several of them are typed on the same enum.
         number: Whether a bare :class:`int` is a valid key too, as for the
             registrars keyed on a port number or a payload protocol identifier.

@@ -270,7 +270,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
 
         Deliberately *not* ``L2TPv2`` (#548): v2 answers on port 1701 only, and
         registering it at ``TransType.L2TP`` points the :rfc:`2661` parser at a
-        v3-over-IP header. The mechanism under test is unchanged either way -- the
+        v3-over-IP header. The mechanism under test is the same either way -- the
         class here is a stand-in and nothing is really registered -- but the example
         should not recommend a binding the library refuses.
         """
@@ -365,7 +365,7 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         Mirrors part (a)'s ``Parent``/``Derived``/``DerivedOptIn`` measurement
         on the issue thread: a subclass of a registered class that itself
         passes no ``code=`` must not re-register under its own name -- there
-        is no name-derived fallback left to do that with, but the property is
+        is no name-derived fallback to do that with, but the property is
         worth pinning directly for ``Protocol`` too.
         """
         from pcapkit.const.reg.transtype import TransType
@@ -416,12 +416,14 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
 class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
     """Each ``code=`` key is checked against its destination's key type, all before any registers (#2268).
 
-    The typed registrars reject a member of another enum (#2224), but
-    ``register_protocol_code`` handed every ``{destination: key}`` pair straight
-    to ``destination.register``. The registry enums compare equal to their
-    values, so ``{Frame: TransType.ICMP}`` replaced the shipped entry at
-    ``LinkType.ETHERNET`` with only a warning. It also registered each target as
-    it flattened them, so a bad later target left the earlier ones in place.
+    The typed registrars reject a member of another enum (#2224), and
+    ``register_protocol_code`` checks every ``{destination: key}`` pair against
+    its destination's key type before it registers anything. The registry enums
+    compare equal to their values, so a pair handed straight to
+    ``destination.register`` -- ``{Frame: TransType.ICMP}`` -- would replace the
+    shipped entry at ``LinkType.ETHERNET`` with only a warning; checking every
+    pair up front also leaves no earlier target registered when a later one is
+    bad.
 
     Each case snapshots every dispatch registry and the name registry, expects
     :exc:`~pcapkit.utilities.exceptions.RegistryError`, compares each registry
@@ -679,15 +681,15 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link` and
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ProtoDestDeclarationTests(unittest.TestCase):
-    """``__proto_dest__``, the declaration #2392 replaced the lookup table with.
+    """``__proto_dest__``, the declaration inference reads (#2392).
 
-    Inference used to read a private lookup table in
-    :mod:`pcapkit.foundation.registry.protocols`, keyed by enum type. #2392
-    moves it onto the enumeration registry classes, mirroring what the same
-    issue did in the other direction with ``__proto_key__``. These pin the
-    declarations themselves; the ``register_protocol_code`` behaviour they drive
-    is pinned by :class:`RegisterProtocolCodeInferenceTests` above, which is
-    unchanged by the move and is the point.
+    The enumeration registry classes name their destination class(es)
+    themselves, as a ``__proto_dest__`` dunder, so inference reads the pairing
+    off the key's own type -- the mirror of ``__proto_key__``, which each
+    destination declares to name the enum its own registry is keyed by. These
+    pin the declarations themselves; the ``register_protocol_code`` behaviour
+    they drive, which is the point of them, is pinned by
+    :class:`RegisterProtocolCodeInferenceTests` above.
     """
 
     def setUp(self) -> None:
@@ -708,7 +710,7 @@ class ProtoDestDeclarationTests(unittest.TestCase):
     )
 
     def test_each_registry_declares_the_destinations_it_keys(self) -> None:
-        """Resolved, and in order -- ``LinkType`` still fans out to both formats.
+        """Resolved, and in order -- ``LinkType`` fans out to both formats.
 
         A declaration is read off the class's own :func:`vars`, since an
         enumeration that inherited one would be declaring nothing.
@@ -754,7 +756,7 @@ class ProtoDestDeclarationTests(unittest.TestCase):
                 self.assertNotIn('import pcapkit.protocols', source)
 
     def test_only_these_registries_declare_a_destination(self) -> None:
-        """Every other generated enumeration is untouched by the template change.
+        """No other generated enumeration declares a destination.
 
         The template renders nothing for a crawler that declares no
         ``PROTO_DEST``, so a declaration appearing anywhere else means either a

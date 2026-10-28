@@ -624,6 +624,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
+                (:issue:`2287`).
+
         .. versionchanged:: 1.5.0
 
            An out-of-range ``srcport`` or ``dstport`` raises
@@ -2900,13 +2904,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # three octets of header -- ``kind``, ``length`` and the subtype/flags
         # octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as
         # its body, so the option is never shorter than 3 octets -- the smallest
-        # Multipath TCP option :rfc:`8684` section 3 permits. The former
-        # ``2 + len(data)`` declared 2 for ``data=b''`` while still packing those
-        # three octets, and the segment could not be read back:
-        # ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which went
-        # negative and raised ``ProtocolError: Field data resolved to a negative
-        # length``. For every non-empty ``data`` the two expressions agree, so
-        # this only changes the empty case.
+        # Multipath TCP option :rfc:`8684` section 3 permits. A plain
+        # ``2 + len(data)`` would declare 2 for ``data=b''`` while those three
+        # octets are packed anyway, and the segment could not be read back:
+        # ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which would
+        # go negative and raise ``ProtocolError: Field data resolved to a
+        # negative length``. For every non-empty ``data`` the two expressions
+        # agree, so only the empty case tells them apart.
         return Schema_MPTCPUnknown(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=3 + len(data[1:]),

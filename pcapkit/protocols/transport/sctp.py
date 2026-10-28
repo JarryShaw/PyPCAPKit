@@ -694,6 +694,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
+                (:issue:`2287`).
+
         Note:
             There is no ``payload`` argument: SCTP carries its user data in the
             ``data`` field of a DATA chunk, so the payload is supplied as part
@@ -730,7 +734,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             code: payload protocol identifier (PPID), as in
                 :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Important:
             SCTP overrides :meth:`Transport.register

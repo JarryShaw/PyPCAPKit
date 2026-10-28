@@ -224,7 +224,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Raises:
             ProtocolError: If the values are neither a request's nor a
-                response's, or if ``raw_line`` or a ``raw_header`` entry that
+                response's, if they are a request's and ``uri`` is
+                :obj:`None`, or if ``raw_line`` or a ``raw_header`` entry that
                 reads back as the given values carries a CR or LF that the
                 values do not (other than the CRLF of an ``obs-fold``).
 
@@ -328,7 +329,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Raises:
             ProtocolError: If the values are neither a request's nor a
-                response's.
+                response's, or if they are a request's and ``uri`` is
+                :obj:`None`.
 
         """
         version = http_version.encode() if isinstance(http_version, str) else http_version

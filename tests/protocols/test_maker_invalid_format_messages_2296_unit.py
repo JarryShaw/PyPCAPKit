@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2296: makers name the argument they rejected.
 
-Several ``_make_*`` builders refused a caller-supplied argument with the
-*reader's* text -- ``<alias>: [Chunk|Param|Cause|OptNo N] invalid format``.
-Nothing had been parsed at that point, so the message described wire data that
-did not exist and told the caller neither which keyword was wrong nor what it
-had passed. Each site now uses the house form established by #2232 and #2257,
-``<prefix>: <lowercase description>: must be X, not {value!r}``.
+The ``_make_*`` builders pinned below refuse a caller-supplied argument in the
+house form established by #2232 and #2257,
+``<prefix>: <lowercase description>: must be X, not {value!r}``, which names
+the keyword at fault and the value passed. A reader instead says
+``<alias>: [Chunk|Param|Cause|OptNo N] invalid format``, which describes wire
+data -- something a maker has not parsed -- and identifies neither.
 
-The parse side is deliberately untouched: ``invalid format`` is the right thing
-for a reader to say, which is why the ``SCTP: [Chunk 0] invalid format`` pin in
+Readers are deliberately exempt: ``invalid format`` is the right thing for a
+reader to say, which is why the ``SCTP: [Chunk 0] invalid format`` pin in
 :mod:`tests.protocols.transport.test_transport_edge_roundtrip_unit` -- a parse
-case -- is left alone. :class:`ReadersKeepInvalidFormat` below pins that
+case -- expects exactly that. :class:`ReadersKeepInvalidFormat` below pins that
 division for the one maker/reader pair where the two guards check the same
 thing.
 
@@ -427,7 +427,7 @@ class PCAPNGDSBSecretsMessage(MakerMessageTestCase):
 
 
 class ReadersKeepInvalidFormat(MakerMessageTestCase):
-    """The parse side still says ``invalid format``, as #2296 asks.
+    """The parse side says ``invalid format``, as #2296 asks.
 
     ``_read_chunk_data`` and ``_make_chunk_data`` guard the same thing -- a DATA
     chunk with no user data -- so the pair is where a sweep over the makers is

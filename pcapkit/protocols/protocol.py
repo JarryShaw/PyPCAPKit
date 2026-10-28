@@ -661,7 +661,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     # protocol chain of current instance
     @property
     def protochain(self) -> 'ProtoChain':
-        """Protocol chain of current instance."""
+        """Protocol chain of current instance.
+
+        Note:
+            :class:`~pcapkit.protocols.misc.null.NoPayload` has no chain and
+            narrows this to :obj:`None`; :meth:`_decode_next_layer` passes it
+            on as ``basis``, which
+            :class:`~pcapkit.corekit.protochain.ProtoChain` accepts.
+
+        """
         return self._protos
 
     # packet data
@@ -1031,7 +1039,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             code: protocol code
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
@@ -1271,9 +1279,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             UnsupportedCall: When constructing (``file`` is :obj:`None`), if a
                 keyword names no parameter of this protocol's :meth:`make`,
                 :meth:`read`, :meth:`pack`, :meth:`unpack`,
-                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO,
-                and is not listed in :attr:`__keywords__`. Parsing (``file`` is
-                given) is unaffected.
+                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO
+                -- except a ``make`` whose class sets
+                :attr:`__own_make_keywords__`, which counts only while it is
+                the ``make`` of the protocol being constructed -- and is not
+                listed in :attr:`__keywords__`. Parsing (``file`` is given) is
+                unaffected.
 
         Note:
             The ``_layer``, ``_protocol`` and ``__context__`` keywords are

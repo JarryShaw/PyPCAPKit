@@ -1955,8 +1955,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         An explicit ``exponent`` is the octet and wins, as a parsed parameter's
         is; otherwise ``lifetime`` is a duration and
-        :meth:`_make_registration_lifetime` encodes it. Shared by the three
-        :rfc:`8003` makers, which between them carry four such octets.
+        :meth:`_make_registration_lifetime` encodes it. Shared by the
+        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet
+        appears.
 
         Args:
             code: parameter code
