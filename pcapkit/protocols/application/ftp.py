@@ -173,7 +173,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
 
     def make(self,
              cmmd: 'Optional[Enum_Command | str | bytes | bytearray]' = None,
-             code: 'Optional[Enum_ReturnCode | int | str | bytes]' = None,
+             code: 'Optional[Enum_ReturnCode | int | str | bytes | bytearray]' = None,
              args: 'Optional[str | bytes | bytearray]' = None,
              more: 'bool' = False,
              charset: 'Optional[str]' = None,
@@ -195,7 +195,10 @@ class FTP(Application[Data_FTP, Schema_FTP],
             cmmd: FTP command, a :class:`str` (an
                 :class:`~pcapkit.const.ftp.command.Command` member is one),
                 :class:`bytes` or :class:`bytearray`.
-            code: FTP status code.
+            code: FTP status code, an :class:`int` in ``0``--``999`` (an
+                :class:`~pcapkit.const.ftp.return_code.ReturnCode` member is
+                one) or a numeric :class:`str`, :class:`bytes` or
+                :class:`bytearray` holding one.
             args: Optional FTP command arguments and/or status messages, a
                 :class:`str`, :class:`bytes` or :class:`bytearray`.
             more: More status messages to follow for response packets.
@@ -213,8 +216,11 @@ class FTP(Application[Data_FTP, Schema_FTP],
             ProtocolError: If neither or both of ``cmmd`` and ``code`` are
                 given, if ``cmmd`` or ``args`` is not a :class:`str`,
                 :class:`bytes` or :class:`bytearray` (a :obj:`bool` included),
-                or if ``lines`` are given other than as the rest of a
-                multi-line reply.
+                if ``code`` is not an :class:`int` in ``0``--``999`` (a
+                :obj:`bool` included) nor a numeric :class:`str`,
+                :class:`bytes` or :class:`bytearray` holding one, or if
+                ``lines`` are given other than as the rest of a multi-line
+                reply.
 
         """
         if cmmd is not None and code is None:
@@ -231,8 +237,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
 
             mf = b''
         elif cmmd is None and code is not None:
-            code_val = int(code)
-            prefix = b'%03d' % code_val  # reply codes are three digits, so keep a leading zero
+            prefix = self._make_code(code)
 
             mf = b'-' if more else b''
         else:
@@ -285,6 +290,48 @@ class FTP(Application[Data_FTP, Schema_FTP],
             'raw_cmmd': getattr(data, 'raw_cmmd', None),
             'lines': getattr(data, 'lines', ()),
         }
+
+    @staticmethod
+    def _make_code(code: 'Enum_ReturnCode | int | str | bytes | bytearray') -> 'bytes':
+        """Render a reply code as the three digits a reply line opens with.
+
+        The three digits hold ``0``--``999``, which is what the ``[0-9]{3}``
+        of ``FTP_RESPONSE`` reads back, so that is the range accepted rather
+        than the 1xx--5xx of :rfc:`959#section-4.2` alone -- 6xx is
+        :rfc:`2228#section-5`, and the read path accepts it.
+
+        Args:
+            code: Reply code, an :class:`int` (a
+                :class:`~pcapkit.const.ftp.return_code.ReturnCode` member is
+                one) or a numeric :class:`str`, :class:`bytes` or
+                :class:`bytearray` holding one.
+
+        Returns:
+            The code as three digits, a leading zero kept.
+
+        Raises:
+            ProtocolError: If ``code`` is of any other type, a :obj:`bool`
+                included, or does not fit in three digits.
+
+        """
+        # NOTE: ``ReturnCode`` is an ``IntEnum``, so a member takes the ``int``
+        # branch. ``bool`` is an ``int`` subclass, so without the explicit check
+        # ``True`` would write code 001, and ``int()`` alone would raise a bare
+        # ValueError or TypeError rather than a ProtocolError (#2416).
+        value = None  # type: Optional[int]
+        if isinstance(code, bool):
+            pass
+        elif isinstance(code, int):
+            value = code
+        elif isinstance(code, (str, bytes, bytearray)):
+            try:
+                value = int(code)
+            except ValueError:
+                pass
+        if value is None or not 0 <= value <= 999:
+            raise ProtocolError('FTP: invalid status code: must be an int in 0-999 or a '
+                                f'numeric str, bytes or bytearray, not {code!r}')
+        return b'%03d' % value
 
     @staticmethod
     def _test_lines(code: 'bytes', lines: 'tuple[bytes, ...]') -> 'bool':

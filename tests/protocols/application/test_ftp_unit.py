@@ -236,6 +236,34 @@ class FTPUnitTests(unittest.TestCase):
         self.assertEqual(ftp.make(code=230, args=bytearray(b'Logged in')).data,
                          b'230 Logged in\r\n')
 
+    def test_ftp_make_rejects_a_status_code_that_is_not_three_digits(self) -> None:
+        """A code of any other type, or out of ``0``--``999``, raises (#2416)."""
+        from pcapkit.const.ftp.return_code import ReturnCode
+        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        ftp = object.__new__(FTP)
+
+        for code in (True, False, 3.7, [220], memoryview(b'230'),
+                     SimpleNamespace(value=220), 'abc', b'abc', 1000, -5, '1000', b'-5'):
+            with self.subTest(code=code):
+                with self.assertRaises(ProtocolError) as context:
+                    ftp.make(code=code, args='Ready')
+                self.assertEqual(
+                    str(context.exception),
+                    'FTP: invalid status code: must be an int in 0-999 or a numeric '
+                    f'str, bytes or bytearray, not {code!r}')
+
+        # an int, a member and a numeric str, bytes or bytearray all still build
+        for code in (230, ReturnCode.CODE_230, '230', b'230', bytearray(b'230')):
+            with self.subTest(code=code):
+                self.assertEqual(ftp.make(code=code, args='Logged in').data,
+                                 b'230 Logged in\r\n')
+
+        # the three digits keep their leading zeroes at either end of the range
+        self.assertEqual(ftp.make(code=0).data, b'000\r\n')
+        self.assertEqual(ftp.make(code=999).data, b'999\r\n')
+
     def test_ftp_make_data_preserves_request_and_response_fields(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode
