@@ -384,6 +384,12 @@ Fixed
   ``bier-echo [udp]``, and ``unknown [dccp]`` and ``unknown [sctp]``. Lookups still
   mint nothing (:issue:`860`) and an out-of-range port still raises (:issue:`2048`,
   :pr:`2052`).
+* ``Method._missing_`` resolves an HTTP method whose registered name differs from
+  its own value, so ``Method('baseline-control')`` and ``Method('version-control')``
+  give ``BASELINE_CONTROL`` and ``VERSION_CONTROL`` rather than minting an
+  unregistered member: the lookup falls back to the value map on the upper-cased
+  value before it mints. :meth:`.Method.get` stays case-sensitive (:issue:`2284`,
+  :pr:`2351`).
 
 pcapkit.corekit
 ---------------
@@ -797,6 +803,13 @@ Fixed
   shared field, and a :class:`.SchemaField` with a callable length sizes its template
   from the resolved length rather than ``1024s``. No parse in the library reached either
   (:issue:`2173`, :pr:`2190`).
+* :class:`.PortEnumField` range-checks the port it is handed, so a directly built
+  TCP, UDP or SCTP schema raises :exc:`.FieldValueError` for a port outside the
+  field's width, where ``srcport=70000`` was masked to ``0x1170`` and ``-1`` to
+  ``0xffff``. :class:`.NumberField` keeps masking, which is its documented contract;
+  the :class:`.NumberField` and :class:`.Schema` docstrings now say that direct
+  construction range-checks nothing, and name where the checks live (:issue:`2314`,
+  :pr:`2335`).
 
 pcapkit.dumpkit
 ---------------
@@ -901,6 +914,20 @@ Added
 * ``conflict`` on the reassembly data models: absolute, inclusive ranges where
   two fragments claimed the same span with different bytes, previously lost
   silently on both the IP (:pr:`482`) and TCP (:issue:`443`, :pr:`478`) paths.
+* the declarations that pair a ``__proto__`` dispatch registry with the
+  enumeration its codes come from, replacing the module-level tables that held the
+  pairing apart from the ``__proto__`` they describe. ``__proto_key__``, on each
+  class owning such a registry (``Link``, ``Internet``, ``Frame``, ``PCAPNG``,
+  ``TCP``, ``UDP`` and ``SCTP``), names that enumeration and whether a bare ``int``
+  is also valid (:pr:`2392`); ``__proto_dest__``, on the
+  :class:`~pcapkit.const.reg.linktype.LinkType`,
+  :class:`~pcapkit.const.reg.ethertype.EtherType`,
+  :class:`~pcapkit.const.reg.transtype.TransType` and
+  :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+  registries, names the destination each enumeration keys, which is how
+  ``code=<member>`` infers one without an explicit destination. Both are rendered
+  attributes, and the vendor crawlers generate the latter from a new
+  :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST` (:pr:`2403`).
 
 Changed
 ~~~~~~~
@@ -1212,6 +1239,29 @@ Fixed
   and ``register_transtype`` refuse a ``code`` that is not an enum member with
   :exc:`.RegistryError` before touching a registry, where they registered it and then
   raised ``AttributeError``, leaving the entry behind (:issue:`2186`, :pr:`2193`).
+* :func:`pcapkit.foundation.registry.protocols.register_protocol_code`, and the
+  ``code=`` class keyword, check every destination's key before registering any of
+  them. A key belonging to another enum, such as ``{Frame: TransType.ICMP}``, is
+  refused with :exc:`.RegistryError` where it replaced the shipped
+  ``LinkType.ETHERNET`` entry, and a bad target late in the list no longer leaves
+  the earlier ones registered. A destination keeping a registry of its own, such as
+  ``Loopback`` and ``IPX``, is not checked against another enum (:issue:`2268`,
+  :pr:`2343`).
+* the number registrars ``register_tcp``, ``register_udp``, ``register_sctp`` and
+  ``register_apptype`` refuse a ``bool`` code with :exc:`.RegistryError`, where
+  ``register_tcp(True, ...)`` registered port 1, since ``bool`` is an ``int``
+  subclass (:issue:`2269`, :pr:`2344`).
+* IP reassembly reports a datagram that is not itself fragmented but whose BUFID is
+  already buffered: it submits that buffer as incomplete and then reassembles the
+  datagram in a buffer of its own, per :rfc:`791#section-3.2`, where the datagram
+  was never reported at all. On IPv6 an atomic fragment is reassembled in a buffer
+  of its own and submitted without flushing the datagram already being reassembled,
+  so that one's final fragment still completes it, per :rfc:`6946#section-4`
+  (:issue:`2270`, :pr:`2345`).
+* the PyPCAP, pcap-ct and pypcapfile engines warn with :exc:`.AttributeWarning`,
+  naming the engine, that they ignore a parsing context supplied through
+  :class:`.Extractor`'s ``context=``, as the dpkt, scapy and pyshark engines already
+  did, where they dropped it silently (:issue:`2313`, :pr:`2332`).
 
 pcapkit.interface
 -----------------
@@ -1222,6 +1272,18 @@ Added
 * :mod:`pcapkit.interface.registry`, making public the registry-entry helpers
   ``same_entry``, ``restore_shipped`` and ``restore_shipped_dumper`` (:issue:`1519`,
   :pr:`1568`).
+
+Fixed
+~~~~~
+
+* the messages the interface functions and the helpers behind them raise and warn
+  read in the house ``<prefix>: <lowercase description>: ... {value!r}`` form.
+  ``reassemble`` and ``trace`` lowercase their unsupported-protocol error and quote
+  the protocol; ``follow_tcp_stream`` warns ``using default engine instead``, the
+  wording :class:`.Extractor` already used, and quotes an engine that has no
+  reassembly adapter; :class:`.TraceFlowBase`'s output-format warning is lowercased;
+  and ``Extractor.make_name`` quotes the format it does not know, where an empty one
+  ended the message at the colon with nothing after it (:issue:`2303`, :pr:`2374`).
 
 pcapkit.protocols
 -----------------
@@ -1497,6 +1559,16 @@ Changed
   :class:`~pcapkit.foundation.engines.pcapng.PCAPNG` engine has not assigned the section
   it opens. Code reading ``block.context`` for the section reads
   ``block.section_context`` (:issue:`2172`, :pr:`2205`).
+* **a breaking change to** ``FTP_DATA``: it derives from ``Application`` as well as
+  :class:`~pcapkit.protocols.misc.raw.Raw`, so its ``__layer__`` names the
+  application layer where it was ``None`` -- a ``layer='application'`` extraction
+  stops at it, and ``extract(layer=FTP_DATA)`` resolves to that layer rather than to
+  ``'none'``. Raw still does the parsing and the rebuild, and ``__index__`` is the
+  application layer's, raising ``IntError`` where it raised
+  :exc:`.UnsupportedCall`. The class moves to
+  :mod:`pcapkit.protocols.application.ftp_data` with nothing left behind on the old
+  path in :mod:`pcapkit.protocols.application.ftp`, where it shipped from 1.0.0
+  through 1.4.1 (:issue:`2285`, :pr:`2357`).
 * **a breaking change to** HIP's ``REG_FAILED`` parameter: its first octet is the
   Failure Type, and it carries no lifetime (:rfc:`8003#section-4.5`), so
   :class:`pcapkit.protocols.data.internet.hip.RegFailedParameter` replaces ``lifetime``
@@ -2762,6 +2834,178 @@ Fixed
   ``info`` disagreed with the octets. A block made without ``snaplen`` writes 0 there,
   and a ``snaplen`` outside ``0`` to ``0xFFFFFFFF`` raises :exc:`.ProtocolError` where it
   was truncated silently (:issue:`2278`).
+* HIP parameters read and rebuilt against the wrong definition. ``TRANSACTION_ID``
+  and ``OVERLAY_ID`` keep the identifier's wire width on rebuild, through a new
+  ``id_len`` field, where the length was sized from the integer's own ``bit_length``
+  and the leading zero octets were lost (:issue:`2271`); the ``HIP_TRANSFORM`` maker
+  raises :exc:`.ProtocolError` for the HIPv2 parameter its own reader already
+  rejects (:issue:`2275`); ``LOCATOR_SET``'s maker derives the locator ``type`` from
+  whether ``spi`` was given, where an ``spi=`` locator was left at type 0, a
+  combination the locator selector itself rejects, and an explicit ``type`` that
+  disagrees raises naming both values (:issue:`2276`); ``REG_INFO``,
+  ``REG_REQUEST`` and ``REG_RESPONSE`` lifetimes decode as the
+  ``2**((v-64)/8)`` seconds :rfc:`8003#section-4.1` defines, with a zero octet its
+  own case, where the octet was read as raw seconds, and their makers take either a
+  duration or the raw exponent (:issue:`2281`); ``OVERLAY_TTL``'s ``ttl`` is the hop
+  count :rfc:`6079` defines rather than a ``timedelta`` (:issue:`2282`); and
+  ``CERT``'s ``cert_group`` is a plain ``int``, since :rfc:`8002#section-2` defines
+  no registry for it, where it was decoded through the DH Group registry
+  (:issue:`2283`). ``HOST_ID``'s maker prefixes its errors in the house
+  ``HIPv{version}: [ParamNo {code}]`` form (:issue:`2299`). The data-model and
+  signature changes are breaking (:pr:`2400`).
+* TCP's Multipath TCP options: an unknown subtype sizes its declared ``length`` from
+  what the schema writes, so one built with ``data=b''`` declares a Length of 3, the
+  header octets it always packs, rather than 2 (:issue:`2272`); and a parsed subtype
+  schema no longer carries an ``option`` attribute it does not declare and no maker
+  mirrors -- the declared ``kind`` already holds ``Multipath_TCP``, and the octets
+  were identical either way (:issue:`2293`, :pr:`2396`).
+* PCAP-NG's Decryption Secrets Block maker builds from a ``bytes`` ``secrets_data``,
+  its ``b''`` default included, by reading those octets through the same secrets
+  schema the parse side selects, where every secrets type raised because the readers
+  expect a parsed schema (:issue:`2273`, :pr:`2346`).
+* HTTP/2's ``make`` defaults ``frame`` to the frame type's own constructor rather
+  than to a ``b''`` packed verbatim with Length 0, so ``PRIORITY``, ``RST_STREAM``,
+  ``PUSH_PROMISE``, ``PING``, ``GOAWAY`` and ``WINDOW_UPDATE`` build a frame that
+  reads back, where ``HTTP(type=..., sid=...)`` raised; an explicit ``b''`` still
+  packs raw, and the default is byte-identical to ``frame={}``. ``settings=None``
+  builds the parameterless SETTINGS frame :rfc:`9113#section-6.5` permits rather
+  than raising (:issue:`2274`, :pr:`2395`).
+* IPv4's Timestamp option builds from its own default: ``timestamp=None`` gives a
+  Timestamp-only option with ``counts`` empty slots, where the default raised
+  :exc:`.ProtocolError` because the maker took only a list or a dict, and any other
+  value is reported with its ``repr`` (:issue:`2277`, :pr:`2347`).
+* a short read raises :exc:`.StructError` for every size, not only for the sizes
+  with a ``struct`` format code: the ``int.from_bytes`` path checks the length it
+  got, where it returned a smaller integer. ``quiet`` still returns the partial
+  value (:issue:`2279`, :pr:`2349`).
+* the Mobility Header's LMAA option carries the code its address family requires:
+  the code defaults to that family's own and an explicit one that disagrees raises
+  :exc:`.ProtocolError`, where ``address='10.0.0.1'`` packed the IPv6 code anyway
+  (:rfc:`5949#section-6.2.2`). A captured mismatch still rebuilds byte for byte
+  (:issue:`2280`, :pr:`2350`).
+* a base class's ``make`` keywords stop reaching a subclass whose own ``make``
+  ignores them. A new ``ProtocolBase.__own_make_keywords__`` marker, read per class
+  like the ``__keywords__`` opt-out, keeps a base's parameters out of the allowlist
+  once a subclass overrides ``make``, and
+  :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sets it, so
+  ``IPv6_Route(len=99)`` is refused where it built the same octets as
+  ``IPv6_Route()`` and a misspelling was steered to the dead keyword
+  (:issue:`2286`, :pr:`2358`).
+* TCP's, UDP's and SCTP's ``make`` raise :exc:`.ProtocolError` for a ``bool`` port,
+  where ``UDP(srcport=True)`` packed port 1 and ``TCP(dstport=False)`` port 0
+  (:issue:`2287`, :pr:`2359`).
+* SCTP's Supported Address Types and Missing Mandatory Parameter makers raise
+  :exc:`.ProtocolError` for a parameter type that is neither a ``Parameter`` member
+  nor an ``int``, a ``bool`` included, where ``True`` became parameter type 1,
+  ``False`` raised :exc:`.EnumValueError`, and a ``str`` or a ``float`` was stored
+  unchecked (:issue:`2288`, :pr:`2363`).
+* ``Loopback.make`` raises :exc:`.ProtocolError` for an address family that is not
+  an ``int``, from the same check as its range test, where ``True`` packed family 1,
+  ``'2'`` and ``None`` raised ``TypeError`` and ``2.0`` raised ``AttributeError``
+  (:issue:`2289`, :pr:`2364`).
+* FTP's ``make`` raises :exc:`.ProtocolError` for a command that is none of ``str``,
+  ``bytes`` and ``bytearray``, a ``bool`` included, where its fallback read
+  ``cmmd.value``, so an ``int``, a ``bool`` or a ``float`` raised a bare
+  ``AttributeError`` while any object that happened to carry a ``.value`` was
+  accepted unchecked. A ``bytearray`` builds as ``bytes`` (:issue:`2290`,
+  :pr:`2365`).
+* ``_make_pack``, and ``_make_index`` packing through it, raise :exc:`.StructError`
+  for a size with no ``struct`` format code, as the ``struct`` path does, where a
+  value out of range, a non-integer or a bad size leaked ``OverflowError``,
+  ``AttributeError`` or ``ValueError`` (:issue:`2291`, :pr:`2367`).
+* a binary read at the end of the stream raises :exc:`.StructError`, as an unpack
+  does, where an exhausted or short stream raised ``TypeError`` out of ``ord()``
+  (:issue:`2292`, :pr:`2368`).
+* IPv4's SEC option warns about the bit it observed: the field termination indicator
+  :rfc:`1108` puts in the final protection authority octet is reported as set, with
+  its value, where the message said the indicator was not set (:issue:`2295`,
+  :pr:`2372`).
+* a maker that refuses a caller's argument names the argument and quotes the value,
+  rather than reusing the reader's ``invalid format`` text, which says nothing about
+  which argument was wrong: SCTP's chunk-flag, empty-data, hostname-termination and
+  reserved-length guards, the Mobility Header's data-type, option-length,
+  empty-data and Pad1 guards, TCP's ``MP_CAPABLE`` optional-field guard, and HIP's
+  and PCAP-NG's fallback branches (:issue:`2296`, :pr:`2405`), then HOPOPT's and
+  IPv6-Opts' Pad1 warning and HTTP/2's and PCAP-NG's ``make`` dispatchers
+  (:issue:`2406`, :pr:`2407`). The readers still say ``invalid format``, which is
+  what a parse found.
+* ESP's errors read in the house ``ESP: <description>: ... {value!r}`` form: the
+  messages raised by the cipher and integrity lookups, by
+  :class:`.esp.SecurityAssociation`'s SPI, destination, AEAD, ICV, key-splitting,
+  decryption and encryption checks, by the context registrar and by ``make`` all
+  carry the prefix and quote the offending value, where none carried an ``ESP:``
+  prefix and most printed the value bare (:issue:`2297`, :pr:`2366`).
+* HTTP's version, data, start-line and settings errors carry the ``HTTP:`` prefix
+  and the rejected value, as in ``HTTP: invalid version: 3`` and
+  ``HTTP/2: [Type 4] invalid settings: 42``, where the prefixes were missing or
+  malformed, some were capitalised with a full stop, and some left the value out
+  (:issue:`2298`, :pr:`2373`).
+* the capture guards read in that form too. The guards that reject a file's magic
+  number or byte order carry the ``PCAP:`` and ``PCAP-NG:`` prefixes, and PCAP's
+  magic-number guard says what it read (:issue:`2300`); and PCAP-NG's option guards
+  drop their trailing full stop, with the block-placement guard naming the block
+  type through the ``BlockType`` registry rather than printing the raw number
+  ``_type`` holds while a block is being made (:issue:`2301`, :pr:`2398`).
+* :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate reads
+  ``invalid version: must be 6, not {version!r}``, in the house form and quoting the
+  rejected value, where its bespoke tail read ``only valid for IPv6, got version=4``
+  -- naming the version it requires in prose rather than as the number it compares
+  against (:issue:`2302`, :pr:`2397`).
+* a trial parse kept as :class:`~pcapkit.protocols.misc.raw.Raw` because it raised
+  no longer replays its warnings: the holding context honours its ``discard`` on an
+  exception exit too, and the next-layer reader discards a raising trial's warnings
+  under ``beholder``, so an Ethernet frame cut inside its IPv4 header stops warning
+  ``packet length < 0`` for a layer it does not have. Outside ``beholder`` the error
+  reaches the caller and the warnings are still reported, and the Raw's error names
+  the cut (:issue:`2308`, :pr:`2339`).
+* the declarations that described a value the code never produces now match it, so
+  a type checker and the rendered API agree with what is stored: CALIPSO's
+  ``cmpt_bitmap`` is the tuple of ints its reader stores, the SMF hash-based DPD
+  option declares its own schema rather than its sibling's, an ``RR`` or ``SSR``
+  ``route`` that is always built is not ``Optional``, ``NoPayload`` narrows
+  ``protochain`` to ``None``, ARP's address maker admits the ``bytearray`` its body
+  handles, and the PCAP-NG flags stub and an undeclared ``entry_raw`` follow. HIP's
+  ``OverlayTTLParameter`` and ``ViaRVSParameter`` join their modules' ``__all__``
+  and the package re-exports those lists require. Parsing and rebuilding are
+  unchanged (:issue:`2317`, :pr:`2377`).
+* HIP's ``parameters=[(code, data)]`` form rebuilds a parsed parameter through its
+  maker positionally, so the parameters whose maker keyword is spelled differently
+  from the data model's own field name -- ``suite_id`` against ``suites``,
+  ``group_id`` against ``group``, ``reg_type`` against ``reg_request`` and its
+  siblings, and the nested locator keys -- keep their values, where they fell back
+  to the maker's default or raised ``AttributeError``: ``HIP_TRANSFORM`` rebuilt as
+  ``0241000000000000``, losing its ``suite_id``. The dict form, as in
+  ``parameters=[(code, {'suites': [...]})]``, is unchanged (:issue:`2352`,
+  :pr:`2383`).
+* PCAP-NG settles the byte order before a block maker runs, the way ``pack`` does --
+  the section's, else the one the packet data declares, else the host's -- so an
+  option or a record handed over as raw ``bytes``, whose type code is read back out
+  of those octets, builds in any block rather than raising
+  ``AttributeError: 'PCAPNG' object has no attribute '_byte'``. A Section Header
+  Block still overrides it from its own Byte-Order Magic, and ``__packet__=None``
+  degrades to no packet data rather than raising ``TypeError``, as
+  :meth:`.Schema.pack` already treated it (:issue:`2353`, :pr:`2369`).
+* a PCAP-NG block made from raw ``bytes`` is read back off the octets ``pack`` has
+  just written, as a reader of the file would, rather than off the schema that
+  carries them, so a Decryption Secrets Block built that way parses and rebuilds
+  byte for byte, where the read looked for the block's fields on the schema
+  holding the octets and raised ``AttributeError``. Octets that are no block
+  raise :exc:`.StreamEOFError` or :exc:`.ProtocolError` (:issue:`2354`,
+  :pr:`2370`).
+* a ``str`` enumeration name resolves where the namespace could not be inferred from
+  the argument's own default. HOPOPT's and IPv6-Opts' ``seed_type`` and ``tid_type``
+  and HTTP/1's ``status`` default to ``None``, so a name such as
+  ``'SEEDID_16_BIT_UNSIGNED_INTEGER'`` raised ``ProtocolNotImplemented`` while the
+  member and ``int`` forms of the same call worked (:issue:`2356`, :pr:`2393`); and
+  HIP's list-argument makers, where the name is an item of a list parameter rather
+  than a bare argument, resolve too, with the enumerations they need imported at
+  runtime rather than only under ``TYPE_CHECKING`` (:issue:`2394`, :pr:`2401`).
+* a PCAP-NG block made without an explicit timestamp reads its interface's
+  resolution from the same lookup the maker already makes for the scale, so the
+  Enhanced Packet Block, the obsolete Packet Block and the Interface Statistics
+  Block default their timestamp where they raised ``AttributeError: '_info'``,
+  having no parsed data model to resolve the interface through yet (:issue:`2362`,
+  :pr:`2382`).
 
 pcapkit.toolkit
 ---------------
@@ -2865,6 +3109,25 @@ Fixed
   such as TCP behind a tunnel or an IPv6 extension header, is documented rather
   than warned about. The pypcapfile engine keeps its warning, once per capture,
   that it leaves TCP over IPv6 out (:issue:`1513`, :pr:`1535`).
+* the pcap-ct, PyPCAP, pypcapfile, pyshark and scapy adapters lead the messages
+  below with their engine's name, read off the engine class's own
+  ``__engine_name__`` rather than hand-typed, so a rename under
+  ``pcapkit/foundation/engines/`` cannot leave an adapter spelling the old one:
+  the pcap-ct and PyPCAP reassembly refusals, pypcapfile's address errors, its IPv6
+  :exc:`.UnsupportedCall` and its TCP-over-IPv6 warning, pyshark's boolean-field,
+  timestamp and missing-layer messages, and scapy's import-time warning, which
+  quotes the installable name, all read in the house
+  ``<prefix>: <lowercase description>: ... {value!r}`` form. The dpkt adapter and
+  the adapters' :exc:`.ModuleNotFound` raises keep the messages they had
+  (:issue:`2304`, :pr:`2399`).
+* the IPv4 and IPv6 reassembly adapters take the first layer of that IP version,
+  from the outside in, that is actually a fragment -- IPv4 with MF set or a non-zero
+  offset, IPv6 with a Fragment header -- so a fragmented inner datagram in an
+  IP-in-IP tunnel is reassembled on its own header, where it was reassembled whole
+  under the tunnel's header, or dropped when the tunnel set DF or carried no
+  Fragment header of its own. With no fragmented layer they take the outermost, as
+  before. Applied to the default engine's PCAP and PCAP-NG adapters and to the
+  scapy and dpkt ones, which picked the outermost too (:issue:`2307`, :pr:`2338`).
 
 pcapkit.utilities
 -----------------
@@ -3071,6 +3334,11 @@ Fixed
   exit 1 with one line naming the missing packages and ``pypcapkit[vendor]``, where
   they died with a traceback, and ``--help`` and ``--version`` still work. Importing a
   crawler then raises ``ModuleNotFoundError`` (:issue:`1850`, :pr:`1875`).
+* the ESP cipher and integrity crawlers strip the brackets off IANA's
+  ``[UNSPECIFIED]`` "no document" cell before testing it against the unknown
+  placeholder, so :mod:`pcapkit.const.esp.integrity` no longer reads
+  ``#: AUTH_DES_MAC [UNSPECIFIED] (DEPRECATED ...)`` for ``AUTH_DES_MAC`` and
+  ``AUTH_KPDK_MD5`` (:issue:`2294`, :pr:`2371`).
 
 Project infrastructure
 ----------------------
@@ -3613,3 +3881,8 @@ Fixed
   installed package as untyped. Nothing declares the file, and setuptools ships it
   unasked only from 69.0.0, so that is the floor now, in ``pyproject.toml`` and the
   Conda recipe alike (:issue:`2062`, :pr:`2064`).
+* ``examples/legacy_smoke``'s ``test_perf`` benchmarks every engine its support
+  table lists, writing each result to ``../captures/engines/<engine>.txt`` or
+  skipping the engine with its reason, where it looked each benchmark up in a table
+  that did not cover pypcap, pcap-ct or pypcapfile, so the first of those to pass
+  preflight raised ``KeyError`` and ended the run (:issue:`2305`, :pr:`2375`).
