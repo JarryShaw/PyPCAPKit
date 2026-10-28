@@ -1536,7 +1536,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             pad = getattr(opt, 'pad', b'')
 
         if code == Enum_Option.Pad1 and length != 0:
-            warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
+            warn(f'{self.alias}: [OptNo {code}] invalid length: must be 0 for a Pad1 option, '
+                 f'not {length!r}; making a PadN', ProtocolWarning)
             code = Enum_Option.PadN  # type: ignore[assignment]
 
         return Schema_PadOption(
