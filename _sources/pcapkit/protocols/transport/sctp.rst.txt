@@ -55,6 +55,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_sctp_causes
    .. automethod:: _make_sctp_causes
    .. automethod:: _make_sctp_cause
+   .. automethod:: _make_param_types
 
    .. automethod:: _read_chunk_donone
    .. automethod:: _read_chunk_data
@@ -137,6 +138,8 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_cause_protocol_violation
 
    .. autoattribute:: __proto__
+      :no-value:
+   .. autoattribute:: __proto_key__
       :no-value:
    .. autoattribute:: __chunk__
       :no-value:

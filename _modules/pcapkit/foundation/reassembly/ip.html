@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.foundation.reassembly.ip - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -551,11 +552,20 @@
 <span class="sd">       &lt;pcapkit.foundation.reassembly.data.ip.Datagram.conflict&gt;`</span>
 <span class="sd">       (:issue:`477`). An incomplete buffer expires</span>
 <span class="sd">       after ``timeout`` seconds of capture time, 60 by default for both IPv4</span>
-<span class="sd">       and IPv6.</span>
+<span class="sd">       and IPv6. A datagram with fragment offset zero and **MF** clear is</span>
+<span class="sd">       reported even when its BUFID is already buffered, rather than dropped</span>
+<span class="sd">       (:issue:`2270`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[IP_Protocol]'</span>
+
+    <span class="c1">#: bool: Whether a datagram with fragment offset zero and **MF** clear is</span>
+    <span class="c1">#: reassembled apart from the buffer its BUFID names, rather than flushing</span>
+    <span class="c1">#: that buffer first. IPv4 flushes it (:rfc:`791#section-3.2`); IPv6</span>
+    <span class="c1">#: overrides this, since :rfc:`6946#section-4` keeps an atomic fragment's</span>
+    <span class="c1">#: buffer intact (:issue:`2270`).</span>
+    <span class="n">__isolate_atomic__</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -633,13 +643,22 @@
         <span class="c1"># belong to.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">TS</span><span class="p">))</span>
 
-        <span class="c1"># when non-fragmented (possibly discarded) packet received</span>
+        <span class="c1"># when non-fragmented (possibly discarded) packet received: it is</span>
+        <span class="c1"># reassembled on its own, in a buffer of its own (#2270)</span>
+        <span class="n">isolated</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isolate_atomic__</span><span class="p">:</span>
+                <span class="c1"># an IPv6 atomic fragment "MUST" be processed in isolation, and</span>
+                <span class="c1"># fragments queued under its BUFID "MUST NOT" be discarded</span>
+                <span class="c1"># (:rfc:`6946#section-4`), so the buffer is left alone</span>
+                <span class="n">isolated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+                <span class="c1"># :rfc:`791#section-3.2` flushes the buffer and then submits</span>
+                <span class="c1"># this datagram, so the flushed one is reported incomplete and</span>
+                <span class="c1"># this one goes on to a fresh buffer below</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="k">return</span>
 
         <span class="c1"># the header of the fragment at offset zero is the reassembled datagram's</span>
         <span class="n">header</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rectify_header</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
@@ -648,8 +667,9 @@
         <span class="c1"># block of the data buffer, its partial last block included -- 8191</span>
         <span class="c1"># would cover octets 0 to 65527 only, so a fragment reaching octet 65528,</span>
         <span class="c1"># e.g. at the largest Fragment Offset, would index past it (#1565)</span>
-        <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
+        <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span>
+        <span class="k">if</span> <span class="n">isolated</span> <span class="ow">or</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
                 <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8192</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
@@ -658,12 +678,13 @@
                 <span class="n">timestamp</span><span class="o">=</span><span class="n">TS</span><span class="p">,</span>                       <span class="c1"># first-arriving fragment's clock reading</span>
                 <span class="n">conflict</span><span class="o">=</span><span class="p">[],</span>                        <span class="c1"># conflicting octet ranges</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isolated</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span>
             <span class="c1"># put header into header buffer</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span><span class="p">:</span>  <span class="c1"># pylint: disable=else-if-used</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
-
-        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span><span class="p">:</span>
+                <span class="n">buf</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
 
         <span class="c1"># append packet index</span>
         <span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
@@ -756,8 +777,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="n">buf</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">TDL</span><span class="o">=</span><span class="n">length</span> <span class="o">+</span> <span class="n">FO</span><span class="p">)</span>
 
+        <span class="c1"># an isolated datagram has no buffer to wait in, so it is submitted</span>
+        <span class="c1"># whether or not it is complete</span>
+        <span class="k">if</span> <span class="n">isolated</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">))</span>
         <span class="c1"># when datagram is reassembled in whole</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="p">)</span></div>

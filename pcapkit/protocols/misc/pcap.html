@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.misc.pcap contains header descriptions for PCAP files, including global header ( Header) and frame header ( Frame). Global Header: pcapkit.protocols.misc.pcap.header contains Head..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="PCAP-NG File Format" href="pcapng.html"><link rel="prev" title="Auxiliary Protocols" href="index.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>PCAP File Headers - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -660,11 +661,10 @@ width (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileError" title="pcapkit.utilities.exceptions.FileError"><strong>FileError</strong></a> – If the magic number is invalid. Parsing does not get
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the magic number is invalid. Parsing does not get
     this far with one: the schema’s
     <code class="xref py py-func docutils literal notranslate"><span class="pre">magic_number_callback()</span></code>
-    raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for it
-    while the header is unpacked.</p>
+    raises it while the header is unpacked.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1220,6 +1220,25 @@ same for PCAP-NG.</p>
 and <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 Each value is a <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the
 module and class, or a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.Frame.__proto_key__">
+<span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto_key__" title="Link to this definition">¶</a></dt>
+<dd><p>the enum a key must be a member of,
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
+class <em>owning</em> the registry, and read from it by
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
+<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap" title="pcapkit.foundation.registry.protocols.register_pcap"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_pcap()</span></code></a> checks its own –
+<a class="reference internal" href="pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> keeps a registry of its own,
+keyed by the same enum, and so declares the same pairing rather than
+sharing this one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What <a class="reference internal" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="pcapkit.protocols.misc.pcap.frame.Frame.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

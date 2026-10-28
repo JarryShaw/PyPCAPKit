@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.internet.mh - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -8854,7 +8855,6 @@
             <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
 

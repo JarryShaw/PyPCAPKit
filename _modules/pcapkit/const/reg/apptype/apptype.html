@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.const.reg.apptype.apptype - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -542,10 +543,6 @@
     <span class="c1"># value it already is; a plain ``dict.get`` lookup cannot tell a composed</span>
     <span class="c1"># ``int`` from any other one that happens to equal it. So ``tcp | udp``</span>
     <span class="c1"># (``3``) resolves as ``sctp``'s own value, silently, with no exception.</span>
-    <span class="c1"># Before 1.5.0 the class was an ``IntFlag`` with ``sctp`` at ``4`` and</span>
-    <span class="c1"># ``dccp`` at ``8``, so an integer held from that numbering (composed or</span>
-    <span class="c1"># not) can land on a different real transport's registry rather than</span>
-    <span class="c1"># merely be refused: a bare ``4`` resolves as ``dccp``'s.</span>
 
     <span class="c1">#: No transport protocol. ``TransportProtocol(0) is undefined`` and</span>
     <span class="c1">#: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default</span>
@@ -585,15 +582,13 @@
 <span class="sd">        that the exception follows what stdlib's ``Enum`` would raise in the</span>
 <span class="sd">        circumstances, :exc:`ValueError` or :exc:`KeyError` as the case may</span>
 <span class="sd">        be, and comes from :mod:`pcapkit.utilities.exceptions` rather than</span>
-<span class="sd">        being a builtin. A</span>
-<span class="sd">        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census</span>
-<span class="sd">        found :class:`~pcapkit.corekit.enum.EnumLookup` subclasses answering a</span>
-<span class="sd">        name miss that way. The exceptions were :class:`AppType` and its</span>
-<span class="sd">        per-transport registries, and they answered with :exc:`ValueError` only</span>
-<span class="sd">        because their own ``get()`` takes an :class:`int` port and never accepts</span>
-<span class="sd">        a name at all, rather than from any name-miss policy. So there was no policy here to</span>
-<span class="sd">        preserve, and a name miss reaches the caller as</span>
-<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The</span>
+<span class="sd">        being a builtin. A stdlib ``E['nosuch']`` raises :exc:`KeyError`, so a</span>
+<span class="sd">        name miss reaches the caller as</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.</span>
+<span class="sd">        :class:`AppType` and its per-transport registries raise</span>
+<span class="sd">        :exc:`ValueError` from their own ``get()`` because it takes an</span>
+<span class="sd">        :class:`int` port and never accepts a name; that is not a name-miss</span>
+<span class="sd">        policy, so it sets none for this class to follow. The</span>
 <span class="sd">        maintainer's ruling given in review of the work for :issue:`808`, that</span>
 <span class="sd">        :class:`TransportProtocol` is not to be extended at all, holds either</span>
 <span class="sd">        way: the refusal is a refusal and mints nothing, whichever exception</span>

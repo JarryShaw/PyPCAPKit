@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.internet.ipv6_ext - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -720,6 +721,12 @@
 
 <span class="sd">    """</span>
 
+    <span class="c1">#: Every subclass overrides :meth:`make` with its own fields and forwards</span>
+    <span class="c1">#: nothing to this one, so this class's ``len`` and ``data`` are accepted</span>
+    <span class="c1">#: only by this class itself. Without the marker, a subclass whose ``make``</span>
+    <span class="c1">#: does not declare them would accept and then drop them (:issue:`2286`).</span>
+    <span class="n">__own_make_keywords__</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
@@ -989,10 +996,14 @@
 <span class="sd">            construction**: a plain</span>
 <span class="sd">            ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises</span>
 <span class="sd">            ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The</span>
-<span class="sd">            ``__keywords__`` escape hatch would cover that too, with no</span>
-<span class="sd">            difference for subclasses: signatures and ``__keywords__`` are</span>
-<span class="sd">            both unioned down the MRO, so every subclass's allowlist takes</span>
-<span class="sd">            these names either way.</span>
+<span class="sd">            ``__keywords__`` escape hatch would cover that too, but a set</span>
+<span class="sd">            there is unioned down the MRO, so every subclass would accept</span>
+<span class="sd">            these names and drop them. A ``make`` signature can be kept from</span>
+<span class="sd">            subclasses instead: this class sets</span>
+<span class="sd">            :attr:`ProtocolBase.__own_make_keywords__</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__&gt;`,</span>
+<span class="sd">            so a subclass that overrides ``make`` accepts ``len`` or ``data``</span>
+<span class="sd">            only where its own ``make`` declares it (:issue:`2286`).</span>
 
 <span class="sd">            They are keyword-*only* because this class is also a base and each</span>
 <span class="sd">            subclass's ``make`` puts different names in the same positions. As</span>
@@ -1066,8 +1077,8 @@
 <span class="sd">            :class:`~pcapkit.protocols.internet.ah.AH` and</span>
 <span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP` both default to</span>
 <span class="sd">            ``version=4`` and are valid under IPv4, so an unconditional gate</span>
-<span class="sd">            would reject them (``ProtocolError: ESP: only valid for IPv6, got</span>
-<span class="sd">            version=4``).</span>
+<span class="sd">            would reject them (``ProtocolError: ESP: invalid version: must be</span>
+<span class="sd">            6, not 4``).</span>
 
 <span class="sd">            The gate exists because this class is registered into</span>
 <span class="sd">            :attr:`Internet.__proto__</span>
@@ -1090,7 +1101,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="ow">is</span> <span class="n">Data_IPv6_Ext</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: only valid for IPv6, got version=</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid version: must be 6, not </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1">#: bool: If the protocol is used as an IPv6 extension header.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span> <span class="o">=</span> <span class="n">extension</span>

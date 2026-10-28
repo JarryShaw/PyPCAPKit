@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.transport.tcp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -525,6 +526,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.checksum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">Enum_Checksum</span>
@@ -623,13 +625,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Data_MPTCP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Data_MPTCPJoin</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
@@ -666,7 +668,7 @@
 <span class="sd">       * - Port Number</span>
 <span class="sd">         - Protocol</span>
 <span class="sd">       * - 20</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.ftp.FTP_DATA`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.ftp_data.FTP_DATA`</span>
 <span class="sd">       * - 21</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.ftp.FTP`</span>
 <span class="sd">       * - 80</span>
@@ -846,12 +848,23 @@
             <span class="c1"># connection preface, then an HTTP/1 start line) and trial-parses</span>
             <span class="c1"># only as a last resort. UDP's table binds the same class for the</span>
             <span class="c1"># same ports.</span>
-            <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
+            <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp_data'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
             <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP'</span><span class="p">),</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
+
+    <span class="c1">#: What :attr:`__proto__` is keyed by: the enum a key must be a member of,</span>
+    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
+    <span class="c1">#: class *owning* the registry, and read from it by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a</span>
+    <span class="c1">#: ``code=`` key is checked exactly as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_tcp` checks its own</span>
+    <span class="c1">#: -- a bare :class:`int` is accepted because the registry is keyed by</span>
+    <span class="c1">#: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
+    <span class="c1">#: member carries one (:issue:`2268`).</span>
+    <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_AppType</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#: Option code to method mapping, see :meth:`_read_tcp_options` and</span>
     <span class="c1">#: :meth:`_make_tcp_options`. A :class:`str` value names the methods</span>
@@ -882,7 +895,7 @@
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start_Response</span><span class="p">:</span> <span class="s1">'qs'</span><span class="p">,</span>                 <span class="c1"># [RFC 4782] Quick-Start Response</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">User_Timeout_Option</span><span class="p">:</span> <span class="s1">'timeout'</span><span class="p">,</span>             <span class="c1"># [RFC 5482] User Timeout Option</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Authentication_Option</span><span class="p">:</span> <span class="s1">'ao'</span><span class="p">,</span>            <span class="c1"># [RFC 5925] TCP Authentication Option</span>
-            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">:</span> <span class="s1">'mp'</span><span class="p">,</span>                        <span class="c1"># [RFC 6824] Multipath TCP</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">:</span> <span class="s1">'mp'</span><span class="p">,</span>                        <span class="c1"># [RFC 8684] Multipath TCP</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Fast_Open_Cookie</span><span class="p">:</span> <span class="s1">'fastopen'</span><span class="p">,</span>           <span class="c1"># [RFC 7413] Fast Open</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | tuple[OptionParser, OptionConstructor]]</span>
@@ -2100,7 +2113,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_mode_mp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MPTCP'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MPTCP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read Multipath TCP option.</span>
 
-<span class="sd">        Structure of ``MP-TCP`` [:rfc:`6824`]:</span>
+<span class="sd">        Structure of ``MP-TCP`` [:rfc:`8684`]:</span>
 
 <span class="sd">        .. code-block:: text</span>
 
@@ -3564,9 +3577,21 @@
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">data</span>
 
+        <span class="c1"># NOTE: The length is sized from what the schema actually writes, not</span>
+        <span class="c1"># from ``data``'s own width (#2272). ``Schema_MPTCPUnknown`` always packs</span>
+        <span class="c1"># three octets of header -- ``kind``, ``length`` and the subtype/flags</span>
+        <span class="c1"># octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as</span>
+        <span class="c1"># its body, so the option is never shorter than 3 octets -- the smallest</span>
+        <span class="c1"># Multipath TCP option :rfc:`8684` section 3 permits. The former</span>
+        <span class="c1"># ``2 + len(data)`` declared 2 for ``data=b''`` while still packing those</span>
+        <span class="c1"># three octets, and the segment could not be read back:</span>
+        <span class="c1"># ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which went</span>
+        <span class="c1"># negative and raised ``ProtocolError: Field data resolved to a negative</span>
+        <span class="c1"># length``. For every non-empty ``data`` the two expressions agree, so</span>
+        <span class="c1"># this only changes the empty case.</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPUnknown</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                 <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>

@@ -6,8 +6,9 @@ FTP - File Transfer Protocol
 :mod:`pcapkit.protocols.application.ftp` contains
 :class:`~pcapkit.protocols.application.ftp.FTP`,
 which implements an extractor for File Transfer Protocol
-(FTP) [*]_, and :class:`~pcapkit.protocols.application.ftp.FTP_DATA`
-for its data channel.
+(FTP) [*]_, the control channel; the data channel is
+:class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, in
+:mod:`pcapkit.protocols.application.ftp_data`.
 
 .. versionchanged:: 1.5.0
 
@@ -16,6 +17,13 @@ for its data channel.
    with no argument and a multi-line reply, whole in one segment or not,
    parse and rebuild as captured (:issue:`1238`, :issue:`1239`,
    :issue:`1240`, :issue:`1241`, :issue:`1303`, :issue:`1333`).
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.application.ftp.FTP_DATA``, with no alias. The class
+   moved to :mod:`pcapkit.protocols.application.ftp_data`, since TCP port 20
+   dispatches it and port 21 the control channel -- two protocols, so two
+   modules (:issue:`2285`).
 
 .. autoclass:: pcapkit.protocols.application.ftp.FTP
    :no-members:
@@ -28,12 +36,6 @@ for its data channel.
    .. automethod:: make
 
    .. automethod:: _make_data
-
-.. autoclass:: pcapkit.protocols.application.ftp.FTP_DATA
-   :no-members:
-   :show-inheritance:
-
-   .. autoproperty:: name
 
 Auxiliary Data
 --------------

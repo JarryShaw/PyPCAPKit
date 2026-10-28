@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.foundation.reassembly.ipv6 - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -576,7 +577,9 @@
 <span class="sd">       The reassembled ``header`` leaves out the Fragment header and carries</span>
 <span class="sd">       its Next Header, per :rfc:`8200#section-4.5`, whichever engine fed it;</span>
 <span class="sd">       1.4.x kept the Fragment header on the ``default`` and ``pcapng``</span>
-<span class="sd">       engines (:issue:`415`).</span>
+<span class="sd">       engines (:issue:`415`). An atomic fragment is reassembled in</span>
+<span class="sd">       isolation, without flushing a buffer that shares its BUFID</span>
+<span class="sd">       (:issue:`2270`).</span>
 
 <span class="sd">    """</span>
 
@@ -607,6 +610,13 @@
     <span class="c1">#: :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`,</span>
     <span class="c1">#: which reports the condition in its log record instead.</span>
     <span class="n">__timeout__</span> <span class="o">=</span> <span class="mf">60.0</span>
+
+    <span class="c1">#: bool: An atomic fragment, one with fragment offset zero and **M**</span>
+    <span class="c1">#: clear, is reassembled on its own and leaves the buffer its BUFID names</span>
+    <span class="c1">#: untouched: :rfc:`6946#section-4` says it "MUST" be processed in</span>
+    <span class="c1">#: isolation and that the fragments queued under that BUFID "MUST NOT" be</span>
+    <span class="c1">#: discarded (:issue:`2270`).</span>
+    <span class="n">__isolate_atomic__</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>

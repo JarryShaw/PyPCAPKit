@@ -22,3 +22,5 @@ and :class:`~pcapkit.protocols.link.vlan.VLAN`.
    .. autoattribute:: __layer__
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:

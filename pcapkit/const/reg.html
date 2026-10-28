@@ -11,7 +11,7 @@
 <meta name="description" content="This module contains all constant enumerations of protocol type registry implementations. Available enumerations include:,, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="ARP Constant Enumerations" href="arp.html"><link rel="prev" title="Constant Enumerations" href="index.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Protocol Type Registry Constant Enumerations - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -3973,9 +3974,12 @@ for a port the registry does not assign (<a class="extlink-issue reference exter
 <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> rather than an <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>), numbered
 sequentially: <code class="docutils literal notranslate"><span class="pre">sctp</span></code> is <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">dccp</span></code> is <code class="docutils literal notranslate"><span class="pre">4</span></code>, where they were <code class="docutils literal notranslate"><span class="pre">4</span></code>
 and <code class="docutils literal notranslate"><span class="pre">8</span></code>, and no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is decoded as a <code class="docutils literal notranslate"><span class="pre">|</span></code> composite
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). Its <code class="docutils literal notranslate"><span class="pre">get()</span></code> refuses a name no member declares, with
-<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>, rather than minting a
-member for it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). An <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> kept from the old numbering is refused
+unless a member carries it, and where one does it can name a different
+transport: <code class="docutils literal notranslate"><span class="pre">3</span></code>, once <code class="docutils literal notranslate"><span class="pre">tcp</span> <span class="pre">|</span> <span class="pre">udp</span></code>, is <code class="docutils literal notranslate"><span class="pre">sctp</span></code>, and a bare <code class="docutils literal notranslate"><span class="pre">4</span></code> is
+<code class="docutils literal notranslate"><span class="pre">dccp</span></code>, not <code class="docutils literal notranslate"><span class="pre">sctp</span></code>. <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get()</span></code> refuses a name no member
+declares, with <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>, rather
+than minting a member for it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol">
@@ -4035,15 +4039,13 @@ the work for <a class="extlink-issue reference external" href="https://github.co
 that the exception follows what stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code> would raise in the
 circumstances, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> as the case may
 be, and comes from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather than
-being a builtin. A
-stdlib <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>’s census
-found <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> subclasses answering a
-name miss that way. The exceptions were <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and its
-per-transport registries, and they answered with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> only
-because their own <code class="docutils literal notranslate"><span class="pre">get()</span></code> takes an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> port and never accepts
-a name at all, rather than from any name-miss policy. So there was no policy here to
-preserve, and a name miss reaches the caller as
-<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> from the base. The
+being a builtin. A stdlib <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, so a
+name miss reaches the caller as
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> from the base.
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and its per-transport registries raise
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> from their own <code class="docutils literal notranslate"><span class="pre">get()</span></code> because it takes an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> port and never accepts a name; that is not a name-miss
+policy, so it sets none for this class to follow. The
 maintainer’s ruling given in review of the work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, that
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> is not to be extended at all, holds either
 way: the refusal is a refusal and mints nothing, whichever exception

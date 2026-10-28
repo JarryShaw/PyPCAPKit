@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.transport.tcp contains TCP only, which implements the extractor for Transmission Control Protocol (TCP)*, whose structure is described as below:,,,, Octets, Bits, Name, Descriptio..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="UDP - User Datagram Protocol" href="udp.html"><link rel="prev" title="SCTP - Stream Control Transmission Protocol" href="sctp.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>TCP - Transmission Control Protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -628,7 +629,7 @@ attribute:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>20</p></td>
-<td><p><a class="reference internal" href="../application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA" title="pcapkit.protocols.application.ftp.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp.FTP_DATA</span></code></a></p></td>
+<td><p><a class="reference internal" href="../application/ftp_data.html#pcapkit.protocols.application.ftp_data.FTP_DATA" title="pcapkit.protocols.application.ftp_data.FTP_DATA"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp_data.FTP_DATA</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p>21</p></td>
 <td><p><a class="reference internal" href="../application/ftp.html#pcapkit.protocols.application.ftp.FTP" title="pcapkit.protocols.application.ftp.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp.FTP</span></code></a></p></td>
@@ -1659,7 +1660,7 @@ unless <code class="docutils literal notranslate"><span class="pre">options</spa
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mode_mp">
 <span class="sig-name descname"><span class="pre">_read_mode_mp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mode_mp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mode_mp" title="Link to this definition">¶</a></dt>
 <dd><p>Read Multipath TCP option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP-TCP</span></code> [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP-TCP</span></code> [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----------------------+
@@ -3095,6 +3096,25 @@ as it was read, without those checks.</p>
 <dd><p>Protocol index mapping for decoding next layer, see
 <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a> &amp;
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.__proto_key__">
+<span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__proto_key__" title="Link to this definition">¶</a></dt>
+<dd><p>the enum a key must be a member of,
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
+class <em>owning</em> the registry, and read from it by
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
+<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp" title="pcapkit.foundation.registry.protocols.register_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_tcp()</span></code></a> checks its own
+– a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is accepted because the registry is keyed by
+port number, and an <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>
+member carries one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What <a class="reference internal" href="#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">

@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.toolkit.pypcapfile - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -530,6 +531,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyPCAPFile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
@@ -558,6 +560,13 @@
     <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'ipv4_header'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
 <span class="p">]</span>
+
+<span class="c1">#: Message prefix shared by every message below, read off</span>
+<span class="c1">#: :attr:`PyPCAPFile.__engine_name__</span>
+<span class="c1">#: &lt;pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__engine_name__&gt;` rather</span>
+<span class="c1">#: than spelled out, so the engine cannot be renamed there and still be named</span>
+<span class="c1">#: the old way here (:issue:`2304`).</span>
+<span class="n">_ENGINE</span> <span class="o">=</span> <span class="n">PyPCAPFile</span><span class="o">.</span><span class="n">__engine_name__</span>
 
 <span class="c1">#: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.</span>
 <span class="n">IPV4_FLAG_DF</span> <span class="o">=</span> <span class="mb">0b010</span>
@@ -648,7 +657,7 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: invalid IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="c1"># Dotted-decimal ASCII text, the actual PyPCAPFile 0.12.0 form --</span>
@@ -657,7 +666,7 @@
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'ascii'</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: invalid IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_mac_address</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -686,14 +695,14 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: invalid MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'ascii'</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">UnicodeDecodeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: invalid MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
 <div class="viewcode-block" id="_maybe_unhex">
@@ -910,9 +919,9 @@
     <span class="n">_ipv6_tcp_warned</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">anchor</span>
     <span class="k">while</span> <span class="n">config</span><span class="o">.</span><span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_ipv6_tcp_warned</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">IPV6_TCP_WARNED_LIMIT</span><span class="p">:</span>
         <span class="n">_ipv6_tcp_warned</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Frame </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "</span>
-         <span class="s2">"'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "</span>
-         <span class="s1">'without another warning'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: frame </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">: TCP over IPv6 is left out of TCP reassembly and flow '</span>
+         <span class="s2">"tracing, as 'pypcapfile' has no IPv6 decoder; later such frames of this capture are "</span>
+         <span class="s1">'left out without another warning'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
 
 <div class="viewcode-block" id="_transport">
@@ -1270,7 +1279,7 @@
 <span class="sd">        UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.</span>
 
 <span class="sd">    """</span>
-    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s1">'IPv6 reassembly is not supported by the PyPCAPFile engine: '</span>
+    <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: IPv6 reassembly is not supported: '</span>
                           <span class="s2">"'pypcapfile' has no IPv6 decoder, so no IPv6 fragment header "</span>
                           <span class="s1">'can be read'</span><span class="p">)</span></div>
 

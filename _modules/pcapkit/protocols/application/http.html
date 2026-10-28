@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.application.http - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -790,7 +791,7 @@
             <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP version: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">http</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -853,7 +854,7 @@
         <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP version: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: ``protocol.make`` is an ordinary instance method (the abstract</span>
         <span class="c1"># declaration at ``ProtocolBase.make`` takes ``self``, and the</span>
@@ -950,7 +951,8 @@
             <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv1</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv2</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'preface'</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">)),</span> <span class="o">**</span><span class="n">HTTPv2</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP data: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid data: must be HTTP/1.* or HTTP/2 data, '</span>
+                            <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_test_preface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -1136,13 +1138,13 @@
         <span class="c1"># test rejects only headers that no conforming sender writes, and it</span>
         <span class="c1"># gates this guess alone: an explicit ``version=2`` is not affected.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_test_http2_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">"unknown HTTP version"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">"unknown HTTP version"</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

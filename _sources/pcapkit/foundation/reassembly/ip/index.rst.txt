@@ -103,6 +103,9 @@ Departures from the procedure above:
   :rfc:`8200#section-4.5` for IPv6.
 * A buffer flushed by an unfragmented datagram reusing its ``BUFID`` is
   reported as an incomplete datagram rather than discarded.
+* An IPv6 atomic fragment, one with fragment offset zero and **M** clear,
+  flushes nothing: it is reassembled in isolation and the fragments buffered
+  under its ``BUFID`` are kept, per :rfc:`6946#section-4` (:issue:`2270`).
 * ``TDL`` starts at ``-1`` rather than ``0``, so that a datagram carrying no
   data can complete (:issue:`1359`).
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final

@@ -11,7 +11,7 @@
 <meta name="description" content="The largest release since 1.0, and the first recorded here as it happened rather than reconstructed. New extraction engines, ESP with payload decryption, SCTP and NGAP over SCTP, a library logger t..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="1.4.1 – 2026-08-22" href="1.4.1.html"><link rel="prev" title="Changelog" href="../changelog.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>1.5.0 – unreleased - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -2643,8 +2644,9 @@ call itself creates is exempt. Flooring the decryption-secrets payloads that rea
 key at <code class="docutils literal notranslate"><span class="pre">-1</span></code> for “unknown”. Ships labelled breaking: well-formed captures are
 byte-identical, but any truncated PCAP-NG now yields the frames before the cut where
 it raised, the last of which may carry zero-padded octets, and some short-file depths
-move from <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">unknown</span> <span class="pre">byteorder</span> <span class="pre">magic</span></code> to <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError" title="pcapkit.utilities.exceptions.StreamEOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StreamEOFError</span></code></a>. The
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/683">#683</a> drift <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/685">#685</a> tracks is unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>).</p></li>
+move from <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">PCAP-NG:</span> <span class="pre">unknown</span> <span class="pre">byte-order</span> <span class="pre">magic</span></code> to
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError" title="pcapkit.utilities.exceptions.StreamEOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StreamEOFError</span></code></a>. The <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/683">#683</a> drift <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/685">#685</a> tracks is unchanged
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>).</p></li>
 <li><p>HIP’s <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code>/<code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> parameter packed 12 octets where
 <span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.3"><strong>RFC 7401 Section 5.2.3</strong></a> requires 16, and <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> declared its <code class="docutils literal notranslate"><span class="pre">Length</span></code>
 in 4-octet units where <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.1"><strong>RFC 7401 Section 5.2.1</strong></a>’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> is a byte count –

@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.internet.ipv6_ext contains IPv6_Ext only, which plays a double role. It is the shared base class of every IPv6 extension header this package implements, supplying the extension-mo..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPv6-Frag - Fragment Header for IPv6" href="ipv6_frag.html"><link rel="prev" title="IPv6 - Internet Protocol version 6" href="ipv6.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>IPv6-Ext - IPv6 Extension Header - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -786,10 +787,13 @@ construction methods of every class in the MRO, plus any
 construction</strong>: a plain
 <code class="docutils literal notranslate"><span class="pre">IPv6_Ext(next=...,</span> <span class="pre">len=...,</span> <span class="pre">data=...,</span> <span class="pre">payload=...)</span></code> raises
 <code class="docutils literal notranslate"><span class="pre">UnsupportedCall:</span> <span class="pre">IPv6_Ext:</span> <span class="pre">unexpected</span> <span class="pre">keyword(s)</span></code>. The
-<code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that too, with no
-difference for subclasses: signatures and <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> are
-both unioned down the MRO, so every subclass’s allowlist takes
-these names either way.</p>
+<code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that too, but a set
+there is unioned down the MRO, so every subclass would accept
+these names and drop them. A <code class="docutils literal notranslate"><span class="pre">make</span></code> signature can be kept from
+subclasses instead: this class sets
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__" title="pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__own_make_keywords__</span></code></a>,
+so a subclass that overrides <code class="docutils literal notranslate"><span class="pre">make</span></code> accepts <code class="docutils literal notranslate"><span class="pre">len</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code>
+only where its own <code class="docutils literal notranslate"><span class="pre">make</span></code> declares it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>).</p>
 <p>They are keyword-<em>only</em> because this class is also a base and each
 subclass’s <code class="docutils literal notranslate"><span class="pre">make</span></code> puts different names in the same positions. As
 positional parameters they draw pylint <code class="docutils literal notranslate"><span class="pre">arguments-renamed</span></code>
@@ -865,8 +869,8 @@ subclasses would break those that are <em>not</em> IPv6-only:
 <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
 <a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> both default to
 <code class="docutils literal notranslate"><span class="pre">version=4</span></code> and are valid under IPv4, so an unconditional gate
-would reject them (<code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">ESP:</span> <span class="pre">only</span> <span class="pre">valid</span> <span class="pre">for</span> <span class="pre">IPv6,</span> <span class="pre">got</span>
-<span class="pre">version=4</span></code>).</p>
+would reject them (<code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">ESP:</span> <span class="pre">invalid</span> <span class="pre">version:</span> <span class="pre">must</span> <span class="pre">be</span>
+<span class="pre">6,</span> <span class="pre">not</span> <span class="pre">4</span></code>).</p>
 <p>The gate exists because this class is registered into
 <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a>, which
 <em>every</em> <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>

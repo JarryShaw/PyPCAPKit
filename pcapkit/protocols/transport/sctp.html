@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.transport.sctp contains SCTP only, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is described as below:,,,, Octets, Bits, Name, ..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="TCP - Transmission Control Protocol" href="tcp.html"><link rel="prev" title="Transport Layer Base Protocol" href="transport.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>SCTP - Stream Control Transmission Protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -1246,6 +1247,34 @@ parameter or error cause list folds its padding into that list, see
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed error cause schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.SCTP._make_param_types">
+<span class="sig-name descname"><span class="pre">_make_param_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/sctp.html#SCTP._make_param_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.sctp.SCTP._make_param_types" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve a list of parameter types.</p>
+<p>Shared by <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP._make_param_addrtypes" title="pcapkit.protocols.transport.sctp.SCTP._make_param_addrtypes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_addrtypes()</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP._make_cause_missing_param" title="pcapkit.protocols.transport.sctp.SCTP._make_cause_missing_param"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_cause_missing_param()</span></code></a>, whose <code class="docutils literal notranslate"><span class="pre">types</span></code> both list
+parameter types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>types</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – parameter types, each given as a
+<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> or an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> for each
+item.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If an item is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, or is neither a
+    <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> nor an
+    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2288">#2288</a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2673,6 +2702,10 @@ reader accepted without a terminator rebuilds as read
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed parameter schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If an item of <code class="docutils literal notranslate"><span class="pre">types</span></code> is not a parameter type,
+    as <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP._make_param_types" title="pcapkit.protocols.transport.sctp.SCTP._make_param_types"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_types()</span></code></a> checks.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -3198,6 +3231,10 @@ cause-specific information is recorded verbatim rather than raising.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed error cause schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If an item of <code class="docutils literal notranslate"><span class="pre">types</span></code> is not a parameter type,
+    as <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP._make_param_types" title="pcapkit.protocols.transport.sctp.SCTP._make_param_types"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_types()</span></code></a> checks.</p>
+</dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -3462,6 +3499,24 @@ lengths</p></li>
 by port number as in <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
 <a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>.</p>
 </div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.SCTP.__proto_key__">
+<span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.sctp.SCTP.__proto_key__" title="Link to this definition">¶</a></dt>
+<dd><p>the enum a key must be a member of,
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
+class <em>owning</em> the registry, and read from it by
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
+<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a> checks its own
+– a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is accepted because the registry is keyed by
+payload protocol identifier, which is a number in its own right (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">

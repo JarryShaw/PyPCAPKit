@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.foundation.registry holds the registration functions for pcapkit ’s engines, dumpers, callbacks and protocols. A code the shipped enumerations do not define can still be registered: most co..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Family" href="../protocols/index.html"><link rel="prev" title="Follow TCP Stream" href="traceflow/tcp.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Registry Management - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -931,7 +932,16 @@ and GitHub issue <a class="extlink-issue reference external" href="https://githu
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> (or any other non-enum,
     non-mapping value) is given without an explicit destination, or if
     an enum member’s type names no known destination registry –
-    inference refuses rather than guesses.</p>
+    inference refuses rather than guesses; or if a key is not of the
+    type its destination’s registry is keyed by, as its typed registrar
+    would reject it, e.g. <code class="docutils literal notranslate"><span class="pre">{Frame:</span> <span class="pre">TransType.ICMP}</span></code>. What a registry is
+    keyed by is read from the
+    <a class="reference internal" href="../protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto_key__" title="pcapkit.protocols.link.link.Link.__proto_key__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto_key__</span></code></a>
+    declared by the class owning it, so a destination sharing another’s
+    registry is checked as its owner is, and one whose owner declares no
+    pairing is not checked. Every target is checked before any is
+    registered, so a rejected <code class="docutils literal notranslate"><span class="pre">code</span></code> leaves every registry as it was
+    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
 </dd>
 </dl>
 </dd></dl>

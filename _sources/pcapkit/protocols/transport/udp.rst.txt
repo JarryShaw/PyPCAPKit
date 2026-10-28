@@ -33,6 +33,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
 
    .. automethod:: __index__
 

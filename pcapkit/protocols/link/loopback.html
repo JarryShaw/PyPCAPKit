@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.link.loopback contains Loopback only, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described as below:..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="VLAN - 802.1Q/802.1ad VLAN Tag Types" href="vlan.html"><link rel="prev" title="L2TPv2 - Layer Two Tunnelling Protocol version 2" href="l2tpv2.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>BSD Loopback Encapsulation - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -651,7 +652,9 @@ this host’s, as a capture of its own loopback interface does.</p></li>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">byteorder</span></code> is neither <code class="docutils literal notranslate"><span class="pre">'big'</span></code> nor
-    <code class="docutils literal notranslate"><span class="pre">'little'</span></code>, or <code class="docutils literal notranslate"><span class="pre">family</span></code> does not fit in 4 octets.</p>
+    <code class="docutils literal notranslate"><span class="pre">'little'</span></code>, or <code class="docutils literal notranslate"><span class="pre">family</span></code> is not an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> (a
+    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> included, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2289">#2289</a>) or does not fit in 4
+    octets.</p>
 </dd>
 </dl>
 </dd></dl>

@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.protocol contains Protocol, an abstract base class with pre-defined utility arguments and methods. Inherit it directly only to create a new protocol stack; a new protocol in an ex..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Link Layer" href="link/index.html"><link rel="prev" title="Protocol Family" href="index.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Root Protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -1055,6 +1056,21 @@ classes that can have it.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__own_make_keywords__">
+<span class="sig-name descname"><span class="pre">__own_make_keywords__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="Link to this definition">¶</a></dt>
+<dd><p>Whether the parameters of this class’s own <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> are accepted only
+while that <code class="docutils literal notranslate"><span class="pre">make</span></code> is the one in use. By default
+<a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> takes every <code class="docutils literal notranslate"><span class="pre">make</span></code> in the MRO, so a subclass
+that overrides <code class="docutils literal notranslate"><span class="pre">make</span></code> and forwards the rest to its parent keeps the
+parent’s keywords. A base whose subclasses override <code class="docutils literal notranslate"><span class="pre">make</span></code> <em>without</em>
+forwarding sets this, so that its keywords are refused for them rather than
+accepted and dropped – <a class="reference internal" href="internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>
+does, for <code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>). Read from the defining
+class alone, so it is not inherited, and it leaves <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a>
+and the other construction methods unaffected.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__schema__">
 <span class="sig-name descname"><span class="pre">__schema__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><span class="pre">_ST</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol header schema definition.</p>
@@ -1166,8 +1182,12 @@ classes that can have it.</p>
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, returns <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented" title="pcapkit.utilities.exceptions.ProtocolNotImplemented"><strong>ProtocolNotImplemented</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is <strong>NOT</strong> in <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
-    and <code class="docutils literal notranslate"><span class="pre">default</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented" title="pcapkit.utilities.exceptions.ProtocolNotImplemented"><strong>ProtocolNotImplemented</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is <strong>NOT</strong> in <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
+    and <code class="docutils literal notranslate"><span class="pre">default</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><strong>StructError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">pack</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and the index could not be
+    packed into <code class="docutils literal notranslate"><span class="pre">size</span></code> octets.</p></li>
+</ul>
 </dd>
 </dl>
 <div class="admonition note">
@@ -2097,6 +2117,8 @@ documented under it above; each group below links to its entries.</p>
 <span class="sig-name descname"><span class="pre">__proto__</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__proto__" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__keywords__">
 <span class="sig-name descname"><span class="pre">__keywords__</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__keywords__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__">
+<span class="sig-name descname"><span class="pre">__own_make_keywords__</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__schema__">
 <span class="sig-name descname"><span class="pre">__schema__</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__schema__" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__header__">
@@ -2126,7 +2148,8 @@ documented under it above; each group below links to its entries.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase._exctx">
 <span class="sig-name descname"><span class="pre">_exctx</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase._exctx" title="Link to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__layer__" title="pcapkit.protocols.protocol.Protocol.__layer__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__layer__</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="pcapkit.protocols.protocol.Protocol.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__schema__</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="pcapkit.protocols.protocol.Protocol.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__own_make_keywords__</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__schema__</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__header__</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._data" title="pcapkit.protocols.protocol.Protocol._data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_data</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_file</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._info" title="pcapkit.protocols.protocol.Protocol._info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_info</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._next" title="pcapkit.protocols.protocol.Protocol._next"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_next</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._protos" title="pcapkit.protocols.protocol.Protocol._protos"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_protos</span></code></a>,
@@ -2209,7 +2232,10 @@ constructed, so a keyword declared by <code class="docutils literal notranslate"
 does not, and <a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.HIP.__post_init__" title="pcapkit.protocols.internet.hip.HIP.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.__post_init__</span></code></a> forwards it to both.</p>
 <p>The walk covers the whole MRO rather than the most derived override of each
 method, so that a subclass declaring its own keyword and forwarding the rest
-to its parent does not make the parent’s keywords unreachable.</p>
+to its parent does not make the parent’s keywords unreachable. The one
+exception is a class that sets <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__" title="pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__own_make_keywords__</span></code></a>: its
+<code class="docutils literal notranslate"><span class="pre">make</span></code> counts only while it is the <code class="docutils literal notranslate"><span class="pre">make</span></code> of <code class="docutils literal notranslate"><span class="pre">cls</span></code>, not once a
+subclass overrides it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>).</p>
 </dd></dl>
 
 </section>

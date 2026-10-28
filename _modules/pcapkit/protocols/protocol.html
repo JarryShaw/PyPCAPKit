@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -765,7 +766,11 @@
 
 <span class="sd">    The walk covers the whole MRO rather than the most derived override of each</span>
 <span class="sd">    method, so that a subclass declaring its own keyword and forwarding the rest</span>
-<span class="sd">    to its parent does not make the parent's keywords unreachable.</span>
+<span class="sd">    to its parent does not make the parent's keywords unreachable. The one</span>
+<span class="sd">    exception is a class that sets :attr:`ProtocolBase.__own_make_keywords__</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__own_make_keywords__&gt;`: its</span>
+<span class="sd">    ``make`` counts only while it is the ``make`` of ``cls``, not once a</span>
+<span class="sd">    subclass overrides it (:issue:`2286`).</span>
 
 <span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
@@ -775,6 +780,9 @@
 
     <span class="n">unchecked</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">OUT_OF_BAND_KEYWORDS</span><span class="p">)</span>
+    <span class="c1"># NOTE: The class whose ``make`` is the one ``cls`` resolves to; any other</span>
+    <span class="c1"># ``make`` in the MRO has been overridden.</span>
+    <span class="n">make_owner</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">klass</span> <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span> <span class="k">if</span> <span class="s1">'make'</span> <span class="ow">in</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
         <span class="c1"># NOTE: A keyword read out of ``**kwargs`` by name is invisible to</span>
         <span class="c1"># :func:`inspect.signature`, so the class lists it in ``__keywords__``.</span>
@@ -805,6 +813,13 @@
             <span class="c1"># lands here.</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># NOTE: A ``make`` whose keywords its class keeps to itself is read</span>
+            <span class="c1"># only while it is the one ``cls`` uses. Read from ``__dict__`` so</span>
+            <span class="c1"># the marker, like the :obj:`None` opt-out above, is not inherited.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">method</span> <span class="o">==</span> <span class="s1">'make'</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">make_owner</span>
+                    <span class="ow">and</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__own_make_keywords__'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
                 <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -1045,6 +1060,18 @@
     <span class="c1">#: and exempting them along with their base would forgo the check on the very</span>
     <span class="c1">#: classes that can have it.</span>
     <span class="n">__keywords__</span><span class="p">:</span> <span class="s1">'Optional[frozenset[str]]'</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span>
+
+    <span class="c1">#: Whether the parameters of this class's own :meth:`make` are accepted only</span>
+    <span class="c1">#: while that ``make`` is the one in use. By default</span>
+    <span class="c1">#: :func:`_declared_keywords` takes every ``make`` in the MRO, so a subclass</span>
+    <span class="c1">#: that overrides ``make`` and forwards the rest to its parent keeps the</span>
+    <span class="c1">#: parent's keywords. A base whose subclasses override ``make`` *without*</span>
+    <span class="c1">#: forwarding sets this, so that its keywords are refused for them rather than</span>
+    <span class="c1">#: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
+    <span class="c1">#: does, for ``len`` and ``data`` (:issue:`2286`). Read from the defining</span>
+    <span class="c1">#: class alone, so it is not inherited, and it leaves :attr:`__keywords__`</span>
+    <span class="c1">#: and the other construction methods unaffected.</span>
+    <span class="n">__own_make_keywords__</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">#: Whether this instance is being rebuilt by :meth:`from_data` from a parsed</span>
     <span class="c1">#: data model, as against constructed from keywords somebody wrote. It governs</span>
@@ -2382,12 +2409,19 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Binary bits (``0``/``1``).</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            StructError: If the buffer is empty, with ``eof`` set as by</span>
+<span class="sd">                :meth:`_read_unpack`, or if fewer than ``size`` octets were read.</span>
+
 <span class="sd">        """</span>
-        <span class="n">bin_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
-            <span class="n">byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">bin_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">byte</span><span class="p">))[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
-        <span class="k">return</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bin_</span><span class="p">)</span>
+        <span class="c1"># ``max`` makes a non-positive size read nothing rather than the</span>
+        <span class="c1"># rest of the stream.</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mem</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">StructError</span><span class="p">(</span><span class="s1">'unpack: empty buffer'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eof</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StructError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unpack failed'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="n">byte</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">mem</span><span class="p">)</span>
 
     <span class="nd">@overload</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'None'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span> <span class="o">...</span>
@@ -2460,7 +2494,12 @@
 
         <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">end</span> <span class="o">=</span> <span class="s1">'little'</span> <span class="k">if</span> <span class="n">lilendian</span> <span class="k">else</span> <span class="s1">'big'</span>  <span class="c1"># type: Literal['little', 'big']</span>
-            <span class="n">buf</span> <span class="o">=</span> <span class="n">integer</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span>
+            <span class="c1"># ``int.to_bytes`` raises these where ``struct.pack`` raises</span>
+            <span class="c1"># ``struct.error`` for the other sizes (#2291).</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">integer</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">StructError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: pack failed'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">kind</span><span class="si">}</span><span class="s1">'</span>
@@ -2540,6 +2579,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolNotImplemented: If ``name`` is **NOT** in ``namespace``</span>
 <span class="sd">                and ``default`` is :data:`None`.</span>
+<span class="sd">            StructError: If ``pack`` is :data:`True` and the index could not be</span>
+<span class="sd">                packed into ``size`` octets.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,</span>

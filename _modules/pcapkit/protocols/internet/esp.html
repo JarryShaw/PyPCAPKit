@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.internet.esp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -561,8 +562,8 @@
 <span class="sd">   &gt;&gt;&gt; CipherSuite.get('ENCR_3DES')     # but ESP cannot apply it</span>
 <span class="sd">   Traceback (most recent call last):</span>
 <span class="sd">     ...</span>
-<span class="sd">   pcapkit.utilities.exceptions.ProtocolError: unsupported ESP encryption</span>
-<span class="sd">   algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,</span>
+<span class="sd">   pcapkit.utilities.exceptions.ProtocolError: ESP: unsupported encryption</span>
+<span class="sd">   algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,</span>
 <span class="sd">   ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16</span>
 
 <span class="sd">Decryption requires the optional |cryptography|_ dependency</span>
@@ -765,13 +766,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">registry</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unknown </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">'_'</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">registry</span><span class="p">[</span><span class="n">candidate</span><span class="p">]</span>
-    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unknown </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
 
@@ -833,7 +834,7 @@
         <span class="n">cipher</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'ENCR_'</span><span class="p">,</span> <span class="s1">'encryption'</span><span class="p">)</span>
         <span class="n">suite</span> <span class="o">=</span> <span class="n">CIPHER_SUITES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cipher</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">suite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported ESP encryption algorithm: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">; pcapkit '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unsupported encryption algorithm: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; pcapkit '</span>
                                 <span class="sa">f</span><span class="s1">'implements </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">CIPHER_SUITES</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">suite</span></div>
 </div>
@@ -893,8 +894,9 @@
         <span class="n">integrity</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">Integrity</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'AUTH_'</span><span class="p">,</span> <span class="s1">'integrity'</span><span class="p">)</span>
         <span class="n">suite</span> <span class="o">=</span> <span class="n">INTEGRITY_SUITES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">integrity</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">suite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported ESP integrity algorithm: </span><span class="si">{</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">; pcapkit '</span>
-                                <span class="sa">f</span><span class="s1">'implements </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">INTEGRITY_SUITES</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unsupported integrity algorithm: </span><span class="si">{</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; '</span>
+                                <span class="sa">f</span><span class="s1">'pcapkit implements '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">INTEGRITY_SUITES</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">suite</span></div>
 </div>
 
@@ -1056,7 +1058,7 @@
                  <span class="n">destination</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address | IPv6Address | str | int | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">spi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">spi</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFFFF</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid SPI: </span><span class="si">{</span><span class="n">spi</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid SPI: </span><span class="si">{</span><span class="n">spi</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="c1"># NOTE: checked before the ``ipaddress.ip_address`` call below, for</span>
@@ -1069,7 +1071,7 @@
             <span class="c1"># would silently become ``IPv4Address('0.0.0.1')``, with no</span>
             <span class="c1"># exception and no warning.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'invalid destination: must not be a bool, not </span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1"> -- '</span>
+                <span class="sa">f</span><span class="s1">'ESP: invalid destination: must not be a bool, not </span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1"> -- '</span>
                 <span class="sa">f</span><span class="s1">'pass int(</span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
 
         <span class="c1">#: Optional[int]: Security Parameters Index, or :data:`None` for any.</span>
@@ -1089,8 +1091,9 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cipher_suite</span><span class="o">.</span><span class="n">is_aead</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Integrity</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is a combined mode algorithm and provides its own '</span>
-                <span class="sa">f</span><span class="s1">'integrity; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> must not be configured alongside it'</span>
+                <span class="sa">f</span><span class="s1">'ESP: invalid integrity algorithm: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is a combined mode '</span>
+                <span class="sa">f</span><span class="s1">'algorithm and provides its own integrity, so </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> must '</span>
+                <span class="sa">f</span><span class="s1">'not be configured alongside it'</span>
             <span class="p">)</span>
 
         <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__salt__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cipher_suite</span><span class="p">,</span> <span class="n">encryption_key</span><span class="p">,</span> <span class="n">salt</span><span class="p">)</span>
@@ -1105,7 +1108,7 @@
                      <span class="sa">f</span><span class="s1">'fail to verify'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">icv_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">icv_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid ICV length: </span><span class="si">{</span><span class="n">icv_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid ICV length: </span><span class="si">{</span><span class="n">icv_length</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__icv_length__</span> <span class="o">=</span> <span class="n">icv_length</span>
 
         <span class="n">unavailable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unavailable</span><span class="p">()</span>
@@ -1199,8 +1202,9 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cipher_suite</span><span class="o">.</span><span class="n">requires_cryptography</span> <span class="ow">and</span> <span class="n">load_cryptography</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs the optional "cryptography" dependency, '</span>
-                    <span class="sa">f</span><span class="s1">'which is not installed (pip install pypcapkit[crypto])'</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unavailable encryption algorithm: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> needs the '</span>
+                    <span class="sa">f</span><span class="s1">'optional "cryptography" dependency, which is not installed '</span>
+                    <span class="sa">f</span><span class="s1">'(pip install pypcapkit[crypto])'</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
@@ -1228,7 +1232,8 @@
 <span class="sd">        """</span>
         <span class="n">digest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrity_suite</span><span class="o">.</span><span class="n">digest</span>
         <span class="k">if</span> <span class="n">digest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> computes no ICV'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: integrity algorithm computes no ICV: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integrity</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">mac</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__integrity_key__</span><span class="p">,</span>
                        <span class="n">spi</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">seq</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">body</span><span class="p">,</span>
@@ -1267,21 +1272,22 @@
 
         <span class="n">crypto</span> <span class="o">=</span> <span class="n">load_cryptography</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">crypto</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs the optional "cryptography" dependency, '</span>
-                                <span class="sa">f</span><span class="s1">'which is not installed'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unavailable encryption algorithm: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> needs '</span>
+                                <span class="sa">f</span><span class="s1">'the optional "cryptography" dependency, which is not '</span>
+                                <span class="sa">f</span><span class="s1">'installed'</span><span class="p">)</span>
         <span class="n">crypto_cipher</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">modes</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span>
 
         <span class="n">iv_length</span> <span class="o">=</span> <span class="n">suite</span><span class="o">.</span><span class="n">iv_length</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">iv_length</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP payload is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets, too short for the '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: payload too short: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span><span class="si">!r}</span><span class="s1"> octets, less than the '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">iv_length</span><span class="si">}</span><span class="s1">-octet </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> IV'</span><span class="p">)</span>
         <span class="n">iv</span><span class="p">,</span> <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">body</span><span class="p">[:</span><span class="n">iv_length</span><span class="p">],</span> <span class="n">body</span><span class="p">[</span><span class="n">iv_length</span><span class="p">:]</span>
 
         <span class="k">if</span> <span class="n">cipher</span> <span class="ow">is</span> <span class="n">Cipher</span><span class="o">.</span><span class="n">ENCR_AES_CBC</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ciphertext</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span> <span class="o">%</span> <span class="n">suite</span><span class="o">.</span><span class="n">block_size</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP ciphertext of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets is not a '</span>
-                                    <span class="sa">f</span><span class="s1">'positive multiple of the </span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">block_size</span><span class="si">}</span><span class="s1">-octet '</span>
-                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> block size'</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid ciphertext length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span><span class="si">!r}</span><span class="s1"> '</span>
+                                    <span class="sa">f</span><span class="s1">'octets is not a positive multiple of the '</span>
+                                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">block_size</span><span class="si">}</span><span class="s1">-octet </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> block size'</span><span class="p">)</span>
             <span class="n">decryptor</span> <span class="o">=</span> <span class="n">crypto_cipher</span><span class="p">(</span><span class="n">algorithms</span><span class="o">.</span><span class="n">AES</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__key__</span><span class="p">),</span> <span class="n">modes</span><span class="o">.</span><span class="n">CBC</span><span class="p">(</span><span class="n">iv</span><span class="p">))</span><span class="o">.</span><span class="n">decryptor</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span> <span class="o">+</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
@@ -1289,8 +1295,8 @@
         <span class="c1"># keying material followed by the explicit IV, and the associated</span>
         <span class="c1"># data is the SPI and the sequence number.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">icv</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> requires an authentication tag, but the '</span>
-                                <span class="sa">f</span><span class="s1">'packet carries no ICV'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: missing authentication tag: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> requires '</span>
+                                <span class="sa">f</span><span class="s1">'one, but the packet carries no ICV'</span><span class="p">)</span>
         <span class="n">nonce</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__salt__</span> <span class="o">+</span> <span class="n">iv</span>
         <span class="n">aad</span> <span class="o">=</span> <span class="n">spi</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">seq</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
         <span class="n">decryptor</span> <span class="o">=</span> <span class="n">crypto_cipher</span><span class="p">(</span>
@@ -1332,15 +1338,17 @@
 
         <span class="n">crypto</span> <span class="o">=</span> <span class="n">load_cryptography</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">crypto</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs the optional "cryptography" dependency, '</span>
-                                <span class="sa">f</span><span class="s1">'which is not installed'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: unavailable encryption algorithm: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> needs '</span>
+                                <span class="sa">f</span><span class="s1">'the optional "cryptography" dependency, which is not '</span>
+                                <span class="sa">f</span><span class="s1">'installed'</span><span class="p">)</span>
         <span class="n">crypto_cipher</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">modes</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span>
 
         <span class="n">iv_length</span> <span class="o">=</span> <span class="n">suite</span><span class="o">.</span><span class="n">iv_length</span>
         <span class="k">if</span> <span class="n">iv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">iv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="n">iv_length</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span> <span class="o">!=</span> <span class="n">iv_length</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a </span><span class="si">{</span><span class="n">iv_length</span><span class="si">}</span><span class="s1">-octet IV, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid IV: </span><span class="si">{</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a </span><span class="si">{</span><span class="n">iv_length</span><span class="si">}</span><span class="s1">-octet IV, '</span>
+                                <span class="sa">f</span><span class="s1">'got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span><span class="si">!r}</span><span class="s1"> octets'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cipher</span> <span class="ow">is</span> <span class="n">Cipher</span><span class="o">.</span><span class="n">ENCR_AES_CBC</span><span class="p">:</span>
             <span class="n">encryptor</span> <span class="o">=</span> <span class="n">crypto_cipher</span><span class="p">(</span><span class="n">algorithms</span><span class="o">.</span><span class="n">AES</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__key__</span><span class="p">),</span> <span class="n">modes</span><span class="o">.</span><span class="n">CBC</span><span class="p">(</span><span class="n">iv</span><span class="p">))</span><span class="o">.</span><span class="n">encryptor</span><span class="p">()</span>
@@ -1391,12 +1399,12 @@
             <span class="n">salt</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">salt</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">salt</span><span class="p">)</span> <span class="o">!=</span> <span class="n">salt_length</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a </span><span class="si">{</span><span class="n">salt_length</span><span class="si">}</span><span class="s1">-octet salt, '</span>
-                                <span class="sa">f</span><span class="s1">'got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">salt</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid salt: </span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">salt_length</span><span class="si">}</span><span class="s1">-octet salt, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">salt</span><span class="p">)</span><span class="si">!r}</span><span class="s1"> octets'</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">material</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">suite</span><span class="o">.</span><span class="n">key_sizes</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a key of '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: invalid key: </span><span class="si">{</span><span class="n">suite</span><span class="o">.</span><span class="n">cipher</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> needs a key of '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="s2">" or "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">suite</span><span class="o">.</span><span class="n">key_sizes</span><span class="p">))</span><span class="si">}</span><span class="s1"> octets, '</span>
-                                <span class="sa">f</span><span class="s1">'got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">material</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                                <span class="sa">f</span><span class="s1">'got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">material</span><span class="p">)</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">material</span><span class="p">,</span> <span class="n">salt</span></div>
 
 
@@ -1467,7 +1475,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">association</span><span class="p">,</span> <span class="n">SecurityAssociation</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'not a security association: </span><span class="si">{</span><span class="n">association</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ESP: not a security association: </span><span class="si">{</span><span class="n">association</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__associations__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">association</span><span class="p">)</span></div>
 
 
@@ -1819,8 +1827,8 @@
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_context</span><span class="p">(</span><span class="n">ESPContext</span><span class="p">)</span>
         <span class="n">association</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">spi</span><span class="p">)</span> <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">association</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no security association for SPI </span><span class="si">{</span><span class="n">spi</span><span class="si">:</span><span class="s1">#010x</span><span class="si">}</span><span class="s1">; ESP cannot be '</span>
-                                <span class="sa">f</span><span class="s1">'constructed with encrypt=True without one'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: no security association for SPI </span><span class="si">{</span><span class="n">spi</span><span class="si">:</span><span class="s1">#010x</span><span class="si">}</span><span class="s1">; '</span>
+                                <span class="sa">f</span><span class="s1">'encrypt=True needs one'</span><span class="p">)</span>
 
         <span class="n">next_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
                                       <span class="nb">reversed</span><span class="o">=</span><span class="n">next_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1830,11 +1838,11 @@
         <span class="k">if</span> <span class="n">pad_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pad_len</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plain</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">align</span>
         <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plain</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad_len</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">align</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'pad length </span><span class="si">{</span><span class="n">pad_len</span><span class="si">}</span><span class="s1"> leaves '</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid pad length: </span><span class="si">{</span><span class="n">pad_len</span><span class="si">!r}</span><span class="s1"> leaves '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plain</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">pad_len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s1"> octets, which is not a multiple '</span>
                                 <span class="sa">f</span><span class="s1">'of the required </span><span class="si">{</span><span class="n">align</span><span class="si">}</span><span class="s1">-octet alignment'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">pad_len</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid pad length: </span><span class="si">{</span><span class="n">pad_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid pad length: </span><span class="si">{</span><span class="n">pad_len</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1"># RFC 4303 s2.4: padding bytes are a monotonically increasing</span>
         <span class="c1"># sequence starting at 1.</span>

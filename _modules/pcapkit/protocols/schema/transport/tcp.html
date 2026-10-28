@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.schema.transport.tcp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -1348,7 +1349,16 @@
 <span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="n">ret</span><span class="o">.</span><span class="n">option</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span>
+        <span class="c1"># NOTE: Only attributes that the construction path sets too are assigned</span>
+        <span class="c1"># here, so that a schema parsed off the wire carries exactly the same</span>
+        <span class="c1"># attributes as one built in memory by ``TCP._make_mode_mp`` (#2293). An</span>
+        <span class="c1"># earlier revision also set ``ret.option = Enum_Option.Multipath_TCP``,</span>
+        <span class="c1"># which no maker mirrored and nothing ever read: ``MPTCP`` declares no</span>
+        <span class="c1"># ``option`` field, and its real ``kind`` field already carries</span>
+        <span class="c1"># ``Multipath_TCP``. ``subtype`` is the one attribute that genuinely has</span>
+        <span class="c1"># to be assigned on both paths -- see the NOTE on :class:`MPTCP` for why</span>
+        <span class="c1"># it cannot be a field -- and ``TCP._make_mode_mp`` makes the matching</span>
+        <span class="c1"># assignment for construction.</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'subtype'</span><span class="p">])</span>
 

@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.data.internet.ipv4 - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -494,7 +495,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -825,12 +826,12 @@
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Route, i.e. the address slots before the pointer.</span>
-    <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
+    <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
     <span class="c1">#: Address slots at or beyond the pointer.</span>
     <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -863,12 +864,12 @@
     <span class="c1">#: Pointer.</span>
     <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Route, i.e. the address slots before the pointer.</span>
-    <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span>
+    <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
     <span class="c1">#: Address slots at or beyond the pointer.</span>
     <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'Optional[tuple[IPv4Address, ...]]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'OptionType'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">,</span> <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

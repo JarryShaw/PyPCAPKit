@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.data.internet.hip - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -537,8 +538,9 @@
     <span class="s1">'RouteDstParameter'</span><span class="p">,</span> <span class="s1">'HIPTransportModeParameter'</span><span class="p">,</span> <span class="s1">'HIPMACParameter'</span><span class="p">,</span>
     <span class="s1">'HIPMAC2Parameter'</span><span class="p">,</span> <span class="s1">'HIPSignature2Parameter'</span><span class="p">,</span> <span class="s1">'HIPSignatureParameter'</span><span class="p">,</span>
     <span class="s1">'EchoRequestUnsignedParameter'</span><span class="p">,</span> <span class="s1">'EchoResponseUnsignedParameter'</span><span class="p">,</span> <span class="s1">'RelayFromParameter'</span><span class="p">,</span>
-    <span class="s1">'RelayToParameter'</span><span class="p">,</span> <span class="s1">'RouteViaParameter'</span><span class="p">,</span> <span class="s1">'FromParameter'</span><span class="p">,</span>
-    <span class="s1">'RVSHMACParameter'</span><span class="p">,</span> <span class="s1">'RelayHMACParameter'</span><span class="p">,</span>
+    <span class="s1">'RelayToParameter'</span><span class="p">,</span> <span class="s1">'OverlayTTLParameter'</span><span class="p">,</span> <span class="s1">'RouteViaParameter'</span><span class="p">,</span>
+    <span class="s1">'FromParameter'</span><span class="p">,</span> <span class="s1">'RVSHMACParameter'</span><span class="p">,</span> <span class="s1">'ViaRVSParameter'</span><span class="p">,</span>
+    <span class="s1">'RelayHMACParameter'</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -1060,10 +1062,22 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.CertParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CertParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``CERT`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``CERT`` parameter.</span>
 
-    <span class="c1">#: Certificate group.</span>
-    <span class="n">cert_group</span><span class="p">:</span> <span class="s1">'Group'</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       :attr:`cert_group` is an :obj:`int` rather than a</span>
+<span class="sd">       :class:`~pcapkit.const.hip.group.Group` (:issue:`2283`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Certificate group -- :rfc:`8002#section-2`'s "Group ID grouping</span>
+    <span class="c1">#: multiple related CERT parameters". An arbitrary number, since that</span>
+    <span class="c1">#: section leaves the CERT group namespace to each sending host, so no</span>
+    <span class="c1">#: registry stands behind it; it used to decode through the</span>
+    <span class="c1">#: Diffie-Hellman group registry and report a group of ``7`` as the curve</span>
+    <span class="c1">#: ``NIST_P_256``. See :issue:`2283`.</span>
+    <span class="n">cert_group</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Certificate count.</span>
     <span class="n">cert_count</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Certificate ID.</span>
@@ -1074,7 +1088,7 @@
     <span class="n">cert</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_group</span><span class="p">:</span> <span class="s1">'Group'</span><span class="p">,</span> <span class="n">cert_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_type</span><span class="p">:</span> <span class="s1">'Certificate'</span><span class="p">,</span> <span class="n">cert</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_group</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cert_type</span><span class="p">:</span> <span class="s1">'Certificate'</span><span class="p">,</span> <span class="n">cert</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1120,15 +1134,32 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.Lifetime">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Lifetime</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for registration lifetime."""</span>
+<span class="w">    </span><span class="sd">"""Data model for registration lifetime.</span>
 
-    <span class="c1">#: Minimum lifetime.</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       New required fields ``min_exponent`` and ``max_exponent``, and</span>
+<span class="sd">       :attr:`min` and :attr:`max` follow :rfc:`8003#section-4.1`'s exponential</span>
+<span class="sd">       encoding rather than reading the octet as a count of seconds</span>
+<span class="sd">       (:issue:`2281`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: The ``Min Lifetime`` octet as it appears on the wire. It is what</span>
+    <span class="c1">#: re-serialising writes back, since most of the 256 octets have no exact</span>
+    <span class="c1">#: :class:`~datetime.timedelta`.</span>
+    <span class="n">min_exponent</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The ``Max Lifetime`` octet as it appears on the wire.</span>
+    <span class="n">max_exponent</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Minimum lifetime, decoded from :attr:`min_exponent` per</span>
+    <span class="c1">#: :rfc:`8003#section-4.1`.</span>
     <span class="nb">min</span><span class="p">:</span> <span class="s1">'timedelta'</span>
-    <span class="c1">#: Maximum lifetime.</span>
+    <span class="c1">#: Maximum lifetime, decoded from :attr:`max_exponent` per</span>
+    <span class="c1">#: :rfc:`8003#section-4.1`.</span>
     <span class="nb">max</span><span class="p">:</span> <span class="s1">'timedelta'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="nb">max</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_exponent</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">max_exponent</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">min</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="nb">max</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1136,7 +1167,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.RegInfoParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RegInfoParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_INFO`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_INFO`` parameter.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       :attr:`lifetime` carries the raw octets alongside the durations, and the</span>
+<span class="sd">       durations follow :rfc:`8003#section-4.1` -- see</span>
+<span class="sd">       :class:`Lifetime` (:issue:`2281`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Registration lifetime.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'Lifetime'</span>
@@ -1152,15 +1191,30 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.RegRequestParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RegRequestParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_REQUEST`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_REQUEST`` parameter.</span>
 
-    <span class="c1">#: Registration lifetime.</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       New required field ``lifetime_exponent``, and :attr:`lifetime` follows</span>
+<span class="sd">       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the</span>
+<span class="sd">       octet as a count of seconds (:issue:`2281`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: The ``Lifetime`` octet as it appears on the wire. :rfc:`8003#section-4.1`</span>
+    <span class="c1">#: makes a non-zero octet an exponent standing for ``2^((lifetime - 64)/8)``</span>
+    <span class="c1">#: seconds, and this is that octet. It is what re-serialising writes back,</span>
+    <span class="c1">#: since most of the 256 octets have no exact</span>
+    <span class="c1">#: :class:`~datetime.timedelta`.</span>
+    <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Registration lifetime, decoded from :attr:`lifetime_exponent` per</span>
+    <span class="c1">#: :rfc:`8003#section-4.1`.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Registration type.</span>
     <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1168,15 +1222,27 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.RegResponseParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RegResponseParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_RESPONSE`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``REG_RESPONSE`` parameter.</span>
 
-    <span class="c1">#: Registration lifetime.</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       New required field ``lifetime_exponent``, and :attr:`lifetime` follows</span>
+<span class="sd">       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the</span>
+<span class="sd">       octet as a count of seconds (:issue:`2281`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: The ``Lifetime`` octet as it appears on the wire, for the reason</span>
+    <span class="c1">#: :attr:`RegRequestParameter.lifetime_exponent` gives.</span>
+    <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Registration lifetime, decoded from :attr:`lifetime_exponent` per</span>
+    <span class="c1">#: :rfc:`8003#section-4.1`.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Registration type.</span>
     <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime_exponent</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">reg_type</span><span class="p">:</span> <span class="s1">'tuple[Registration, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1340,13 +1406,26 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.TransactionIDParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransactionIDParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``TRANSACTION_ID`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``TRANSACTION_ID`` parameter.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       New required field ``id_len`` (:issue:`2271`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,</span>
+    <span class="c1">#: which :rfc:`6078#section-4.4` gives as the "Length of the Identifier, in</span>
+    <span class="c1">#: octets" for what is otherwise an opaque value. Declared rather than</span>
+    <span class="c1">#: recomputed from :meth:`int.bit_length`, which cannot see a leading zero</span>
+    <span class="c1">#: octet: without it a parameter read with ``Length = 4`` re-serialised as</span>
+    <span class="c1">#: ``Length = 1``. Same class of bug as :issue:`653`; see :issue:`2271`.</span>
+    <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1354,13 +1433,24 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.OverlayIDParameter">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OverlayIDParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for HIP ``OVERLAY_ID`` parameter."""</span>
+<span class="w">    </span><span class="sd">"""Data model for HIP ``OVERLAY_ID`` parameter.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       New required field ``id_len`` (:issue:`2271`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,</span>
+    <span class="c1">#: which :rfc:`6079#section-6.1` gives as the "Length of the Identifier, in</span>
+    <span class="c1">#: octets" for what is otherwise an opaque value. Declared for the reason</span>
+    <span class="c1">#: :attr:`TransactionIDParameter.id_len` gives. See :issue:`2271`.</span>
+    <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">id_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -1577,17 +1667,22 @@
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
-<span class="sd">       New required field ``reserved`` (:issue:`1223`).</span>
+<span class="sd">       New required field ``reserved`` (:issue:`1223`), and :attr:`ttl` is an</span>
+<span class="sd">       :obj:`int` rather than a :class:`~datetime.timedelta` (:issue:`2282`).</span>
 
 <span class="sd">    """</span>
 
     <span class="c1">#: The two reserved octets, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: TTL value.</span>
-    <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span>
+    <span class="c1">#: TTL value -- "the number of overlay hops this packet has left"</span>
+    <span class="c1">#: (:rfc:`6079#section-6.2`), decremented by one per overlay hop. A count,</span>
+    <span class="c1">#: not a duration, so it is a plain :obj:`int`: reading it as</span>
+    <span class="c1">#: ``timedelta(seconds=ttl)`` reported a 5-hop budget as five seconds.</span>
+    <span class="c1">#: See :issue:`2282`.</span>
+    <span class="n">ttl</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 

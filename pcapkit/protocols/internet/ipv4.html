@@ -11,7 +11,7 @@
 <meta name="description" content="pcapkit.protocols.internet.ipv4 contains IPv4 only, which implements the extractor for Internet Protocol version 4 (IPv4)*, whose structure is described as below:,,,, Octets, Bits, Name, Descriptio..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPv6 - Internet Protocol version 6" href="ipv6.html"><link rel="prev" title="IP - Internet Protocol" href="ip.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>IPv4 - Internet Protocol version 4 - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -1409,7 +1410,14 @@ final octet, <code class="docutils literal notranslate"><span class="pre">1</spa
 <p class="admonition-title">Note</p>
 <p>An option whose QS function is neither of the two above has no
 defined layout, so the schema keeps it as an unassigned option and
-it is parsed as one, see <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_unassigned()</span></code></a>.</p>
+it is parsed as one, see <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_unassigned()</span></code></a>. That
+dispatch is by the schema’s own class, decided from the octets a
+file read hands it; a
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption" title="pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartRequestOption</span></code></a>
+or <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption" title="pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartReportOption</span></code></a>
+built directly with an unassigned <code class="docutils literal notranslate"><span class="pre">func</span></code> reaches this method
+regardless, which is why it still raises below rather than
+returning early.</p>
 </div>
 </dd></dl>
 
@@ -3048,7 +3056,7 @@ than an <a class="reference internal" href="../../corekit/multidict.html#pcapkit
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.RROption.route">
-<span class="sig-name descname"><span class="pre">route</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RROption.route" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">route</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.RROption.route" title="Link to this definition">¶</a></dt>
 <dd><p>Route, i.e. the address slots before the pointer.</p>
 </dd></dl>
 
@@ -3089,7 +3097,7 @@ than an <a class="reference internal" href="../../corekit/multidict.html#pcapkit
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv4.SSROption.route">
-<span class="sig-name descname"><span class="pre">route</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SSROption.route" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">route</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv4.SSROption.route" title="Link to this definition">¶</a></dt>
 <dd><p>Route, i.e. the address slots before the pointer.</p>
 </dd></dl>
 

@@ -143,6 +143,8 @@ whose structure is described as below:
 
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
 
    .. automethod:: __post_init__
    .. automethod:: __index__

@@ -11,7 +11,7 @@
 <meta name="description" content="The algorithm below follows the IP reassembly procedure of RFC 791, using RCVBT(fragment received bit table). RFC 815 explains an alternative that replaces RCVBT; it is not used here. IP Reassembly..." />
 <link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="IP Reassembly Base Class" href="ip.html"><link rel="prev" title="Reassembly Base Class" href="../reassembly.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>IP Datagram Reassembly - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -622,6 +623,9 @@ seconds by default, per <span class="target" id="index-4"></span><a class="rfc r
 <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> for IPv6.</p></li>
 <li><p>A buffer flushed by an unfragmented datagram reusing its <code class="docutils literal notranslate"><span class="pre">BUFID</span></code> is
 reported as an incomplete datagram rather than discarded.</p></li>
+<li><p>An IPv6 atomic fragment, one with fragment offset zero and <strong>M</strong> clear,
+flushes nothing: it is reassembled in isolation and the fragments buffered
+under its <code class="docutils literal notranslate"><span class="pre">BUFID</span></code> are kept, per <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6946.html#section-4"><strong>RFC 6946 Section 4</strong></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2270">#2270</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">TDL</span></code> starts at <code class="docutils literal notranslate"><span class="pre">-1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">0</span></code>, so that a datagram carrying no
 data can complete (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1359">#1359</a>).</p></li>
 <li><p>Only the final fragment’s partial last <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block is set. A non-final

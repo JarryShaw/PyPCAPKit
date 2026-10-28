@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.interface.misc - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -609,7 +610,7 @@
     <span class="c1"># all and disable TCP flow tracing outright, so ``extraction.trace`` below</span>
     <span class="c1"># would raise instead of yielding streams.</span>
     <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">):</span>
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1">; fallback to default engine'</span><span class="p">,</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine: </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">; using default engine instead'</span><span class="p">,</span>
              <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -669,7 +670,7 @@
         <span class="c1"># to the pcapkit adapter is exactly the #399 failure mode -- a wrong or empty</span>
         <span class="c1"># result indistinguishable from a real one -- so warn and return no streams</span>
         <span class="c1"># rather than reassemble frames whose shape we cannot parse.</span>
-        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine for TCP stream following: </span><span class="si">{</span><span class="n">exeng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">; '</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported extraction engine for TCP stream following: </span><span class="si">{</span><span class="n">exeng</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; '</span>
              <span class="s1">'returning no streams'</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="p">()</span>
 

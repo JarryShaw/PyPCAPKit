@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.transport.sctp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -643,12 +644,13 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">Data_Chunk</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCause</span> <span class="k">as</span> <span class="n">Data_ErrorCause</span>
@@ -954,6 +956,16 @@
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP over DTLS</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
+
+    <span class="c1">#: What :attr:`__proto__` is keyed by: the enum a key must be a member of,</span>
+    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
+    <span class="c1">#: class *owning* the registry, and read from it by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a</span>
+    <span class="c1">#: ``code=`` key is checked exactly as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.register_sctp` checks its own</span>
+    <span class="c1">#: -- a bare :class:`int` is accepted because the registry is keyed by</span>
+    <span class="c1">#: payload protocol identifier, which is a number in its own right (:issue:`2268`).</span>
+    <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_PayloadProtocolIdentifier</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and</span>
     <span class="c1">#: :meth:`_make_sctp_chunks`. A :class:`str` value names the methods</span>
@@ -1806,6 +1818,40 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">declared</span> <span class="o">==</span> <span class="n">padded</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">padded</span>
         <span class="k">return</span> <span class="n">padded</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SCTP._make_param_types">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._make_param_types">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="s1">'Optional[list[Enum_Parameter | int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Enum_Parameter]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve a list of parameter types.</span>
+
+<span class="sd">        Shared by :meth:`_make_param_addrtypes` and</span>
+<span class="sd">        :meth:`_make_cause_missing_param`, whose ``types`` both list</span>
+<span class="sd">        parameter types.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            types: parameter types, each given as a</span>
+<span class="sd">                :class:`~pcapkit.const.sctp.parameter.Parameter` or an</span>
+<span class="sd">                :obj:`int`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The :class:`~pcapkit.const.sctp.parameter.Parameter` for each</span>
+<span class="sd">            item.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an item is a :obj:`bool`, or is neither a</span>
+<span class="sd">                :class:`~pcapkit.const.sctp.parameter.Parameter` nor an</span>
+<span class="sd">                :obj:`int` (:issue:`2288`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">types_value</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Enum_Parameter]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="c1"># NOTE: ``bool`` is an ``int`` subclass, so ``Parameter.get``</span>
+            <span class="c1"># would look ``True`` up as parameter type 1 (#2288).</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid parameter type: </span><span class="si">{</span><span class="n">item</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">types_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">types_value</span></div>
+
 
 <div class="viewcode-block" id="SCTP._read_chunk_donone">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._read_chunk_donone">[docs]</a>
@@ -3685,12 +3731,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed parameter schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an item of ``types`` is not a parameter type,</span>
+<span class="sd">                as :meth:`_make_param_types` checks.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">types</span><span class="p">)</span>
 
-        <span class="n">types_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span>
-                       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="p">[]]</span>
+        <span class="n">types_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_types</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_SupportedAddressTypesParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
@@ -4299,6 +4348,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed error cause schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an item of ``types`` is not a parameter type,</span>
+<span class="sd">                as :meth:`_make_param_types` checks.</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            The count of missing parameters is derived from ``types`` rather</span>
 <span class="sd">            than taken as an argument, so that it cannot disagree with the list</span>
@@ -4308,8 +4361,7 @@
         <span class="k">if</span> <span class="n">cause</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cause</span><span class="o">.</span><span class="n">types</span><span class="p">)</span>
 
-        <span class="n">types_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span>
-                       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="p">[]]</span>
+        <span class="n">types_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_types</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MissingMandatoryParameterCause</span><span class="p">(</span>
             <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>

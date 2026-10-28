@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.vendor.esp.integrity - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -524,14 +525,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The cell with its ``[RFCxxxx]`` citations turned into</span>
 <span class="sd">            :rst:role:`rfc` roles, or an empty string when the cell names no</span>
-<span class="sd">            document at all. IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a</span>
+<span class="sd">            document at all, bracketed (``[UNSPECIFIED]``) or not</span>
+<span class="sd">            (:issue:`2294`). IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a</span>
 <span class="sd">            cell is rendered as its ``[RFCxxxx][RFCyyyy]`` one is, as</span>
 <span class="sd">            :meth:`~pcapkit.vendor.default.Vendor.split_references` does for</span>
 <span class="sd">            the other crawlers (:issue:`1664`).</span>
 
 <span class="sd">        """</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\][\s;]*\['</span><span class="p">,</span> <span class="s1">']['</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">UNKNOWN</span><span class="p">:</span>
+        <span class="c1"># IANA brackets a placeholder as it brackets a citation, so one</span>
+        <span class="c1"># surrounding pair is dropped before the placeholder test (#2294).</span>
+        <span class="n">bare</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'['</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">']'</span><span class="p">)</span> <span class="k">else</span> <span class="n">text</span>
+        <span class="k">if</span> <span class="n">bare</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">UNKNOWN</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">''</span>
         <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC\s*(\d+)\]'</span><span class="p">,</span>
                       <span class="k">lambda</span> <span class="n">match</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s1">`]'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">)</span>

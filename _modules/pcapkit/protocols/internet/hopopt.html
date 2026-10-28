@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
-    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>pcapkit.protocols.internet.hopopt - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
@@ -1288,17 +1289,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed option data.</span>
 
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the option is malformed.</span>
+<span class="sd">        Note:</span>
+<span class="sd">            ``Cmpt Length`` counts 32-bit words and may be odd</span>
+<span class="sd">            [:rfc:`5570#section-5.2`]; it only has to fit inside ``Opt Data</span>
+<span class="sd">            Len``, which</span>
+<span class="sd">            :func:`~pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len`</span>
+<span class="sd">            has already checked while the option was unpacked.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-        <span class="c1"># ``Cmpt Length`` counts 32-bit words and may be odd [:rfc:`5570#section-5.2`];</span>
-        <span class="c1"># it only has to fit inside ``Opt Data Len``</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpt_len</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">Enum_OptionAction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">),</span>
@@ -1458,7 +1456,7 @@
 
 <div class="viewcode-block" id="HOPOPT._read_opt_qs">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_QuickStartOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_QuickStartOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read HOPOPT Quick Start option.</span>
 
 <span class="sd">        Structure of HOPOPT Quick-Start option [:rfc:`4782`]:</span>
@@ -1502,7 +1500,13 @@
 <span class="sd">        Note:</span>
 <span class="sd">            An option whose QS function is neither of the two above has no</span>
 <span class="sd">            defined layout, so the schema keeps it as an unassigned option and</span>
-<span class="sd">            it is parsed as one, see :meth:`_read_opt_none`.</span>
+<span class="sd">            it is parsed as one, see :meth:`_read_opt_none`. That dispatch is</span>
+<span class="sd">            by the schema's own class, decided from the octets a file read</span>
+<span class="sd">            hands it; a :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartRequestOption`</span>
+<span class="sd">            or :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartReportOption`</span>
+<span class="sd">            built directly with an unassigned ``func`` reaches this method</span>
+<span class="sd">            regardless, which is why it still raises below rather than</span>
+<span class="sd">            returning early.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnassignedOption</span><span class="p">):</span>
@@ -2091,7 +2095,6 @@
             <span class="n">pad</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'pad'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1">#raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
 
@@ -2314,8 +2317,13 @@
             <span class="n">tid_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tid_bytes</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">tid_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tid_kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">tid_type</span><span class="p">,</span> <span class="n">tid_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">tid_type_namespace</span><span class="p">,</span>
-                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">tid_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># NOTE: ``tid_type`` defaults to :data:`None`, so ``_make_index`` has no</span>
+                <span class="c1"># enum default to infer the namespace of a :obj:`str` member name from;</span>
+                <span class="c1"># name it here rather than leave the name unresolvable (#2356).</span>
+                <span class="n">tid_kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span>
+                    <span class="n">tid_type</span><span class="p">,</span> <span class="n">tid_type_default</span><span class="p">,</span>
+                    <span class="n">namespace</span><span class="o">=</span><span class="n">tid_type_namespace</span> <span class="k">if</span> <span class="n">tid_type_namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Enum_TaggerID</span><span class="p">,</span>
+                    <span class="nb">reversed</span><span class="o">=</span><span class="n">tid_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">tid_kind</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span>
             <span class="k">elif</span> <span class="n">tid_len</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
@@ -2636,8 +2644,13 @@
             <span class="n">seed</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">seed_id</span>
 
         <span class="k">if</span> <span class="n">seed_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">seed_type</span><span class="p">,</span> <span class="n">seed_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">seed_type_namespace</span><span class="p">,</span>
-                                    <span class="nb">reversed</span><span class="o">=</span><span class="n">seed_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># NOTE: ``seed_type`` defaults to :data:`None`, so ``_make_index`` has no</span>
+            <span class="c1"># enum default to infer the namespace of a :obj:`str` member name from;</span>
+            <span class="c1"># name it here rather than leave the name unresolvable (#2356).</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span>
+                <span class="n">seed_type</span><span class="p">,</span> <span class="n">seed_type_default</span><span class="p">,</span>
+                <span class="n">namespace</span><span class="o">=</span><span class="n">seed_type_namespace</span> <span class="k">if</span> <span class="n">seed_type_namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Enum_SeedID</span><span class="p">,</span>
+                <span class="nb">reversed</span><span class="o">=</span><span class="n">seed_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span>
         <span class="k">else</span><span class="p">:</span>
