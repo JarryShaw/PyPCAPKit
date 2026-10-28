@@ -1906,7 +1906,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             value = chunk.value
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         return Schema_UnknownChunk(
             type=code,
@@ -1965,7 +1966,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             data = chunk.data
 
         if not data:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid data: '
+                                f'must be at least one octet, not {data!r}')
 
         return Schema_DATAChunk(
             type=code,
@@ -2028,7 +2030,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             parameters = chunk.parameters
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2089,7 +2092,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             parameters = chunk.parameters
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2150,7 +2154,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             dup_tsn = list(chunk.dup_tsn)
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         blocks = []  # type: list[Schema_GapAckBlock]
         for block in gap_blocks or []:
@@ -2200,7 +2205,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             parameters = chunk.parameters
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2241,7 +2247,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             parameters = chunk.parameters
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2323,7 +2330,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             cum_tsn_ack = chunk.cum_tsn_ack
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         return Schema_ShutdownChunk(
             type=code,
@@ -2354,7 +2362,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         return Schema_ShutdownACKChunk(
             type=code,
@@ -2387,7 +2396,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             error = chunk.error
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         if error is not None:
             error_value = self._make_sctp_causes(error)
@@ -2429,7 +2439,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             cookie = chunk.cookie
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         return Schema_CookieEchoChunk(
             type=code,
@@ -2460,7 +2471,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
 
         if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
+                                f'must be one octet, not {flags!r}')
 
         return Schema_CookieACKChunk(
             type=code,
@@ -3018,7 +3030,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         if param is not None:
             name = param.name
         elif not name.endswith(b'\x00'):
-            raise ProtocolError(f'{self.alias}: [Param {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Param {code}] invalid name: '
+                                f'must be NUL-terminated, not {name!r}')
 
         return Schema_HostNameAddressParameter(
             type=code,
@@ -3583,7 +3596,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             reserved = cause.reserved
 
         if len(reserved) != 2:
-            raise ProtocolError(f'{self.alias}: [Cause {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Cause {code}] invalid reserved: '
+                                f'must be two octets, not {reserved!r}')
 
         return Schema_InvalidStreamIdentifierCause(
             code=code,

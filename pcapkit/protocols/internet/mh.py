@@ -1454,6 +1454,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``data`` is none of the forms this maker reads --
+                raw :obj:`bytes`, a :obj:`dict` of message arguments, an
+                :class:`~pcapkit.protocols.data.internet.mh.MH` data model or a
+                :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema.
+
         .. versionchanged:: 1.5.0
 
            Takes ``reserved`` ahead of ``chksum`` (:issue:`1329`), which shifts
@@ -1483,7 +1489,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         elif isinstance(data, Schema_Packet):
             data_val = data
         else:
-            raise ProtocolError(f'MH: [Type {type_val}] invalid format')
+            raise ProtocolError(f'MH: [Type {type_val}] invalid data: must be bytes, a dict, '
+                                f'an MH data model or a Packet schema, not {data!r}')
 
         # NOTE: The header has to be a multiple of 8 octets, so the message data
         # needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up
@@ -7903,6 +7910,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Warns:
+            ProtocolWarning: If ``length`` is non-zero for a ``Pad1``, which
+                has no ``Option Length`` field to carry it; the option is made
+                as a ``PadN`` instead.
+
         Note:
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.mh.Option.length>` counts the
@@ -7921,7 +7933,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = getattr(option, 'data', b'')
 
         if type == Enum_Option.Pad1 and length != 0:
-            warn(f'{self.alias}: [OptNo {type}] invalid format', ProtocolWarning)
+            warn(f'{self.alias}: [OptNo {type}] invalid length: must be 0 for a Pad1 option, '
+                 f'not {length!r}; making a PadN', ProtocolWarning)
             type = Enum_Option.PadN  # type: ignore[assignment]
 
         return Schema_PadOption(
@@ -8024,12 +8037,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is not a multiple of eight octets, the
+                length :meth:`_read_opt_bad` accepts for an :rfc:`6275`
+                authenticator.
+
         """
         if option is not None:
             data = option.data
 
         if len(data) % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: '
+                                f'must be a multiple of eight octets, not {data!r}')
 
         return Schema_AuthorizationDataOption(
             type=type,
@@ -8349,6 +8368,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is not two octets more than a multiple of
+                four, which is the only length leaving an ``Option Length`` of
+                ``5 + len(data)`` that :meth:`_read_opt_auth` accepts.
+
         """
         if option is not None:
             subtype_val = option.subtype
@@ -8359,7 +8383,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                            reversed=subtype_reversed, pack=False)
 
         if (len(data) + 6) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: must be two octets '
+                                f'more than a multiple of four, not {data!r}')
 
         return Schema_AuthOption(
             type=type,
@@ -8611,6 +8636,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is empty, since the ``length`` field then
+                reads as ``0``, which :meth:`_read_opt_badf` rejects.
+
         Note:
             The ``length`` field counts the authenticator only, excluding the
             SPI, see :meth:`_read_opt_badf`.
@@ -8621,7 +8650,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = option.data
 
         if not data:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: '
+                                f'must be at least one octet, not {data!r}')
 
         return Schema_BADFOption(
             type=type,

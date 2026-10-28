@@ -4882,6 +4882,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed block schema.
 
+        Raises:
+            ProtocolError: If ``secrets_data`` is none of the forms this maker
+                reads -- raw :obj:`bytes`, a :obj:`dict` of secrets arguments, a
+                :class:`~pcapkit.protocols.data.misc.pcapng.DSBSecrets` data
+                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
+
         """
         declared = None  # type: Optional[int]
         if block is not None:
@@ -4921,7 +4927,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         elif isinstance(secrets_data, Schema):
             secrets_data_val = secrets_data
         else:
-            raise ProtocolError(f'PCAP-NG: [DSB] secrets {secrets_type_val} invalid format')
+            raise ProtocolError(f'PCAP-NG: [DSB] invalid secrets_data: must be bytes, a dict, '
+                                f'a DSBSecrets data model or a Schema, not {secrets_data!r}')
         # NOTE: Secrets Length excludes the padding to the next 32-bit boundary,
         # which ``padding_data`` writes and the block length has to include.
         if block is not None and isinstance(secrets_data_val, Schema):
