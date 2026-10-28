@@ -68,7 +68,7 @@ class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     #: and customer tag apart in the parsed info dict.
     @property
     def info_name(self) -> 'Literal["s_tag"]':
-        """Key name of the :attr:`~pcapkit.protocols.protocol.Protocol.info` dict."""
+        """Key name of the :attr:`~pcapkit.protocols.protocol.ProtocolBase.info` dict."""
         return 's_tag'
 
     ##########################################################################

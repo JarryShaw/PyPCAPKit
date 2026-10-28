@@ -506,7 +506,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             ipv6: info buffer
             proto: next layer protocol index
             length: valid (*not padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -685,7 +685,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
             version: IP protocol version
             extension: if is extension header
             payload: payload from packet. If not provided, will extract from

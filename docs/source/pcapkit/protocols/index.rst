@@ -99,6 +99,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        Raw --> FTP_DATA
        ARP --> RARP
        IPv6_Ext --> AH & ESP
+       Internet --> HIP
 
        B --> C(Protocol)
        C --> D([user customisation ...])

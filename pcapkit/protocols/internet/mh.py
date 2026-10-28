@@ -575,11 +575,10 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
         :class:`int`-valued registry here, so a key that is neither an
         :class:`int` nor a :class:`str` raises
-        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
-        was rejected (decided on :issue:`935`; the override was deleted, not
-        widened to accept ``default``): this class mints no alias
-        (``__members__`` and ``list(cls)`` hold the same members), so an override
-        could only repeat the base's dual :class:`int`/name resolution.
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This class mints
+        no alias (``__members__`` and ``list(cls)`` hold the same members), so
+        an override could only repeat the base's dual :class:`int`/name
+        resolution (see :issue:`935`).
 
     """
 
@@ -646,11 +645,10 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
         :class:`int`-valued registry here, so a key that is neither an
         :class:`int` nor a :class:`str` raises
-        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
-        was rejected (decided on :issue:`935`; the override was deleted, not
-        widened to accept ``default``): this class mints no alias
-        (``__members__`` and ``list(cls)`` hold the same members), so an override
-        could only repeat the base's dual :class:`int`/name resolution.
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This class mints
+        no alias (``__members__`` and ``list(cls)`` hold the same members), so
+        an override could only repeat the base's dual :class:`int`/name
+        resolution (see :issue:`935`).
 
     """
 

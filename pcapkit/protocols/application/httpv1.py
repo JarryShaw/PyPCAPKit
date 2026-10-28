@@ -418,7 +418,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         """Decode start-line text, recording how to encode it back.
 
         The text is decoded by :meth:`self.decode
-        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
+        <pcapkit.protocols.protocol.ProtocolBase.decode>`. Where the result does
         not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by
         default -- the detected charset is returned with it, or ``'latin-1'``
         (decoding again) if that does not reproduce ``text`` either, so that the

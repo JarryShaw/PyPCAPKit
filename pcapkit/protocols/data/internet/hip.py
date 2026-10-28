@@ -520,9 +520,7 @@ class CertParameter(Parameter):
     #: Certificate group -- :rfc:`8002#section-2`'s "Group ID grouping
     #: multiple related CERT parameters". An arbitrary number, since that
     #: section leaves the CERT group namespace to each sending host, so no
-    #: registry stands behind it; it used to decode through the
-    #: Diffie-Hellman group registry and report a group of ``7`` as the curve
-    #: ``NIST_P_256``. See :issue:`2283`.
+    #: registry stands behind it. See :issue:`2283`.
     cert_group: 'int'
     #: Certificate count.
     cert_count: 'int'

@@ -312,7 +312,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
         """Decode arguments, recording how to encode them back.
 
         The arguments are decoded by :meth:`self.decode
-        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
+        <pcapkit.protocols.protocol.ProtocolBase.decode>`. Where the result does
         not encode back to ``args`` as UTF-8 -- which :meth:`make` uses by
         default -- the detected charset is returned with it, or ``'latin-1'``
         (decoding again) if that does not reproduce ``args`` either, so that the

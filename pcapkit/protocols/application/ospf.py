@@ -112,9 +112,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
     """
     #: Version number of corresponding protocol, as read off the header. Held on
     #: the instance rather than read back out of :attr:`self._info
-    #: <pcapkit.protocols.protocol.Protocol._info>` because :attr:`name` and
+    #: <pcapkit.protocols.protocol.ProtocolBase._info>` because :attr:`name` and
     #: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` builds the
+    #: <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` builds the
     #: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until
     #: :meth:`read` has returned. See ``ARP._acnm`` on
     #: :class:`~pcapkit.protocols.link.arp.ARP`, which has the same constraint.
@@ -403,7 +403,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
             The description below uses :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias
-            <pcapkit.protocols.protocol.Protocol.alias>`, because ``alias``
+            <pcapkit.protocols.protocol.ProtocolBase.alias>`, because ``alias``
             here reads ``self._version``, which :meth:`read` only assigns
             from the wire -- unavailable to a construction-only instance that
             never went through :meth:`read`.

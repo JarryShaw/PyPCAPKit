@@ -454,7 +454,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #: :meth:`self._decode_next_layer
     #: <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` &
     #: :meth:`self._import_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     #:
     #: Important:
     #:    Keyed by the DATA chunk's *payload protocol identifier* (PPID), **not**
@@ -982,7 +982,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             proto: payload protocol identifier of the DATA chunk carrying the
                 payload, if any
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -1000,9 +1000,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             does for an unregistered transport type. Resolving it to
             :class:`~pcapkit.protocols.misc.raw.Raw` is
             :meth:`ProtocolBase._import_next_layer
-            <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
+            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`'s job,
             through :meth:`ProtocolBase._lookup_next_layer
-            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`, which
+            <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>`, which
             leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
 
         """

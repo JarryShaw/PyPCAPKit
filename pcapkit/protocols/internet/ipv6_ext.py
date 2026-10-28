@@ -108,7 +108,7 @@ This class is reached in these ways:
    ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
    have dedicated classes. When one of *those* raises,
    :func:`~pcapkit.corekit.decorators.beholder`
-   (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
+   (:meth:`ProtocolBase._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
    would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
    ``next`` and crashes the walk as in path 1.
    :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
@@ -299,7 +299,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         In the *fallback* role (this instance parsed this module's own schema)
         this is **not** the base
-        :attr:`Protocol.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`
+        :attr:`ProtocolBase.protocol <pcapkit.protocols.protocol.ProtocolBase.protocol>`
         meaning ("name of next layer protocol"). On the owner's ruling for
         GitHub issue :issue:`891` it is deliberately repointed at this
         instance's *own* identity, i.e. which header's format it parsed, such as

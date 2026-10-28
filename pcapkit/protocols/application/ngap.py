@@ -31,7 +31,7 @@ Decoding therefore needs the optional |pycrate|_ dependency
 (``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without
 it; an NGAP payload simply degrades to the opaque payload path, exactly as an
 unregistered PPID would, because
-:meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which
+:meth:`~pcapkit.protocols.protocol.ProtocolBase._import_next_layer`, which
 :class:`~pcapkit.protocols.transport.sctp.SCTP` inherits, is wrapped in
 :func:`~pcapkit.corekit.decorators.beholder` and falls back to
 :class:`~pcapkit.protocols.misc.raw.Raw`.

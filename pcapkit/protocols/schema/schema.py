@@ -377,7 +377,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         :class:`~pcapkit.corekit.fields.numbers.NumberField` masks an
         out-of-range integer to its width on packing, so e.g. ``70000`` in a
         two-octet field packs as ``0x1170``. The range checks live in each
-        protocol's :meth:`~pcapkit.protocols.protocol.Protocol.make`, and in a
+        protocol's :meth:`~pcapkit.protocols.protocol.ProtocolBase.make`, and in a
         field whose values have a range of their own, such as
         :class:`~pcapkit.corekit.fields.numbers.PortEnumField`. See GitHub issue
         :issue:`2314`.
@@ -1232,7 +1232,7 @@ class _EnumRegistry(collections.defaultdict):
     block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this
     subclass keeps returning it and just stops recording it.
     :meth:`ProtocolBase._lookup_registry
-    <pcapkit.protocols.protocol.Protocol._lookup_registry>`
+    <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`
     does the same for the protocol-layer ``__proto__`` family.
 
     """

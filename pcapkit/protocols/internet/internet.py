@@ -431,7 +431,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
             version: IP version
             ipv6_exthdr: protocol chain of IPv6 extension headers
             payload: payload from packet. If not provided, will extract from
@@ -480,7 +480,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
             version: IP protocol version
             extension: if is extension header
             payload: payload from packet. If not provided, will extract from

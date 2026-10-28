@@ -23,7 +23,7 @@ whose structure is described as below:
 
 .. versionchanged:: 1.5.0
 
-   ``bytes(frame)`` and :attr:`~pcapkit.protocols.protocol.Protocol.packet`
+   ``bytes(frame)`` and :attr:`~pcapkit.protocols.protocol.ProtocolBase.packet`
    hold this frame's own octets, where they held the next frame's
    (:issue:`357`), and the parsed ``time`` is timezone-aware UTC. The parsed
    ``len`` is the on-wire length and ``cap_len`` the captured one, where the
@@ -101,8 +101,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     ##########################################################################
 
     #: Protocol index mapping for decoding the next layer; see
-    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>`
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
     __proto__ = collections.defaultdict(
@@ -216,7 +216,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
-            As in :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>`,
+            As in :meth:`ProtocolBase.pack <pcapkit.protocols.protocol.ProtocolBase.pack>`,
             the header is made on a copy outside construction, so the instance
             keeps its own (:issue:`1769`).
 
@@ -521,7 +521,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Args:
             length: Length of packet data, as the caller declared it, or
                 :obj:`None` to measure what is left in
-                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+                :attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>`.
 
         Raises:
             StreamEOFError: If fewer than sixteen octets are left to read.
@@ -636,7 +636,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with packet extracted.

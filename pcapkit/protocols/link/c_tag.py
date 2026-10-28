@@ -71,7 +71,7 @@ class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     #: class-name default -- a rename must not silently move the output key.
     @property
     def info_name(self) -> 'Literal["c_tag"]':
-        """Key name of the :attr:`~pcapkit.protocols.protocol.Protocol.info` dict."""
+        """Key name of the :attr:`~pcapkit.protocols.protocol.ProtocolBase.info` dict."""
         return 'c_tag'
 
     ##########################################################################

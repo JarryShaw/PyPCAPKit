@@ -75,7 +75,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     .. versionchanged:: 1.5.0
 
        :meth:`make` takes ``total_length``, which a
-       :meth:`~pcapkit.protocols.protocol.Protocol.from_data` rebuild
+       :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuild
        passes so that a truncated capture keeps its declared Length
        (:issue:`1155`), and ``trailer``, so that the octets past the Length
        field rebuild as captured (:issue:`1461`).
@@ -90,7 +90,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     #: :meth:`self._decode_next_layer
     #: <pcapkit.protocols.transport.transport.Transport._decode_next_layer>` &
     #: :meth:`self._import_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {

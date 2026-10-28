@@ -269,7 +269,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             #
             # NOTE: ``ip`` still has to be *set*, though, rather than merely
             # left alone. :meth:`Protocol.__post_init__
-            # <pcapkit.protocols.protocol.Protocol.__post_init__>` packs and
+            # <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` packs and
             # then unpacks, and :meth:`IPv6_Route.read
             # <pcapkit.protocols.internet.ipv6_route.IPv6_Route.read>` hands
             # :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`

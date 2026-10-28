@@ -158,7 +158,9 @@ The job drives them through the `Makefile` rather than restating their flags (`v
 variables, so a check cannot come out clean locally and red in CI because the two drifted.
 
 **Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
-as a non-blocking annotation and a red linter will not fail your pull request. The workflow's
+as a non-blocking annotation and a red one will not fail your pull request. The job's `actionlint`
+step is the exception — it lints `.github/workflows/`, has no `Makefile` target, and carries no
+`continue-on-error`, so a finding there does fail the job. The workflow's
 header records which of them are clean and what each of the others would need before its
 `continue-on-error` line could be deleted. Read the job's run summary, where each step writes
 its verdict, and try not to add to the numbers.

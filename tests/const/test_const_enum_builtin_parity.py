@@ -2,14 +2,15 @@
 """Every :mod:`pcapkit.const` registry must reject an invalid value the way the built-in does.
 
 GitHub issue #647 counted the generated range guards under :mod:`pcapkit.const`
-and found that 113 of the 117 modules raise a bare :exc:`ValueError`. The issue
+and found that nearly all of the modules raise a bare :exc:`ValueError`, with
+only a handful behaving differently (enumerated below). The issue
 proposed replacing them with :class:`~pcapkit.utilities.exceptions.EnumError`;
 the decision went the other way. A bare :exc:`ValueError` is exactly what
 :class:`enum.IntEnum` raises for a value it does not define, mirroring the
 built-in is the intent, and
 :class:`~pcapkit.utilities.exceptions.EnumError` is ``(BaseError, TypeError)`` --
 not a :exc:`ValueError` at all -- so swapping it in would have diverged from the
-built-in *and* walked past the ``except ValueError`` in all 113 generated
+built-in *and* walked past the ``except ValueError`` in most of the generated
 ``get()`` bodies, silently undoing GitHub issue #584.
 
 What was left was the inconsistency. Six registries across four modules did

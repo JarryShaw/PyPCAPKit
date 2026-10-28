@@ -5,8 +5,8 @@ The package writes its annotations as string literals and imports the names they
 need inside an ``if TYPE_CHECKING:`` block. Nothing at runtime evaluates those
 strings, so a name that is *never imported at all* costs nothing until a type
 checker or a documentation build looks at it -- at which point it is an error in a
-file that has been passing tests for months. Issue #642 found these, and mypy
-2.3.1 agreed they were the complete set:
+file whose tests all pass. Issue #642 found these, and mypy 2.3.1 agreed they were
+the complete set:
 
 .. code-block:: text
 

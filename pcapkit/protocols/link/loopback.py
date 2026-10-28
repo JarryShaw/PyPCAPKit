@@ -85,7 +85,7 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
     ``alias`` it was dispatched with; for ``LINKTYPE_NULL``, which a frame
     parsed on its own is read as, the byte order is read from the octets
     themselves (see :func:`family_byteorder`). Either way it is kept in
-    :attr:`~pcapkit.protocols.protocol.Protocol.info`, and
+    :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`, and
     :meth:`from_data <pcapkit.protocols.link.link.Link.from_data>`
     reads the family back in that byte order rather than inferring it again.
 
@@ -119,9 +119,9 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
 
     #: Protocol index mapping for decoding next layer, see
     #: :meth:`self._decode_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` &
+    #: <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` &
     #: :meth:`self._import_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`. Keyed by
+    #: <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`. Keyed by
     #: address family rather than by EtherType, so this class keeps a registry
     #: of its own instead of sharing :attr:`Link.__proto__
     #: <pcapkit.protocols.link.link.Link.__proto__>`.
@@ -182,7 +182,7 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
                 anything else as ``LINKTYPE_NULL``.
             byteorder: Byte order to read the family in, ahead of ``alias``.
                 :meth:`make` is handed the one
-                :attr:`~pcapkit.protocols.protocol.Protocol.info` holds by
+                :attr:`~pcapkit.protocols.protocol.ProtocolBase.info` holds by
                 :meth:`from_data <pcapkit.protocols.link.link.Link.from_data>`,
                 and it reaches here too, so a rebuild reads the family as it was
                 parsed rather than inferring it again.

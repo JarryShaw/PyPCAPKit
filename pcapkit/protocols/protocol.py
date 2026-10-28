@@ -213,7 +213,7 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 #: Keywords that configure the construction rather than naming a field, and are
 #: therefore consumed by :meth:`ProtocolBase.__init__
 #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema layer
-#: instead of by a :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
+#: instead of by a :meth:`make <pcapkit.protocols.protocol.ProtocolBase.make>`. No
 #: signature declares them, so :func:`_declared_keywords` cannot find them and
 #: they are listed here.
 #:
@@ -244,9 +244,9 @@ _DECLARED_KEYWORDS = {}  # type: dict[type, Optional[frozenset[str]]]
 #: Methods a construction keyword may be destined for. The keywords handed to
 #: :class:`Protocol` reach all of them: :meth:`ProtocolBase.__post_init__
 #: <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` passes the same
-#: ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.Protocol.pack>` (and
+#: ``**kwargs`` to :meth:`pack <pcapkit.protocols.protocol.ProtocolBase.pack>` (and
 #: through it to ``make``) *and* to :meth:`unpack
-#: <pcapkit.protocols.protocol.Protocol.unpack>` (and through it to ``read``).
+#: <pcapkit.protocols.protocol.ProtocolBase.unpack>` (and through it to ``read``).
 _KEYWORD_CONSUMERS = ('make', 'read', 'pack', 'unpack', '__post_init__', '__init__')
 
 
@@ -523,8 +523,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
     #: Protocol index mapping for decoding the next layer; see
-    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>`
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`ProtocolBase` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
@@ -591,7 +591,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     __reconstructing__: 'bool' = False
 
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
-    #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
+    #: :meth:`self.__init__ <ProtocolBase.__init__>` replaces this with a real
     #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level
     #: :data:`None` is what an instance built without ``__init__`` (e.g.
     #: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.
@@ -734,7 +734,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             the method may return multiple values.
 
         See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+            :meth:`pcapkit.protocols.protocol.ProtocolBase.__getitem__`
 
         """
         return (cls.__name__,)
@@ -822,7 +822,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         .. versionchanged:: 1.5.0
 
            Calling it no longer replaces the instance's
-           :attr:`__header__ <Protocol.__header__>`, which left :attr:`schema`
+           :attr:`__header__ <ProtocolBase.__header__>`, which left :attr:`schema`
            disagreeing with :attr:`info` (:issue:`1769`).
 
         """
@@ -874,7 +874,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             packet data to underlying methods. This is useful when the packet
             data is not available in the current instance.
 
-            When :attr:`self.__header__ <Protocol.__header__>` is already set,
+            When :attr:`self.__header__ <ProtocolBase.__header__>` is already set,
             by :meth:`from_schema` or by the :meth:`pack` call that
             :meth:`__post_init__` makes to construct the instance, that schema
             is kept, unless it still holds raw :obj:`bytes` where parsing its
@@ -970,10 +970,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         1. If ``value`` is a protocol instance, the method will return the
            protocol class, and the protocol names in upper case obtained from
-           :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
+           :meth:`ProtocolBase.id <pcapkit.protocols.protocol.ProtocolBase.id>`.
         2. If ``value`` is a protocol class, the method will return the
            protocol class itself, and the protocol names in upper case
-           obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
+           obtained from :meth:`ProtocolBase.id <pcapkit.protocols.protocol.ProtocolBase.id>`.
         3. If ``value`` is :obj:`str`, the method will attempt to search for
            the existing registered protocol class from
            :data:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
@@ -1248,11 +1248,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             file: Source packet stream.
             length: Length of packet data.
             _layer (str): Parse packet until ``_layer``
-                (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
+                (:attr:`self._exlayer <pcapkit.protocols.protocol.ProtocolBase._exlayer>`).
                 While parsing, the un-prefixed ``layer`` is accepted as well --
                 see the note below.
             _protocol: Parse packet until ``_protocol``
-                (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`),
+                (:attr:`self._exproto <pcapkit.protocols.protocol.ProtocolBase._exproto>`),
                 given as a protocol name (:obj:`str`), a protocol class or a
                 protocol instance.
                 While parsing, the un-prefixed ``protocol`` is accepted as well --
@@ -1261,16 +1261,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 handed over by
                 :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
                 While parsing, it is republished as ``__packet__`` so that
-                :meth:`self.unpack <Protocol.unpack>` -- and through it the
+                :meth:`self.unpack <ProtocolBase.unpack>` -- and through it the
                 schema -- can see it; see the note below.
-            __context__: Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`;
+            __context__: Caller supplied parsing context
+                (:attr:`self._exctx <ProtocolBase._exctx>`;
                 see :mod:`pcapkit.corekit.context`): a
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping of
                 names to :class:`~pcapkit.corekit.context.ProtocolContext`, or an
                 iterable of :class:`~pcapkit.corekit.context.ProtocolContext`.
                 It is consumed here rather
-                than being forwarded to :meth:`self.read <Protocol.read>`, and is
+                than being forwarded to :meth:`self.read <ProtocolBase.read>`, and is
                 propagated to nested layers by
                 :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
             **kwargs: Arbitrary keyword arguments.
@@ -1427,7 +1428,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         See Also:
             For construction arguments, please refer to
-            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
+            :meth:`self.make <pcapkit.protocols.protocol.ProtocolBase.make>`.
 
         """
         if file is None:
@@ -1460,8 +1461,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             UnsupportedCall: If any unrecognised class keyword is given.
 
         This method is called when a subclass of :class:`ProtocolBase` is defined.
-        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
-        and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
+        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.ProtocolBase.__schema__>`
+        and :attr:`self.__data__ <pcapkit.protocols.protocol.ProtocolBase.__data__>`
         attributes of the subclass, and, if ``code`` is given, to register the
         subclass into the next-layer dispatch :term:`registry` (or registries) that
         ``code`` names -- e.g. :attr:`Link.__proto__
@@ -1617,14 +1618,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Return an estimated length for the object."""
 
     def __iter__(self) -> 'IO[bytes]':
-        """Iterate through :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
+        """Iterate through :attr:`self._data <pcapkit.protocols.protocol.ProtocolBase._data>`."""
         return io.BytesIO(self._data)
 
     def __getitem__(self, key: 'str | Protocol | Type[Protocol]') -> 'ProtocolBase':
         """Subscription (``getitem``) support.
 
         * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,
-          the method will fetch its indexes (:meth:`self.id <pcapkit.protocols.protocol.Protocol.id>`).
+          the method will fetch its indexes (:meth:`self.id <pcapkit.protocols.protocol.ProtocolBase.id>`).
         * Later, search the packet's chain of protocols with the calculated ``key``.
         * If no matches, then raises :exc:`~pcapkit.utilities.exceptions.ProtocolNotFound`.
 
@@ -1639,7 +1640,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         See Also:
             The method calls
-            :meth:`self.expand_comp <pcapkit.protocols.protocol.Protocol.expand_comp>`
+            :meth:`self.expand_comp <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`
             to handle the ``key`` and expand it for robust searching.
 
         """
@@ -1671,7 +1672,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         See Also:
             The method calls
-            :meth:`self.expand_comp <pcapkit.protocols.protocol.Protocol.expand_comp>`
+            :meth:`self.expand_comp <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`
             to handle the ``name`` and expand it for robust searching.
 
         """
@@ -1719,7 +1720,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return False
 
     def __hash__(self) -> 'int':
-        """Return the hash value for :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
+        """Return the hash value for :attr:`self._data <pcapkit.protocols.protocol.ProtocolBase._data>`."""
         return hash(self._data)
 
     ##########################################################################
@@ -1752,10 +1753,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return registry.match(self.id(), cls)
 
     def _get_payload(self) -> 'bytes':
-        """Get payload from :attr:`self.__header__ <Protocol.__header__>`.
+        """Get payload from :attr:`self.__header__ <ProtocolBase.__header__>`.
 
         Returns:
-            Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
+            Payload of :attr:`self.__header__ <ProtocolBase.__header__>` as :obj:`bytes`.
 
         See Also:
             This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.
@@ -1775,7 +1776,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
 
     def _read_fileng(self, *args: 'Any', **kwargs: 'Any') -> 'bytes':
-        """Read file buffer (:attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`).
+        """Read file buffer (:attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>`).
 
         This method wraps the :meth:`file.read <io.BytesIO.read>` call.
 
@@ -2176,7 +2177,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         :class:`~pcapkit.protocols.misc.null.NoPayload` instance will be
         returned, exactly as for a protocol with no next layer. Otherwise, the
         payload will be constructed by :meth:`Protocol.from_data
-        <pcapkit.protocols.protocol.Protocol.from_data>`.
+        <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries
         both keys, so ``data`` rebuilt from such a :obj:`dict` dispatches as
@@ -2303,7 +2304,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -2342,7 +2343,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <ProtocolBase.unpack>`)
 
         Returns:
             Instance of next layer.
@@ -2519,8 +2520,8 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
             **kwargs: Arbitrary keyword arguments.
 
         This method is called when a subclass of :class:`Protocol` is defined.
-        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
-        and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
+        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.ProtocolBase.__schema__>`
+        and :attr:`self.__data__ <pcapkit.protocols.protocol.ProtocolBase.__data__>`
         attributes of the subclass.
 
         Notes:

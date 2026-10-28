@@ -67,9 +67,9 @@ def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Calla
     Important:
         This decorator function is designed for decorating *instance methods*.
 
-    The decorator will keep the current offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`,
+    The decorator will keep the current offset of :attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>`,
     then call the decorated function. Afterwards, it will rewind the offset of
-    :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` to the original and return the return value from
+    :attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>` to the original and return the return value from
     the decorated function.
 
     Note:
@@ -79,7 +79,7 @@ def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Calla
                  *args: 'typing.Any', **kwargs: 'typing.Any') -> 'typing.Any'
 
     See Also:
-        :meth:`pcapkit.protocols.protocol.Protocol._read_packet`
+        :meth:`pcapkit.protocols.protocol.ProtocolBase._read_packet`
 
     :param func: decorated function
     :meta decorator:
@@ -130,7 +130,7 @@ def beholder(
                  *args: 'typing.Any', **kwargs: 'typing.Any') -> 'pcapkit.protocols.protocol.ProtocolBase'
 
     See Also:
-        :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`
+        :meth:`pcapkit.protocols.protocol.ProtocolBase._decode_next_layer`
 
     .. versionchanged:: 1.3.0
 

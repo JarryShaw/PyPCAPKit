@@ -72,9 +72,9 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
     #: Protocol index mapping for decoding next layer, see
     #: :meth:`self._decode_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` &
+    #: <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` &
     #: :meth:`self._import_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -178,7 +178,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         Args:
             data: Protocol data.
             **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
-                <pcapkit.protocols.protocol.Protocol.from_data>`.
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         Returns:
             Protocol instance, cut back to what was captured when the header
@@ -202,7 +202,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
         Notes:
             A header the data ends inside keeps that in its
-            :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
+            :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`, so that
             :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
 
         """

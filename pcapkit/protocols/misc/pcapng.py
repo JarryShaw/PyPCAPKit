@@ -349,7 +349,7 @@ def _block_type_name(block_type: 'Enum_BlockType') -> 'str':
         ``block_type`` is looked up rather than having its :attr:`~enum.Enum.name`
         read directly, because :attr:`PCAPNG._type <PCAPNG._type>` is only an
         :class:`~pcapkit.const.pcapng.block_type.BlockType` on the parse path.
-        On the make path :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
+        On the make path :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index`
         returns a plain :obj:`int`, which the assignment in
         :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>` only
         :func:`~typing.cast` to the enumeration, so reading ``.name`` off it
@@ -760,8 +760,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
 
     #: Protocol index mapping for decoding the next layer; see
-    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>`
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
     __proto__ = collections.defaultdict(
@@ -1254,7 +1254,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
-            As in :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>`,
+            As in :meth:`ProtocolBase.pack <pcapkit.protocols.protocol.ProtocolBase.pack>`,
             the header is made on a copy outside construction, so the instance
             keeps its own header, block type, byte order and option counts
             (:issue:`1769`).
@@ -1654,7 +1654,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             length: Length of packet data, as the caller declared it, or
                 :obj:`None` to measure what is left in
-                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+                :attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>`.
 
         Raises:
             StreamEOFError: If fewer than twelve octets are left to read.
@@ -1717,7 +1717,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             Octets from ``offset`` to the end of
-            :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+            :attr:`self._file <pcapkit.protocols.protocol.ProtocolBase._file>`.
 
         """
         current = self._file.tell()
@@ -1757,10 +1757,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _get_payload(self) -> 'bytes':
-        """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.
+        """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.ProtocolBase.__header__>`.
 
         Returns:
-            Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>` as :obj:`bytes`.
+            Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.ProtocolBase.__header__>` as :obj:`bytes`.
 
         See Also:
             This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.
@@ -2247,7 +2247,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with packet extracted.

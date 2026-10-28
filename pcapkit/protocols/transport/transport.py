@@ -44,7 +44,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
     if TYPE_CHECKING:
         #: Protocol index mapping for decoding next layer,
         #: see :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
-        #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+        #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
         __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'
 
     ##########################################################################
@@ -171,7 +171,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Args:
             data: Protocol data.
             **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
-                <pcapkit.protocols.protocol.Protocol.from_data>`.
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
 
         Returns:
             Protocol instance, cut back to what was captured when the header
@@ -195,7 +195,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         Notes:
             A header the data ends inside keeps that in its
-            :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
+            :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`, so that
             :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
 
         """
@@ -223,7 +223,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             ProtocolError: If ``port`` is a :obj:`bool` (:issue:`2287`).
 
         Important:
-            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` accepts
+            :meth:`self.make <pcapkit.protocols.protocol.ProtocolBase.make>` accepts
             a bare :obj:`int` for a port, but the schema field converts it only
             on the way *out* (in
             :meth:`PortEnumField.pre_process
@@ -254,7 +254,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             dict_: info buffer
             ports: source & destination port numbers
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -262,7 +262,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Important:
             The port is forwarded **whether or not it is registered**:
             :meth:`ProtocolBase._import_next_layer
-            <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
+            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` passes
             it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
             records it as :attr:`Data_Raw.protocol
             <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it would

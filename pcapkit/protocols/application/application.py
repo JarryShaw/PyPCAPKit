@@ -86,7 +86,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         See Also:
             For construction arguments, please refer to
-            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
+            :meth:`self.make <pcapkit.protocols.protocol.ProtocolBase.make>`.
 
         """
         # call super post-init
@@ -144,7 +144,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             proto: next layer protocol index; only the ``-1`` sentinel
                 (the rest, undissected) is accepted
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Current protocol with the undissected remainder as payload.
@@ -167,7 +167,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             proto: next layer protocol index; only the ``-1`` sentinel
                 (the rest, undissected) is accepted
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.ProtocolBase.unpack>`)
 
         Returns:
             Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of

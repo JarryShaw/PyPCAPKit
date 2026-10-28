@@ -9,11 +9,11 @@ who uses them. This rule can be checked from the import graph alone, and it need
 the fewest moves: one.
 
 :mod:`pcapkit.utilities` **is for cross-cutting services**: exceptions, warnings,
-logging, the compatibility layer, configuration, and wrappers around third-party
-libraries such as :mod:`~pcapkit.utilities.chardet`. The question to ask of a module
-is *could any code use this service, and does it import nothing from* :mod:`pcapkit`
-*outside* ``utilities``? Both halves have to hold, and *nothing* covers a top-level
-import, one inside a function and one under ``TYPE_CHECKING`` alike.
+logging, the compatibility layer, configuration, timestamp conversion, and wrappers
+around third-party libraries such as :mod:`~pcapkit.utilities.chardet`. The question
+to ask of a module is *could any code use this service, and does it import nothing
+from* :mod:`pcapkit` *outside* ``utilities``? Both halves have to hold, and *nothing*
+covers a top-level import, one inside a function and one under ``TYPE_CHECKING`` alike.
 :file:`tests/project/test_utilities_import_boundary_1735_unit.py` checks every module
 under :file:`pcapkit/utilities/` for it.
 

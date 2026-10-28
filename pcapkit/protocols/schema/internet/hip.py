@@ -418,13 +418,15 @@ def parameter_total_len(length: 'int') -> 'int':
 def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
     """Return the number of padding octets a HIP parameter needs.
 
-    Used by the ``padding`` field of every parameter schema in this module.
-    The count is whatever :func:`parameter_total_len` leaves over once the
-    four-octet ``Type`` and ``Length`` header and the ``Length`` octets of
-    contents are accounted for, which :rfc:`7401` Section 5.2.1 bounds at
+    Used by the ``padding`` field of every parameter schema in this module
+    except :class:`LocatorSetParameter`, which needs
+    :func:`locator_set_padding_len` instead (see its ``padding`` field for
+    why). The count is whatever :func:`parameter_total_len` leaves over once
+    the four-octet ``Type`` and ``Length`` header and the ``Length`` octets
+    of contents are accounted for, which :rfc:`7401` Section 5.2.1 bounds at
     "0-7 bytes".
 
-    This is one function shared by every parameter rather than a lambda
+    This is one function shared by those parameters rather than a lambda
     repeated per class, so the RFC's arithmetic is stated in one place.
 
     Args:

@@ -338,7 +338,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     #: :meth:`self._decode_next_layer
     #: <pcapkit.protocols.transport.transport.Transport._decode_next_layer>` &
     #: :meth:`self._import_next_layer
-    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {

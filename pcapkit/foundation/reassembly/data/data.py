@@ -134,7 +134,7 @@ class Deferred:
 
     Args:
         analyze: The analyser to call, i.e.
-            :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
+            :meth:`ProtocolBase.analyze <pcapkit.protocols.protocol.ProtocolBase.analyze>`
             bound to the reassembly object's protocol.
         proto: Payload protocol type.
         payload: Reassembled payload to parse.

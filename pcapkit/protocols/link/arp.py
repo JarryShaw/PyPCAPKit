@@ -420,7 +420,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
         Notes:
             The messages are prefixed with :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias
-            <pcapkit.protocols.protocol.Protocol.alias>`, for the reason
+            <pcapkit.protocols.protocol.ProtocolBase.alias>`, for the reason
             :meth:`_make_proto_resolve` gives.
 
         """
@@ -480,7 +480,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
             The messages are prefixed with :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias
-            <pcapkit.protocols.protocol.Protocol.alias>`, even though the
+            <pcapkit.protocols.protocol.ProtocolBase.alias>`, even though the
             latter is this project's usual choice: :attr:`alias` here reads
             ``self._acnm``, which :meth:`read` only assigns once the operation
             code is known, and this method runs from :meth:`make` -- before
