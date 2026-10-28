@@ -2974,7 +2974,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         fields = (skey, rkey, dl_len, checksum)
         present = fields.index(None) if None in fields else len(fields)
         if any(field is not None for field in fields[present:]):
-            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid format')
+            field_names = ('skey', 'rkey', 'dl_len', 'checksum')
+            index = next(i for i, field in enumerate(fields) if i >= present and field is not None)
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] '
+                                f'invalid fields: {field_names[index]!r} given without {field_names[index - 1]!r}')
 
         return Schema_MPTCPCapable(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),

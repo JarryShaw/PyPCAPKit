@@ -1483,7 +1483,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         elif isinstance(data, Schema_Packet):
             data_val = data
         else:
-            raise ProtocolError(f'MH: [Type {type_val}] invalid format')
+            raise ProtocolError(f'MH: [Type {type_val}] invalid data: unsupported type {data.__class__.__name__}')
 
         # NOTE: The header has to be a multiple of 8 octets, so the message data
         # needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up
@@ -7921,7 +7921,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = getattr(option, 'data', b'')
 
         if type == Enum_Option.Pad1 and length != 0:
-            warn(f'{self.alias}: [OptNo {type}] invalid format', ProtocolWarning)
+            warn(f'{self.alias}: [OptNo {type}] invalid length for Pad1: {length}; falling back to PadN', ProtocolWarning)
             type = Enum_Option.PadN  # type: ignore[assignment]
 
         return Schema_PadOption(
@@ -8029,7 +8029,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = option.data
 
         if len(data) % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: length must be a multiple of 8, not {len(data)}')
 
         return Schema_AuthorizationDataOption(
             type=type,
@@ -8359,7 +8359,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                            reversed=subtype_reversed, pack=False)
 
         if (len(data) + 6) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: length must make the option a multiple of 4, not {len(data)}')
 
         return Schema_AuthOption(
             type=type,
@@ -8621,7 +8621,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data = option.data
 
         if not data:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: must not be empty, not {data!r}')
 
         return Schema_BADFOption(
             type=type,

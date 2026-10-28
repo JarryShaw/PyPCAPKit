@@ -3450,7 +3450,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                         ip=value.ip.packed,
                     )
                 else:
-                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid locator: '
+                                        f'must be an IPv6Address or LocatorData, not {value!r}')
 
                 traffic = locator.traffic
                 type = locator.type

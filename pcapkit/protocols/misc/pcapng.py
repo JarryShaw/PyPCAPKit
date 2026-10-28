@@ -4921,7 +4921,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         elif isinstance(secrets_data, Schema):
             secrets_data_val = secrets_data
         else:
-            raise ProtocolError(f'PCAP-NG: [DSB] secrets {secrets_type_val} invalid format')
+            raise ProtocolError(f'PCAP-NG: [DSB] invalid secrets_data: '
+                                f'unsupported type {type(secrets_data).__name__}')
         # NOTE: Secrets Length excludes the padding to the next 32-bit boundary,
         # which ``padding_data`` writes and the block length has to include.
         if block is not None and isinstance(secrets_data_val, Schema):
