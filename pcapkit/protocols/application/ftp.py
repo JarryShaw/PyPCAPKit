@@ -174,7 +174,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
     def make(self,
              cmmd: 'Optional[Enum_Command | str | bytes | bytearray]' = None,
              code: 'Optional[Enum_ReturnCode | int | str | bytes]' = None,
-             args: 'Optional[str | bytes]' = None,
+             args: 'Optional[str | bytes | bytearray]' = None,
              more: 'bool' = False,
              charset: 'Optional[str]' = None,
              raw_cmmd: 'Optional[bytes]' = None,
@@ -196,7 +196,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
                 :class:`~pcapkit.const.ftp.command.Command` member is one),
                 :class:`bytes` or :class:`bytearray`.
             code: FTP status code.
-            args: Optional FTP command arguments and/or status messages.
+            args: Optional FTP command arguments and/or status messages, a
+                :class:`str`, :class:`bytes` or :class:`bytearray`.
             more: More status messages to follow for response packets.
             charset: Encoding for :obj:`str` arguments, **UTF-8** if not given.
             raw_cmmd: FTP command as received, in its original case.
@@ -210,9 +211,10 @@ class FTP(Application[Data_FTP, Schema_FTP],
 
         Raises:
             ProtocolError: If neither or both of ``cmmd`` and ``code`` are
-                given, if ``cmmd`` is not a :class:`str`, :class:`bytes` or
-                :class:`bytearray` (a :obj:`bool` included), or if ``lines``
-                are given other than as the rest of a multi-line reply.
+                given, if ``cmmd`` or ``args`` is not a :class:`str`,
+                :class:`bytes` or :class:`bytearray` (a :obj:`bool` included),
+                or if ``lines`` are given other than as the rest of a
+                multi-line reply.
 
         """
         if cmmd is not None and code is None:
@@ -240,12 +242,18 @@ class FTP(Application[Data_FTP, Schema_FTP],
         if lines and not (mf and self._test_lines(prefix, lines)):
             raise ProtocolError('FTP: lines must close a multi-line reply')
 
+        # NOTE: bytes and a bytearray are written verbatim and only a ``str`` is
+        # encoded; anything else is the wrong type, as it is for ``cmmd`` above
+        # (#2410).
         if args is None:
             suffix = b''
-        elif isinstance(args, bytes):
-            suffix = args
-        else:
+        elif isinstance(args, (bytes, bytearray)):
+            suffix = bytes(args)
+        elif isinstance(args, str):
             suffix = args.encode(charset or 'utf-8')
+        else:
+            raise ProtocolError('FTP: invalid arguments: '
+                                f'must be a str, bytes or bytearray, not {args!r}')
 
         # the separating SP, absent with no arguments and after a hyphen
         sep = b'' if args is None or mf else b' '
