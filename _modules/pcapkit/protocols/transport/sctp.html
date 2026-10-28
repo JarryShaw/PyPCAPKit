@@ -1184,6 +1184,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`</span>
+<span class="sd">                (:issue:`2287`).</span>
+
 <span class="sd">        Note:</span>
 <span class="sd">            There is no ``payload`` argument: SCTP carries its user data in the</span>
 <span class="sd">            ``data`` field of a DATA chunk, so the payload is supplied as part</span>
@@ -1223,7 +1227,7 @@
 <span class="sd">            code: payload protocol identifier (PPID), as in</span>
 <span class="sd">                :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            SCTP overrides :meth:`Transport.register</span>

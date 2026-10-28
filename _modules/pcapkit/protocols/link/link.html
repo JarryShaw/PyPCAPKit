@@ -625,7 +625,7 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
@@ -637,7 +637,7 @@
 <span class="sd">                replacement so a caller can tell *what* was lost. Fires only</span>
 <span class="sd">                when the incumbent differs from the replacement -- see</span>
 <span class="sd">                :meth:`ProtocolBase.register</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.register&gt;` for the</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
 <span class="sd">                guard this shares with ``register_protocol``, and for the</span>
 <span class="sd">                shipped descriptor that a restore puts back (:issue:`1504`).</span>
 
@@ -645,7 +645,7 @@
 
 <span class="sd">           Takes the protocol as one ``protocol`` argument, a</span>
 <span class="sd">           :class:`~pcapkit.corekit.module.ModuleDescriptor` or a</span>
-<span class="sd">           :class:`~pcapkit.protocols.protocol.Protocol` subclass, in place of</span>
+<span class="sd">           :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, in place of</span>
 <span class="sd">           the ``module`` and ``class_`` names.</span>
 
 <span class="sd">        """</span>

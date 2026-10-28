@@ -718,6 +718,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`</span>
+<span class="sd">                (:issue:`2287`).</span>
+
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
 <span class="sd">           An out-of-range ``srcport`` or ``dstport`` raises</span>

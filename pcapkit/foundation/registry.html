@@ -850,9 +850,9 @@ name as a plain string, and the <code class="docutils literal notranslate"><span
 <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a> and
 <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a> fall back to
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. The registry redesign of
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/514">#514</a> left this key unchanged and recorded the shared namespace as a
-risk it did not fix, so the collision is reported here rather than
-resolved.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/514">#514</a> keeps this key, and its thread records the shared namespace as
+a risk that design does not resolve, so the collision is reported here
+rather than fixed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – Protocol class.</p>

@@ -852,6 +852,12 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``frame`` is none of the forms this maker reads --</span>
+<span class="sd">                raw :obj:`bytes`, a :obj:`dict` of frame arguments, an</span>
+<span class="sd">                :class:`~pcapkit.protocols.data.application.httpv2.HTTP` data</span>
+<span class="sd">                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.</span>
+
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
 <span class="sd">           * ``reserved`` is a new parameter before ``sid``, so a 1.4.x</span>
@@ -893,7 +899,8 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">frame_val</span> <span class="o">=</span> <span class="n">frame</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid frame: must be bytes, a dict, '</span>
+                                <span class="sa">f</span><span class="s1">'an HTTP data model or a Schema, not </span><span class="si">{</span><span class="n">frame</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">flags_val</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, int]</span>
         <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>

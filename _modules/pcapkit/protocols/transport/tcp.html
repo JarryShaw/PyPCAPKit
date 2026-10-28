@@ -1114,6 +1114,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`</span>
+<span class="sd">                (:issue:`2287`).</span>
+
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
 <span class="sd">           An out-of-range ``srcport`` or ``dstport`` raises</span>
@@ -3582,13 +3586,13 @@
         <span class="c1"># three octets of header -- ``kind``, ``length`` and the subtype/flags</span>
         <span class="c1"># octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as</span>
         <span class="c1"># its body, so the option is never shorter than 3 octets -- the smallest</span>
-        <span class="c1"># Multipath TCP option :rfc:`8684` section 3 permits. The former</span>
-        <span class="c1"># ``2 + len(data)`` declared 2 for ``data=b''`` while still packing those</span>
-        <span class="c1"># three octets, and the segment could not be read back:</span>
-        <span class="c1"># ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which went</span>
-        <span class="c1"># negative and raised ``ProtocolError: Field data resolved to a negative</span>
-        <span class="c1"># length``. For every non-empty ``data`` the two expressions agree, so</span>
-        <span class="c1"># this only changes the empty case.</span>
+        <span class="c1"># Multipath TCP option :rfc:`8684` section 3 permits. A plain</span>
+        <span class="c1"># ``2 + len(data)`` would declare 2 for ``data=b''`` while those three</span>
+        <span class="c1"># octets are packed anyway, and the segment could not be read back:</span>
+        <span class="c1"># ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which would</span>
+        <span class="c1"># go negative and raise ``ProtocolError: Field data resolved to a</span>
+        <span class="c1"># negative length``. For every non-empty ``data`` the two expressions</span>
+        <span class="c1"># agree, so only the empty case tells them apart.</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPUnknown</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>

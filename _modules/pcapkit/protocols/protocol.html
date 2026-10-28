@@ -1152,7 +1152,15 @@
     <span class="c1"># protocol chain of current instance</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtoChain'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Protocol chain of current instance."""</span>
+<span class="w">        </span><span class="sd">"""Protocol chain of current instance.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.null.NoPayload` has no chain and</span>
+<span class="sd">            narrows this to :obj:`None`; :meth:`_decode_next_layer` passes it</span>
+<span class="sd">            on as ``basis``, which</span>
+<span class="sd">            :class:`~pcapkit.corekit.protochain.ProtoChain` accepts.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span>
 
     <span class="c1"># packet data</span>
@@ -1560,7 +1568,7 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
@@ -1809,9 +1817,12 @@
 <span class="sd">            UnsupportedCall: When constructing (``file`` is :obj:`None`), if a</span>
 <span class="sd">                keyword names no parameter of this protocol's :meth:`make`,</span>
 <span class="sd">                :meth:`read`, :meth:`pack`, :meth:`unpack`,</span>
-<span class="sd">                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO,</span>
-<span class="sd">                and is not listed in :attr:`__keywords__`. Parsing (``file`` is</span>
-<span class="sd">                given) is unaffected.</span>
+<span class="sd">                :meth:`__post_init__` or :meth:`__init__`, anywhere in the MRO</span>
+<span class="sd">                -- except a ``make`` whose class sets</span>
+<span class="sd">                :attr:`__own_make_keywords__`, which counts only while it is</span>
+<span class="sd">                the ``make`` of the protocol being constructed -- and is not</span>
+<span class="sd">                listed in :attr:`__keywords__`. Parsing (``file`` is given) is</span>
+<span class="sd">                unaffected.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            The ``_layer``, ``_protocol`` and ``__context__`` keywords are</span>

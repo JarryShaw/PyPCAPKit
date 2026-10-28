@@ -553,7 +553,17 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Protocol chain of current instance, which an empty payload does not</span>
-<span class="sd">        have."""</span>
+<span class="sd">        have.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           Narrows :attr:`Protocol.protochain</span>
+<span class="sd">           &lt;pcapkit.protocols.protocol.ProtocolBase.protochain&gt;`'s declared</span>
+<span class="sd">           type from :class:`~pcapkit.corekit.protochain.ProtoChain` to</span>
+<span class="sd">           :obj:`None`, the value ``self._protos`` already held here; the fix</span>
+<span class="sd">           is to the declaration, not the runtime value (:issue:`2317`).</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>

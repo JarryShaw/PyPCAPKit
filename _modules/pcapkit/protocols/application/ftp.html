@@ -667,7 +667,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">cmmd</span><span class="p">:</span> <span class="s1">'Optional[Enum_Command | str | bytes | bytearray]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">code</span><span class="p">:</span> <span class="s1">'Optional[Enum_ReturnCode | int | str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">args</span><span class="p">:</span> <span class="s1">'Optional[str | bytes | bytearray]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">more</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">charset</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">raw_cmmd</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -689,7 +689,8 @@
 <span class="sd">                :class:`~pcapkit.const.ftp.command.Command` member is one),</span>
 <span class="sd">                :class:`bytes` or :class:`bytearray`.</span>
 <span class="sd">            code: FTP status code.</span>
-<span class="sd">            args: Optional FTP command arguments and/or status messages.</span>
+<span class="sd">            args: Optional FTP command arguments and/or status messages, a</span>
+<span class="sd">                :class:`str`, :class:`bytes` or :class:`bytearray`.</span>
 <span class="sd">            more: More status messages to follow for response packets.</span>
 <span class="sd">            charset: Encoding for :obj:`str` arguments, **UTF-8** if not given.</span>
 <span class="sd">            raw_cmmd: FTP command as received, in its original case.</span>
@@ -703,9 +704,10 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If neither or both of ``cmmd`` and ``code`` are</span>
-<span class="sd">                given, if ``cmmd`` is not a :class:`str`, :class:`bytes` or</span>
-<span class="sd">                :class:`bytearray` (a :obj:`bool` included), or if ``lines``</span>
-<span class="sd">                are given other than as the rest of a multi-line reply.</span>
+<span class="sd">                given, if ``cmmd`` or ``args`` is not a :class:`str`,</span>
+<span class="sd">                :class:`bytes` or :class:`bytearray` (a :obj:`bool` included),</span>
+<span class="sd">                or if ``lines`` are given other than as the rest of a</span>
+<span class="sd">                multi-line reply.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cmmd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -733,12 +735,18 @@
         <span class="k">if</span> <span class="n">lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mf</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_lines</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">lines</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: lines must close a multi-line reply'</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: bytes and a bytearray are written verbatim and only a ``str`` is</span>
+        <span class="c1"># encoded; anything else is the wrong type, as it is for ``cmmd`` above</span>
+        <span class="c1"># (#2410).</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">suffix</span> <span class="o">=</span> <span class="n">args</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: invalid arguments: '</span>
+                                <span class="sa">f</span><span class="s1">'must be a str, bytes or bytearray, not </span><span class="si">{</span><span class="n">args</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="c1"># the separating SP, absent with no arguments and after a hyphen</span>
         <span class="n">sep</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mf</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">' '</span>

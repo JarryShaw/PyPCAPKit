@@ -544,9 +544,9 @@ overwrites them, as <span class="target" id="index-1"></span><a class="rfc refer
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.conflict" title="pcapkit.foundation.reassembly.data.ip.Datagram.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.conflict</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/477">#477</a>). An incomplete buffer expires
 after <code class="docutils literal notranslate"><span class="pre">timeout</span></code> seconds of capture time, 60 by default for both IPv4
-and IPv6. A datagram with fragment offset zero and <strong>MF</strong> clear is
-reported even when its BUFID is already buffered, rather than dropped
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2270">#2270</a>).</p>
+and IPv6. A datagram with fragment offset zero and <strong>MF</strong> (<strong>M</strong> in
+IPv6) clear is reported even when its BUFID is already buffered,
+rather than dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2270">#2270</a>).</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.reassembly">

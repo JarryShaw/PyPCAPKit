@@ -627,7 +627,8 @@ header field and in the order of <code class="docutils literal notranslate"><spa
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the values are neither a request’s nor a
-    response’s, or if <code class="docutils literal notranslate"><span class="pre">raw_line</span></code> or a <code class="docutils literal notranslate"><span class="pre">raw_header</span></code> entry that
+    response’s, if they are a request’s and <code class="docutils literal notranslate"><span class="pre">uri</span></code> is
+    <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, or if <code class="docutils literal notranslate"><span class="pre">raw_line</span></code> or a <code class="docutils literal notranslate"><span class="pre">raw_header</span></code> entry that
     reads back as the given values carries a CR or LF that the
     values do not (other than the CRLF of an <code class="docutils literal notranslate"><span class="pre">obs-fold</span></code>).</p>
 </dd>

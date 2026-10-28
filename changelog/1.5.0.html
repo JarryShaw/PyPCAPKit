@@ -880,6 +880,12 @@ transports only stays <code class="docutils literal notranslate"><span class="pr
 <code class="docutils literal notranslate"><span class="pre">bier-echo</span> <span class="pre">[udp]</span></code>, and <code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">[dccp]</span></code> and <code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">[sctp]</span></code>. Lookups still
 mint nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>) and an out-of-range port still raises (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2048">#2048</a>,
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2052">#2052</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Method._missing_</span></code> resolves an HTTP method whose registered name differs from
+its own value, so <code class="docutils literal notranslate"><span class="pre">Method('baseline-control')</span></code> and <code class="docutils literal notranslate"><span class="pre">Method('version-control')</span></code>
+give <code class="docutils literal notranslate"><span class="pre">BASELINE_CONTROL</span></code> and <code class="docutils literal notranslate"><span class="pre">VERSION_CONTROL</span></code> rather than minting an
+unregistered member: the lookup falls back to the value map on the upper-cased
+value before it mints. <a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method.get()</span></code></a> stays case-sensitive (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2284">#2284</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2351">#2351</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1296,6 +1302,13 @@ modules defining them, so <code class="docutils literal notranslate"><span class
 shared field, and a <a class="reference internal" href="../pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> with a callable length sizes its template
 from the resolved length rather than <code class="docutils literal notranslate"><span class="pre">1024s</span></code>. No parse in the library reached either
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2173">#2173</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2190">#2190</a>).</p></li>
+<li><p><a class="reference internal" href="../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a> range-checks the port it is handed, so a directly built
+TCP, UDP or SCTP schema raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> for a port outside the
+field’s width, where <code class="docutils literal notranslate"><span class="pre">srcport=70000</span></code> was masked to <code class="docutils literal notranslate"><span class="pre">0x1170</span></code> and <code class="docutils literal notranslate"><span class="pre">-1</span></code> to
+<code class="docutils literal notranslate"><span class="pre">0xffff</span></code>. <a class="reference internal" href="../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> keeps masking, which is its documented contract;
+the <a class="reference internal" href="../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> and <a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> docstrings now say that direct
+construction range-checks nothing, and name where the checks live (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2335">#2335</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1402,6 +1415,20 @@ for an engine whose package is not installed at all (<a class="extlink-issue ref
 <li><p><code class="docutils literal notranslate"><span class="pre">conflict</span></code> on the reassembly data models: absolute, inclusive ranges where
 two fragments claimed the same span with different bytes, previously lost
 silently on both the IP (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/482">#482</a>) and TCP (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/443">#443</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/478">#478</a>) paths.</p></li>
+<li><p>the declarations that pair a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch registry with the
+enumeration its codes come from, replacing the module-level tables that held the
+pairing apart from the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> they describe. <code class="docutils literal notranslate"><span class="pre">__proto_key__</span></code>, on each
+class owning such a registry (<code class="docutils literal notranslate"><span class="pre">Link</span></code>, <code class="docutils literal notranslate"><span class="pre">Internet</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame</span></code>, <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code> and <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>), names that enumeration and whether a bare <code class="docutils literal notranslate"><span class="pre">int</span></code>
+is also valid (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2392">#2392</a>); <code class="docutils literal notranslate"><span class="pre">__proto_dest__</span></code>, on the
+<a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>,
+<a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a>,
+<a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> and
+<a class="reference internal" href="../pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
+registries, names the destination each enumeration keys, which is how
+<code class="docutils literal notranslate"><span class="pre">code=&lt;member&gt;</span></code> infers one without an explicit destination. Both are rendered
+attributes, and the vendor crawlers generate the latter from a new
+<a class="reference internal" href="../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.PROTO_DEST" title="pcapkit.vendor.default.Vendor.PROTO_DEST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PROTO_DEST</span></code></a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2403">#2403</a>).</p></li>
 </ul>
 </section>
 <section id="id5">
@@ -1715,6 +1742,29 @@ value 64-bit builds already used (<a class="extlink-issue reference external" hr
 and <code class="docutils literal notranslate"><span class="pre">register_transtype</span></code> refuse a <code class="docutils literal notranslate"><span class="pre">code</span></code> that is not an enum member with
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> before touching a registry, where they registered it and then
 raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>, leaving the entry behind (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2186">#2186</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2193">#2193</a>).</p></li>
+<li><p><a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_protocol_code()</span></code></a>, and the
+<code class="docutils literal notranslate"><span class="pre">code=</span></code> class keyword, check every destination’s key before registering any of
+them. A key belonging to another enum, such as <code class="docutils literal notranslate"><span class="pre">{Frame:</span> <span class="pre">TransType.ICMP}</span></code>, is
+refused with <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> where it replaced the shipped
+<code class="docutils literal notranslate"><span class="pre">LinkType.ETHERNET</span></code> entry, and a bad target late in the list no longer leaves
+the earlier ones registered. A destination keeping a registry of its own, such as
+<code class="docutils literal notranslate"><span class="pre">Loopback</span></code> and <code class="docutils literal notranslate"><span class="pre">IPX</span></code>, is not checked against another enum (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2343">#2343</a>).</p></li>
+<li><p>the number registrars <code class="docutils literal notranslate"><span class="pre">register_tcp</span></code>, <code class="docutils literal notranslate"><span class="pre">register_udp</span></code>, <code class="docutils literal notranslate"><span class="pre">register_sctp</span></code> and
+<code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> refuse a <code class="docutils literal notranslate"><span class="pre">bool</span></code> code with <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a>, where
+<code class="docutils literal notranslate"><span class="pre">register_tcp(True,</span> <span class="pre">...)</span></code> registered port 1, since <code class="docutils literal notranslate"><span class="pre">bool</span></code> is an <code class="docutils literal notranslate"><span class="pre">int</span></code>
+subclass (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2269">#2269</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2344">#2344</a>).</p></li>
+<li><p>IP reassembly reports a datagram that is not itself fragmented but whose BUFID is
+already buffered: it submits that buffer as incomplete and then reassembles the
+datagram in a buffer of its own, per <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>, where the datagram
+was never reported at all. On IPv6 an atomic fragment is reassembled in a buffer
+of its own and submitted without flushing the datagram already being reassembled,
+so that one’s final fragment still completes it, per <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6946.html#section-4"><strong>RFC 6946 Section 4</strong></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2270">#2270</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2345">#2345</a>).</p></li>
+<li><p>the PyPCAP, pcap-ct and pypcapfile engines warn with <a class="reference internal" href="../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>,
+naming the engine, that they ignore a parsing context supplied through
+<a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">context=</span></code>, as the dpkt, scapy and pyshark engines already
+did, where they dropped it silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2313">#2313</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2332">#2332</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -1728,13 +1778,26 @@ raised <code class="docutils literal notranslate"><span class="pre">AttributeErr
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1568">#1568</a>).</p></li>
 </ul>
 </section>
+<section id="id8">
+<h3>Fixed<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>the messages the interface functions and the helpers behind them raise and warn
+read in the house <code class="docutils literal notranslate"><span class="pre">&lt;prefix&gt;:</span> <span class="pre">&lt;lowercase</span> <span class="pre">description&gt;:</span> <span class="pre">...</span> <span class="pre">{value!r}</span></code> form.
+<code class="docutils literal notranslate"><span class="pre">reassemble</span></code> and <code class="docutils literal notranslate"><span class="pre">trace</span></code> lowercase their unsupported-protocol error and quote
+the protocol; <code class="docutils literal notranslate"><span class="pre">follow_tcp_stream</span></code> warns <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">default</span> <span class="pre">engine</span> <span class="pre">instead</span></code>, the
+wording <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> already used, and quotes an engine that has no
+reassembly adapter; <a class="reference internal" href="../pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>’s output-format warning is lowercased;
+and <code class="docutils literal notranslate"><span class="pre">Extractor.make_name</span></code> quotes the format it does not know, where an empty one
+ended the message at the colon with nothing after it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2303">#2303</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2374">#2374</a>).</p></li>
+</ul>
+</section>
 </section>
 <section id="pcapkit-protocols">
 <h2>pcapkit.protocols<a class="headerlink" href="#pcapkit-protocols" title="Link to this heading">¶</a></h2>
-<section id="id8">
-<h3>Added<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3>Added<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p>ESP parsing and construction [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>], with optional payload decryption and ICV
+<li><p>ESP parsing and construction [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>], with optional payload decryption and ICV
 verification through <code class="docutils literal notranslate"><span class="pre">cryptography</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[crypto]</span></code>)
 (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/378">#378</a>). Keys reach the dissector through a new caller-state channel,
 <a class="reference internal" href="../pcapkit/corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>, surfaced as the <code class="docutils literal notranslate"><span class="pre">context=</span></code> keyword on <code class="docutils literal notranslate"><span class="pre">extract()</span></code>
@@ -1744,7 +1807,7 @@ ciphertext is left opaque with <code class="docutils literal notranslate"><span 
 check is recorded on the parsed result the same way. Extended Sequence Numbers, TFC
 padding and anti-replay are not implemented, and an unsupported cipher or MAC is
 refused with a clear error rather than half-processed.</p></li>
-<li><p>SCTP as a transport protocol [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>]: every chunk type, chunk
+<li><p>SCTP as a transport protocol [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>]: every chunk type, chunk
 parameter and error cause it defines, with the CRC32c both recorded and verifiable (it
 covers the SCTP packet alone, with no IP pseudo-header). Upper layers register
 on the DATA chunk’s Payload Protocol Identifier through <code class="docutils literal notranslate"><span class="pre">register_sctp</span></code>, not
@@ -1759,7 +1822,7 @@ was at first left out of the <code class="docutils literal notranslate"><span cl
 is BSD-3-Clause, and lands some 238 MB to obtain one module – until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/910">#910</a>
 counted it among <code class="docutils literal notranslate"><span class="pre">all</span></code>’s core addons, so <code class="docutils literal notranslate"><span class="pre">all</span></code> installs it (the <code class="docutils literal notranslate"><span class="pre">all</span></code> entry
 under <em>Project infrastructure</em>).</p></li>
-<li><p>the Mobility Header registry, completed (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/383">#383</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/437">#437</a>): the <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>
+<li><p>the Mobility Header registry, completed (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/383">#383</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/437">#437</a>): the <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>
 fast-handover messages and options, then every registered message data type,
 every registered option (with nested sub-option registries for the flow
 identification, access network identifier, quality-of-service and LMA-controlled MAG
@@ -1774,7 +1837,7 @@ generic handler, which is what let the CGA extensions round-trip end to end.</p>
 <a class="reference internal" href="../pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag" title="pcapkit.protocols.link.c_tag.C_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code></a> (802.1Q) and <a class="reference internal" href="../pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag" title="pcapkit.protocols.link.s_tag.S_Tag"><code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code></a> (802.1ad) as concrete subclasses, so a
 Q-in-Q frame no longer collapses into one opaque
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; <a class="reference internal" href="../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>
-likewise became a base, with <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> carrying the <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> implementation.</p></li>
+likewise became a base, with <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> carrying the <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> implementation.</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>/<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> gain a <code class="docutils literal notranslate"><span class="pre">code=</span></code>
 class keyword for the next-layer dispatch registries (<a class="reference internal" href="../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>,
 <a class="reference internal" href="../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a>, <a class="reference internal" href="../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a>, <a class="reference internal" href="../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a>,
@@ -1803,7 +1866,7 @@ destination raises <a class="reference internal" href="../pcapkit/utilities/exce
 <a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_protocol_code()</span></code></a>, also callable
 directly for a class that declined at definition time. It was written up as the
 mechanism <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a> needs; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a> turned out to need a missing class instead
-(115 is <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> L2TPv3 over IP, not <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>; see the corresponding <strong>Fixed</strong>
+(115 is <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> L2TPv3 over IP, not <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>; see the corresponding <strong>Fixed</strong>
 entry below), so its worked example names <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/570">#570</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_reachability_unit.py</span></code>, the coverage <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a>
 asked for: every <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> descendant whose <code class="docutils literal notranslate"><span class="pre">__index__</span></code> returns an enum
@@ -1831,7 +1894,7 @@ eight, where floor division and the ceiling disagree (<a class="extlink-issue re
 <li><p><code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> parameter width coverage in
 <code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_hip_unit.py</span></code>: a spread of widths, each asserting
 the declared length, the reader’s acceptance and the construct-pack-parse cycle,
-plus a 57-bit case pinning the 20-octet length <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> requires
+plus a 57-bit case pinning the 20-octet length <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> requires
 of HIPv1. Some widths are deliberately <em>not</em> multiples of eight, where the defective
 <code class="docutils literal notranslate"><span class="pre">ceil(bits</span> <span class="pre">/</span> <span class="pre">4)</span></code> differs from the correct width (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/608">#608</a>).</p></li>
 <li><p>the BSD loopback layer for <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code>, and dissection of
@@ -1842,15 +1905,15 @@ PCAP and PCAP-NG framing constants – in the module that owns the protocol
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1752">#1752</a>).</p></li>
 </ul>
 </section>
-<section id="id9">
-<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<section id="id10">
+<h3>Changed<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p><strong>a breaking change to</strong> <a class="reference internal" href="../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>,
 <a class="reference internal" href="../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP" title="pcapkit.protocols.application.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> and <a class="reference internal" href="../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP" title="pcapkit.protocols.application.rarp.DRARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DRARP</span></code></a>: they move from <a class="reference internal" href="../pcapkit/protocols/link/index.html#module-pcapkit.protocols.link" title="pcapkit.protocols.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link</span></code></a> to
 <a class="reference internal" href="../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application</span></code></a>, with no deprecated re-export at the old path
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>). Layer is decided by designed function, with the IETF as the single
-source of truth – <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-7"><strong>RFC 1812 Section 7</strong></a> places routing protocols in the application
-layer and <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-1.1.3"><strong>RFC 1122 Section 1.1.3</strong></a> lists RARP there – and the rule is recorded in
+source of truth – <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-7"><strong>RFC 1812 Section 7</strong></a> places routing protocols in the application
+layer and <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-1.1.3"><strong>RFC 1122 Section 1.1.3</strong></a> lists RARP there – and the rule is recorded in
 <code class="docutils literal notranslate"><span class="pre">docs/source/contributing/conventions/protocol-layer-placement.rst</span></code>.</p>
 <p>Import paths, before to after:</p>
 <ul class="simple">
@@ -1956,7 +2019,7 @@ extension-header chain at 32 headers (<a class="extlink-issue reference external
 <a class="reference internal" href="../pcapkit/utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1743">#1743</a>). Rebuilding a
 frame cut at the chain bound warns once (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1630">#1630</a>).</p></li>
 <li><p><strong>a breaking change to</strong> IPv6 extension headers: an unrecognised or unparsable one
-is parsed generically, per <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html"><strong>RFC 6564</strong></a>, rather than collapsing the packet to
+is parsed generically, per <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html"><strong>RFC 6564</strong></a>, rather than collapsing the packet to
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/904">#904</a>).
 <a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> does it, and is also the shared
 base of every extension header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a>).</p></li>
@@ -1973,7 +2036,7 @@ raises. Code that relied on <code class="docutils literal notranslate"><span cla
 constructs a new instance (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1769">#1769</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1791">#1791</a>).</p></li>
 <li><p><strong>a breaking change to</strong> the HOPOPT, IPv6-Opts and Mobility Header padding: two
 octets are one <code class="docutils literal notranslate"><span class="pre">PadN</span></code> with no data (<code class="docutils literal notranslate"><span class="pre">01</span> <span class="pre">00</span></code>) rather than two <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> options,
-as <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a> and <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.2"><strong>RFC 6275 Section 6.2.2</strong></a> ask. Only a freshly built
+as <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a> and <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html#section-6.2.2"><strong>RFC 6275 Section 6.2.2</strong></a> ask. Only a freshly built
 header with exactly two octets of padding changes; a parsed one that carried two
 <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> options still rebuilds byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1793">#1793</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1812">#1812</a>).</p></li>
 <li><p><strong>a breaking change to</strong> <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.NTPTimestamp" title="pcapkit.protocols.data.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a>: it and <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.PMIPv6Timestamp" title="pcapkit.protocols.data.internet.mh.PMIPv6Timestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PMIPv6Timestamp</span></code></a> are
@@ -2001,8 +2064,18 @@ on a block that holds no section, such as a Section Header Block the
 <a class="reference internal" href="../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG" title="pcapkit.foundation.engines.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> engine has not assigned the section
 it opens. Code reading <code class="docutils literal notranslate"><span class="pre">block.context</span></code> for the section reads
 <code class="docutils literal notranslate"><span class="pre">block.section_context</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2172">#2172</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2205">#2205</a>).</p></li>
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">FTP_DATA</span></code>: it derives from <code class="docutils literal notranslate"><span class="pre">Application</span></code> as well as
+<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, so its <code class="docutils literal notranslate"><span class="pre">__layer__</span></code> names the
+application layer where it was <code class="docutils literal notranslate"><span class="pre">None</span></code> – a <code class="docutils literal notranslate"><span class="pre">layer='application'</span></code> extraction
+stops at it, and <code class="docutils literal notranslate"><span class="pre">extract(layer=FTP_DATA)</span></code> resolves to that layer rather than to
+<code class="docutils literal notranslate"><span class="pre">'none'</span></code>. Raw still does the parsing and the rebuild, and <code class="docutils literal notranslate"><span class="pre">__index__</span></code> is the
+application layer’s, raising <code class="docutils literal notranslate"><span class="pre">IntError</span></code> where it raised
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>. The class moves to
+<a class="reference internal" href="../pcapkit/protocols/application/ftp_data.html#module-pcapkit.protocols.application.ftp_data" title="pcapkit.protocols.application.ftp_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp_data</span></code></a> with nothing left behind on the old
+path in <a class="reference internal" href="../pcapkit/protocols/application/ftp.html#module-pcapkit.protocols.application.ftp" title="pcapkit.protocols.application.ftp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code></a>, where it shipped from 1.0.0
+through 1.4.1 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2285">#2285</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2357">#2357</a>).</p></li>
 <li><p><strong>a breaking change to</strong> HIP’s <code class="docutils literal notranslate"><span class="pre">REG_FAILED</span></code> parameter: its first octet is the
-Failure Type, and it carries no lifetime (<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html#section-4.5"><strong>RFC 8003 Section 4.5</strong></a>), so
+Failure Type, and it carries no lifetime (<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html#section-4.5"><strong>RFC 8003 Section 4.5</strong></a>), so
 <a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.data.internet.hip.RegFailedParameter" title="pcapkit.protocols.data.internet.hip.RegFailedParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.data.internet.hip.RegFailedParameter</span></code></a> replaces <code class="docutils literal notranslate"><span class="pre">lifetime</span></code>
 with <code class="docutils literal notranslate"><span class="pre">failure_type</span></code>, a <a class="reference internal" href="../pcapkit/const/hip.html#pcapkit.const.hip.registration_failure.RegistrationFailure" title="pcapkit.const.hip.registration_failure.RegistrationFailure"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationFailure</span></code></a>,
 with no alias, and its <code class="docutils literal notranslate"><span class="pre">reg_type</span></code> holds
@@ -2012,14 +2085,14 @@ types. <a class="reference internal" href="../pcapkit/protocols/internet/hip.htm
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2309">#2309</a>).</p></li>
 <li><p><strong>a breaking change to</strong> the HTTP/2 <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code> and <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> builders: a frame
 constructed without <code class="docutils literal notranslate"><span class="pre">error</span></code> carries <code class="docutils literal notranslate"><span class="pre">NO_ERROR</span></code> (<code class="docutils literal notranslate"><span class="pre">0x0</span></code>), the code
-<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-7"><strong>RFC 9113 Section 7</strong></a> gives a condition that is not the result of an error, rather
+<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-7"><strong>RFC 9113 Section 7</strong></a> gives a condition that is not the result of an error, rather
 than <code class="docutils literal notranslate"><span class="pre">HTTP_1_1_REQUIRED</span></code> (<code class="docutils literal notranslate"><span class="pre">0xd</span></code>), which asks the peer to use HTTP/1.1 instead.
 A <code class="docutils literal notranslate"><span class="pre">make</span></code> that omits <code class="docutils literal notranslate"><span class="pre">error</span></code> emits different octets; one that passes it is
 unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2311">#2311</a>).</p></li>
 </ul>
 </section>
-<section id="id10">
-<h3>Fixed<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<section id="id11">
+<h3>Fixed<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>next-layer, option, chunk, block and parameter dispatch all read <code class="docutils literal notranslate"><span class="pre">defaultdict</span></code>
 registries, so a lookup miss inserted the key into class-level state shared by
@@ -2068,12 +2141,12 @@ into a silent empty list; they are floored and raise instead (<a class="extlink-
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/460">#460</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/463">#463</a>).</p></li>
 <li><p>field widths and units, each measured against the specification: HIP’s
 <code class="docutils literal notranslate"><span class="pre">TRANSPORT_FORMAT_LIST</span></code>, <code class="docutils literal notranslate"><span class="pre">NAT_TRAVERSAL_MODE</span></code> and <code class="docutils literal notranslate"><span class="pre">ESP_TRANSFORM</span></code> list
-entries are two octets, not one [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>, <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a>, <span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a>]
+entries are two octets, not one [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>, <span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a>, <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a>]
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/463">#463</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/472">#472</a>); the MN-ID option sizes from its subtype, not from
 <code class="docutils literal notranslate"><span class="pre">identifier</span></code>’s Python type (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/448">#448</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/464">#464</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/467">#467</a>); IPv6-Route’s
-<code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is computed in 8-octet units on both sides [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]
+<code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is computed in 8-octet units on both sides [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/487">#487</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/489">#489</a>); and the Fast Binding Update and Acknowledgment
-Lifetimes are plain seconds [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>], not <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>’s four-second units
+Lifetimes are plain seconds [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>], not <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>’s four-second units
 (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/502">#502</a>).</p></li>
 <li><p>the remaining call sites where a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> method converts an address itself,
 ahead of the schema, so the same <code class="docutils literal notranslate"><span class="pre">bool</span></code>-as-<code class="docutils literal notranslate"><span class="pre">int</span></code> mistake reached them,
@@ -2134,7 +2207,7 @@ way <code class="docutils literal notranslate"><span class="pre">kind</span></co
 bits of each subtype’s own <code class="docutils literal notranslate"><span class="pre">test</span></code> bitfield, and a second field for the same bits
 would double-encode them or need a “derive, don’t pack” field kind this library lacks
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/566">#566</a>). Separately, <code class="docutils literal notranslate"><span class="pre">_make_mptcp_capable</span></code> wrote
-<code class="docutils literal notranslate"><span class="pre">length=20</span> <span class="pre">if</span> <span class="pre">rkey</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">32</span></code> where <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives 12 and 20,
+<code class="docutils literal notranslate"><span class="pre">length=20</span> <span class="pre">if</span> <span class="pre">rkey</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">32</span></code> where <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives 12 and 20,
 and
 <a class="reference internal" href="../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey" title="pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPCapable.rkey</span></code></a>’s
 condition (<code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">!=</span> <span class="pre">32</span></code>) dropped the receiver’s key for exactly the length
@@ -2144,7 +2217,7 @@ key-present one lost its key on the wire. Both, and the guard in
 output</strong>: a 20-octet key-present option built or parsed under the old code becomes 12
 octets with no key, or 20 octets with the key present, depending on which the caller
 meant (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/567">#567</a>).</p></li>
-<li><p>TCP’s MP_CAPABLE now parses and builds all five lengths of <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1
+<li><p>TCP’s MP_CAPABLE now parses and builds all five lengths of <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1
 – 4 (SYN, no key), 12, 20, 22 (adds the Data-Level Length) and 24 (adds the
 Checksum) – where <code class="docutils literal notranslate"><span class="pre">_read_mptcp_capable</span></code> raised
 <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">TCP:</span> <span class="pre">[OptNo</span> <span class="pre">30]</span> <span class="pre">invalid</span> <span class="pre">format</span></code> for anything but 12 and 20. In the
@@ -2158,7 +2231,7 @@ data model <a class="reference internal" href="../pcapkit/protocols/transport/tc
 <code class="docutils literal notranslate"><span class="pre">dl_len</span></code> and <code class="docutils literal notranslate"><span class="pre">checksum</span></code>, and <code class="docutils literal notranslate"><span class="pre">skey</span></code> becomes <code class="docutils literal notranslate"><span class="pre">Optional[int]</span></code>: code that
 constructs it directly must now pass both new fields, and <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> carries the
 new keys (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1042">#1042</a>).</p></li>
-<li><p>IPv6-Route’s RPL routing data was five octets wide at the front where <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>
+<li><p>IPv6-Route’s RPL routing data was five octets wide at the front where <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>
 section 3 gives four, with further defects behind it. <code class="docutils literal notranslate"><span class="pre">CmprI</span></code>, <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Pad</span></code> are each 4 bits sharing a 32-bit word with a 20-bit <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>, but the
 schema declared <code class="docutils literal notranslate"><span class="pre">cmpr_i</span></code> and <code class="docutils literal notranslate"><span class="pre">cmpr_e</span></code> as whole octets, so a constructed
@@ -2185,20 +2258,20 @@ requires <code class="docutils literal notranslate"><span class="pre">Pad</span>
 its <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entry is deleted; none of this has been checked against a
 real RPL capture (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/564">#564</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> parsed any version nibble, so an L2TPv3 datagram was reported as v2
-with a tunnel and session ID read out of v3’s Control Connection ID. <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>
+with a tunnel and session ID read out of v3’s Control Connection ID. <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>
 §3.1 fixes <code class="docutils literal notranslate"><span class="pre">Ver</span></code> at 2 and reserves 1 for L2F, and <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2.version" title="pcapkit.protocols.link.l2tpv2.L2TPv2.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">L2TPv2.version</span></code></a> documented
 that any other value “is a different protocol reached through a different class”,
 but nothing enforced it, so the hard-coded <code class="docutils literal notranslate"><span class="pre">Literal[2]</span></code> property and
 <code class="docutils literal notranslate"><span class="pre">info.version</span></code> answered 2 and 3 on the same octets. <code class="docutils literal notranslate"><span class="pre">read</span></code> now raises
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, degrading the payload to
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> through the existing <code class="docutils literal notranslate"><span class="pre">beholder</span></code> path with
-the reason recorded. <strong>This affects real captures</strong>: <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.2 puts L2TPv3 on
+the reason recorded. <strong>This affects real captures</strong>: <span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.2 puts L2TPv3 on
 port 1701 too, the port <a class="reference internal" href="../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a> binds, so
 <code class="docutils literal notranslate"><span class="pre">Ethernet:IPv4:UDP:L2TPv2:Raw</span></code> with invented field values becomes
 <code class="docutils literal notranslate"><span class="pre">Ethernet:IPv4:UDP:Raw</span></code> with the octets preserved.</p>
 <p>This resolves <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/548">#548</a>, which reported <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.L2TP" title="pcapkit.const.reg.transtype.TransType.L2TP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TransType.L2TP</span></code></a> (115) as registered
 nowhere and proposed binding <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> there. That binding is wrong rather than
-awkward: <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.1 gives 115 to <em>L2TPv3 over IP</em>, whose session header
+awkward: <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.1 gives 115 to <em>L2TPv3 over IP</em>, whose session header
 carries <strong>no version nibble at all</strong>, so a v2 parser cannot detect that the
 datagram is not its own. 115 is a missing <em>class</em>, not a missing registration, and stays
 unbound until an <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class exists; no dissector was invented to fill it.
@@ -2210,7 +2283,7 @@ names <code class="docutils literal notranslate"><span class="pre">L2TPv3</span>
 <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'TCP'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'_flags'</span></code>. <a class="reference internal" href="../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.make" title="pcapkit.protocols.transport.tcp.TCP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.make()</span></code></a>
 constructed the options <em>before</em> assigning the <code class="docutils literal notranslate"><span class="pre">self._flags</span></code> that the option makers
 read, and <code class="docutils literal notranslate"><span class="pre">_make_mptcp_join</span></code> branches on it to choose among the three layouts of
-<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2 (figure 5, SYN, 12 octets; figure 6, SYN/ACK, 16; figure 7,
+<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2 (figure 5, SYN, 12 octets; figure 6, SYN/ACK, 16; figure 7,
 ACK, 24). The parse path was never affected, since <code class="docutils literal notranslate"><span class="pre">read</span></code> assigns the flags first.
 Fixed by hoisting the flag resolution above the <code class="docutils literal notranslate"><span class="pre">_make_tcp_options</span></code> call, leaving
 only the data-offset computation, which needs the options’ total length, after it.
@@ -2241,7 +2314,7 @@ boundary values</strong>: any nonce below 256 was declared as <em>zero</em> octe
 in <code class="docutils literal notranslate"><span class="pre">hip.py</span></code> and <code class="docutils literal notranslate"><span class="pre">mh.py</span></code>. The one-octet floor is the <code class="docutils literal notranslate"><span class="pre">mh.py</span></code> convention and is
 load-bearing because <code class="docutils literal notranslate"><span class="pre">nonce</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>, whose bit length is <code class="docutils literal notranslate"><span class="pre">0</span></code>: without
 it the default builds an option with no Nonce Value field at all, collapsing “the
-nonce is 0” into “there is no nonce” when <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a> gives the option that field. The
+nonce is 0” into “there is no nonce” when <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a> gives the option that field. The
 read path takes its width from the <code class="docutils literal notranslate"><span class="pre">len</span></code> octet on the wire and was never affected
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/601">#601</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">httpv1</span></code>’s <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code> was unanchored and <code class="docutils literal notranslate"><span class="pre">re.match</span></code> anchors only at the
@@ -2254,7 +2327,7 @@ would parse <code class="docutils literal notranslate"><span class="pre">b'Get'<
 would parse it as a method named <code class="docutils literal notranslate"><span class="pre">G</span></code>). The pattern is anchored at both ends and
 the captured group is looked up, so a non-method token is a malformed request line
 rather than a mis-parsed one. Method tokens are case-sensitive per
-<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>, so no <code class="docutils literal notranslate"><span class="pre">re.I</span></code> was added: <code class="docutils literal notranslate"><span class="pre">GET</span></code> parses, <code class="docutils literal notranslate"><span class="pre">Get</span></code> and
+<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>, so no <code class="docutils literal notranslate"><span class="pre">re.I</span></code> was added: <code class="docutils literal notranslate"><span class="pre">GET</span></code> parses, <code class="docutils literal notranslate"><span class="pre">Get</span></code> and
 <code class="docutils literal notranslate"><span class="pre">get</span></code> are rejected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/583">#583</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">_RE_STATUS</span></code> in the same reader had the same unanchored prefix defect, found by
 auditing <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code>’s siblings, and escaped as the wrong exception type. The
@@ -2263,9 +2336,9 @@ prefix match let a malformed status past the guard and out of <code class="docut
 where <code class="docutils literal notranslate"><span class="pre">_read_http_header</span></code> documents <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>: <code class="docutils literal notranslate"><span class="pre">200x</span></code> raised
 <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">invalid</span> <span class="pre">literal</span> <span class="pre">for</span> <span class="pre">int()</span></code> and <code class="docutils literal notranslate"><span class="pre">2000</span></code> raised
 <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">2000</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">StatusCode</span></code>; both are now <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>.
-<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-4"><strong>RFC 9112 Section 4</strong></a> gives <code class="docutils literal notranslate"><span class="pre">status-code</span> <span class="pre">=</span> <span class="pre">3DIGIT</span></code>, exactly three, so the anchor
+<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-4"><strong>RFC 9112 Section 4</strong></a> gives <code class="docutils literal notranslate"><span class="pre">status-code</span> <span class="pre">=</span> <span class="pre">3DIGIT</span></code>, exactly three, so the anchor
 is what the grammar said (the production lives in HTTP/1.1 because <code class="docutils literal notranslate"><span class="pre">status-code</span></code>
-is part of its <code class="docutils literal notranslate"><span class="pre">status-line</span></code>; <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15"><strong>RFC 9110 Section 15</strong></a> covers code semantics and the
+is part of its <code class="docutils literal notranslate"><span class="pre">status-line</span></code>; <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15"><strong>RFC 9110 Section 15</strong></a> covers code semantics and the
 registry). <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code> was audited and is safe, since every call site reads
 the captured group (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/583">#583</a>).</p></li>
 <li><p>as a consequence of the above, the unhandled <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> in
@@ -2318,7 +2391,7 @@ corrected. Test-only; the sibling case in
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/604">#604</a>).</p></li>
 <li><p>the HIP <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> builder sized the parameter with
 <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">math.ceil(max(random.bit_length(),</span> <span class="pre">solution.bit_length())</span> <span class="pre">/</span> <span class="pre">4)</span></code>, an invalid
-shorthand for two fields. <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a> gives <code class="docutils literal notranslate"><span class="pre">Length</span></code> as
+shorthand for two fields. <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a> gives <code class="docutils literal notranslate"><span class="pre">Length</span></code> as
 <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">4</span></code> over a <code class="docutils literal notranslate"><span class="pre">Random</span> <span class="pre">#I</span></code> and a <code class="docutils literal notranslate"><span class="pre">Puzzle</span> <span class="pre">solution</span> <span class="pre">#J</span></code> of
 <code class="docutils literal notranslate"><span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">8</span></code> octets <strong>each</strong>, and <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">4</span></code> equals twice <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">8</span></code> only because
 <code class="docutils literal notranslate"><span class="pre">RHASH_len</span></code> is a whole number of octets. For an arbitrary <code class="docutils literal notranslate"><span class="pre">bit_length()</span></code> the
@@ -2349,7 +2422,7 @@ it, which is how it survived 100% statement and branch coverage. The seed is
 an ordinary <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> pseudo-member and does not meet the <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>
 the same construction hits on the <a class="reference internal" href="../pcapkit/const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a> flag enumerations
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/623">#623</a>). The MP_JOIN path was latent: <code class="docutils literal notranslate"><span class="pre">mptcp_data_selector</span></code> rejects a
-flagless MP_JOIN before <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2’s three layouts are chosen. A
+flagless MP_JOIN before <span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2’s three layouts are chosen. A
 dump-format change is observable: a flagless segment’s <code class="docutils literal notranslate"><span class="pre">connection</span></code> renders as a
 string where it rendered as the number <code class="docutils literal notranslate"><span class="pre">0</span></code>, so it no longer switches JSON type with
 the flags. That string read <code class="docutils literal notranslate"><span class="pre">Flags::None</span> <span class="pre">[0]</span></code> until the <a class="reference internal" href="../pcapkit/dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> fix
@@ -2381,16 +2454,16 @@ octets both parameters emit.</strong> The width of <code class="docutils literal
 came from <code class="docutils literal notranslate"><span class="pre">int.bit_length()</span></code> alone, so every leading zero octet was dropped on
 re-serialisation: a <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> read with <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">20</span></code> rebuilt as <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">6</span></code>,
 a <code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> with <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">12</span></code> as <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">5</span></code>, silently. That width is
-<code class="docutils literal notranslate"><span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">8</span></code> octets [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a>, <span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>], a
+<code class="docutils literal notranslate"><span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">8</span></code> octets [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a>, <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>], a
 property of the Responder’s HIT Suite, so both data models now carry it as
 <code class="docutils literal notranslate"><span class="pre">rhash_len</span></code> and both builders prefer it; a new <code class="docutils literal notranslate"><span class="pre">rhash_len=</span></code> keyword states it for
 a build from scratch, which under HIPv2 is the only place it can come from, since
-<code class="docutils literal notranslate"><span class="pre">RSA,DSA/SHA-256</span></code> is the REQUIRED HIT Suite [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.10"><strong>RFC 7401 Section 5.2.10</strong></a>] and
+<code class="docutils literal notranslate"><span class="pre">RSA,DSA/SHA-256</span></code> is the REQUIRED HIT Suite [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.10"><strong>RFC 7401 Section 5.2.10</strong></a>] and
 makes the field 32 octets rather than 8. On the mandatory path about one parameter
 in 256 has a zero top octet and lost it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/653">#653</a>). <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code>’s second
 contents octet is <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>, “zero when sent, ignored when received”
-[<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically], not the
-<code class="docutils literal notranslate"><span class="pre">Lifetime</span></code> that only <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines, which pcapkit encoded
+[<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a>, and <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> identically], not the
+<code class="docutils literal notranslate"><span class="pre">Lifetime</span></code> that only <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.4"><strong>RFC 7401 Section 5.2.4</strong></a> defines, which pcapkit encoded
 there as <code class="docutils literal notranslate"><span class="pre">2^(value</span> <span class="pre">-</span> <span class="pre">32)</span></code> seconds. It wrote <code class="docutils literal notranslate"><span class="pre">0x20</span></code>, <code class="docutils literal notranslate"><span class="pre">0x21</span></code>, <code class="docutils literal notranslate"><span class="pre">0x25</span></code> or
 <code class="docutils literal notranslate"><span class="pre">0x2b</span></code> into a field the RFC requires to be zero, and could not write that zero:
 a conformant <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> with <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> <code class="docutils literal notranslate"><span class="pre">0x00</span></code> parsed to <code class="docutils literal notranslate"><span class="pre">timedelta(0)</span></code> and
@@ -2398,7 +2471,7 @@ could not be re-serialised, escaping a bare <code class="docutils literal notran
 that was not a <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a>. The field is renamed <code class="docutils literal notranslate"><span class="pre">reserved</span></code>, defaults to zero,
 and is carried verbatim across a round trip (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/654">#654</a>). And neither builder
 read its own <code class="docutils literal notranslate"><span class="pre">version</span></code> keyword, so <code class="docutils literal notranslate"><span class="pre">version=1</span></code> and <code class="docutils literal notranslate"><span class="pre">version=2</span></code> computed
-identical lengths, where <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.4"><strong>RFC 5201 Section 5.2.4</strong></a> and <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a>
+identical lengths, where <span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.4"><strong>RFC 5201 Section 5.2.4</strong></a> and <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a>
 state both fields as literally 8 bytes and <code class="docutils literal notranslate"><span class="pre">Length</span></code> as literally 12 and 20. Under
 HIPv1 each builder accepted only a <code class="docutils literal notranslate"><span class="pre">bit_length()</span></code> of 57..64 and built, for
 anything narrower, a parameter this library’s reader rejects – the shape of
@@ -2418,13 +2491,13 @@ fixed together (<a class="extlink-issue reference external" href="https://github
 padding aligned the <em>contents</em> rather than the record. Corrected for <strong>every
 HIP parameter but</strong> <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code>, excluded below. <strong>This changes the octets those
 parameters write, and the</strong> <code class="docutils literal notranslate"><span class="pre">length</span></code> <strong>their data models report.</strong>
-<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.1"><strong>RFC 7401 Section 5.2.1</strong></a> requires every TLV parameter to have “a length (that
+<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.1"><strong>RFC 7401 Section 5.2.1</strong></a> requires every TLV parameter to have “a length (that
 includes the Type and Length fields), which is a multiple of 8 bytes” and gives
 <code class="docutils literal notranslate"><span class="pre">Total</span> <span class="pre">Length</span> <span class="pre">=</span> <span class="pre">11</span> <span class="pre">+</span> <span class="pre">Length</span> <span class="pre">-</span> <span class="pre">(Length</span> <span class="pre">+</span> <span class="pre">3)</span> <span class="pre">%</span> <span class="pre">8</span></code>; every padding site computed
 <code class="docutils literal notranslate"><span class="pre">(8</span> <span class="pre">-</span> <span class="pre">(Length</span> <span class="pre">%</span> <span class="pre">8))</span> <span class="pre">%</span> <span class="pre">8</span></code>, which aligns the contents alone. For every <code class="docutils literal notranslate"><span class="pre">Length</span></code>
 from 0 to 63 the result was never a multiple of eight and never the RFC’s value,
 erring both ways: at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">4</span></code> (a whole <code class="docutils literal notranslate"><span class="pre">SEQ</span></code>, which
-<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.3.5"><strong>RFC 7401 Section 5.3.5</strong></a> puts on every <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code>) pcapkit appended four octets
+<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.3.5"><strong>RFC 7401 Section 5.3.5</strong></a> puts on every <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code>) pcapkit appended four octets
 that must not be there, and at <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">8</span></code> it appended none and went out four
 short. A conformant peer lands mid-parameter; pcapkit did not, because its reader
 consumed the same wrong count its writer wrote, which is why no round-trip test
@@ -2444,7 +2517,7 @@ both sites. <a class="reference internal" href="../pcapkit/protocols/internet/hi
 octets but not the four <code class="docutils literal notranslate"><span class="pre">reserved</span></code> ones, which cancelled the padding’s four at
 <code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">%</span> <span class="pre">8</span></code> in <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7}</span></code>, so correcting the padding alone would have made
 <code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code> four octets too long at all eight residues. <a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.make" title="pcapkit.protocols.internet.hip.HIP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.make()</span></code></a>’s
-<code class="docutils literal notranslate"><span class="pre">len</span> <span class="pre">=</span> <span class="pre">total_length</span> <span class="pre">//</span> <span class="pre">8</span> <span class="pre">+</span> <span class="pre">4</span></code> is not part of the defect: <span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.1.3"><strong>RFC 7401 Section 5.1.3</strong></a>
+<code class="docutils literal notranslate"><span class="pre">len</span> <span class="pre">=</span> <span class="pre">total_length</span> <span class="pre">//</span> <span class="pre">8</span> <span class="pre">+</span> <span class="pre">4</span></code> is not part of the defect: <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.1.3"><strong>RFC 7401 Section 5.1.3</strong></a>
 defines Header Length in 8-byte units excluding the first 8 bytes, so the floor
 division is exact once each parameter is a multiple of eight. Migration: a <code class="docutils literal notranslate"><span class="pre">SEQ</span></code>
 parameter’s <code class="docutils literal notranslate"><span class="pre">length</span></code> is now 8 where it was 12, and the other parameters move
@@ -2452,7 +2525,7 @@ likewise, so code comparing stored output byte for byte or asserting on
 <code class="docutils literal notranslate"><span class="pre">Data_*Parameter.length</span></code> sees the RFC’s values. <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> is unchanged in both
 respects until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/679">#679</a> (below). <code class="docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> stayed at two for <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code>’s four-octet <code class="docutils literal notranslate"><span class="pre">counter</span></code> where
-<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.3"><strong>RFC 7401 Section 5.2.3</strong></a> requires eight, which this defect had masked, until
+<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.3"><strong>RFC 7401 Section 5.2.3</strong></a> requires eight, which this defect had masked, until
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/672">#672</a> widened <code class="docutils literal notranslate"><span class="pre">counter</span></code> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/679">#679</a> fixed <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code>’s <code class="docutils literal notranslate"><span class="pre">Length</span></code>
 unit, after which <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/689">#689</a> dropped <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> to one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>).</p></li>
 <li><p>HTTP/2 flag defects on each side of a round trip. <strong>This changes the octets
@@ -2461,7 +2534,7 @@ flags.</strong> <code class="docutils literal notranslate"><span class="pre">_ma
 that never read <code class="docutils literal notranslate"><span class="pre">frame.flags</span></code>, so a DATA frame parsed with <code class="docutils literal notranslate"><span class="pre">END_STREAM</span></code> set
 rebuilt with the bit clear (flags octet <code class="docutils literal notranslate"><span class="pre">0x01</span></code> to <code class="docutils literal notranslate"><span class="pre">0x00</span></code>): a well-formed frame
 saying the stream continues where the capture said it ended
-[<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a>]. <code class="docutils literal notranslate"><span class="pre">PADDED</span></code> was re-derived from <code class="docutils literal notranslate"><span class="pre">pad_len</span></code>, and the
+[<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a>]. <code class="docutils literal notranslate"><span class="pre">PADDED</span></code> was re-derived from <code class="docutils literal notranslate"><span class="pre">pad_len</span></code>, and the
 sibling builders already restored theirs, so this was a missing read-back
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/652">#652</a>). Separately, <a class="reference internal" href="../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.post_process" title="pcapkit.protocols.schema.application.httpv2.FrameType.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FrameType.post_process()</span></code></a> seeded its flag
 accumulator with a bare <code class="docutils literal notranslate"><span class="pre">0</span></code>, which <code class="docutils literal notranslate"><span class="pre">|=</span></code> promotes only as a side effect, so a frame
@@ -2572,7 +2645,7 @@ conditional of this shape,
 <a class="reference internal" href="../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption.remainder" title="pcapkit.protocols.schema.internet.ipv4.TSOption.remainder"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TSOption.remainder</span></code></a>
 in <code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/schema/internet/ipv4.py</span></code>, is correct: its <code class="docutils literal notranslate"><span class="pre">else</span> <span class="pre">0</span></code> is
 intentional because <code class="docutils literal notranslate"><span class="pre">ts_data</span></code> consumes the whole option data area in that arm. The
-new tests use non-zero padding rather than the zeros <span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a> tells a
+new tests use non-zero padding rather than the zeros <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.1"><strong>RFC 9113 Section 6.1</strong></a> tells a
 sender to use, so failing to subtract it yields a different byte string. Ships
 labelled breaking: restoring a dropped payload moves the parse output of essentially
 every HTTP/2 capture, and constructed frames change byte-for-byte, from malformed to
@@ -2648,8 +2721,8 @@ move from <code class="docutils literal notranslate"><span class="pre">ProtocolE
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError" title="pcapkit.utilities.exceptions.StreamEOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StreamEOFError</span></code></a>. The <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/683">#683</a> drift <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/685">#685</a> tracks is unchanged
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>).</p></li>
 <li><p>HIP’s <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code>/<code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> parameter packed 12 octets where
-<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.3"><strong>RFC 7401 Section 5.2.3</strong></a> requires 16, and <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> declared its <code class="docutils literal notranslate"><span class="pre">Length</span></code>
-in 4-octet units where <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.1"><strong>RFC 7401 Section 5.2.1</strong></a>’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> is a byte count –
+<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.3"><strong>RFC 7401 Section 5.2.3</strong></a> requires 16, and <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> declared its <code class="docutils literal notranslate"><span class="pre">Length</span></code>
+in 4-octet units where <span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.1"><strong>RFC 7401 Section 5.2.1</strong></a>’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> is a byte count –
 independent defects, fixed together because the evidence for either needed the other
 out of the way. <a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.R1CounterParameter" title="pcapkit.protocols.schema.internet.hip.R1CounterParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">R1CounterParameter</span></code></a>’s
 <code class="docutils literal notranslate"><span class="pre">counter</span></code> was a <a class="reference internal" href="../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a> where the RFC states the width twice, “8
@@ -2658,7 +2731,7 @@ bytes” in the diagram and “a 64-bit unsigned integer” in prose; both versi
 12-octet record at <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">(mod</span> <span class="pre">8)</span></code>. It is a <a class="reference internal" href="../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field" title="pcapkit.corekit.fields.numbers.UInt64Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt64Field</span></code></a> now and the record is
 16 octets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/672">#672</a>).
 <a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.LocatorSetParameter" title="pcapkit.protocols.schema.internet.hip.LocatorSetParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocatorSetParameter</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> was
-<code class="docutils literal notranslate"><span class="pre">sum(Locator.len)</span></code>, in the 4-octet units <span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8046.html#section-4"><strong>RFC 8046 Section 4</strong></a> gives
+<code class="docutils literal notranslate"><span class="pre">sum(Locator.len)</span></code>, in the 4-octet units <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8046.html#section-4"><strong>RFC 8046 Section 4</strong></a> gives
 <code class="docutils literal notranslate"><span class="pre">Locator</span> <span class="pre">Length</span></code>; a set of <em>n</em> plain IPv6 locators declared <code class="docutils literal notranslate"><span class="pre">4n</span></code> octets against
 <code class="docutils literal notranslate"><span class="pre">24n</span></code> present, and <a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack()</span></code></a> handed the nested <a class="reference internal" href="../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> only
 the declared octets, so <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">2</span></code> and <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">5</span></code> parsed one truncated locator and left
@@ -2689,7 +2762,7 @@ those inputs. Each site now raises <a class="reference internal" href="../pcapki
 <code class="docutils literal notranslate"><span class="pre">Raises:</span></code> section documented, and a test pins the invariant (nothing escapes
 <a class="reference internal" href="../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">httpv1.HTTP</span></code></a> that is not a
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>), so any further bare-raising site would fail there. An obs-fold
-continuation line [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-5.2"><strong>RFC 9112 Section 5.2</strong></a>] is legal HTTP/1 and is now unfolded, the
+continuation line [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-5.2"><strong>RFC 9112 Section 5.2</strong></a>] is legal HTTP/1 and is now unfolded, the
 RFC’s remedy, rather than read as a field of its own (with no colon it raised that
 <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>; with one it parsed into a spurious extra field). Reaching the HTTP/2
 arm exposed a payload under nine octets to
@@ -2882,7 +2955,7 @@ the wrong option too: <code class="docutils literal notranslate"><span class="pr
 guard says <code class="docutils literal notranslate"><span class="pre">[epb_queue]</span></code> rather than <code class="docutils literal notranslate"><span class="pre">[epb_packetid]</span></code>. Only message text changes;
 the exception and warning types are unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1038">#1038</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">httpv1.HTTP</span></code></a> refused every HTTP/1
-message with no header fields, which [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a>] allows
+message with no header fields, which [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a>] allows
 (<code class="docutils literal notranslate"><span class="pre">*(</span> <span class="pre">field-line</span> <span class="pre">CRLF</span> <span class="pre">)</span></code>): <code class="docutils literal notranslate"><span class="pre">b'GET</span> <span class="pre">/</span> <span class="pre">HTTP/1.0\r\n\r\n'</span></code> raised
 <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">HTTP:</span> <span class="pre">invalid</span> <span class="pre">format</span></code>, because <code class="docutils literal notranslate"><span class="pre">_read_http_header</span></code> treated a
 header with no CRLF as malformed. So
@@ -2910,7 +2983,7 @@ now writes <code class="docutils literal notranslate"><span class="pre">round(fr
 <code class="docutils literal notranslate"><span class="pre">fraction</span> <span class="pre">/</span> <span class="pre">2**32</span></code> seconds, so <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> keeps sub-second precision
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1093">#1093</a>).</p></li>
 <li><p>HIP parameter defects. <code class="docutils literal notranslate"><span class="pre">HOST_ID</span></code> packed DI-Type and DI-Length as a 4-octet
-<a class="reference internal" href="../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> where <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> section 5.2.9 has one 16-bit word, so every built
+<a class="reference internal" href="../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> where <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> section 5.2.9 has one 16-bit word, so every built
 record carried two surplus octets and read back the wrong algorithm (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1118">#1118</a>);
 with it, <code class="docutils literal notranslate"><span class="pre">make_samples.py</span></code> builds every HIP parameter. <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code> warned at six
 Cipher IDs, which section 5.2.8 allows; it now warns only above six and keeps the
@@ -2959,7 +3032,7 @@ option raised <code class="docutils literal notranslate"><span class="pre">Attri
 as 5, misreading the nonce with a <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> warning (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1091">#1091</a>).
 TCP’s Quick-Start Response reader read one octet past the option, and its maker
 produced a negative rate code below 40 kbps; such a rate now rounds down to zero,
-which <span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> permits (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1119">#1119</a>).</p></li>
+which <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> permits (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1119">#1119</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet" title="pcapkit.protocols.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a>,
 <a class="reference internal" href="../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a> and
 <a class="reference internal" href="../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> packed MAC addresses as ASCII hex text.
@@ -2969,11 +3042,11 @@ which <span class="target" id="index-65"></span><a class="rfc reference external
 the wire for an all-zero address (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1123">#1123</a>). <code class="docutils literal notranslate"><span class="pre">ARP._make_addr_resolve</span></code>,
 <code class="docutils literal notranslate"><span class="pre">PCAPNG._make_mac_addr</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_eui_addr</span></code> did the same; all now decode the hex
 to octets, and <code class="docutils literal notranslate"><span class="pre">from_data</span></code> rebuilds each byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1134">#1134</a>).</p></li>
-<li><p>TCP’s User Timeout maker wrote <code class="docutils literal notranslate"><span class="pre">length=3</span></code> where <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a> and the reader require
+<li><p>TCP’s User Timeout maker wrote <code class="docutils literal notranslate"><span class="pre">length=3</span></code> where <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a> and the reader require
 4, so every option it built failed to parse with <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1120">#1120</a>).</p></li>
 <li><p><strong>a breaking change to</strong> the HTTP/2 frame <code class="docutils literal notranslate"><span class="pre">length</span></code>: it counted the 9-octet frame
-header, where <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> section 4.1 counts the payload alone, so <code class="docutils literal notranslate"><span class="pre">make()</span></code> wrote
+header, where <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> section 4.1 counts the payload alone, so <code class="docutils literal notranslate"><span class="pre">make()</span></code> wrote
 <code class="docutils literal notranslate"><span class="pre">00000e</span></code> for a 5-octet PRIORITY frame and <code class="docutils literal notranslate"><span class="pre">read</span></code> rejected RFC-conformant frames
 – and, since <code class="docutils literal notranslate"><span class="pre">_read_http_priority</span></code> checked for 9, pcapkit’s own PRIORITY frame.
 The length and every per-type check now exclude the header. Captures written to the
@@ -2992,7 +3065,7 @@ so a well-formed frame warned <code class="docutils literal notranslate"><span c
 its fixed 6-octet size, as TCP SACK and SCTP gap-ack items already do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1140">#1140</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> took almost any binary for HTTP/2 on its fall-through:
 nine zero octets read as a DATA frame. The HTTP/2 trial now runs only on a header with
-a type <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> defines, no undefined flag, the reserved bit clear and a stream
+a type <span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> defines, no undefined flag, the reserved bit clear and a stream
 that type is sent on. Over 5,000 fuzzed zero-heavy buffers, HTTP/2 labels fell from
 566 to 101, every one a legal DATA header. Explicit <code class="docutils literal notranslate"><span class="pre">version=2</span></code> parsing is unchanged
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1141">#1141</a>).</p></li>
@@ -3031,7 +3104,7 @@ and fewer than the next layer’s <code class="docutils literal notranslate"><sp
 minimum header (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1173">#1173</a>), and so does the
 <a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> fallback, which hinted 2
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1178">#1178</a>).</p></li>
-<li><p><strong>a breaking change to</strong> <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, against <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> section 3.1.
+<li><p><strong>a breaking change to</strong> <a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, against <span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> section 3.1.
 <a class="reference internal" href="../pcapkit/const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> was inverted; it is now <code class="docutils literal notranslate"><span class="pre">Data</span> <span class="pre">=</span> <span class="pre">0</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Control</span> <span class="pre">=</span> <span class="pre">1</span></code>, regenerated in <a class="reference internal" href="../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> from the fixed
 <a class="reference internal" href="../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> table, so the same bytes parse to the other <code class="docutils literal notranslate"><span class="pre">flags.type</span></code>, and
@@ -3077,7 +3150,7 @@ preceding octet. An SMF_DPD option in the last two octets of a
 padding and raised a bare <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>; it now raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a>, as
 CALIPSO and MPL do. A full read rewinds as before (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1195">#1195</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP()</span></code></a> with no parameters wrote Header
-Length 0, below <span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> section 5.1’s minimum of 4 for the two HITs, so it failed
+Length 0, below <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> section 5.1’s minimum of 4 for the two HITs, so it failed
 to read back with <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>; it now writes 4. <code class="docutils literal notranslate"><span class="pre">read</span></code> names a Header
 Length below 4 in a new <code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">header</span> <span class="pre">length</span></code> message. Lengths 0 to 3 already
 raised <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, so only the message changes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1189">#1189</a>).</p></li>
@@ -3087,7 +3160,7 @@ raised <a class="reference internal" href="../pcapkit/utilities/exceptions.html#
 The test that an option of any type in the last two octets of the header fails
 in-library no longer skips it; test-only (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1771">#1771</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1776">#1776</a>).</p></li>
 <li><p><strong>a breaking change to</strong> the RPL option: it keeps its reserved flag bits on rebuild
-and reads <span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html"><strong>RFC 6553</strong></a> sub-TLVs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1199">#1199</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1201">#1201</a>).</p></li>
+and reads <span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html"><strong>RFC 6553</strong></a> sub-TLVs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1199">#1199</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1201">#1201</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make()</span></code> rejected an enum member name given as <code class="docutils literal notranslate"><span class="pre">str</span></code> unless a namespace was
 passed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1210">#1210</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1227">#1227</a>); raw items in a <code class="docutils literal notranslate"><span class="pre">make()</span></code> list build a packet,
 and <code class="docutils literal notranslate"><span class="pre">str</span></code> member names resolve per argument (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1352">#1352</a>).</p></li>
@@ -3165,7 +3238,7 @@ not an upper-layer header (<a class="extlink-issue reference external" href="htt
 <li><p>IPv4: a Total Length of 0 is read as TSO, and one inside the header as bogus
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1554">#1554</a>).</p></li>
 <li><p>IPv6: a jumbogram’s payload is dissected up to its Jumbo Payload Length
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1434">#1434</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1440">#1440</a>), a jumbogram <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a> calls an error is rejected
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1434">#1434</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1440">#1440</a>), a jumbogram <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a> calls an error is rejected
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1713">#1713</a>), and so is a header whose Version is not 6
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1680">#1680</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1723">#1723</a>).</p></li>
 <li><p>the warnings of a next layer replaced by <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> are
@@ -3179,7 +3252,7 @@ declare, so HIP and MH options that hold one round-trip (<a class="extlink-issue
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/480">#480</a>).</p></li>
 <li><p>a Mobility Header CGA extension reports its length with its 4-octet header, where
 every parsed one read 2 octets short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/512">#512</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/517">#517</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/528">#528</a>).</p></li>
-<li><p>TCP’s SACK option enforces the <code class="docutils literal notranslate"><span class="pre">8n</span> <span class="pre">+</span> <span class="pre">2</span></code> length <span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a> gives it, as its
+<li><p>TCP’s SACK option enforces the <code class="docutils literal notranslate"><span class="pre">8n</span> <span class="pre">+</span> <span class="pre">2</span></code> length <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a> gives it, as its
 docstring promised (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/519">#519</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/535">#535</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">IPv4.from_data()</span></code> rebuilds a parsed datagram: <a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack()</span></code></a> checks a payload
 against <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, and option padding ends in an <code class="docutils literal notranslate"><span class="pre">EOOL</span></code> option rather
@@ -3187,7 +3260,7 @@ than a bare wire code (<a class="extlink-issue reference external" href="https:/
 <li><p>IPv4’s SEC option sets the termination bit its own reader requires, sizes the
 bitmap from the bit count, and SID is 16 bits wide (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/534">#534</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/537">#537</a>,
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/543">#543</a>).</p></li>
-<li><p>the MPTCP option header reads <code class="docutils literal notranslate"><span class="pre">length</span></code> from bit 8, per <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html#section-3"><strong>RFC 8684 Section 3</strong></a>,
+<li><p>the MPTCP option header reads <code class="docutils literal notranslate"><span class="pre">length</span></code> from bit 8, per <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html#section-3"><strong>RFC 8684 Section 3</strong></a>,
 rather than bit 1 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/553">#553</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/558">#558</a>).</p></li>
 <li><p>Mobility Header enumerations defined inline from their RFCs
 (<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code></a>, <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code></a>,
@@ -3268,13 +3341,185 @@ defaults to 0, which the PCAP-NG specification reads as no limit, where its defa
 <code class="docutils literal notranslate"><span class="pre">info</span></code> disagreed with the octets. A block made without <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> writes 0 there,
 and a <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> outside <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code> raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> where it
 was truncated silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2278">#2278</a>).</p></li>
+<li><p>HIP parameters read and rebuilt against the wrong definition. <code class="docutils literal notranslate"><span class="pre">TRANSACTION_ID</span></code>
+and <code class="docutils literal notranslate"><span class="pre">OVERLAY_ID</span></code> keep the identifier’s wire width on rebuild, through a new
+<code class="docutils literal notranslate"><span class="pre">id_len</span></code> field, where the length was sized from the integer’s own <code class="docutils literal notranslate"><span class="pre">bit_length</span></code>
+and the leading zero octets were lost (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2271">#2271</a>); the <code class="docutils literal notranslate"><span class="pre">HIP_TRANSFORM</span></code> maker
+raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for the HIPv2 parameter its own reader already
+rejects (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2275">#2275</a>); <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code>’s maker derives the locator <code class="docutils literal notranslate"><span class="pre">type</span></code> from
+whether <code class="docutils literal notranslate"><span class="pre">spi</span></code> was given, where an <code class="docutils literal notranslate"><span class="pre">spi=</span></code> locator was left at type 0, a
+combination the locator selector itself rejects, and an explicit <code class="docutils literal notranslate"><span class="pre">type</span></code> that
+disagrees raises naming both values (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2276">#2276</a>); <code class="docutils literal notranslate"><span class="pre">REG_INFO</span></code>,
+<code class="docutils literal notranslate"><span class="pre">REG_REQUEST</span></code> and <code class="docutils literal notranslate"><span class="pre">REG_RESPONSE</span></code> lifetimes decode as the
+<code class="docutils literal notranslate"><span class="pre">2**((v-64)/8)</span></code> seconds <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html#section-4.1"><strong>RFC 8003 Section 4.1</strong></a> defines, with a zero octet its
+own case, where the octet was read as raw seconds, and their makers take either a
+duration or the raw exponent (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2281">#2281</a>); <code class="docutils literal notranslate"><span class="pre">OVERLAY_TTL</span></code>’s <code class="docutils literal notranslate"><span class="pre">ttl</span></code> is the hop
+count <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6079.html"><strong>RFC 6079</strong></a> defines rather than a <code class="docutils literal notranslate"><span class="pre">timedelta</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2282">#2282</a>); and
+<code class="docutils literal notranslate"><span class="pre">CERT</span></code>’s <code class="docutils literal notranslate"><span class="pre">cert_group</span></code> is a plain <code class="docutils literal notranslate"><span class="pre">int</span></code>, since <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8002.html#section-2"><strong>RFC 8002 Section 2</strong></a> defines
+no registry for it, where it was decoded through the DH Group registry
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2283">#2283</a>). <code class="docutils literal notranslate"><span class="pre">HOST_ID</span></code>’s maker prefixes its errors in the house
+<code class="docutils literal notranslate"><span class="pre">HIPv{version}:</span> <span class="pre">[ParamNo</span> <span class="pre">{code}]</span></code> form (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2299">#2299</a>). The data-model and
+signature changes are breaking (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2400">#2400</a>).</p></li>
+<li><p>TCP’s Multipath TCP options: an unknown subtype sizes its declared <code class="docutils literal notranslate"><span class="pre">length</span></code> from
+what the schema writes, so one built with <code class="docutils literal notranslate"><span class="pre">data=b''</span></code> declares a Length of 3, the
+header octets it always packs, rather than 2 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2272">#2272</a>); and a parsed subtype
+schema no longer carries an <code class="docutils literal notranslate"><span class="pre">option</span></code> attribute it does not declare and no maker
+mirrors – the declared <code class="docutils literal notranslate"><span class="pre">kind</span></code> already holds <code class="docutils literal notranslate"><span class="pre">Multipath_TCP</span></code>, and the octets
+were identical either way (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2293">#2293</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2396">#2396</a>).</p></li>
+<li><p>PCAP-NG’s Decryption Secrets Block maker builds from a <code class="docutils literal notranslate"><span class="pre">bytes</span></code> <code class="docutils literal notranslate"><span class="pre">secrets_data</span></code>,
+its <code class="docutils literal notranslate"><span class="pre">b''</span></code> default included, by reading those octets through the same secrets
+schema the parse side selects, where every secrets type raised because the readers
+expect a parsed schema (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2273">#2273</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2346">#2346</a>).</p></li>
+<li><p>HTTP/2’s <code class="docutils literal notranslate"><span class="pre">make</span></code> defaults <code class="docutils literal notranslate"><span class="pre">frame</span></code> to the frame type’s own constructor rather
+than to a <code class="docutils literal notranslate"><span class="pre">b''</span></code> packed verbatim with Length 0, so <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code>, <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code>, <code class="docutils literal notranslate"><span class="pre">PING</span></code>, <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> and <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> build a frame that
+reads back, where <code class="docutils literal notranslate"><span class="pre">HTTP(type=...,</span> <span class="pre">sid=...)</span></code> raised; an explicit <code class="docutils literal notranslate"><span class="pre">b''</span></code> still
+packs raw, and the default is byte-identical to <code class="docutils literal notranslate"><span class="pre">frame={}</span></code>. <code class="docutils literal notranslate"><span class="pre">settings=None</span></code>
+builds the parameterless SETTINGS frame <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5"><strong>RFC 9113 Section 6.5</strong></a> permits rather
+than raising (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2274">#2274</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2395">#2395</a>).</p></li>
+<li><p>IPv4’s Timestamp option builds from its own default: <code class="docutils literal notranslate"><span class="pre">timestamp=None</span></code> gives a
+Timestamp-only option with <code class="docutils literal notranslate"><span class="pre">counts</span></code> empty slots, where the default raised
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> because the maker took only a list or a dict, and any other
+value is reported with its <code class="docutils literal notranslate"><span class="pre">repr</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2277">#2277</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2347">#2347</a>).</p></li>
+<li><p>a short read raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a> for every size, not only for the sizes
+with a <code class="docutils literal notranslate"><span class="pre">struct</span></code> format code: the <code class="docutils literal notranslate"><span class="pre">int.from_bytes</span></code> path checks the length it
+got, where it returned a smaller integer. <code class="docutils literal notranslate"><span class="pre">quiet</span></code> still returns the partial
+value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2279">#2279</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2349">#2349</a>).</p></li>
+<li><p>the Mobility Header’s LMAA option carries the code its address family requires:
+the code defaults to that family’s own and an explicit one that disagrees raises
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, where <code class="docutils literal notranslate"><span class="pre">address='10.0.0.1'</span></code> packed the IPv6 code anyway
+(<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a>). A captured mismatch still rebuilds byte for byte
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2280">#2280</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2350">#2350</a>).</p></li>
+<li><p>a base class’s <code class="docutils literal notranslate"><span class="pre">make</span></code> keywords stop reaching a subclass whose own <code class="docutils literal notranslate"><span class="pre">make</span></code>
+ignores them. A new <code class="docutils literal notranslate"><span class="pre">ProtocolBase.__own_make_keywords__</span></code> marker, read per class
+like the <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> opt-out, keeps a base’s parameters out of the allowlist
+once a subclass overrides <code class="docutils literal notranslate"><span class="pre">make</span></code>, and
+<a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> sets it, so
+<code class="docutils literal notranslate"><span class="pre">IPv6_Route(len=99)</span></code> is refused where it built the same octets as
+<code class="docutils literal notranslate"><span class="pre">IPv6_Route()</span></code> and a misspelling was steered to the dead keyword
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2358">#2358</a>).</p></li>
+<li><p>TCP’s, UDP’s and SCTP’s <code class="docutils literal notranslate"><span class="pre">make</span></code> raise <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for a <code class="docutils literal notranslate"><span class="pre">bool</span></code> port,
+where <code class="docutils literal notranslate"><span class="pre">UDP(srcport=True)</span></code> packed port 1 and <code class="docutils literal notranslate"><span class="pre">TCP(dstport=False)</span></code> port 0
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2287">#2287</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2359">#2359</a>).</p></li>
+<li><p>SCTP’s Supported Address Types and Missing Mandatory Parameter makers raise
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for a parameter type that is neither a <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> member
+nor an <code class="docutils literal notranslate"><span class="pre">int</span></code>, a <code class="docutils literal notranslate"><span class="pre">bool</span></code> included, where <code class="docutils literal notranslate"><span class="pre">True</span></code> became parameter type 1,
+<code class="docutils literal notranslate"><span class="pre">False</span></code> raised <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>, and a <code class="docutils literal notranslate"><span class="pre">str</span></code> or a <code class="docutils literal notranslate"><span class="pre">float</span></code> was stored
+unchecked (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2288">#2288</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2363">#2363</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Loopback.make</span></code> raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for an address family that is not
+an <code class="docutils literal notranslate"><span class="pre">int</span></code>, from the same check as its range test, where <code class="docutils literal notranslate"><span class="pre">True</span></code> packed family 1,
+<code class="docutils literal notranslate"><span class="pre">'2'</span></code> and <code class="docutils literal notranslate"><span class="pre">None</span></code> raised <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> and <code class="docutils literal notranslate"><span class="pre">2.0</span></code> raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2289">#2289</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2364">#2364</a>).</p></li>
+<li><p>FTP’s <code class="docutils literal notranslate"><span class="pre">make</span></code> raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for a command that is none of <code class="docutils literal notranslate"><span class="pre">str</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bytes</span></code> and <code class="docutils literal notranslate"><span class="pre">bytearray</span></code>, a <code class="docutils literal notranslate"><span class="pre">bool</span></code> included, where its fallback read
+<code class="docutils literal notranslate"><span class="pre">cmmd.value</span></code>, so an <code class="docutils literal notranslate"><span class="pre">int</span></code>, a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or a <code class="docutils literal notranslate"><span class="pre">float</span></code> raised a bare
+<code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> while any object that happened to carry a <code class="docutils literal notranslate"><span class="pre">.value</span></code> was
+accepted unchecked. A <code class="docutils literal notranslate"><span class="pre">bytearray</span></code> builds as <code class="docutils literal notranslate"><span class="pre">bytes</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2290">#2290</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2365">#2365</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_make_pack</span></code>, and <code class="docutils literal notranslate"><span class="pre">_make_index</span></code> packing through it, raise <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>
+for a size with no <code class="docutils literal notranslate"><span class="pre">struct</span></code> format code, as the <code class="docutils literal notranslate"><span class="pre">struct</span></code> path does, where a
+value out of range, a non-integer or a bad size leaked <code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> or <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2291">#2291</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2367">#2367</a>).</p></li>
+<li><p>a binary read at the end of the stream raises <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>, as an unpack
+does, where an exhausted or short stream raised <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> out of <code class="docutils literal notranslate"><span class="pre">ord()</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2292">#2292</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2368">#2368</a>).</p></li>
+<li><p>IPv4’s SEC option warns about the bit it observed: the field termination indicator
+<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1108.html"><strong>RFC 1108</strong></a> puts in the final protection authority octet is reported as set, with
+its value, where the message said the indicator was not set (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2295">#2295</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2372">#2372</a>).</p></li>
+<li><p>a maker that refuses a caller’s argument names the argument and quotes the value,
+rather than reusing the reader’s <code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">format</span></code> text, which says nothing about
+which argument was wrong: SCTP’s chunk-flag, empty-data, hostname-termination and
+reserved-length guards, the Mobility Header’s data-type, option-length,
+empty-data and Pad1 guards, TCP’s <code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code> optional-field guard, and HIP’s
+and PCAP-NG’s fallback branches (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2296">#2296</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2405">#2405</a>), then HOPOPT’s and
+IPv6-Opts’ Pad1 warning and HTTP/2’s and PCAP-NG’s <code class="docutils literal notranslate"><span class="pre">make</span></code> dispatchers
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2406">#2406</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2407">#2407</a>). The readers still say <code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">format</span></code>, which is
+what a parse found.</p></li>
+<li><p>ESP’s errors read in the house <code class="docutils literal notranslate"><span class="pre">ESP:</span> <span class="pre">&lt;description&gt;:</span> <span class="pre">...</span> <span class="pre">{value!r}</span></code> form: the
+messages raised by the cipher and integrity lookups, by
+<a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.SecurityAssociation" title="pcapkit.protocols.internet.esp.SecurityAssociation"><code class="xref py py-class docutils literal notranslate"><span class="pre">esp.SecurityAssociation</span></code></a>’s SPI, destination, AEAD, ICV, key-splitting,
+decryption and encryption checks, by the context registrar and by <code class="docutils literal notranslate"><span class="pre">make</span></code> all
+carry the prefix and quote the offending value, where none carried an <code class="docutils literal notranslate"><span class="pre">ESP:</span></code>
+prefix and most printed the value bare (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2297">#2297</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2366">#2366</a>).</p></li>
+<li><p>HTTP’s version, data, start-line and settings errors carry the <code class="docutils literal notranslate"><span class="pre">HTTP:</span></code> prefix
+and the rejected value, as in <code class="docutils literal notranslate"><span class="pre">HTTP:</span> <span class="pre">invalid</span> <span class="pre">version:</span> <span class="pre">3</span></code> and
+<code class="docutils literal notranslate"><span class="pre">HTTP/2:</span> <span class="pre">[Type</span> <span class="pre">4]</span> <span class="pre">invalid</span> <span class="pre">settings:</span> <span class="pre">42</span></code>, where the prefixes were missing or
+malformed, some were capitalised with a full stop, and some left the value out
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2298">#2298</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2373">#2373</a>).</p></li>
+<li><p>the capture guards read in that form too. The guards that reject a file’s magic
+number or byte order carry the <code class="docutils literal notranslate"><span class="pre">PCAP:</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAP-NG:</span></code> prefixes, and PCAP’s
+magic-number guard says what it read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2300">#2300</a>); and PCAP-NG’s option guards
+drop their trailing full stop, with the block-placement guard naming the block
+type through the <code class="docutils literal notranslate"><span class="pre">BlockType</span></code> registry rather than printing the raw number
+<code class="docutils literal notranslate"><span class="pre">_type</span></code> holds while a block is being made (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2301">#2301</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2398">#2398</a>).</p></li>
+<li><p><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>’s version gate reads
+<code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">version:</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">6,</span> <span class="pre">not</span> <span class="pre">{version!r}</span></code>, in the house form and quoting the
+rejected value, where its bespoke tail read <code class="docutils literal notranslate"><span class="pre">only</span> <span class="pre">valid</span> <span class="pre">for</span> <span class="pre">IPv6,</span> <span class="pre">got</span> <span class="pre">version=4</span></code>
+– naming the version it requires in prose rather than as the number it compares
+against (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2302">#2302</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2397">#2397</a>).</p></li>
+<li><p>a trial parse kept as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> because it raised
+no longer replays its warnings: the holding context honours its <code class="docutils literal notranslate"><span class="pre">discard</span></code> on an
+exception exit too, and the next-layer reader discards a raising trial’s warnings
+under <code class="docutils literal notranslate"><span class="pre">beholder</span></code>, so an Ethernet frame cut inside its IPv4 header stops warning
+<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> for a layer it does not have. Outside <code class="docutils literal notranslate"><span class="pre">beholder</span></code> the error
+reaches the caller and the warnings are still reported, and the Raw’s error names
+the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2339">#2339</a>).</p></li>
+<li><p>the declarations that described a value the code never produces now match it, so
+a type checker and the rendered API agree with what is stored: CALIPSO’s
+<code class="docutils literal notranslate"><span class="pre">cmpt_bitmap</span></code> is the tuple of ints its reader stores, the SMF hash-based DPD
+option declares its own schema rather than its sibling’s, an <code class="docutils literal notranslate"><span class="pre">RR</span></code> or <code class="docutils literal notranslate"><span class="pre">SSR</span></code>
+<code class="docutils literal notranslate"><span class="pre">route</span></code> that is always built is not <code class="docutils literal notranslate"><span class="pre">Optional</span></code>, <code class="docutils literal notranslate"><span class="pre">NoPayload</span></code> narrows
+<code class="docutils literal notranslate"><span class="pre">protochain</span></code> to <code class="docutils literal notranslate"><span class="pre">None</span></code>, ARP’s address maker admits the <code class="docutils literal notranslate"><span class="pre">bytearray</span></code> its body
+handles, and the PCAP-NG flags stub and an undeclared <code class="docutils literal notranslate"><span class="pre">entry_raw</span></code> follow. HIP’s
+<code class="docutils literal notranslate"><span class="pre">OverlayTTLParameter</span></code> and <code class="docutils literal notranslate"><span class="pre">ViaRVSParameter</span></code> join their modules’ <code class="docutils literal notranslate"><span class="pre">__all__</span></code>
+and the package re-exports those lists require. Parsing and rebuilding are
+unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2317">#2317</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2377">#2377</a>).</p></li>
+<li><p>HIP’s <code class="docutils literal notranslate"><span class="pre">parameters=[(code,</span> <span class="pre">data)]</span></code> form rebuilds a parsed parameter through its
+maker positionally, so the parameters whose maker keyword is spelled differently
+from the data model’s own field name – <code class="docutils literal notranslate"><span class="pre">suite_id</span></code> against <code class="docutils literal notranslate"><span class="pre">suites</span></code>,
+<code class="docutils literal notranslate"><span class="pre">group_id</span></code> against <code class="docutils literal notranslate"><span class="pre">group</span></code>, <code class="docutils literal notranslate"><span class="pre">reg_type</span></code> against <code class="docutils literal notranslate"><span class="pre">reg_request</span></code> and its
+siblings, and the nested locator keys – keep their values, where they fell back
+to the maker’s default or raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>: <code class="docutils literal notranslate"><span class="pre">HIP_TRANSFORM</span></code> rebuilt as
+<code class="docutils literal notranslate"><span class="pre">0241000000000000</span></code>, losing its <code class="docutils literal notranslate"><span class="pre">suite_id</span></code>. The dict form, as in
+<code class="docutils literal notranslate"><span class="pre">parameters=[(code,</span> <span class="pre">{'suites':</span> <span class="pre">[...]})]</span></code>, is unchanged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2352">#2352</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2383">#2383</a>).</p></li>
+<li><p>PCAP-NG settles the byte order before a block maker runs, the way <code class="docutils literal notranslate"><span class="pre">pack</span></code> does –
+the section’s, else the one the packet data declares, else the host’s – so an
+option or a record handed over as raw <code class="docutils literal notranslate"><span class="pre">bytes</span></code>, whose type code is read back out
+of those octets, builds in any block rather than raising
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'PCAPNG'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'_byte'</span></code>. A Section Header
+Block still overrides it from its own Byte-Order Magic, and <code class="docutils literal notranslate"><span class="pre">__packet__=None</span></code>
+degrades to no packet data rather than raising <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, as
+<a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack()</span></code></a> already treated it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2353">#2353</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2369">#2369</a>).</p></li>
+<li><p>a PCAP-NG block made from raw <code class="docutils literal notranslate"><span class="pre">bytes</span></code> is read back off the octets <code class="docutils literal notranslate"><span class="pre">pack</span></code> has
+just written, as a reader of the file would, rather than off the schema that
+carries them, so a Decryption Secrets Block built that way parses and rebuilds
+byte for byte, where the read looked for the block’s fields on the schema
+holding the octets and raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>. Octets that are no block
+raise <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError" title="pcapkit.utilities.exceptions.StreamEOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StreamEOFError</span></code></a> or <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2354">#2354</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2370">#2370</a>).</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">str</span></code> enumeration name resolves where the namespace could not be inferred from
+the argument’s own default. HOPOPT’s and IPv6-Opts’ <code class="docutils literal notranslate"><span class="pre">seed_type</span></code> and <code class="docutils literal notranslate"><span class="pre">tid_type</span></code>
+and HTTP/1’s <code class="docutils literal notranslate"><span class="pre">status</span></code> default to <code class="docutils literal notranslate"><span class="pre">None</span></code>, so a name such as
+<code class="docutils literal notranslate"><span class="pre">'SEEDID_16_BIT_UNSIGNED_INTEGER'</span></code> raised <code class="docutils literal notranslate"><span class="pre">ProtocolNotImplemented</span></code> while the
+member and <code class="docutils literal notranslate"><span class="pre">int</span></code> forms of the same call worked (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2393">#2393</a>); and
+HIP’s list-argument makers, where the name is an item of a list parameter rather
+than a bare argument, resolve too, with the enumerations they need imported at
+runtime rather than only under <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2401">#2401</a>).</p></li>
+<li><p>a PCAP-NG block made without an explicit timestamp reads its interface’s
+resolution from the same lookup the maker already makes for the scale, so the
+Enhanced Packet Block, the obsolete Packet Block and the Interface Statistics
+Block default their timestamp where they raised <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'_info'</span></code>,
+having no parsed data model to resolve the interface through yet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2362">#2362</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2382">#2382</a>).</p></li>
 </ul>
 </section>
 </section>
 <section id="pcapkit-toolkit">
 <h2>pcapkit.toolkit<a class="headerlink" href="#pcapkit-toolkit" title="Link to this heading">¶</a></h2>
-<section id="id11">
-<h3>Added<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<section id="id12">
+<h3>Added<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">util/pyshark_encap_map.py</span></code>, a generator that regenerates
 <code class="docutils literal notranslate"><span class="pre">ENCAP_TYPE_TO_LINKTYPE</span></code> and <code class="docutils literal notranslate"><span class="pre">FILTER_NAME_TO_LINKTYPE</span></code> in
@@ -3299,8 +3544,8 @@ itself is the <code class="docutils literal notranslate"><span class="pre">IPMB_
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1570">#1570</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1579">#1579</a>).</p></li>
 </ul>
 </section>
-<section id="id12">
-<h3>Fixed<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="id13">
+<h3>Fixed<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>the engine adapters, which were quietly wrong rather than loud. The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>
 toolkit split TCP and IPv4 headers at their fixed struct size instead of their real
@@ -3310,7 +3555,7 @@ offsets unscaled (<a class="extlink-issue reference external" href="https://gith
 loaded its layer registry, so that engine did not dissect at all (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/409">#409</a>), and its
 IPv4 fragment offset reached reassembly unscaled (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/483">#483</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/484">#484</a>). The
 IPv6 adapters disagreed about whether the 8-octet Fragment header belongs to
-<code class="docutils literal notranslate"><span class="pre">ihl</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code>; per <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none, and
+<code class="docutils literal notranslate"><span class="pre">ihl</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code>; per <span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none, and
 they now agree (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/415">#415</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/424">#424</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code>’s <code class="docutils literal notranslate"><span class="pre">IP.src</span></code>/<code class="docutils literal notranslate"><span class="pre">.dst</span></code> are dotted-decimal ASCII text in a
 <code class="docutils literal notranslate"><span class="pre">ctypes.c_char_p</span></code> (per <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> 0.12.0’s <code class="docutils literal notranslate"><span class="pre">ip.py</span></code>), not packed 4-byte values,
@@ -3373,13 +3618,32 @@ match the default engine is reverted (<a class="extlink-pr reference external" h
 such as TCP behind a tunnel or an IPv6 extension header, is documented rather
 than warned about. The pypcapfile engine keeps its warning, once per capture,
 that it leaves TCP over IPv6 out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1513">#1513</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1535">#1535</a>).</p></li>
+<li><p>the pcap-ct, PyPCAP, pypcapfile, pyshark and scapy adapters lead the messages
+below with their engine’s name, read off the engine class’s own
+<code class="docutils literal notranslate"><span class="pre">__engine_name__</span></code> rather than hand-typed, so a rename under
+<code class="docutils literal notranslate"><span class="pre">pcapkit/foundation/engines/</span></code> cannot leave an adapter spelling the old one:
+the pcap-ct and PyPCAP reassembly refusals, pypcapfile’s address errors, its IPv6
+<a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> and its TCP-over-IPv6 warning, pyshark’s boolean-field,
+timestamp and missing-layer messages, and scapy’s import-time warning, which
+quotes the installable name, all read in the house
+<code class="docutils literal notranslate"><span class="pre">&lt;prefix&gt;:</span> <span class="pre">&lt;lowercase</span> <span class="pre">description&gt;:</span> <span class="pre">...</span> <span class="pre">{value!r}</span></code> form. The dpkt adapter and
+the adapters’ <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ModuleNotFound" title="pcapkit.utilities.exceptions.ModuleNotFound"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFound</span></code></a> raises keep the messages they had
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2304">#2304</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2399">#2399</a>).</p></li>
+<li><p>the IPv4 and IPv6 reassembly adapters take the first layer of that IP version,
+from the outside in, that is actually a fragment – IPv4 with MF set or a non-zero
+offset, IPv6 with a Fragment header – so a fragmented inner datagram in an
+IP-in-IP tunnel is reassembled on its own header, where it was reassembled whole
+under the tunnel’s header, or dropped when the tunnel set DF or carried no
+Fragment header of its own. With no fragmented layer they take the outermost, as
+before. Applied to the default engine’s PCAP and PCAP-NG adapters and to the
+scapy and dpkt ones, which picked the outermost too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2307">#2307</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2338">#2338</a>).</p></li>
 </ul>
 </section>
 </section>
 <section id="pcapkit-utilities">
 <h2>pcapkit.utilities<a class="headerlink" href="#pcapkit-utilities" title="Link to this heading">¶</a></h2>
-<section id="id13">
-<h3>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<section id="id14">
+<h3>Added<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../pcapkit/utilities/logging.html#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> as a real interface: <code class="docutils literal notranslate"><span class="pre">get_logger()</span></code> for per-module
 children, <code class="docutils literal notranslate"><span class="pre">configure()</span></code> to set level, handler, stream, format or propagation at
@@ -3400,8 +3664,8 @@ a limit. The homes these limits had in the prereleases keep no re-export
 capture-timestamp entry under <a class="reference internal" href="../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2111">#2111</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2136">#2136</a>).</p></li>
 </ul>
 </section>
-<section id="id14">
-<h3>Changed<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<section id="id15">
+<h3>Changed<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> no longer configures logging at import. It installs a <code class="docutils literal notranslate"><span class="pre">NullHandler</span></code>
 and sets no level, so verbosity is inherited from the application instead of being
@@ -3427,8 +3691,8 @@ standard library has them: their fallbacks for interpreters below 3.8 are remove
 with that floor (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2053">#2053</a>).</p></li>
 </ul>
 </section>
-<section id="id15">
-<h3>Fixed<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id16">
+<h3>Fixed<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>further gaps the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/514">#514</a> keyword audit turned up, none covered by a test:
 <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError" title="pcapkit.utilities.exceptions.StreamEOFError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StreamEOFError</span></code></a>’s docstring did not say that <code class="docutils literal notranslate"><span class="pre">&#64;prepare</span></code> always raises it with
@@ -3459,8 +3723,8 @@ attributing the warning to <code class="docutils literal notranslate"><span clas
 </section>
 <section id="pcapkit-vendor">
 <h2>pcapkit.vendor<a class="headerlink" href="#pcapkit-vendor" title="Link to this heading">¶</a></h2>
-<section id="id16">
-<h3>Fixed<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<section id="id17">
+<h3>Fixed<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">re.sub</span></code> sites under <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/</span></code> passed <code class="docutils literal notranslate"><span class="pre">re.MULTILINE</span></code> as the
 fourth <em>positional</em> argument, which is <code class="docutils literal notranslate"><span class="pre">count</span></code>, not <code class="docutils literal notranslate"><span class="pre">flags</span></code>: substitution capped
@@ -3538,13 +3802,13 @@ scope: an untested <code class="docutils literal notranslate"><span class="pre">
 and the semantically identical unindented form of the same <code class="docutils literal notranslate"><span class="pre">else:</span></code>. Closes <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/875">#875</a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/876">#876</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> tracked the Mozilla NSS
 key-log wiki, but <code class="docutils literal notranslate"><span class="pre">draft-ietf-opsawg-pcapng-06</span></code> section 4.7 now points at
-<code class="docutils literal notranslate"><span class="pre">[I-D.ietf-tls-keylogfile]</span></code> (draft-05), published as <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>, “The SSLKEYLOGFILE
+<code class="docutils literal notranslate"><span class="pre">[I-D.ietf-tls-keylogfile]</span></code> (draft-05), published as <span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>, “The SSLKEYLOGFILE
 Format for TLS”, whose section 4.2 creates the IANA “TLS SSLKEYLOGFILE Labels”
 registry. Against it, <a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> was
-missing <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> and <code class="docutils literal notranslate"><span class="pre">ECH_CONFIG</span></code> (<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a> sections 2.3 and 4.2), so
+missing <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> and <code class="docutils literal notranslate"><span class="pre">ECH_CONFIG</span></code> (<span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a> sections 2.3 and 4.2), so
 <code class="docutils literal notranslate"><span class="pre">TLSKeyLabel('ECH_SECRET')</span></code> raised <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on a legitimate Decryption Secrets
 Block; both are added, <code class="docutils literal notranslate"><span class="pre">ECH_SECRET</span></code> keeping the file’s <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">nosec</span> <span class="pre">B105</span></code> bandit
-convention for <code class="docutils literal notranslate"><span class="pre">*_SECRET</span></code> members. <code class="docutils literal notranslate"><span class="pre">RSA</span></code> has no row in <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>’s registry (it
+convention for <code class="docutils literal notranslate"><span class="pre">*_SECRET</span></code> members. <code class="docutils literal notranslate"><span class="pre">RSA</span></code> has no row in <span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>’s registry (it
 is an NSS-only label the NSS wiki records as removed in NSS 3.34) and is kept, since
 removing a public member is breaking, with a docstring comment marking it the
 historical exception. <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/pcapng/secrets_type.py</span></code>’s stale
@@ -3583,13 +3847,18 @@ escaped, and a hyphenated word is no longer split across lines (<a class="extlin
 exit 1 with one line naming the missing packages and <code class="docutils literal notranslate"><span class="pre">pypcapkit[vendor]</span></code>, where
 they died with a traceback, and <code class="docutils literal notranslate"><span class="pre">--help</span></code> and <code class="docutils literal notranslate"><span class="pre">--version</span></code> still work. Importing a
 crawler then raises <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1850">#1850</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1875">#1875</a>).</p></li>
+<li><p>the ESP cipher and integrity crawlers strip the brackets off IANA’s
+<code class="docutils literal notranslate"><span class="pre">[UNSPECIFIED]</span></code> “no document” cell before testing it against the unknown
+placeholder, so <a class="reference internal" href="../pcapkit/const/esp.html#module-pcapkit.const.esp.integrity" title="pcapkit.const.esp.integrity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.esp.integrity</span></code></a> no longer reads
+<code class="docutils literal notranslate"><span class="pre">#:</span> <span class="pre">AUTH_DES_MAC</span> <span class="pre">[UNSPECIFIED]</span> <span class="pre">(DEPRECATED</span> <span class="pre">...)</span></code> for <code class="docutils literal notranslate"><span class="pre">AUTH_DES_MAC</span></code> and
+<code class="docutils literal notranslate"><span class="pre">AUTH_KPDK_MD5</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2294">#2294</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2371">#2371</a>).</p></li>
 </ul>
 </section>
 </section>
 <section id="project-infrastructure">
 <h2>Project infrastructure<a class="headerlink" href="#project-infrastructure" title="Link to this heading">¶</a></h2>
-<section id="id17">
-<h3>Added<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<section id="id18">
+<h3>Added<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>an end-to-end test tier (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/376">#376</a>), sample-capture generators so a fresh clone can
 rebuild every fixture (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/340">#340</a>), a Dockerised engine benchmark covering every
@@ -3660,8 +3929,8 @@ release names that remedy when Anaconda files are what is missing (<a class="ext
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2151">#2151</a>).</p></li>
 </ul>
 </section>
-<section id="id18">
-<h3>Changed<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<section id="id19">
+<h3>Changed<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">requires-python</span></code>: it is <code class="docutils literal notranslate"><span class="pre">&gt;=3.8</span></code>, so pip refuses an
 older interpreter at install, as “requires a different Python”. The sources use 3.8
@@ -3831,7 +4100,7 @@ test-only, which may skip <code class="docutils literal notranslate"><span class
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2244">#2244</a>).</p></li>
 <li><p>the prose the post-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> defect wave added or touched, checked against the
 code; no code changes. <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds" title="pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MesgIDOption.seconds</span></code></a> in the Mobility Header schema
-said seconds since 1970 where it holds an <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a> NTP count from 1900;
+said seconds since 1970 where it holds an <span class="target" id="index-87"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a> NTP count from 1900;
 <a class="reference internal" href="../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version()</span></code></a> comments predated the HTTP/2 gate; and the
 <code class="docutils literal notranslate"><span class="pre">_parse_next_layer</span></code> note miscounted the captured octets.
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._open_output" title="pcapkit.foundation.extraction.Extractor._open_output"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor._open_output()</span></code></a> now says only the PCAP engine passes header fields,
@@ -3882,8 +4151,8 @@ confirms the 3.8 floor, bandit reports nothing, and the unused <code class="docu
 comments go, from the vendor templates too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2145">#2145</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2147">#2147</a>).</p></li>
 </ul>
 </section>
-<section id="id19">
-<h3>Fixed<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<section id="id20">
+<h3>Fixed<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>places where a documentation page contradicted the code (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/413">#413</a>),
 ambiguous cross-references and autodoc signature failures (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/416">#416</a>), and
@@ -3896,7 +4165,7 @@ so a reported number could not reach most of the file, and roles on separate sou
 lines were all reported as one line. The
 conversion now carries a source map, so every complaint cites a line of the file the
 message names, one per construct, in the entry’s order (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/588">#588</a>). Rule 2 accepted
-only the bare-number spelling of Sphinx’s <code class="docutils literal notranslate"><span class="pre">:rfc:</span></code> role, so <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a>
+only the bare-number spelling of Sphinx’s <code class="docutils literal notranslate"><span class="pre">:rfc:</span></code> role, so <span class="target" id="index-88"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a>
 fell past it and was reported as a role the rules do not cover; both spellings now
 convert, the anchor carried into the link target and the link text taken from
 Sphinx’s own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/592">#592</a>). Regenerating <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> is byte-identical over
@@ -4042,7 +4311,7 @@ them (<a class="extlink-issue reference external" href="https://github.com/Jarry
 unlisted deliberately, so generic helpers such as <code class="docutils literal notranslate"><span class="pre">warn</span></code> do not arrive through
 <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1136">#1136</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> wrote every HTTP/2 sample frame on stream 0, which
-<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> forbids for <code class="docutils literal notranslate"><span class="pre">DATA</span></code>, <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> and the other stream-level types, so
+<span class="target" id="index-89"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a> forbids for <code class="docutils literal notranslate"><span class="pre">DATA</span></code>, <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> and the other stream-level types, so
 those frames in <code class="docutils literal notranslate"><span class="pre">options-transport.pcap</span></code> decoded as <code class="docutils literal notranslate"><span class="pre">TCP:Raw</span></code>.
 <code class="docutils literal notranslate"><span class="pre">_httpv2_build</span></code> now puts <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code>, <code class="docutils literal notranslate"><span class="pre">PING</span></code> and <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> on stream 0 and every
 other type on stream 1, with <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> promising stream 2, and every HTTP/2
@@ -4128,6 +4397,11 @@ without build isolation, left out <code class="docutils literal notranslate"><sp
 installed package as untyped. Nothing declares the file, and setuptools ships it
 unasked only from 69.0.0, so that is the floor now, in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> and the
 Conda recipe alike (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2062">#2062</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2064">#2064</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/legacy_smoke</span></code>’s <code class="docutils literal notranslate"><span class="pre">test_perf</span></code> benchmarks every engine its support
+table lists, writing each result to <code class="docutils literal notranslate"><span class="pre">../captures/engines/&lt;engine&gt;.txt</span></code> or
+skipping the engine with its reason, where it looked each benchmark up in a table
+that did not cover pypcap, pcap-ct or pypcapfile, so the first of those to pass
+preflight raised <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> and ended the run (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2305">#2305</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2375">#2375</a>).</p></li>
 </ul>
 </section>
 </section>
@@ -4212,33 +4486,34 @@ Conda recipe alike (<a class="extlink-issue reference external" href="https://gi
 </li>
 <li><a class="reference internal" href="#pcapkit-interface">pcapkit.interface</a><ul>
 <li><a class="reference internal" href="#id7">Added</a></li>
+<li><a class="reference internal" href="#id8">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-protocols">pcapkit.protocols</a><ul>
-<li><a class="reference internal" href="#id8">Added</a></li>
-<li><a class="reference internal" href="#id9">Changed</a></li>
-<li><a class="reference internal" href="#id10">Fixed</a></li>
+<li><a class="reference internal" href="#id9">Added</a></li>
+<li><a class="reference internal" href="#id10">Changed</a></li>
+<li><a class="reference internal" href="#id11">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-toolkit">pcapkit.toolkit</a><ul>
-<li><a class="reference internal" href="#id11">Added</a></li>
-<li><a class="reference internal" href="#id12">Fixed</a></li>
+<li><a class="reference internal" href="#id12">Added</a></li>
+<li><a class="reference internal" href="#id13">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#pcapkit-utilities">pcapkit.utilities</a><ul>
-<li><a class="reference internal" href="#id13">Added</a></li>
-<li><a class="reference internal" href="#id14">Changed</a></li>
-<li><a class="reference internal" href="#id15">Fixed</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit-vendor">pcapkit.vendor</a><ul>
+<li><a class="reference internal" href="#id14">Added</a></li>
+<li><a class="reference internal" href="#id15">Changed</a></li>
 <li><a class="reference internal" href="#id16">Fixed</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#pcapkit-vendor">pcapkit.vendor</a><ul>
+<li><a class="reference internal" href="#id17">Fixed</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#project-infrastructure">Project infrastructure</a><ul>
-<li><a class="reference internal" href="#id17">Added</a></li>
-<li><a class="reference internal" href="#id18">Changed</a></li>
-<li><a class="reference internal" href="#id19">Fixed</a></li>
+<li><a class="reference internal" href="#id18">Added</a></li>
+<li><a class="reference internal" href="#id19">Changed</a></li>
+<li><a class="reference internal" href="#id20">Fixed</a></li>
 </ul>
 </li>
 </ul>

@@ -717,7 +717,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the values are neither a request's nor a</span>
-<span class="sd">                response's, or if ``raw_line`` or a ``raw_header`` entry that</span>
+<span class="sd">                response's, if they are a request's and ``uri`` is</span>
+<span class="sd">                :obj:`None`, or if ``raw_line`` or a ``raw_header`` entry that</span>
 <span class="sd">                reads back as the given values carries a CR or LF that the</span>
 <span class="sd">                values do not (other than the CRLF of an ``obs-fold``).</span>
 
@@ -822,7 +823,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the values are neither a request's nor a</span>
-<span class="sd">                response's.</span>
+<span class="sd">                response's, or if they are a request's and ``uri`` is</span>
+<span class="sd">                :obj:`None`.</span>
 
 <span class="sd">        """</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">http_version</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">http_version</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">http_version</span>

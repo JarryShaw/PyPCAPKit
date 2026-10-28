@@ -552,9 +552,9 @@
 <span class="sd">       &lt;pcapkit.foundation.reassembly.data.ip.Datagram.conflict&gt;`</span>
 <span class="sd">       (:issue:`477`). An incomplete buffer expires</span>
 <span class="sd">       after ``timeout`` seconds of capture time, 60 by default for both IPv4</span>
-<span class="sd">       and IPv6. A datagram with fragment offset zero and **MF** clear is</span>
-<span class="sd">       reported even when its BUFID is already buffered, rather than dropped</span>
-<span class="sd">       (:issue:`2270`).</span>
+<span class="sd">       and IPv6. A datagram with fragment offset zero and **MF** (**M** in</span>
+<span class="sd">       IPv6) clear is reported even when its BUFID is already buffered,</span>
+<span class="sd">       rather than dropped (:issue:`2270`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -643,8 +643,10 @@
         <span class="c1"># belong to.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">TS</span><span class="p">))</span>
 
-        <span class="c1"># when non-fragmented (possibly discarded) packet received: it is</span>
-        <span class="c1"># reassembled on its own, in a buffer of its own (#2270)</span>
+        <span class="c1"># a datagram with fragment offset zero and MF clear is reported even</span>
+        <span class="c1"># when its BUFID is already buffered, rather than dropped: isolated</span>
+        <span class="c1"># from that buffer (IPv6 atomic fragments) or after flushing it first</span>
+        <span class="c1"># (IPv4) (#2270)</span>
         <span class="n">isolated</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__isolate_atomic__</span><span class="p">:</span>

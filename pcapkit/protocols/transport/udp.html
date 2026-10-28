@@ -661,6 +661,10 @@ written as is and not counted in a computed <code class="docutils literal notran
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet data.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">srcport</span></code> or <code class="docutils literal notranslate"><span class="pre">dstport</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>
+    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2287">#2287</a>).</p>
+</dd>
 </dl>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>An out-of-range <code class="docutils literal notranslate"><span class="pre">srcport</span></code> or <code class="docutils literal notranslate"><span class="pre">dstport</span></code> raises
