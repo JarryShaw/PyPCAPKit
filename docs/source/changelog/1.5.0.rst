@@ -1303,7 +1303,7 @@ Added
 * ``tests/protocols/test_dispatch_reachability_unit.py``, the coverage :issue:`548`
   asked for: every :class:`.ProtocolBase` descendant whose ``__index__`` returns an enum
   member must be reachable under that code in the registry its enum *type*
-  designates, read from the same ``_CODE_DESTINATIONS`` table backing ``code=`` so
+  designates, read from the same ``__proto_dest__`` declaration backing ``code=`` so
   the two cannot drift. It walks the classes rather than the registry entries, so it
   catches a class nothing registered, the shape in which
   :class:`~pcapkit.protocols.application.ospf.OSPF` once shipped (:issue:`548`).

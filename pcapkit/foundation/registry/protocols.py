@@ -88,7 +88,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.sctp.payload_protocol_identifier import \
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
-    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
@@ -405,25 +404,6 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
             _CODE_LEASES[target] = lease
 
 
-#: Destination classes for each enum type a ``code=`` key can carry.
-#:
-#: Maps an enum type to the class(es) owning the
-#: :attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>`
-#: dispatch registry keyed by that enum type -- the "registry-of-registries" that
-#: lets ``code=`` infer a destination from a key's own type, per :issue:`514`. It
-#: is the same targeting :func:`register_ethertype`, :func:`register_transtype`,
-#: :func:`register_linktype` and :func:`register_sctp` hard-code by hand, in one
-#: table so :func:`register_protocol_code` can consult it. :class:`~pcapkit.const.reg.linktype.LinkType` naming
-#: more than one class is deliberate, not ambiguous -- :func:`register_linktype`
-#: already fans out to each of them.
-_CODE_DESTINATIONS: 'dict[Type[EnumRegistry], tuple[Type[ProtocolBase], ...]]' = {
-    Enum_EtherType: (Link,),
-    Enum_TransType: (Internet,),
-    Enum_PayloadProtocolIdentifier: (SCTP,),
-    Enum_LinkType: (Frame, PCAPNG),
-}
-
-
 def _iter_code_targets(code: 'Any') -> 'Iterator[tuple[Type[ProtocolBase], Any]]':
     """Flatten a ``code=`` argument into ``(destination, key)`` pairs.
 
@@ -445,13 +425,29 @@ linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.
         return
 
     if isinstance(code, (enum.Enum, aenum.Enum)):
-        destinations = _CODE_DESTINATIONS.get(cast('Type[EnumRegistry]', type(code)))
-        if destinations is None:
+        # NOTE: read with ``getattr``, not out of the type's own ``vars()`` as
+        # the ``__proto_key__`` check in ``register_protocol_code`` does. That
+        # read is deliberately non-inheriting because a protocol subclass can
+        # own a registry keyed by something other than its parent's -- Loopback
+        # does. No enum registry can be in that position: declaring a
+        # destination means having members, and aenum refuses to extend an
+        # enumeration with members, so none of these registries has a subclass
+        # and none can gain one. The one enum registry that is subclassed is
+        # AppType, a memberless base partitioned by transport protocol, and its
+        # subclass relationship is irrelevant here only because AppType itself
+        # declares no ``__proto_dest__`` at all -- the inheriting read finds
+        # nothing to inherit, so none of its parts reaches this branch. A
+        # class-level destination would in fact be the wrong model for it:
+        # ``register_apptype`` routes each member to the registry named by that
+        # member's own transport protocol, which one shared destination for the
+        # whole family could not express.
+        destinations = getattr(type(code), '__proto_dest__', None)
+        if not destinations:
             raise RegistryError(
                 f'no destination registry is known for enum type {type(code).__name__!r} '
                 f'(key {code!r}); pass an explicit destination, e.g. code={{SomeClass: {code!r}}}')
-        for destination in destinations:
-            yield destination, code
+        for descriptor in destinations:
+            yield descriptor.klass, code
         return
 
     if isinstance(code, (str, bytes)):
@@ -479,8 +475,9 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
     ``code`` is normalised into a flat sequence of targets, where each item
     is either:
 
-    * an enum member, whose *type* is looked up in a small table mapping
-      enum type to the class(es) owning the matching ``__proto__`` --
+    * an enum member, whose *type* names the class(es) owning the matching
+      ``__proto__`` in its
+      :attr:`__proto_dest__ <pcapkit.const.reg.ethertype.EtherType.__proto_dest__>` --
       :class:`~pcapkit.const.reg.ethertype.EtherType` to
       :class:`~pcapkit.protocols.link.link.Link`,
       :class:`~pcapkit.const.reg.transtype.TransType` to
@@ -527,7 +524,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
     Raises:
         RegistryError: If a bare :class:`int` (or any other non-enum,
             non-mapping value) is given without an explicit destination, or if
-            an enum member's type names no known destination registry --
+            an enum member's type declares no
+            :attr:`__proto_dest__ <pcapkit.const.reg.ethertype.EtherType.__proto_dest__>` --
             inference refuses rather than guesses; or if a key is not of the
             type its destination's registry is keyed by, as its typed registrar
             would reject it, e.g. ``{Frame: TransType.ICMP}``. What a registry is

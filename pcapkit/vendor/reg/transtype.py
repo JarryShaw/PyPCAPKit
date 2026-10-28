@@ -15,6 +15,7 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.vendor.default import Vendor
 
 if TYPE_CHECKING:
@@ -30,6 +31,10 @@ class TransType(Vendor):
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
+
+    #: Destination of a bare ``TransType`` member; see
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.internet.internet', 'Internet'),)
 
     def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.

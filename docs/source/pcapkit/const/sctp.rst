@@ -70,6 +70,7 @@ which is automatically generated from :class:`pcapkit.vendor.sctp.payload_protoc
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __proto_dest__
 
 .. rubric:: Footnotes
 

@@ -30,6 +30,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.linktype.LinkTy
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __proto_dest__
 
 Ethertype IEEE 802 Numbers
 ==========================
@@ -43,6 +44,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.Ether
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __proto_dest__
 
 Transport Layer Protocol Numbers
 ================================
@@ -56,6 +58,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.transtype.Trans
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __proto_dest__
 
 Application Layer Protocol Numbers
 ==================================

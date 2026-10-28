@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 import bs4
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.vendor.default import Vendor
 
 if TYPE_CHECKING:
@@ -33,6 +34,16 @@ class LinkType(Vendor):
     FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
     #: Link to registry.
     LINK = 'http://www.tcpdump.org/linktypes.html'
+
+    #: Destinations of a bare ``LinkType`` member; see
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. Two of them, because a
+    #: link-layer header type keys the next-layer registry of both capture file
+    #: formats, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`
+    #: already registers into both by hand.
+    PROTO_DEST = (
+        ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),
+        ModuleDescriptor('pcapkit.protocols.misc.pcapng', 'PCAPNG'),
+    )
 
     def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records."""
