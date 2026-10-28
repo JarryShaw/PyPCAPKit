@@ -215,6 +215,27 @@ class FTPUnitTests(unittest.TestCase):
         self.assertEqual(ftp.make(cmmd=bytearray(b'user'), args='anon', raw_cmmd=b'user').data,
                          b'user anon\r\n')
 
+    def test_ftp_make_rejects_arguments_that_are_not_str_bytes_or_bytearray(self) -> None:
+        """Arguments of any other type raise ``ProtocolError`` (#2410)."""
+        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        ftp = object.__new__(FTP)
+
+        for args in (42, True, 1.5, memoryview(b'anon'), SimpleNamespace(value=b'anon')):
+            with self.subTest(args=args):
+                with self.assertRaises(ProtocolError) as context:
+                    ftp.make(cmmd='USER', args=args)
+                self.assertEqual(
+                    str(context.exception),
+                    f'FTP: invalid arguments: must be a str, bytes or bytearray, not {args!r}')
+
+        # a bytearray is written verbatim, as bytes are, on a request and a reply
+        self.assertEqual(ftp.make(cmmd='USER', args=bytearray(b'anonymous')).data,
+                         b'USER anonymous\r\n')
+        self.assertEqual(ftp.make(code=230, args=bytearray(b'Logged in')).data,
+                         b'230 Logged in\r\n')
+
     def test_ftp_make_data_preserves_request_and_response_fields(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode
