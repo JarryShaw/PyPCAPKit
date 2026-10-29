@@ -576,7 +576,7 @@
 
 <span class="sd">1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
 <span class="sd">   is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so</span>
-<span class="sd">   :meth:`Internet._lookup_next_layer &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer&gt;`</span>
+<span class="sd">   :meth:`Internet._lookup_next_layer &lt;pcapkit.protocols.protocol.Protocol._lookup_next_layer&gt;`</span>
 <span class="sd">   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That</span>
 <span class="sd">   has no ``next`` field, so the walk in</span>
 <span class="sd">   :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>

@@ -1537,7 +1537,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`</span>
+<span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`</span>
 <span class="sd">            instance.</span>
 
 <span class="sd">        """</span>
@@ -1573,7 +1573,7 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: protocol code</span>
 <span class="sd">            protocol: module descriptor or a</span>
-<span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>

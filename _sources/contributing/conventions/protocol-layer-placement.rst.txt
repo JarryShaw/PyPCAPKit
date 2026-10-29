@@ -191,20 +191,26 @@ Counting the names in each class's own namespace, whether new or overriding
 :class:`~pcapkit.protocols.protocol.ProtocolBase`'s, and including those
 :meth:`ProtocolBase.__init_subclass__ <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`
 sets there, :class:`~pcapkit.protocols.link.link.Link` has ``__data__``, ``__layer__``,
-``__post_init__``, ``__proto__``, ``__schema__``, ``_read_protos``, ``_shipped_proto``,
-``from_data``, ``register`` and ``layer``, and
+``__post_init__``, ``__proto__``, ``__proto_key__``, ``__schema__``, ``_read_protos``,
+``_shipped_proto``, ``from_data``, ``register`` and ``layer``, and
 :class:`~pcapkit.protocols.application.application.Application` has what they share
 (``__data__``, ``__layer__``, ``__post_init__``, ``__schema__``, ``from_data``, ``layer``)
 plus ``__index__``, ``_decode_next_layer`` and ``_import_next_layer``.
 :class:`~pcapkit.protocols.link.link.Link` overrides names that
 :class:`~pcapkit.protocols.application.application.Application` does not -- ``__proto__``,
 ``register``, ``_read_protos`` and ``_shipped_proto``, the last set because
-:class:`~pcapkit.protocols.link.link.Link` defines its own ``__proto__`` -- but each also
-exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so the strict difference
+:class:`~pcapkit.protocols.link.link.Link` defines its own ``__proto__`` -- and each of
+those also exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so each still
+resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. The strict difference
 :class:`~pcapkit.protocols.link.link.Link` minus
 :class:`~pcapkit.protocols.application.application.Application` minus
-:class:`~pcapkit.protocols.protocol.ProtocolBase` is **empty** and every one of them still
-resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. What changes is which
+:class:`~pcapkit.protocols.protocol.ProtocolBase` is ``__proto_key__`` alone
+(:issue:`2343`), which :class:`~pcapkit.protocols.link.link.Link` declares and neither of
+the others does, so it does **not** resolve on
+:class:`~pcapkit.protocols.application.ospf.OSPF`. Nothing turns on that:
+:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` reads the pairing
+out of the registry owner's own namespace rather than off the class, and reads its
+absence as *declares no pairing* rather than as an error. What changes is which
 registry it resolves *to*: ``OSPF.__proto__`` is
 :attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>` rather
 than :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, so OSPF does not

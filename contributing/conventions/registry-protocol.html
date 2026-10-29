@@ -567,7 +567,7 @@ generated registries spell by hand in <code class="docutils literal notranslate"
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Every registry overrides it</strong>, so that <code class="docutils literal notranslate"><span class="pre">register</span></code> refuses what <code class="docutils literal notranslate"><span class="pre">get</span></code> refuses
+<p><strong>Every registry has it overridden</strong>, so that <code class="docutils literal notranslate"><span class="pre">register</span></code> refuses what <code class="docutils literal notranslate"><span class="pre">get</span></code> refuses
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>). Each vendor generator emits the override from the check it already
 writes at the top of <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, with the same message. That is the <code class="docutils literal notranslate"><span class="pre">FLAG</span></code> of most
 crawlers, but a bespoke template’s own range where its <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> checks something

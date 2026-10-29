@@ -521,10 +521,10 @@
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'http://www.tcpdump.org/linktypes.html'</span>
 
     <span class="c1">#: Destinations of a bare ``LinkType`` member; see</span>
-    <span class="c1">#: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. Two of them, because a</span>
-    <span class="c1">#: link-layer header type keys the next-layer registry of both capture file</span>
-    <span class="c1">#: formats, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
-    <span class="c1">#: already registers into both by hand.</span>
+    <span class="c1">#: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. One per capture file</span>
+    <span class="c1">#: format, because a link-layer header type keys the next-layer registry of</span>
+    <span class="c1">#: each, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
+    <span class="c1">#: already registers into every one of them by hand.</span>
     <span class="n">PROTO_DEST</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcap.frame'</span><span class="p">,</span> <span class="s1">'Frame'</span><span class="p">),</span>
         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcapng'</span><span class="p">,</span> <span class="s1">'PCAPNG'</span><span class="p">),</span>

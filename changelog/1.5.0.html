@@ -3863,6 +3863,18 @@ crawler then raises <code class="docutils literal notranslate"><span class="pre"
 placeholder, so <a class="reference internal" href="../pcapkit/const/esp.html#module-pcapkit.const.esp.integrity" title="pcapkit.const.esp.integrity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.esp.integrity</span></code></a> no longer reads
 <code class="docutils literal notranslate"><span class="pre">#:</span> <span class="pre">AUTH_DES_MAC</span> <span class="pre">[UNSPECIFIED]</span> <span class="pre">(DEPRECATED</span> <span class="pre">...)</span></code> for <code class="docutils literal notranslate"><span class="pre">AUTH_DES_MAC</span></code> and
 <code class="docutils literal notranslate"><span class="pre">AUTH_KPDK_MD5</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2294">#2294</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2371">#2371</a>).</p></li>
+<li><p>some dict-based crawlers’ <code class="docutils literal notranslate"><span class="pre">process(self,</span> <span class="pre">data)</span></code> ignored the <code class="docutils literal notranslate"><span class="pre">data</span></code>
+argument and read the module-level <code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal instead, in
+<code class="docutils literal notranslate"><span class="pre">ipv4/{qs_function,tos_del,tos_ecn,tos_pre,tos_rel,tos_thr,ts_flag}.py</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ipv6/{option_action,qs_function,smf_dpd_mode}.py</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mh/{binding_error,lla_code}.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapng/{filter_type,hash_algorithm,secrets_type,verdict_type}.py</span></code>. Harmless
+today, since every real call site passes <code class="docutils literal notranslate"><span class="pre">request()</span></code>’s own
+<code class="docutils literal notranslate"><span class="pre">DATA</span></code>-returning value, so <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">is</span> <span class="pre">DATA</span></code> always held in practice – but a
+caller passing different data, such as a test fixture or a future <code class="docutils literal notranslate"><span class="pre">LINK</span></code>-based
+fetch, got the module’s table back regardless, with no error. The dict-based
+crawlers are hand-written rather than generated, so the fix needs no <code class="docutils literal notranslate"><span class="pre">const/</span></code>
+regeneration (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2429">#2429</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2430">#2430</a>).</p></li>
 </ul>
 </section>
 </section>
