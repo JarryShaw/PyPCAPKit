@@ -56,8 +56,8 @@ logger = get_logger(__name__)
 
 #: contextvars.ContextVar[bool]: Whether a call :func:`beholder` wraps is under
 #: way, so that an :exc:`Exception` raised inside it ends with the layer that
-#: raised replaced; see :meth:`ProtocolBase._parse_next_layer
-#: <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` (:issue:`2308`).
+#: raised replaced; see :meth:`Protocol._parse_next_layer
+#: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` (:issue:`2308`).
 _beholding = contextvars.ContextVar('_beholding', default=False)
 
 
@@ -116,8 +116,8 @@ def beholder(
     :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an
     end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
 
-    When :meth:`ProtocolBase._parse_next_layer
-    <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` held the
+    When :meth:`Protocol._parse_next_layer
+    <pcapkit.protocols.protocol.Protocol._parse_next_layer>` held the
     warnings of the layer that raised, they are dropped with it: they describe a
     layer the result does not have, and the replacement's ``error`` reports the
     failure (:issue:`2308`).
