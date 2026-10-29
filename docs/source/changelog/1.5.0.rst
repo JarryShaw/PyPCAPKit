@@ -1262,6 +1262,17 @@ Fixed
   naming the engine, that they ignore a parsing context supplied through
   :class:`.Extractor`'s ``context=``, as the dpkt, scapy and pyshark engines already
   did, where they dropped it silently (:issue:`2313`, :pr:`2332`).
+* :class:`~pcapkit.foundation.reassembly.data.data.Deferred` could not be pickled
+  under protocol 0 or 1 -- a slotted class with no ``__getstate__`` raises
+  :exc:`TypeError` there, independent of the ``analyze``/``proto`` regression
+  :issue:`2417` fixed. It now defines ``__getstate__`` and ``__setstate__``,
+  mirroring the ``(dict_or_None, slots)`` pair Python's own default slotted-class
+  reduction already used for every released build, so a ``Deferred`` pickled by
+  one of those still unpickles. The slot names come from ``copyreg._slotnames``
+  rather than a hand-rolled walk of ``type(self).__mro__``, which would otherwise
+  shadow a base class's slots under a subclass declaring its own, miscount a
+  bare-string ``__slots__ = 'name'``, or read a private, name-mangled slot under
+  its unmangled spelling (:issue:`2423`, :issue:`2425`, :pr:`2424`).
 
 pcapkit.interface
 -----------------
