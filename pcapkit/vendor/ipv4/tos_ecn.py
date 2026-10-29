@@ -85,7 +85,7 @@ class ToSECN(Vendor):
         miss = [
             "return cls._unregistered_member(value, 'Unassigned')",
         ]
-        for code, name in DATA.items():
+        for code, name in data.items():
             renm = self.rename(name, code)
             enum.append(f"{renm} = 0b{bin(code)[2:].zfill(2)}".ljust(76))
         return enum, miss

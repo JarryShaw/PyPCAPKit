@@ -3350,6 +3350,18 @@ Fixed
   placeholder, so :mod:`pcapkit.const.esp.integrity` no longer reads
   ``#: AUTH_DES_MAC [UNSPECIFIED] (DEPRECATED ...)`` for ``AUTH_DES_MAC`` and
   ``AUTH_KPDK_MD5`` (:issue:`2294`, :pr:`2371`).
+* some dict-based crawlers' ``process(self, data)`` ignored the ``data``
+  argument and read the module-level ``DATA`` literal instead, in
+  ``ipv4/{qs_function,tos_del,tos_ecn,tos_pre,tos_rel,tos_thr,ts_flag}.py``,
+  ``ipv6/{option_action,qs_function,smf_dpd_mode}.py``,
+  ``mh/{binding_error,lla_code}.py`` and
+  ``pcapng/{filter_type,hash_algorithm,secrets_type,verdict_type}.py``. Harmless
+  today, since every real call site passes ``request()``'s own
+  ``DATA``-returning value, so ``data is DATA`` always held in practice -- but a
+  caller passing different data, such as a test fixture or a future ``LINK``-based
+  fetch, got the module's table back regardless, with no error. The dict-based
+  crawlers are hand-written rather than generated, so the fix needs no ``const/``
+  regeneration (:issue:`2429`, :pr:`2430`).
 
 Project infrastructure
 ----------------------
