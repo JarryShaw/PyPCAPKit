@@ -1776,6 +1776,20 @@ rather than a hand-rolled walk of <code class="docutils literal notranslate"><sp
 shadow a base class’s slots under a subclass declaring its own, miscount a
 bare-string <code class="docutils literal notranslate"><span class="pre">__slots__</span> <span class="pre">=</span> <span class="pre">'name'</span></code>, or read a private, name-mangled slot under
 its unmangled spelling (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2425">#2425</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2424">#2424</a>).</p></li>
+<li><p>that same <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> still failed to pickle under protocol 0 or 1 on GraalPy
+25.4, after <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>’s fix: <code class="docutils literal notranslate"><span class="pre">copyreg._reduce_ex</span></code>, which handles protocol
+0 and 1 before <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> is ever consulted, walks <code class="docutils literal notranslate"><span class="pre">cls.__mro__</span></code> for a
+base to compute a base-object state from, and on GraalPy that walk stops at
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a> itself rather than at <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, raising
+<code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">typing.Generic()</span> <span class="pre">takes</span> <span class="pre">no</span> <span class="pre">arguments</span></code>. <code class="docutils literal notranslate"><span class="pre">Deferred.__reduce_ex__</span></code>
+now hard-codes the <code class="docutils literal notranslate"><span class="pre">base=object,</span> <span class="pre">state=None</span></code> outcome the walk always reached
+on CPython for protocol 0 and 1, so the walk – and <code class="docutils literal notranslate"><span class="pre">Generic</span></code> – is no longer
+part of the route pickling takes. The same override also checks for, and
+defers to, a subclass’s own <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code> before building that hard-coded
+tuple – without that check a <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> subclass overriding <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code>
+had it silently ignored at protocol 0 and 1 while protocol 2 and above (via
+<code class="docutils literal notranslate"><span class="pre">object.__reduce_ex__</span></code> unchanged) kept honouring it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2433">#2433</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2435">#2435</a>).</p></li>
 </ul>
 </section>
 </section>

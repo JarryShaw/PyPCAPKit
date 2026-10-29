@@ -804,6 +804,67 @@ protocol type for IP, the port pair for TCP, as above.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__reduce_ex__">
+<span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__reduce_ex__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__reduce_ex__" title="Link to this definition">¶</a></dt>
+<dd><p>Pickling support for protocol 0 and 1.</p>
+<p><a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce_ex__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__reduce_ex__()</span></code></a> hands protocol 0 and 1 off to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reduce_ex()</span></code>, which – <em>before</em> it ever consults
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getstate__()</span></code></a> – walks <code class="docutils literal notranslate"><span class="pre">type(self).__mro__</span></code> looking for the
+first base that is either not a heap type or whose own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> is
+bound to itself, to compute a base-object state via <code class="docutils literal notranslate"><span class="pre">base(self)</span></code>. On
+CPython, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a> is a heap type and its <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
+is just the inherited <code class="docutils literal notranslate"><span class="pre">object.__new__</span></code> (bound to <code class="docutils literal notranslate"><span class="pre">object</span></code>, not to
+<code class="docutils literal notranslate"><span class="pre">Generic</span></code>), so neither check fires there and the walk continues to
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> itself, which <em>is</em> a non-heap type – the walk’s first
+check breaks on it, so <code class="docutils literal notranslate"><span class="pre">base</span></code> is <code class="docutils literal notranslate"><span class="pre">object</span></code> and the computed state is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>. On GraalPy 25.4, <code class="docutils literal notranslate"><span class="pre">Generic</span></code> is itself a non-heap
+(built-in) type there – <code class="docutils literal notranslate"><span class="pre">Generic.__flags__</span></code> lacks <code class="docutils literal notranslate"><span class="pre">_HEAPTYPE</span></code> –
+so the walk’s <em>first</em> check breaks on <code class="docutils literal notranslate"><span class="pre">Generic</span></code> directly, one step
+earlier than on CPython, without ever reaching the <code class="docutils literal notranslate"><span class="pre">__new__</span></code> check
+at all. <code class="docutils literal notranslate"><span class="pre">base</span></code> therefore resolves to <code class="docutils literal notranslate"><span class="pre">Generic</span></code> itself, and the
+walk calls <code class="docutils literal notranslate"><span class="pre">Generic(self)</span></code>, which raises:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">TypeError</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">()</span> <span class="n">takes</span> <span class="n">no</span> <span class="n">arguments</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getstate__()</span></code></a>/<a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__setstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setstate__()</span></code></a> never run in that failure:
+they only ever supply the <em>dict</em> half of the reduction tuple the walk
+above is computing the <em>base-object</em> half for, so defining them
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2425">#2425</a>) does nothing to protect against a
+GraalPy-specific outcome of a walk that happens before either is
+consulted.</p>
+<p>This override sidesteps the walk entirely rather than trying to steer
+it: for protocol 0 and 1 it hard-codes the one outcome the walk was
+ever going to reach for this class – <code class="docutils literal notranslate"><span class="pre">base=object</span></code>,
+<code class="docutils literal notranslate"><span class="pre">state=None</span></code> – and builds the same <code class="docutils literal notranslate"><span class="pre">(callable,</span> <span class="pre">args,</span> <span class="pre">state)</span></code>
+reduction <code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reduce_ex()</span></code> itself would have, with
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getstate__()</span></code></a>’s own <code class="docutils literal notranslate"><span class="pre">(dict_or_None,</span> <span class="pre">slots)</span></code> pair as the
+third element, restored through <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__setstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setstate__()</span></code></a> exactly as
+before. <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> has no base below <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> that could
+need special handling – <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a> carries no runtime
+state of its own – so hard-coding that outcome changes nothing about
+<em>what</em> gets pickled, only <em>how</em> protocol 0 and 1 get there: the MRO
+walk, and <code class="docutils literal notranslate"><span class="pre">Generic</span></code> along with it, is no longer part of the route at
+all. Protocol 2 and above are untouched, deferring to
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce_ex__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__reduce_ex__()</span></code></a> exactly as before this method existed –
+their own <code class="docutils literal notranslate"><span class="pre">__reduce_ex__</span></code> never walked the MRO this way to begin
+with, building a reduction straight from <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> instead.</p>
+<p>A subclass that overrides <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code> is checked for first, and
+deferred to, before any of the above: <a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce_ex__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__reduce_ex__()</span></code></a>
+itself does this – for <em>every</em> protocol, including 0 and 1, it
+calls a non-default <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code> in preference to building a
+reduction of its own – so hard-coding the protocol 0/1 tuple here
+without the same check would silently drop such a subclass’s
+override at exactly those two protocols, while protocol 2 and above
+(going through <code class="docutils literal notranslate"><span class="pre">object.__reduce_ex__</span></code> unchanged) kept honouring
+it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__">
 <span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__getstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="Link to this definition">¶</a></dt>
 <dd><p>Pickling support.</p>

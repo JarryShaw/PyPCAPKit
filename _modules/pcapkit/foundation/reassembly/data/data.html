@@ -494,7 +494,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">SupportsIndex</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
@@ -714,6 +714,73 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Deferred.__reduce_ex__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred.__reduce_ex__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'SupportsIndex'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pickling support for protocol 0 and 1.</span>
+
+<span class="sd">        :meth:`object.__reduce_ex__` hands protocol 0 and 1 off to</span>
+<span class="sd">        :func:`copyreg._reduce_ex`, which -- *before* it ever consults</span>
+<span class="sd">        :meth:`__getstate__` -- walks ``type(self).__mro__`` looking for the</span>
+<span class="sd">        first base that is either not a heap type or whose own ``__new__`` is</span>
+<span class="sd">        bound to itself, to compute a base-object state via ``base(self)``. On</span>
+<span class="sd">        CPython, :class:`~typing.Generic` is a heap type and its ``__new__``</span>
+<span class="sd">        is just the inherited ``object.__new__`` (bound to ``object``, not to</span>
+<span class="sd">        ``Generic``), so neither check fires there and the walk continues to</span>
+<span class="sd">        :class:`object` itself, which *is* a non-heap type -- the walk's first</span>
+<span class="sd">        check breaks on it, so ``base`` is ``object`` and the computed state is</span>
+<span class="sd">        :data:`None`. On GraalPy 25.4, ``Generic`` is itself a non-heap</span>
+<span class="sd">        (built-in) type there -- ``Generic.__flags__`` lacks ``_HEAPTYPE`` --</span>
+<span class="sd">        so the walk's *first* check breaks on ``Generic`` directly, one step</span>
+<span class="sd">        earlier than on CPython, without ever reaching the ``__new__`` check</span>
+<span class="sd">        at all. ``base`` therefore resolves to ``Generic`` itself, and the</span>
+<span class="sd">        walk calls ``Generic(self)``, which raises::</span>
+
+<span class="sd">            TypeError: typing.Generic() takes no arguments</span>
+
+<span class="sd">        :meth:`__getstate__`/:meth:`__setstate__` never run in that failure:</span>
+<span class="sd">        they only ever supply the *dict* half of the reduction tuple the walk</span>
+<span class="sd">        above is computing the *base-object* half for, so defining them</span>
+<span class="sd">        (:issue:`2423`, :issue:`2425`) does nothing to protect against a</span>
+<span class="sd">        GraalPy-specific outcome of a walk that happens before either is</span>
+<span class="sd">        consulted.</span>
+
+<span class="sd">        This override sidesteps the walk entirely rather than trying to steer</span>
+<span class="sd">        it: for protocol 0 and 1 it hard-codes the one outcome the walk was</span>
+<span class="sd">        ever going to reach for this class -- ``base=object``,</span>
+<span class="sd">        ``state=None`` -- and builds the same ``(callable, args, state)``</span>
+<span class="sd">        reduction :func:`copyreg._reduce_ex` itself would have, with</span>
+<span class="sd">        :meth:`__getstate__`'s own ``(dict_or_None, slots)`` pair as the</span>
+<span class="sd">        third element, restored through :meth:`__setstate__` exactly as</span>
+<span class="sd">        before. ``Deferred`` has no base below :class:`object` that could</span>
+<span class="sd">        need special handling -- :class:`~typing.Generic` carries no runtime</span>
+<span class="sd">        state of its own -- so hard-coding that outcome changes nothing about</span>
+<span class="sd">        *what* gets pickled, only *how* protocol 0 and 1 get there: the MRO</span>
+<span class="sd">        walk, and ``Generic`` along with it, is no longer part of the route at</span>
+<span class="sd">        all. Protocol 2 and above are untouched, deferring to</span>
+<span class="sd">        :meth:`object.__reduce_ex__` exactly as before this method existed --</span>
+<span class="sd">        their own ``__reduce_ex__`` never walked the MRO this way to begin</span>
+<span class="sd">        with, building a reduction straight from ``__getstate__`` instead.</span>
+
+<span class="sd">        A subclass that overrides ``__reduce__`` is checked for first, and</span>
+<span class="sd">        deferred to, before any of the above: :meth:`object.__reduce_ex__`</span>
+<span class="sd">        itself does this -- for *every* protocol, including 0 and 1, it</span>
+<span class="sd">        calls a non-default ``__reduce__`` in preference to building a</span>
+<span class="sd">        reduction of its own -- so hard-coding the protocol 0/1 tuple here</span>
+<span class="sd">        without the same check would silently drop such a subclass's</span>
+<span class="sd">        override at exactly those two protocols, while protocol 2 and above</span>
+<span class="sd">        (going through ``object.__reduce_ex__`` unchanged) kept honouring</span>
+<span class="sd">        it.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__reduce__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">copyreg</span><span class="o">.</span><span class="n">_reconstructor</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>  <span class="c1"># type: ignore[attr-defined] # pylint: disable=protected-access</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="Deferred.__getstate__">
