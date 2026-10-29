@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """shared data models for reassembly"""
 
+import copyreg
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
@@ -10,7 +11,7 @@ from pcapkit.utilities.compat import StrEnum, auto
 __all__ = ['ReassemblyData', 'Completion', 'Deferred']
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
+    from typing import Any, Callable, Optional
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
@@ -220,6 +221,69 @@ class Deferred(Generic[_KT]):
 
         """
         return self.analyze(self.proto, self.payload)
+
+    def __getstate__(self) -> 'tuple[Optional[dict[str, Any]], dict[str, Any]]':
+        """Pickling support.
+
+        A slotted class with no ``__dict__`` has nothing for the default
+        :mod:`pickle` reduction to read. :mod:`copyreg` refuses outright with
+        *"cannot be pickled"* under protocol 0 or 1 whenever
+        ``type(self).__getstate__`` is still the inherited default -- which is
+        why defining *any* ``__getstate__`` here, even one that only calls the
+        default, clears protocols 0 and 1 (:issue:`2423`). Protocol 2 and above
+        never needed one: their own ``__reduce_ex__`` already walks
+        ``__slots__`` directly.
+
+        The shape returned -- an instance-``__dict__`` state (or :data:`None`)
+        paired with a slots-state :obj:`dict` -- is deliberately the same one
+        Python's own default state construction produces for a slotted class,
+        rather than a bespoke flat :obj:`dict`. A flat shape would be a *new*
+        pickle format for this class: a ``Deferred`` already pickled by a
+        released version under protocol 2 or above -- every one of them built
+        this same ``(dict_or_None, slots)`` pair -- would fail to unpickle
+        against a flat-shaped :meth:`__setstate__`, and the reverse.
+
+        The slot names come from :func:`copyreg._slotnames`, the standard
+        library's own helper for this exact job, rather than a hand-rolled
+        walk of ``type(self).__mro__`` and each class's ``__slots__``: a
+        subclass of ``Deferred`` may spell a slot as a bare string
+        (``__slots__ = 'extra'``, valid Python for one slot named by the
+        whole string) or as a private, name-mangled one
+        (``__slots__ = ('__secret',)``, stored on the instance under
+        ``_<ClassName>__secret``), and a hand-rolled walk that assumes every
+        ``__slots__`` is an iterable of already-resolved attribute names gets
+        both wrong -- the first by iterating the string's *characters*, the
+        second by testing the unmangled name ``hasattr`` never finds
+        (:issue:`2425`). ``_slotnames`` already handles both, the same way
+        protocol 0 and 1 reduction has relied on it to for decades.
+
+        """
+        slotnames = copyreg._slotnames(type(self))  # type: ignore[attr-defined] # pylint: disable=protected-access
+        slots = {name: getattr(self, name) for name in slotnames if hasattr(self, name)}
+        dict_state = dict(self.__dict__) if getattr(self, '__dict__', None) else None
+        return (dict_state, slots)
+
+    def __setstate__(
+        self,
+        state: 'tuple[Optional[dict[str, Any]], dict[str, Any]] | dict[str, Any]',
+    ) -> 'None':
+        """Unpickling support; the counterpart to :meth:`__getstate__`.
+
+        Accepts the ``(dict_or_None, slots)`` pair :meth:`__getstate__` builds
+        above -- the shape every released, pre-:issue:`2423` pickle already
+        used under protocol 2 and above -- and, for a pickle made by this
+        class's own first, unreleased fix for :issue:`2423`, a bare :obj:`dict`
+        of ``{slot: value}`` (:issue:`2425`).
+
+        """
+        if isinstance(state, dict):
+            dict_state, slots = None, state
+        else:
+            dict_state, slots = state
+        if dict_state:
+            self.__dict__.update(dict_state)
+        for slot, value in slots.items():
+            setattr(self, slot, value)
 
 
 @info_final
