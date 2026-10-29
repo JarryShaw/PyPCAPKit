@@ -629,7 +629,7 @@ because <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> for what this channel is for, and
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._get_context" title="pcapkit.protocols.protocol.ProtocolBase._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._get_context</span></code></a> for how a
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._get_context</span></code></a> for how a
 protocol implementation reaches its own entry.</p>
 </div>
 </dd></dl>
@@ -1275,10 +1275,11 @@ in place still reaches the instance’s.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]</span>) – dispatch registry to read, i.e. <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__proto__" title="pcapkit.protocols.protocol.ProtocolBase.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> or one of the per-protocol
-<code class="docutils literal notranslate"><span class="pre">__option__</span></code> / <code class="docutils literal notranslate"><span class="pre">__chunk__</span></code> / <code class="docutils literal notranslate"><span class="pre">__block__</span></code> family. Passed in
-rather than read from the class, so that a caller reaching the
-registry through an instance keeps doing so.</p></li>
+<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]</span>) – dispatch registry to read, i.e. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="pcapkit.protocols.protocol.Protocol.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> or one of the
+per-protocol <code class="docutils literal notranslate"><span class="pre">__option__</span></code> / <code class="docutils literal notranslate"><span class="pre">__chunk__</span></code> / <code class="docutils literal notranslate"><span class="pre">__block__</span></code>
+family. Passed in rather than read from the class, so that a
+caller reaching the registry through an instance keeps doing
+so.</p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – registry key to look up, i.e. the wire code being dispatched on</p></li>
 </ul>
 </dd>
@@ -1313,9 +1314,9 @@ directly rather than through a lookup that records it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]]</span>) – next layer protocol registry, i.e. <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__proto__" title="pcapkit.protocols.protocol.ProtocolBase.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>. Passed in rather than read from the
-class, so that a caller reaching the registry through an
-instance keeps doing so.</p></li>
+<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]]</span>) – next layer protocol registry, i.e. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="pcapkit.protocols.protocol.Protocol.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>. Passed in
+rather than read from the class, so that a caller reaching the
+registry through an instance keeps doing so.</p></li>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – next layer protocol index</p></li>
 </ul>
 </dd>
@@ -1330,14 +1331,15 @@ declares – normally <a class="reference internal" href="misc/raw.html#pcapkit.
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The lookup itself is <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="pcapkit.protocols.protocol.ProtocolBase._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a>, so a miss does not grow the shared
-registry. What this adds is the next-layer-specific resolution step:
-the entry found – registered, or the fallback – may be a
+<p>The lookup itself is <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a>, so a miss
+does not grow the shared registry. What this adds is the
+next-layer-specific resolution step: the entry found –
+registered, or the fallback – may be a
 <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> rather than a
 class, and it is resolved to the class it names.</p>
 <p>Nothing is written back, on a hit or a miss. A miss has no key to
 write under, and recording one would be exactly the insertion
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="pcapkit.protocols.protocol.ProtocolBase._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a> exists
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a> exists
 to avoid. A hit memoised under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would retain a class that
 <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale, and would make parsing
 mutate a registry shared by the whole process (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>). The
@@ -1434,8 +1436,8 @@ instead, as an unparseable one is.</p>
 <p>The captured octets are the first <code class="docutils literal notranslate"><span class="pre">length</span></code> of <code class="docutils literal notranslate"><span class="pre">file_</span></code>, or all of
 it when it holds fewer, as a truncated capture does. They are short
 of the header when there are fewer than the next layer’s
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__length_hint__" title="pcapkit.protocols.protocol.ProtocolBase.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__length_hint__</span></code></a>, unless the
-header it parsed, <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.length" title="pcapkit.protocols.protocol.ProtocolBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> octets long, fits
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__length_hint__" title="pcapkit.protocols.protocol.Protocol.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__length_hint__</span></code></a>, unless the
+header it parsed, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> octets long, fits
 in them anyway: for a variable-length header such as
 <a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> the hint is the longest
 form rather than the shortest. A next layer that reports no hint is
@@ -1470,7 +1472,7 @@ it and the rest of the frame are kept as
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._get_context">
 <span class="sig-name descname"><span class="pre">_get_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._get_context" title="Link to this definition">¶</a></dt>
 <dd><p>Get the caller supplied context for this protocol, if any.</p>
-<p>The lookup is keyed on <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.id" title="pcapkit.protocols.protocol.ProtocolBase.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.id</span></code></a>, so a
+<p>The lookup is keyed on <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.id</span></code></a>, so a
 protocol finds its own context without knowing how the caller spelled
 the registry.</p>
 <dl class="field-list simple">
@@ -1588,7 +1590,7 @@ While parsing, the un-prefixed <code class="docutils literal notranslate"><span 
 see the note below.</p></li>
 <li><p><strong>packet</strong> – Packet context of the enclosing layer, a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> as
 handed over by
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._import_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 While parsing, it is republished as <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> so that
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a> – and through it the
 schema – can see it; see the note below.</p></li>
@@ -1601,7 +1603,7 @@ iterable of <a class="reference internal" href="../corekit/context.html#pcapkit.
 It is consumed here rather
 than being forwarded to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.read</span></code></a>, and is
 propagated to nested layers by
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._import_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p></li>
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -1625,7 +1627,7 @@ packet, and every one of them is consumed here, at the one point
 each of a protocol’s producers passes through. That is deliberate,
 and the normalisation below relies on it: fixing a spelling here
 fixes it for the engines, for every
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase._import_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer</span></code></a>
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer</span></code></a>
 implementation, and for any third party protocol that copied their
 shape, rather than one call site at a time.</p>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is read but not consumed: it stays in the keywords

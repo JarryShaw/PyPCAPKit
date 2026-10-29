@@ -632,7 +632,7 @@ raises where the lookup used to fall back to
 <code class="docutils literal notranslate"><span class="pre">'80'</span></code> would dispatch a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> nobody registered.</p>
 <p>Nothing is written back on a miss either way, so a payload on an
 unregistered port does not grow a process-wide registry – see
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="pcapkit.protocols.protocol.ProtocolBase._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_registry</span></code></a>.</p>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._lookup_registry</span></code></a>.</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">ports</span></code> is a pair of
