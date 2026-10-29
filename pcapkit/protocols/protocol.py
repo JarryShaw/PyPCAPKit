@@ -1006,7 +1006,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`
+            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             instance.
 
         """
@@ -1039,7 +1039,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             code: protocol code
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a

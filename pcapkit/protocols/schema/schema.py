@@ -1231,7 +1231,7 @@ class _EnumRegistry(collections.defaultdict):
     The fallback itself is deliberate -- it is how an unknown option, chunk or
     block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this
     subclass keeps returning it and just stops recording it.
-    :meth:`ProtocolBase._lookup_registry
+    :meth:`Protocol._lookup_registry
     <pcapkit.protocols.protocol.Protocol._lookup_registry>`
     does the same for the protocol-layer ``__proto__`` family.
 

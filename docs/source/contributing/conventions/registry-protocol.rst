@@ -74,7 +74,7 @@ generated registries spell by hand in ``_missing_``:
        if not (isinstance(value, int) and 0 <= value <= 0xFF):
            raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
 
-**Every registry overrides it**, so that ``register`` refuses what ``get`` refuses
+**Every registry has it overridden**, so that ``register`` refuses what ``get`` refuses
 (:issue:`1816`). Each vendor generator emits the override from the check it already
 writes at the top of ``_missing_``, with the same message. That is the ``FLAG`` of most
 crawlers, but a bespoke template's own range where its ``_missing_`` checks something

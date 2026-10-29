@@ -188,7 +188,7 @@ preflight described at the top of this page.
 
    Only the engines above carry extra constraints. :mod:`pcapkit` itself and
    its ``default``, ``dpkt`` and ``scapy`` engines need nothing beyond their
-   ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy`` 2.7.0 were both measured
+   ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy`` 2.8.0 were both measured
    reading a capture on Python 3.14. The ``scapy`` engine needs **scapy 2.6.0 or
    newer**, which the ``Scapy`` extra requires: 2.5.0 can drop a PCAP-NG
    interface's timestamp resolution, reading nanoseconds as microseconds

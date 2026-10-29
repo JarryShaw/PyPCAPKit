@@ -86,7 +86,8 @@ __all__ = ['Packet']
 #: ``IPX_PACKET_TYPE_IPX 0``, ``_RIP 1``, ``_ECHO 2``, ``_ERROR 3``, ``_PEP 4``,
 #: ``_SPX 5``, ``_NCP 17`` and ``_WANBCAST 20`` -- the same values in the
 #: same order. Types 1-5 are inherited from Xerox XNS IDP, which IPX was derived
-#: from; no RFC assigns them, and the notes below say so where that is the case.
+#: from, and -- type 4 apart -- no RFC assigns them. The note on each row below
+#: says which sources do and do not carry its number.
 DATA = {
     # NOTE: not a protocol assignment. The scraped table listed 0 as "Unknown",
     # and it doubles as the IPX protocol's own default for the ``type`` field.

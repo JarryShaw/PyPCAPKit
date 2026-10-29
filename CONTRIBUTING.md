@@ -163,9 +163,15 @@ header records which of them are clean and what each of the others would need be
 `continue-on-error` line could be deleted. Read the job's run summary, where each step writes
 its verdict, and try not to add to the numbers.
 
-`isort` is the exception: no `Lint` step runs it. It appears in `cron-vendor.yml` as a formatter
-that rewrites the regenerated constants, and `tests/project/test_isort_clean.py`, which the `test`
-extra's `isort` lets run, fails on a file whose imports `make isort` would reorder.
+**The job is not entirely advisory, though.** It carries one more step, `actionlint`, which lints
+the workflow YAML rather than `pcapkit/`, and that one has no `continue-on-error` and no
+`Makefile` target — so a change under `.github/` can turn `Lint` red even though none of the
+linters above can. The header records that split, and asks for a promoted step to be moved below
+the advisory ones, since a failed step skips every step after it.
+
+`isort` is absent from the job altogether: no `Lint` step runs it. It appears in `cron-vendor.yml`
+as a formatter that rewrites the regenerated constants, and `tests/project/test_isort_clean.py`,
+which the `test` extra's `isort` lets run, fails on a file whose imports `make isort` would reorder.
 
 One trap: `make vermin` redirects its report into `temp/vermin.txt` rather than to your terminal,
 so when vermin finds code that misses `vermin.ini`'s `targets = 3.8` and exits 1,

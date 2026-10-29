@@ -36,10 +36,10 @@ class LinkType(Vendor):
     LINK = 'http://www.tcpdump.org/linktypes.html'
 
     #: Destinations of a bare ``LinkType`` member; see
-    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. Two of them, because a
-    #: link-layer header type keys the next-layer registry of both capture file
-    #: formats, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`
-    #: already registers into both by hand.
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. One per capture file
+    #: format, because a link-layer header type keys the next-layer registry of
+    #: each, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`
+    #: already registers into every one of them by hand.
     PROTO_DEST = (
         ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),
         ModuleDescriptor('pcapkit.protocols.misc.pcapng', 'PCAPNG'),
