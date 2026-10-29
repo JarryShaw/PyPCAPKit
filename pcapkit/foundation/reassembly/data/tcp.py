@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
+    from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.protocols.protocol import ProtocolBase
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
@@ -84,7 +85,26 @@ class Packet(Info):
 
 @info_final
 class DatagramID(Info, Generic[_AT]):
-    """Data model for :term:`TCP <reasm.tcp.datagram>` original packet identifier."""
+    """Data model for :term:`TCP <reasm.tcp.datagram>` original packet identifier.
+
+    Note:
+        The ports here stay bare :obj:`int` port numbers, where the pair
+        :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` hands
+        :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is one of
+        :class:`~pcapkit.const.reg.apptype.tcp.TCP` members
+        (:issue:`2417`). The two are not the same thing to name: this is the
+        flow's identity, split out of :data:`BufferID`, which every
+        :mod:`pcapkit.toolkit` adapter builds from a plain port number -- the
+        native ones by reading :attr:`AppType.port
+        <pcapkit.const.reg.apptype.apptype.AppType.port>` off the parsed header,
+        the third-party ones from whatever their own engine exposes -- and which
+        is then used as a :class:`dict` key and dumped as part of the report.
+        The deferred pair is a *dispatch* key for
+        :meth:`Transport.analyze
+        <pcapkit.protocols.transport.transport.Transport.analyze>`, which is
+        what gains from carrying the service name.
+
+    """
 
     #: Source address.
     src: 'tuple[_AT, int]'
@@ -150,7 +170,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies
         # here identically: ``strict=False`` reports an incomplete payload buffer as
         # one contiguous ``bytes`` and analyses it.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[tuple[int, int]]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[tuple[AppType_TCP, AppType_TCP]]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

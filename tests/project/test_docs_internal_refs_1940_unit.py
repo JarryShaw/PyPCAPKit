@@ -61,10 +61,12 @@ ENTRIES = (
 HELPERS = (
     ('pcapkit/const/ftp.rst', 'pcapkit.const.ftp.command.Command.__new__'),
     ('pcapkit/const/reg.rst', 'pcapkit.const.reg.apptype.apptype.AppType.__eq__'),
+    ('pcapkit/const/reg.rst', 'pcapkit.const.reg.apptype.apptype.AppType.__hash__'),
     ('pcapkit/dumpkit/pcap.rst', 'pcapkit.dumpkit.pcap.PCAPIO.__init__'),
     ('pcapkit/foundation/extraction.rst', 'pcapkit.foundation.extraction.Extractor._note_eof_progress'),
     ('pcapkit/foundation/extraction.rst', 'pcapkit.foundation.extraction.Extractor._owns_input'),
     ('pcapkit/foundation/extraction.rst', 'pcapkit.foundation.extraction.Extractor._register_internal_engine'),
+    ('pcapkit/foundation/reassembly/tcp.rst', 'pcapkit.foundation.reassembly.tcp.TCP._make_ports'),
     ('pcapkit/protocols/application/http.rst', 'pcapkit.protocols.application.http.HTTP.from_data'),
     ('pcapkit/protocols/application/httpv2.rst', 'pcapkit.protocols.application.httpv2.HTTP.unpack'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap._convert'),

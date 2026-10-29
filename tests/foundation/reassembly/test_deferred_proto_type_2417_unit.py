@@ -31,27 +31,47 @@ That is a gap in the dependency's type coverage rather than in the type
 parameter. It is also why these tests read the declaration at runtime instead
 of resting on mypy.
 
-The runtime value was always correct, so there is no behaviour to pin. What
-these tests pin is the declared type against the values the reassemblers really
-hand it. Two of them fail on anything but the generic:
+The port pair itself then moved: both constraints are *named registry values*,
+so ``TCP.submit`` resolves each port through :meth:`Transport._make_port
+<pcapkit.protocols.transport.transport.Transport._make_port>` and the constraint
+is ``tuple[AppType_TCP, AppType_TCP]`` -- the *per-transport* registry, which
+is what the resolution really answers with -- rather than ``tuple[int, int]``.
+A deferred analysis now dispatches on a member of the registry
+:attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` reads from: the very
+same member for a registered port, an equal one reached by a different route
+for an unassigned one (see :meth:`ResolvedPortTests.test_an_unassigned_port_is_equal_to_the_parse_paths_own`),
+and :meth:`Transport.analyze
+<pcapkit.protocols.transport.transport.Transport.analyze>` declares that pair.
+Unlike the generic itself, this half *is* a runtime change --
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` is a
+:class:`~enum.StrEnum`, so it is no :obj:`int` at all and
+``isinstance(port, int)`` is now :data:`False` -- which is what
+:class:`ResolvedPortTests` pins.
+
+Three cases fail on anything but the generic over named values:
 :meth:`DeclaredProtoTypeTests.test_declared_type_admits_what_each_reassembler_passes`
 requires each value to be admitted by *exactly one* constraint and the two by
-different ones, and
+different ones,
 :meth:`DeclaredProtoTypeTests.test_the_analyser_takes_the_same_type_variable_as_proto`
-requires the analyser to take the variable ``proto`` names. Against the
-regression's single class, and against the union that first widened it, both
-report that ``proto`` is annotated with a type rather than a type parameter.
+requires the analyser to take the variable ``proto`` names, and
+:meth:`ResolvedPortTests.test_submit_hands_over_resolved_application_types`
+requires the values themselves to be members. Against the regression's single
+class, and against the union that first widened it, the first two report that
+``proto`` is annotated with a type rather than a type parameter; against the
+bare port pair, the first fails because ``tuple[AppType_TCP, AppType_TCP]``
+does not admit it and the third because an :obj:`int` is not a member.
 
 The "different ones" half is what the parameter buys over a union: a union
 admits a port pair and a protocol type on *either* call, so it cannot tell a
-``Deferred[TransType]`` from a ``Deferred[tuple[int, int]]`` and leaves each
-analyser's first parameter unconstrained. Pinning the annotation's text instead
-would pass for a union that happened to name the right classes while still
-excluding one of them.
+``Deferred[TransType]`` from a ``Deferred[tuple[AppType_TCP, AppType_TCP]]`` and leaves
+each analyser's first parameter unconstrained. Pinning the annotation's text
+instead would pass for a union that happened to name the right classes while
+still excluding one of them.
 
-Both cases build their packets in memory, read no capture, and never *call* the
-held analyser -- only :attr:`Deferred.proto` is read, so nothing here depends on
-a parser. Classes are imported inside each test, after
+Every case builds its packets in memory and reads no capture. Those in
+:class:`DeclaredProtoTypeTests` never *call* the held analyser either -- only
+:attr:`Deferred.proto` is read, so nothing there depends on a parser. Classes
+are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
 """
@@ -64,13 +84,21 @@ from ipaddress import ip_address
 
 from tests._support import reimport_once_per_class
 
-#: Test tier (#1958): reads an annotation and two in-memory reassemblies, so the
-#: same text and the same values on every leg; nothing version-specific to sweep.
+#: Test tier (#1958): reads an annotation and a handful of in-memory
+#: reassemblies, so the same text and the same values on every leg; nothing
+#: version-specific to sweep.
 __tier__ = 'LATEST'
 
 #: TCP ``BUFID``: source address, source port, destination address, destination
-#: port. ``TCP.submit`` passes positions 1 and 3 of this to ``Deferred``.
+#: port. ``TCP.submit`` passes positions 1 and 3 of this to ``Deferred``. Both
+#: ports carry an IANA assignment -- ``italk`` and ``https`` -- so the resolved
+#: members are named ones; :data:`UNASSIGNED_BUFID` covers the other case.
 TCP_BUFID = (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
+
+#: As :data:`TCP_BUFID`, but on ports IANA assigns no service to and lists in no
+#: span of its own, which resolve to unregistered ``unknown`` members rather
+#: than raising or coming back as :data:`None`.
+UNASSIGNED_BUFID = (ip_address('192.0.2.1'), 50000, ip_address('198.51.100.2'), 65535)
 
 
 def admits(declared: 'object', value: 'object') -> 'bool':
@@ -122,6 +150,31 @@ def held(datagram: 'object') -> 'object':
     """
     key = datagram.__map__.get('packet', 'packet')  # type: ignore[attr-defined]
     return datagram.__dict__[key]
+
+
+def tcp_proto(bufid=TCP_BUFID):
+    """The ``proto`` ``TCP.submit`` hands :class:`Deferred` for ``bufid``.
+
+    One segment with a FIN, which closes the stream and so submits it complete:
+    the partial branch of ``submit`` reports ``packet=None`` and builds no
+    :class:`~pcapkit.foundation.reassembly.data.data.Deferred` to read.
+
+    Args:
+        bufid: The buffer identifier to reassemble under, i.e. where the ports
+            come from.
+
+    Returns:
+        The placeholder's ``proto``, unresolved.
+
+    """
+    from pcapkit.foundation.reassembly.data.tcp import Packet
+    from pcapkit.foundation.reassembly.tcp import TCP
+
+    reasm = TCP()
+    reasm(Packet(bufid, 1, 500, 1, False, True, False, 5, 1, 5,
+                 b'', bytearray(b'hello'), 1000.0))
+    datagram, = reasm.datagram
+    return held(datagram).proto
 
 
 class AdmitsTests(unittest.TestCase):
@@ -176,22 +229,25 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """What that type variable is constrained to, each one evaluated.
 
         A constraint is written as a string literal, since
-        :class:`~pcapkit.const.reg.transtype.TransType` is imported under
-        ``TYPE_CHECKING`` and nothing at runtime has it in scope; the namespace
-        is rebuilt here rather than asking :func:`typing.get_type_hints`, which
-        raises :exc:`NameError` on it. :class:`~typing.TypeVar` keeps such a
-        constraint as the string itself from Python 3.14 and as a
-        :class:`typing.ForwardRef` before it, so both spellings are unwrapped.
+        :class:`~pcapkit.const.reg.transtype.TransType` and
+        :class:`~pcapkit.const.reg.apptype.tcp.TCP` are both imported
+        under ``TYPE_CHECKING`` and nothing at runtime has either in scope; the
+        namespace is rebuilt here rather than asking
+        :func:`typing.get_type_hints`, which raises :exc:`NameError` on them.
+        :class:`~typing.TypeVar` keeps such a constraint as the string itself
+        from Python 3.14 and as a :class:`typing.ForwardRef` before it, so both
+        spellings are unwrapped.
 
         Returns:
             The admissible types, in declaration order.
 
         """
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.transtype import TransType
 
         return tuple(
             eval(getattr(constraint, '__forward_arg__', constraint),  # pylint: disable=eval-used
-                 {'TransType': TransType})
+                 {'TransType': TransType, 'AppType_TCP': AppType_TCP})
             for constraint in cls._proto_type_variable().__constraints__
         )
 
@@ -207,16 +263,9 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         datagram, = reasm.datagram
         return held(datagram).proto
 
-    def _tcp_proto(self):
+    def _tcp_proto(self, bufid=TCP_BUFID):
         """The ``proto`` ``TCP.submit`` hands to :class:`Deferred`."""
-        from pcapkit.foundation.reassembly.data.tcp import Packet
-        from pcapkit.foundation.reassembly.tcp import TCP
-
-        reasm = TCP()
-        reasm(Packet(TCP_BUFID, 1, 500, 1, False, True, False, 5, 1, 5,
-                     b'', bytearray(b'hello'), 1000.0))
-        datagram, = reasm.datagram
-        return held(datagram).proto
+        return tcp_proto(bufid)
 
     def test_ip_passes_the_payload_protocol_type(self) -> None:
         """IP reassembly reads it from the datagram's **Protocol** field."""
@@ -225,7 +274,16 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         self.assertIs(self._ip_proto(), TransType.UDP)
 
     def test_tcp_passes_a_port_pair(self) -> None:
-        """A reassembled stream carries no protocol number, so it keys on ports."""
+        """A reassembled stream carries no protocol number, so it keys on ports.
+
+        The pair compares equal to the bare port numbers it was resolved from --
+        :meth:`AppType.__eq__ <pcapkit.const.reg.apptype.apptype.AppType.__eq__>`
+        compares against :attr:`AppType.port
+        <pcapkit.const.reg.apptype.apptype.AppType.port>` -- which is exactly why
+        an equality assertion cannot tell the two apart and
+        :class:`ResolvedPortTests` checks the members themselves.
+
+        """
         self.assertEqual(self._tcp_proto(), (TCP_BUFID[1], TCP_BUFID[3]))
 
     def test_the_analyser_takes_the_same_type_variable_as_proto(self) -> None:
@@ -285,6 +343,197 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         self.assertIsInstance(placeholder, Deferred)
         self.assertEqual(placeholder.proto, (TCP_BUFID[1], TCP_BUFID[3]))
         self.assertIsInstance(held(datagram), Deferred)
+
+
+class ResolvedPortTests(unittest.TestCase):
+    """The ports themselves, not the declaration: members rather than numbers.
+
+    This is the half of :issue:`2417` that runs. The declaration above would be
+    satisfied by a ``tuple[AppType_TCP, AppType_TCP]`` constraint over a ``submit`` that
+    still passed bare numbers -- :func:`admits` would simply report that nothing
+    admits the pair -- so what pins the resolution is reading the values.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_submit_hands_over_resolved_application_types(self) -> None:
+        """Each port is the member its registry holds, carrying TCP's transport.
+
+        Named outright rather than compared against a second
+        :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>` call,
+        which would pass against a ``submit`` that resolved the wrong transport's
+        registry as readily as the right one.
+
+        """
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+
+        src, dst = tcp_proto()
+        for port, member, service in ((TCP_BUFID[1], src, 'italk'),
+                                      (TCP_BUFID[3], dst, 'https')):
+            with self.subTest(port=port):
+                self.assertIsInstance(member, AppType)
+                self.assertEqual(member.port, port)
+                self.assertEqual(member.svc, service)
+                self.assertIs(member.proto, TransportProtocol.tcp)
+
+    def test_each_port_is_a_member_of_the_per_transport_tcp_registry(self) -> None:
+        """Not merely *an* ``AppType`` -- the TCP partition, exactly.
+
+        ``proto=tcp`` sends :meth:`AppType.get
+        <pcapkit.const.reg.apptype.apptype.AppType.get>` through
+        :meth:`AppType._dispatch
+        <pcapkit.const.reg.apptype.apptype.AppType._dispatch>` to
+        :class:`~pcapkit.const.reg.apptype.tcp.TCP`, so ``type(...) is TCP``
+        rather than merely ``isinstance(..., AppType)``. That is what lets the
+        annotations name the narrow registry, and it is checked with ``is``
+        because an ``isinstance`` against the base would also pass for a member
+        of the UDP or SCTP partition -- which is the mistake the narrow
+        annotation exists to catch.
+
+        """
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
+
+        for bufid in (TCP_BUFID, UNASSIGNED_BUFID):
+            for member in tcp_proto(bufid):
+                with self.subTest(port=member.port):
+                    self.assertIs(type(member), AppType_TCP)
+
+    def test_an_unassigned_port_is_equal_to_the_parse_paths_own(self) -> None:
+        """Equal and of one registry, but not the same object, and named apart.
+
+        The claim worth stating precisely rather than overstating: for a
+        *registered* port this resolution and the parse path's own give the very
+        same member, but for an unassigned one they build equal members by
+        different routes -- the parse path through
+        :meth:`EnumField._unregistered_member
+        <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`, named
+        ``'<unassigned>'``, and this one through ``get``'s own, named
+        ``'unknown'``. Both carry the same :attr:`AppType.port
+        <pcapkit.const.reg.apptype.apptype.AppType.port>`, which is what every
+        reader of the pair goes on to use.
+
+        """
+        from pcapkit.const.reg.apptype import TransportProtocol
+        from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+
+        field = Schema_TCP.__fields__['srcport']
+
+        registered, _ = tcp_proto()
+        self.assertIs(field.post_process(TCP_BUFID[1], None), registered)
+        self.assertIs(registered.proto, TransportProtocol.tcp)
+
+        unassigned, _ = tcp_proto(UNASSIGNED_BUFID)
+        parsed = field.post_process(UNASSIGNED_BUFID[1], None)
+        self.assertEqual(parsed, unassigned)
+        self.assertIsNot(parsed, unassigned)
+        self.assertEqual(parsed.port, unassigned.port)
+        self.assertEqual((parsed.name, unassigned.name), ('<unassigned>', 'unknown'))
+
+    def test_a_resolved_port_is_no_longer_an_int(self) -> None:
+        """The runtime change, stated as the thing a caller could notice.
+
+        :class:`~pcapkit.const.reg.apptype.apptype.AppType` derives from
+        :class:`str`, so the pair is outside ``tuple[int, int]`` at runtime as
+        well as to a type checker, and that is what makes the old constraint
+        wrong rather than merely loose. It still *compares* equal to the number,
+        which is why nothing downstream of ``submit`` had to change.
+
+        """
+        src, _ = tcp_proto()
+        self.assertNotIsInstance(src, int)
+        self.assertEqual(src, TCP_BUFID[1])
+        self.assertEqual(int(src), TCP_BUFID[1])
+        self.assertEqual(hash(src), hash(TCP_BUFID[1]))
+
+    def test_an_unassigned_port_resolves_rather_than_raising(self) -> None:
+        """Every port a 16-bit field can hold has to come back as *something*.
+
+        :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`
+        answers a port in no IANA span with an unregistered ``unknown`` member
+        and mints nothing into the registry (:issue:`860`), so resolving in
+        ``submit`` cannot fail on a capture of traffic on an ephemeral port --
+        which is most captures, and would otherwise have made this change a new
+        way for reassembly to raise.
+
+        """
+        from pcapkit.const.reg.apptype import AppType
+
+        src, dst = tcp_proto(UNASSIGNED_BUFID)
+        for port, member in ((UNASSIGNED_BUFID[1], src), (UNASSIGNED_BUFID[3], dst)):
+            with self.subTest(port=port):
+                self.assertIsInstance(member, AppType)
+                self.assertEqual(member.svc, 'unknown')
+                self.assertEqual(member.port, port)
+
+    def test_resolving_grows_no_registry(self) -> None:
+        """Neither the application-type registry nor the next-layer one."""
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
+        from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+
+        before_apptype = len(AppType_TCP.__registry__)
+        before_proto = sorted(TCP_Protocol.__proto__)
+
+        tcp_proto(UNASSIGNED_BUFID)
+
+        self.assertEqual(len(AppType_TCP.__registry__), before_apptype)
+        self.assertEqual(sorted(TCP_Protocol.__proto__), before_proto)
+
+    def test_the_pair_is_what_the_analyser_dispatches_on(self) -> None:
+        """End to end: the resolved pair still selects the registered next layer.
+
+        ``Transport.analyze`` keys :attr:`TCP.__proto__
+        <pcapkit.protocols.transport.tcp.TCP.__proto__>` on the port, and that
+        mapping is keyed by number, so the members have to reach it as the
+        numbers they carry. Port 80 is bound to the version-dispatching HTTP
+        class; the unassigned pair falls through to the registry's own fallback.
+
+        """
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+
+        http_bufid = (ip_address('192.0.2.1'), 54321, ip_address('198.51.100.2'), 80)
+        self.assertIsInstance(
+            TCP_Protocol.analyze(tcp_proto(http_bufid), b'GET / HTTP/1.1\r\n\r\n'), HTTP)
+        self.assertIsInstance(
+            TCP_Protocol.analyze(tcp_proto(UNASSIGNED_BUFID), b'not a protocol'), Raw)
+
+    def test_a_custom_analyser_need_not_be_a_transport(self) -> None:
+        """``__protocol_type__`` is an extension point, so ``_make_port`` is not read off it.
+
+        The analyser plugged in here defines ``analyze`` and nothing else, which
+        is all :attr:`ReassemblyBase.protocol
+        <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`
+        promises. Resolving the ports through it instead of through
+        :class:`~pcapkit.protocols.transport.tcp.TCP` would raise
+        :exc:`AttributeError` here, and it is the reassembly tests' own idiom.
+
+        """
+        from pcapkit.const.reg.apptype import AppType
+        from pcapkit.foundation.reassembly.data.tcp import Packet
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        class Analyzer:  # pylint: disable=too-few-public-methods
+            """Everything ``__protocol_type__`` is required to be."""
+
+            @classmethod
+            def analyze(cls, ports, payload):
+                return (ports, payload)
+
+        class TestTCP(TCP):
+            __protocol_type__ = Analyzer
+
+        reasm = TestTCP()
+        reasm(Packet(TCP_BUFID, 1, 500, 1, False, True, False, 5, 1, 5,
+                     b'', bytearray(b'hello'), 1000.0))
+        datagram, = reasm.datagram
+        ports, payload = datagram.packet
+        self.assertEqual(payload, b'hello')
+        self.assertEqual(ports, (TCP_BUFID[1], TCP_BUFID[3]))
+        for member in ports:
+            self.assertIsInstance(member, AppType)
 
 
 if __name__ == '__main__':

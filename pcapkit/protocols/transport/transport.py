@@ -132,11 +132,15 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         cls.__proto__[code] = entry
 
     @classmethod
-    def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def analyze(cls, ports: 'tuple[Enum_AppType, Enum_AppType]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed
         """Analyse packet payload.
 
         Args:
-            ports: Source & destination port numbers.
+            ports: Source & destination ports, as the application types
+                :meth:`_make_port` resolves them to -- what
+                :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` and
+                :attr:`TCP.dst <pcapkit.protocols.transport.tcp.TCP.dst>` read
+                off a parsed header, resolved the same way.
             payload: Packet payload.
             **kwargs: Arbitrary keyword arguments.
 
@@ -144,9 +148,60 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`
             instance.
 
+        Important:
+            The annotation names the **base** registry rather than one
+            transport's own, because this is the single method
+            :class:`~pcapkit.protocols.transport.tcp.TCP`,
+            :class:`~pcapkit.protocols.transport.udp.UDP` and
+            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each
+            resolves its ports in a different one --
+            :class:`~pcapkit.const.reg.apptype.tcp.TCP` for the first, and so
+            on. A caller that knows which transport it has gets the narrower
+            type from whatever handed it the pair, e.g.
+            :meth:`TCP._make_ports
+            <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`.
+
+            A bare :obj:`int` port still resolves, so the tightened annotation
+            is a declaration of what callers should pass rather than a new
+            rejection -- the method predates 1.5.0, and a member and the port it
+            carries are the same key of an :obj:`int`-keyed mapping anyway:
+            :meth:`AppType.__hash__
+            <pcapkit.const.reg.apptype.apptype.AppType.__hash__>` is its port's
+            and :meth:`AppType.__eq__
+            <pcapkit.const.reg.apptype.apptype.AppType.__eq__>` compares against
+            it. So the port chosen below is tested against :attr:`__proto__`
+            exactly as it arrived, and the chosen one is unwrapped to the
+            :obj:`int` key the registry declares only when it is a member --
+            through :meth:`AppType.__int__
+            <pcapkit.const.reg.apptype.apptype.AppType.__int__>`, i.e.
+            :attr:`AppType.port
+            <pcapkit.const.reg.apptype.apptype.AppType.port>`. Reading
+            ``.port`` unconditionally would have made the :obj:`int` case an
+            :exc:`AttributeError`, and unwrapping unconditionally would have
+            changed what anything *else* does here: :func:`int` of :obj:`None`
+            raises where the lookup used to fall back to
+            :class:`~pcapkit.protocols.misc.raw.Raw`, and :func:`int` of
+            ``'80'`` would dispatch a :class:`str` nobody registered.
+
+            Nothing is written back on a miss either way, so a payload on an
+            unregistered port does not grow a process-wide registry -- see
+            :meth:`ProtocolBase._lookup_registry
+            <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`.
+
+        .. versionchanged:: 1.5.0
+
+           ``ports`` is a pair of
+           :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather
+           than of bare :obj:`int` port numbers, so that the one caller that
+           reaches this method -- :meth:`TCP.submit
+           <pcapkit.foundation.reassembly.tcp.TCP.submit>`, through
+           :class:`~pcapkit.foundation.reassembly.data.data.Deferred` -- hands
+           over the same named ports a parsed header carries (:issue:`2417`).
+
         """
+        port = ports[0] if ports[0] in cls.__proto__ else ports[1]
         protocol = cls._lookup_next_layer(
-            cls.__proto__, ports[0] if ports[0] in cls.__proto__ else ports[1])
+            cls.__proto__, int(port) if isinstance(port, Enum_AppType) else port)
 
         payload_io = io.BytesIO(payload)
         try:

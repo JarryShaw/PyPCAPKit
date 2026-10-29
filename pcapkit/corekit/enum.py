@@ -96,6 +96,7 @@ to a given member's mapping.
    an unknown value does not mint one (:issue:`775`).
 
 """
+import functools
 from typing import TYPE_CHECKING
 
 from aenum import extend_enum
@@ -104,7 +105,7 @@ from pcapkit.corekit.sentinels import NO_DEFAULT
 from pcapkit.utilities.exceptions import BaseError, CaughtByCaller, EnumKeyError, EnumValueError
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Callable, Type
 
     from typing_extensions import Self
 
@@ -709,3 +710,97 @@ class EnumRegistry(EnumLookup):
         obj._name_ = name  # pylint: disable=protected-access
         obj._value_ = value  # pylint: disable=protected-access
         return obj
+
+    @classmethod
+    def _make_reducible(cls, obj: 'Any', *args: 'Any') -> 'Any':
+        """Make an unregistered member survive :mod:`pickle` and :mod:`copy`.
+
+        ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``, i.e. to
+        a *value*-keyed lookup -- the one table an unregistered member is
+        deliberately absent from. So a member :meth:`_unregistered_member`
+        built pickles happily and then raises :exc:`ValueError` on read-back,
+        where the failure is a long way from its cause.
+
+        This replaces that reduction with one through
+        :func:`_rebuild_unregistered_member`, which re-enters
+        ``cls._unregistered_member(*args)``. Rebuilding therefore takes exactly
+        the path that built the original and never ``cls.__new__``, so an
+        unpickled member is unregistered just as the original was and no
+        lookup table grows. The rebuilt member is itself reducible, since the
+        method it comes back through installs this again.
+
+        The override goes on the *instance* rather than on the type, which both
+        :mod:`pickle` and :mod:`copy` honour: each fetches ``__reduce_ex__``
+        with :func:`getattr` on the object. :func:`functools.partial` rather
+        than a closure keeps the member itself out of its own reducer, so being
+        reducible does not put it in a reference cycle.
+
+        Note:
+            This is opt-in per registry rather than done by
+            :meth:`_unregistered_member` itself, because the arguments to
+            rebuild *from* are the overriding method's own, not this base
+            method's. :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
+            for one, hands its base the crafted ``'svc [port - proto]'``
+            string while its own entry point takes ``(port, name, proto)``;
+            reducing to the former would rebuild a member whose value had been
+            formatted twice. A registry whose ``_missing_`` calls
+            :meth:`_unregistered_member` directly is unaffected and keeps
+            reducing the way ``Enum`` does.
+
+        Args:
+            obj: The unregistered member to install the reducer on.
+            *args: The arguments ``cls._unregistered_member`` should be called
+                with to rebuild an equivalent member.
+
+        Returns:
+            ``obj``, for use as a ``return`` expression.
+
+        """
+        obj.__reduce_ex__ = functools.partial(_reduce_unregistered_member, cls, args)
+        return obj
+
+
+def _rebuild_unregistered_member(namespace: 'Type[EnumRegistry]',
+                                 args: 'tuple[Any, ...]') -> 'Any':
+    """Rebuild the member :meth:`EnumRegistry._make_reducible` reduced.
+
+    This is what :mod:`pickle` and :mod:`copy` reconstruct through, in place of
+    the value lookup ``Enum.__reduce_ex__`` would have reduced the member to.
+    It is a module-level function rather than a method so that every
+    :mod:`pickle` protocol can name it: protocols below 4 cannot reference a
+    callable nested inside a class.
+
+    Args:
+        namespace: The registry class to rebuild the member as an instance of.
+        args: The arguments to ``namespace._unregistered_member``.
+
+    Returns:
+        A member equal to the original and, like it, absent from every one of
+        ``namespace``'s lookup tables.
+
+    """
+    return namespace._unregistered_member(*args)  # pylint: disable=protected-access
+
+
+def _reduce_unregistered_member(  # pylint: disable=unused-argument
+        namespace: 'Type[EnumRegistry]', args: 'tuple[Any, ...]',
+        protocol: 'int') -> 'tuple[Callable[..., Any], tuple[Any, ...]]':
+    """The ``__reduce_ex__`` :meth:`EnumRegistry._make_reducible` installs.
+
+    Bound to its first two arguments with :func:`functools.partial`, so that
+    the reducer holds the ingredients of the member rather than the member
+    itself.
+
+    Args:
+        namespace: The registry class the member is an instance of.
+        args: The arguments to rebuild the member from.
+        protocol: The :mod:`pickle` protocol version, as passed by
+            :mod:`pickle` and :mod:`copy`. Unused -- the reduction is the same
+            for every protocol -- but accepted because both call this with it.
+
+    Returns:
+        The callable and arguments :mod:`pickle` and :mod:`copy` should rebuild
+        the member through.
+
+    """
+    return (_rebuild_unregistered_member, (namespace, args))
