@@ -438,7 +438,7 @@ class ProtocolRegistryTests(unittest.TestCase):
             ('none', None, 'must be a class'),
             ('descriptor argument (not unwrapped here)',
              ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'), 'must be a class'),
-            ('wrong class', object, 'ProtocolBase subclass'),
+            ('wrong class', object, 'Protocol subclass'),
         ):
             with self.subTest(value=label):
                 with self.assertRaises(RegistryError) as caught:
