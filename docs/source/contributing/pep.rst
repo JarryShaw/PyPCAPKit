@@ -953,12 +953,16 @@ against the waves above in two deliberate steps:
    <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
    beta rather than a final release, because the consistency sweep below had not
    run yet and was expected to find things.
-#. **The official** ``1.5.0`` **when the post-wave-1 consistency sweep is done.** The
-   sweep is described under `Delivery Sequence`_ below — prose against code,
-   missing tests, unaligned changes, and packet formats against the
-   specifications. Its whole point is to find what one-at-a-time defect work
-   does not, so shipping a final release before it has run would be shipping
-   ahead of the evidence.
+#. **The official** ``1.5.0`` **when the post-wave-1 consistency sweep is done.**
+   *Done.* The sweep is described under `Delivery Sequence`_ below — prose
+   against code, missing tests, unaligned changes, packet formats against the
+   specifications, and duplicated logic. Its whole point was to find what
+   one-at-a-time defect work does not, and its verified findings are closed:
+   :issue:`490`, :issue:`491`, :issue:`492`, :issue:`493`, :issue:`494`,
+   :issue:`495` and :issue:`496`, alongside the prose strand's own
+   :issue:`719`. A later defect wave made the prose strand's ground move again,
+   so it ran a second time as :issue:`1103`; that is closed too. ``1.5.0``
+   shipped once this work was in.
 
 **The version string is the release button, so it is worth knowing exactly what
 each step does before editing it.** ``.github/workflows/create-release.yml`` is
@@ -1058,13 +1062,13 @@ being in a later wave is not a reason to leave it alone if you want it now. Say
 so in the `discussion thread
 <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ and it moves.
 
-**Wave 1 — done or in flight.** The Mobility Header registry completion, the
-protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
+**Wave 1 — done.** The Mobility Header registry completion, the protocol
+bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
 :class:`~pcapkit.protocols.link.vlan.VLAN` C-Tag/S-Tag split, the option
 round-trip coverage harness, and reassembly's :rfc:`8200` timeout with
-bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
-`the issue tracker <https://github.com/JarryShaw/PyPCAPKit/issues>`__ rather than
-here.
+bidirectional flow tracing. Its defect tail closed out through the
+post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
+Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
 Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and

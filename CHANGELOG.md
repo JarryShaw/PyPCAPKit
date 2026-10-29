@@ -1,4 +1,4 @@
-## 1.5.0 -- unreleased
+## 1.5.0 -- 2026-10-29
 
 The largest release since 1.0, and the first recorded here as it happened rather than reconstructed. New extraction engines, ESP with payload decryption, SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's, and a defect programme run through the issue tracker, citing issues and pull requests from [#340](https://github.com/JarryShaw/PyPCAPKit/pull/340) to [#2257](https://github.com/JarryShaw/PyPCAPKit/pull/2257).
 
