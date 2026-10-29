@@ -221,7 +221,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     if not isinstance(protocol, type):
         raise RegistryError(f'protocol must be a class, not {protocol!r}')
     if not issubclass(protocol, ProtocolBase):
-        raise RegistryError(f'protocol must be a ProtocolBase subclass, not {protocol!r}')
+        raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
     name = protocol.__name__.upper()
     incumbent = protocol_registry.get(name)

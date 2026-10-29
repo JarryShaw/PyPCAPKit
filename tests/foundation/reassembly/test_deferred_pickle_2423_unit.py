@@ -245,7 +245,7 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
         """The flat ``{slot: value}`` shape the very first fix returned.
 
         Never released, but already pushed in an earlier revision of
-        :issue:`2424`'s fix -- accepting it costs nothing and protects anyone
+        :issue:`2423`'s fix -- accepting it costs nothing and protects anyone
         who pickled against that revision.
 
         """

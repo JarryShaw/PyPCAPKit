@@ -82,7 +82,7 @@ class RegisterClassGuardTests(unittest.TestCase):
                 with mock.patch.dict(klass.__proto__):
                     with self.assertRaises(RegistryError) as caught:
                         klass.register(code, dict)  # type: ignore[arg-type]
-                self.assertIn('ProtocolBase subclass', str(caught.exception))
+                self.assertIn('Protocol subclass', str(caught.exception))
 
     def test_descriptor_naming_a_non_class_raises_registry_error(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
@@ -107,7 +107,7 @@ class RegisterClassGuardTests(unittest.TestCase):
                 with mock.patch.dict(klass.__proto__):
                     with self.assertRaises(RegistryError) as caught:
                         klass.register(code, descriptor)  # type: ignore[arg-type]
-                self.assertIn('ProtocolBase subclass', str(caught.exception))
+                self.assertIn('Protocol subclass', str(caught.exception))
 
     def test_valid_class_and_descriptor_still_register(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
