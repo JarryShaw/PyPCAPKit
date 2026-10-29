@@ -14,6 +14,7 @@ which reconstructs fragmented TCP packets back to origin.
 
    .. automethod:: reassembly
    .. automethod:: submit
+   .. automethod:: _make_ports
 
    .. autoattribute:: __protocol_name__
    .. autoattribute:: __protocol_type__

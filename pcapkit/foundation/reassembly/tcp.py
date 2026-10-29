@@ -12,6 +12,7 @@ which reconstructs fragmented TCP packets back to origin.
 import math
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
                                                     DatagramID, Fragment, HoleDescriptor, Packet)
@@ -20,6 +21,8 @@ from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
 if TYPE_CHECKING:
     from typing import Type
+
+    from pcapkit.const.reg.apptype import TCP as AppType_TCP
 
 __all__ = ['TCP']
 
@@ -653,6 +656,85 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             index = stop
         return bytes(merged), conflicts
 
+    @staticmethod
+    def _make_ports(bufid: 'BufferID') -> 'tuple[AppType_TCP, AppType_TCP]':
+        """The flow's ``(source, destination)`` ports, as application types.
+
+        Arguments:
+            bufid: :term:`buffer <reasm.tcp.buffer>` identifier, whose positions
+                ``1`` and ``3`` are the source and destination ports.
+
+        Returns:
+            The pair :meth:`submit` hands
+            :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, i.e. what
+            :meth:`Transport.analyze
+            <pcapkit.protocols.transport.transport.Transport.analyze>` dispatches
+            the reassembled payload on (:issue:`2417`). Typed as the
+            *per-transport* registry :class:`~pcapkit.const.reg.apptype.tcp.TCP`
+            rather than as the base
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType`, because that is
+            what it really is: ``proto=tcp`` sends
+            :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`
+            through :meth:`AppType._dispatch
+            <pcapkit.const.reg.apptype.apptype.AppType._dispatch>` to the TCP
+            registry, and ``type(...) is TCP`` holds of the member it answers
+            with -- measured, for a registered port and an unassigned one alike.
+            :meth:`Transport.analyze
+            <pcapkit.protocols.transport.transport.Transport.analyze>` keeps the
+            base in its own signature, since it is the one method
+            :class:`~pcapkit.protocols.transport.udp.UDP` and
+            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each of
+            them would name a different registry.
+
+        Important:
+            Every port a 16-bit header field can hold resolves to a member, so
+            this raises for nothing that can come off the wire:
+            :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`
+            answers an assignment with its canonical service, a port inside a
+            documented IANA span with that span's label (``reserved`` for ``0``),
+            and one in no span at all with an unregistered ``unknown`` member --
+            never :obj:`None`, and without growing the registry (:issue:`860`).
+            It rejects a port outside ``0``-``65535`` and a non-:obj:`int`.
+
+            A :obj:`bool` is rejected by :meth:`Transport._make_port
+            <pcapkit.protocols.transport.transport.Transport._make_port>` rather
+            than by ``get``, which is the reason to go through it here and not
+            call ``get`` directly: :obj:`bool` is an :obj:`int` subclass, so
+            ``AppType.get(True, proto=tcp)`` resolves ``True`` as port ``1`` and
+            answers ``<TCP.tcpmux: 1 [tcp]>`` -- measured -- where ``_make_port``
+            raises, which is what closed :issue:`2287`. Calling ``get`` straight
+            would reopen it. None of the three can come out of a TCP header
+            either way; what ``_make_port`` also buys is idempotence, so a
+            ``bufid`` already holding a member passes through untouched.
+
+        Note:
+            The resolution is reached through
+            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through
+            :attr:`self.protocol
+            <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`,
+            which is what :meth:`submit` reads the analyser itself off. That is
+            deliberate: ``__protocol_type__`` is an extension point, and an
+            analyser plugged into it need only define ``analyze`` -- it is not
+            required to be a
+            :class:`~pcapkit.protocols.transport.transport.Transport` subclass
+            and so need not have ``_make_port`` at all, which reaching it
+            through ``self.protocol`` would turn into an
+            :exc:`AttributeError`. What a TCP port *means* belongs to the TCP
+            protocol either way, not to whatever consumes the payload, which is
+            also why the transport below is named outright rather than read off
+            the analyser.
+
+        """
+        # NOTE: ``_make_port`` is protected, and reached from outside its own
+        # class as :meth:`SCTP._decode_next_layer
+        # <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` reaches
+        # ``ProtocolBase._decode_next_layer``. Duplicating it here instead would
+        # put a second port normaliser beside the maker path's, free to drift
+        # from it; it is idempotent, so a ``bufid`` that already holds a member
+        # passes through unchanged.
+        return (TCP_Protocol._make_port(bufid[1], Enum_TransportProtocol.tcp),  # pylint: disable=protected-access
+                TCP_Protocol._make_port(bufid[3], Enum_TransportProtocol.tcp))  # pylint: disable=protected-access
+
     def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
                timeout: 'bool' = False) -> 'list[Datagram]':
         """Submit reassembled payload.
@@ -666,6 +748,34 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         Returns:
             Reassembled :term:`packets <reasm.tcp.datagram>`.
+
+        Important:
+            The ``(source, destination)`` pair handed to
+            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair
+            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than
+            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so
+            a deferred analysis dispatches on the named service rather than on a
+            number. The resolution is :meth:`Transport._make_port
+            <pcapkit.protocols.transport.transport.Transport._make_port>`, so it
+            is the one the maker path uses and cannot drift from it. See
+            :meth:`_make_ports` for why it is reached through
+            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through
+            :attr:`self.protocol
+            <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`.
+
+            For a *registered* port that is the very member
+            :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` reads off
+            a parsed header. For an unassigned one the two are **equal but not
+            identical**, and not even equally named: the parse path builds its
+            member through :meth:`EnumField._unregistered_member
+            <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`,
+            whose ``.name`` is ``'<unassigned>'``, where ``get`` builds its own,
+            named ``'unknown'`` -- measured on port ``50000``. Both are real
+            members of the same registry carrying the same :attr:`AppType.port
+            <pcapkit.const.reg.apptype.apptype.AppType.port>`, which is what
+            every reader of this pair goes on to use, so the distinction costs
+            nothing here; it is recorded because "the same member the header
+            carries" would be an overstatement of it.
 
         """
         datagram = []  # type: list[Datagram] # reassembled datagram
@@ -751,7 +861,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=bytes(payload),
-                        packet=Deferred(self.protocol.analyze, (bufid[1], bufid[3]), bytes(payload)),
+                        packet=Deferred(self.protocol.analyze,
+                                        self._make_ports(bufid), bytes(payload)),
                         conflict=conflict,
                     )
                     datagram.append(packet)

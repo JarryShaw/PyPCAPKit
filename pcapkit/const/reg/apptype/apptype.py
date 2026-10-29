@@ -2497,6 +2497,17 @@ class AppType(EnumRegistry, StrEnum):
         return self.port != other
 
     def __hash__(self) -> 'int':
+        """Hash the member by its port number, as :meth:`__eq__` compares it.
+
+        Keeping the two consistent is what lets a member and the bare
+        :obj:`int` port it carries be the same key of an :obj:`int`-keyed
+        mapping -- which is how :meth:`Transport.analyze
+        <pcapkit.protocols.transport.transport.Transport.analyze>` reads
+        :attr:`Transport.__proto__
+        <pcapkit.protocols.transport.transport.Transport.__proto__>` with
+        either one.
+
+        """
         return hash(self.port)
 
     @classmethod
@@ -2941,6 +2952,22 @@ class AppType(EnumRegistry, StrEnum):
         exactly the one this registry must not remember past the call that
         built it.
 
+        The member is made reducible through
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._make_reducible` before it is
+        returned, so that it survives :mod:`pickle` and :mod:`copy`. Without
+        that, ``Enum.__reduce_ex__`` would reduce it to a lookup of its own
+        crafted value -- ``TCP('unknown [54321 - tcp]')`` -- which
+        :meth:`_missing_` rejects as not a port, so the member pickled fine and
+        then raised :exc:`ValueError` on read-back. That bit reassembly, whose
+        :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` holds these
+        members in an unresolved
+        :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: measured
+        before the fix, 59,413 of the 65,536 possible ports -- every
+        ``unknown`` and every IANA-span label alike, not just the truly
+        unregistered ones -- failed to round-trip. Rebuilding re-enters this
+        method, so an unpickled member is unregistered exactly as the original
+        was and neither lookup table nor :data:`__registry__` grows.
+
         Args:
             value: Port number.
             name: Bare label for the unregistered member -- what
@@ -2956,7 +2983,9 @@ class AppType(EnumRegistry, StrEnum):
         obj.svc = name
         obj.port = value
         obj.proto = proto
-        return obj
+        # NOTE: reduce to this method's own (value, name, proto), not to the
+        # crafted ``temp`` the base was handed -- see _make_reducible's note.
+        return cls._make_reducible(obj, value, name, proto)
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Optional[AppType]':

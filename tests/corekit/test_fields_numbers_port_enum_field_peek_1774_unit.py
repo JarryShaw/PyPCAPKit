@@ -6,9 +6,14 @@ GitHub issue #1774. The field looks a port up in the registry rows and in
 miss builds its member through ``EnumField._unregistered_member``. That peek was
 written to stop ``get`` minting a member per ephemeral port. ``get`` does not
 mint (#860), so the growth it guarded against cannot happen; but the member
-``get`` builds on a miss is not the one a parse needs. These tests pin both
-halves, so that the peek's documented reason fails here the day it stops being
-true, and pin that a composite ``proto`` resolves a miss as ``get`` does.
+``get`` builds on a miss is not the one a parse needs -- it is named ``unknown``
+where a parse wants ``<unassigned>``. These tests pin both halves, so that the
+peek's documented reason fails here the day it stops being true, and pin that a
+composite ``proto`` resolves a miss as ``get`` does.
+
+The naming is the *only* half left. ``get``'s member was also unpicklable until
+#2417, which is a difference these tests used to assert; that was a defect in
+its own right, fixed there, and is now asserted the other way round.
 
 """
 import pickle
@@ -91,18 +96,41 @@ class PortEnumFieldPeekTests(unittest.TestCase):
                                      ('unknown', PORT, proto))
 
     def test_gets_own_member_for_a_miss_is_not_that_member(self) -> None:
-        """Why the field cannot just call ``get``: its miss member has no reducer
-        and another name. If this starts failing, ``get``'s member has become
-        what a parse needs, and the peek can go -- see #1774."""
+        """Why the field cannot just call ``get``: its miss member has another
+        name. If this starts failing, ``get``'s member has become what a parse
+        needs, and the peek can go -- see #1774.
+
+        ``get``'s member used to differ in a second way, which this test also
+        pinned: it carried no reducer, so pickling it raised
+        ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP`` on read-back.
+        That was a defect rather than a distinction -- reassembly dispatches on
+        these members, so an unresolved
+        :class:`~pcapkit.foundation.reassembly.data.data.Deferred` could not be
+        pickled for 90.7% of the port space -- and :issue:`2417` fixed it by
+        giving :meth:`AppType._unregistered_member
+        <pcapkit.const.reg.apptype.apptype.AppType._unregistered_member>` the
+        same per-instance ``__reduce_ex__`` the field's own path already had.
+        Both members now round-trip, so the ``name`` is the only difference
+        left, and it is the one that still justifies the peek.
+
+        """
         from pcapkit.const.reg.apptype import AppType
 
         for proto in self._protos():
             with self.subTest(proto=proto.name):
                 member = AppType.get(PORT, proto=proto)
+                parsed = self._field(proto).unpack(PORT.to_bytes(2, 'big'), {})
 
                 self.assertEqual(member.name, 'unknown')
-                with self.assertRaises(ValueError):
-                    pickle.loads(pickle.dumps(member))
+                self.assertEqual(parsed.name, '<unassigned>')
+                self.assertNotEqual(member.name, parsed.name)
+
+                # ... and the difference really is only the name now: both
+                # survive the round trip, and compare equal to each other.
+                restored = pickle.loads(pickle.dumps(member))
+                self.assertEqual(restored, member)
+                self.assertEqual(restored.name, 'unknown')
+                self.assertEqual(member, parsed)
 
     def test_a_composite_proto_resolves_a_miss_as_get_does(self) -> None:
         """``tcp | udp`` is a bare :class:`int` (``3``, which is SCTP's value).

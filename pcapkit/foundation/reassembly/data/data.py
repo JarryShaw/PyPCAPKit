@@ -12,13 +12,14 @@ __all__ = ['ReassemblyData', 'Completion', 'Deferred']
 if TYPE_CHECKING:
     from typing import Callable, Optional
 
+    from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase
 
 # registry key an analyser dispatches a reassembled payload on; see ``Deferred``
-_KT = TypeVar('_KT', 'TransType', 'tuple[int, int]')
+_KT = TypeVar('_KT', 'TransType', 'tuple[AppType_TCP, AppType_TCP]')
 
 
 class Completion(EnumLookup, StrEnum):
@@ -148,23 +149,37 @@ class Deferred(Generic[_KT]):
       :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`,
       which looks the next layer up by protocol registry number.
     * :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` builds a
-      ``Deferred[tuple[int, int]]``. It passes a ``(source, destination)`` port
-      pair, because :meth:`Transport.analyze
+      ``Deferred[tuple[AppType_TCP, AppType_TCP]]``. It passes a
+      ``(source, destination)`` port pair, because :meth:`Transport.analyze
       <pcapkit.protocols.transport.transport.Transport.analyze>` overrides that
       parameter to one: a reassembled transport-layer payload carries no
       protocol number, so its application protocol is inferred from the ports.
 
-    Those are the two cases the type parameter is constrained to. The pairing
-    the regression actually produced -- a port pair handed to an analyser
-    declared over :class:`~pcapkit.const.reg.transtype.TransType` -- is
-    rejected, which is the direction a real mismatch takes and the one
+    Those are the two cases the type parameter is constrained to. Both are
+    *named registry values* rather than one named value and one pair of bare
+    port numbers: a port is a member of
+    :class:`~pcapkit.const.reg.apptype.tcp.TCP` here -- the per-transport
+    registry itself, not the base
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType`, since that is what
+    :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`
+    really answers with -- so what the deferred analysis dispatches on is of a
+    piece with what the eager path dispatches on at
+    :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>`, whichever
+    reassembler built it. (Of a piece, not identical: for an *unassigned* port
+    the two paths build equal members by different routes, which
+    ``TCP.submit``'s own docstring records.)
+
+    The pairing the regression actually produced -- a port pair handed to an
+    analyser declared over :class:`~pcapkit.const.reg.transtype.TransType` --
+    is rejected, which is the direction a real mismatch takes and the one
     :issue:`2417` was about.
 
     Rejecting the *reverse* pairing is not guaranteed by mypy alone, for a
     reason outside this class: |aenum|_ ships no type stubs, so under
     ``ignore_missing_imports`` the ``aenum.IntEnum`` base of
     :class:`~pcapkit.const.reg.transtype.TransType` resolves to ``Any``. A
-    ``TransType`` is therefore accepted where a ``tuple[int, int]`` is
+    ``TransType`` is therefore accepted where a
+    ``tuple[AppType_TCP, AppType_TCP]`` is
     expected, and a ``Deferred[TransType]`` built over the port-pair analyser
     type-checks clean. That is a gap in the dependency's type coverage rather
     than in the constraint, which would bite both ways were ``TransType`` fully
