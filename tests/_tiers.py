@@ -81,25 +81,21 @@ engine, say -- but only when the capture name is a string literal. The call-time
 check sees the name however it was computed, e.g. ``sample_path(sample)`` in a
 parametrised loop, but only once the call is reached.
 
-What neither catches, deliberately: a unit-tier module that opens a capture without
-going through :func:`~tests._support.sample_path` at all, e.g. by joining
-:file:`examples/captures/` and a name itself. No *unit-tier* module does this:
-:file:`tests/protocols/misc/test_pcapng_unit.py`, for one, reads
-``sample_path('dhcp_big_endian.pcapng')`` inside the
-``try``/``except FileNotFoundError`` idiom :func:`explain` recommends. Only the
-*unit* tier is claimed there, deliberately: fixture-tier modules join the directory
-freely and are entitled to, e.g.
+What :func:`audit_module` does not catch *in general*: a unit-tier module that opens
+a capture without going through :func:`~tests._support.sample_path` at all, e.g. by
+joining :file:`examples/captures/` and a name itself. Fixture-tier modules join the
+directory freely and are entitled to, e.g.
 :file:`tests/protocols/test_option_coverage_runtime.py`, which imports
 :data:`SAMPLE_ROOT` from here and joins names onto it -- legal, because that tier
-runs only once the fixtures exist. The one unit-tier module that touches
-:data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, stats :file:`in.pcap`
-directly -- which is committed -- and separately loops over every name
-:func:`committed_captures` reports, each committed by construction, since that is
-git's own tracked listing rather than a name the test made up. But nothing stops the
-next unit-tier module from opening a *generated* capture that way, and the shape
-stays invisible here.
+runs only once the fixtures exist. Two unit-tier modules touch :data:`SAMPLE_ROOT`
+directly, outside the one specific indirection below, and both are safe by
+construction rather than by escaping notice: :file:`tests/test_tier_guard.py`
+stats :file:`in.pcap` directly -- which is committed -- and separately loops over
+every name :func:`committed_captures` reports; :file:`tests/project/
+test_capture_tracking.py` loops over git's own tracked listing the same way. Both
+read only names git already tracks, never a generated one.
 
-Flagging it in general was considered and rejected, with a measurement behind the
+Flagging *every* such join was considered and rejected, with a measurement behind the
 decision. A rule as broad as "any string literal ending in ``.pcap``" matches 18
 distinct literal values in the unit-tier modules under :file:`tests/`, across 85
 occurrences of them -- 199 occurrences once the fixture tier is counted too. Only
@@ -117,6 +113,23 @@ handled" idiom -- an :func:`os.path.isfile` check and a skip -- on top of the
 ``try``/``except`` one. So the rule this module enforces is stated as it is:
 capture reads go through :func:`~tests._support.sample_path`, and that is the door
 with the lock on it.
+
+One indirection through that door *is* caught, narrowly (#2426):
+:func:`sample_root_join_calls` follows a module-level name -- a bare string, or a
+tuple/list of them -- that is later joined straight onto :data:`SAMPLE_ROOT`,
+bypassing :func:`~tests._support.sample_path` altogether. This is exactly the shape
+:file:`tests/foundation/reassembly/test_datagram_deferred_pickle_2417_unit.py` used,
+with a module-level ``CAPTURES`` tuple read in a ``for`` loop whose body joined
+``SAMPLE_ROOT / name`` -- invisible to :func:`sample_path_calls`, since no
+``sample_path`` call is made at all. CI's unit-tests leg genuinely failed on that
+module, on every affected interpreter, for exactly the reason this guard exists to
+catch early: the capture was not on disk. What missed it was this *guard*, which
+ran clean over a tree that in fact carried the violation -- a static-analysis gap
+at review time, not a passing CI run. It stays narrow on purpose, for the reason
+the paragraph above gives for rejecting the broad literal rule: it fires only on
+``SAMPLE_ROOT / NAME`` for a ``NAME`` this module can resolve to a module-level
+string, tuple, or list of strings, never on the general "ends in .pcap" literal
+that rejected rule would have invented false positives from.
 
 The curated ``ALL`` tier
 ------------------------
@@ -192,7 +205,7 @@ __all__ = [
     'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
     'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
-    'guard_unavailable_reason', 'handled_lines', 'sample_path_calls',
+    'guard_unavailable_reason', 'handled_lines', 'sample_path_calls', 'sample_root_join_calls',
     'audit_module', 'check_unit_tier_read', 'explain',
     'skip_idiom_modules', 'skip_idiom_test_ids', 'fixture_tier_paths',
 ]
@@ -1279,8 +1292,11 @@ def _parse(module_path: 'str') -> 'Optional[ast.Module]':
     except (OSError, UnicodeDecodeError):
         return None
     # Cheap gate before the parse: nearly every module in the suite never
-    # mentions sample_path, and parsing them all would be work for nothing.
-    if 'sample_path' not in source:
+    # mentions sample_path or SAMPLE_ROOT, and parsing them all would be work
+    # for nothing. The second substring is what lets this same parse feed
+    # sample_root_join_calls(), which looks for SAMPLE_ROOT joins rather than
+    # sample_path() calls.
+    if 'sample_path' not in source and 'SAMPLE_ROOT' not in source:
         return None
     try:
         return ast.parse(source, filename=module_path)
@@ -1402,6 +1418,171 @@ def sample_path_calls(module_path: 'str') -> 'tuple[SampleCall, ...]':
     )
 
 
+def _is_sample_root(node: 'ast.expr') -> 'bool':
+    """Whether ``node`` names :data:`SAMPLE_ROOT`, bare or qualified.
+
+    Matched on the bare name alone, as :func:`_is_sample_path` matches
+    ``sample_path`` -- a false positive here only means a path join is checked
+    against git that did not need to be.
+
+    """
+    if isinstance(node, ast.Name):
+        return node.id == 'SAMPLE_ROOT'
+    if isinstance(node, ast.Attribute):
+        return node.attr == 'SAMPLE_ROOT'
+    return False
+
+
+def _string_constants(elements: 'list[ast.expr]') -> 'Optional[tuple[str, ...]]':
+    """The literal strings ``elements`` holds, or :data:`None` if any of them is not one.
+
+    A plain loop rather than a generator expression guarded by :func:`all`: mypy
+    narrows ``element`` to :class:`ast.Constant` inside this function's own body,
+    but not across the boundary of a second generator expression built from the
+    same ``all(...)`` check, which is what the two callers used to do.
+
+    """
+    values = []  # type: list[str]
+    for element in elements:
+        if not (isinstance(element, ast.Constant) and isinstance(element.value, str)):
+            return None
+        values.append(element.value)
+    return tuple(values)
+
+
+@functools.lru_cache(maxsize=None)
+def _module_level_string_tuples(tree: 'ast.Module') -> 'dict[str, tuple[str, ...]]':
+    """Module-level ``NAME = '...'`` / ``NAME = ('...', ...)`` / ``[...]`` bindings, by name.
+
+    Scoped to a single assignment target naming a bare module-level variable, whose
+    value is a string constant, or a tuple or list every element of which is one --
+    the shapes ``CAPTURE = 'a.pcap'`` and ``CAPTURES = ('a.pcap', 'b.pcap')`` take.
+    A later assignment to the same name overwrites the earlier one, matching normal
+    Python shadowing, and a value this cannot describe (a call, a comprehension, an
+    f-string) drops the name instead of guessing at it.
+
+    This is the one indirection :func:`sample_root_join_calls` follows -- see its
+    docstring and the module docstring's note on #2426 for why it stops here rather
+    than resolving an arbitrary expression.
+
+    """
+    bindings = {}  # type: dict[str, tuple[str, ...]]
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if not isinstance(target, ast.Name):
+            continue
+        value = node.value
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            bindings[target.id] = (value.value,)
+            continue
+        strings = _string_constants(value.elts) if isinstance(value, (ast.Tuple, ast.List)) else None
+        if strings:
+            bindings[target.id] = strings
+        else:
+            bindings.pop(target.id, None)
+    return bindings
+
+
+def _iterable_literal_strings(node: 'ast.expr',
+                              bindings: 'dict[str, tuple[str, ...]]') -> 'Optional[tuple[str, ...]]':
+    """The literal capture names a ``for ... in node:`` loop walks, if known.
+
+    ``node`` is either a bare module-level name resolved through ``bindings``
+    (:func:`_module_level_string_tuples`), or a tuple/list literal written on the
+    ``for`` line itself. Anything else -- a call such as ``sorted(CAPTURES)``, a
+    subscript, a comprehension -- is left as :data:`None`: this is a static,
+    best-effort pass, not a general evaluator.
+
+    """
+    if isinstance(node, ast.Name):
+        return bindings.get(node.id)
+    if isinstance(node, (ast.Tuple, ast.List)):
+        return _string_constants(node.elts) or None
+    return None
+
+
+def _sample_root_join_literals(tree: 'ast.Module') -> 'list[tuple[int, str]]':
+    """``(lineno, name)`` for every capture reached by joining :data:`SAMPLE_ROOT`
+    onto a module-level name, in source order.
+
+    Two shapes, both requiring the join to be ``SAMPLE_ROOT / NAME`` (or
+    ``_tiers.SAMPLE_ROOT / NAME``) literally -- a nested join such as
+    ``SAMPLE_ROOT / subdir / name`` is not resolved, since its left operand is
+    itself a :class:`ast.BinOp`, not :data:`SAMPLE_ROOT`:
+
+    * ``NAME`` is bound once, at module level, to a single string constant; or
+    * ``NAME`` is a ``for`` loop's target, and the loop's iterable is a
+      module-level name bound to a tuple/list of string constants, or such a
+      tuple/list written inline on the ``for`` line.
+
+    """
+    bindings = _module_level_string_tuples(tree)
+    found = []  # type: list[tuple[int, int, str]]
+
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)
+                and _is_sample_root(node.left)):
+            continue
+        right = node.right
+        if isinstance(right, ast.Name) and len(bindings.get(right.id, ())) == 1:
+            found.append((node.lineno, node.col_offset, bindings[right.id][0]))
+
+    for for_node in ast.walk(tree):
+        if not isinstance(for_node, ast.For):
+            continue
+        target = for_node.target
+        if not isinstance(target, ast.Name):
+            continue
+        names = _iterable_literal_strings(for_node.iter, bindings)
+        if not names:
+            continue
+        for node in ast.walk(for_node):
+            if (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)
+                    and _is_sample_root(node.left)
+                    and isinstance(node.right, ast.Name) and node.right.id == target.id):
+                for name in names:
+                    found.append((node.lineno, node.col_offset, name))
+
+    found.sort(key=lambda item: (item[0], item[1]))
+    return [(lineno, name) for lineno, _, name in found]
+
+
+@functools.lru_cache(maxsize=None)
+def sample_root_join_calls(module_path: 'str') -> 'tuple[SampleCall, ...]':
+    """Every capture name reached by joining :data:`SAMPLE_ROOT` onto a name bound
+    at module level, in source order (#2426).
+
+    This is the indirection the module docstring's note on #2426 describes:
+    :func:`sample_path_calls` only sees a literal argument to
+    :func:`~tests._support.sample_path` itself, so a module that skips that
+    function and joins :data:`SAMPLE_ROOT` directly onto a module-level name --
+    straight, or through a ``for`` loop over a module-level tuple/list -- was
+    invisible to :func:`audit_module`. :file:`tests/foundation/reassembly/
+    test_datagram_deferred_pickle_2417_unit.py` did exactly that with a
+    module-level ``CAPTURES`` tuple read in a ``for`` loop, and this guard's own
+    static pass missed it -- CI's unit-tests leg still failed on every affected
+    interpreter, since the capture genuinely was not on disk there; the guard
+    simply never flagged the violation to catch it before review.
+
+    Reuses :data:`SampleCall` rather than a new type: the two are positioned the
+    same way relative to a ``try``/``except FileNotFoundError`` -- see
+    :func:`handled_lines` -- and :func:`audit_module` reports both through the
+    same :func:`explain`.
+
+    """
+    tree = _parse(module_path)
+    if tree is None:
+        return ()
+
+    handled = handled_lines(module_path)
+    return tuple(
+        SampleCall(lineno, name, lineno in handled)
+        for lineno, name in _sample_root_join_literals(tree)
+    )
+
+
 def _display_path(module_path: 'pathlib.Path | str') -> 'str':
     """``module_path`` relative to the repository root, when it is inside it."""
     path = pathlib.Path(module_path)
@@ -1480,6 +1661,8 @@ def audit_module(module_path: 'pathlib.Path | str') -> 'list[str]':
     Only calls whose capture name is a string literal can be checked here;
     ``sample_path(sample)`` in a parametrised loop is invisible to a static
     pass, and :func:`check_unit_tier_read` catches those at call time instead.
+    :func:`sample_root_join_calls` adds the one indirection that bypasses
+    ``sample_path`` altogether (#2426); the two are merged here, in source order.
 
     The caller decides tier membership -- this function audits whatever it is
     handed, so a module can be audited by name in a test without having to be
@@ -1497,9 +1680,13 @@ def audit_module(module_path: 'pathlib.Path | str') -> 'list[str]':
     if tracked is None:
         return []
 
+    calls = sorted(
+        (*sample_path_calls(str(module_path)), *sample_root_join_calls(str(module_path))),
+        key=lambda call: call.lineno,
+    )
     return [
         explain(call.name, module_path, call.lineno)
-        for call in sample_path_calls(str(module_path))
+        for call in calls
         if call.name is not None and not call.handled and not _is_committed(call.name, tracked)
     ]
 

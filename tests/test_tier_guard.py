@@ -1238,6 +1238,127 @@ class AuditTests(unittest.TestCase):
         calls = _tiers.sample_path_calls(str(module))
         self.assertEqual([call.name for call in calls], [None])
 
+    def test_a_module_level_tuple_joined_onto_sample_root_is_flagged(self) -> None:
+        """#2426: the indirection this guard missed on PR #2421's first revision.
+
+        ``tests/foundation/reassembly/test_datagram_deferred_pickle_2417_unit.py``
+        read four generated captures through exactly this shape -- a module-level
+        ``CAPTURES`` tuple, read in a ``for`` loop whose body joined
+        ``SAMPLE_ROOT / name`` -- and no ``sample_path`` call appears anywhere, so
+        :func:`~tests._tiers.sample_path_calls` saw nothing. CI's unit-tests leg
+        genuinely failed on that revision, on every affected interpreter, because
+        the capture was not on disk; this guard's own static pass is what missed
+        the violation, not CI.
+
+        """
+        module = write_module(self.tmp_path, 'test_root_join_loop_unit.py', """
+            from tests._tiers import SAMPLE_ROOT
+
+            CAPTURES = ('test.pcap', 'http6.cap')
+
+
+            class Tests:
+                def test_every_capture(self):
+                    for name in CAPTURES:
+                        path = SAMPLE_ROOT / name
+                        assert path.is_file()
+            """)
+
+        findings = _tiers.audit_module(module)
+        self.assertEqual(len(findings), 2)
+        self.assertIn("test_root_join_loop_unit.py:9", findings[0])
+        self.assertIn("'test.pcap'", findings[0])
+        self.assertIn("test_root_join_loop_unit.py:9", findings[1])
+        self.assertIn("'http6.cap'", findings[1])
+
+        calls = _tiers.sample_root_join_calls(str(module))
+        self.assertEqual([(call.lineno, call.name, call.handled) for call in calls],
+                         [(9, 'test.pcap', False), (9, 'http6.cap', False)])
+        # Invisible to the sample_path-call scan, which is the whole point.
+        self.assertEqual(_tiers.sample_path_calls(str(module)), ())
+
+    def test_a_direct_module_level_name_joined_onto_sample_root_is_flagged(self) -> None:
+        """The simpler shape: no loop, a single module-level string joined straight."""
+        module = write_module(self.tmp_path, 'test_root_join_direct_unit.py', """
+            from tests._tiers import SAMPLE_ROOT
+
+            CAPTURE = 'test.pcap'
+
+
+            def test_reads_it():
+                path = SAMPLE_ROOT / CAPTURE
+                assert path.is_file()
+            """)
+
+        findings = _tiers.audit_module(module)
+        self.assertEqual(len(findings), 1)
+        self.assertIn("test_root_join_direct_unit.py:7", findings[0])
+        self.assertIn("'test.pcap'", findings[0])
+
+    def test_a_committed_capture_joined_onto_sample_root_is_not_flagged(self) -> None:
+        """The same loop shape, over a committed name, is fine -- as a direct
+        ``sample_path('in.pcap')`` call already is."""
+        module = write_module(self.tmp_path, 'test_root_join_committed_unit.py', """
+            from tests._tiers import SAMPLE_ROOT
+
+            CAPTURES = ('in.pcap',)
+
+
+            def test_reads_a_committed_capture(self) -> None:
+                for name in CAPTURES:
+                    path = SAMPLE_ROOT / name
+                    assert path.is_file()
+            """)
+        self.assertEqual(_tiers.audit_module(module), [])
+
+    def test_a_handled_join_onto_sample_root_is_not_flagged(self) -> None:
+        """The skip idiom opts the loop out, the same as it does a ``sample_path`` call."""
+        module = write_module(self.tmp_path, 'test_root_join_handled_unit.py', """
+            import unittest
+
+            from tests._tiers import SAMPLE_ROOT
+
+            CAPTURES = ('test.pcap',)
+
+
+            class Tests(unittest.TestCase):
+                def test_skips_without_the_fixture(self):
+                    try:
+                        for name in CAPTURES:
+                            path = SAMPLE_ROOT / name
+                            assert path.is_file()
+                    except FileNotFoundError as exc:
+                        self.skipTest(str(exc))
+            """)
+        self.assertEqual(_tiers.audit_module(module), [])
+
+    def test_a_computed_iterable_joined_onto_sample_root_is_left_to_a_human(self) -> None:
+        """Deliberately narrow (see the module docstring's #2426 note): a ``for``
+        loop whose iterable is not a bare module-level name or an inline literal
+        tuple/list -- here, ``sorted(CAPTURES)`` rather than bare ``CAPTURES`` --
+        is not resolved, even though ``CAPTURES`` itself is a module-level tuple
+        this guard could otherwise see straight through.
+
+        ``CAPTURES`` has to be module-level and unambiguous for this to actually
+        discriminate: a loop over a mere function parameter would pass whether or
+        not the resolver follows ``sorted(...)``, since the parameter is not a
+        module-level binding either way.
+
+        """
+        module = write_module(self.tmp_path, 'test_root_join_computed_unit.py', """
+            from tests._tiers import SAMPLE_ROOT
+
+            CAPTURES = ('test.pcap', 'http6.cap')
+
+
+            def test_reads_them_sorted():
+                for name in sorted(CAPTURES):
+                    path = SAMPLE_ROOT / name
+                    assert path.is_file()
+            """)
+        self.assertEqual(_tiers.audit_module(module), [])
+        self.assertEqual(_tiers.sample_root_join_calls(str(module)), ())
+
     def test_a_qualified_call_is_recognised(self) -> None:
         """``_support.sample_path(...)`` counts as much as the bare name."""
         module = write_module(self.tmp_path, 'test_qualified_unit.py', """
