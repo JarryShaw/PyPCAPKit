@@ -44,7 +44,7 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
 carries only the version being released; this page is the whole recorded history.
 
-* **1.5.0** (unreleased) -- The largest release since 1.0, and the first
+* **1.5.0** (2026-10-29) -- The largest release since 1.0, and the first
   recorded here as it happened rather than reconstructed: more extraction
   engines, ESP with payload decryption, SCTP and NGAP over SCTP,
   and a logger that no longer hijacks the consumer's. :doc:`Full changelog

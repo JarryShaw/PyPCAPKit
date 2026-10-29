@@ -1,4 +1,4 @@
-1.5.0 -- unreleased
+1.5.0 -- 2026-10-29
 ===================
 
 The largest release since 1.0, and the first recorded here as it happened rather

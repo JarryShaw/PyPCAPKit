@@ -397,7 +397,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
@@ -1372,12 +1372,16 @@ against the waves above in two deliberate steps:</p>
 defect tail in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a>, and closing it earned a
 beta rather than a final release, because the consistency sweep below had not
 run yet and was expected to find things.</p></li>
-<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>when the post-wave-1 consistency sweep is done.</strong> The
-sweep is described under <a class="reference internal" href="#delivery-sequence">Delivery Sequence</a> below — prose against code,
-missing tests, unaligned changes, and packet formats against the
-specifications. Its whole point is to find what one-at-a-time defect work
-does not, so shipping a final release before it has run would be shipping
-ahead of the evidence.</p></li>
+<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>when the post-wave-1 consistency sweep is done.</strong>
+<em>Done.</em> The sweep is described under <a class="reference internal" href="#delivery-sequence">Delivery Sequence</a> below — prose
+against code, missing tests, unaligned changes, packet formats against the
+specifications, and duplicated logic. Its whole point was to find what
+one-at-a-time defect work does not, and its verified findings are closed:
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/490">#490</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/492">#492</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/493">#493</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/494">#494</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/495">#495</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>, alongside the prose strand’s own
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>. A later defect wave made the prose strand’s ground move again,
+so it ran a second time as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; that is closed too. <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code>
+shipped once this work was in.</p></li>
 </ol>
 <p><strong>The version string is the release button, so it is worth knowing exactly what
 each step does before editing it.</strong> <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> is
@@ -1479,13 +1483,13 @@ nobody has started them.</p>
 <p>It is a sequencing note, not a commitment: nothing here is claimed, and an item
 being in a later wave is not a reason to leave it alone if you want it now. Say
 so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> and it moves.</p>
-<p><strong>Wave 1 — done or in flight.</strong> The Mobility Header registry completion, the
-protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
+<p><strong>Wave 1 — done.</strong> The Mobility Header registry completion, the protocol
+bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
 <a class="reference internal" href="../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> C-Tag/S-Tag split, the option
 round-trip coverage harness, and reassembly’s <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> timeout with
-bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> rather than
-here.</p>
+bidirectional flow tracing. Its defect tail closed out through the
+post-wave-1 consistency sweep described under <a class="reference internal" href="#release-plan-1-5-0-in-two-steps">Release Plan — 1.5.0 in Two
+Steps</a> above.</p>
 <p><strong>Wave 2 — the protocol pairs that want a shared abstract base</strong>, per <a class="reference internal" href="#more-protocols-more">More
 Protocols, More!!!</a> above: <strong>ICMP with ICMPv6</strong>, <strong>TLS/SSL with DTLS</strong>, and
 <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>, plus <strong>IGMP</strong> on its own. These are grouped
@@ -1731,7 +1735,7 @@ on this family.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e0f63a88"></script>
+</div><script src="../_static/documentation_options.js?v=623e1633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
