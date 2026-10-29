@@ -1273,6 +1273,20 @@ Fixed
   shadow a base class's slots under a subclass declaring its own, miscount a
   bare-string ``__slots__ = 'name'``, or read a private, name-mangled slot under
   its unmangled spelling (:issue:`2423`, :issue:`2425`, :pr:`2424`).
+* that same ``Deferred`` still failed to pickle under protocol 0 or 1 on GraalPy
+  25.4, after :issue:`2423`'s fix: ``copyreg._reduce_ex``, which handles protocol
+  0 and 1 before ``__getstate__`` is ever consulted, walks ``cls.__mro__`` for a
+  base to compute a base-object state from, and on GraalPy that walk stops at
+  :class:`~typing.Generic` itself rather than at :class:`object`, raising
+  ``TypeError: typing.Generic() takes no arguments``. ``Deferred.__reduce_ex__``
+  now hard-codes the ``base=object, state=None`` outcome the walk always reached
+  on CPython for protocol 0 and 1, so the walk -- and ``Generic`` -- is no longer
+  part of the route pickling takes. The same override also checks for, and
+  defers to, a subclass's own ``__reduce__`` before building that hard-coded
+  tuple -- without that check a ``Deferred`` subclass overriding ``__reduce__``
+  had it silently ignored at protocol 0 and 1 while protocol 2 and above (via
+  ``object.__reduce_ex__`` unchanged) kept honouring it (:issue:`2433`,
+  :pr:`2435`).
 
 pcapkit.interface
 -----------------

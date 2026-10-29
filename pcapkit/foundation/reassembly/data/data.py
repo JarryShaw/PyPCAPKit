@@ -11,7 +11,7 @@ from pcapkit.utilities.compat import StrEnum, auto
 __all__ = ['ReassemblyData', 'Completion', 'Deferred']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Callable, Optional, SupportsIndex
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
@@ -221,6 +221,70 @@ class Deferred(Generic[_KT]):
 
         """
         return self.analyze(self.proto, self.payload)
+
+    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'Any':
+        """Pickling support for protocol 0 and 1.
+
+        :meth:`object.__reduce_ex__` hands protocol 0 and 1 off to
+        :func:`copyreg._reduce_ex`, which -- *before* it ever consults
+        :meth:`__getstate__` -- walks ``type(self).__mro__`` looking for the
+        first base that is either not a heap type or whose own ``__new__`` is
+        bound to itself, to compute a base-object state via ``base(self)``. On
+        CPython, :class:`~typing.Generic` is a heap type and its ``__new__``
+        is just the inherited ``object.__new__`` (bound to ``object``, not to
+        ``Generic``), so neither check fires there and the walk continues to
+        :class:`object` itself, which *is* a non-heap type -- the walk's first
+        check breaks on it, so ``base`` is ``object`` and the computed state is
+        :data:`None`. On GraalPy 25.4, ``Generic`` is itself a non-heap
+        (built-in) type there -- ``Generic.__flags__`` lacks ``_HEAPTYPE`` --
+        so the walk's *first* check breaks on ``Generic`` directly, one step
+        earlier than on CPython, without ever reaching the ``__new__`` check
+        at all. ``base`` therefore resolves to ``Generic`` itself, and the
+        walk calls ``Generic(self)``, which raises::
+
+            TypeError: typing.Generic() takes no arguments
+
+        :meth:`__getstate__`/:meth:`__setstate__` never run in that failure:
+        they only ever supply the *dict* half of the reduction tuple the walk
+        above is computing the *base-object* half for, so defining them
+        (:issue:`2423`, :issue:`2425`) does nothing to protect against a
+        GraalPy-specific outcome of a walk that happens before either is
+        consulted.
+
+        This override sidesteps the walk entirely rather than trying to steer
+        it: for protocol 0 and 1 it hard-codes the one outcome the walk was
+        ever going to reach for this class -- ``base=object``,
+        ``state=None`` -- and builds the same ``(callable, args, state)``
+        reduction :func:`copyreg._reduce_ex` itself would have, with
+        :meth:`__getstate__`'s own ``(dict_or_None, slots)`` pair as the
+        third element, restored through :meth:`__setstate__` exactly as
+        before. ``Deferred`` has no base below :class:`object` that could
+        need special handling -- :class:`~typing.Generic` carries no runtime
+        state of its own -- so hard-coding that outcome changes nothing about
+        *what* gets pickled, only *how* protocol 0 and 1 get there: the MRO
+        walk, and ``Generic`` along with it, is no longer part of the route at
+        all. Protocol 2 and above are untouched, deferring to
+        :meth:`object.__reduce_ex__` exactly as before this method existed --
+        their own ``__reduce_ex__`` never walked the MRO this way to begin
+        with, building a reduction straight from ``__getstate__`` instead.
+
+        A subclass that overrides ``__reduce__`` is checked for first, and
+        deferred to, before any of the above: :meth:`object.__reduce_ex__`
+        itself does this -- for *every* protocol, including 0 and 1, it
+        calls a non-default ``__reduce__`` in preference to building a
+        reduction of its own -- so hard-coding the protocol 0/1 tuple here
+        without the same check would silently drop such a subclass's
+        override at exactly those two protocols, while protocol 2 and above
+        (going through ``object.__reduce_ex__`` unchanged) kept honouring
+        it.
+
+        """
+        if type(self).__reduce__ is not object.__reduce__:
+            return self.__reduce__()
+        if int(protocol) >= 2:
+            return object.__reduce_ex__(self, protocol)
+        return (copyreg._reconstructor, (type(self), object, None),  # type: ignore[attr-defined] # pylint: disable=protected-access
+                self.__getstate__())
 
     def __getstate__(self) -> 'tuple[Optional[dict[str, Any]], dict[str, Any]]':
         """Pickling support.
