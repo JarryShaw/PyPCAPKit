@@ -205,8 +205,8 @@ BLANK LINE
 footer (optional)
 ```
 
-`type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci`, `chore` or `release` —
-those are the ones in use. `scope` names the part of the package affected — `tcp`, `corekit`,
+`type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci`, `chore`, `release` or
+`const` — those are the ones in use. `scope` names the part of the package affected — `tcp`, `corekit`,
 `schema`, `ipv4`, `vendor` — and several are separated by commas inside the parentheses, as in `fix(link,internet):`
 or `test(utilities,foundation):`. The scope may be omitted where nothing narrower than the whole
 project applies, as in `docs:`.
