@@ -244,9 +244,9 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
     def test_setstate_still_accepts_the_first_revisions_flat_shape(self) -> None:
         """The flat ``{slot: value}`` shape the very first fix returned.
 
-        Never released, but already pushed to this pull request's earlier
-        commit -- accepting it costs nothing and protects anyone who
-        pickled against that commit.
+        Never released, but already pushed in an earlier revision of
+        :issue:`2424`'s fix -- accepting it costs nothing and protects anyone
+        who pickled against that revision.
 
         """
         from pcapkit.foundation.reassembly.data.data import Deferred
