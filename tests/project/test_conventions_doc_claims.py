@@ -1316,8 +1316,8 @@ class ProcessConventionTests(unittest.TestCase):
 
         :file:`.github/PULL_REQUEST_TEMPLATE.md` is where a contributor actually meets
         the list, so it is the ground truth rather than a list retyped into this file.
-        Note the label set is a **superset**: ``const`` is a type-ish label with no
-        tickbox, so this is a one-way check by design.
+        The check runs one way, template to page, by design: it would not catch a page
+        label gaining no tickbox, only a tickbox naming no label.
 
         """
         types = re.findall(r'^- \[ \] `([a-z]+)` ', self.TEMPLATE.read_text(encoding='utf-8'),

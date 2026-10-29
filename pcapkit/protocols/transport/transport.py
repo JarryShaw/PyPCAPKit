@@ -185,8 +185,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
             Nothing is written back on a miss either way, so a payload on an
             unregistered port does not grow a process-wide registry -- see
-            :meth:`ProtocolBase._lookup_registry
-            <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`.
+            :meth:`Protocol._lookup_registry
+            <pcapkit.protocols.protocol.Protocol._lookup_registry>`.
 
         .. versionchanged:: 1.5.0
 

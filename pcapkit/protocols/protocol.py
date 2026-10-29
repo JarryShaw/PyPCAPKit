@@ -720,7 +720,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         See Also:
             :mod:`pcapkit.corekit.context` for what this channel is for, and
-            :meth:`self._get_context <ProtocolBase._get_context>` for how a
+            :meth:`self._get_context
+            <pcapkit.protocols.protocol.Protocol._get_context>` for how a
             protocol implementation reaches its own entry.
 
         """
@@ -1264,7 +1265,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 see the note below.
             packet: Packet context of the enclosing layer, a :obj:`dict` as
                 handed over by
-                :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
+                :meth:`self._import_next_layer
+                <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
                 While parsing, it is republished as ``__packet__`` so that
                 :meth:`self.unpack <Protocol.unpack>` -- and through it the
                 schema -- can see it; see the note below.
@@ -1277,7 +1279,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 It is consumed here rather
                 than being forwarded to :meth:`self.read <Protocol.read>`, and is
                 propagated to nested layers by
-                :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
+                :meth:`self._import_next_layer
+                <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
             **kwargs: Arbitrary keyword arguments.
 
         Raises:
@@ -1298,7 +1301,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             each of a protocol's producers passes through. That is deliberate,
             and the normalisation below relies on it: fixing a spelling here
             fixes it for the engines, for every
-            :meth:`_import_next_layer <ProtocolBase._import_next_layer>`
+            :meth:`_import_next_layer
+            <pcapkit.protocols.protocol.Protocol._import_next_layer>`
             implementation, and for any third party protocol that copied their
             shape, rather than one call site at a time.
 
@@ -1734,7 +1738,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     def _get_context(self, cls: 'Optional[Type[_CTX]]' = None) -> 'Optional[_CTX]':
         """Get the caller supplied context for this protocol, if any.
 
-        The lookup is keyed on :meth:`self.id <ProtocolBase.id>`, so a
+        The lookup is keyed on :meth:`self.id
+        <pcapkit.protocols.protocol.Protocol.id>`, so a
         protocol finds its own context without knowing how the caller spelled
         the registry.
 
@@ -2225,10 +2230,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Arguments:
             registry: dispatch registry to read, i.e. :attr:`self.__proto__
-                <ProtocolBase.__proto__>` or one of the per-protocol
-                ``__option__`` / ``__chunk__`` / ``__block__`` family. Passed in
-                rather than read from the class, so that a caller reaching the
-                registry through an instance keeps doing so.
+                <pcapkit.protocols.protocol.Protocol.__proto__>` or one of the
+                per-protocol ``__option__`` / ``__chunk__`` / ``__block__``
+                family. Passed in rather than read from the class, so that a
+                caller reaching the registry through an instance keeps doing
+                so.
             code: registry key to look up, i.e. the wire code being dispatched on
 
         Returns:
@@ -2261,9 +2267,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Arguments:
             registry: next layer protocol registry, i.e. :attr:`self.__proto__
-                <ProtocolBase.__proto__>`. Passed in rather than read from the
-                class, so that a caller reaching the registry through an
-                instance keeps doing so.
+                <pcapkit.protocols.protocol.Protocol.__proto__>`. Passed in
+                rather than read from the class, so that a caller reaching the
+                registry through an instance keeps doing so.
             proto: next layer protocol index
 
         Returns:
@@ -2273,15 +2279,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Important:
             The lookup itself is :meth:`self._lookup_registry
-            <ProtocolBase._lookup_registry>`, so a miss does not grow the shared
-            registry. What this adds is the next-layer-specific resolution step:
-            the entry found -- registered, or the fallback -- may be a
+            <pcapkit.protocols.protocol.Protocol._lookup_registry>`, so a miss
+            does not grow the shared registry. What this adds is the
+            next-layer-specific resolution step: the entry found --
+            registered, or the fallback -- may be a
             :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a
             class, and it is resolved to the class it names.
 
             Nothing is written back, on a hit or a miss. A miss has no key to
             write under, and recording one would be exactly the insertion
-            :meth:`self._lookup_registry <ProtocolBase._lookup_registry>` exists
+            :meth:`self._lookup_registry
+            <pcapkit.protocols.protocol.Protocol._lookup_registry>` exists
             to avoid. A hit memoised under ``proto`` would retain a class that
             :func:`importlib.reload` then makes stale, and would make parsing
             mutate a registry shared by the whole process (:issue:`1559`). The
@@ -2398,8 +2406,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             The captured octets are the first ``length`` of ``file_``, or all of
             it when it holds fewer, as a truncated capture does. They are short
             of the header when there are fewer than the next layer's
-            :meth:`__length_hint__ <ProtocolBase.__length_hint__>`, unless the
-            header it parsed, :attr:`length <ProtocolBase.length>` octets long, fits
+            :meth:`__length_hint__
+            <pcapkit.protocols.protocol.Protocol.__length_hint__>`, unless the
+            header it parsed, :attr:`length
+            <pcapkit.protocols.protocol.Protocol.length>` octets long, fits
             in them anyway: for a variable-length header such as
             :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` the hint is the longest
             form rather than the shortest. A next layer that reports no hint is
