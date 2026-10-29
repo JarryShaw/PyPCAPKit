@@ -126,7 +126,7 @@ This class is reached in these ways:
 1. **An unrecognised protocol number.**
    :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real
    IANA extension header (:rfc:`5533`) with no dedicated parser, so
-   :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>`
+   :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
    would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That
    has no ``next`` field, so the walk in
    :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` would

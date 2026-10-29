@@ -178,11 +178,11 @@ RFC_URL = 'https://datatracker.ietf.org/doc/html/rfc'
 _RFC_ROLE = re.compile(r':rfc:`(\d+)(?:#([\w.-]+))?`')
 
 #: Anchor prefixes Sphinx renders as words rather than as part of the target,
-#: from ``sphinx.roles._format_rfc_target`` (read from Sphinx 9.1.0, the version
-#: this repository builds its documentation with): ``#section-3`` is titled
-#: ``Section 3``, and an anchor of any other shape is left exactly as written.
-#: Kept level with Sphinx so the Markdown link and the rendered documentation say
-#: the same thing about the same page, which is the whole point of rule 2.
+#: from ``sphinx.roles._format_rfc_target`` (read from Sphinx 9.1.0): ``#section-3``
+#: is titled ``Section 3``, and an anchor of any other shape is left exactly as
+#: written. Kept level with the Sphinx that ``docs/requirements.txt`` pins, so the
+#: Markdown link and the rendered documentation say the same thing about the same
+#: page, which is the whole point of rule 2.
 _RFC_ANCHORS = frozenset({'appendix', 'page', 'section'})
 
 #: The Sphinx configuration whose ``extlinks`` table :data:`EXTLINKS` mirrors.

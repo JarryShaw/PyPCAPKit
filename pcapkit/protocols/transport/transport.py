@@ -79,7 +79,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Arguments:
             code: port number
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Important:
             This method must be called from a non-abstract class, as the
@@ -115,7 +115,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
            Takes the protocol as one ``protocol`` argument, a
            :class:`~pcapkit.corekit.module.ModuleDescriptor` or a
-           :class:`~pcapkit.protocols.protocol.Protocol` subclass, in place of
+           :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass, in place of
            the ``module`` and ``class_`` names.
 
         """
@@ -145,7 +145,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`
+            Parsed payload as a :class:`~pcapkit.protocols.protocol.ProtocolBase`
             instance.
 
         Important:

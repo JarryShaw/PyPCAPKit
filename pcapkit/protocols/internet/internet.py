@@ -182,7 +182,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a

@@ -183,7 +183,7 @@ intersphinx_mapping = {
 # Those packages are therefore linked to their project pages instead, through
 # :data:`rst_epilog` below (#1936).
 
-#: The label on the note in :file:`pcapkit/foundation/engines/3rdparty.rst` that
+#: The label on the note in :file:`docs/source/pcapkit/foundation/engines/3rdparty.rst` that
 #: says which distribution installs the ``pcap`` module, which ``|pcap|_`` links
 #: to (:issue:`1948`).
 PCAP_MODULE_LABEL = 'pcap-module'
