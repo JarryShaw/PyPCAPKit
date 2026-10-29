@@ -642,7 +642,7 @@ override it. Every implemented header does, and
 <dd><p>The extension header this instance stands in for.</p>
 <p>In the <em>fallback</em> role (this instance parsed this module’s own schema)
 this is <strong>not</strong> the base
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.protocol" title="pcapkit.protocols.protocol.ProtocolBase.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.protocol</span></code></a>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.protocol" title="pcapkit.protocols.protocol.Protocol.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.protocol</span></code></a>
 meaning (“name of next layer protocol”). On the owner’s ruling for
 GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a> it is deliberately repointed at this
 instance’s <em>own</em> identity, i.e. which header’s format it parsed, such as
@@ -668,7 +668,7 @@ data model with no such field (<code class="docutils literal notranslate"><span 
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__data__" title="pcapkit.protocols.protocol.Protocol.__data__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__data__</span></code></a> rather than an
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> test on <code class="docutils literal notranslate"><span class="pre">self._info</span></code>, because a <code class="docutils literal notranslate"><span class="pre">make</span></code>-only
 instance has no <code class="docutils literal notranslate"><span class="pre">_info</span></code> at all. Reading it would turn
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.protocol" title="pcapkit.protocols.protocol.ProtocolBase.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.protocol</span></code></a>,
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.protocol" title="pcapkit.protocols.protocol.Protocol.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.protocol</span></code></a>,
 which only needs <code class="docutils literal notranslate"><span class="pre">self._protos</span></code>, into an <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>;
 <code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_ipv6_extension_unit.py</span></code> constructs
 exactly that instance.</p>
@@ -1008,7 +1008,7 @@ number 140; see its docstring.</p></li>
 <code class="docutils literal notranslate"><span class="pre">IPv6-Route</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>, <code class="docutils literal notranslate"><span class="pre">MH</span></code>, <code class="docutils literal notranslate"><span class="pre">HIP</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6-Frag</span></code> and <code class="docutils literal notranslate"><span class="pre">AH</span></code> all
 have dedicated classes. When one of <em>those</em> raises,
 <a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>
-(<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase._import_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code></a>)
+(<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a>)
 would substitute plain <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, which loses
 <code class="docutils literal notranslate"><span class="pre">next</span></code> and crashes the walk as in path 1.
 <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._import_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._import_next_layer</span></code></a> catches

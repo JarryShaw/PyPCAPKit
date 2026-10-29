@@ -604,7 +604,7 @@ filter turning them into errors cannot replace it.</p>
 it to an enclosing block. Under a filter turning warnings into errors, the
 error is then raised where the block that kept them is left – the end of
 the trial parse, inside the guard it was raised in when nothing was held.</p>
-<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._parse_next_layer" title="pcapkit.protocols.protocol.ProtocolBase._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._parse_next_layer</span></code></a> uses this for the
+<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._parse_next_layer</span></code></a> uses this for the
 trial parse it replaces with <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when the
 header was not captured, or that <a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>
 replaces when it raises: the warnings describe a layer the result does not

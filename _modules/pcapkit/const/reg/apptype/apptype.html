@@ -2999,8 +2999,22 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">!=</span> <span class="n">other</span>
 
+<div class="viewcode-block" id="AppType.__hash__">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__hash__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Hash the member by its port number, as :meth:`__eq__` compares it.</span>
+
+<span class="sd">        Keeping the two consistent is what lets a member and the bare</span>
+<span class="sd">        :obj:`int` port it carries be the same key of an :obj:`int`-keyed</span>
+<span class="sd">        mapping -- which is how :meth:`Transport.analyze</span>
+<span class="sd">        &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` reads</span>
+<span class="sd">        :attr:`Transport.__proto__</span>
+<span class="sd">        &lt;pcapkit.protocols.transport.transport.Transport.__proto__&gt;` with</span>
+<span class="sd">        either one.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="AppType._dispatch">
 <a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._dispatch">[docs]</a>
@@ -3467,6 +3481,22 @@
 <span class="sd">        exactly the one this registry must not remember past the call that</span>
 <span class="sd">        built it.</span>
 
+<span class="sd">        The member is made reducible through</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry._make_reducible` before it is</span>
+<span class="sd">        returned, so that it survives :mod:`pickle` and :mod:`copy`. Without</span>
+<span class="sd">        that, ``Enum.__reduce_ex__`` would reduce it to a lookup of its own</span>
+<span class="sd">        crafted value -- ``TCP('unknown [54321 - tcp]')`` -- which</span>
+<span class="sd">        :meth:`_missing_` rejects as not a port, so the member pickled fine and</span>
+<span class="sd">        then raised :exc:`ValueError` on read-back. That bit reassembly, whose</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` holds these</span>
+<span class="sd">        members in an unresolved</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: measured</span>
+<span class="sd">        before the fix, 59,413 of the 65,536 possible ports -- every</span>
+<span class="sd">        ``unknown`` and every IANA-span label alike, not just the truly</span>
+<span class="sd">        unregistered ones -- failed to round-trip. Rebuilding re-enters this</span>
+<span class="sd">        method, so an unpickled member is unregistered exactly as the original</span>
+<span class="sd">        was and neither lookup table nor :data:`__registry__` grows.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            value: Port number.</span>
 <span class="sd">            name: Bare label for the unregistered member -- what</span>
@@ -3482,7 +3512,9 @@
         <span class="n">obj</span><span class="o">.</span><span class="n">svc</span> <span class="o">=</span> <span class="n">name</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">proto</span> <span class="o">=</span> <span class="n">proto</span>
-        <span class="k">return</span> <span class="n">obj</span></div>
+        <span class="c1"># NOTE: reduce to this method's own (value, name, proto), not to the</span>
+        <span class="c1"># crafted ``temp`` the base was handed -- see _make_reducible's note.</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_reducible</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AppType._missing_">

@@ -912,13 +912,16 @@
 
 
 <span class="c1">#: contextvars.ContextVar[int]: How many layers of the frame being dissected</span>
-<span class="c1">#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses; see</span>
+<span class="c1">#: come before the next one :meth:`Protocol._parse_next_layer</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;` parses; see</span>
 <span class="c1">#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_frame_depth</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_frame_depth'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by</span>
-<span class="c1">#: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for</span>
-<span class="c1">#: parses the same octets again; see :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
+<span class="c1">#: :meth:`Protocol._make_payload</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._make_payload&gt;`, so that the layer</span>
+<span class="c1">#: it is rebuilt for parses the same octets again; see</span>
+<span class="c1">#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_rebuilding</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_rebuilding'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -932,7 +935,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Whether a next layer of ``klass`` parsed from ``captured`` octets may be</span>
 <span class="sd">        replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by</span>
-<span class="sd">        :meth:`ProtocolBase._parse_next_layer`, and so has its warnings held.</span>
+<span class="sd">        :meth:`Protocol._parse_next_layer</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;`, and so has</span>
+<span class="sd">        its warnings held.</span>
 
 <span class="sd">    The hint is read from the class, before there is an instance to ask, which</span>
 <span class="sd">    is enough for every protocol shipped: each returns a constant. A hint that</span>

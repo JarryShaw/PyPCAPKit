@@ -555,7 +555,7 @@ registered and the incumbent differs from the replacement; the
 message names both. An unresolved
 <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> counts as
 different from the class it names. See
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code></a> for the
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.register" title="pcapkit.protocols.protocol.Protocol.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.register</span></code></a> for the
 guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>, and for the
 shipped descriptor that a restore puts back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>).</p>
 </dd>
@@ -584,7 +584,11 @@ the <code class="docutils literal notranslate"><span class="pre">module</span></
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ports</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Source &amp; destination port numbers.</p></li>
+<li><p><strong>ports</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>]</span>) – Source &amp; destination ports, as the application types
+<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_port()</span></code></a> resolves them to – what
+<a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP.src" title="pcapkit.protocols.transport.tcp.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> and
+<a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP.dst" title="pcapkit.protocols.transport.tcp.TCP.dst"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.dst</span></code></a> read
+off a parsed header, resolved the same way.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Packet payload.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -597,6 +601,47 @@ the <code class="docutils literal notranslate"><span class="pre">module</span></
 instance.</p>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The annotation names the <strong>base</strong> registry rather than one
+transport’s own, because this is the single method
+<a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>,
+<a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
+<a class="reference internal" href="sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> share, and each
+resolves its ports in a different one –
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> for the first, and so
+on. A caller that knows which transport it has gets the narrower
+type from whatever handed it the pair, e.g.
+<a class="reference internal" href="../../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>.</p>
+<p>A bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> port still resolves, so the tightened annotation
+is a declaration of what callers should pass rather than a new
+rejection – the method predates 1.5.0, and a member and the port it
+carries are the same key of an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>-keyed mapping anyway:
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__hash__" title="pcapkit.const.reg.apptype.apptype.AppType.__hash__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.__hash__</span></code></a> is its port’s
+and <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__eq__" title="pcapkit.const.reg.apptype.apptype.AppType.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.__eq__</span></code></a> compares against
+it. So the port chosen below is tested against <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport.__proto__" title="pcapkit.protocols.transport.transport.Transport.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a>
+exactly as it arrived, and the chosen one is unwrapped to the
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> key the registry declares only when it is a member –
+through <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__int__" title="pcapkit.const.reg.apptype.apptype.AppType.__int__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.__int__</span></code></a>, i.e.
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.port</span></code></a>. Reading
+<code class="docutils literal notranslate"><span class="pre">.port</span></code> unconditionally would have made the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> case an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>, and unwrapping unconditionally would have
+changed what anything <em>else</em> does here: <code class="xref py py-func docutils literal notranslate"><span class="pre">int()</span></code> of <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>
+raises where the lookup used to fall back to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, and <code class="xref py py-func docutils literal notranslate"><span class="pre">int()</span></code> of
+<code class="docutils literal notranslate"><span class="pre">'80'</span></code> would dispatch a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> nobody registered.</p>
+<p>Nothing is written back on a miss either way, so a payload on an
+unregistered port does not grow a process-wide registry – see
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="pcapkit.protocols.protocol.ProtocolBase._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_registry</span></code></a>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">ports</span></code> is a pair of
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> members rather
+than of bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> port numbers, so that the one caller that
+reaches this method – <a class="reference internal" href="../../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a>, through
+<a class="reference internal" href="../../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> – hands
+over the same named ports a parsed header carries (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -607,7 +652,7 @@ instance.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Protocol data.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Construction keywords, as for <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.from_data</span></code></a>.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Construction keywords, as for <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -705,7 +750,7 @@ registered.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The port is forwarded <strong>whether or not it is registered</strong>:
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code></a> passes
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a> passes
 it on as <code class="docutils literal notranslate"><span class="pre">alias</span></code> and <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
 records it as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.data.misc.raw.Raw.protocol" title="pcapkit.protocols.data.misc.raw.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_Raw.protocol</span></code></a>. Dropping it would
 make a payload on a port we do not decode indistinguishable from

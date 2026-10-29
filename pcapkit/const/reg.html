@@ -7146,6 +7146,22 @@ to guard the read.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.__hash__" title="Link to this definition">¶</a></dt>
+<dd><p>Hash the member by its port number, as <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.__eq__" title="pcapkit.const.reg.apptype.apptype.AppType.__eq__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code></a> compares it.</p>
+<p>Keeping the two consistent is what lets a member and the bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> port it carries be the same key of an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>-keyed
+mapping – which is how <a class="reference internal" href="../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> reads
+<a class="reference internal" href="../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.__proto__" title="pcapkit.protocols.transport.transport.Transport.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Transport.__proto__</span></code></a> with
+either one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType._dispatch">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType._dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="Link to this definition">¶</a></dt>
 <dd><p>The registry that owns <code class="docutils literal notranslate"><span class="pre">proto</span></code>, or <code class="docutils literal notranslate"><span class="pre">cls</span></code> where it is one already.</p>
@@ -7456,6 +7472,21 @@ Deliberately <em>not</em> added to <a class="reference internal" href="#pcapkit.
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.__new__" title="pcapkit.const.reg.apptype.apptype.AppType.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>, which always does – since an unregistered member is
 exactly the one this registry must not remember past the call that
 built it.</p>
+<p>The member is made reducible through
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._make_reducible" title="pcapkit.corekit.enum.EnumRegistry._make_reducible"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_reducible()</span></code></a> before it is
+returned, so that it survives <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a>. Without
+that, <code class="docutils literal notranslate"><span class="pre">Enum.__reduce_ex__</span></code> would reduce it to a lookup of its own
+crafted value – <code class="docutils literal notranslate"><span class="pre">TCP('unknown</span> <span class="pre">[54321</span> <span class="pre">-</span> <span class="pre">tcp]')</span></code> – which
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> rejects as not a port, so the member pickled fine and
+then raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> on read-back. That bit reassembly, whose
+<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a> holds these
+members in an unresolved
+<a class="reference internal" href="../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>: measured
+before the fix, 59,413 of the 65,536 possible ports – every
+<code class="docutils literal notranslate"><span class="pre">unknown</span></code> and every IANA-span label alike, not just the truly
+unregistered ones – failed to round-trip. Rebuilding re-enters this
+method, so an unpickled member is unregistered exactly as the original
+was and neither lookup table nor <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.__registry__" title="pcapkit.const.reg.apptype.apptype.AppType.__registry__"><code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code></a> grows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

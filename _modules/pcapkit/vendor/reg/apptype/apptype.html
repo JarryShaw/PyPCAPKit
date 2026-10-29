@@ -934,6 +934,17 @@
 <span class="s1">        return self.port != other</span>
 
 <span class="s1">    def __hash__(self) -&gt; 'int':</span>
+<span class="s1">        """Hash the member by its port number, as :meth:`__eq__` compares it.</span>
+
+<span class="s1">        Keeping the two consistent is what lets a member and the bare</span>
+<span class="s1">        :obj:`int` port it carries be the same key of an :obj:`int`-keyed</span>
+<span class="s1">        mapping -- which is how :meth:`Transport.analyze</span>
+<span class="s1">        &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` reads</span>
+<span class="s1">        :attr:`Transport.__proto__</span>
+<span class="s1">        &lt;pcapkit.protocols.transport.transport.Transport.__proto__&gt;` with</span>
+<span class="s1">        either one.</span>
+
+<span class="s1">        """</span>
 <span class="s1">        return hash(self.port)</span>
 
 <span class="s1">    @classmethod</span>
@@ -1378,6 +1389,22 @@
 <span class="s1">        exactly the one this registry must not remember past the call that</span>
 <span class="s1">        built it.</span>
 
+<span class="s1">        The member is made reducible through</span>
+<span class="s1">        :meth:`~pcapkit.corekit.enum.EnumRegistry._make_reducible` before it is</span>
+<span class="s1">        returned, so that it survives :mod:`pickle` and :mod:`copy`. Without</span>
+<span class="s1">        that, ``Enum.__reduce_ex__`` would reduce it to a lookup of its own</span>
+<span class="s1">        crafted value -- ``TCP('unknown [54321 - tcp]')`` -- which</span>
+<span class="s1">        :meth:`_missing_` rejects as not a port, so the member pickled fine and</span>
+<span class="s1">        then raised :exc:`ValueError` on read-back. That bit reassembly, whose</span>
+<span class="s1">        :class:`~pcapkit.foundation.reassembly.data.tcp.Datagram` holds these</span>
+<span class="s1">        members in an unresolved</span>
+<span class="s1">        :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: measured</span>
+<span class="s1">        before the fix, 59,413 of the 65,536 possible ports -- every</span>
+<span class="s1">        ``unknown`` and every IANA-span label alike, not just the truly</span>
+<span class="s1">        unregistered ones -- failed to round-trip. Rebuilding re-enters this</span>
+<span class="s1">        method, so an unpickled member is unregistered exactly as the original</span>
+<span class="s1">        was and neither lookup table nor :data:`__registry__` grows.</span>
+
 <span class="s1">        Args:</span>
 <span class="s1">            value: Port number.</span>
 <span class="s1">            name: Bare label for the unregistered member -- what</span>
@@ -1393,7 +1420,9 @@
 <span class="s1">        obj.svc = name</span>
 <span class="s1">        obj.port = value</span>
 <span class="s1">        obj.proto = proto</span>
-<span class="s1">        return obj</span>
+<span class="s1">        # NOTE: reduce to this method's own (value, name, proto), not to the</span>
+<span class="s1">        # crafted ``temp`` the base was handed -- see _make_reducible's note.</span>
+<span class="s1">        return cls._make_reducible(obj, value, name, proto)</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; 'Optional[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>

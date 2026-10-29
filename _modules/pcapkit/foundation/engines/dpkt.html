@@ -1047,8 +1047,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
-            <span class="c1"># NOTE: Caught broadly, as :meth:`ProtocolBase.analyze</span>
-            <span class="c1"># &lt;pcapkit.protocols.protocol.ProtocolBase.analyze&gt;` does: dpkt raises</span>
+            <span class="c1"># NOTE: Caught broadly, as :meth:`Protocol.analyze</span>
+            <span class="c1"># &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;` does: dpkt raises</span>
             <span class="c1"># more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads</span>
             <span class="c1"># ``frag_off`` from whatever header follows an IPv6 Fragment header,</span>
             <span class="c1"># so a Fragment header followed by ESP or Destination Options raises</span>

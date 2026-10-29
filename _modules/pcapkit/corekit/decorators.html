@@ -539,8 +539,8 @@
 
 <span class="c1">#: contextvars.ContextVar[bool]: Whether a call :func:`beholder` wraps is under</span>
 <span class="c1">#: way, so that an :exc:`Exception` raised inside it ends with the layer that</span>
-<span class="c1">#: raised replaced; see :meth:`ProtocolBase._parse_next_layer</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._parse_next_layer&gt;` (:issue:`2308`).</span>
+<span class="c1">#: raised replaced; see :meth:`Protocol._parse_next_layer</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;` (:issue:`2308`).</span>
 <span class="n">_beholding</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_beholding'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -604,8 +604,8 @@
 <span class="sd">    :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an</span>
 <span class="sd">    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.</span>
 
-<span class="sd">    When :meth:`ProtocolBase._parse_next_layer</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase._parse_next_layer&gt;` held the</span>
+<span class="sd">    When :meth:`Protocol._parse_next_layer</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;` held the</span>
 <span class="sd">    warnings of the layer that raised, they are dropped with it: they describe a</span>
 <span class="sd">    layer the result does not have, and the replacement's ``error`` reports the</span>
 <span class="sd">    failure (:issue:`2308`).</span>

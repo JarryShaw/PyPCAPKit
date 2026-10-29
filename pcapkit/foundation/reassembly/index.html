@@ -703,7 +703,7 @@ renders a member as its value.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">Deferred</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_KT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">AppType_TCP</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AppType_TCP</span><span class="p"><span class="pre">]</span></span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_KT</span></code>]</p>
 <p>A postponed analysis of a reassembled payload.</p>
 <p>A reassembled datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is a second, full parse of the payload
@@ -741,21 +741,34 @@ datagram’s <strong>Protocol</strong> / <strong>Next Header</strong> field, to
 <a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>,
 which looks the next layer up by protocol registry number.</p></li>
 <li><p><a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> builds a
-<code class="docutils literal notranslate"><span class="pre">Deferred[tuple[int,</span> <span class="pre">int]]</span></code>. It passes a <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> port
-pair, because <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> overrides that
+<code class="docutils literal notranslate"><span class="pre">Deferred[tuple[AppType_TCP,</span> <span class="pre">AppType_TCP]]</span></code>. It passes a
+<code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> port pair, because <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> overrides that
 parameter to one: a reassembled transport-layer payload carries no
 protocol number, so its application protocol is inferred from the ports.</p></li>
 </ul>
-<p>Those are the two cases the type parameter is constrained to. The pairing
-the regression actually produced – a port pair handed to an analyser
-declared over <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> – is
-rejected, which is the direction a real mismatch takes and the one
+<p>Those are the two cases the type parameter is constrained to. Both are
+<em>named registry values</em> rather than one named value and one pair of bare
+port numbers: a port is a member of
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> here – the per-transport
+registry itself, not the base
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, since that is what
+<a class="reference internal" href="tcp.html#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_ports</span></code></a>
+really answers with – so what the deferred analysis dispatches on is of a
+piece with what the eager path dispatches on at
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.src" title="pcapkit.protocols.transport.tcp.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a>, whichever
+reassembler built it. (Of a piece, not identical: for an <em>unassigned</em> port
+the two paths build equal members by different routes, which
+<code class="docutils literal notranslate"><span class="pre">TCP.submit</span></code>’s own docstring records.)</p>
+<p>The pairing the regression actually produced – a port pair handed to an
+analyser declared over <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> –
+is rejected, which is the direction a real mismatch takes and the one
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a> was about.</p>
 <p>Rejecting the <em>reverse</em> pairing is not guaranteed by mypy alone, for a
 reason outside this class: <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> ships no type stubs, so under
 <code class="docutils literal notranslate"><span class="pre">ignore_missing_imports</span></code> the <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> base of
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> resolves to <code class="docutils literal notranslate"><span class="pre">Any</span></code>. A
-<code class="docutils literal notranslate"><span class="pre">TransType</span></code> is therefore accepted where a <code class="docutils literal notranslate"><span class="pre">tuple[int,</span> <span class="pre">int]</span></code> is
+<code class="docutils literal notranslate"><span class="pre">TransType</span></code> is therefore accepted where a
+<code class="docutils literal notranslate"><span class="pre">tuple[AppType_TCP,</span> <span class="pre">AppType_TCP]</span></code> is
 expected, and a <code class="docutils literal notranslate"><span class="pre">Deferred[TransType]</span></code> built over the port-pair analyser
 type-checks clean. That is a gap in the dependency’s type coverage rather
 than in the constraint, which would bite both ways were <code class="docutils literal notranslate"><span class="pre">TransType</span></code> fully
@@ -788,6 +801,57 @@ protocol type for IP, the port pair for TCP, as above.</p></li>
 <dd class="field-even"><p>Parsed payload.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__getstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="Link to this definition">¶</a></dt>
+<dd><p>Pickling support.</p>
+<p>A slotted class with no <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> has nothing for the default
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> reduction to read. <a class="reference external" href="https://docs.python.org/3/library/copyreg.html#module-copyreg" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copyreg</span></code></a> refuses outright with
+<em>“cannot be pickled”</em> under protocol 0 or 1 whenever
+<code class="docutils literal notranslate"><span class="pre">type(self).__getstate__</span></code> is still the inherited default – which is
+why defining <em>any</em> <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> here, even one that only calls the
+default, clears protocols 0 and 1 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>). Protocol 2 and above
+never needed one: their own <code class="docutils literal notranslate"><span class="pre">__reduce_ex__</span></code> already walks
+<code class="docutils literal notranslate"><span class="pre">__slots__</span></code> directly.</p>
+<p>The shape returned – an instance-<code class="docutils literal notranslate"><span class="pre">__dict__</span></code> state (or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>)
+paired with a slots-state <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – is deliberately the same one
+Python’s own default state construction produces for a slotted class,
+rather than a bespoke flat <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>. A flat shape would be a <em>new</em>
+pickle format for this class: a <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> already pickled by a
+released version under protocol 2 or above – every one of them built
+this same <code class="docutils literal notranslate"><span class="pre">(dict_or_None,</span> <span class="pre">slots)</span></code> pair – would fail to unpickle
+against a flat-shaped <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__setstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setstate__()</span></code></a>, and the reverse.</p>
+<p>The slot names come from <code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._slotnames()</span></code>, the standard
+library’s own helper for this exact job, rather than a hand-rolled
+walk of <code class="docutils literal notranslate"><span class="pre">type(self).__mro__</span></code> and each class’s <code class="docutils literal notranslate"><span class="pre">__slots__</span></code>: a
+subclass of <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> may spell a slot as a bare string
+(<code class="docutils literal notranslate"><span class="pre">__slots__</span> <span class="pre">=</span> <span class="pre">'extra'</span></code>, valid Python for one slot named by the
+whole string) or as a private, name-mangled one
+(<code class="docutils literal notranslate"><span class="pre">__slots__</span> <span class="pre">=</span> <span class="pre">('__secret',)</span></code>, stored on the instance under
+<code class="docutils literal notranslate"><span class="pre">_&lt;ClassName&gt;__secret</span></code>), and a hand-rolled walk that assumes every
+<code class="docutils literal notranslate"><span class="pre">__slots__</span></code> is an iterable of already-resolved attribute names gets
+both wrong – the first by iterating the string’s <em>characters</em>, the
+second by testing the unmangled name <code class="docutils literal notranslate"><span class="pre">hasattr</span></code> never finds
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2425">#2425</a>). <code class="docutils literal notranslate"><span class="pre">_slotnames</span></code> already handles both, the same way
+protocol 0 and 1 reduction has relied on it to for decades.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Deferred.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#Deferred.__setstate__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__" title="Link to this definition">¶</a></dt>
+<dd><p>Unpickling support; the counterpart to <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getstate__()</span></code></a>.</p>
+<p>Accepts the <code class="docutils literal notranslate"><span class="pre">(dict_or_None,</span> <span class="pre">slots)</span></code> pair <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__" title="pcapkit.foundation.reassembly.data.data.Deferred.__getstate__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getstate__()</span></code></a> builds
+above – the shape every released, pre-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a> pickle already
+used under protocol 2 and above – and, for a pickle made by this
+class’s own first, unreleased fix for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>, a bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>
+of <code class="docutils literal notranslate"><span class="pre">{slot:</span> <span class="pre">value}</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2425">#2425</a>).</p>
 </dd></dl>
 
 </dd></dl>

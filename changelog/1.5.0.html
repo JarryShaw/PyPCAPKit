@@ -1765,6 +1765,17 @@ so that one’s final fragment still completes it, per <span class="target" id="
 naming the engine, that they ignore a parsing context supplied through
 <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">context=</span></code>, as the dpkt, scapy and pyshark engines already
 did, where they dropped it silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2313">#2313</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2332">#2332</a>).</p></li>
+<li><p><a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> could not be pickled
+under protocol 0 or 1 – a slotted class with no <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> there, independent of the <code class="docutils literal notranslate"><span class="pre">analyze</span></code>/<code class="docutils literal notranslate"><span class="pre">proto</span></code> regression
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a> fixed. It now defines <code class="docutils literal notranslate"><span class="pre">__getstate__</span></code> and <code class="docutils literal notranslate"><span class="pre">__setstate__</span></code>,
+mirroring the <code class="docutils literal notranslate"><span class="pre">(dict_or_None,</span> <span class="pre">slots)</span></code> pair Python’s own default slotted-class
+reduction already used for every released build, so a <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> pickled by
+one of those still unpickles. The slot names come from <code class="docutils literal notranslate"><span class="pre">copyreg._slotnames</span></code>
+rather than a hand-rolled walk of <code class="docutils literal notranslate"><span class="pre">type(self).__mro__</span></code>, which would otherwise
+shadow a base class’s slots under a subclass declaring its own, miscount a
+bare-string <code class="docutils literal notranslate"><span class="pre">__slots__</span> <span class="pre">=</span> <span class="pre">'name'</span></code>, or read a private, name-mangled slot under
+its unmangled spelling (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2423">#2423</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2425">#2425</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2424">#2424</a>).</p></li>
 </ul>
 </section>
 </section>

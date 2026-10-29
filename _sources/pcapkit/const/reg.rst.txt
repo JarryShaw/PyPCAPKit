@@ -109,7 +109,7 @@ registry is one enumeration per transport protocol sharing a memberless base.
    :members:
    :undoc-members:
    :show-inheritance:
-   :special-members: __new__, __repr__, __str__, __int__, __eq__, __registry__, __canonical__
+   :special-members: __new__, __repr__, __str__, __int__, __eq__, __hash__, __registry__, __canonical__
 
 .. module:: pcapkit.const.reg.apptype.tcp
 

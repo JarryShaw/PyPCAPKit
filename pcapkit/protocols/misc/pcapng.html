@@ -864,7 +864,7 @@ is <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.sec
 length field included – and not a header length. The two are the
 same thing for a protocol whose payload runs to the end of its
 buffer, which is why
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.length" title="pcapkit.protocols.protocol.ProtocolBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.length</span></code></a>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.length</span></code></a>
 does not distinguish them, but a PCAP-NG block carries a trailer.
 <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.packet" title="pcapkit.protocols.misc.pcapng.PCAPNG.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.packet</span></code></a> is overridden accordingly.</p>
 </div>
@@ -949,7 +949,7 @@ given in <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAP
 octets sit in the <em>middle</em> of a packet block, ahead of the option list
 and the trailing Block Total Length, so no single split point expresses
 the shape and the inherited
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.packet" title="pcapkit.protocols.protocol.ProtocolBase.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.packet</span></code></a>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.packet" title="pcapkit.protocols.protocol.Protocol.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.packet</span></code></a>
 – which reads <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.length" title="pcapkit.protocols.misc.pcapng.PCAPNG.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.length</span></code></a> octets of header and takes
 everything after as payload – cannot produce it. Since
 <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG.length" title="pcapkit.protocols.misc.pcapng.PCAPNG.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.length</span></code></a> is the Block Total Length, that split would
@@ -998,7 +998,7 @@ class it names; handing back the stored entry, or a descriptor
 equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
 writing to both cannot make either warn about the other. See
-<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code></a> for the
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.register" title="pcapkit.protocols.protocol.Protocol.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.register</span></code></a> for the
 shipped descriptor a restore puts back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>).</p>
 </dd>
 </dl>

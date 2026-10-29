@@ -502,6 +502,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
@@ -572,7 +573,26 @@
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.DatagramID">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` original packet identifier."""</span>
+<span class="w">    </span><span class="sd">"""Data model for :term:`TCP &lt;reasm.tcp.datagram&gt;` original packet identifier.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The ports here stay bare :obj:`int` port numbers, where the pair</span>
+<span class="sd">        :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;` hands</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is one of</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.tcp.TCP` members</span>
+<span class="sd">        (:issue:`2417`). The two are not the same thing to name: this is the</span>
+<span class="sd">        flow's identity, split out of :data:`BufferID`, which every</span>
+<span class="sd">        :mod:`pcapkit.toolkit` adapter builds from a plain port number -- the</span>
+<span class="sd">        native ones by reading :attr:`AppType.port</span>
+<span class="sd">        &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;` off the parsed header,</span>
+<span class="sd">        the third-party ones from whatever their own engine exposes -- and which</span>
+<span class="sd">        is then used as a :class:`dict` key and dumped as part of the report.</span>
+<span class="sd">        The deferred pair is a *dispatch* key for</span>
+<span class="sd">        :meth:`Transport.analyze</span>
+<span class="sd">        &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;`, which is</span>
+<span class="sd">        what gains from carrying the service name.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Source address.</span>
     <span class="n">src</span><span class="p">:</span> <span class="s1">'tuple[_AT, int]'</span>
@@ -641,7 +661,7 @@
         <span class="c1"># :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies</span>
         <span class="c1"># here identically: ``strict=False`` reports an incomplete payload buffer as</span>
         <span class="c1"># one contiguous ``bytes`` and analyses it.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[tuple[int, int]]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[ProtocolBase | Deferred[tuple[AppType_TCP, AppType_TCP]]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 

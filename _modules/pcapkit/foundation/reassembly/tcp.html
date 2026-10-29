@@ -495,6 +495,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span>
                                                     <span class="n">DatagramID</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
@@ -503,6 +504,8 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TCP'</span><span class="p">]</span>
 
@@ -1141,6 +1144,88 @@
             <span class="n">index</span> <span class="o">=</span> <span class="n">stop</span>
         <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">merged</span><span class="p">),</span> <span class="n">conflicts</span>
 
+<div class="viewcode-block" id="TCP._make_ports">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP._make_ports">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ports</span><span class="p">(</span><span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[AppType_TCP, AppType_TCP]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The flow's ``(source, destination)`` ports, as application types.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bufid: :term:`buffer &lt;reasm.tcp.buffer&gt;` identifier, whose positions</span>
+<span class="sd">                ``1`` and ``3`` are the source and destination ports.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The pair :meth:`submit` hands</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, i.e. what</span>
+<span class="sd">            :meth:`Transport.analyze</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` dispatches</span>
+<span class="sd">            the reassembled payload on (:issue:`2417`). Typed as the</span>
+<span class="sd">            *per-transport* registry :class:`~pcapkit.const.reg.apptype.tcp.TCP`</span>
+<span class="sd">            rather than as the base</span>
+<span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.AppType`, because that is</span>
+<span class="sd">            what it really is: ``proto=tcp`` sends</span>
+<span class="sd">            :meth:`AppType.get &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;`</span>
+<span class="sd">            through :meth:`AppType._dispatch</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType._dispatch&gt;` to the TCP</span>
+<span class="sd">            registry, and ``type(...) is TCP`` holds of the member it answers</span>
+<span class="sd">            with -- measured, for a registered port and an unassigned one alike.</span>
+<span class="sd">            :meth:`Transport.analyze</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` keeps the</span>
+<span class="sd">            base in its own signature, since it is the one method</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each of</span>
+<span class="sd">            them would name a different registry.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            Every port a 16-bit header field can hold resolves to a member, so</span>
+<span class="sd">            this raises for nothing that can come off the wire:</span>
+<span class="sd">            :meth:`AppType.get &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;`</span>
+<span class="sd">            answers an assignment with its canonical service, a port inside a</span>
+<span class="sd">            documented IANA span with that span's label (``reserved`` for ``0``),</span>
+<span class="sd">            and one in no span at all with an unregistered ``unknown`` member --</span>
+<span class="sd">            never :obj:`None`, and without growing the registry (:issue:`860`).</span>
+<span class="sd">            It rejects a port outside ``0``-``65535`` and a non-:obj:`int`.</span>
+
+<span class="sd">            A :obj:`bool` is rejected by :meth:`Transport._make_port</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;` rather</span>
+<span class="sd">            than by ``get``, which is the reason to go through it here and not</span>
+<span class="sd">            call ``get`` directly: :obj:`bool` is an :obj:`int` subclass, so</span>
+<span class="sd">            ``AppType.get(True, proto=tcp)`` resolves ``True`` as port ``1`` and</span>
+<span class="sd">            answers ``&lt;TCP.tcpmux: 1 [tcp]&gt;`` -- measured -- where ``_make_port``</span>
+<span class="sd">            raises, which is what closed :issue:`2287`. Calling ``get`` straight</span>
+<span class="sd">            would reopen it. None of the three can come out of a TCP header</span>
+<span class="sd">            either way; what ``_make_port`` also buys is idempotence, so a</span>
+<span class="sd">            ``bufid`` already holding a member passes through untouched.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The resolution is reached through</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through</span>
+<span class="sd">            :attr:`self.protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`,</span>
+<span class="sd">            which is what :meth:`submit` reads the analyser itself off. That is</span>
+<span class="sd">            deliberate: ``__protocol_type__`` is an extension point, and an</span>
+<span class="sd">            analyser plugged into it need only define ``analyze`` -- it is not</span>
+<span class="sd">            required to be a</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.transport.Transport` subclass</span>
+<span class="sd">            and so need not have ``_make_port`` at all, which reaching it</span>
+<span class="sd">            through ``self.protocol`` would turn into an</span>
+<span class="sd">            :exc:`AttributeError`. What a TCP port *means* belongs to the TCP</span>
+<span class="sd">            protocol either way, not to whatever consumes the payload, which is</span>
+<span class="sd">            also why the transport below is named outright rather than read off</span>
+<span class="sd">            the analyser.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: ``_make_port`` is protected, and reached from outside its own</span>
+        <span class="c1"># class as :meth:`SCTP._decode_next_layer</span>
+        <span class="c1"># &lt;pcapkit.protocols.transport.sctp.SCTP._decode_next_layer&gt;` reaches</span>
+        <span class="c1"># ``ProtocolBase._decode_next_layer``. Duplicating it here instead would</span>
+        <span class="c1"># put a second port normaliser beside the maker path's, free to drift</span>
+        <span class="c1"># from it; it is idempotent, so a ``bufid`` that already holds a member</span>
+        <span class="c1"># passes through unchanged.</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">),</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="n">TCP_Protocol</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span></div>
+
+
 <div class="viewcode-block" id="TCP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
@@ -1156,6 +1241,34 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Reassembled :term:`packets &lt;reasm.tcp.datagram&gt;`.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            The ``(source, destination)`` pair handed to</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.data.data.Deferred` is a pair</span>
+<span class="sd">            of :class:`~pcapkit.const.reg.apptype.tcp.TCP` members rather than</span>
+<span class="sd">            of the bare port numbers :data:`BufferID` holds (:issue:`2417`), so</span>
+<span class="sd">            a deferred analysis dispatches on the named service rather than on a</span>
+<span class="sd">            number. The resolution is :meth:`Transport._make_port</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`, so it</span>
+<span class="sd">            is the one the maker path uses and cannot drift from it. See</span>
+<span class="sd">            :meth:`_make_ports` for why it is reached through</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through</span>
+<span class="sd">            :attr:`self.protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`.</span>
+
+<span class="sd">            For a *registered* port that is the very member</span>
+<span class="sd">            :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.TCP.src&gt;` reads off</span>
+<span class="sd">            a parsed header. For an unassigned one the two are **equal but not</span>
+<span class="sd">            identical**, and not even equally named: the parse path builds its</span>
+<span class="sd">            member through :meth:`EnumField._unregistered_member</span>
+<span class="sd">            &lt;pcapkit.corekit.fields.numbers.EnumField._unregistered_member&gt;`,</span>
+<span class="sd">            whose ``.name`` is ``'&lt;unassigned&gt;'``, where ``get`` builds its own,</span>
+<span class="sd">            named ``'unknown'`` -- measured on port ``50000``. Both are real</span>
+<span class="sd">            members of the same registry carrying the same :attr:`AppType.port</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;`, which is what</span>
+<span class="sd">            every reader of this pair goes on to use, so the distinction costs</span>
+<span class="sd">            nothing here; it is recorded because "the same member the header</span>
+<span class="sd">            carries" would be an overstatement of it.</span>
 
 <span class="sd">        """</span>
         <span class="n">datagram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram] # reassembled datagram</span>
@@ -1241,7 +1354,8 @@
                         <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">ind</span><span class="p">),</span>
                         <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
                         <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
-                        <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span> <span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
+                        <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">_make_ports</span><span class="p">(</span><span class="n">bufid</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
                         <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>

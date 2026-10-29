@@ -1408,7 +1408,7 @@
 <span class="sd">            length field included -- and not a header length. The two are the</span>
 <span class="sd">            same thing for a protocol whose payload runs to the end of its</span>
 <span class="sd">            buffer, which is why</span>
-<span class="sd">            :attr:`ProtocolBase.length &lt;pcapkit.protocols.protocol.ProtocolBase.length&gt;`</span>
+<span class="sd">            :attr:`Protocol.length &lt;pcapkit.protocols.protocol.Protocol.length&gt;`</span>
 <span class="sd">            does not distinguish them, but a PCAP-NG block carries a trailer.</span>
 <span class="sd">            :attr:`self.packet &lt;packet&gt;` is overridden accordingly.</span>
 
@@ -1438,7 +1438,7 @@
 <span class="sd">        octets sit in the *middle* of a packet block, ahead of the option list</span>
 <span class="sd">        and the trailing Block Total Length, so no single split point expresses</span>
 <span class="sd">        the shape and the inherited</span>
-<span class="sd">        :attr:`ProtocolBase.packet &lt;pcapkit.protocols.protocol.ProtocolBase.packet&gt;`</span>
+<span class="sd">        :attr:`Protocol.packet &lt;pcapkit.protocols.protocol.Protocol.packet&gt;`</span>
 <span class="sd">        -- which reads :attr:`self.length &lt;length&gt;` octets of header and takes</span>
 <span class="sd">        everything after as payload -- cannot produce it. Since</span>
 <span class="sd">        :attr:`self.length &lt;length&gt;` is the Block Total Length, that split would</span>
@@ -1612,8 +1612,8 @@
 <span class="sd">                equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so</span>
 <span class="sd">                :func:`~pcapkit.foundation.registry.protocols.register_linktype`</span>
 <span class="sd">                writing to both cannot make either warn about the other. See</span>
-<span class="sd">                :meth:`ProtocolBase.register</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
+<span class="sd">                :meth:`Protocol.register</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.register&gt;` for the</span>
 <span class="sd">                shipped descriptor a restore puts back (:issue:`1504`).</span>
 
 <span class="sd">        """</span>

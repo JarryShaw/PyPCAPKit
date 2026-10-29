@@ -613,6 +613,101 @@ abandoned it under the reassembly timeout</p></li>
 <dd class="field-odd"><p>Reassembled <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">packets</span></a>.</p>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> pair handed to
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> is a pair
+of <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> members rather than
+of the bare port numbers <code class="xref py py-data docutils literal notranslate"><span class="pre">BufferID</span></code> holds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>), so
+a deferred analysis dispatches on the named service rather than on a
+number. The resolution is <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a>, so it
+is the one the maker path uses and cannot drift from it. See
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ports()</span></code></a> for why it is reached through
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>.</p>
+<p>For a <em>registered</em> port that is the very member
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.src" title="pcapkit.protocols.transport.tcp.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> reads off
+a parsed header. For an unassigned one the two are <strong>equal but not
+identical</strong>, and not even equally named: the parse path builds its
+member through <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField._unregistered_member</span></code></a>,
+whose <code class="docutils literal notranslate"><span class="pre">.name</span></code> is <code class="docutils literal notranslate"><span class="pre">'&lt;unassigned&gt;'</span></code>, where <code class="docutils literal notranslate"><span class="pre">get</span></code> builds its own,
+named <code class="docutils literal notranslate"><span class="pre">'unknown'</span></code> – measured on port <code class="docutils literal notranslate"><span class="pre">50000</span></code>. Both are real
+members of the same registry carrying the same <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.port</span></code></a>, which is what
+every reader of this pair goes on to use, so the distinction costs
+nothing here; it is recorded because “the same member the header
+carries” would be an overstatement of it.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP._make_ports">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_ports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP._make_ports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="Link to this definition">¶</a></dt>
+<dd><p>The flow’s <code class="docutils literal notranslate"><span class="pre">(source,</span> <span class="pre">destination)</span></code> ports, as application types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">buffer</span></a> identifier, whose positions
+<code class="docutils literal notranslate"><span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">3</span></code> are the source and destination ports.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>, <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The pair <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> hands
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>, i.e. what
+<a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> dispatches
+the reassembled payload on (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>). Typed as the
+<em>per-transport</em> registry <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>
+rather than as the base
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>, because that is
+what it really is: <code class="docutils literal notranslate"><span class="pre">proto=tcp</span></code> sends
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get" title="pcapkit.const.reg.apptype.apptype.AppType.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.get</span></code></a>
+through <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType._dispatch</span></code></a> to the TCP
+registry, and <code class="docutils literal notranslate"><span class="pre">type(...)</span> <span class="pre">is</span> <span class="pre">TCP</span></code> holds of the member it answers
+with – measured, for a registered port and an unassigned one alike.
+<a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> keeps the
+base in its own signature, since it is the one method
+<a class="reference internal" href="../../protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
+<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> share, and each of
+them would name a different registry.</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Every port a 16-bit header field can hold resolves to a member, so
+this raises for nothing that can come off the wire:
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get" title="pcapkit.const.reg.apptype.apptype.AppType.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.get</span></code></a>
+answers an assignment with its canonical service, a port inside a
+documented IANA span with that span’s label (<code class="docutils literal notranslate"><span class="pre">reserved</span></code> for <code class="docutils literal notranslate"><span class="pre">0</span></code>),
+and one in no span at all with an unregistered <code class="docutils literal notranslate"><span class="pre">unknown</span></code> member –
+never <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, and without growing the registry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>).
+It rejects a port outside <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code> and a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>.</p>
+<p>A <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> is rejected by <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a> rather
+than by <code class="docutils literal notranslate"><span class="pre">get</span></code>, which is the reason to go through it here and not
+call <code class="docutils literal notranslate"><span class="pre">get</span></code> directly: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> is an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> subclass, so
+<code class="docutils literal notranslate"><span class="pre">AppType.get(True,</span> <span class="pre">proto=tcp)</span></code> resolves <code class="docutils literal notranslate"><span class="pre">True</span></code> as port <code class="docutils literal notranslate"><span class="pre">1</span></code> and
+answers <code class="docutils literal notranslate"><span class="pre">&lt;TCP.tcpmux:</span> <span class="pre">1</span> <span class="pre">[tcp]&gt;</span></code> – measured – where <code class="docutils literal notranslate"><span class="pre">_make_port</span></code>
+raises, which is what closed <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2287">#2287</a>. Calling <code class="docutils literal notranslate"><span class="pre">get</span></code> straight
+would reopen it. None of the three can come out of a TCP header
+either way; what <code class="docutils literal notranslate"><span class="pre">_make_port</span></code> also buys is idempotence, so a
+<code class="docutils literal notranslate"><span class="pre">bufid</span></code> already holding a member passes through untouched.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The resolution is reached through
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>,
+which is what <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> reads the analyser itself off. That is
+deliberate: <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> is an extension point, and an
+analyser plugged into it need only define <code class="docutils literal notranslate"><span class="pre">analyze</span></code> – it is not
+required to be a
+<a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> subclass
+and so need not have <code class="docutils literal notranslate"><span class="pre">_make_port</span></code> at all, which reaching it
+through <code class="docutils literal notranslate"><span class="pre">self.protocol</span></code> would turn into an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>. What a TCP port <em>means</em> belongs to the TCP
+protocol either way, not to whatever consumes the payload, which is
+also why the transport below is named outright rather than read off
+the analyser.</p>
+</div>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1130,6 +1225,22 @@ timeout, which for TCP is off by default – see
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">DatagramID</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_AT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">IPv4Address</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IPv6Address</span></span><span class="p"><span class="pre">)</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ack</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/tcp.html#DatagramID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</p>
 <p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">TCP</span></a> original packet identifier.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The ports here stay bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> port numbers, where the pair
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.submit</span></code></a> hands
+<a class="reference internal" href="index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> is one of
+<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> members
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2417">#2417</a>). The two are not the same thing to name: this is the
+flow’s identity, split out of <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.BufferID" title="pcapkit.foundation.reassembly.data.tcp.BufferID"><code class="xref py py-data docutils literal notranslate"><span class="pre">BufferID</span></code></a>, which every
+<a class="reference internal" href="../../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> adapter builds from a plain port number – the
+native ones by reading <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.port</span></code></a> off the parsed header,
+the third-party ones from whatever their own engine exposes – and which
+is then used as a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> key and dumped as part of the report.
+The deferred pair is a <em>dispatch</em> key for
+<a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a>, which is
+what gains from carrying the service name.</p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.DatagramID.src">
 <span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.data.tcp._AT"><span class="pre">_AT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID.src" title="Link to this definition">¶</a></dt>

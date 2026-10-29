@@ -1065,6 +1065,57 @@ is.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.enum.EnumRegistry._make_reducible">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_reducible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._make_reducible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.enum.EnumRegistry._make_reducible" title="Link to this definition">¶</a></dt>
+<dd><p>Make an unregistered member survive <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Enum.__reduce_ex__</span></code> reduces a member to <code class="docutils literal notranslate"><span class="pre">(cls,</span> <span class="pre">(value,))</span></code>, i.e. to
+a <em>value</em>-keyed lookup – the one table an unregistered member is
+deliberately absent from. So a member <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
+built pickles happily and then raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> on read-back,
+where the failure is a long way from its cause.</p>
+<p>This replaces that reduction with one through
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_rebuild_unregistered_member()</span></code>, which re-enters
+<code class="docutils literal notranslate"><span class="pre">cls._unregistered_member(*args)</span></code>. Rebuilding therefore takes exactly
+the path that built the original and never <code class="docutils literal notranslate"><span class="pre">cls.__new__</span></code>, so an
+unpickled member is unregistered just as the original was and no
+lookup table grows. The rebuilt member is itself reducible, since the
+method it comes back through installs this again.</p>
+<p>The override goes on the <em>instance</em> rather than on the type, which both
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a> honour: each fetches <code class="docutils literal notranslate"><span class="pre">__reduce_ex__</span></code>
+with <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> on the object. <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.partial()</span></code></a> rather
+than a closure keeps the member itself out of its own reducer, so being
+reducible does not put it in a reference cycle.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is opt-in per registry rather than done by
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> itself, because the arguments to
+rebuild <em>from</em> are the overriding method’s own, not this base
+method’s. <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>,
+for one, hands its base the crafted <code class="docutils literal notranslate"><span class="pre">'svc</span> <span class="pre">[port</span> <span class="pre">-</span> <span class="pre">proto]'</span></code>
+string while its own entry point takes <code class="docutils literal notranslate"><span class="pre">(port,</span> <span class="pre">name,</span> <span class="pre">proto)</span></code>;
+reducing to the former would rebuild a member whose value had been
+formatted twice. A registry whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> calls
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> directly is unaffected and keeps
+reducing the way <code class="docutils literal notranslate"><span class="pre">Enum</span></code> does.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The unregistered member to install the reducer on.</p></li>
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The arguments <code class="docutils literal notranslate"><span class="pre">cls._unregistered_member</span></code> should be called
+with to rebuild an equivalent member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">obj</span></code>, for use as a <code class="docutils literal notranslate"><span class="pre">return</span></code> expression.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

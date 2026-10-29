@@ -786,7 +786,7 @@ built per value rather than grafted onto
 the registry with <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code>, for two reasons: a
 capture carrying many distinct unassigned codes would otherwise grow
 a process-global registry without bound, which is the growth
-<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._lookup_registry" title="pcapkit.protocols.protocol.ProtocolBase._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_registry</span></code></a> exists
+<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._lookup_registry</span></code></a> exists
 to avoid; and a stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></a> registry is then
 handled exactly like an <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> one.</p>
 <p>Only a <em>foreign</em> rejection is absorbed. A registry rejecting a value

@@ -484,6 +484,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">"""shared data models for reassembly"""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">copyreg</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
@@ -493,15 +494,16 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="c1"># registry key an analyser dispatches a reassembled payload on; see ``Deferred``</span>
-<span class="n">_KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_KT'</span><span class="p">,</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="s1">'tuple[int, int]'</span><span class="p">)</span>
+<span class="n">_KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_KT'</span><span class="p">,</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="s1">'tuple[AppType_TCP, AppType_TCP]'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Completion">
@@ -639,23 +641,37 @@
 <span class="sd">      :meth:`Protocol.analyze &lt;pcapkit.protocols.protocol.Protocol.analyze&gt;`,</span>
 <span class="sd">      which looks the next layer up by protocol registry number.</span>
 <span class="sd">    * :meth:`TCP.submit &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;` builds a</span>
-<span class="sd">      ``Deferred[tuple[int, int]]``. It passes a ``(source, destination)`` port</span>
-<span class="sd">      pair, because :meth:`Transport.analyze</span>
+<span class="sd">      ``Deferred[tuple[AppType_TCP, AppType_TCP]]``. It passes a</span>
+<span class="sd">      ``(source, destination)`` port pair, because :meth:`Transport.analyze</span>
 <span class="sd">      &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` overrides that</span>
 <span class="sd">      parameter to one: a reassembled transport-layer payload carries no</span>
 <span class="sd">      protocol number, so its application protocol is inferred from the ports.</span>
 
-<span class="sd">    Those are the two cases the type parameter is constrained to. The pairing</span>
-<span class="sd">    the regression actually produced -- a port pair handed to an analyser</span>
-<span class="sd">    declared over :class:`~pcapkit.const.reg.transtype.TransType` -- is</span>
-<span class="sd">    rejected, which is the direction a real mismatch takes and the one</span>
+<span class="sd">    Those are the two cases the type parameter is constrained to. Both are</span>
+<span class="sd">    *named registry values* rather than one named value and one pair of bare</span>
+<span class="sd">    port numbers: a port is a member of</span>
+<span class="sd">    :class:`~pcapkit.const.reg.apptype.tcp.TCP` here -- the per-transport</span>
+<span class="sd">    registry itself, not the base</span>
+<span class="sd">    :class:`~pcapkit.const.reg.apptype.apptype.AppType`, since that is what</span>
+<span class="sd">    :meth:`TCP._make_ports &lt;pcapkit.foundation.reassembly.tcp.TCP._make_ports&gt;`</span>
+<span class="sd">    really answers with -- so what the deferred analysis dispatches on is of a</span>
+<span class="sd">    piece with what the eager path dispatches on at</span>
+<span class="sd">    :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.TCP.src&gt;`, whichever</span>
+<span class="sd">    reassembler built it. (Of a piece, not identical: for an *unassigned* port</span>
+<span class="sd">    the two paths build equal members by different routes, which</span>
+<span class="sd">    ``TCP.submit``'s own docstring records.)</span>
+
+<span class="sd">    The pairing the regression actually produced -- a port pair handed to an</span>
+<span class="sd">    analyser declared over :class:`~pcapkit.const.reg.transtype.TransType` --</span>
+<span class="sd">    is rejected, which is the direction a real mismatch takes and the one</span>
 <span class="sd">    :issue:`2417` was about.</span>
 
 <span class="sd">    Rejecting the *reverse* pairing is not guaranteed by mypy alone, for a</span>
 <span class="sd">    reason outside this class: |aenum|_ ships no type stubs, so under</span>
 <span class="sd">    ``ignore_missing_imports`` the ``aenum.IntEnum`` base of</span>
 <span class="sd">    :class:`~pcapkit.const.reg.transtype.TransType` resolves to ``Any``. A</span>
-<span class="sd">    ``TransType`` is therefore accepted where a ``tuple[int, int]`` is</span>
+<span class="sd">    ``TransType`` is therefore accepted where a</span>
+<span class="sd">    ``tuple[AppType_TCP, AppType_TCP]`` is</span>
 <span class="sd">    expected, and a ``Deferred[TransType]`` built over the port-pair analyser</span>
 <span class="sd">    type-checks clean. That is a gap in the dependency's type coverage rather</span>
 <span class="sd">    than in the constraint, which would bite both ways were ``TransType`` fully</span>
@@ -698,6 +714,75 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Deferred.__getstate__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred.__getstate__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[dict[str, Any]], dict[str, Any]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pickling support.</span>
+
+<span class="sd">        A slotted class with no ``__dict__`` has nothing for the default</span>
+<span class="sd">        :mod:`pickle` reduction to read. :mod:`copyreg` refuses outright with</span>
+<span class="sd">        *"cannot be pickled"* under protocol 0 or 1 whenever</span>
+<span class="sd">        ``type(self).__getstate__`` is still the inherited default -- which is</span>
+<span class="sd">        why defining *any* ``__getstate__`` here, even one that only calls the</span>
+<span class="sd">        default, clears protocols 0 and 1 (:issue:`2423`). Protocol 2 and above</span>
+<span class="sd">        never needed one: their own ``__reduce_ex__`` already walks</span>
+<span class="sd">        ``__slots__`` directly.</span>
+
+<span class="sd">        The shape returned -- an instance-``__dict__`` state (or :data:`None`)</span>
+<span class="sd">        paired with a slots-state :obj:`dict` -- is deliberately the same one</span>
+<span class="sd">        Python's own default state construction produces for a slotted class,</span>
+<span class="sd">        rather than a bespoke flat :obj:`dict`. A flat shape would be a *new*</span>
+<span class="sd">        pickle format for this class: a ``Deferred`` already pickled by a</span>
+<span class="sd">        released version under protocol 2 or above -- every one of them built</span>
+<span class="sd">        this same ``(dict_or_None, slots)`` pair -- would fail to unpickle</span>
+<span class="sd">        against a flat-shaped :meth:`__setstate__`, and the reverse.</span>
+
+<span class="sd">        The slot names come from :func:`copyreg._slotnames`, the standard</span>
+<span class="sd">        library's own helper for this exact job, rather than a hand-rolled</span>
+<span class="sd">        walk of ``type(self).__mro__`` and each class's ``__slots__``: a</span>
+<span class="sd">        subclass of ``Deferred`` may spell a slot as a bare string</span>
+<span class="sd">        (``__slots__ = 'extra'``, valid Python for one slot named by the</span>
+<span class="sd">        whole string) or as a private, name-mangled one</span>
+<span class="sd">        (``__slots__ = ('__secret',)``, stored on the instance under</span>
+<span class="sd">        ``_&lt;ClassName&gt;__secret``), and a hand-rolled walk that assumes every</span>
+<span class="sd">        ``__slots__`` is an iterable of already-resolved attribute names gets</span>
+<span class="sd">        both wrong -- the first by iterating the string's *characters*, the</span>
+<span class="sd">        second by testing the unmangled name ``hasattr`` never finds</span>
+<span class="sd">        (:issue:`2425`). ``_slotnames`` already handles both, the same way</span>
+<span class="sd">        protocol 0 and 1 reduction has relied on it to for decades.</span>
+
+<span class="sd">        """</span>
+        <span class="n">slotnames</span> <span class="o">=</span> <span class="n">copyreg</span><span class="o">.</span><span class="n">_slotnames</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore[attr-defined] # pylint: disable=protected-access</span>
+        <span class="n">slots</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">slotnames</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)}</span>
+        <span class="n">dict_state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">dict_state</span><span class="p">,</span> <span class="n">slots</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Deferred.__setstate__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred.__setstate__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="s1">'tuple[Optional[dict[str, Any]], dict[str, Any]] | dict[str, Any]'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpickling support; the counterpart to :meth:`__getstate__`.</span>
+
+<span class="sd">        Accepts the ``(dict_or_None, slots)`` pair :meth:`__getstate__` builds</span>
+<span class="sd">        above -- the shape every released, pre-:issue:`2423` pickle already</span>
+<span class="sd">        used under protocol 2 and above -- and, for a pickle made by this</span>
+<span class="sd">        class's own first, unreleased fix for :issue:`2423`, a bare :obj:`dict`</span>
+<span class="sd">        of ``{slot: value}`` (:issue:`2425`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">dict_state</span><span class="p">,</span> <span class="n">slots</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dict_state</span><span class="p">,</span> <span class="n">slots</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">if</span> <span class="n">dict_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dict_state</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">slots</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 </div>
 
 

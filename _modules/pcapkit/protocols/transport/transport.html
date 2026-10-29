@@ -585,8 +585,8 @@
 <span class="sd">                message names both. An unresolved</span>
 <span class="sd">                :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as</span>
 <span class="sd">                different from the class it names. See</span>
-<span class="sd">                :meth:`ProtocolBase.register</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
+<span class="sd">                :meth:`Protocol.register</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.register&gt;` for the</span>
 <span class="sd">                guard this shares with ``register_protocol``, and for the</span>
 <span class="sd">                shipped descriptor that a restore puts back (:issue:`1504`).</span>
 
@@ -622,11 +622,15 @@
 <div class="viewcode-block" id="Transport.analyze">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="s1">'tuple[int, int]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-renamed</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="s1">'tuple[Enum_AppType, Enum_AppType]'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-renamed</span>
 <span class="w">        </span><span class="sd">"""Analyse packet payload.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            ports: Source &amp; destination port numbers.</span>
+<span class="sd">            ports: Source &amp; destination ports, as the application types</span>
+<span class="sd">                :meth:`_make_port` resolves them to -- what</span>
+<span class="sd">                :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.TCP.src&gt;` and</span>
+<span class="sd">                :attr:`TCP.dst &lt;pcapkit.protocols.transport.tcp.TCP.dst&gt;` read</span>
+<span class="sd">                off a parsed header, resolved the same way.</span>
 <span class="sd">            payload: Packet payload.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -634,9 +638,60 @@
 <span class="sd">            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`</span>
 <span class="sd">            instance.</span>
 
+<span class="sd">        Important:</span>
+<span class="sd">            The annotation names the **base** registry rather than one</span>
+<span class="sd">            transport's own, because this is the single method</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP`,</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each</span>
+<span class="sd">            resolves its ports in a different one --</span>
+<span class="sd">            :class:`~pcapkit.const.reg.apptype.tcp.TCP` for the first, and so</span>
+<span class="sd">            on. A caller that knows which transport it has gets the narrower</span>
+<span class="sd">            type from whatever handed it the pair, e.g.</span>
+<span class="sd">            :meth:`TCP._make_ports</span>
+<span class="sd">            &lt;pcapkit.foundation.reassembly.tcp.TCP._make_ports&gt;`.</span>
+
+<span class="sd">            A bare :obj:`int` port still resolves, so the tightened annotation</span>
+<span class="sd">            is a declaration of what callers should pass rather than a new</span>
+<span class="sd">            rejection -- the method predates 1.5.0, and a member and the port it</span>
+<span class="sd">            carries are the same key of an :obj:`int`-keyed mapping anyway:</span>
+<span class="sd">            :meth:`AppType.__hash__</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.__hash__&gt;` is its port's</span>
+<span class="sd">            and :meth:`AppType.__eq__</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.__eq__&gt;` compares against</span>
+<span class="sd">            it. So the port chosen below is tested against :attr:`__proto__`</span>
+<span class="sd">            exactly as it arrived, and the chosen one is unwrapped to the</span>
+<span class="sd">            :obj:`int` key the registry declares only when it is a member --</span>
+<span class="sd">            through :meth:`AppType.__int__</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.__int__&gt;`, i.e.</span>
+<span class="sd">            :attr:`AppType.port</span>
+<span class="sd">            &lt;pcapkit.const.reg.apptype.apptype.AppType.port&gt;`. Reading</span>
+<span class="sd">            ``.port`` unconditionally would have made the :obj:`int` case an</span>
+<span class="sd">            :exc:`AttributeError`, and unwrapping unconditionally would have</span>
+<span class="sd">            changed what anything *else* does here: :func:`int` of :obj:`None`</span>
+<span class="sd">            raises where the lookup used to fall back to</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, and :func:`int` of</span>
+<span class="sd">            ``'80'`` would dispatch a :class:`str` nobody registered.</span>
+
+<span class="sd">            Nothing is written back on a miss either way, so a payload on an</span>
+<span class="sd">            unregistered port does not grow a process-wide registry -- see</span>
+<span class="sd">            :meth:`ProtocolBase._lookup_registry</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;`.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           ``ports`` is a pair of</span>
+<span class="sd">           :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather</span>
+<span class="sd">           than of bare :obj:`int` port numbers, so that the one caller that</span>
+<span class="sd">           reaches this method -- :meth:`TCP.submit</span>
+<span class="sd">           &lt;pcapkit.foundation.reassembly.tcp.TCP.submit&gt;`, through</span>
+<span class="sd">           :class:`~pcapkit.foundation.reassembly.data.data.Deferred` -- hands</span>
+<span class="sd">           over the same named ports a parsed header carries (:issue:`2417`).</span>
+
 <span class="sd">        """</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span> <span class="k">else</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">)</span> <span class="k">else</span> <span class="n">port</span><span class="p">)</span>
 
         <span class="n">payload_io</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -663,7 +718,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
-<span class="sd">            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data</span>
+<span class="sd">            **kwargs: Construction keywords, as for :meth:`Protocol.from_data</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`.</span>
 
 <span class="sd">        Returns:</span>
@@ -763,7 +818,7 @@
 
 <span class="sd">        Important:</span>
 <span class="sd">            The port is forwarded **whether or not it is registered**:</span>
-<span class="sd">            :meth:`ProtocolBase._import_next_layer</span>
+<span class="sd">            :meth:`Protocol._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;` passes</span>
 <span class="sd">            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            records it as :attr:`Data_Raw.protocol</span>
