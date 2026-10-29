@@ -15,7 +15,7 @@ Why the assignment had nothing to be symmetric about
 exactly ``kind`` and ``length`` (#541) and every concrete subtype adds its own on top; none of
 them declares ``option``, under :data:`~typing.TYPE_CHECKING` or otherwise. So the assignment
 created an attribute out of nothing at unpack time, and nothing in ``pcapkit`` read it back:
-``kind``, a real :class:`~pcapkit.corekit.fields.enums.EnumField`, already carries
+``kind``, a real :class:`~pcapkit.corekit.fields.numbers.EnumField`, already carries
 :attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`, and it is ``kind`` that the schema
 packs.
 

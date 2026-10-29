@@ -1139,7 +1139,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
+            raise RegistryError(f'protocol must be a ProtocolBase subclass, not {protocol!r}')
         return protocol
 
     @classmethod
