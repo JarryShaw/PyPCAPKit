@@ -1,0 +1,11 @@
+1.5.1 -- 2026-10-30
+===================
+
+* **Fixed** -- ``dictdumper`` 0.8.5 fixed the mapping-key/XML-escaping defects
+  (:issue:`772`, :issue:`1261`) that :mod:`pcapkit.dumpkit.common` had been
+  working around since before 0.8.5 existed, so the two fixes stacked and
+  double-escaped every dumped value (:issue:`2442`, :pr:`2445`). The redundant
+  workarounds are removed; the unrelated ``keep_none`` (:issue:`1257`) and
+  ``tree_numbers`` (:issue:`1266`) workarounds, and a UTC-conversion fix for
+  :meth:`~pcapkit.dumpkit.common.make_dumper`'s ``_append_date`` override that
+  predates the stacking bug, are untouched.

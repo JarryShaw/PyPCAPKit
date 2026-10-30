@@ -397,6 +397,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
@@ -541,7 +543,10 @@ starts the automated path described below.</p>
 <p>The same script is also the manual entry point: run
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a
 release that is not a vendor-registry refresh – a feature or a fix that has
-landed and is ready to go out.</p>
+landed and is ready to go out. Running it while <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is still a
+<code class="docutils literal notranslate"><span class="pre">.devN</span></code> one only advances that counter (<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>) –
+see the dev-release note below – so it produces another blocked dev version,
+not a release.</p>
 <p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without also moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">version</span></code> field to match is <strong>not</strong> a safe shortcut: it blocks the release.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
@@ -564,6 +569,28 @@ entry” step fails outright if <code class="docutils literal notranslate"><span
 warns, without failing, if that entry’s heading still reads “unreleased”. Each
 enforces what the changelog convention
 already asks for.</p>
+<p>Owner ruling, 2026-10-30: while a version is still under active development,
+<code class="docutils literal notranslate"><span class="pre">__version__</span></code> should carry that <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a> <code class="docutils literal notranslate"><span class="pre">devN</span></code> suffix itself, as a plain
+work-in-progress signal distinct from a deliberately-tagged alpha, beta or
+release candidate – this project has shipped those for real (e.g.
+<code class="docutils literal notranslate"><span class="pre">1.5.0b14</span></code>), and they must stay publishable. <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEV_RELEASE</span></code> output reads <code class="docutils literal notranslate"><span class="pre">Version(__version__).is_devrelease</span></code>,
+never <code class="docutils literal notranslate"><span class="pre">is_prerelease</span></code> (which a real beta sets too), and <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all refuse to run while it is <code class="docutils literal notranslate"><span class="pre">true</span></code> – so a scheduled
+Vendor Update reaching this workflow (see below) can never tag or publish a dev
+version on the strength of <code class="docutils literal notranslate"><span class="pre">github-release</span></code>’s one reviewer approval alone
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, below). That approval still exists and still matters, but it is one
+person approving a diff for reasons usually unrelated to the version string, so
+a stray <code class="docutils literal notranslate"><span class="pre">.devN</span></code> is easy to miss there; and a re-run of a job that already
+skipped <code class="docutils literal notranslate"><span class="pre">github</span></code> once does not ask for a fresh approval at all. This gate
+closes that in code rather than leaving it to review.</p>
+<p>The suffix comes off only by hand: <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> has no option
+to drop it – run on a dev version it only advances the <code class="docutils literal notranslate"><span class="pre">devN</span></code> counter
+(<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), never past it. Finishing a dev version
+means editing the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in <code class="file docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code>
+to the real final string by hand, and moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s matching
+<code class="docutils literal notranslate"><span class="pre">version</span></code> field in the same commit, once that version is actually ready to
+ship.</p>
 </section>
 <section id="ways-to-start-a-release">
 <h2>Ways to Start a Release<a class="headerlink" href="#ways-to-start-a-release" title="Link to this heading">¶</a></h2>
@@ -1146,7 +1173,7 @@ hand-rolled recovery.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=623e1633"></script>
+</div><script src="../_static/documentation_options.js?v=cb7e6255"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

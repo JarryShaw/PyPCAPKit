@@ -390,6 +390,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
@@ -503,7 +505,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xml.sax.saxutils</span>  <span class="c1"># nosec: B406  # escape() only, nothing parsed</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
@@ -796,6 +797,40 @@
     <span class="k">return</span> <span class="n">qualname</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_surrogate_pairs</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Split every character above ``U+FFFF`` in ``text`` into its UTF-16 surrogate pair.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text: Text to split.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``text`` with each astral character (above ``U+FFFF``) replaced by the</span>
+<span class="sd">        two lone-surrogate code points :func:`json.dumps` would write it as;</span>
+<span class="sd">        every other character is returned unchanged.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This is for :mod:`dictdumper.json`'s *key* path, which escapes a</span>
+<span class="sd">        mapping key through its module-level :func:`~dictdumper.json.encode_string`</span>
+<span class="sd">        directly rather than through an overridable method (GitHub issue</span>
+<span class="sd">        :issue:`1261`). That function already escapes a lone surrogate as a</span>
+<span class="sd">        four-digit ``\\uXXXX`` sequence -- it is only a *pair* of code points</span>
+<span class="sd">        above ``U+FFFF`` it cannot spell -- so splitting first and handing it</span>
+<span class="sd">        the pair is enough; no change to :func:`~dictdumper.json.encode_string`</span>
+<span class="sd">        itself is needed.</span>
+
+<span class="sd">    """</span>
+    <span class="n">chars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="n">codepoint</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">codepoint</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span><span class="p">:</span>
+            <span class="n">codepoint</span> <span class="o">-=</span> <span class="mh">0x10000</span>
+            <span class="n">chars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mh">0xD800</span> <span class="o">+</span> <span class="p">(</span><span class="n">codepoint</span> <span class="o">&gt;&gt;</span> <span class="mi">10</span><span class="p">)))</span>
+            <span class="n">chars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mh">0xDC00</span> <span class="o">+</span> <span class="p">(</span><span class="n">codepoint</span> <span class="o">&amp;</span> <span class="mh">0x3FF</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="make_dumper">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ABCDumper]'</span><span class="p">:</span>
@@ -825,88 +860,48 @@
     <span class="c1"># NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what</span>
     <span class="c1"># :attr:`Extractor.__output__ &lt;pcapkit.foundation.extraction.Extractor.__output__&gt;`</span>
     <span class="c1"># maps the ``'xml'`` format to, so the two are the same writer under two</span>
-    <span class="c1"># names here -- interpolates every ``&lt;string&gt;``/``&lt;key&gt;`` value into its</span>
-    <span class="c1"># XML-shaped markup with no entity escaping at all: neither ``&amp;``, ``&lt;``</span>
-    <span class="c1"># nor ``&gt;`` is escaped anywhere in :mod:`dictdumper`. Filed upstream as</span>
-    <span class="c1"># JarryShaw/DictDumper#125 and tracked here as GitHub issue #772. ``json``,</span>
-    <span class="c1"># ``tree`` and ``text`` have no such defect and all three characters are</span>
-    <span class="c1"># legal in their output, so escaping is conditioned on the output class</span>
-    <span class="c1"># rather than done unconditionally in :func:`render_enum`, which would</span>
-    <span class="c1"># double-escape those three. :class:`~dictdumper.xml.XML` itself defines</span>
-    <span class="c1"># no ``_append_string`` of its own -- its own module docstring says not to</span>
-    <span class="c1"># use it directly -- so :class:`~dictdumper.plist.PLIST` is the only</span>
-    <span class="c1"># concrete writer this applies to.</span>
-    <span class="n">escape_strings</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
-    <span class="c1"># NOTE: :class:`~dictdumper.json.JSON` escapes every string *value* it</span>
-    <span class="c1"># writes, but interpolates a mapping key into ``'"{item}": '`` raw: a ``"``</span>
-    <span class="c1"># in a key closes the JSON string early, and a ``\`` escapes the character</span>
-    <span class="c1"># after it (GitHub issue #1152). The defect is :mod:`dictdumper`'s, so it is</span>
-    <span class="c1"># worked around here.</span>
-    <span class="n">escape_json_keys</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
-    <span class="n">escape_keys</span> <span class="o">=</span> <span class="n">escape_strings</span> <span class="ow">or</span> <span class="n">escape_json_keys</span>
+    <span class="c1"># names here -- used to interpolate every ``&lt;string&gt;``/``&lt;key&gt;`` value into</span>
+    <span class="c1"># its XML-shaped markup with no entity escaping at all: neither ``&amp;``,</span>
+    <span class="c1"># ``&lt;`` nor ``&gt;`` was escaped anywhere in :mod:`dictdumper`. Filed upstream</span>
+    <span class="c1"># as JarryShaw/DictDumper#125 and tracked here as GitHub issue #772 -- along</span>
+    <span class="c1"># with the sibling ``json`` key-quoting defect, DictDumper#121 -- and both</span>
+    <span class="c1"># halves are now fixed upstream in ``dictdumper`` 0.8.5 (DictDumper#123):</span>
+    <span class="c1"># :func:`dictdumper.plist.encode_xml` and :func:`dictdumper.json.encode_string`</span>
+    <span class="c1"># each escape a mapping key exactly as they escape the value beside it, so</span>
+    <span class="c1"># the escaping this module used to do for both is removed rather than</span>
+    <span class="c1"># doubled up on top of the upstream fix.</span>
+    <span class="c1">#</span>
+    <span class="c1"># ``is_plist_output`` survives under its own name for two narrower,</span>
+    <span class="c1"># still-unfixed reasons: a string holding a character XML 1.0 cannot spell</span>
+    <span class="c1"># at all (GitHub issue #1262, below) still has to be written as</span>
+    <span class="c1"># :class:`bytes` instead, and an aware :class:`~datetime.datetime` still has</span>
+    <span class="c1"># to be converted to UTC before the (now upstream-fixed) ``&lt;date&gt;``</span>
+    <span class="c1"># formatting runs, which neither :mod:`dictdumper` nor</span>
+    <span class="c1"># :func:`plistlib.dump` does on its own (GitHub issue #1448, below).</span>
+    <span class="n">is_plist_output</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
+    <span class="c1"># NOTE: :meth:`~dictdumper.json.JSON._append_string` and the module-level</span>
+    <span class="c1"># :func:`dictdumper.json.encode_string` it shares with</span>
+    <span class="c1"># :meth:`~dictdumper.json.JSON._append_object` both escape a character</span>
+    <span class="c1"># above ``U+FFFF`` as a single five- or six-digit ``\uXXXX`` escape, which a</span>
+    <span class="c1"># reader takes as one four-digit escape followed by literal text (GitHub</span>
+    <span class="c1"># issue #1261). Unlike the key-escaping defect above, ``dictdumper`` 0.8.5</span>
+    <span class="c1"># left this one alone -- confirmed by reading the installed package's</span>
+    <span class="c1"># :func:`dictdumper.json.encode_string` -- so the surrogate-pair workarounds</span>
+    <span class="c1"># on :meth:`DictDumper._append_string` (values) and</span>
+    <span class="c1"># :meth:`DictDumper._append_object` (keys) below still apply.</span>
+    <span class="n">is_json_output</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
     <span class="c1"># NOTE: :meth:`~dictdumper.plist.PLIST._append_dict` and</span>
     <span class="c1"># :meth:`~dictdumper.plist.PLIST._append_array` skip every :data:`None`</span>
     <span class="c1"># value and item outright, so a ``plist`` report lacks keys the ``json``</span>
-    <span class="c1"># report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it</span>
-    <span class="c1"># is worked around here.</span>
+    <span class="c1"># report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, and</span>
+    <span class="c1"># ``dictdumper`` 0.8.5 did not touch it, so it is still worked around here.</span>
     <span class="n">keep_none</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
-    <span class="c1"># NOTE: :meth:`~dictdumper.plist.PLIST._append_date` writes every date with</span>
-    <span class="c1"># six fractional digits, which the property list ``&lt;date&gt;`` grammar does not</span>
-    <span class="c1"># admit, so :func:`plistlib.load` rejects every report (GitHub issue #1448).</span>
-    <span class="c1"># The defect is :mod:`dictdumper`'s, so it is worked around here.</span>
-    <span class="n">plist_dates</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
     <span class="c1"># NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to</span>
     <span class="c1"># :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`</span>
     <span class="c1"># one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there</span>
-    <span class="c1"># (GitHub issue #1266). The defect is :mod:`dictdumper`'s, so it is worked</span>
-    <span class="c1"># around here.</span>
+    <span class="c1"># (GitHub issue #1266). The defect is :mod:`dictdumper`'s, and ``dictdumper``</span>
+    <span class="c1"># 0.8.5 did not touch it, so it is still worked around here.</span>
     <span class="n">tree_numbers</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">Tree</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Escape a mapping key on its way to the writer.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Mapping key, as the writer would interpolate it.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The key unchanged where ``output`` needs no escaping, otherwise the</span>
-<span class="sd">            escaped text of the writer's own rendering of it.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            :meth:`~dictdumper.plist.PLIST._append_dict` writes a key straight</span>
-<span class="sd">            into ``'&lt;key&gt;{item}&lt;/key&gt;'``, and</span>
-<span class="sd">            :meth:`~dictdumper.json.JSON._append_object` into ``'"{item}": '``;</span>
-<span class="sd">            both call :meth:`~dictdumper.dumper.Dumper._encode_value` on the</span>
-<span class="sd">            *value* that follows, never on the key -- so</span>
-<span class="sd">            :meth:`DictDumper.object_hook` is handed every value the writer will</span>
-<span class="sd">            interpolate but no key at all, and cannot escape one on the way out</span>
-<span class="sd">            the way it does a value. Each branch below that builds a mapping</span>
-<span class="sd">            therefore escapes its own keys through here.</span>
-
-<span class="sd">            A non-:class:`str` key is rendered with :func:`format`, which is the</span>
-<span class="sd">            very conversion ``'{item}'.format(item=key)`` already applies to it,</span>
-<span class="sd">            so the key text is unchanged apart from the escaping.</span>
-<span class="sd">            Rendering such a key rather than passing it over is deliberate:</span>
-<span class="sd">            :file:`examples/captures/test.pcapng` keys the TLS key log entries</span>
-<span class="sd">            of its decryption secrets block by a raw :class:`bytes` client</span>
-<span class="sd">            random (:meth:`TLSKeyLog.post_process</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process&gt;`), and</span>
-<span class="sd">            the ``bytes`` repr of that one carries ``&amp;``, ``&lt;``, ``&gt;``, ``"``</span>
-<span class="sd">            *and* ``\\``. Unescaped, that makes the fixture's ``plist`` report</span>
-<span class="sd">            unparseable at the key's ``&amp;``, and its ``json`` report at the</span>
-<span class="sd">            key's ``"``.</span>
-
-<span class="sd">            For ``json`` the key is escaped by :func:`json.dumps` with the</span>
-<span class="sd">            surrounding quotes stripped, since the writer supplies its own. Like</span>
-<span class="sd">            :meth:`~dictdumper.json.JSON._append_string`, that spells every</span>
-<span class="sd">            non-ASCII character as a ``\\uXXXX`` escape.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">escape_strings</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">escape_json_keys</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">''</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">key</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">excluded</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Collection[Any]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return the keys of ``info`` the writer leaves out.</span>
@@ -937,13 +932,14 @@
 <span class="sd">                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            One entry per field, in order, with its key escaped as</span>
-<span class="sd">            :func:`escape_key` does. A field held once maps to its value; a field</span>
-<span class="sd">            held more than once, such as a repeated IPv6 extension header, maps</span>
-<span class="sd">            to the :class:`list` of all its values, in order (GitHub issue</span>
-<span class="sd">            :issue:`1484`). The values are left as they are, so each comes back</span>
-<span class="sd">            through :meth:`DictDumper.object_hook` when written. The keys</span>
-<span class="sd">            :func:`excluded` names are left out.</span>
+<span class="sd">            One entry per field, in order, with its key unchanged -- the writer</span>
+<span class="sd">            itself now escapes a mapping key where ``output`` needs that</span>
+<span class="sd">            (``dictdumper`` 0.8.5, DictDumper#123). A field held once maps to</span>
+<span class="sd">            its value; a field held more than once, such as a repeated IPv6</span>
+<span class="sd">            extension header, maps to the :class:`list` of all its values, in</span>
+<span class="sd">            order (GitHub issue :issue:`1484`). The values are left as they</span>
+<span class="sd">            are, so each comes back through :meth:`DictDumper.object_hook` when</span>
+<span class="sd">            written. The keys :func:`excluded` names are left out.</span>
 
 <span class="sd">        """</span>
         <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
@@ -952,12 +948,12 @@
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[Any, Any]</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># NOTE: read by indexing, so that a model overriding it is</span>
                 <span class="c1"># honoured -- the traceflow and reassembly models resolve a</span>
                 <span class="c1"># deferred ``packet`` there.</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="c1">#: Whether the writer is handed the fields of an</span>
@@ -1010,26 +1006,22 @@
 <span class="sd">                o: object to convert</span>
 
 <span class="sd">            Returns:</span>
-<span class="sd">                Converted object, escaped for XML-shaped output where needed.</span>
+<span class="sd">                Converted object. Escaping a string or a mapping key for</span>
+<span class="sd">                XML-shaped output is the writer's own job since ``dictdumper``</span>
+<span class="sd">                0.8.5 (DictDumper#123); this method no longer does it.</span>
 
 <span class="sd">            Notes:</span>
 <span class="sd">                :meth:`~dictdumper.dumper.Dumper._encode_value` -- and so this</span>
 <span class="sd">                method -- is called once per node the dumper writes, however</span>
-<span class="sd">                deeply nested, so escaping the :class:`str` result here on the</span>
-<span class="sd">                way out reaches every string the writer will ever interpolate</span>
-<span class="sd">                raw, not merely the ones built directly in this method. The</span>
-<span class="sd">                one exception is a mapping *key*:</span>
-<span class="sd">                :meth:`~dictdumper.plist.PLIST._append_dict` and</span>
-<span class="sd">                :meth:`~dictdumper.json.JSON._append_object` write those</span>
-<span class="sd">                straight from the mapping without ever calling this method on</span>
-<span class="sd">                them, so both branches that hand the writer a mapping -- a</span>
-<span class="sd">                :class:`~pcapkit.corekit.multidict.MultiDict` and a plain</span>
-<span class="sd">                :class:`dict` -- escape their own keys through</span>
-<span class="sd">                :func:`escape_key` instead. An</span>
-<span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a</span>
-<span class="sd">                :class:`list` of single-key :class:`dict` objects, each of</span>
-<span class="sd">                which comes back through the :class:`dict` branch, and so</span>
-<span class="sd">                does an :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`,</span>
+<span class="sd">                deeply nested. A mapping *key* never reaches this method at</span>
+<span class="sd">                all: :meth:`~dictdumper.plist.PLIST._append_dict` and</span>
+<span class="sd">                :meth:`~dictdumper.json.JSON._append_object` write a key</span>
+<span class="sd">                straight from the mapping, and now escape it themselves where</span>
+<span class="sd">                ``output`` needs that, exactly as they escape the value beside</span>
+<span class="sd">                it. An :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
+<span class="sd">                becomes a :class:`list` of single-key :class:`dict` objects,</span>
+<span class="sd">                each of which comes back through the :class:`dict` branch, and</span>
+<span class="sd">                so does an :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`,</span>
 <span class="sd">                the option lists an :class:`~pcapkit.corekit.infoclass.Info`</span>
 <span class="sd">                holds. An :class:`~pcapkit.corekit.infoclass.Info` itself</span>
 <span class="sd">                becomes the :class:`dict` of its fields that :func:`fields`</span>
@@ -1059,11 +1051,11 @@
                 <span class="c1"># NOTE: one single-key mapping per entry, in insertion order --</span>
                 <span class="c1"># i.e. wire order for the option lists -- since a mapping keyed</span>
                 <span class="c1"># by name could only gather the repeats of a key under its first</span>
-                <span class="c1"># occurrence (GitHub issue #1263). The keys are escaped when the</span>
-                <span class="c1"># writer hands each mapping back to this hook, through the</span>
-                <span class="c1"># :class:`dict` branch below. The keys an export of an</span>
-                <span class="c1"># :class:`Info` excludes are left out, as :func:`fields` leaves</span>
-                <span class="c1"># them out (#2003).</span>
+                <span class="c1"># occurrence (GitHub issue #1263). Each single-key mapping comes</span>
+                <span class="c1"># back through the :class:`dict` branch below, which is where the</span>
+                <span class="c1"># writer itself now escapes the key, where ``output`` needs that.</span>
+                <span class="c1"># The keys an export of an :class:`Info` excludes are left out,</span>
+                <span class="c1"># as :func:`fields` leaves them out (#2003).</span>
                 <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="p">{</span><span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
@@ -1076,16 +1068,14 @@
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
                         <span class="n">key</span> <span class="o">=</span> <span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                    <span class="n">temp</span><span class="p">[</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="n">temp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">temp</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="c1"># NOTE: rebuilt only where the keys need escaping, so every other</span>
-                <span class="c1"># output is still handed the caller's own mapping rather than a</span>
-                <span class="c1"># copy of it.</span>
-                <span class="k">if</span> <span class="n">escape_keys</span><span class="p">:</span>
-                    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">):</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">result</span> <span class="o">=</span> <span class="n">o</span>
+                <span class="c1"># NOTE: never rebuilt -- the writer now escapes a key itself</span>
+                <span class="c1"># where ``output`` needs that (``dictdumper`` 0.8.5,</span>
+                <span class="c1"># DictDumper#123), so every output is handed the caller's own</span>
+                <span class="c1"># mapping, with the caller's own key objects in it.</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">o</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
                 <span class="n">addon</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)}</span>
                 <span class="k">if</span> <span class="n">addon</span><span class="p">:</span>
@@ -1098,15 +1088,46 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">escape_strings</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="c1"># NOTE: XML 1.0 has no spelling at all for some characters, not</span>
-                <span class="c1"># even a character reference, so a string holding one is written</span>
-                <span class="c1"># as ``&lt;data&gt;``, the way :class:`bytes` already is (GitHub issue</span>
-                <span class="c1"># #1262).</span>
-                <span class="k">if</span> <span class="n">_XML_ILLEGAL</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">,</span> <span class="s1">'surrogatepass'</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="c1"># NOTE: XML 1.0 has no spelling at all for some characters, not</span>
+            <span class="c1"># even a character reference, so a PLIST string holding one is</span>
+            <span class="c1"># written as ``&lt;data&gt;``, the way :class:`bytes` already is (GitHub</span>
+            <span class="c1"># issue #1262). Any escaping the string itself still needs --</span>
+            <span class="c1"># ``&amp;``, ``&lt;`` and ``&gt;`` -- is now the writer's own job.</span>
+            <span class="k">if</span> <span class="n">is_plist_output</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_XML_ILLEGAL</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">,</span> <span class="s1">'surrogatepass'</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">if</span> <span class="n">is_plist_output</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'datetime.date'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write date contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    An aware value is converted to UTC first, a naive one is</span>
+<span class="sd">                    taken as UTC already -- neither :mod:`dictdumper` nor</span>
+<span class="sd">                    :func:`plistlib.dump` (without its 3.13+ ``aware_datetime``</span>
+<span class="sd">                    flag) does this conversion on its own, so it stays pcapkit's</span>
+<span class="sd">                    own addition on top of the upstream writer. The exact value</span>
+<span class="sd">                    is not lost: every timestamp pcapkit reports sits next to a</span>
+<span class="sd">                    field that carries it exactly -- a :class:`~decimal.Decimal`</span>
+<span class="sd">                    ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.</span>
+<span class="sd">                    ``time_epoch``, and the raw ``ntp_timestamp`` or</span>
+<span class="sd">                    ``pmip_timestamp`` for the MH options that carry one.</span>
+
+<span class="sd">                    Formatting to whole seconds -- the property list ``&lt;date&gt;``</span>
+<span class="sd">                    grammar has no fractional part (GitHub issue :issue:`1448`) -- is now</span>
+<span class="sd">                    :meth:`~dictdumper.plist.PLIST._append_date`'s own job, fixed</span>
+<span class="sd">                    upstream in ``dictdumper`` 0.8.5 (DictDumper#124), so it is</span>
+<span class="sd">                    left to :meth:`super`.</span>
+
+<span class="sd">                """</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_date</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">keep_none</span><span class="p">:</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">_append_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'dict[Any, Any]'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -1142,9 +1163,9 @@
                 <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_encode_value</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
                 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">plist_dates</span><span class="p">:</span>
-            <span class="k">def</span><span class="w"> </span><span class="nf">_append_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'datetime.date'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">                </span><span class="sd">"""Call this function to write date contents.</span>
+        <span class="k">if</span> <span class="n">is_json_output</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'dict[Any, Any]'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write object (mapping) contents.</span>
 
 <span class="sd">                Args:</span>
 <span class="sd">                    self: Dumper instance.</span>
@@ -1152,32 +1173,29 @@
 <span class="sd">                    file: Output file.</span>
 
 <span class="sd">                Notes:</span>
-<span class="sd">                    The date is written in UTC to whole seconds, as</span>
-<span class="sd">                    :func:`plistlib.dump` writes one: an aware value is</span>
-<span class="sd">                    converted to UTC first, a naive one is taken as UTC already,</span>
-<span class="sd">                    and the sub-second part of the :class:`~datetime.datetime`</span>
-<span class="sd">                    is truncated. That value is already rounded to the</span>
-<span class="sd">                    microsecond where it is parsed, so within half a microsecond</span>
-<span class="sd">                    of a second boundary the date is one second past the floor</span>
-<span class="sd">                    of a finer ``*_epoch``. The exact value is not</span>
-<span class="sd">                    lost: every timestamp pcapkit reports sits next to a field</span>
-<span class="sd">                    that carries it exactly -- a :class:`~decimal.Decimal`</span>
-<span class="sd">                    ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.</span>
-<span class="sd">                    ``time_epoch``, and the raw ``ntp_timestamp`` or</span>
-<span class="sd">                    ``pmip_timestamp`` for the MH options that carry one.</span>
+<span class="sd">                    :meth:`dictdumper.json.JSON._append_object` escapes each key</span>
+<span class="sd">                    through the module-level :func:`dictdumper.json.encode_string`</span>
+<span class="sd">                    directly, not through :meth:`_append_string`, so the</span>
+<span class="sd">                    surrogate-pair handling there never reaches a key -- a</span>
+<span class="sd">                    :class:`str` key holding a character above ``U+FFFF`` is</span>
+<span class="sd">                    still written as the single five- or six-digit escape</span>
+<span class="sd">                    :func:`~dictdumper.json.encode_string` always wrote (GitHub</span>
+<span class="sd">                    issue :issue:`1261`). Splitting such a key into its UTF-16</span>
+<span class="sd">                    surrogate pair first, with :func:`_surrogate_pairs`, makes</span>
+<span class="sd">                    :func:`~dictdumper.json.encode_string` emit the same pair of</span>
+<span class="sd">                    four-digit escapes it already writes for a lone surrogate,</span>
+<span class="sd">                    matching what :func:`json.dumps` writes and what</span>
+<span class="sd">                    :meth:`_append_string` above already does for a value.</span>
 
 <span class="sd">                """</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
-                <span class="c1"># NOTE: not :meth:`~datetime.date.strftime`, whose ``%Y`` does not</span>
-                <span class="c1"># zero-pad a year below 1000 on every platform.</span>
-                <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-                                        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'hour'</span><span class="p">,</span> <span class="s1">'minute'</span><span class="p">,</span> <span class="s1">'second'</span><span class="p">))</span>
-                <span class="n">tabs</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tctr</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">tabs</span><span class="si">}</span><span class="s1">&lt;date&gt;</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">year</span><span class="si">:</span><span class="s1">04d</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">month</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">day</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">'</span>
-                           <span class="sa">f</span><span class="s1">'T</span><span class="si">{</span><span class="n">hour</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">minute</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">second</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">Z&lt;/date&gt;</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">key</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">_surrogate_pairs</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="p">}</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_object</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">escape_json_keys</span><span class="p">:</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">_append_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">                </span><span class="sd">"""Call this function to write string contents.</span>
 
@@ -1360,7 +1378,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=623e1633"></script>
+</div><script src="../../../_static/documentation_options.js?v=cb7e6255"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
