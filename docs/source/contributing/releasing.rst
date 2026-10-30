@@ -46,7 +46,10 @@ starts the automated path described below.
 The same script is also the manual entry point: run
 ``python util/bump_version.py`` and commit the result to ``main`` for a
 release that is not a vendor-registry refresh -- a feature or a fix that has
-landed and is ready to go out.
+landed and is ready to go out. Running it while ``main``'s version is still a
+``.devN`` one only advances that counter (``1.6.0.dev2`` to ``1.6.0.dev3``) --
+see the dev-release note below -- so it produces another blocked dev version,
+not a release.
 
 Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 ``version`` field to match is **not** a safe shortcut: it blocks the release.
@@ -71,6 +74,30 @@ entry" step fails outright if ``CHANGELOG.md`` has drifted from its source entry
 warns, without failing, if that entry's heading still reads "unreleased". Each
 enforces what the changelog convention
 already asks for.
+
+Owner ruling, 2026-10-30: while a version is still under active development,
+``__version__`` should carry that :pep:`440` ``devN`` suffix itself, as a plain
+work-in-progress signal distinct from a deliberately-tagged alpha, beta or
+release candidate -- this project has shipped those for real (e.g.
+``1.5.0b14``), and they must stay publishable. ``version_check``'s
+``PCAPKIT_DEV_RELEASE`` output reads ``Version(__version__).is_devrelease``,
+never ``is_prerelease`` (which a real beta sets too), and ``github``, ``tag``,
+``pypi`` and ``conda`` all refuse to run while it is ``true`` -- so a scheduled
+Vendor Update reaching this workflow (see below) can never tag or publish a dev
+version on the strength of ``github-release``'s one reviewer approval alone
+(:issue:`887`, below). That approval still exists and still matters, but it is one
+person approving a diff for reasons usually unrelated to the version string, so
+a stray ``.devN`` is easy to miss there; and a re-run of a job that already
+skipped ``github`` once does not ask for a fresh approval at all. This gate
+closes that in code rather than leaving it to review.
+
+The suffix comes off only by hand: :file:`util/bump_version.py` has no option
+to drop it -- run on a dev version it only advances the ``devN`` counter
+(``1.6.0.dev2`` to ``1.6.0.dev3``), never past it. Finishing a dev version
+means editing the ``__version__`` assignment in :file:`pcapkit/__init__.py`
+to the real final string by hand, and moving :file:`CITATION.cff`'s matching
+``version`` field in the same commit, once that version is actually ready to
+ship.
 
 Ways to Start a Release
 -----------------------

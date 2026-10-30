@@ -441,7 +441,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
                 'PCAPKIT_PYPI_JOB': 'success', 'PCAPKIT_CONDA_JOB': 'success',
                 'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_TAG_EXISTS': 'false',
                 'PCAPKIT_CONDA_TAG_EXISTS': 'false', 'PCAPKIT_PYPI_COMPLETE': 'false',
-                'PCAPKIT_CONDA_COMPLETE': 'false'}
+                'PCAPKIT_CONDA_COMPLETE': 'false', 'PCAPKIT_DEV_RELEASE': 'false'}
         clean, failed = (subprocess.run(command, env=dict(os.environ, **env), capture_output=True, text=True,
                                         check=False, timeout=60)
                          for env in (base, dict(base, PCAPKIT_PYPI_KTLO_310='failure',
