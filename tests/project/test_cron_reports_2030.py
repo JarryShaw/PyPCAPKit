@@ -67,6 +67,11 @@ ARGS = {
         'UPDATE_STATUS': '${{ needs.conda-update.outputs.status }}',
         'TAG_RESULT': '${{ needs.conda-tag.result }}',
         'DIST_RESULT': '${{ needs.conda-dist.result }}',
+        # #2458: tells "skipped, nothing pushed" apart from "skipped, a
+        # dev-release build was pushed on purpose".
+        'CONDA_CHANGED': '${{ needs.conda-update.outputs.CONDA_CHANGED }}',
+        'DEV_RELEASE': '${{ needs.conda-update.outputs.PCAPKIT_DEV_RELEASE }}',
+        'PCAPKIT_VERSION': '${{ needs.conda-update.outputs.PCAPKIT_VERSION }}',
     }),
     VERSIONS: ('--mode scheduled --status "$status"', {
         'DETECT_RESULT': '${{ needs.detect.result }}',
@@ -525,6 +530,39 @@ class TestThePostSteps(unittest.TestCase):
                 self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
                                                UPDATE_RESULT=update, UPDATE_STATUS=status, TAG_RESULT=tag,
                                                DIST_RESULT=dist), (expected, 'the run\n' + added))
+
+    def test_a_pushed_dev_release_skips_tag_and_upload_with_an_explanation(self) -> None:
+        """#2458: a pushed dev-release build leaves Tag/Upload skipped, but says why, not silently."""
+        self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
+                                       UPDATE_RESULT='success', UPDATE_STATUS='success', TAG_RESULT='skipped',
+                                       DIST_RESULT='skipped', CONDA_CHANGED='true', DEV_RELEASE='true',
+                                       PCAPKIT_VERSION='1.6.0.dev1'), ('success', 'the run\n'
+            '- Tag: skipped, and Upload: skipped -- 1.6.0.dev1 carries a PEP 440 dev-release suffix (.devN), '
+            'so PCAPKIT_DEV_RELEASE withheld both deliberately\n'))
+
+    def test_a_skipped_tag_with_nothing_pushed_adds_no_explanation(self) -> None:
+        """The ordinary case -- `CONDA_CHANGED` and `DEV_RELEASE` both unset -- stays silent, as before #2458."""
+        self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
+                                       UPDATE_RESULT='success', UPDATE_STATUS='success', TAG_RESULT='skipped',
+                                       DIST_RESULT='skipped'), ('success', 'the run\n'))
+
+    def test_no_explanation_unless_conda_changed_and_dev_release_both_hold(self) -> None:
+        """#2458: the explanation line needs `CONDA_CHANGED` and `DEV_RELEASE` both literally 'true' -- a dev
+        version that was not pushed, a pushed build that is not a dev release, and a pushed build with
+        `DEV_RELEASE` unset to empty, all stay as quiet as the ordinary skip above."""
+        rows = (
+            ('a dev version that was not pushed', 'success',
+             {'CONDA_CHANGED': 'false', 'DEV_RELEASE': 'true', 'PCAPKIT_VERSION': '1.6.0.dev1'}),
+            ('a pushed build that is not a dev release', 'cancelled',
+             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': 'false'}),
+            ('DEV_RELEASE unset to empty on a pushed build', 'cancelled',
+             {'CONDA_CHANGED': 'true', 'DEV_RELEASE': ''}),
+        )
+        for label, update, env in rows:
+            with self.subTest(label):
+                self.assertEqual(self.run_step(CONDA, 'the run\n', MODE='scheduled', HEAD_RESULT='success',
+                                               UPDATE_RESULT=update, UPDATE_STATUS='success', TAG_RESULT='skipped',
+                                               DIST_RESULT='skipped', **env), (update, 'the run\n'))
 
     def test_the_versions_status(self) -> None:
         for result, status, expected in (('success', 'success', 'success'), ('success', 'warning', 'warning'),
