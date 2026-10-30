@@ -173,6 +173,19 @@ class TestDumperRoundTrip(unittest.TestCase):
         self.assertIn(b'"a\\u007f\\u000b\\u00e9\\"\\\\\\n"', data)
         self.assertEqual(json.loads(data)['x'], value)
 
+    def test_json_writes_astral_characters_in_keys_as_surrogate_pairs(self) -> None:
+        """#1261: a mapping KEY above ``U+FFFF`` round-trips, not just a value.
+
+        ``dictdumper.json.JSON._append_object`` escapes a key through the
+        module-level :func:`dictdumper.json.encode_string` directly, bypassing
+        the overridable :meth:`_append_string` the previous test covers, so the
+        key side needed its own, separate fix.
+        """
+        value = {'astral\U0001F600key': 'v', 'plain': 1}
+        data = self.dump('JSON', value)
+        self.assertIn(b'"astral\\ud83d\\ude00key"', data)
+        self.assertEqual(json.loads(data)['x'], value)
+
     def test_plist_writes_strings_xml_cannot_spell_as_data(self) -> None:
         """#1262: a control character does not make the document unparseable."""
         value = {'c': 'a\x01b\x1bc', 'ok': 'tab\there & <there>'}

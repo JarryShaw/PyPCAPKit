@@ -171,9 +171,12 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
     """The ``json`` report of :file:`test.pcapng`, whose mapping keys need escaping.
 
     The fixture's decryption secrets block keys its TLS key log entries by a raw
-    :class:`bytes` client random, and :mod:`dictdumper` writes a mapping key
-    into a ``json`` report without escaping it. The report parses only because
-    :mod:`pcapkit.dumpkit` escapes the keys itself (GitHub issue #1152).
+    :class:`bytes` client random. ``dictdumper.json.JSON._append_object`` used
+    to write a mapping key into a ``json`` report without escaping it (GitHub
+    issue #1152), and the report parsed only because :mod:`pcapkit.dumpkit`
+    escaped the key itself. Fixed upstream in ``dictdumper`` 0.8.5
+    (DictDumper#123), so the report now parses on the writer's own escaping;
+    this test pins that the behaviour survives either way.
 
     """
 
@@ -184,12 +187,9 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
         <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>` keys the
         entries by ``bytes.fromhex(random)``, so the key the writer formats is a
         :class:`bytes` repr carrying ``"`` and ``\\``:
-        ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``.
-        :meth:`dictdumper.json.JSON._append_object` writes a key into
-        ``'"{item}": '`` raw, so that ``"`` would end the JSON string early --
-        still open upstream as JarryShaw/DictDumper#121. The ``escape_key``
-        helper of :func:`~pcapkit.dumpkit.common.make_dumper` escapes it with
-        :func:`json.dumps` first; without that, this test fails.
+        ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``, which a key written into
+        ``'"{item}": '`` raw -- as ``dictdumper`` 0.8.5 no longer does -- would
+        close the JSON string early.
 
         """
         extractor = self.extract(fin=sample_path('test.pcapng'), fout=self.out('report'),

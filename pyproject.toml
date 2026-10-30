@@ -74,7 +74,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "dictdumper~=0.8.0",  # for formatted output
+    "dictdumper>=0.8.5",  # for formatted output -- the floor fixing #772/#1448 upstream
     "chardet",            # for bytes decode
     "aenum",              # for const types
     "tbtrim>=0.2.1",      # for refined exceptions

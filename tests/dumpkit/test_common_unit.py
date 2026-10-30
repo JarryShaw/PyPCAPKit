@@ -77,7 +77,6 @@ class SlotObject:
 #: because neither is special inside an XML text node.
 BYTES_KEY = bytes(range(0x20, 0x40))
 RAW_BYTES_KEY = """b' !"#$%&\\'()*+,-./0123456789:;<=>?'"""
-ESCAPED_BYTES_KEY = """b' !"#$%&amp;\\'()*+,-./0123456789:;&lt;=&gt;?'"""
 
 
 def plist_like_dumper() -> 'object':
@@ -226,123 +225,85 @@ class DumpkitCommonTests(unittest.TestCase):
         dumper._append_fallback(123, file)
         self.assertEqual(file.getvalue(), "{'base': '123'}")
 
-    def test_make_dumper_escapes_strings_only_for_plist_like_output(self) -> None:
-        """GitHub issue #772: no entity escaping anywhere in :mod:`dictdumper`.
+    def test_make_dumper_object_hook_leaves_strings_and_enum_renderings_unescaped(self) -> None:
+        """GitHub issue #772: escaping is now the writer's own job, not this hook's.
 
         ``dictdumper.plist.PLIST`` (which is also what ``'xml'`` maps to --
-        see ``Extractor.__output__``) interpolates every ``<string>``/``<key>``
-        value straight into its markup, so a value containing ``&``, ``<`` or
-        ``>`` breaks the document it is embedded in. Filed upstream as
-        JarryShaw/DictDumper#125. ``json``/``tree``/``text`` have no such
-        defect and all three characters are legal there, so the escaping in
-        :func:`~pcapkit.dumpkit.common.make_dumper` must fire for a
-        PLIST-rooted ``output`` and stay off for anything else -- a plain
-        :class:`str`, an enum rendered by :func:`~pcapkit.dumpkit.common.render_enum`,
-        and a :class:`~pcapkit.corekit.multidict.MultiDict` key built from one,
-        since that key is written by the PLIST writer directly and never
-        passed back through this hook the way a value is.
+        see ``Extractor.__output__``) used to interpolate every
+        ``<string>``/``<key>`` value straight into its markup with no entity
+        escaping at all, so a value containing ``&``, ``<`` or ``>`` broke the
+        document it was embedded in. Filed upstream as JarryShaw/DictDumper#125
+        and fixed there in ``dictdumper`` 0.8.5 (DictDumper#123):
+        :func:`dictdumper.plist.encode_xml` now escapes a value itself. So
+        :meth:`~pcapkit.dumpkit.common.make_dumper.DictDumper.object_hook` no
+        longer escapes anything on the way out, for *any* ``output`` -- a plain
+        :class:`str`, an enum rendered by
+        :func:`~pcapkit.dumpkit.common.render_enum`, or a
+        :class:`~pcapkit.corekit.multidict.MultiDict` key built from one, since
+        that key is written by the writer directly and never passed back
+        through this hook the way a value is.
 
         """
         from pcapkit.corekit.multidict import MultiDict
         from pcapkit.dumpkit.common import make_dumper
 
-        plist_dumper = plist_like_dumper()
-        self.assertEqual(plist_dumper.object_hook('a & b <c>'), 'a &amp; b &lt;c&gt;')
-
         unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
         member = getattr(unknown, '<unassigned>')
-        self.assertEqual(plist_dumper.object_hook(member),
-                          '&lt;unknown&gt;::&lt;unassigned&gt; [1]')
 
-        multidict = MultiDict()
-        multidict.add(member, 'value')
-        converted = plist_dumper.object_hook(multidict)
-        self.assertEqual(converted['&lt;unknown&gt;::&lt;unassigned&gt; [1]'], ['value'])
+        for name, dumper in (('plist-like', plist_like_dumper()), ('identity', make_dumper(IdentityDumper)())):
+            with self.subTest(dumper=name):
+                self.assertEqual(dumper.object_hook('a & b <c>'), 'a & b <c>')
+                self.assertEqual(dumper.object_hook(member), '<unknown>::<unassigned> [1]')
 
-        plain_dumper = make_dumper(IdentityDumper)()
-        self.assertEqual(plain_dumper.object_hook('a & b <c>'), 'a & b <c>')
-        self.assertEqual(plain_dumper.object_hook(member), '<unknown>::<unassigned> [1]')
+                multidict = MultiDict()
+                multidict.add(member, 'value')
+                converted = dumper.object_hook(multidict)
+                self.assertEqual(converted['<unknown>::<unassigned> [1]'], ['value'])
 
-    def test_make_dumper_escapes_mapping_keys_for_plist_like_output(self) -> None:
+    def test_make_dumper_never_rebuilds_or_escapes_a_mapping(self) -> None:
         """GitHub issue #772, the half the hook above cannot reach.
 
         ``PLIST._append_dict`` in :mod:`dictdumper.plist` writes a key as
-        ``'<key>{item}</key>'.format(item=item)`` and then calls ``_encode_value``
-        on the *value*, never on the key -- so :meth:`object_hook`
-        is handed every value the writer interpolates and no key at all, and the
-        escaping proven above cannot reach one. Both branches that build a
-        mapping therefore escape their own keys:
-        :class:`~pcapkit.corekit.multidict.MultiDict`, where without the fix
-        only an enum-derived key is escaped, and a plain :class:`dict`, where
-        nothing is.
+        ``'<key>{item}</key>'.format(item=item)`` and
+        ``JSON._append_object`` into ``'"{item}": '``, then call
+        ``_encode_value`` on the *value*, never on the key -- so
+        :meth:`object_hook` is handed every value the writer interpolates and
+        no key at all. Since ``dictdumper`` 0.8.5 (DictDumper#123) both writers
+        escape a key themselves, exactly as they escape the value beside it, so
+        neither a plain :class:`dict` nor the single-key mappings a
+        :class:`~pcapkit.corekit.multidict.MultiDict` or
+        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes is rebuilt
+        here any more: the writer is handed the caller's own mapping, with the
+        caller's own key objects in it, exactly as given -- for *any*
+        ``output``, not only a non-PLIST one.
 
-        The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own,
-        and it is the reason that fixture's ``plist`` report did not parse:
-        ``&``, ``<`` and ``>`` all inside one key. It is rendered with
-        :func:`format`, i.e. the conversion the writer's interpolation already
-        applies to it, so the ``<key>`` text is unchanged apart from the
-        escaping -- which is what the :data:`RAW_BYTES_KEY` assertion pins,
-        since an expected escaping is only as good as the rendering it is
-        derived from.
+        The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own
+        -- it used to be the reason that fixture's ``plist`` report did not
+        parse, since its repr carries ``&``, ``<`` and ``>``.
 
         """
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-
-        plist_dumper = plist_like_dumper()
-
-        # A plain dict: str keys, and the bytes key of the fixture.
-        self.assertEqual(format(BYTES_KEY, ''), RAW_BYTES_KEY)
-        converted = plist_dumper.object_hook({'a & b <c>': 'value', BYTES_KEY: 'secret'})
-        self.assertEqual(list(converted), ['a &amp; b &lt;c&gt;', ESCAPED_BYTES_KEY])
-        self.assertEqual(converted['a &amp; b &lt;c&gt;'], 'value')
-        self.assertEqual(converted[ESCAPED_BYTES_KEY], 'secret')
-
-        # An OrderedMultiDict: the bytes key of the fixture arrives through here
-        # -- its TLS key log entries are an OrderedMultiDict. Each entry becomes
-        # a single-key mapping, whose key is escaped when the writer hands that
-        # mapping back to the hook.
-        multidict = OrderedMultiDict()
-        multidict.add('a & b <c>', 'value')
-        multidict.add(BYTES_KEY, 'secret')
-        converted = [plist_dumper.object_hook(entry) for entry in plist_dumper.object_hook(multidict)]
-        self.assertEqual(converted, [{'a &amp; b &lt;c&gt;': 'value'}, {ESCAPED_BYTES_KEY: 'secret'}])
-
-        # An enum-derived key is escaped exactly once: this branch renders it
-        # with ``render_enum`` and escapes the result through the one shared
-        # ``escape_key`` helper, so escaping it twice is the mistake to rule out.
-        unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
-        member = getattr(unknown, '<unassigned>')
-        multidict = MultiDict()
-        multidict.add(member, 'value')
-        converted = plist_dumper.object_hook(multidict)
-        self.assertEqual(list(converted), ['&lt;unknown&gt;::&lt;unassigned&gt; [1]'])
-        self.assertNotIn('&amp;', ''.join(converted))
-
-    def test_make_dumper_hands_other_output_the_mapping_it_was_given(self) -> None:
-        """``json``, ``tree`` and ``text`` take all three characters literally.
-
-        So no key is escaped for them, and -- the stronger statement, and the
-        one that keeps this branch free of any risk of double-escaping -- a
-        plain :class:`dict` is not even rebuilt: the writer is handed the
-        caller's own mapping, with the caller's own key objects in it, exactly
-        as given. A :class:`bytes` key stays :class:`bytes` there,
-        which is what ``dictdumper``'s ``json`` writer then breaks on, for
-        reasons of its own.
-
-        """
-        from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.dumpkit.common import make_dumper
 
-        plain_dumper = make_dumper(IdentityDumper)()
+        unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
+        member = getattr(unknown, '<unassigned>')
 
-        mapping = {'a & b <c>': 'value', BYTES_KEY: 'secret'}
-        self.assertIs(plain_dumper.object_hook(mapping), mapping)
+        for name, dumper in (('plist-like', plist_like_dumper()), ('identity', make_dumper(IdentityDumper)())):
+            with self.subTest(dumper=name):
+                mapping = {'a & b <c>': 'value', BYTES_KEY: 'secret'}
+                self.assertIs(dumper.object_hook(mapping), mapping)
+                self.assertEqual(format(BYTES_KEY, ''), RAW_BYTES_KEY)
 
-        multidict = OrderedMultiDict()
-        multidict.add('a & b <c>', 'value')
-        multidict.add(BYTES_KEY, 'secret')
-        converted = plain_dumper.object_hook(multidict)
-        self.assertEqual(converted, [{'a & b <c>': 'value'}, {BYTES_KEY: 'secret'}])
+                multidict = OrderedMultiDict()
+                multidict.add('a & b <c>', 'value')
+                multidict.add(BYTES_KEY, 'secret')
+                converted = dumper.object_hook(multidict)
+                self.assertEqual(converted, [{'a & b <c>': 'value'}, {BYTES_KEY: 'secret'}])
+
+                key_multidict = MultiDict()
+                key_multidict.add(member, 'value')
+                converted_keys = dumper.object_hook(key_multidict)
+                self.assertEqual(list(converted_keys), ['<unknown>::<unassigned> [1]'])
 
     def test_an_unassigned_port_dumps_its_addon_keys_in_the_declared_order(self) -> None:
         """GitHub issue #575's fallback must not reorder what it renders.
