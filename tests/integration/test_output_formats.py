@@ -117,10 +117,11 @@ class PlistRoundTripTests(EndToEndTestCase):
     def test_plist_report_round_trips_through_plistlib(self) -> None:
         """A ``plist`` report is readable by :func:`plistlib.load` (GitHub issue #1448).
 
-        ``dictdumper`` writes a ``<date>`` with fractional seconds, which
-        :mod:`plistlib` rejects; :mod:`pcapkit.dumpkit` writes it to whole
-        seconds instead, and the exact value stays in ``time_epoch``. The date
-        is compared as naive UTC, since ``aware_datetime`` is new in Python 3.13.
+        ``dictdumper`` used to write a ``<date>`` with fractional seconds,
+        which :mod:`plistlib` rejects; fixed upstream in ``dictdumper`` 0.8.5
+        (DictDumper#124), which now writes whole seconds itself. The exact
+        value stays in ``time_epoch`` regardless. The date is compared as
+        naive UTC, since ``aware_datetime`` is new in Python 3.13.
 
         """
         import datetime
