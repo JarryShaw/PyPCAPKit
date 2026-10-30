@@ -639,10 +639,15 @@ def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> byt
 
 
 class VersionDispatchTests(unittest.TestCase):
-    """:meth:`TLS._guess_version`/:meth:`DTLS._guess_version` -- the restructure
-    :issue:`2437`'s follow-up asked for: a thin per-version dispatcher over
-    the family, mirroring :class:`~pcapkit.protocols.application.http.HTTP`'s
-    own dispatch over HTTP/1.* and HTTP/2.
+    """:meth:`TLS.read`/:meth:`DTLS.read` -- the restructure :issue:`2437`'s
+    follow-up asked for: identifying the concrete tier and setting
+    :attr:`~pcapkit.protocols.application.tls.TLS.alias` dynamically,
+    mirroring :class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch
+    over RARP/DRARP/InARP by operation code, rather than
+    :class:`~pcapkit.protocols.application.http.HTTP`'s dispatch over
+    distinct per-version classes: a record identified as, say, SSLv3 never
+    becomes a different *class*, only a different :attr:`alias`, on the same
+    :class:`~pcapkit.protocols.application.tls.TLS` instance throughout.
 
     """
 
@@ -711,41 +716,78 @@ class VersionDispatchTests(unittest.TestCase):
         parsed = DTLS(wire, len(wire))
         self.assertEqual(parsed.alias, 'DTLS 1.3')
 
-    def test_concrete_tiers_are_constructible_directly_and_narrow_id(self) -> None:
-        """Each concrete tier works standalone, bypassing dispatch entirely."""
-        from pcapkit.protocols.application.dtlsv1_0 import DTLSv1_0
-        from pcapkit.protocols.application.dtlsv1_2 import DTLSv1_2
-        from pcapkit.protocols.application.dtlsv1_3 import DTLSv1_3
-        from pcapkit.protocols.application.sslv3 import SSLv3
-        from pcapkit.protocols.application.tlsv1_0 import TLSv1_0
-        from pcapkit.protocols.application.tlsv1_1 import TLSv1_1
-        from pcapkit.protocols.application.tlsv1_2 import TLSv1_2
-        from pcapkit.protocols.application.tlsv1_3 import TLSv1_3
+    def test_sslv3_is_constructible_directly_and_narrows_id(self) -> None:
+        """:class:`SSLv3` -- explicit/manual construction only, mirroring
+        :class:`~pcapkit.protocols.link.arp.InARP`'s relationship to
+        :class:`~pcapkit.protocols.link.arp.ARP`: it narrows :meth:`id` only
+        and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read`
+        unchanged, so parsing SSLv3-shaped data through it sets
+        :attr:`alias` to ``'SSLv3'`` exactly as parsing it through
+        :class:`~pcapkit.protocols.application.tls.TLS` would.
 
-        tls_wire = b'\x17\x03\x03\x00\x05hello'
-        for cls, alias in ((SSLv3, 'SSLv3'), (TLSv1_0, 'TLS 1.0'), (TLSv1_1, 'TLS 1.1'),
-                           (TLSv1_2, 'TLS 1.2'), (TLSv1_3, 'TLS 1.3')):
-            with self.subTest(cls=cls.__name__):
-                parsed = cls(tls_wire, len(tls_wire))
-                self.assertEqual(parsed.alias, alias)
-                self.assertEqual(parsed.info.content, b'hello')
-                self.assertEqual(cls.id(), ('TLS', cls.__name__))
+        """
+        from pcapkit.protocols.application.tls import SSLv3
 
-        dtls_wire = (b'\x17\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
-                     + (5).to_bytes(2, 'big') + b'hello')
-        for cls, alias in ((DTLSv1_0, 'DTLS 1.0'), (DTLSv1_2, 'DTLS 1.2'), (DTLSv1_3, 'DTLS 1.3')):
-            with self.subTest(cls=cls.__name__):
-                parsed = cls(dtls_wire, len(dtls_wire))
-                self.assertEqual(parsed.alias, alias)
-                self.assertEqual(parsed.info.content, b'hello')
-                self.assertEqual(cls.id(), ('DTLS', cls.__name__))
+        tls_wire = b'\x17\x03\x00\x00\x05hello'
+        parsed = SSLv3(tls_wire, len(tls_wire))
+        self.assertEqual(parsed.alias, 'SSLv3')
+        self.assertEqual(parsed.info.content, b'hello')
+        self.assertEqual(SSLv3.id(), ('SSLv3',))
 
-    def test_dispatcher_id_names_every_concrete_tier_canonical_first(self) -> None:
+    def test_sslv3_class_does_not_force_its_own_alias(self) -> None:
+        """The same nuance :class:`~pcapkit.protocols.link.arp.InARP` has:
+        constructing :class:`SSLv3` directly over data that is not actually
+        SSLv3-shaped still reports the *real* tier, since :meth:`read` is
+        inherited unmodified and dispatches off the wire, not off the class
+        it happened to be instantiated as.
+
+        """
+        from pcapkit.protocols.application.tls import SSLv3
+
+        tls_1_0_wire = b'\x17\x03\x01\x00\x05hello'
+        parsed = SSLv3(tls_1_0_wire, len(tls_1_0_wire))
+        self.assertEqual(parsed.alias, 'TLS 1.0')
+
+    def test_tls_and_dtls_id_are_fixed_regardless_of_dispatched_tier(self) -> None:
+        """:meth:`TLS.id`/:meth:`DTLS.id` no longer vary with the identified
+        tier: a genuine TLS 1.2 record must not stop matching a lookup keyed
+        on ``('TLS',)`` just because *some* instance of the class happened to
+        parse as SSLv3.
+
+        """
         from pcapkit.protocols.application.dtls import DTLS
         from pcapkit.protocols.application.tls import TLS
 
-        self.assertEqual(TLS.id(), ('TLS', 'SSLv3', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3'))
-        self.assertEqual(DTLS.id(), ('DTLS', 'DTLSv1_0', 'DTLSv1_2', 'DTLSv1_3'))
+        self.assertEqual(TLS.id(), ('TLS',))
+        self.assertEqual(DTLS.id(), ('DTLS',))
+
+        sslv3_wire = b'\x17\x03\x00\x00\x05hello'
+        parsed = TLS(sslv3_wire, len(sslv3_wire))
+        self.assertEqual(parsed.alias, 'SSLv3')
+        self.assertEqual(TLS.id(), ('TLS',))
+
+        dtls_1_0_wire = (b'\x17\xfe\xff' + bytes(2) + (1).to_bytes(6, 'big')
+                         + (5).to_bytes(2, 'big') + b'hello')
+        parsed_dtls = DTLS(dtls_1_0_wire, len(dtls_1_0_wire))
+        self.assertEqual(parsed_dtls.alias, 'DTLS 1.0')
+        self.assertEqual(DTLS.id(), ('DTLS',))
+
+    def test_sslv3_record_reports_its_own_name(self) -> None:
+        """SSLv3 is the one tier in the family with a genuinely different
+        full :attr:`name`, set dynamically the same way :attr:`alias` is --
+        mirroring :attr:`ARP._name <pcapkit.protocols.link.arp.ARP._name>`
+        tracking :attr:`ARP._acnm <pcapkit.protocols.link.arp.ARP._acnm>`.
+
+        """
+        from pcapkit.protocols.application.tls import TLS
+
+        sslv3_wire = b'\x17\x03\x00\x00\x05hello'
+        parsed = TLS(sslv3_wire, len(sslv3_wire))
+        self.assertEqual(parsed.name, 'Secure Sockets Layer version 3')
+
+        tls_1_2_wire = _tls_client_hello_wire()
+        parsed_12 = TLS(tls_1_2_wire, len(tls_1_2_wire))
+        self.assertEqual(parsed_12.name, 'Transport Layer Security')
 
     def test_malformed_client_hello_raises_through_dispatch_same_as_before(self) -> None:
         """Dispatch's own sniff must not swallow a genuine parse failure.
@@ -774,8 +816,8 @@ class VersionDispatchTests(unittest.TestCase):
 
 class SSLv2HeuristicTests(unittest.TestCase):
     """:func:`pcapkit.protocols.application.tls._looks_like_sslv2` -- the
-    disambiguation :meth:`TLS._guess_version
-    <pcapkit.protocols.application.tls.TLS._guess_version>` uses to route
+    disambiguation :meth:`TLS.read
+    <pcapkit.protocols.application.tls.TLS.read>` uses to route
     port-443 traffic to :class:`~pcapkit.protocols.application.ssl2.SSL2`
     rather than the TLS family.
 

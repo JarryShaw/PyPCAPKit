@@ -5,17 +5,21 @@
 .. module:: pcapkit.protocols.application.dtls
 
 :mod:`pcapkit.protocols.application.dtls` contains
-:class:`~pcapkit.protocols.application.dtls.DTLS`, which is a version
-dispatcher for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
+:class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an
+extractor for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
 1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format records (:rfc:`9147`) -- the
 epoch/sequence-number fields and the handshake-message fragment header that
 set the family apart from :class:`~pcapkit.protocols.application.tls.TLS`,
-whose reliable, ordered transport needs neither, stay shared across all
-three tiers via :class:`~pcapkit.protocols.application.ssl.SSL`.
+whose reliable, ordered transport needs neither, stay shared across the
+whole family via :class:`~pcapkit.protocols.application.ssl.SSL`.
 :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` binds
-this class at port 5684; its own :meth:`read` identifies the concrete tier
-and delegates to it, rather than parsing content itself -- the same shape
-:class:`~pcapkit.protocols.application.tls.TLS` uses for its own family.
+this class at port 5684; its own :meth:`read` parses the (always
+wire-identical) record header, then sets :attr:`~DTLS.alias` according to
+the record's legacy version -- mirroring
+:class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch over
+RARP/DRARP/InARP by operation code, and
+:class:`~pcapkit.protocols.application.tls.TLS`'s own dispatch over its
+family.
 
 Known Limitation
 -----------------
@@ -41,10 +45,10 @@ never fragments.
 depends on this PR landing first). DTLS 1.3 records before the handshake
 completes still use the legacy ``DTLSPlaintext`` header this module reads --
 the same shape DTLS 1.2 uses, with ``legacy_record_version`` frozen at DTLS
-1.2's value (:rfc:`9147#section-4.1`) -- so :class:`DTLSv1_3
-<pcapkit.protocols.application.dtlsv1_3.DTLSv1_3>` decodes exactly that
-traffic. The *unified header* :rfc:`9147#section-4` introduces for records
-once a connection has a negotiated epoch has no content-type byte at all, so
+1.2's value (:rfc:`9147#section-4.1`) -- so a DTLS 1.3 record identified by
+:meth:`read` decodes exactly that traffic. The *unified header*
+:rfc:`9147#section-4` introduces for records once a connection has a
+negotiated epoch has no content-type byte at all, so
 :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
 rejects it outright -- its first octet never falls inside the assigned
 content-type range this module checks -- and it degrades to
@@ -55,14 +59,11 @@ that follow-up lands.
 
 .. versionchanged:: 1.6.0
 
-   :class:`DTLS` is now a version dispatcher rather than a single generic
-   parser: it identifies DTLS 1.0, DTLS 1.2, or DTLS 1.3's legacy-format
-   records and delegates to the matching concrete class --
-   :mod:`~pcapkit.protocols.application.dtlsv1_0`,
-   :mod:`~pcapkit.protocols.application.dtlsv1_2`, or
-   :mod:`~pcapkit.protocols.application.dtlsv1_3` -- the same shape
-   :class:`~pcapkit.protocols.application.tls.TLS` already uses for its own
-   family (:issue:`2437`).
+   :class:`DTLS` identifies DTLS 1.0, DTLS 1.2, or DTLS 1.3's legacy-format
+   records and reports the identified tier through :attr:`~DTLS.alias` --
+   :data:`self <DTLS>` throughout, never a distinct per-version instance --
+   the same shape :class:`~pcapkit.protocols.link.arp.ARP` already uses for
+   its own family (:issue:`2437`).
 
 """
 from typing import TYPE_CHECKING, cast
@@ -74,8 +75,7 @@ from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional
-    from typing import Type as _Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -93,7 +93,11 @@ _DTLSV1_2_VERSION = 0xFEFD
 
 
 class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
-    """This class implements Datagram Transport Layer Security.
+    """This class implements all protocols in the DTLS record-layer family.
+
+    - Datagram Transport Layer Security 1.0 [:rfc:`4347`]
+    - Datagram Transport Layer Security 1.2 [:rfc:`6347`]
+    - Datagram Transport Layer Security 1.3, legacy-format records only [:rfc:`9147`]
 
     Note:
         The subpackage does not track the dispatch tier: DTLS is dispatched
@@ -111,9 +115,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
     """
 
     #: Resolved alias once :meth:`read` has identified the concrete tier --
-    #: e.g. ``'DTLS 1.2'`` -- mirroring
-    #: :attr:`TLS._alias <pcapkit.protocols.application.tls.TLS._alias>`.
-    _alias = 'DTLS'
+    #: e.g. ``'DTLS 1.2'``. The class name itself until then, same as the
+    #: unversioned default every :class:`~pcapkit.protocols.protocol.ProtocolBase`
+    #: falls back to. Mirrors :attr:`ARP._acnm <pcapkit.protocols.link.arp.ARP._acnm>`.
+    _alias = 'DTLS'  # type: Literal["DTLS", "DTLS 1.0", "DTLS 1.2", "DTLS 1.3"]
 
     ##########################################################################
     # Properties.
@@ -125,7 +130,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         return 'Datagram Transport Layer Security'
 
     @property
-    def alias(self) -> 'str':
+    def alias(self) -> 'Literal["DTLS", "DTLS 1.0", "DTLS 1.2", "DTLS 1.3"]':
         """Acronym of current protocol -- the concrete tier :meth:`read` identified."""
         return self._alias
 
@@ -143,47 +148,44 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["DTLS"], Literal["DTLSv1_0"], Literal["DTLSv1_2"], Literal["DTLSv1_3"]]':  # type: ignore[override] # pylint: disable=line-too-long
+    def id(cls) -> 'tuple[Literal["DTLS"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
         Returns:
-            Index ID of the protocol -- the canonical name first, then every
-            concrete tier this dispatcher may delegate to.
+            Index ID of the protocol. Fixed, regardless of which tier
+            :meth:`read` identifies the record as -- see
+            :meth:`TLS.id <pcapkit.protocols.application.tls.TLS.id>` for why.
 
         """
-        return ('DTLS', 'DTLSv1_0', 'DTLSv1_2', 'DTLSv1_3')
+        return ('DTLS',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Any':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS':
         """Read Datagram Transport Layer Security (DTLS).
 
-        Identifies the concrete tier -- DTLS 1.0, DTLS 1.2, or DTLS 1.3's
-        legacy-format records -- and delegates to it, mirroring
-        :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>`'s own
-        dispatch over its family.
+        Parses the record and identifies its concrete tier -- DTLS 1.0, DTLS
+        1.2, or DTLS 1.3's legacy-format records -- setting :attr:`alias`
+        accordingly, mirroring :meth:`TLS.read
+        <pcapkit.protocols.application.tls.TLS.read>`'s own dispatch over its
+        family.
 
         Args:
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Parsed packet data, from whichever concrete tier :meth:`_guess_version`
-            identified.
+            Parsed packet data.
 
         Raises:
-            ProtocolError: If the identified tier's own parse fails -- see
-                :meth:`_read_dtls_record`, shared by every tier.
+            ProtocolError: If the record cannot be a genuine DTLS record --
+                see :meth:`_read_dtls_record`.
 
         """
-        if length is None:
-            length = len(self)
-
-        obj = self._guess_version(length, **kwargs)
-        return self._adopt_dispatched(obj)
+        return self._read_dtls_record(length, **kwargs)
 
     def make(self,
              content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
              content_type_default: 'Optional[int]' = None,
-             content_type_namespace: 'Optional[dict[str, int] | dict[int, str] | _Type[StdlibEnum] | _Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             content_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              content_type_reversed: 'bool' = False,
              version: 'int' = 0xFEFD,
              epoch: 'int' = 0,
@@ -274,43 +276,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             'payload': cls._make_payload(data),
         }
 
-    def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'Any':
-        """Identify the concrete tier of the payload, and parse it as that tier.
-
-        DTLS 1.0 and DTLS 1.2 are named directly by the record's legacy
-        version. DTLS 1.3's legacy-format records freeze theirs at DTLS
-        1.2's value, and are told apart by peeking the
-        ``supported_versions`` extension (:meth:`SSL._tls_negotiates
-        <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`), falling
-        back to DTLS 1.2 -- the common case -- when that peek is
-        inconclusive. Any legacy version naming neither falls back to the
-        DTLS 1.2 tier too, so that its own :meth:`SSL._validate_tls_record
-        <pcapkit.protocols.application.ssl.SSL._validate_tls_record>` reports
-        the real reason the payload is not a genuine record.
-
-        Args:
-            length: Length of packet data.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Parsed packet data from whichever concrete tier was identified.
-
-        """
-        from pcapkit.protocols.application.dtlsv1_0 import DTLSv1_0  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.application.dtlsv1_2 import DTLSv1_2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.application.dtlsv1_3 import DTLSv1_3  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-
-        schema = self.__header__
-
-        protocol: '_Type[DTLS]' = DTLSv1_2
-        if schema.version == _DTLSV1_0_VERSION:
-            protocol = DTLSv1_0
-        elif schema.version == _DTLSV1_2_VERSION and self._tls_negotiates(schema, DTLS13_VERSION, dtls=True):
-            protocol = DTLSv1_3
-        return protocol(self._data, length, **kwargs)
-
     def _read_dtls_record(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS':  # pylint: disable=unused-argument
-        """Read a DTLS record -- the real parse every concrete tier shares.
+        """Read a DTLS record, identifying its concrete tier as it goes.
 
         Structure of DTLS record layer, the ``DTLSPlaintext`` form
         [:rfc:`9147#section-4`] -- the full header this module reads;
@@ -328,6 +295,20 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                uint16 length;
                opaque fragment[DTLSPlaintext.length];
            } DTLSPlaintext;
+
+        Parses the record first, then identifies the concrete tier from its
+        legacy version and sets :attr:`alias` accordingly -- mirroring
+        :meth:`ARP.read <pcapkit.protocols.link.arp.ARP.read>`'s own
+        ``self._acnm = ...`` dispatch by operation code. DTLS 1.0 and DTLS
+        1.2 are named directly by the record's legacy version. DTLS 1.3's
+        legacy-format records freeze theirs at DTLS 1.2's value, and are told
+        apart by peeking the ``supported_versions`` extension
+        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`),
+        falling back to DTLS 1.2 -- the common case -- when that peek is
+        inconclusive. Any legacy version naming neither never reaches this
+        dispatch at all: :meth:`SSL._validate_tls_record
+        <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`, called
+        first, already raises for it.
 
         Args:
             length: Length of packet data.
@@ -358,6 +339,13 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         schema = self.__header__
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=True)
+
+        if schema.version == _DTLSV1_0_VERSION:
+            self._alias = 'DTLS 1.0'
+        elif schema.version == _DTLSV1_2_VERSION and self._tls_negotiates(schema, DTLS13_VERSION, dtls=True):
+            self._alias = 'DTLS 1.3'
+        else:
+            self._alias = 'DTLS 1.2'
 
         content = self._read_tls_content(schema.content_type, schema.fragment,
                                          dtls=True, epoch=schema.epoch)

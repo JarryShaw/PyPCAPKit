@@ -75,6 +75,12 @@ for why rejecting such a fragment is the honest answer at this layer.
 
    .. automethod:: _make_data
 
+.. autoclass:: pcapkit.protocols.application.tls.SSLv3
+   :no-members:
+   :show-inheritance:
+
+   .. automethod:: id
+
 Header Schema
 -------------
 
