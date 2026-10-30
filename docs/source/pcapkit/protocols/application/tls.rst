@@ -4,10 +4,62 @@ TLS/SSL - Transport Layer Security
 .. module:: pcapkit.protocols.application.tls
 
 :mod:`pcapkit.protocols.application.tls` contains
-:class:`~pcapkit.protocols.application.tls.TLS` only, which implements an
-extractor for Transport Layer Security (TLS) [*]_ -- TLS 1.2 (:rfc:`5246`) and
-TLS 1.3 (:rfc:`9846`, which obsoletes :rfc:`8446`) -- at the record layer, plus
+:class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.application.tls.SSLv3`, which implement an
+extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
+TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
+1.3 (:rfc:`9846`, which obsoletes :rfc:`8446`) -- at the record layer, plus
 handshake message TYPE-level framing.
+
+Version Identification
+----------------------
+
+The record layer is wire-identical across the family, so one
+:class:`~pcapkit.protocols.application.tls.TLS` class parses all of it and
+reports the version it identified through
+:attr:`~pcapkit.protocols.application.tls.TLS.alias` and
+:attr:`~pcapkit.protocols.application.tls.TLS.name`, set by
+:meth:`~pcapkit.protocols.application.tls.TLS.read` -- the same shape
+:class:`~pcapkit.protocols.link.arp.ARP` uses for RARP/DRARP/InARP.
+:meth:`~pcapkit.protocols.application.tls.TLS.id` stays ``('TLS',)``
+whatever the version.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Legacy record version
+     - :attr:`~pcapkit.protocols.application.tls.TLS.alias`
+     - :attr:`~pcapkit.protocols.application.tls.TLS.name`
+   * - ``0x0300``
+     - ``SSLv3``
+     - ``Secure Sockets Layer version 3``
+   * - ``0x0301``
+     - ``TLS 1.0``
+     - ``Transport Layer Security``
+   * - ``0x0302``
+     - ``TLS 1.1``
+     - ``Transport Layer Security``
+   * - ``0x0303``
+     - ``TLS 1.2``
+     - ``Transport Layer Security``
+   * - ``0x0303``, or ``0x0301`` on an initial ``ClientHello``, whose
+       ``supported_versions`` extension lists ``0x0304``
+     - ``TLS 1.3``
+     - ``Transport Layer Security``
+   * - any other ``0x03xx``
+     - ``TLS``
+     - ``Transport Layer Security``
+
+TLS 1.3 never puts its own ``0x0304`` on the record layer
+(:rfc:`9846#section-5.1`), so it is told apart only by the
+``supported_versions`` peek. A version the table does not name keeps the
+generic ``TLS`` alias rather than claiming a specific one.
+
+:class:`~pcapkit.protocols.application.tls.SSLv3` is for explicit
+construction only, mirroring :class:`~pcapkit.protocols.link.arp.InARP`: it
+narrows :meth:`~pcapkit.protocols.application.tls.SSLv3.id` to ``('SSLv3',)``
+and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read` unchanged,
+so the alias still follows the wire. Dispatch never constructs one.
 
 Decoded Fields
 --------------
@@ -55,8 +107,6 @@ for why rejecting such a fragment is the honest answer at this layer.
 
 .. versionadded:: 1.6.0
 
-   :issue:`2437`.
-
 .. raw:: html
 
    <br />
@@ -66,7 +116,10 @@ for why rejecting such a fragment is the honest answer at this layer.
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. automethod:: id
 
    .. automethod:: read
    .. automethod:: make

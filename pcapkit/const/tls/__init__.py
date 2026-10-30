@@ -5,11 +5,11 @@
 
 .. module:: pcapkit.const.tls
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ssl.SSL` implementations -- i.e.
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.dtls.DTLS`. Available enumerations
-include:
+This module contains the constant enumerations shared by the record-layer
+implementations under the :class:`~pcapkit.protocols.application.ssl.SSL`
+umbrella -- :class:`~pcapkit.protocols.application.tls.TLS` (SSLv3 through
+TLS 1.3) and :class:`~pcapkit.protocols.application.dtls.DTLS`. Available
+enumerations include:
 
 .. list-table::
 

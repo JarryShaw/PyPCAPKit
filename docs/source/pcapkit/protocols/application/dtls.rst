@@ -5,11 +5,40 @@ DTLS - Datagram Transport Layer Security
 
 :mod:`pcapkit.protocols.application.dtls` contains
 :class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an
-extractor for Datagram Transport Layer Security (DTLS) [*]_ -- DTLS 1.2
-(:rfc:`6347`) and DTLS 1.3 (:rfc:`9147`) -- at the record layer, plus the
-epoch/sequence-number fields and the handshake-message fragment header that
-set DTLS apart from :class:`~pcapkit.protocols.application.tls.TLS`, whose
-reliable, ordered transport needs neither.
+extractor for Datagram Transport Layer Security (DTLS) [*]_ -- DTLS 1.0
+(:rfc:`4347`), DTLS 1.2 (:rfc:`6347`) and DTLS 1.3's legacy-format records
+(:rfc:`9147`) -- at the record layer, plus the epoch/sequence-number fields and
+the handshake-message fragment header that set DTLS apart from
+:class:`~pcapkit.protocols.application.tls.TLS`, whose reliable, ordered
+transport needs neither.
+
+Version Identification
+----------------------
+
+As with :class:`~pcapkit.protocols.application.tls.TLS`, one class parses
+every version and :meth:`~pcapkit.protocols.application.dtls.DTLS.read` sets
+:attr:`~pcapkit.protocols.application.dtls.DTLS.alias` from the record;
+:meth:`~pcapkit.protocols.application.dtls.DTLS.id` stays ``('DTLS',)``.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Legacy record version
+     - :attr:`~pcapkit.protocols.application.dtls.DTLS.alias`
+   * - ``0xFEFF``
+     - ``DTLS 1.0``
+   * - ``0xFEFD``
+     - ``DTLS 1.2``
+   * - ``0xFEFD``, or ``0xFEFF`` on an initial ``ClientHello``, whose
+       ``supported_versions`` extension lists ``0xFEFC``
+     - ``DTLS 1.3``
+   * - any other ``0xFExx``
+     - ``DTLS``
+
+DTLS 1.3 never puts its own ``0xFEFC`` on the record layer
+(:rfc:`9147#section-4.1`), so it is told apart only by the
+``supported_versions`` peek. A version the table does not name keeps the
+generic ``DTLS`` alias rather than claiming a specific one.
 
 Known Limitation
 -----------------
@@ -32,8 +61,6 @@ never fragments.
 
 .. versionadded:: 1.6.0
 
-   :issue:`2437`.
-
 .. raw:: html
 
    <br />
@@ -43,7 +70,10 @@ never fragments.
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
+
+   .. automethod:: id
 
    .. automethod:: read
    .. automethod:: make

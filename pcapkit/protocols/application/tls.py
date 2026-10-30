@@ -106,6 +106,26 @@ __all__ = ['TLS', 'SSLv3']
 #: is the same one by definition.
 _TLS_VERSION_MAJOR = 0x03
 
+#: Legacy record version SSLv3 carries -- the one tier in this family with a
+#: different full :attr:`~TLS.name` as well as a different :attr:`~TLS.alias`.
+_SSLV3_VERSION = 0x0300
+
+#: Legacy record version to alias, for every tier the record layer's own
+#: version names directly. ``0x0303`` reads as TLS 1.2 unless the
+#: ``supported_versions`` peek finds TLS 1.3 (see
+#: :data:`_TLS13_LEGACY_VERSIONS`). A version not listed here keeps the
+#: generic ``'TLS'`` alias.
+_TLS_VERSION_ALIASES = {
+    _SSLV3_VERSION: 'SSLv3',
+    0x0301: 'TLS 1.0',
+    0x0302: 'TLS 1.1',
+    0x0303: 'TLS 1.2',
+}  # type: dict[int, Literal["SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2"]]
+
+#: Legacy record versions a TLS 1.3 record may carry: ``0x0303`` always, and
+#: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
+_TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
+
 #: The content types IANA's registry assigns that a genuine *first* record on
 #: a fresh connection carries on the wire -- the four
 #: :func:`_looks_like_sslv2` tests the second octet of, to tell a real
@@ -386,13 +406,16 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         Parses the record first, then identifies the concrete tier from its
         legacy version and sets :attr:`alias` (and, for SSLv3, :attr:`name`)
         accordingly -- mirroring :meth:`ARP.read <pcapkit.protocols.link.arp.ARP.read>`'s
-        own ``self._acnm = ...`` dispatch by operation code.  SSLv3, TLS 1.0,
-        and TLS 1.1 are named directly by the record's legacy version; TLS
-        1.2 and TLS 1.3 share the same legacy value (``0x0303``) and are told
-        apart by peeking the ``supported_versions`` extension
-        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`),
-        falling back to TLS 1.2 -- the common case -- when that peek is
-        inconclusive. Any legacy version outside SSLv3+'s ``0x03xx`` range
+        own ``self._acnm = ...`` dispatch by operation code. TLS 1.3 records
+        carry a legacy version of ``0x0303`` -- or ``0x0301`` on an initial
+        ``ClientHello`` (:rfc:`9846#section-5.1`) -- and are told apart by
+        peeking the ``supported_versions`` extension
+        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`).
+        Otherwise SSLv3 (``0x0300``), TLS 1.0 (``0x0301``), TLS 1.1
+        (``0x0302``) and TLS 1.2 (``0x0303``) are named directly by the
+        record's legacy version. Any other ``0x03xx`` value names no known
+        tier and keeps the generic ``'TLS'`` alias rather than claiming one.
+        Any legacy version outside SSLv3+'s ``0x03xx`` range
         never reaches this dispatch at all: :meth:`SSL._validate_tls_record
         <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`, called
         first, already raises for it.
@@ -416,22 +439,22 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=False)
 
-        minor = schema.version & 0xFF
-        if not minor:
-            self._alias = 'SSLv3'
-            self._name = 'Secure Sockets Layer version 3'
-        elif minor == 0x01:
-            self._alias = 'TLS 1.0'
-            self._name = 'Transport Layer Security'
-        elif minor == 0x02:
-            self._alias = 'TLS 1.1'
-            self._name = 'Transport Layer Security'
-        elif minor == 0x03 and self._tls_negotiates(schema, TLS13_VERSION, dtls=False):
+        # NOTE: TLS 1.3 is checked first, and at 0x0301 as well as 0x0303:
+        # an initial ClientHello may carry 0x0301 "for compatibility
+        # purposes" (RFC 9846, section 5.1), so a 0x0301 record negotiating
+        # TLS 1.3 is not TLS 1.0. Any other legacy version names no known
+        # tier -- TLS 1.3 never puts 0x0304 on the record layer -- so it keeps
+        # the generic ``TLS`` alias rather than claiming a version it does not
+        # carry.
+        self._name = 'Transport Layer Security'
+        if schema.version in _TLS13_LEGACY_VERSIONS and self._tls_negotiates(schema, TLS13_VERSION, dtls=False):
             self._alias = 'TLS 1.3'
-            self._name = 'Transport Layer Security'
+        elif schema.version in _TLS_VERSION_ALIASES:
+            self._alias = _TLS_VERSION_ALIASES[schema.version]
+            if schema.version == _SSLV3_VERSION:
+                self._name = 'Secure Sockets Layer version 3'
         else:
-            self._alias = 'TLS 1.2'
-            self._name = 'Transport Layer Security'
+            self._alias = 'TLS'
 
         content = self._read_tls_content(schema.content_type, schema.fragment, dtls=False)
         tls = Data_TLS(

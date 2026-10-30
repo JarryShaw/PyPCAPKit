@@ -598,13 +598,15 @@ class EncryptedAlertRecordTests(unittest.TestCase):
             DTLS(wire, len(wire))
 
 
-def _tls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> bytes:
+def _tls_client_hello_wire(*, supported_versions: 'bytes | None' = None,
+                           record_version: bytes = b'\x03\x03') -> bytes:
     """A minimal, well-formed TLS ``ClientHello`` record.
 
     Args:
         supported_versions: When given, the raw ``supported_versions``
             extension body (length-prefixed version list) to append as an
             extension; otherwise the message carries no extensions at all.
+        record_version: The record header's legacy version octets.
 
     """
     version = b'\x03\x03'
@@ -617,10 +619,11 @@ def _tls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> byte
         extension = (43).to_bytes(2, 'big') + len(supported_versions).to_bytes(2, 'big') + supported_versions
         body += len(extension).to_bytes(2, 'big') + extension
     handshake = b'\x01' + len(body).to_bytes(3, 'big') + body  # msg_type=1, client_hello
-    return b'\x16\x03\x03' + len(handshake).to_bytes(2, 'big') + handshake
+    return b'\x16' + record_version + len(handshake).to_bytes(2, 'big') + handshake
 
 
-def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> bytes:
+def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None,
+                            record_version: bytes = b'\xfe\xfd') -> bytes:
     """A minimal, well-formed DTLS ``ClientHello`` record, unfragmented."""
     version = b'\xfe\xfd'
     random = bytes(32)
@@ -634,7 +637,7 @@ def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> byt
         body += len(extension).to_bytes(2, 'big') + extension
     frag_header = (0).to_bytes(2, 'big') + (0).to_bytes(3, 'big') + len(body).to_bytes(3, 'big')
     handshake = b'\x01' + len(body).to_bytes(3, 'big') + frag_header + body
-    record_header = b'\x16\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
+    record_header = b'\x16' + record_version + bytes(2) + (1).to_bytes(6, 'big')
     return record_header + len(handshake).to_bytes(2, 'big') + handshake
 
 
@@ -715,6 +718,77 @@ class VersionDispatchTests(unittest.TestCase):
         wire = _dtls_client_hello_wire(supported_versions=supported_versions)
         parsed = DTLS(wire, len(wire))
         self.assertEqual(parsed.alias, 'DTLS 1.3')
+
+    def test_tls_unknown_record_version_keeps_the_generic_alias(self) -> None:
+        """A ``0x03xx`` legacy version naming no known tier claims none.
+
+        TLS 1.3 never puts ``0x0304`` on the record layer
+        (:rfc:`9846#section-5.1`), and nothing assigns a later value, so
+        neither may be branded TLS 1.2 -- or any other specific version.
+
+        """
+        from pcapkit.protocols.application.tls import TLS
+
+        for legacy_version in (0x0304, 0x0305, 0x03FF):
+            with self.subTest(legacy_version=hex(legacy_version)):
+                wire = bytes([0x17]) + legacy_version.to_bytes(2, 'big') + b'\x00\x05hello'
+                parsed = TLS(wire, len(wire))
+                self.assertEqual(parsed.alias, 'TLS')
+                self.assertEqual(parsed.name, 'Transport Layer Security')
+                self.assertEqual(parsed.info.content, b'hello')
+
+    def test_tls_unknown_record_version_stays_generic_even_offering_1_3(self) -> None:
+        """The ``supported_versions`` peek only applies where TLS 1.3 may
+        legitimately sit on the record layer, not to an unknown version."""
+        from pcapkit.protocols.application.tls import TLS
+
+        supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
+        wire = _tls_client_hello_wire(supported_versions=supported_versions,
+                                      record_version=b'\x03\x04')
+        parsed = TLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'TLS')
+
+    def test_tls_0301_client_hello_negotiating_1_3_dispatches_tls_1_3(self) -> None:
+        """An initial ``ClientHello`` may carry ``0x0301`` on the record layer
+        "for compatibility purposes" (:rfc:`9846#section-5.1`)."""
+        from pcapkit.protocols.application.tls import TLS
+
+        supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
+        wire = _tls_client_hello_wire(supported_versions=supported_versions,
+                                      record_version=b'\x03\x01')
+        parsed = TLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'TLS 1.3')
+
+        plain = _tls_client_hello_wire(record_version=b'\x03\x01')
+        self.assertEqual(TLS(plain, len(plain)).alias, 'TLS 1.0')
+
+    def test_dtls_unknown_record_version_keeps_the_generic_alias(self) -> None:
+        """A ``0xFExx`` legacy version naming no known tier claims none --
+        DTLS 1.3's own ``0xFEFC`` included, which :rfc:`9147#section-4.1`
+        never puts on the record layer."""
+        from pcapkit.protocols.application.dtls import DTLS
+
+        for legacy_version in (0xFEFC, 0xFEFE, 0xFE00):
+            with self.subTest(legacy_version=hex(legacy_version)):
+                wire = (bytes([0x17]) + legacy_version.to_bytes(2, 'big') + bytes(2)
+                        + (1).to_bytes(6, 'big') + (5).to_bytes(2, 'big') + b'hello')
+                parsed = DTLS(wire, len(wire))
+                self.assertEqual(parsed.alias, 'DTLS')
+                self.assertEqual(parsed.info.content, b'hello')
+
+    def test_dtls_0xfeff_client_hello_negotiating_1_3_dispatches_dtls_1_3(self) -> None:
+        """An initial ``ClientHello`` may carry DTLS 1.0's ``{254, 255}``
+        on the record layer (:rfc:`9147#section-4.1`)."""
+        from pcapkit.protocols.application.dtls import DTLS
+
+        supported_versions = b'\x02' + (0xFEFC).to_bytes(2, 'big')
+        wire = _dtls_client_hello_wire(supported_versions=supported_versions,
+                                       record_version=b'\xfe\xff')
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'DTLS 1.3')
+
+        plain = _dtls_client_hello_wire(record_version=b'\xfe\xff')
+        self.assertEqual(DTLS(plain, len(plain)).alias, 'DTLS 1.0')
 
     def test_sslv3_is_constructible_directly_and_narrows_id(self) -> None:
         """:class:`SSLv3` -- explicit/manual construction only, mirroring
@@ -874,6 +948,99 @@ class SSLv2HeuristicTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             proto = TCP(raw, len(raw))
         self.assertEqual(str(proto.protochain), 'TCP:Raw')
+
+    def test_delegated_parse_adopts_both_alias_and_name(self) -> None:
+        """:meth:`SSL._adopt_dispatched` carries the delegate's :attr:`name`
+        over alongside its :attr:`alias`, as :meth:`TLS.read` sets both when
+        it parses the record itself. SSLv2 support (:issue:`2457`) is not on
+        this checkout, so a stand-in delegate is installed in its place.
+
+        """
+        import sys
+        import types
+        from unittest import mock
+
+        from pcapkit.const.tls.content_type import ContentType
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.data.application.tls import TLS as Data_TLS
+
+        sentinel = Data_TLS(content_type=ContentType.handshake, version=0x0002,
+                            length=3, content=b'\x01\x00\x00')
+
+        class StandInSSL2:
+            alias = 'SSLv2'
+            name = 'Secure Sockets Layer version 2'
+            info = sentinel
+            _next = None
+
+            def __init__(self, data: bytes, length: int, **kwargs: object) -> None:
+                self.data = data[:length]
+
+        module = types.ModuleType('pcapkit.protocols.application.ssl2')
+        module.SSL2 = StandInSSL2  # type: ignore[attr-defined]
+
+        sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
+        with mock.patch.dict(sys.modules, {'pcapkit.protocols.application.ssl2': module}):
+            parsed = TLS(sslv2_shaped, len(sslv2_shaped))
+        self.assertEqual(parsed.alias, 'SSLv2')
+        self.assertEqual(parsed.name, 'Secure Sockets Layer version 2')
+        self.assertIs(parsed.info, sentinel)
+
+
+class ExportTests(unittest.TestCase):
+    """The family is exported, and registered, the way every sibling
+    application protocol is -- :class:`~pcapkit.protocols.application.ngap.NGAP`
+    for one."""
+
+    NAMES = ('SSL', 'SSLv3', 'TLS', 'DTLS')
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_exported_from_every_namespace(self) -> None:
+        import pcapkit
+        import pcapkit.all
+        import pcapkit.protocols
+        import pcapkit.protocols.application
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.tls import TLS, SSLv3
+
+        classes = {'SSL': SSL, 'SSLv3': SSLv3, 'TLS': TLS, 'DTLS': DTLS}
+        for module in (pcapkit, pcapkit.all, pcapkit.protocols, pcapkit.protocols.application):
+            for name in self.NAMES:
+                with self.subTest(module=module.__name__, name=name):
+                    self.assertIn(name, module.__all__)
+                    self.assertIs(getattr(module, name), classes[name])
+
+    def test_registered_in_the_protocol_registry(self) -> None:
+        import pcapkit.protocols
+
+        for name in self.NAMES:
+            with self.subTest(name=name):
+                self.assertIs(pcapkit.protocols.__proto__[name.upper()],
+                              getattr(pcapkit.protocols, name))
+
+    def test_string_lookup_matches_a_parsed_record(self) -> None:
+        """``'SSL' in pkt`` agrees with ``SSL in pkt`` now that the name is registered."""
+        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.transport.tcp import TCP
+
+        raw = _TCP_TO_443 + b'\x17\x03\x03\x00\x05hello'
+        proto = TCP(raw, len(raw))
+        self.assertIn(SSL, proto)
+        self.assertIn('SSL', proto)
+        self.assertIn('TLS', proto)
+
+    def test_const_package_star_imports_tls(self) -> None:
+        import pcapkit.const
+        from pcapkit.const.tls.content_type import ContentType
+        from pcapkit.const.tls.handshake_type import HandshakeType
+
+        self.assertIn('TLS_ContentType', pcapkit.const.__all__)
+        self.assertIn('TLS_HandshakeType', pcapkit.const.__all__)
+        self.assertIs(pcapkit.const.TLS_ContentType, ContentType)
+        self.assertIs(pcapkit.const.TLS_HandshakeType, HandshakeType)
 
 
 if __name__ == '__main__':

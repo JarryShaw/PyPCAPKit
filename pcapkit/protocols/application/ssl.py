@@ -6,10 +6,11 @@
 
 :mod:`pcapkit.protocols.application.ssl` contains
 :class:`~pcapkit.protocols.application.ssl.SSL` only,
-which is a base class for Transport Layer Security (TLS) protocol
-family [*]_, e.g.
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.dtls.DTLS`.
+which is the umbrella base class for the Secure Sockets Layer protocol
+family [*]_ -- the SSL versions, Transport Layer Security
+(:class:`~pcapkit.protocols.application.tls.TLS`, which also covers SSLv3
+through :class:`~pcapkit.protocols.application.tls.SSLv3`) and Datagram TLS
+(:class:`~pcapkit.protocols.application.dtls.DTLS`).
 
 The record-layer header -- a :class:`~pcapkit.const.tls.content_type.ContentType`,
 a legacy record version, and a length -- is byte-identical in shape between
@@ -220,10 +221,12 @@ def _tls_handshake_tiles(fragment: 'bytes') -> 'bool':
 
 
 class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
-    """Base class for the TLS protocol family.
+    """Umbrella base class for the SSL protocol family: the SSL versions, TLS and DTLS.
 
-    - Transport Layer Security (:class:`~pcapkit.protocols.application.tls.TLS`) [:rfc:`5246`, :rfc:`9846`]
-    - Datagram TLS (:class:`~pcapkit.protocols.application.dtls.DTLS`) [:rfc:`6347`, :rfc:`9147`]
+    - Transport Layer Security, SSLv3 through TLS 1.3
+      (:class:`~pcapkit.protocols.application.tls.TLS`) [:rfc:`6101`, :rfc:`5246`, :rfc:`9846`]
+    - Datagram TLS, DTLS 1.0 through DTLS 1.3
+      (:class:`~pcapkit.protocols.application.dtls.DTLS`) [:rfc:`4347`, :rfc:`6347`, :rfc:`9147`]
 
     """
 
@@ -361,13 +364,15 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     def _adopt_dispatched(self, obj: 'Any') -> 'Any':
         """Adopt a dispatched tier's parse result as this dispatcher's own.
 
-        Shared by every family's version-dispatching ``read()`` --
-        :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>` and
-        :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>` --
-        mirroring :meth:`HTTP.read <pcapkit.protocols.application.http.HTTP.read>`'s
+        Used where a version-dispatching ``read()`` hands the payload to a
+        different class -- :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>`
+        delegating an SSLv2-shaped payload -- mirroring
+        :meth:`HTTP.read <pcapkit.protocols.application.http.HTTP.read>`'s
         own adoption of whichever versioned object it constructed: the
         dispatcher's own :attr:`alias <pcapkit.protocols.protocol.ProtocolBase.alias>`
-        becomes the identified tier's, and a next layer the tier's own parse
+        and :attr:`name <pcapkit.protocols.protocol.ProtocolBase.name>` both
+        become the delegate's -- the same pair ``read()`` sets when it parses
+        the record itself -- and a next layer the delegate's own parse
         already decoded is carried over rather than decoded twice.
 
         Args:
@@ -379,6 +384,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         """
         self._alias = obj.alias  # pylint: disable=attribute-defined-outside-init
+        self._name = obj.name  # pylint: disable=attribute-defined-outside-init
         next_ = getattr(obj, '_next', None)
         if next_ is not None and not isinstance(next_, NoPayload):
             self._next = next_  # pylint: disable=attribute-defined-outside-init

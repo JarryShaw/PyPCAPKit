@@ -5,10 +5,16 @@ SSL - Secure Sockets Layer
 
 :mod:`pcapkit.protocols.application.ssl` contains
 :class:`~pcapkit.protocols.application.ssl.SSL` only,
-which is a base class for Transport Layer Security (TLS) protocol
-family [*]_, e.g.
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.dtls.DTLS`.
+which is the umbrella base class for the Secure Sockets Layer protocol
+family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
+
+* :class:`~pcapkit.protocols.application.tls.TLS` -- SSLv3 and TLS 1.0
+  through TLS 1.3, with :class:`~pcapkit.protocols.application.tls.SSLv3` as
+  its thin subclass for explicit construction;
+* :class:`~pcapkit.protocols.application.dtls.DTLS` -- DTLS 1.0, 1.2 and 1.3.
+
+:meth:`SSL.id <pcapkit.protocols.application.ssl.SSL.id>` lists the direct
+concrete subclasses, so a lookup keyed on ``SSL`` matches any of them.
 
 The record-layer header -- a :class:`~pcapkit.const.tls.content_type.ContentType`,
 a legacy record version, and a length -- is byte-identical in shape between
@@ -21,8 +27,6 @@ message decoding, and the record-level validation that keeps dispatch from
 accepting bytes that cannot be a genuine record.
 
 .. versionadded:: 1.6.0
-
-   :issue:`2437`.
 
 .. raw:: html
 

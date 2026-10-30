@@ -90,6 +90,9 @@ _DTLSV1_0_VERSION = 0xFEFF
 #: Legacy record version DTLS 1.2 carries, and the value DTLS 1.3 freezes its
 #: own legacy-format records at (:rfc:`9147#section-4.1`).
 _DTLSV1_2_VERSION = 0xFEFD
+#: Legacy record versions a DTLS 1.3 record may carry: DTLS 1.2's always, and
+#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4.1`).
+_DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
 
 
 class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
@@ -299,13 +302,15 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         Parses the record first, then identifies the concrete tier from its
         legacy version and sets :attr:`alias` accordingly -- mirroring
         :meth:`ARP.read <pcapkit.protocols.link.arp.ARP.read>`'s own
-        ``self._acnm = ...`` dispatch by operation code. DTLS 1.0 and DTLS
-        1.2 are named directly by the record's legacy version. DTLS 1.3's
-        legacy-format records freeze theirs at DTLS 1.2's value, and are told
-        apart by peeking the ``supported_versions`` extension
-        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`),
-        falling back to DTLS 1.2 -- the common case -- when that peek is
-        inconclusive. Any legacy version naming neither never reaches this
+        ``self._acnm = ...`` dispatch by operation code. DTLS 1.3's
+        legacy-format records freeze theirs at DTLS 1.2's value -- or DTLS
+        1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4.1`) -- and
+        are told apart by peeking the ``supported_versions`` extension
+        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`).
+        Otherwise DTLS 1.0 (``0xFEFF``) and DTLS 1.2 (``0xFEFD``) are named
+        directly by the record's legacy version, and any other ``0xFExx``
+        value keeps the generic ``'DTLS'`` alias rather than claiming a tier.
+        A legacy version outside ``0xFExx`` never reaches this
         dispatch at all: :meth:`SSL._validate_tls_record
         <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`, called
         first, already raises for it.
@@ -340,12 +345,20 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=True)
 
-        if schema.version == _DTLSV1_0_VERSION:
-            self._alias = 'DTLS 1.0'
-        elif schema.version == _DTLSV1_2_VERSION and self._tls_negotiates(schema, DTLS13_VERSION, dtls=True):
+        # NOTE: DTLS 1.3 is checked first, and at DTLS 1.0's value as well as
+        # DTLS 1.2's: an initial ClientHello may carry {254, 255} "for
+        # compatibility purposes" (RFC 9147, section 4.1). Any other legacy
+        # version -- DTLS 1.3's own 0xFEFC included, which never appears on
+        # the record layer -- names no known tier and keeps the generic
+        # ``DTLS`` alias rather than claiming a version it does not carry.
+        if schema.version in _DTLS13_LEGACY_VERSIONS and self._tls_negotiates(schema, DTLS13_VERSION, dtls=True):
             self._alias = 'DTLS 1.3'
-        else:
+        elif schema.version == _DTLSV1_0_VERSION:
+            self._alias = 'DTLS 1.0'
+        elif schema.version == _DTLSV1_2_VERSION:
             self._alias = 'DTLS 1.2'
+        else:
+            self._alias = 'DTLS'
 
         content = self._read_tls_content(schema.content_type, schema.fragment,
                                          dtls=True, epoch=schema.epoch)

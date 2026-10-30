@@ -11,7 +11,7 @@ application layer.
 """
 # TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
-#       SSH, TELNET, TLS/SSL, XMPP.
+#       SSH, TELNET, XMPP.
 #
 # NB: NGAP's decoder below is an optional
 #     dependency; see pcapkit.protocols.application.ngap. Importing the module
@@ -28,9 +28,12 @@ from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.application.ngap import NGAP
 from pcapkit.protocols.application.ospf import OSPF
 from pcapkit.protocols.application.rarp import RARP, DRARP
+from pcapkit.protocols.application.tls import TLS, SSLv3
+from pcapkit.protocols.application.dtls import DTLS
 
 # Base Classes
 from pcapkit.protocols.application.http import HTTP
+from pcapkit.protocols.application.ssl import SSL
 
 # Application Layer Protocol Numbers
 from pcapkit.const.reg.apptype import AppType as APPTYPE
@@ -42,4 +45,5 @@ __all__ = [
     'NGAP',
     'OSPF',
     'RARP', 'DRARP',
+    'SSL', 'SSLv3', 'TLS', 'DTLS',
 ]
