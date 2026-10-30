@@ -747,6 +747,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             warn(f'parameter {code} already registered, overwriting', RegistryWarning)
         cls.__parameter__[code] = meth
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["HIP"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('HIP',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

@@ -410,6 +410,16 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             warn(f'routing {code} already registered, overwriting', RegistryWarning)
         cls.__routing__[code] = meth
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv6_Route"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv6_Route',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

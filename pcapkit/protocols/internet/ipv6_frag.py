@@ -217,6 +217,16 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             payload=payload,
         )
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv6_Frag"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv6_Frag',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

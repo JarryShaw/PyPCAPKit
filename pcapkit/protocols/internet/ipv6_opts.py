@@ -409,6 +409,16 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv6_Opts"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv6_Opts',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

@@ -1584,6 +1584,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             warn(f'extension {code} already registered, overwriting', RegistryWarning)
         cls.__extension__[code] = meth
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["MH"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('MH',)
+
     ##########################################################################
     # Data models.
     ##########################################################################
