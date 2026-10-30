@@ -48,7 +48,10 @@ Octets      Bits        Name                    Description
    .. automethod:: make
 
    .. automethod:: _make_data
-   .. automethod:: _from_ip
+   .. automethod:: _source
+   .. automethod:: _destination
+   .. automethod:: _upper_protocol
+   .. automethod:: _upper_length
 
    .. automethod:: __post_init__
    .. automethod:: __index__

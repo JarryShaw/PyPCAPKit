@@ -884,9 +884,9 @@ from *wrong*, or it will cry wolf on the commonest capture there is —
 model for how to spell "expected, not an error".
 
 Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
-ESP has already laid the groundwork, but the checksum half needs the IP
-pseudo-header class defined first, and that is worth doing deliberately rather
-than as a side effect of a checksum patch.
+ESP has already laid the groundwork. The checksum half builds on the IP
+pseudo-header class, :class:`~pcapkit.protocols.internet.ip_pseudo.IP_Pseudo`
+(:issue:`2471`).
 
 Deterministic Construction Arguments
 ------------------------------------
@@ -1251,12 +1251,14 @@ equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
 ``RELAY_HMAC`` and its signature parameters) could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
-one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP
-pseudo-header, and the owner has settled how: a **pseudo-protocol class** for the
-IP family, serving both the parsing and the constructing path, rather than a
-back-reference from a parsed protocol to its parent. So that half is not blocked
-on an open design question -- only on someone defining that class, which is a
-bounded piece of work and the natural first step.
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is :issue:`2470` and
+:issue:`2472` to :issue:`2475`.
+
+**IP pseudo-header — done** (:issue:`2471`).
+:class:`~pcapkit.protocols.internet.ip_pseudo.IP_Pseudo` is the
+**pseudo-protocol class** for the IP family the owner settled on, serving both
+the parsing and the constructing path, rather than a back-reference from a
+parsed protocol to its parent.
 
 **Queued for wave 2 or 3 — deterministic construction arguments.** See
 `Deterministic Construction Arguments`_ above: dropping ``make()``'s implicit

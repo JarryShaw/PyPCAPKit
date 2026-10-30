@@ -39,6 +39,7 @@ import ipaddress
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
+from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.protochain import ProtoChain
@@ -49,7 +50,8 @@ from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.internet.ip_pseudo import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
 from pcapkit.protocols.schema.internet.ip_pseudo import IP_Pseudo as Schema_IP_Pseudo
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -163,15 +165,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         Returns:
             Parsed packet data.
 
-        Raises:
-            ProtocolError: If the octets are not 12 (IPv4) or 40 (IPv6) long.
-
         """
-        if length is None:
-            length = len(self)
-        if length not in (IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN):
-            raise ProtocolError(f'{self.alias}: invalid length {length}; '
-                                f'expected {IPV4_PSEUDO_LEN} or {IPV6_PSEUDO_LEN}')
         schema = self.__header__
 
         version: 'Literal[4, 6]' = schema.src.version
@@ -198,10 +192,19 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         """Make (construct) packet data.
 
         Values not given are taken from ``ip``. From an
-        :class:`~pcapkit.protocols.internet.ipv6.IPv6` layer, ``dst`` is the
-        final destination of a Routing header with segments left, and
-        ``protocol`` and ``upper_length`` are those past the extension headers,
-        as :rfc:`8200#section-8.1` specifies.
+        :class:`~pcapkit.protocols.internet.ipv6.IPv6` layer, as
+        :rfc:`8200#section-8.1` specifies, ``src`` is the address of a Home
+        Address option (:rfc:`6275#section-11.3.1`), ``dst`` the final
+        destination of a Routing header with segments left, and ``protocol``
+        and ``upper_length`` those past the extension headers, a jumbogram's
+        length being its Jumbo Payload Length (:rfc:`2675`).
+
+        Values ``ip`` does not determine are to be given, or ``make`` raises:
+        the final destination of a Routing header whose addresses are not parsed,
+        such as the Segment List[0] of a Segment Routing Header
+        (:rfc:`8754`); the upper-layer length of a fragment, which only
+        reassembly gives; and the upper layer behind an unparsed header, such
+        as an encrypted ESP.
 
         Args:
             ip: Parsed or constructed IP layer enclosing the upper layer.
@@ -222,19 +225,23 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         Raises:
             ProtocolError: If ``ip`` is neither IPv4 nor IPv6, or a value is
                 given by neither the arguments nor ``ip``.
-            FieldValueError: If ``src`` or ``dst`` is not a valid address, or
-                they differ in IP version.
+            FieldValueError: If ``src`` or ``dst`` is not a valid address,
+                they differ in IP version, or ``upper_length`` does not fit
+                the layout's length field.
 
         """
         if ip is not None:
             if not isinstance(ip, (IPv4, IPv6)):
                 raise ProtocolError(f'{self.alias}: unsupported enclosing layer '
                                     f'{type(ip).__name__}')
-            ip_src, ip_dst, ip_proto, ip_len = self._from_ip(ip)
-            src = ip_src if src is None else src
-            dst = ip_dst if dst is None else dst
-            protocol = ip_proto if protocol is None else protocol
-            upper_length = ip_len if upper_length is None else upper_length
+            if src is None:
+                src = self._source(ip)
+            if dst is None:
+                dst = self._destination(ip)
+            if protocol is None:
+                protocol = self._upper_protocol(ip)
+            if upper_length is None:
+                upper_length = self._upper_length(ip)
 
         if src is None or dst is None or protocol is None or upper_length is None:
             raise ProtocolError(f'{self.alias}: src, dst, protocol and upper_length '
@@ -242,6 +249,10 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
 
         src_val = parse_ip_address(src, f'{self.alias}: source address')
         dst_val = parse_ip_address(dst, f'{self.alias}: destination address', src_val.version)
+        limit = 0xFFFFFFFF if src_val.version == 6 else 0xFFFF
+        if not 0 <= upper_length <= limit:
+            raise FieldValueError(f'{self.alias}: upper-layer length {upper_length} '
+                                  f'out of range 0 to {limit:#x}')
         if protocol_namespace is None:
             protocol_namespace = Enum_TransType
         proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,
@@ -286,10 +297,24 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
+        Raises:
+            ProtocolError: If the octets parsed are not ``length`` long, or
+                not 12 (IPv4) or 40 (IPv6) long.
+
         See Also:
             For construction arguments, please refer to :meth:`make`.
 
         """
+        if file is not None:
+            file = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
+            if length is None:
+                length = len(file)
+            if len(file) != length:
+                raise ProtocolError(f'{self.alias}: length {length} disagrees with '
+                                    f'{len(file)} octets')
+            if length not in (IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN):
+                raise ProtocolError(f'{self.alias}: invalid length {length}; '
+                                    f'expected {IPV4_PSEUDO_LEN} or {IPV6_PSEUDO_LEN}')
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
         #: pcapkit.protocols.misc.null.NoPayload: Next layer (no payload).
@@ -334,31 +359,108 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             'zero': data.zero,
         }
 
-    @staticmethod
-    def _from_ip(ip: 'IPv4 | IPv6') -> 'tuple[IPv4Address | IPv6Address, IPv4Address | IPv6Address, Enum_TransType, int]':  # pylint: disable=line-too-long
-        """Read the pseudo-header values from an IP layer.
+    def _source(self, ip: 'IPv4 | IPv6') -> 'IPv4Address | IPv6Address':
+        """Read the pseudo-header source address from an IP layer.
 
         Args:
             ip: IPv4 or IPv6 layer.
 
         Returns:
-            Source address, destination address, upper-layer protocol and
-            upper-layer packet length.
+            The address of a Home Address option (:rfc:`6275#section-11.3.1`)
+            if any, the source address otherwise.
+
+        """
+        src = ip.info.src
+        if isinstance(ip, IPv6):
+            for header in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Opts):  # type: ignore[arg-type]
+                option = header.info.options.get(Enum_Option.Home_Address)
+                if option is not None:
+                    src = option.address
+        return src
+
+    def _destination(self, ip: 'IPv4 | IPv6') -> 'IPv4Address | IPv6Address':
+        """Read the pseudo-header destination address from an IP layer.
+
+        Args:
+            ip: IPv4 or IPv6 layer.
+
+        Returns:
+            The last address of a Routing header with segments left if any,
+            the destination address otherwise.
+
+        Raises:
+            ProtocolError: If a Routing header with segments left has no
+                parsed last address.
+
+        """
+        dst = ip.info.dst
+        if isinstance(ip, IPv4):
+            return dst
+        for header in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Route):  # type: ignore[arg-type]
+            route = header.info
+            if not route.seg_left:
+                continue
+            # NOTE: Type 2 carries one address, the source routes a tuple. A
+            # truncated RPL address stays bytes; unparsed types carry none.
+            final = route.get('ip')
+            if isinstance(final, tuple) and final:
+                final = final[-1]
+            if not isinstance(final, ipaddress.IPv6Address):
+                raise ProtocolError(f'{self.alias}: final destination of Routing type '
+                                    f'{route.type} not parsed; give dst')
+            dst = final
+        return dst
+
+    def _upper_protocol(self, ip: 'IPv4 | IPv6') -> 'Enum_TransType':
+        """Read the upper-layer protocol from an IP layer.
+
+        Args:
+            ip: IPv4 or IPv6 layer.
+
+        Returns:
+            The protocol past the extension headers.
+
+        Raises:
+            ProtocolError: If the walk ended at an unparsed header.
+
+        """
+        protocol = ip.info.protocol
+        if protocol is None:
+            raise ProtocolError(f'{self.alias}: upper layer of {ip.alias} not parsed; '
+                                'give protocol and upper_length')
+        return protocol
+
+    def _upper_length(self, ip: 'IPv4 | IPv6') -> 'int':
+        """Read the upper-layer packet length from an IP layer.
+
+        Args:
+            ip: IPv4 or IPv6 layer.
+
+        Returns:
+            The length past the IP header and extension headers.
+
+        Raises:
+            ProtocolError: If ``ip`` is a fragment, ends at an unparsed header,
+                or has a zero Payload Length and no Jumbo Payload option.
 
         """
         if isinstance(ip, IPv4):
             info4 = ip.info
-            return info4.src, info4.dst, info4.protocol, info4.len - info4.hdr_len
+            if info4.offset or info4.flags.mf:
+                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
+            return info4.len - info4.hdr_len
 
+        self._upper_protocol(ip)
         info = ip.info
-        dst = info.dst
-        for header in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Route):  # type: ignore[arg-type]
-            route = header.info
-            # NOTE: Type 2 carries one address, the source routes a tuple; an
-            # RPL address left compressed (bytes) is not a final destination.
-            final = route.get('ip')
-            if isinstance(final, tuple) and final:
-                final = final[-1]
-            if route.seg_left and isinstance(final, ipaddress.IPv6Address):
-                dst = final
-        return info.src, dst, info.protocol, info.payload - (info.hdr_len - IPV6_HEADER_LEN)
+        for frag in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Frag):  # type: ignore[arg-type]
+            if frag.info.offset or frag.info.mf:
+                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
+
+        extent = info.payload
+        if not extent:
+            jumbo = jumbo_payload_length(info.next, ip.data[IPV6_HEADER_LEN:])
+            if jumbo is None:
+                raise ProtocolError(f'{self.alias}: Payload Length 0 and no Jumbo Payload '
+                                    'option; give upper_length')
+            extent = jumbo
+        return extent - sum(header.length for _, header in ip.extension_headers.items(multi=True))
