@@ -14,8 +14,7 @@ family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
 * :class:`~pcapkit.protocols.application.dtls.DTLS` -- DTLS 1.0, 1.2 and 1.3.
 
 :meth:`SSL.id <pcapkit.protocols.application.ssl.SSL.id>` lists the direct
-concrete subclasses, so a lookup keyed on ``SSL`` matches any of them. The
-SSLv2 class joins it in its own PR.
+concrete subclasses, so a lookup keyed on ``SSL`` matches any of them.
 
 The TLS record header (:rfc:`9846#section-5.1`) is a
 :class:`~pcapkit.const.tls.content_type.ContentType`, a legacy record version

@@ -17,6 +17,7 @@ from tests._support import reimport_once_per_class
 #: :mod:`tests.protocols.transport.test_tcp_http_dispatch_unit`'s port-80 header.
 _TCP_TO_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
 
+
 def _udp_to_5684(payload: bytes) -> bytes:
     """An 8-octet UDP header to port 5684 -- where DTLS is bound -- plus
     ``payload``. The checksum is left zero, which UDP permits over IPv4 and

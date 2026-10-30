@@ -192,7 +192,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
     @classmethod
     def id(cls) -> 'tuple[Literal["TLS"], Literal["DTLS"]]':
-        """Index ID of the protocol. The SSLv2 class joins it in its own PR.
+        """Index ID of the protocol.
 
         Returns:
             Index ID of the protocol.
