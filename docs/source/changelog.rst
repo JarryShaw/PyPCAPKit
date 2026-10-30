@@ -44,6 +44,9 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
 carries only the version being released; this page is the whole recorded history.
 
+* **1.5.1** (2026-10-30) -- Fixed a double-escaping regression: ``dictdumper``
+  0.8.5 fixed defects :mod:`pcapkit.dumpkit.common` had its own workarounds
+  for, so the two stacked. :doc:`Full changelog <changelog/1.5.1>`.
 * **1.6.0** (unreleased) -- Wave 2 of the roadmap: the protocol pairs that
   wanted a shared abstract base, and the two that had no dissector at all.
   :doc:`Full changelog <changelog/1.6.0>`.
@@ -177,6 +180,7 @@ carries only the version being released; this page is the whole recorded history
    :hidden:
    :maxdepth: 1
 
+   changelog/1.5.1
    changelog/1.6.0
    changelog/1.5.0
    changelog/1.4.1
