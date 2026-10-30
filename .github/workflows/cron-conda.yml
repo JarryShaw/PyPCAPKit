@@ -322,6 +322,18 @@ jobs:
           esac
 
       # A build-only run builds whether or not anything changed.
+      #
+      # #2458: `PCAPKIT_DEV_RELEASE` is `is_devrelease`, not `is_prerelease` --
+      # the latter is also `true` for a deliberately-tagged alpha/beta/rc this
+      # project has shipped for real (e.g. 1.5.0b14), and gating on it would
+      # silently block one. `is_devrelease` is `true` only for a PEP 440
+      # dev-release suffix (X.Y.Z.devN), the work-in-progress signal `conda-tag`
+      # and `conda-dist` read below so that a scheduled or `workflow_run`
+      # trigger never tags or uploads a dev version with no human in the path.
+      # Independent of the equivalent `PCAPKIT_DEV_RELEASE` gate proposed for
+      # create-release.yml's `version_check` job in #2452 (not yet merged):
+      # this workflow has no `version_check` job to share that output with,
+      # so it is computed here too.
       - name: Get Version
         if: steps.bump.outputs.bump == 'true' || needs.mode.outputs.publishes != 'true'
         id: get_version
@@ -330,6 +342,7 @@ jobs:
 
           {
             echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')"
+            echo "PCAPKIT_DEV_RELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_devrelease).lower())')"
             echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')"
             echo "PCAPKIT_BUILD=$(cat conda/build)"
           } >> "$GITHUB_OUTPUT"
@@ -432,6 +445,9 @@ jobs:
       # The commit Push Changes put on `main`, and the one `conda-tag` tags.
       CONDA_COMMIT: ${{ steps.push-changes.outputs.commit }}
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+      # #2458: read by `conda-tag` and `conda-dist` below, to block tagging and
+      # uploading a dev-release version.
+      PCAPKIT_DEV_RELEASE: ${{ steps.get_version.outputs.PCAPKIT_DEV_RELEASE }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
       PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
       PYTHON_CONDA: ${{ steps.python-versions.outputs.conda }}
@@ -462,10 +478,17 @@ jobs:
     # outputs, is never tagged. Same shape as create-release.yml's `tag` job.
     #
     # Never on a build-only run, which pushed nothing to tag.
+    #
+    # #2458: nor on a dev-release version (`__version__` carrying a PEP 440
+    # `.devN` suffix) -- a scheduled run or the `workflow_run` trigger above is
+    # enough to reach this job with no human in the path, which mirrors the
+    # equivalent gate proposed for create-release.yml's publishers in #2452
+    # (not yet merged).
     if: >-
       !cancelled() && needs.mode.outputs.publishes == 'true' &&
       needs.conda-update.result == 'success' &&
-      needs.conda-update.outputs.CONDA_CHANGED == 'true'
+      needs.conda-update.outputs.CONDA_CHANGED == 'true' &&
+      needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
     permissions:
       contents: write
     steps:
@@ -533,11 +556,21 @@ jobs:
     # pins the tag, which names the pushed commit only then, and `conda-tag`
     # skips only when no bump was pushed. A build-only run, which never tags,
     # builds the dispatched commit with `conda-update`'s changes applied.
+    #
+    # #2458: the dev-release check is checked again here, inside the
+    # publishing branch only, so a build-only run still builds and
+    # smoke-tests a dev version -- it uploads nothing regardless. On the
+    # publishing path it is also redundant with `conda-tag`'s own gate, which
+    # already leaves `needs.conda-tag.result` at `'skipped'` rather than
+    # `'success'`; kept explicit anyway, mirroring how the equivalent gate
+    # proposed for create-release.yml's publishers in #2452 (not yet merged)
+    # has each read it rather than relying on one another's cascade.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
       (needs.mode.outputs.publishes != 'true' || (
         needs.conda-tag.result == 'success' &&
-        needs.conda-update.outputs.CONDA_CHANGED == 'true'
+        needs.conda-update.outputs.CONDA_CHANGED == 'true' &&
+        needs.conda-update.outputs.PCAPKIT_DEV_RELEASE != 'true'
       ))
     permissions:
       contents: write
@@ -844,6 +877,11 @@ jobs:
           UPDATE_STATUS: ${{ needs.conda-update.outputs.status }}
           TAG_RESULT: ${{ needs.conda-tag.result }}
           DIST_RESULT: ${{ needs.conda-dist.result }}
+          # #2458: needed to tell "skipped, nothing was pushed" apart from
+          # "skipped, a build was pushed but it is a dev release" below.
+          CONDA_CHANGED: ${{ needs.conda-update.outputs.CONDA_CHANGED }}
+          DEV_RELEASE: ${{ needs.conda-update.outputs.PCAPKIT_DEV_RELEASE }}
+          PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
         run: |
           if [ "$UPDATE_RESULT" = skipped ]; then
             status="$HEAD_RESULT"
@@ -863,12 +901,19 @@ jobs:
             else
               status="${UPDATE_STATUS:-success}"
             fi
-            # Both skip unless a build was pushed.
+            # #2458: both used to skip only when nothing was pushed, so a
+            # pushed build always carried Tag/Upload lines too. Now a pushed
+            # dev-release build (`DEV_RELEASE` = 'true') also leaves both
+            # skipped, on purpose, so that case gets its own explanatory line
+            # below rather than silently dropping Tag/Upload with no reason
+            # given.
             if [ "$TAG_RESULT" != skipped ] && [ -f report/conda-report.md ]; then
               {
                 echo "- Tag: $TAG_RESULT"
                 echo "- Upload: $DIST_RESULT"
               } >> report/conda-report.md
+            elif [ "$CONDA_CHANGED" = true ] && [ "$DEV_RELEASE" = true ] && [ -f report/conda-report.md ]; then
+              echo "- Tag: skipped, and Upload: skipped -- ${PCAPKIT_VERSION} carries a PEP 440 dev-release suffix (.devN), so PCAPKIT_DEV_RELEASE withheld both deliberately" >> report/conda-report.md
             fi
           fi
           python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
