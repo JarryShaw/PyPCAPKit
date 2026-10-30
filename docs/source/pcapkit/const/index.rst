@@ -80,6 +80,8 @@ Internet Layer
 
    esp
    hip
+   icmp
+   icmpv6
    ipv4
    ipv6
    ipx

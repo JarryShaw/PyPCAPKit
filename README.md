@@ -57,7 +57,7 @@ its own parser.
 6
 >>> frame = extraction.frame[0]
 >>> str(frame.protochain)
-'Ethernet:IPv6:IPv6_ICMP'
+'Ethernet:IPv6:ICMPv6'
 >>> frame.info.time
 datetime.datetime(2017, 11, 19, 15, 49, 5, 471719, tzinfo=datetime.timezone.utc)
 >>> frame.payload.payload.src

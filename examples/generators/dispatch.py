@@ -342,7 +342,7 @@ def _link_build(code: 'int') -> 'Any':
 ###############################################################################
 
 #: Codes dispatched over an IPv4 outer header.
-_INTERNET_OVER_IPV4 = frozenset({4, 6, 17, 50, 51, 89, 111, 132})
+_INTERNET_OVER_IPV4 = frozenset({1, 4, 6, 17, 50, 51, 89, 111, 132})
 
 
 def _internet_registry() -> 'Any':
@@ -359,6 +359,18 @@ def _internet_payload(code: 'int') -> 'bytes':
         return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPv4:  # IP-in-IP.
         return _ip4(6, _tcp(9999))
+    if code == TransType.ICMP:
+        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv4(type=8, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
+    if code == TransType.IPv6_ICMP:
+        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv6(type=128, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.TCP:
         return _tcp(9999)
     if code == TransType.UDP:
@@ -667,9 +679,11 @@ PINNED_TARGETS = {
     # -- Internet.__proto__ (TransType) ---------------------------------------
     'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
     'internet/IPv4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
     'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
     'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
     'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
     'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
     'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
     'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),

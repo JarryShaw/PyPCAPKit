@@ -432,6 +432,7 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_reassembly_ipv6_callback': 'append-only, nothing to undo with',
             'register_reassembly_tcp_callback': 'append-only, nothing to undo with',
             'register_traceflow_tcp_callback': 'append-only, nothing to undo with',
+            'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
         }
         self.assertEqual(sorted(set(registry.__all__) - covered - set(excused)), [])
         self.assertEqual(sorted((covered | set(excused)) - set(registry.__all__)), [])

@@ -83,10 +83,14 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph internet [Internet Layer]
-           Internet --> IPX & IP & IPsec & IPv6_Ext
+           Internet --> IPX & IP & ICMP & IPsec & IPv6_Ext
 
            subgraph ip [IP Family]
                IP --> IPv4 & IPv6
+           end
+
+           subgraph icmp [ICMP Family]
+               ICMP --> ICMPv4 & ICMPv6
            end
 
            subgraph ipsec [IPsec Family]
@@ -136,6 +140,9 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click ESP "internet/esp.html#pcapkit.protocols.internet.esp.ESP"
        click HIP "internet/hip.html#pcapkit.protocols.internet.hip.HIP"
        click HOPOPT "internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
+       click ICMP "internet/icmp.html#pcapkit.protocols.internet.icmp.ICMP"
+       click ICMPv4 "internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.ICMPv4"
+       click ICMPv6 "internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.ICMPv6"
        click IP "internet/ip.html#pcapkit.protocols.internet.ip.IP"
        click IPsec "internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
        click IPv4 "internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
