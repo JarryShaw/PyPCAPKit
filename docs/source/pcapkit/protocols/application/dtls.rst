@@ -36,7 +36,7 @@ every version and :meth:`~pcapkit.protocols.application.dtls.DTLS.read` sets
      - ``DTLS``
 
 DTLS 1.3 never puts its own ``0xFEFC`` on the record layer
-(:rfc:`9147#section-4.1`), so it is told apart only by the
+(:rfc:`9147#section-4`), so it is told apart only by the
 ``supported_versions`` peek. A version the table does not name keeps the
 generic ``DTLS`` alias rather than claiming a specific one.
 
@@ -47,8 +47,7 @@ Known Limitation
 DTLS fragments a handshake message when it does not fit in one datagram
 (:rfc:`6347#section-4.2.3`); reassembling that would need
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` keyed on the
-UDP 5-tuple plus epoch, which is substantial enough that it did not fit
-cleanly alongside this dissector in the same PR (:issue:`2440`). A fragment's
+UDP 5-tuple plus epoch (:issue:`2440`). A fragment's
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
 says whether this is the case; such a message's
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body` is kept

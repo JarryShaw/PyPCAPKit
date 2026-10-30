@@ -17,6 +17,10 @@ from tests._support import reimport_once_per_class
 #: :mod:`tests.protocols.transport.test_tcp_http_dispatch_unit`'s port-80 header.
 _TCP_TO_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
 
+#: Both module names the SSLv2 dissector (:issue:`2457`) may live under, so a
+#: test patching them holds whichever one :meth:`TLS.read` imports.
+_SSLV2_MODULES = ('pcapkit.protocols.application.ssl2', 'pcapkit.protocols.application.sslv2')
+
 
 def _udp_to_5684(payload: bytes) -> bytes:
     """An 8-octet UDP header to port 5684 -- where DTLS is bound -- plus
@@ -85,13 +89,12 @@ class SSLFamilyUnitTests(unittest.TestCase):
     def test_change_cipher_spec_wrong_length_keeps_its_octets(self) -> None:
         """A ``change_cipher_spec`` that is not exactly 1 octet is not a bug.
 
-        It used to raise, on the theory that a cleartext CCS is always 1
-        octet -- true, but a CCS sent mid-renegotiation (after keys exist)
-        is ciphertext under the same content type, and ciphertext is never
-        exactly 1 octet either, given MAC/tag overhead. Same bug class as
-        the already-fixed content-type-21/22 cases: the fix is to keep the
-        fragment opaque rather than raise, so the record (and its cleartext
-        header) survives instead of degrading to :class:`Raw`.
+        A cleartext CCS is always 1 octet, but a CCS sent mid-renegotiation
+        (after keys exist) is ciphertext under the same content type, and
+        ciphertext is never exactly 1 octet, given MAC/tag overhead. As for
+        content types 21 and 22, the fragment is kept opaque rather than
+        raising, so the record (and its cleartext header) survives instead
+        of degrading to :class:`Raw`.
 
         """
         from pcapkit.protocols.application.tls import TLS
@@ -201,13 +204,11 @@ class SSLFamilyUnitTests(unittest.TestCase):
 class RecordValidationTests(unittest.TestCase):
     """Every branch of ``SSL._validate_tls_record``, and what dispatch does with it.
 
-    The content-type check is the one with a confirmed exploit behind it: it
-    used to ask whether :class:`~pcapkit.const.tls.content_type.ContentType`
-    had *named* the value, and ``invalid(0)`` is named -- a sentinel
-    :rfc:`9846#section-5.1` defines so a record carrying it can be rejected,
-    which IANA correspondingly leaves inside its Unassigned 0-19 band. So
-    ``00 03 03 00 04 deadbeef`` on TCP:443 was accepted and its fragment
-    decoded. It is an allowlist of the assigned 20-27 now.
+    The content-type check is an allowlist of the assigned 20-27, not a test
+    of whether :class:`~pcapkit.const.tls.content_type.ContentType` *names*
+    the value: ``invalid(0)`` is named -- a sentinel :rfc:`9846#section-5.1`
+    defines so a record carrying it can be rejected -- so a name-based check
+    accepts ``00 03 03 00 04 deadbeef`` on TCP:443 and decodes its fragment.
 
     """
 
@@ -642,8 +643,8 @@ def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None,
 
 
 class VersionDispatchTests(unittest.TestCase):
-    """:meth:`TLS.read`/:meth:`DTLS.read` -- the restructure :issue:`2437`'s
-    follow-up asked for: identifying the concrete tier and setting
+    """:meth:`TLS.read`/:meth:`DTLS.read` (:issue:`2437`): identifying the
+    concrete tier and setting
     :attr:`~pcapkit.protocols.application.tls.TLS.alias` dynamically,
     mirroring :class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch
     over RARP/DRARP/InARP by operation code, rather than
@@ -764,7 +765,7 @@ class VersionDispatchTests(unittest.TestCase):
 
     def test_dtls_unknown_record_version_keeps_the_generic_alias(self) -> None:
         """A ``0xFExx`` legacy version naming no known tier claims none --
-        DTLS 1.3's own ``0xFEFC`` included, which :rfc:`9147#section-4.1`
+        DTLS 1.3's own ``0xFEFC`` included, which :rfc:`9147#section-4`
         never puts on the record layer."""
         from pcapkit.protocols.application.dtls import DTLS
 
@@ -778,7 +779,7 @@ class VersionDispatchTests(unittest.TestCase):
 
     def test_dtls_0xfeff_client_hello_negotiating_1_3_dispatches_dtls_1_3(self) -> None:
         """An initial ``ClientHello`` may carry DTLS 1.0's ``{254, 255}``
-        on the record layer (:rfc:`9147#section-4.1`)."""
+        on the record layer (:rfc:`9147#section-4`)."""
         from pcapkit.protocols.application.dtls import DTLS
 
         supported_versions = b'\x02' + (0xFEFC).to_bytes(2, 'big')
@@ -931,20 +932,25 @@ class SSLv2HeuristicTests(unittest.TestCase):
         self.assertTrue(_looks_like_sslv2(b'\x16'))  # no second octet to check
 
     def test_sslv2_shaped_payload_degrades_to_raw_when_ssl2_is_unavailable(self) -> None:
-        """SSLv2 support (:issue:`2457`) is not on this checkout.
-
-        Dispatch still identifies the shape and tries to import
-        :class:`~pcapkit.protocols.application.ssl2.SSL2`; the
-        :exc:`ImportError` falls through to the TLS-family dispatch, whose
-        own validation then rejects the payload -- degrading to
+        """With SSLv2 support (:issue:`2457`) unavailable, dispatch still
+        identifies the shape and tries to import it; the :exc:`ImportError`
+        falls through to the TLS-family dispatch, whose own validation then
+        rejects the payload -- degrading to
         :class:`~pcapkit.protocols.misc.raw.Raw` rather than crashing.
 
+        Both module names the SSLv2 dissector may live under are blocked, so
+        the import fails whichever one :meth:`TLS.read` imports.
+
         """
+        import sys
+        from unittest import mock
+
         from pcapkit.protocols.transport.tcp import TCP
 
         sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
         raw = _TCP_TO_443 + sslv2_shaped
-        with warnings.catch_warnings():
+        unavailable = dict.fromkeys(_SSLV2_MODULES)
+        with mock.patch.dict(sys.modules, unavailable), warnings.catch_warnings():
             warnings.simplefilter('ignore')
             proto = TCP(raw, len(raw))
         self.assertEqual(str(proto.protochain), 'TCP:Raw')
@@ -952,8 +958,9 @@ class SSLv2HeuristicTests(unittest.TestCase):
     def test_delegated_parse_adopts_both_alias_and_name(self) -> None:
         """:meth:`SSL._adopt_dispatched` carries the delegate's :attr:`name`
         over alongside its :attr:`alias`, as :meth:`TLS.read` sets both when
-        it parses the record itself. SSLv2 support (:issue:`2457`) is not on
-        this checkout, so a stand-in delegate is installed in its place.
+        it parses the record itself. A stand-in SSLv2 delegate
+        (:issue:`2457`) is installed under both module names it may live
+        under, so the test does not depend on the real one.
 
         """
         import sys
@@ -976,11 +983,14 @@ class SSLv2HeuristicTests(unittest.TestCase):
             def __init__(self, data: bytes, length: int, **kwargs: object) -> None:
                 self.data = data[:length]
 
-        module = types.ModuleType('pcapkit.protocols.application.ssl2')
-        module.SSL2 = StandInSSL2  # type: ignore[attr-defined]
+        stand_ins = {}
+        for name in _SSLV2_MODULES:
+            module = types.ModuleType(name)
+            module.SSL2 = module.SSLv2 = StandInSSL2  # type: ignore[attr-defined]
+            stand_ins[name] = module
 
         sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
-        with mock.patch.dict(sys.modules, {'pcapkit.protocols.application.ssl2': module}):
+        with mock.patch.dict(sys.modules, stand_ins):
             parsed = TLS(sslv2_shaped, len(sslv2_shaped))
         self.assertEqual(parsed.alias, 'SSLv2')
         self.assertEqual(parsed.name, 'Secure Sockets Layer version 2')
@@ -1022,7 +1032,7 @@ class ExportTests(unittest.TestCase):
                               getattr(pcapkit.protocols, name))
 
     def test_string_lookup_matches_a_parsed_record(self) -> None:
-        """``'SSL' in pkt`` agrees with ``SSL in pkt`` now that the name is registered."""
+        """``'SSL' in pkt`` agrees with ``SSL in pkt``, the name being registered."""
         from pcapkit.protocols.application.ssl import SSL
         from pcapkit.protocols.transport.tcp import TCP
 

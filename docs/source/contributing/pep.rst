@@ -50,12 +50,11 @@ the ones outstanding are,
 Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
-ICMPv6, and ``LINUX_SLL`` with ``LINUX_SLL2``. **Done** for the third such
-pair, TLS/SSL with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is
-the shared record-layer base, with
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.dtls.DTLS` as its two concrete
-implementations -- see the `DTLS`_ section below.
+ICMPv6, and ``LINUX_SLL`` with ``LINUX_SLL2``. **Done** for TLS/SSL with
+DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
+record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
+below.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
@@ -228,9 +227,10 @@ DTLS
 ~~~~
 
 **Done** for the record layer and handshake message framing:
-:class:`~pcapkit.protocols.application.tls.TLS` (TLS 1.2, :rfc:`5246`; TLS
-1.3, :rfc:`9846`) and :class:`~pcapkit.protocols.application.dtls.DTLS`
-(DTLS 1.2, :rfc:`6347`; DTLS 1.3, :rfc:`9147`) share
+:class:`~pcapkit.protocols.application.tls.TLS` (SSLv3, :rfc:`6101`; TLS
+1.0, :rfc:`2246`; TLS 1.1, :rfc:`4346`; TLS 1.2, :rfc:`5246`; TLS 1.3,
+:rfc:`9846`) and :class:`~pcapkit.protocols.application.dtls.DTLS` (DTLS
+1.0, :rfc:`4347`; DTLS 1.2, :rfc:`6347`; DTLS 1.3, :rfc:`9147`) share
 :class:`~pcapkit.protocols.application.ssl.SSL` as their record-layer base --
 content type, legacy version, length, and content-type dispatch -- with
 DTLS's own divergence (the epoch/sequence-number pair in its record header,
@@ -1098,7 +1098,7 @@ stub.
 
 **Done within wave 2 — TLS/SSL with DTLS.** See the `DTLS`_ section above for
 what landed (the shared :class:`~pcapkit.protocols.application.ssl.SSL` base,
-both concrete protocols, and handshake message framing) and what is left
+TLS, DTLS, and handshake message framing) and what is left
 (DTLS handshake-fragment reassembly, tracked as its own follow-up).
 
 **Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``

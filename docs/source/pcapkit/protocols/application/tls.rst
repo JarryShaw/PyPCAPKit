@@ -42,8 +42,8 @@ whatever the version.
    * - ``0x0303``
      - ``TLS 1.2``
      - ``Transport Layer Security``
-   * - ``0x0303``, or ``0x0301`` on an initial ``ClientHello``, whose
-       ``supported_versions`` extension lists ``0x0304``
+   * - ``0x0301`` or ``0x0303``, on a ``ClientHello`` or ``ServerHello``
+       whose ``supported_versions`` extension lists ``0x0304``
      - ``TLS 1.3``
      - ``Transport Layer Security``
    * - any other ``0x03xx``
@@ -54,6 +54,11 @@ TLS 1.3 never puts its own ``0x0304`` on the record layer
 (:rfc:`9846#section-5.1`), so it is told apart only by the
 ``supported_versions`` peek. A version the table does not name keeps the
 generic ``TLS`` alias rather than claiming a specific one.
+
+Each record is branded by its own legacy version, not by the connection's
+negotiated one. So in a TLS 1.3 connection, every record after the hellos
+carries ``0x0303`` and reads ``TLS 1.2``; and a TLS 1.2 ``ClientHello`` sent
+at record version ``0x0301`` reads ``TLS 1.0``.
 
 :class:`~pcapkit.protocols.application.tls.SSLv3` is for explicit
 construction only, mirroring :class:`~pcapkit.protocols.link.arp.InARP`: it

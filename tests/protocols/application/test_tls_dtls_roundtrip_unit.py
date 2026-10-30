@@ -2,12 +2,12 @@
 """TLS and DTLS records rebuild byte for byte.
 
 Hand-crafted wire octets for every content type and handshake-message shape
-this PR implements (:issue:`2437`): ``handshake`` carrying a ``ClientHello``,
+the TLS and DTLS dissectors implement (:issue:`2437`): ``handshake`` carrying a ``ClientHello``,
 a ``ServerHello``, a message-TYPE-level-only type, and several messages
 coalesced in one record; ``alert``; ``change_cipher_spec``;
 ``application_data``; and, for DTLS, both an unfragmented handshake message
 (which decodes exactly as TLS's does) and a message split across two
-fragments (which does not, since this PR does not reassemble one -- see
+fragments (which does not, since one is not reassembled -- see
 :class:`~pcapkit.protocols.application.dtls.DTLS`).
 
 Every case is checked two ways: parsing the wire octets and rebuilding them
@@ -83,6 +83,12 @@ TLS_RECORDS = {
     'application_data': _tls_record(23, b'hello'),
     # :rfc:`9853`, the newest ContentType assignment.
     'return_routability_check': _tls_record(27, b'\xde\xad\xbe\xef'),
+    # The other legacy record versions dispatch brands: SSLv3, TLS 1.0, TLS 1.1.
+    'handshake: ClientHello at record version 0x0300': _tls_record(
+        22, _handshake(1, _client_hello_body()), version=b'\x03\x00'),
+    'handshake: ClientHello at record version 0x0301': _tls_record(
+        22, _handshake(1, _client_hello_body()), version=b'\x03\x01'),
+    'alert at record version 0x0302': _tls_record(21, b'\x02\x0a', version=b'\x03\x02'),
 }
 
 
@@ -149,6 +155,10 @@ DTLS_RECORDS = {
     'alert': _dtls_record(21, b'\x01\x00'),
     'change_cipher_spec': _dtls_record(20, b'\x01'),
     'return_routability_check': _dtls_record(27, b'\xde\xad\xbe\xef'),
+    # DTLS 1.0's legacy record version.
+    'handshake: unfragmented ClientHello at record version 0xFEFF': _dtls_record(
+        22, _dtls_handshake(1, _CH_BODY, message_seq=0, fragment_offset=0,
+                            fragment_length=len(_CH_BODY)), version=b'\xfe\xff'),
 }
 
 
@@ -227,11 +237,9 @@ class TestTLSRoundTrip(unittest.TestCase):
     def test_alert_record_with_excess_octets_keeps_its_octets(self) -> None:
         """A 3-octet TLS ``alert`` fragment is not a malformed cleartext alert.
 
-        It used to raise, on the theory that any alert fragment must be
-        exactly 2 octets, cleartext or not -- but an encrypted alert is
-        never exactly 2 octets either, so a non-2-octet fragment is kept
-        opaque now rather than raising, the same discipline applied to the
-        encrypted close_notify case below.
+        An encrypted alert is never exactly 2 octets, so a non-2-octet
+        fragment is kept opaque rather than raising, the same discipline
+        applied to the encrypted close_notify case below.
 
         """
         from pcapkit.protocols.application.tls import TLS
@@ -271,7 +279,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(schema).hex(), wire.hex())
 
     def test_fragment_is_flagged_and_body_kept_undecoded(self) -> None:
-        """The known limitation this PR documents: no reassembly yet."""
+        """The documented limitation: a fragmented message is not reassembled."""
         from pcapkit.protocols.application.dtls import DTLS
 
         wire = DTLS_RECORDS['handshake: fragment 1 of 2']

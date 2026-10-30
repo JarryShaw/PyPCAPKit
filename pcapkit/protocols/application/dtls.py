@@ -28,9 +28,7 @@ Known Limitation
 DTLS fragments a handshake message when it does not fit in one datagram
 (:rfc:`6347#section-4.2.3`); reassembling that would need
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` keyed on the
-UDP 5-tuple plus epoch, which is substantial enough that it did not fit
-cleanly alongside this dissector in the same PR (:issue:`2437`; see the
-follow-up issue it links for exactly what is missing). A fragment's
+UDP 5-tuple plus epoch (:issue:`2440`). A fragment's
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
 says whether this is the case; such a message's
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body` is kept
@@ -41,29 +39,19 @@ exactly as :class:`~pcapkit.protocols.application.tls.TLS` would, which is
 the common case: a ``ClientHello`` or ``ServerHello`` that fits one datagram
 never fragments.
 
-**DTLS 1.3's unified record header is not decoded** (:issue:`2467`, which
-depends on this PR landing first). DTLS 1.3 records before the handshake
-completes still use the legacy ``DTLSPlaintext`` header this module reads --
-the same shape DTLS 1.2 uses, with ``legacy_record_version`` frozen at DTLS
-1.2's value (:rfc:`9147#section-4.1`) -- so a DTLS 1.3 record identified by
-:meth:`read` decodes exactly that traffic. The *unified header*
-:rfc:`9147#section-4` introduces for records once a connection has a
-negotiated epoch has no content-type byte at all, so
+**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). DTLS 1.3
+records before the handshake completes still use the legacy ``DTLSPlaintext``
+header this module reads -- the same shape DTLS 1.2 uses, with
+``legacy_record_version`` frozen at DTLS 1.2's value (:rfc:`9147#section-4`) --
+so a DTLS 1.3 record identified by :meth:`read` decodes exactly that traffic.
+The *unified header* :rfc:`9147#section-4` introduces for records once a
+connection has a negotiated epoch has no content-type byte at all, so
 :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
 rejects it outright -- its first octet never falls inside the assigned
 content-type range this module checks -- and it degrades to
-:class:`~pcapkit.protocols.misc.raw.Raw`, which is the honest answer until
-that follow-up lands.
+:class:`~pcapkit.protocols.misc.raw.Raw`.
 
 .. versionadded:: 1.6.0
-
-.. versionchanged:: 1.6.0
-
-   :class:`DTLS` identifies DTLS 1.0, DTLS 1.2, or DTLS 1.3's legacy-format
-   records and reports the identified tier through :attr:`~DTLS.alias` --
-   :data:`self <DTLS>` throughout, never a distinct per-version instance --
-   the same shape :class:`~pcapkit.protocols.link.arp.ARP` already uses for
-   its own family (:issue:`2437`).
 
 """
 from typing import TYPE_CHECKING, cast
@@ -88,10 +76,10 @@ __all__ = ['DTLS']
 #: Legacy record version DTLS 1.0 carries (:rfc:`4347#section-4.1`).
 _DTLSV1_0_VERSION = 0xFEFF
 #: Legacy record version DTLS 1.2 carries, and the value DTLS 1.3 freezes its
-#: own legacy-format records at (:rfc:`9147#section-4.1`).
+#: own legacy-format records at (:rfc:`9147#section-4`).
 _DTLSV1_2_VERSION = 0xFEFD
 #: Legacy record versions a DTLS 1.3 record may carry: DTLS 1.2's always, and
-#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4.1`).
+#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`).
 _DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
 
 
@@ -304,7 +292,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         :meth:`ARP.read <pcapkit.protocols.link.arp.ARP.read>`'s own
         ``self._acnm = ...`` dispatch by operation code. DTLS 1.3's
         legacy-format records freeze theirs at DTLS 1.2's value -- or DTLS
-        1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4.1`) -- and
+        1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`) -- and
         are told apart by peeking the ``supported_versions`` extension
         (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`).
         Otherwise DTLS 1.0 (``0xFEFF``) and DTLS 1.2 (``0xFEFD``) are named
@@ -345,12 +333,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=True)
 
-        # NOTE: DTLS 1.3 is checked first, and at DTLS 1.0's value as well as
-        # DTLS 1.2's: an initial ClientHello may carry {254, 255} "for
-        # compatibility purposes" (RFC 9147, section 4.1). Any other legacy
-        # version -- DTLS 1.3's own 0xFEFC included, which never appears on
-        # the record layer -- names no known tier and keeps the generic
-        # ``DTLS`` alias rather than claiming a version it does not carry.
+        # NOTE: DTLS 1.3 is checked first, at 0xFEFF too: an initial ClientHello may carry
+        # {254, 255} (RFC 9147, section 4). Unknown versions keep the generic alias.
         if schema.version in _DTLS13_LEGACY_VERSIONS and self._tls_negotiates(schema, DTLS13_VERSION, dtls=True):
             self._alias = 'DTLS 1.3'
         elif schema.version == _DTLSV1_0_VERSION:

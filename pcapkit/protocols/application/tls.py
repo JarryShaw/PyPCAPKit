@@ -67,16 +67,6 @@ for why rejecting such a fragment is the honest answer at this layer.
 
 .. versionadded:: 1.6.0
 
-.. versionchanged:: 1.6.0
-
-   :class:`TLS` identifies SSLv3, TLS 1.0, TLS 1.1, TLS 1.2, or TLS 1.3 (and,
-   where available, SSLv2) and reports the identified tier through
-   :attr:`~TLS.alias` -- :class:`self <TLS>` throughout, never a distinct
-   per-version instance -- the same shape
-   :class:`~pcapkit.protocols.link.arp.ARP` already uses for its own family
-   (:issue:`2437`). :class:`SSLv3` remains available for explicit, manual
-   construction only; :meth:`TLS.read` never constructs one itself.
-
 """
 from typing import TYPE_CHECKING, cast
 
@@ -195,8 +185,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
     Note:
         The subpackage does not track the dispatch tier: TLS is dispatched
         from :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
-        at port 443, the ``https`` service name IANA assigns there, now that
-        this module parses the record layer it carries. See
+        at port 443, the ``https`` service name IANA assigns there. See
         :func:`pcapkit.foundation.registry.protocols.register_tcp`.
 
     """
@@ -295,9 +284,8 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             try:
                 from pcapkit.protocols.application.ssl2 import SSL2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             except ImportError:
-                pass  # SSLv2 support (#2457) is not present on this
-                      # checkout -- fall through to the TLS/SSLv3+ parse
-                      # below, exactly as if this identification did not exist.
+                pass  # SSLv2 support (#2457) is unavailable -- fall through
+                      # to the TLS/SSLv3+ parse below.
             else:
                 obj = SSL2(self._data, length, **kwargs)
                 return self._adopt_dispatched(obj)
@@ -439,13 +427,8 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=False)
 
-        # NOTE: TLS 1.3 is checked first, and at 0x0301 as well as 0x0303:
-        # an initial ClientHello may carry 0x0301 "for compatibility
-        # purposes" (RFC 9846, section 5.1), so a 0x0301 record negotiating
-        # TLS 1.3 is not TLS 1.0. Any other legacy version names no known
-        # tier -- TLS 1.3 never puts 0x0304 on the record layer -- so it keeps
-        # the generic ``TLS`` alias rather than claiming a version it does not
-        # carry.
+        # NOTE: TLS 1.3 is checked first, at 0x0301 too: an initial ClientHello may carry
+        # 0x0301 (RFC 9846, section 5.1). Unknown versions keep the generic alias.
         self._name = 'Transport Layer Security'
         if schema.version in _TLS13_LEGACY_VERSIONS and self._tls_negotiates(schema, TLS13_VERSION, dtls=False):
             self._alias = 'TLS 1.3'

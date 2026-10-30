@@ -333,13 +333,12 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
     Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
-    a DTLS record, and this registry still maps it straight to
+    a DTLS record, and this registry maps it straight to
     :class:`~pcapkit.protocols.application.ngap.NGAP` rather than through
     :class:`~pcapkit.protocols.application.dtls.DTLS`, so the bytes are not
     aligned PER and the parse always degrades to
-    :class:`~pcapkit.protocols.misc.raw.Raw` -- :mod:`pcapkit` implements DTLS
-    now, but rewiring this dispatch through it, and deciding what an
-    undecrypted DTLS-wrapped NGAP PDU should report, is its own follow-up. It
+    :class:`~pcapkit.protocols.misc.raw.Raw`: what an undecrypted
+    DTLS-wrapped NGAP PDU should report is not yet decided. It
     is registered so that the PPID is *named* in the protochain rather than
     reported as an unassigned number.
 

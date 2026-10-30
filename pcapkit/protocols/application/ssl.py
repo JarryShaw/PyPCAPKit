@@ -83,11 +83,10 @@ _DTLS_VERSION_MAJOR = 0xFE
 #: during the handshake -- it is not on the wire of the record itself. Reading
 #: ``length`` at the fixed offset for a type-25 record decodes the tail of the
 #: CID as the length field, fabricating a fragment that was never on the wire
-#: (confirmed: an 8-octet CID made an 8-octet fragment read back as
-#: ``length=17``). Parsing it correctly needs this dissector to track the
-#: negotiated CID length per connection, which the current stateless,
-#: per-packet schema read has nowhere to keep; until a follow-up adds that,
-#: type 25 is excluded here so it falls back to
+#: (an 8-octet CID makes an 8-octet fragment read back as ``length=17``).
+#: Parsing it correctly needs the negotiated CID length per connection, which
+#: the stateless, per-packet schema read has nowhere to keep, so type 25 is
+#: excluded here and falls back to
 #: :class:`~pcapkit.protocols.misc.raw.Raw` instead of being decoded wrong.
 _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.change_cipher_spec,
@@ -99,7 +98,7 @@ _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.return_routability_check,
 })
 
-#: The IANA ``supported_versions`` extension type (:rfc:`9846#section-4.2.1`).
+#: The IANA ``supported_versions`` extension type (:rfc:`9846#section-4.3.1`).
 #: TLS 1.3 and DTLS 1.3 negotiate the *real* version here rather than in the
 #: record header's own legacy version, which both freeze at their immediate
 #: predecessor's value for backward compatibility -- see :data:`TLS13_VERSION`
@@ -107,7 +106,7 @@ _WIRE_CONTENT_TYPES = frozenset({
 _EXT_SUPPORTED_VERSIONS = 43
 
 #: The wire value a ``supported_versions`` extension carries for TLS 1.3
-#: (:rfc:`9846#section-4.2.1`). Never the record layer's own
+#: (:rfc:`9846#section-4.3.1`). Never the record layer's own
 #: ``legacy_version``, which TLS 1.3 freezes at TLS 1.2's ``0x0303``.
 TLS13_VERSION = 0x0304
 #: Same, for DTLS 1.3 (:rfc:`9147#section-5.3`). The record layer stays
@@ -142,7 +141,7 @@ def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
         data = extension.data
         # A ``ClientHello`` lists several versions behind a 1-octet length
         # prefix; a ``ServerHello`` selects exactly one, with no length
-        # prefix of its own (:rfc:`9846#section-4.2.1`).
+        # prefix of its own (:rfc:`9846#section-4.3.1`).
         versions = data[1:] if isinstance(message, Data_ClientHello) else data
         return tuple(
             int.from_bytes(versions[i:i + 2], 'big') for i in range(0, len(versions) - 1, 2)
@@ -292,19 +291,10 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             answer, because the fragment this layer holds is not a record.
 
         """
-        # NOTE: ``schema.content_type`` is the registry member when this
-        # schema came from a genuine parse (``EnumField.post_process``
-        # resolves it there), but a plain :obj:`int` when it came from
-        # ``make()`` instead -- :meth:`Protocol._make_index` with
-        # ``pack=False`` returns the bare index despite its ``cast`` to the
-        # enum type, which is a typing fiction rather than a runtime one. So
-        # it is resolved through the registry explicitly here rather than
-        # read off the value directly, to cover both.
-        #
-        # NOTE: checked against ``_WIRE_CONTENT_TYPES`` rather than by asking
-        # whether the registry named the value: ``invalid(0)`` *is* named, and
-        # is still not a content type any record carries, so a name-based test
-        # accepted ``00 03 03 ...`` as a TLS record and decoded its fragment.
+        # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
+        # parse yields, so resolve it through the registry to cover both.
+        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: ``invalid(0)`` is
+        # named yet never a record's content type.
         content_type = Enum_ContentType.get(int(schema.content_type))
         if content_type not in _WIRE_CONTENT_TYPES:
             raise ProtocolError(
@@ -403,8 +393,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         fabricates content out of pseudorandom octets or fails and drops the
         whole record to :class:`~pcapkit.protocols.misc.raw.Raw`, losing the
         record header that *was* in the clear -- the bug this method exists to
-        avoid for all three types rather than just ``handshake``, where it was
-        first caught.
+        avoid for all three types rather than just ``handshake``.
 
         The two protocols answer this differently because DTLS gives a direct
         answer and TLS does not:
@@ -573,8 +562,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             not reassembled in this version (:issue:`2440`), so its body is
             kept as the single fragment's raw octets regardless of
             ``msg_type``. Every other ``msg_type`` is message-TYPE-level
-            framing only: its body is kept undecoded, as :issue:`2437` scopes
-            this PR to.
+            framing only: its body is kept undecoded (:issue:`2437`).
 
         """
         from pcapkit.protocols.data.application.dtls import \
@@ -590,10 +578,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             pos += 4
 
             is_fragmented = False
-            # NOTE: 0 rather than ``None`` -- unused by the ``else`` branch
-            # below when ``dtls`` is false, so there is no "not yet known"
-            # state for a type to carry, only a value :class:`DTLSHandshake`
-            # declares as plain ``int``.
+            # NOTE: 0 rather than ``None``: unused when ``dtls`` is false, and
+            # :class:`DTLSHandshake` declares these as plain ``int``.
             message_seq = fragment_offset = fragment_length = 0
             if dtls:
                 frag_header = _take(fragment, pos, 8, what='DTLS fragment header', alias=self.alias)
@@ -656,14 +642,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             else:
                 body_bytes = bytes(body)
 
-            # NOTE: the message's own ``length`` is trusted only when it
-            # cannot be recovered any other way -- a fragmented DTLS message,
-            # where this fragment's body is a strict subset of the total.
-            # Otherwise it is recomputed from ``body_bytes``, so a message
-            # built by hand need not get a redundant length right, and a
-            # parse-then-rebuild stays exact either way (a read message's
-            # ``length`` already equals its body's, there or in DTLS's
-            # unfragmented case).
+            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
+            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
             is_fragmented = dtls and message.is_fragmented
             length = message.length if is_fragmented else len(body_bytes)
 
@@ -747,12 +727,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         cipher_suites_len = int.from_bytes(
             _take(body, pos, 2, what='client_hello.cipher_suites length', alias=alias), 'big')
         pos += 2
-        # NOTE: a ``CipherSuite`` is 2 octets (:rfc:`9846#section-4.2.2`), so an
-        # odd length never has an RFC-compliant decoding -- and without this
-        # check, the last, incomplete pair would quietly decode as one lone
-        # octet rather than fail, and :meth:`_make_tls_client_hello` would then
-        # re-pad it to 2 octets on rebuild, losing byte-exactness silently
-        # rather than refusing to parse.
+        # NOTE: a ``CipherSuite`` is 2 octets (:rfc:`9846#section-4.2.2`): an odd length
+        # would decode a lone octet and re-pad it on rebuild, so it is refused.
         if cipher_suites_len % 2:
             raise ProtocolError(
                 f'{alias}: invalid format: client_hello.cipher_suites length '
@@ -915,7 +891,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         An extension's own body is not decoded (:issue:`2437`): it is kept
         as :attr:`~pcapkit.protocols.data.application.tls.Extension.data`,
-        undecoded, which is what this PR scopes extension support to.
+        undecoded.
 
         Args:
             data: The extension list, i.e. one or more concatenated
