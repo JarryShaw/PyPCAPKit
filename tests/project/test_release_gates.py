@@ -1105,7 +1105,8 @@ def release_context(version_check: 'str' = 'success',
                     release_app_bot_id: 'str' = RELEASE_APP_BOT_ID,
                     released_elsewhere: 'str' = 'false',
                     vendor_update: 'str' = 'success',
-                    vendor_updated: 'object' = 'true') -> 'dict[str, object]':
+                    vendor_updated: 'object' = 'true',
+                    dev_release: 'str' = 'false') -> 'dict[str, object]':
     """The ``needs``/``github``/status context one scenario row stands for.
 
     Every default is a value that, on its own, lets a gate run, so a row
@@ -1148,12 +1149,19 @@ def release_context(version_check: 'str' = 'success',
     ``'false'`` for a Vendor Update that skipped ``vendor-update``, or
     :data:`NULL` for one it could not read or a ``vendor_update`` that skipped.
 
+    Owner ruling, 2026-10-30: ``dev_release`` is ``PCAPKIT_DEV_RELEASE``,
+    whether ``__version__`` carries a PEP 440 dev-release suffix -- ``'false'``,
+    the value that lets every gate run, unless a row says otherwise, and
+    ``null`` when named in ``unknown``, the same treatment as
+    ``released_elsewhere``.
+
     """
     outputs = {}  # type: dict[str, object]
     if outputs_present:
         outputs = {name: ('true' if name in complete else 'false')
                    for name in GATE_EVIDENCE.values()}
         outputs['PCAPKIT_RELEASED_ELSEWHERE'] = released_elsewhere
+        outputs['PCAPKIT_DEV_RELEASE'] = dev_release
         outputs.update({name: NULL for name in unknown})
         outputs['PCAPKIT_VERSION'] = '1.5.0'
         outputs['PCAPKIT_PRERELEASE'] = 'false'
@@ -1226,6 +1234,18 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
       decides; and
       ``PCAPKIT_RELEASED_ELSEWHERE`` at ``null``, which runs -- the one row that
       tells ``!= 'true'`` from ``== 'false'`` for it.
+    * **Owner ruling, 2026-10-30: ``PCAPKIT_DEV_RELEASE=true`` on both ``main``
+      and a ``v*`` push**, with this job's own evidence otherwise favourable so
+      that the dev-release clause alone decides -- unlike the released-elsewhere
+      and evidence clauses above, this one carries no ``startsWith(github.ref_name,
+      'v')`` exemption, so it has to block a direct ``v*`` tag push too; and
+      ``PCAPKIT_DEV_RELEASE`` at ``null``, which runs -- the same ``!= 'true'``
+      spelling convention as ``PCAPKIT_RELEASED_ELSEWHERE``, but not the same
+      stakes: this row's job is one of the four publishers, so an unset output
+      here does not merely cost a wasted run the way an unset evidence output
+      on the release test gate would -- it lets this publisher through
+      unguarded, risking a dev version actually being tagged or published for
+      real.
 
     Held false in every row but the two cancellation rows: ``cancelled()``.
     Holding it *true* elsewhere would make each row pass for any mutation that
@@ -1290,6 +1310,15 @@ def gate_rows(job: 'str') -> 'list[tuple[str, dict[str, object], bool]]':
                      ref_name.startswith('v')))
     rows.append(('ref_name=main, PCAPKIT_RELEASED_ELSEWHERE=null',
                  release_context(unknown=('PCAPKIT_RELEASED_ELSEWHERE',)), True))
+
+    # Owner ruling, 2026-10-30: a dev-release version must never publish,
+    # unconditionally -- checked on both ref shapes, since this clause carries
+    # no `startsWith(github.ref_name, 'v')` exemption.
+    for ref_name in ('main', 'v1.5.0'):
+        rows.append((f'ref_name={ref_name}, PCAPKIT_DEV_RELEASE=true',
+                     release_context(ref_name=ref_name, dev_release='true'), False))
+    rows.append(('ref_name=main, PCAPKIT_DEV_RELEASE=null',
+                 release_context(unknown=('PCAPKIT_DEV_RELEASE',)), True))
     return rows
 
 
@@ -2457,9 +2486,129 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
 
         """
         block = self.jobs['version_check']
-        for output in ('PCAPKIT_CONDA_TAG_EXISTS', 'PCAPKIT_PYPI_COMPLETE', 'PCAPKIT_CONDA_COMPLETE'):
+        for output in ('PCAPKIT_CONDA_TAG_EXISTS', 'PCAPKIT_PYPI_COMPLETE', 'PCAPKIT_CONDA_COMPLETE',
+                      'PCAPKIT_DEV_RELEASE'):
             with self.subTest(output=output):
                 self.assertIn(f'{output}:', block)
+
+    def test_dev_release_evidence_reads_is_devrelease_not_is_prerelease(self) -> None:
+        """Owner ruling, 2026-10-30: ``PCAPKIT_DEV_RELEASE`` has to come from
+        ``Version(...).is_devrelease``, never ``.is_prerelease``.
+
+        The two differ exactly on a deliberately-tagged alpha/beta/rc, which
+        this project has shipped for real (e.g. ``1.5.0b14``): ``is_prerelease``
+        is ``True`` for it too, so gating on that would silently block a
+        legitimate release. ``is_devrelease`` is ``True`` only for a PEP 440
+        dev release (``X.Y.Z.devN``).
+
+        """
+        block = self.jobs['version_check']
+        self.assertIn('PCAPKIT_DEV_RELEASE=$(python -c ', block)
+        self.assertIn('Version(pcapkit.__version__).is_devrelease', block)
+        # The literal assignment line must not itself read .is_prerelease --
+        # PCAPKIT_PRERELEASE (a separate, pre-existing output) legitimately
+        # does, a few lines away, so this narrows to the one line that matters.
+        dev_release_line = next(
+            line for line in block.splitlines() if 'PCAPKIT_DEV_RELEASE=$(python -c' in line)
+        self.assertNotIn('is_prerelease', dev_release_line)
+
+    def test_all_four_publishers_gate_on_dev_release(self) -> None:
+        """Owner ruling, 2026-10-30: a scheduled Vendor Update is enough to
+        reach this workflow and carry a version under active development --
+        ``__version__`` carrying a PEP 440 dev-release suffix -- all the way to
+        ``github-release``'s one reviewer approval (see the module docstring).
+        That approval exists, but it is one person approving a diff for
+        reasons usually unrelated to the version string, so a stray ``.devN``
+        is easy to miss there, and a re-run of a job that already skipped
+        ``github`` once does not ask for a fresh approval at all -- so a dev
+        release must never be tagged or published regardless. Checked as a
+        top-level ``&&`` conjunct, for the same reason
+        ``test_version_check_must_strictly_succeed`` is: a disjunct or a
+        negation could keep the same tokens while nullifying the gate.
+
+        Unlike :data:`GATE_EVIDENCE`, this clause is the same for all four
+        publishing jobs, ``github`` included -- there is no reason a human
+        hand-pushing a ``v*`` tag naming a dev-release version should be let
+        through either, so it carries none of the other clauses'
+        ``startsWith(github.ref_name, 'v')`` exemption.
+
+        """
+        for name in ('github', 'tag', 'pypi', 'conda'):
+            with self.subTest(job=name):
+                compact = re.sub(r'\s+', '', declared_if(self.jobs[name]))
+                self.assertIn(
+                    "&&needs.version_check.outputs.PCAPKIT_DEV_RELEASE!='true'&&", compact,
+                    f'`{name}` does not gate on PCAPKIT_DEV_RELEASE as a top-level '
+                    f'`&&` conjunct, so a dev-release version (__version__ carrying a '
+                    f'.devN suffix) could be tagged or published on the strength of a '
+                    f'single reviewer approval that was not actually about the version',
+                )
+                self.assertEqual(
+                    compact.count('PCAPKIT_DEV_RELEASE'), 1,
+                    f'`{name}` refers to PCAPKIT_DEV_RELEASE more than once; the gate '
+                    f"is one comparison, != 'true', and a second reference can only "
+                    f'weaken it',
+                )
+
+    def test_dev_release_output_wiring_matches_character_for_character(self) -> None:
+        """A typo'd output name leaves ``PCAPKIT_DEV_RELEASE`` unset forever,
+        which every job's ``!= 'true'`` comparison then reads as "not a dev
+        release" -- a gate that looks present in the YAML but never actually
+        fires. The same silent-open shape
+        :mod:`tests.project.test_release_tags_the_run_sha_1634`'s
+        ``TestTheOwnerStep.test_both_outputs_reach_the_jobs`` guards
+        ``PCAPKIT_RELEASED_ELSEWHERE`` against; ``PCAPKIT_DEV_RELEASE`` comes
+        from ``version_check``'s ``get_version`` step, not its ``owner`` step,
+        so it is checked here instead of there.
+
+        :meth:`test_all_four_publishers_gate_on_dev_release` already compares
+        the compacted (whitespace-stripped) ``if:`` text; this checks the
+        producer side too -- ``version_check``'s own ``outputs:`` block has to
+        name the step that actually sets it -- and pins the consumer text
+        verbatim, uncompacted.
+
+        """
+        self.assertIn(
+            'PCAPKIT_DEV_RELEASE: ${{ steps.get_version.outputs.PCAPKIT_DEV_RELEASE }}',
+            self.jobs['version_check'],
+            "`version_check`'s `outputs:` block does not wire PCAPKIT_DEV_RELEASE "
+            'to the `get_version` step that computes it, so every job reading '
+            '`needs.version_check.outputs.PCAPKIT_DEV_RELEASE` sees an empty string',
+        )
+        for name in ('github', 'tag', 'pypi', 'conda'):
+            with self.subTest(job=name):
+                self.assertIn(
+                    "needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true'",
+                    self.jobs[name],
+                    f'`{name}` does not reference PCAPKIT_DEV_RELEASE exactly as '
+                    f'`version_check` names it',
+                )
+        # `release_status` reads the same output through its own `env:`, to
+        # report a dev-release skip as a deliberate no-op rather than #888.
+        self.assertIn(
+            'PCAPKIT_DEV_RELEASE: ${{ needs.version_check.outputs.PCAPKIT_DEV_RELEASE }}',
+            self.jobs['release_status'],
+        )
+
+    def test_dev_release_gate_names_is_devrelease_not_is_prerelease(self) -> None:
+        """The other way this gate silently fails open: swapping in
+        ``PCAPKIT_PRERELEASE`` (``is_prerelease``) by mistake. That output is
+        ``true`` for a deliberately-tagged alpha/beta/rc this project has
+        shipped for real (e.g. ``1.5.0b14``) as well as for a dev release, so
+        gating on it would block a legitimate release -- the owner ruling
+        :meth:`test_dev_release_evidence_reads_is_devrelease_not_is_prerelease`
+        already pins at the source. This checks the *consumer* side: every job
+        that gates on the dev-release output names ``PCAPKIT_DEV_RELEASE``, not
+        ``PCAPKIT_PRERELEASE``, which reads identically to a careless search
+        and replace, so it is worth asserting directly rather than trusting
+        the variable name in the ``if:`` alone.
+
+        """
+        for name in ('github', 'tag', 'pypi', 'conda'):
+            with self.subTest(job=name):
+                condition = declared_if(self.jobs[name])
+                self.assertIn('PCAPKIT_DEV_RELEASE', condition)
+                self.assertNotIn('PCAPKIT_PRERELEASE', condition)
 
     def test_pypi_evidence_reads_the_per_version_endpoint(self) -> None:
         """Not ``releases[<version>]``: that field was empty on every live
@@ -2540,6 +2689,13 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
          release_context(released_elsewhere='true'), False),
         ('a v* tag push of a version tagged at another commit',
          release_context(ref_name='v1.5.0', released_elsewhere='true'), True),
+        # Owner ruling, 2026-10-30: unconditional, so it blocks a v* push too.
+        ('a fresh version carrying a dev-release suffix',
+         release_context(dev_release='true'), False),
+        ('a v* tag push of a version carrying a dev-release suffix',
+         release_context(ref_name='v1.5.0', dev_release='true'), False),
+        ('PCAPKIT_DEV_RELEASE unset',
+         release_context(unknown=('PCAPKIT_DEV_RELEASE',)), True),
     ]
 
     #: ``(row name, context, whether version_check must run)``. Its ``if:``
@@ -2624,6 +2780,15 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
          release_context(ref_name='v1.5.0', released_elsewhere='true'), True),
         ('whether the tag names another commit unknown',
          release_context(unknown=('PCAPKIT_RELEASED_ELSEWHERE',)), True),
+        # Owner ruling, 2026-10-30: a dev version can never be published, by
+        # any trigger, so the ~20-minute gate is wasted on it too -- the same
+        # reasoning #1052 added this job's `if:` for in the first place.
+        ('main is on a dev version, nothing published yet',
+         release_context(dev_release='true'), False),
+        ('a v* tag push of a dev version',
+         release_context(ref_name='v1.6.0.dev2', dev_release='true'), False),
+        ('whether main is on a dev version unknown',
+         release_context(unknown=('PCAPKIT_DEV_RELEASE',)), True),
     ]
 
     def _assert_rows(self, job: 'str',
@@ -2648,7 +2813,7 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
         runs, which is #888 rather than a fix for it.
 
         """
-        for job, expected in (('tag', 25), ('pypi', 25), ('conda', 29)):
+        for job, expected in (('tag', 28), ('pypi', 28), ('conda', 32)):
             with self.subTest(job=job):
                 rows = gate_rows(job)
                 self.assertEqual(
@@ -2903,6 +3068,16 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
          ('evaluator',)),
         ("the released-elsewhere check becomes == 'false', so an unset output skips",
          "PCAPKIT_RELEASED_ELSEWHERE != 'true'", "PCAPKIT_RELEASED_ELSEWHERE == 'false'",
+         ('evaluator',)),
+        # Owner ruling, 2026-10-30. The evaluator alone: text_gate_violations
+        # mirrors only the #888 evidence-and-predecessor assertions this
+        # module already made before this clause existed, and extending it
+        # is not required for the clause to be checked -- gate_rows carries
+        # the rows that catch this, and test_all_four_publishers_gate_on_dev_release
+        # (TestEvidenceBasedGating) is the text-layer assertion for it, run
+        # directly against the real file rather than through this mirror.
+        ('the dev-release conjunct is dropped entirely',
+         "needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' && ", '',
          ('evaluator',)),
     ]
 
@@ -3330,6 +3505,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             'PCAPKIT_RUN_SHA': RUN_COMMIT,
             'PCAPKIT_RELEASED_AT': RUN_COMMIT,
             'PCAPKIT_RELEASED_ELSEWHERE': 'false',
+            'PCAPKIT_DEV_RELEASE': 'false',
         }
         env.update(overrides)
         return subprocess.run(  # type: ignore[return-value]
@@ -3533,6 +3709,56 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
                 'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
                 'PCAPKIT_TAG_EXISTS': 'true',
                 'PCAPKIT_RELEASED_ELSEWHERE': '', 'PCAPKIT_RELEASED_AT': '',
+            },
+            '::error title=Stranded partial release (#888)',
+            1,
+        ),
+        (
+            # Owner ruling, 2026-10-30: the version is a dev version, so the
+            # PCAPKIT_DEV_RELEASE gate skipped all four publishers on purpose.
+            # Their evidence stays false -- nothing was ever tagged or
+            # published -- which must not read as the #888 stranded shape.
+            'dev_release_skips_every_publisher',
+            {
+                'PCAPKIT_DEV_RELEASE': 'true',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::notice title=Nothing to release::this run\'s version',
+            0,
+        ),
+        (
+            # The critical regression check: the identical skip pattern with
+            # PCAPKIT_DEV_RELEASE false must still be the loud #888 shape.
+            'the_same_skip_pattern_with_dev_release_false_stays_888',
+            {
+                'PCAPKIT_DEV_RELEASE': 'false',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::error title=Stranded partial release (#888)',
+            1,
+        ),
+        (
+            # A dev flag with a publisher that ran is not the deliberate
+            # no-op: only every publisher skipping is.
+            'dev_release_with_a_publisher_that_failed',
+            {
+                'PCAPKIT_DEV_RELEASE': 'true',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'failure', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::warning title=Release did not complete',
+            0,
+        ),
+        (
+            # Run 41098750345, 1.5.1's partial publish, with the dev flag
+            # empty: only 'true' opens the quiet branch.
+            'the_1_5_1_shape_with_the_dev_flag_empty_stays_888',
+            {
+                'PCAPKIT_DEV_RELEASE': '', 'PCAPKIT_VERSION': '1.5.1', 'PCAPKIT_TAG_EXISTS': 'true',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
             },
             '::error title=Stranded partial release (#888)',
             1,

@@ -123,6 +123,28 @@ concurrency:
 # gate and every publisher, and ``release_status`` reports, green, whether that
 # release is complete. A ``v*`` push still meets the #1634 check. The
 # ``vendor_update`` job is the issue's other half.
+#
+# Owner ruling, 2026-10-30: ``__version__`` carries a PEP 440 dev-release
+# suffix (``X.Y.Z.devN``) while a version is still under active development, a
+# work-in-progress signal with no gate of its own until now -- and the
+# ``workflow_run`` trigger above means a scheduled Vendor Update can reach this
+# workflow and carry that dev version all the way to ``github``'s one reviewer
+# approval (#887, below). That approval is not nothing, but it is one person
+# approving a diff for reasons that are usually unrelated to the version
+# string, so a stray ``.devN`` is easy to miss there; and a re-run of a job
+# that already skipped ``github`` once does not ask for a fresh approval at
+# all. ``PCAPKIT_DEV_RELEASE`` closes that gap in code rather than leaving it
+# to review. ``PCAPKIT_DEV_RELEASE`` (``version_check``'s ``is_devrelease``)
+# is read by ``github``, ``tag``, ``pypi`` and ``conda`` alike, deliberately not
+# ``PCAPKIT_PRERELEASE`` (``is_prerelease``): the latter is also ``true`` for a
+# deliberately-tagged alpha/beta/rc this project has shipped for real (e.g.
+# ``1.5.0b14``), and gating on it would silently block one.
+# tests/project/test_release_gates.py's ``test_all_four_publishers_gate_on_dev_release``
+# checks this text, and ``gate_rows``/``GITHUB_ROWS`` evaluate it. ``release_status``
+# also reads it: with the gate skipping all four publishers, their evidence
+# outputs stay ``false``, which would otherwise read as #888's stranded partial
+# release. util/release_status.py's ``dev_release_skipped()`` reports that
+# combination as a quiet, deliberate no-op instead.
 
 jobs:
   # #1748: a Vendor Update raised by a Unit Tests verdict for another commit
@@ -226,6 +248,17 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel packaging
 
+      # Owner ruling, 2026-10-30: during active development on a not-yet-released
+      # version, ``__version__`` carries a PEP 440 dev-release suffix
+      # (``X.Y.Z.devN``) as a work-in-progress signal. ``PCAPKIT_DEV_RELEASE`` is
+      # ``is_devrelease``, not ``is_prerelease`` -- the latter is also ``true``
+      # for a deliberately-tagged alpha/beta/rc (e.g. ``1.5.0b14``, a real
+      # release), and gating on it would silently block one. ``github``, ``tag``,
+      # ``pypi`` and ``conda`` all read this below so that a scheduled Vendor
+      # Update bumping a dev version never tags or publishes it on the strength
+      # of ``github-release``'s one reviewer alone, who can miss a stray
+      # ``.devN`` in an otherwise-unrelated approval; see
+      # docs/source/contributing/releasing.rst.
       - name: Get Version
         id: get_version
         run: |
@@ -236,6 +269,7 @@ jobs:
           {
             echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')"
             echo "PCAPKIT_PRERELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_prerelease).lower())')"
+            echo "PCAPKIT_DEV_RELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_devrelease).lower())')"
             echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')"
           } >> "$GITHUB_OUTPUT"
 
@@ -310,6 +344,7 @@ jobs:
     outputs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
+      PCAPKIT_DEV_RELEASE: ${{ steps.get_version.outputs.PCAPKIT_DEV_RELEASE }}
       PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
       PCAPKIT_CONDA_TAG_EXISTS: ${{ steps.check_conda_tag.outputs.exists }}
       PCAPKIT_PYPI_COMPLETE: ${{ steps.check_pypi.outputs.PCAPKIT_PYPI_COMPLETE }}
@@ -324,12 +359,18 @@ jobs:
 
   # No ``environment:``: no outward effect, and a job calling a reusable
   # workflow may not declare one. Runs exactly when a publisher could (#1052,
-  # #1748); see the note above ``jobs:``.
+  # #1748, and, since the dev-release gate below, owner ruling 2026-10-30);
+  # see the note above ``jobs:``. ``PCAPKIT_DEV_RELEASE`` carries none of the
+  # other clauses' ``startsWith(github.ref_name, 'v')`` exemption, matching
+  # ``github``, ``tag``, ``pypi`` and ``conda`` below: a dev version can never
+  # be published regardless of how this run started, so spending the ~20
+  # minutes here on one is the same waste #1052 added this job to avoid.
   unit-tests:
     name: Release test gate
     needs: [ version_check ]
     if: >-
       ${{ needs.version_check.result == 'success' &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
       (startsWith(github.ref_name, 'v') ||
       needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') ||
@@ -360,6 +401,7 @@ jobs:
     needs: [ unit-tests, version_check ]
     if: >-
       ${{ (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false') }}
     steps:
       - name: Checkout code
@@ -494,6 +536,7 @@ jobs:
     if: >-
       ${{ !cancelled() && needs.version_check.result == 'success' &&
       needs.unit-tests.result == 'success' &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS == 'false') }}
@@ -580,6 +623,7 @@ jobs:
     if: >-
       ${{ !cancelled() && needs.version_check.result == 'success' &&
       needs.unit-tests.result == 'success' &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE == 'false') }}
@@ -738,6 +782,7 @@ jobs:
     if: >-
       ${{ !cancelled() && needs.version_check.result == 'success' &&
       needs.unit-tests.result == 'success' &&
+      needs.version_check.outputs.PCAPKIT_DEV_RELEASE != 'true' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
       (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
@@ -994,6 +1039,7 @@ jobs:
           PCAPKIT_CONDA_COMPLETE: ${{ needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE }}
           PCAPKIT_RELEASED_AT: ${{ needs.version_check.outputs.PCAPKIT_RELEASED_AT }}
           PCAPKIT_RELEASED_ELSEWHERE: ${{ needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE }}
+          PCAPKIT_DEV_RELEASE: ${{ needs.version_check.outputs.PCAPKIT_DEV_RELEASE }}
           PCAPKIT_PYPI_KTLO_310: ${{ needs.pypi.outputs.ktlo_310 }}
           PCAPKIT_PYPI_KTLO_PYPY310: ${{ needs.pypi.outputs.ktlo_pypy310 }}
         run: python3 util/release_status.py
