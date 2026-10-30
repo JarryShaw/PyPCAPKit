@@ -20,6 +20,8 @@ from pcapkit.const.esp import *
 from pcapkit.const.ftp import *
 from pcapkit.const.hip import *
 from pcapkit.const.http import *
+from pcapkit.const.icmp import *
+from pcapkit.const.icmpv6 import *
 from pcapkit.const.igmp import *
 from pcapkit.const.ipv4 import *
 from pcapkit.const.ipv6 import *
@@ -49,6 +51,11 @@ __all__ = [
     'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_Status',
+    # ICMP
+    'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
+    # ICMPv6
+    'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
+    'ICMPv6_ParameterProblemCode',
     # IGMP
     'IGMP_Type',
     # IPv4
