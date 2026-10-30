@@ -373,7 +373,10 @@ class RecordValidationTests(unittest.TestCase):
 
         tls_good = b'\x16\x03\x03\x00\x04\x0e\x00\x00\x00'
         tls_cases = (
-            ('a genuine record', tls_good, 'TCP:TLS'),
+            # The identified tier's own alias, not the dispatcher's generic
+            # name -- same convention as ``HTTP``'s own dispatch (see
+            # ``tests.protocols.transport.test_tcp_http_dispatch_unit``).
+            ('a genuine record', tls_good, 'TCP:TLS 1.2'),
             ('content type 0', b'\x00\x03\x03\x00\x04\xde\xad\xbe\xef', 'TCP:Raw'),
             ('a DTLS legacy version', b'\x17\xfe\xfd\x00\x05hello', 'TCP:Raw'),
             ('a length past the buffer', b'\x17\x03\x03\xff\xffhello', 'TCP:Raw'),
@@ -390,7 +393,7 @@ class RecordValidationTests(unittest.TestCase):
         dtls_cases = (
             ('a genuine record',
              b'\x16' + dtls_header + (12).to_bytes(2, 'big') + b'\x0e\x00\x00\x00' + bytes(8),
-             'UDP:DTLS'),
+             'UDP:DTLS 1.2'),
             ('content type 0',
              b'\x00' + dtls_header + (4).to_bytes(2, 'big') + b'\xde\xad\xbe\xef',
              'UDP:Raw'),
@@ -593,6 +596,242 @@ class EncryptedAlertRecordTests(unittest.TestCase):
                 + len(fragment).to_bytes(2, 'big') + fragment)
         with self.assertRaises(ProtocolError):
             DTLS(wire, len(wire))
+
+
+def _tls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> bytes:
+    """A minimal, well-formed TLS ``ClientHello`` record.
+
+    Args:
+        supported_versions: When given, the raw ``supported_versions``
+            extension body (length-prefixed version list) to append as an
+            extension; otherwise the message carries no extensions at all.
+
+    """
+    version = b'\x03\x03'
+    random = bytes(32)
+    session_id = b'\x00'
+    cipher_suites = b'\x00\x02\x13\x01'
+    compression = b'\x01\x00'
+    body = version + random + session_id + cipher_suites + compression
+    if supported_versions is not None:
+        extension = (43).to_bytes(2, 'big') + len(supported_versions).to_bytes(2, 'big') + supported_versions
+        body += len(extension).to_bytes(2, 'big') + extension
+    handshake = b'\x01' + len(body).to_bytes(3, 'big') + body  # msg_type=1, client_hello
+    return b'\x16\x03\x03' + len(handshake).to_bytes(2, 'big') + handshake
+
+
+def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None) -> bytes:
+    """A minimal, well-formed DTLS ``ClientHello`` record, unfragmented."""
+    version = b'\xfe\xfd'
+    random = bytes(32)
+    session_id = b'\x00'
+    cookie = b'\x00'
+    cipher_suites = b'\x00\x02\x13\x01'
+    compression = b'\x01\x00'
+    body = version + random + session_id + cookie + cipher_suites + compression
+    if supported_versions is not None:
+        extension = (43).to_bytes(2, 'big') + len(supported_versions).to_bytes(2, 'big') + supported_versions
+        body += len(extension).to_bytes(2, 'big') + extension
+    frag_header = (0).to_bytes(2, 'big') + (0).to_bytes(3, 'big') + len(body).to_bytes(3, 'big')
+    handshake = b'\x01' + len(body).to_bytes(3, 'big') + frag_header + body
+    record_header = b'\x16\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
+    return record_header + len(handshake).to_bytes(2, 'big') + handshake
+
+
+class VersionDispatchTests(unittest.TestCase):
+    """:meth:`TLS._guess_version`/:meth:`DTLS._guess_version` -- the restructure
+    :issue:`2437`'s follow-up asked for: a thin per-version dispatcher over
+    the family, mirroring :class:`~pcapkit.protocols.application.http.HTTP`'s
+    own dispatch over HTTP/1.* and HTTP/2.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_tls_dispatches_sslv3_tlsv1_0_and_tlsv1_1_by_legacy_version(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+
+        cases = (
+            (0x0300, 'SSLv3'),
+            (0x0301, 'TLS 1.0'),
+            (0x0302, 'TLS 1.1'),
+        )
+        for legacy_version, alias in cases:
+            with self.subTest(legacy_version=hex(legacy_version)):
+                wire = bytes([0x17]) + legacy_version.to_bytes(2, 'big') + b'\x00\x05hello'
+                parsed = TLS(wire, len(wire))
+                self.assertEqual(parsed.alias, alias)
+                self.assertEqual(parsed.info.content, b'hello')
+
+    def test_tls_0303_without_1_3_negotiation_dispatches_tls_1_2(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+
+        wire = _tls_client_hello_wire()
+        parsed = TLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'TLS 1.2')
+
+    def test_tls_0303_negotiating_1_3_dispatches_tls_1_3(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+
+        supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
+        wire = _tls_client_hello_wire(supported_versions=supported_versions)
+        parsed = TLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'TLS 1.3')
+
+    def test_tls_supported_versions_naming_only_1_2_stays_tls_1_2(self) -> None:
+        """The negotiation really is consulted, not just "an extension exists"."""
+        from pcapkit.protocols.application.tls import TLS
+
+        supported_versions = b'\x02' + (0x0303).to_bytes(2, 'big')
+        wire = _tls_client_hello_wire(supported_versions=supported_versions)
+        parsed = TLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'TLS 1.2')
+
+    def test_dtls_dispatches_dtlsv1_0_by_legacy_version(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+
+        wire = (b'\x17\xfe\xff' + bytes(2) + (1).to_bytes(6, 'big')
+                + (5).to_bytes(2, 'big') + b'hello')
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'DTLS 1.0')
+
+    def test_dtls_0xfefd_without_1_3_negotiation_dispatches_dtls_1_2(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+
+        wire = _dtls_client_hello_wire()
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'DTLS 1.2')
+
+    def test_dtls_0xfefd_negotiating_1_3_dispatches_dtls_1_3(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+
+        supported_versions = b'\x02' + (0xFEFC).to_bytes(2, 'big')
+        wire = _dtls_client_hello_wire(supported_versions=supported_versions)
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(parsed.alias, 'DTLS 1.3')
+
+    def test_concrete_tiers_are_constructible_directly_and_narrow_id(self) -> None:
+        """Each concrete tier works standalone, bypassing dispatch entirely."""
+        from pcapkit.protocols.application.dtlsv1_0 import DTLSv1_0
+        from pcapkit.protocols.application.dtlsv1_2 import DTLSv1_2
+        from pcapkit.protocols.application.dtlsv1_3 import DTLSv1_3
+        from pcapkit.protocols.application.sslv3 import SSLv3
+        from pcapkit.protocols.application.tlsv1_0 import TLSv1_0
+        from pcapkit.protocols.application.tlsv1_1 import TLSv1_1
+        from pcapkit.protocols.application.tlsv1_2 import TLSv1_2
+        from pcapkit.protocols.application.tlsv1_3 import TLSv1_3
+
+        tls_wire = b'\x17\x03\x03\x00\x05hello'
+        for cls, alias in ((SSLv3, 'SSLv3'), (TLSv1_0, 'TLS 1.0'), (TLSv1_1, 'TLS 1.1'),
+                           (TLSv1_2, 'TLS 1.2'), (TLSv1_3, 'TLS 1.3')):
+            with self.subTest(cls=cls.__name__):
+                parsed = cls(tls_wire, len(tls_wire))
+                self.assertEqual(parsed.alias, alias)
+                self.assertEqual(parsed.info.content, b'hello')
+                self.assertEqual(cls.id(), ('TLS', cls.__name__))
+
+        dtls_wire = (b'\x17\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
+                     + (5).to_bytes(2, 'big') + b'hello')
+        for cls, alias in ((DTLSv1_0, 'DTLS 1.0'), (DTLSv1_2, 'DTLS 1.2'), (DTLSv1_3, 'DTLS 1.3')):
+            with self.subTest(cls=cls.__name__):
+                parsed = cls(dtls_wire, len(dtls_wire))
+                self.assertEqual(parsed.alias, alias)
+                self.assertEqual(parsed.info.content, b'hello')
+                self.assertEqual(cls.id(), ('DTLS', cls.__name__))
+
+    def test_dispatcher_id_names_every_concrete_tier_canonical_first(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.tls import TLS
+
+        self.assertEqual(TLS.id(), ('TLS', 'SSLv3', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3'))
+        self.assertEqual(DTLS.id(), ('DTLS', 'DTLSv1_0', 'DTLSv1_2', 'DTLSv1_3'))
+
+    def test_malformed_client_hello_raises_through_dispatch_same_as_before(self) -> None:
+        """Dispatch's own sniff must not swallow a genuine parse failure.
+
+        The sniff that decides SSLv3+ vs. TLS 1.3 decodes the same
+        ``ClientHello`` the real parse goes on to decode; this pins that a
+        malformed one still raises from the dispatcher's :meth:`read`, not
+        just from a concrete tier constructed directly (already covered by
+        ``RecordValidationTests`` et al. above).
+
+        """
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        version = b'\x03\x03'
+        random = bytes(32)
+        session_id = b'\x00'
+        cipher_suites = b'\x00\x03\x13\x01\x00'  # odd length -- malformed
+        compression = b'\x01\x00'
+        body = version + random + session_id + cipher_suites + compression
+        handshake = b'\x01' + len(body).to_bytes(3, 'big') + body
+        wire = b'\x16\x03\x03' + len(handshake).to_bytes(2, 'big') + handshake
+        with self.assertRaises(ProtocolError):
+            TLS(wire, len(wire))
+
+
+class SSLv2HeuristicTests(unittest.TestCase):
+    """:func:`pcapkit.protocols.application.tls._looks_like_sslv2` -- the
+    disambiguation :meth:`TLS._guess_version
+    <pcapkit.protocols.application.tls.TLS._guess_version>` uses to route
+    port-443 traffic to :class:`~pcapkit.protocols.application.ssl2.SSL2`
+    rather than the TLS family.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_two_octet_sslv2_header_is_recognised(self) -> None:
+        from pcapkit.protocols.application.tls import _looks_like_sslv2
+
+        self.assertTrue(_looks_like_sslv2(b'\x81\x00\x01'))
+
+    def test_three_octet_escaped_sslv2_header_is_recognised(self) -> None:
+        from pcapkit.protocols.application.tls import _looks_like_sslv2
+
+        self.assertTrue(_looks_like_sslv2(b'\x41\x00\x01'))
+
+    def test_three_octet_plain_sslv2_header_is_recognised(self) -> None:
+        """The genuinely ambiguous case: top bits ``00``, like a real content type."""
+        from pcapkit.protocols.application.tls import _looks_like_sslv2
+
+        # Second octet is not 0x03, so this cannot be a TLS record either.
+        self.assertTrue(_looks_like_sslv2(b'\x01\x00\x01'))
+
+    def test_a_genuine_tls_record_is_not_misread_as_sslv2(self) -> None:
+        from pcapkit.protocols.application.tls import _looks_like_sslv2
+
+        for content_type in (0x14, 0x15, 0x16, 0x17):
+            with self.subTest(content_type=hex(content_type)):
+                self.assertFalse(_looks_like_sslv2(bytes([content_type, 0x03, 0x03])))
+
+    def test_too_short_to_tell_reads_as_sslv2(self) -> None:
+        from pcapkit.protocols.application.tls import _looks_like_sslv2
+
+        self.assertTrue(_looks_like_sslv2(b''))
+        self.assertTrue(_looks_like_sslv2(b'\x16'))  # no second octet to check
+
+    def test_sslv2_shaped_payload_degrades_to_raw_when_ssl2_is_unavailable(self) -> None:
+        """SSLv2 support (:issue:`2457`) is not on this checkout.
+
+        Dispatch still identifies the shape and tries to import
+        :class:`~pcapkit.protocols.application.ssl2.SSL2`; the
+        :exc:`ImportError` falls through to the TLS-family dispatch, whose
+        own validation then rejects the payload -- degrading to
+        :class:`~pcapkit.protocols.misc.raw.Raw` rather than crashing.
+
+        """
+        from pcapkit.protocols.transport.tcp import TCP
+
+        sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
+        raw = _TCP_TO_443 + sslv2_shaped
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain), 'TCP:Raw')
 
 
 if __name__ == '__main__':
