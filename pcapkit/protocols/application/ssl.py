@@ -12,20 +12,18 @@ family [*]_ -- the SSL versions, Transport Layer Security
 through :class:`~pcapkit.protocols.application.tls.SSLv3`) and Datagram TLS
 (:class:`~pcapkit.protocols.application.dtls.DTLS`).
 
-The record-layer header -- a :class:`~pcapkit.const.tls.content_type.ContentType`,
-a legacy record version, and a length -- is byte-identical in shape between
-TLS (:rfc:`9846#section-5.1`) and DTLS (:rfc:`9147#section-4`); DTLS's own
-divergence (an explicit epoch and sequence number in the record header, and
-handshake-message fragmentation that a reliable TLS stream never needs) stays
-entirely in :class:`~pcapkit.protocols.application.dtls.DTLS`. This base class
-carries the logic the two genuinely share -- content-type dispatch and
-handshake-message decoding -- parameterised by a ``dtls`` flag where DTLS's
-extra fragment header has to be read or written; the record header fields
-themselves are declared separately in each subclass's own schema
+The TLS record header (:rfc:`9846#section-5.1`) is a
+:class:`~pcapkit.const.tls.content_type.ContentType`, a legacy record version
+and a length. The DTLS ``DTLSPlaintext`` header (:rfc:`9147#section-4`) has
+the same fields plus an epoch and a 48-bit sequence number *between* the
+version and the length, and DTLS adds a fragment header to each handshake
+message. Each record header is declared in its subclass's own schema
 (:class:`~pcapkit.protocols.schema.application.tls.TLS` and
-:class:`~pcapkit.protocols.schema.application.dtls.DTLS`), since DTLS inserts
-its epoch and sequence number *between* the version and the length rather than
-appending them.
+:class:`~pcapkit.protocols.schema.application.dtls.DTLS`), and
+:class:`~pcapkit.protocols.application.dtls.DTLS` reads the epoch and sequence
+number. This base class carries the logic the two share -- content-type
+dispatch and handshake-message decoding -- parameterised by a ``dtls`` flag
+where the DTLS handshake fragment header has to be read or written.
 
 .. [*] https://en.wikipedia.org/wiki/Transport_Layer_Security
 
@@ -413,11 +411,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
           * ``change_cipher_spec`` -- the same reasoning, at exactly 1 octet.
 
         Any other content type is reported as *not* cleartext -- a miss lands
-        on the conservative side, same as :func:`_tls_handshake_tiles` -- even
-        though callers today only consult this for the three above, so that a
-        future content type ever routed through this method without adding a
-        branch for it fails closed instead of silently reintroducing the bug
-        this method exists to avoid.
+        on the conservative side, same as :func:`_tls_handshake_tiles` -- so a
+        content type without a branch here fails closed.
 
         Args:
             content_type: Record content type.
@@ -559,7 +554,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             only when the whole message is present -- always true for TLS,
             and true for DTLS only when the message is not fragmented across
             several records. A DTLS message that is split across records is
-            not reassembled in this version (:issue:`2440`), so its body is
+            not reassembled (:issue:`2440`), so its body is
             kept as the single fragment's raw octets regardless of
             ``msg_type``. Every other ``msg_type`` is message-TYPE-level
             framing only: its body is kept undecoded (:issue:`2437`).

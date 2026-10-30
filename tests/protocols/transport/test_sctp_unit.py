@@ -893,8 +893,8 @@ class SCTPUnitTests(unittest.TestCase):
 
         Dispatching is all the two have in common, and the assertion is
         deliberately no stronger than that. Only PPID 60 can decode: a PPID 66
-        payload is an NGAP PDU inside a DTLS record, and the registry still
-        maps it straight to NGAP rather than through DTLS, so those bytes are
+        payload is an NGAP PDU inside a DTLS record, and the registry maps it
+        to NGAP rather than through DTLS, so those bytes are
         never aligned PER and 66 degrades to :class:`Raw` on every
         well-formed capture as well as on this junk one.
 

@@ -81,7 +81,7 @@ TLS_RECORDS = {
     'alert': _tls_record(21, b'\x02\x0a'),
     'change_cipher_spec': _tls_record(20, b'\x01'),
     'application_data': _tls_record(23, b'hello'),
-    # :rfc:`9853`, the newest ContentType assignment.
+    # DTLS connection-ID path validation (:rfc:`9853`).
     'return_routability_check': _tls_record(27, b'\xde\xad\xbe\xef'),
     # The other legacy record versions dispatch brands: SSLv3, TLS 1.0, TLS 1.1.
     'handshake: ClientHello at record version 0x0300': _tls_record(

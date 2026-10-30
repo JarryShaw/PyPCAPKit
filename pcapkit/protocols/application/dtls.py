@@ -7,21 +7,22 @@
 :mod:`pcapkit.protocols.application.dtls` contains
 :class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an
 extractor for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
-1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format records (:rfc:`9147`) -- the
-epoch/sequence-number fields and the handshake-message fragment header that
-set the family apart from :class:`~pcapkit.protocols.application.tls.TLS`,
-whose reliable, ordered transport needs neither, stay shared across the
-whole family via :class:`~pcapkit.protocols.application.ssl.SSL`.
+1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format records (:rfc:`9147`). The
+epoch and sequence number in the record header, which set DTLS apart from
+:class:`~pcapkit.protocols.application.tls.TLS`, are declared in
+:class:`~pcapkit.protocols.schema.application.dtls.DTLS` and read here; the
+handshake-message fragment header is read by the handshake decoding shared
+with TLS in :class:`~pcapkit.protocols.application.ssl.SSL`.
 :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` binds
-this class at port 5684; its own :meth:`read` parses the (always
-wire-identical) record header, then sets :attr:`~DTLS.alias` according to
+this class at port 5684; its own :meth:`read` parses the ``DTLSPlaintext``
+record header, then sets :attr:`~DTLS.alias` according to
 the record's legacy version -- mirroring
 :class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch over
 RARP/DRARP/InARP by operation code, and
 :class:`~pcapkit.protocols.application.tls.TLS`'s own dispatch over its
 family.
 
-Known Limitation
+Known Limitations
 -----------------
 
 **A handshake message split across several DTLS records is not reassembled.**
@@ -40,15 +41,19 @@ the common case: a ``ClientHello`` or ``ServerHello`` that fits one datagram
 never fragments.
 
 **DTLS 1.3's unified record header is not decoded** (:issue:`2467`). DTLS 1.3
-records before the handshake completes still use the legacy ``DTLSPlaintext``
-header this module reads -- the same shape DTLS 1.2 uses, with
-``legacy_record_version`` frozen at DTLS 1.2's value (:rfc:`9147#section-4`) --
-so a DTLS 1.3 record identified by :meth:`read` decodes exactly that traffic.
-The *unified header* :rfc:`9147#section-4` introduces for records once a
-connection has a negotiated epoch has no content-type byte at all, so
+sends its cleartext records with the legacy ``DTLSPlaintext`` header this
+module reads -- the DTLS 1.2 shape, with ``legacy_record_version`` frozen at
+DTLS 1.2's value (:rfc:`9147#section-4`). The *unified header* the same
+section defines for encrypted records has no content-type octet, so
 :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-rejects it outright -- its first octet never falls inside the assigned
-content-type range this module checks -- and it degrades to
+rejects it -- its first octet is never an accepted content type -- and it
+degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
+
+**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`). Their
+connection ID precedes ``length``, and its length is negotiated during the
+handshake rather than carried in the record, so
+:meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
+rejects content type 25 and the record degrades to
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 .. versionadded:: 1.6.0

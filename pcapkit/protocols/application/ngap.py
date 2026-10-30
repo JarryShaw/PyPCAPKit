@@ -77,8 +77,8 @@ Known Limitations
 
 * **PPID 66 payloads are not decoded.** NGAP over DTLS over SCTP wraps the
   ``NGAP-PDU`` in a DTLS record, and :attr:`SCTP.__proto__
-  <pcapkit.protocols.transport.sctp.SCTP.__proto__>` still maps PPID 66
-  straight to :class:`~pcapkit.protocols.application.ngap.NGAP` rather than
+  <pcapkit.protocols.transport.sctp.SCTP.__proto__>` maps PPID 66 to
+  :class:`~pcapkit.protocols.application.ngap.NGAP` rather than
   through :class:`~pcapkit.protocols.application.dtls.DTLS`, so the bytes
   reaching :meth:`NGAP.read` are not an APER encoding. The PPID is
   registered so that it is *named* rather than anonymous; the payload itself

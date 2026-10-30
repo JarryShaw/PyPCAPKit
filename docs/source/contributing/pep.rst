@@ -239,31 +239,28 @@ and the fragment header each handshake message carries) staying in
 ``ServerHello`` decode down to their cipher suite(s), compression method(s)
 and extension list (TYPE+LENGTH framed, extension bodies undecoded); every
 other handshake message is message-TYPE-level framing only. Decryption is a
-separate question and was never needed to make the record structure legible,
-in the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
+separate question and is not needed to make the record structure legible, in
+the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
 without keys.
 
-**Not yet done: reassembling a handshake message DTLS has fragmented across
-several records** (:rfc:`6347#section-4.2.3`). That needs a
+**Not done: reassembling a handshake message DTLS has fragmented across
+several records** (:rfc:`6347#section-4.2.3`, :issue:`2440`). That needs a
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass keyed
-on the UDP 5-tuple plus epoch, which is substantial enough that it was left
-for a follow-up rather than landing alongside the dissector
-(:issue:`2440`). Until then, a fragmented message's body is kept as that one
+on the UDP 5-tuple plus epoch. A fragmented message's body is kept as that one
 fragment's raw octets -- see
 :attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`
--- rather than attempted as a decode only a slice of the message could ever
-back correctly. An unfragmented message, the common case, is unaffected.
+-- rather than decoded from a slice of the message. An unfragmented message is
+unaffected.
 
 NGAP over DTLS over SCTP (PPID 66,
 :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`),
 asked for in `discussion #251
 <https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, is **not**
-unblocked by this: :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
-still maps PPID 66 straight to :class:`~pcapkit.protocols.application.ngap.NGAP`
-rather than through :class:`~pcapkit.protocols.application.dtls.DTLS`, so those
-bytes still degrade straight to :class:`~pcapkit.protocols.misc.raw.Raw`. Rewiring
-that dispatch, and deciding what an undecrypted DTLS-wrapped NGAP PDU should
-report, is left to its own follow-up.
+decoded: :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+maps PPID 66 to :class:`~pcapkit.protocols.application.ngap.NGAP` rather than
+through :class:`~pcapkit.protocols.application.dtls.DTLS`, so those bytes
+degrade to :class:`~pcapkit.protocols.misc.raw.Raw`. Rewiring that dispatch
+needs a decision on what an undecrypted DTLS-wrapped NGAP PDU reports.
 
 Registered, but Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -320,11 +317,9 @@ Some wanted only a table entry, because the dissector was already there:
   *name* rather than a parse -- which is the right answer for a data channel
   carrying an arbitrary file.
 * **Done.** HTTP is additionally bound on 8080 (IANA ``http-alt``, "HTTP
-  Alternate (see port 80)") on both TCP and UDP, and TCP 443 (IANA ``https``)
-  is bound to :class:`~pcapkit.protocols.application.tls.TLS`, now that it
-  parses the record layer de-facto 443 traffic carries; UDP 5684 (IANA
-  ``coaps``) is bound to :class:`~pcapkit.protocols.application.dtls.DTLS`
-  likewise. **8443 is deliberately left unbound**: IANA registers it as
+  Alternate (see port 80)") on both TCP and UDP. TCP 443 (IANA ``https``) is
+  bound to :class:`~pcapkit.protocols.application.tls.TLS` and UDP 5684 (IANA
+  ``coaps``) to :class:`~pcapkit.protocols.application.dtls.DTLS`. **8443 is deliberately left unbound**: IANA registers it as
   ``pcsync-https``, not as an HTTP alternate, and binding it to HTTP would
   feed a TLS record to an HTTP parser; binding it to TLS instead would be a
   guess this registry does not make for a service IANA does not actually
@@ -1096,10 +1091,10 @@ pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
 size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
 stub.
 
-**Done within wave 2 — TLS/SSL with DTLS.** See the `DTLS`_ section above for
-what landed (the shared :class:`~pcapkit.protocols.application.ssl.SSL` base,
-TLS, DTLS, and handshake message framing) and what is left
-(DTLS handshake-fragment reassembly, tracked as its own follow-up).
+**Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
+what is decoded (the shared :class:`~pcapkit.protocols.application.ssl.SSL`
+base, TLS, DTLS, and handshake message framing) and what is not (DTLS
+handshake-fragment reassembly, :issue:`2440`).
 
 **Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``
 **link types.** Both are genuine DLTs that a capture can legitimately be rooted

@@ -337,10 +337,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     :class:`~pcapkit.protocols.application.ngap.NGAP` rather than through
     :class:`~pcapkit.protocols.application.dtls.DTLS`, so the bytes are not
     aligned PER and the parse always degrades to
-    :class:`~pcapkit.protocols.misc.raw.Raw`: what an undecrypted
-    DTLS-wrapped NGAP PDU should report is not yet decided. It
-    is registered so that the PPID is *named* in the protochain rather than
-    reported as an unassigned number.
+    :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the
+    PPID is *named* in the protochain rather than reported as an unassigned
+    number.
 
     This class supports parsing of the following SCTP chunks, which
     are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`
@@ -468,8 +467,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
             # PPID 66 is NGAP wrapped in a DTLS record rather than a bare
-            # NGAP-PDU, and this table still maps it straight to NGAP rather
-            # than through DTLS. It is registered so that the PPID is
+            # NGAP-PDU, and this table maps it to NGAP rather than through
+            # DTLS. It is registered so that the PPID is
             # *named*: the payload fails in NGAP's own decoder and
             # `beholder` degrades it to Raw, as an unregistered PPID would.
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP

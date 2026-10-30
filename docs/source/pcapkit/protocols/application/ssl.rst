@@ -16,15 +16,17 @@ family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
 :meth:`SSL.id <pcapkit.protocols.application.ssl.SSL.id>` lists the direct
 concrete subclasses, so a lookup keyed on ``SSL`` matches any of them.
 
-The record-layer header -- a :class:`~pcapkit.const.tls.content_type.ContentType`,
-a legacy record version, and a length -- is byte-identical in shape between
-TLS (:rfc:`9846#section-5.1`) and DTLS (:rfc:`9147#section-4`); DTLS's own
-divergence (an explicit epoch and sequence number in the record header, and
-handshake-message fragmentation that a reliable TLS stream never needs) stays
-entirely in :class:`~pcapkit.protocols.application.dtls.DTLS`. This base class
-carries the logic the two genuinely share -- content-type dispatch, handshake-
-message decoding, and the record-level validation that keeps dispatch from
-accepting bytes that cannot be a genuine record.
+The TLS record header (:rfc:`9846#section-5.1`) is a
+:class:`~pcapkit.const.tls.content_type.ContentType`, a legacy record version
+and a length. The DTLS ``DTLSPlaintext`` header (:rfc:`9147#section-4`) has
+the same fields plus an epoch and a 48-bit sequence number *between* the
+version and the length, and DTLS adds a fragment header to each handshake
+message. Each record header is declared in its subclass's own schema, and
+:class:`~pcapkit.protocols.application.dtls.DTLS` reads the epoch and sequence
+number. This base class carries the logic the two share -- content-type
+dispatch, handshake-message decoding (including the DTLS fragment header), and
+the record-level validation that keeps dispatch from accepting bytes that
+cannot be a genuine record.
 
 .. versionadded:: 1.6.0
 

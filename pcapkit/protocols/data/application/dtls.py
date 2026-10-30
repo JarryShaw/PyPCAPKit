@@ -34,7 +34,7 @@ class DTLSHandshake(Handshake):
     :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`
     or :class:`~pcapkit.protocols.data.application.tls.ServerHello` only when
     :attr:`is_fragmented` is :data:`False`; a genuinely fragmented message is
-    not reassembled in this version (:issue:`2440`; see
+    not reassembled (:issue:`2440`; see
     :class:`~pcapkit.protocols.application.dtls.DTLS` for why), so its
     :attr:`body` is the single fragment's raw, undecoded octets regardless of
     :attr:`msg_type`.

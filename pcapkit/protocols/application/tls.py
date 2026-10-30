@@ -9,7 +9,7 @@
 :class:`~pcapkit.protocols.application.tls.SSLv3`,
 which implement an extractor for the TLS/SSLv3+ record-layer family --
 SSLv3, TLS 1.0, TLS 1.1, TLS 1.2 (:rfc:`5246`) and TLS 1.3 (:rfc:`9846`,
-which obsoletes :rfc:`8446`). :attr:`TCP.__proto__
+which obsoletes :rfc:`8446` and :rfc:`5246`). :attr:`TCP.__proto__
 <pcapkit.protocols.transport.tcp.TCP.__proto__>` binds :class:`TLS` at port
 443; its own :meth:`~TLS.read` parses the (always wire-identical) record
 header, then sets :attr:`~TLS.alias` (and, for SSLv3, :attr:`~TLS.name`)
@@ -19,7 +19,7 @@ RARP/DRARP/InARP by operation code, rather than
 :class:`~pcapkit.protocols.application.http.HTTP`'s dispatch over distinct
 per-version classes. Where the payload is SSLv2-shaped instead,
 :meth:`~TLS.read` delegates to
-:class:`~pcapkit.protocols.application.ssl2.SSL2`.
+:class:`~pcapkit.protocols.application.sslv2.SSLv2`.
 
 Decoded Fields
 --------------
@@ -116,61 +116,42 @@ _TLS_VERSION_ALIASES = {
 #: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
 _TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
 
-#: The content types IANA's registry assigns that a genuine *first* record on
-#: a fresh connection carries on the wire -- the four
-#: :func:`_looks_like_sslv2` tests the second octet of, to tell a real
-#: TLS/SSLv3+ record from SSLv2's wire-incompatible, content-type-less header.
-#: Deliberately narrower than
-#: :data:`~pcapkit.protocols.application.ssl._WIRE_CONTENT_TYPES`: ``heartbeat``
-#: and the DTLS-only ``ack``/``return_routability_check`` do not open a
-#: connection, and widening this set only widens the window in which a
-#: genuine SSLv2 record (whose second octet is an arbitrary length octet, not
-#: always a version byte) could be misread as TLS.
-_SSLV3_PLUS_FIRST_OCTETS = frozenset({
-    int(Enum_ContentType.change_cipher_spec),
-    int(Enum_ContentType.alert),
-    int(Enum_ContentType.handshake),
-    int(Enum_ContentType.application_data),
-})
+#: Exclusive upper bound of a TLS content type that :func:`_looks_like_sslv2`
+#: accepts: the first octets SSLv2's padded 3-octet header also uses (top bits
+#: ``00``). IANA assigns no content type above it, and :rfc:`9443` reserves
+#: 64-255 for other protocols multiplexed on the same port.
+_TLS_FIRST_OCTET_LIMIT = 0x40
 
 
 def _looks_like_sslv2(data: 'bytes') -> 'bool':
     """Whether ``data`` opens with an SSLv2 record header rather than a TLS one.
 
-    SSLv2 carries no content-type byte at all: its record header is either 2
-    octets, with the top bit of the first set, or 3, with the top two bits
-    ``01`` for the escaped form or ``00`` for the plain one (see
-    :mod:`~pcapkit.protocols.application.ssl2`'s module docstring for the
-    exact bit layout). A genuine TLS/SSLv3+ record's first octet is always
-    one of the content types :data:`_SSLV3_PLUS_FIRST_OCTETS` names, and its
-    second is always :data:`_TLS_VERSION_MAJOR`.
+    A TLS record header (:rfc:`9846#section-5.1`) opens with a content type
+    and the legacy version's major octet, :data:`_TLS_VERSION_MAJOR`. An
+    SSLv2 header (draft-hickman-netscape-ssl-00, "SSL Record Header") has no
+    content type: a first octet with the top bit set opens a 2-octet header,
+    one with top bits ``01`` an escaped 3-octet header, and one with top bits
+    ``00`` a padded 3-octet header whose second octet is the low half of the
+    record length (see :mod:`~pcapkit.protocols.application.sslv2`).
 
-    Only the plain (``00``) 3-octet SSLv2 form is genuinely ambiguous with a
-    real content-type byte, since content types 20-23 also carry top bits
-    ``00`` -- resolved the same way the positive identification is, by
-    testing the second octet too, so only a match on *both* conditions reads
-    as TLS; everything else, including a buffer too short to carry even one
-    octet, reads as SSLv2.
+    ``data`` is read as TLS when its first octet is below
+    :data:`_TLS_FIRST_OCTET_LIMIT` and its second is
+    :data:`_TLS_VERSION_MAJOR`, whether or not the content type is one
+    :meth:`SSL._validate_tls_record
+    <pcapkit.protocols.application.ssl.SSL._validate_tls_record>` accepts, so
+    that it, not SSLv2, rejects the others. Everything else reads as SSLv2,
+    including a buffer too short to hold both octets.
 
     Args:
         data: The payload, from its first octet.
 
     Returns:
-        :data:`False` only when ``data`` opens with a content type this
-        module recognises as a TLS/SSLv3+ one immediately followed by
-        :data:`_TLS_VERSION_MAJOR`; :data:`True` otherwise.
+        :data:`False` when ``data`` opens with a TLS record header;
+        :data:`True` otherwise.
 
     """
-    if not data:
-        return True
-    first = data[0]
-    if first & 0x80:            # SSLv2, 2-octet header
-        return True
-    if (first & 0xC0) == 0x40:  # SSLv2, 3-octet header, escaped
-        return True
-    if first in _SSLV3_PLUS_FIRST_OCTETS and len(data) >= 2 and data[1] == _TLS_VERSION_MAJOR:
-        return False
-    return True                 # SSLv2, 3-octet header, plain -- or too short to tell
+    return not (len(data) >= 2 and data[0] < _TLS_FIRST_OCTET_LIMIT
+                and data[1] == _TLS_VERSION_MAJOR)
 
 
 class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
@@ -246,7 +227,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             identified tier apart instead. SSLv2 is not among them either:
             :meth:`read` may still delegate to it when the payload is shaped
             that way (see :func:`_looks_like_sslv2`), but doing so hands back
-            an :class:`~pcapkit.protocols.application.ssl2.SSL2` instance,
+            an :class:`~pcapkit.protocols.application.sslv2.SSLv2` instance,
             which carries its own, distinct :meth:`id`.
 
         """
@@ -256,7 +237,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """Read Transport Layer Security (TLS), or whatever port 443 actually carries.
 
         Where the payload is SSLv2-shaped instead (:func:`_looks_like_sslv2`),
-        delegates to :class:`~pcapkit.protocols.application.ssl2.SSL2` and
+        delegates to :class:`~pcapkit.protocols.application.sslv2.SSLv2` and
         adopts its parse. Otherwise parses the TLS/SSLv3+ record itself via
         :meth:`_read_tls_record`, which also sets :attr:`alias` (and, for
         SSLv3, :attr:`name`) according to the record's legacy version --
@@ -272,8 +253,8 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         Raises:
             ProtocolError: If the record cannot be a genuine TLS/SSLv3+
                 record -- see :meth:`_read_tls_record` -- or, where
-                delegated, if :class:`~pcapkit.protocols.application.ssl2.SSL2`'s
-                own :meth:`read <pcapkit.protocols.application.ssl2.SSL2.read>`
+                delegated, if :class:`~pcapkit.protocols.application.sslv2.SSLv2`'s
+                own :meth:`read <pcapkit.protocols.application.sslv2.SSLv2.read>`
                 fails.
 
         """
@@ -282,12 +263,12 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
         if _looks_like_sslv2(self._data[:length]):
             try:
-                from pcapkit.protocols.application.ssl2 import SSL2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+                from pcapkit.protocols.application.sslv2 import SSLv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             except ImportError:
                 pass  # SSLv2 support (#2457) is unavailable -- fall through
                       # to the TLS/SSLv3+ parse below.
             else:
-                obj = SSL2(self._data, length, **kwargs)
+                obj = SSLv2(self._data, length, **kwargs)
                 return self._adopt_dispatched(obj)
 
         return self._read_tls_record(length, **kwargs)

@@ -7,8 +7,8 @@
 
 This module contains the constant enumeration for **TLS/DTLS Content Types**,
 as assigned by IANA in the ``TLS ContentType`` registry [*]_. The record-layer
-header -- :rfc:`9846#section-5.1` for TLS, :rfc:`9147#section-4` for DTLS --
-is identical in shape between the two, and this is the type it dispatches on.
+header -- :rfc:`9846#section-5.1` for TLS, :rfc:`9147#section-4`'s
+``DTLSPlaintext`` for DTLS -- opens with this type in both.
 
 Every value IANA assigns is named below. Everything else in the 0-255 range it
 lists as Unassigned (0-19 and 28-31, plus 64-255, which :rfc:`9443` reserves

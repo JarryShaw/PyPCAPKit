@@ -8,7 +8,8 @@ TLS/SSL - Transport Layer Security
 :class:`~pcapkit.protocols.application.tls.SSLv3`, which implement an
 extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
 TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
-1.3 (:rfc:`9846`, which obsoletes :rfc:`8446`) -- at the record layer, plus
+1.3 (:rfc:`9846`, which obsoletes :rfc:`8446` and :rfc:`5246`) -- at the
+record layer, plus
 handshake message TYPE-level framing.
 
 Version Identification

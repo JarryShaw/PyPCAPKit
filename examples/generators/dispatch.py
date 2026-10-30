@@ -60,7 +60,7 @@ a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
 already does, and for the same documented reason -- one PPID is DTLS-wrapped
 and :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
-still maps it straight to NGAP rather than through DTLS; the other degrades
+maps it to NGAP rather than through DTLS; the other degrades
 identically because the payload is not an aligned PER encoding, exactly as
 that test's own docstring records.
 
@@ -929,8 +929,8 @@ KNOWN_DEGRADED = {
         'placeholder payload is not an aligned PER NGAP-PDU; building '
             'one is out of scope for a minimal dispatch probe, not a '
             'library defect'),
-    # PPID 66 is NGAP wrapped in a DTLS record, and the registry still maps
-    # it straight to NGAP rather than through DTLS -- registered so the PPID
+    # PPID 66 is NGAP wrapped in a DTLS record, and the registry maps it to
+    # NGAP rather than through DTLS -- registered so the PPID
     # is *named*, per the registry's own comment in
     # pcapkit/protocols/transport/sctp.py, not because it decodes. The same
     # placeholder payload fails the same way, for the same reason.
