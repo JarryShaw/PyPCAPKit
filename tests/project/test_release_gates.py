@@ -3714,7 +3714,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             1,
         ),
         (
-            # Owner ruling, 2026-10-30: main is on a dev version, so the
+            # Owner ruling, 2026-10-30: the version is a dev version, so the
             # PCAPKIT_DEV_RELEASE gate skipped all four publishers on purpose.
             # Their evidence stays false -- nothing was ever tagged or
             # published -- which must not read as the #888 stranded shape.
@@ -3724,7 +3724,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
                 'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
                 'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
             },
-            '::notice title=Nothing to release::main\'s version',
+            '::notice title=Nothing to release::this run\'s version',
             0,
         ),
         (
@@ -3733,6 +3733,30 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             'the_same_skip_pattern_with_dev_release_false_stays_888',
             {
                 'PCAPKIT_DEV_RELEASE': 'false',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::error title=Stranded partial release (#888)',
+            1,
+        ),
+        (
+            # A dev flag with a publisher that ran is not the deliberate
+            # no-op: only every publisher skipping is.
+            'dev_release_with_a_publisher_that_failed',
+            {
+                'PCAPKIT_DEV_RELEASE': 'true',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'failure', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::warning title=Release did not complete',
+            0,
+        ),
+        (
+            # Run 41098750345, 1.5.1's partial publish, with the dev flag
+            # empty: only 'true' opens the quiet branch.
+            'the_1_5_1_shape_with_the_dev_flag_empty_stays_888',
+            {
+                'PCAPKIT_DEV_RELEASE': '', 'PCAPKIT_VERSION': '1.5.1', 'PCAPKIT_TAG_EXISTS': 'true',
                 'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
                 'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
             },

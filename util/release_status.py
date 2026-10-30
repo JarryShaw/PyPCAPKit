@@ -20,7 +20,7 @@ In order, the first that applies:
 4. The version is tagged at another commit and every publisher skipped (#1748):
    a notice if that release is complete, else a warning naming what it lacks,
    and, for Anaconda files, Conda Update's ``publish`` dispatch (#2140).
-5. ``main``'s version carries a PEP 440 dev-release suffix and every publisher
+5. The version carries a PEP 440 dev-release suffix and every publisher
    skipped for it: a quiet notice, since the ``PCAPKIT_DEV_RELEASE`` gate did
    that on purpose (owner ruling, 2026-10-30) -- never the #888 shape.
 6. Each publisher reconciled against its own evidence -- succeeded, or skipped
@@ -159,7 +159,7 @@ def report_elsewhere() -> 'None':
 
 
 def dev_release_skipped() -> 'bool':
-    """Whether ``main``'s version is a dev release, with every publisher skipped for it.
+    """Whether this run's version is a dev release, with every publisher skipped for it.
 
     ``PCAPKIT_DEV_RELEASE`` may legitimately be absent -- a workflow run old
     enough to predate this gate -- so it is read with a default rather than
@@ -171,9 +171,9 @@ def dev_release_skipped() -> 'bool':
 
 
 def report_dev_release() -> 'None':
-    """Case 5: every publisher skipped on purpose, because main is on a dev version."""
+    """Case 5: every publisher skipped on purpose, because this run's version is a dev version."""
     say('notice', 'Nothing to release',
-        f"main's version, {var('PCAPKIT_VERSION')}, carries a PEP 440 dev-release suffix (.devN), so the "
+        f"this run's version, {var('PCAPKIT_VERSION')}, carries a PEP 440 dev-release suffix (.devN), so the "
         'PCAPKIT_DEV_RELEASE gate skipped every publisher deliberately: this run correctly released nothing.')
 
 
@@ -219,7 +219,11 @@ def report() -> 'int':
     # Reconcile each job against its OWN evidence, not against each other: a
     # self-heal mixes jobs that skipped because their artefact existed with jobs
     # that ran, and demanding uniformity would read that mix as #888.
-    all_reconciled = all(reconciled(job, evidence) for job, evidence in TARGETS)
+    # NOTE: a list, not a generator, on purpose: every publisher's evidence is
+    # read before any verdict, as the shell form's ``set -u`` reads each one,
+    # so an unset evidence variable ends the script even after a failure. A
+    # generator would short-circuit at the first unreconciled publisher.
+    all_reconciled = all([reconciled(job, evidence) for job, evidence in TARGETS])  # pylint: disable=use-a-generator
     results = [var(job) for job, _ in TARGETS]
     all_skipped = all(result == 'skipped' for result in results)
     any_broken = any(result in ('failure', 'cancelled') for result in results)

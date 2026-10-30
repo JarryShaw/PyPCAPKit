@@ -145,13 +145,13 @@ REFERENCE_STATUS = textwrap.dedent(r'''
       exit 0
     fi
 
-    # Owner ruling, 2026-10-30: main's version carries a PEP 440 dev-release
+    # Owner ruling, 2026-10-30: this run's version carries a PEP 440 dev-release
     # suffix, and the PCAPKIT_DEV_RELEASE gate skips every publisher for it on
     # purpose, so this is a deliberate no-op, never the #888 shape.
     if [ "${PCAPKIT_DEV_RELEASE:-}" = "true" ] && [ "$PCAPKIT_GITHUB_JOB" = "skipped" ] \
        && [ "$PCAPKIT_TAG_JOB" = "skipped" ] && [ "$PCAPKIT_PYPI_JOB" = "skipped" ] \
        && [ "$PCAPKIT_CONDA_JOB" = "skipped" ]; then
-      echo "::notice title=Nothing to release::main's version, ${PCAPKIT_VERSION}, carries a PEP 440 dev-release suffix (.devN), so the PCAPKIT_DEV_RELEASE gate skipped every publisher deliberately: this run correctly released nothing."
+      echo "::notice title=Nothing to release::this run's version, ${PCAPKIT_VERSION}, carries a PEP 440 dev-release suffix (.devN), so the PCAPKIT_DEV_RELEASE gate skipped every publisher deliberately: this run correctly released nothing."
       exit 0
     fi
 
@@ -330,6 +330,16 @@ STATUS_CASES = (
     # PCAPKIT_DEV_RELEASE false (not a dev release) must still be the loud
     # #888 shape, not swallowed by the new branch above.
     ('the same skip pattern with dev release false stays 888', {**ALL_SKIPPED, 'PCAPKIT_DEV_RELEASE': 'false'}),
+    # A dev flag does not make a publisher that ran quiet: only every one
+    # skipping is the deliberate no-op.
+    ('a dev release with a publisher that failed', {**ALL_SKIPPED, 'PCAPKIT_DEV_RELEASE': 'true',
+                                                    'PCAPKIT_PYPI_JOB': 'failure'}),
+    # Run 41098750345, 1.5.1's partial publish: only the dev flag's 'true'
+    # opens the quiet branch, so an empty or absent one stays #888.
+    ('the 1.5.1 shape with the dev flag empty', {**ALL_SKIPPED, 'PCAPKIT_VERSION': '1.5.1',
+                                                 'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_DEV_RELEASE': ''}),
+    ('the 1.5.1 shape with the dev flag unset', {**ALL_SKIPPED, 'PCAPKIT_VERSION': '1.5.1',
+                                                 'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_DEV_RELEASE': UNSET}),
     ('steady state', {**ALL_SKIPPED, **ALL_DONE}),
     ('a fresh release', {}),
     ('a self-heal', {'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped', 'PCAPKIT_TAG_EXISTS': 'true',
@@ -359,6 +369,11 @@ STATUS_CASES = (
                                     'PCAPKIT_RELEASE_APP_BOT_ID': UNSET}),
     ('the version unset elsewhere', {**ELSEWHERE, 'PCAPKIT_VERSION': UNSET}),
     ('an evidence output unset', {**ALL_SKIPPED, 'PCAPKIT_CONDA_COMPLETE': UNSET}),
+    # The shell form reads every publisher's evidence before any verdict, so a
+    # later skipped publisher's unset evidence ends it even after an earlier
+    # failure; reconciling with a short-circuiting generator would not.
+    ('an evidence output unset after a failure', {'PCAPKIT_GITHUB_JOB': 'failure', 'PCAPKIT_TAG_JOB': 'skipped',
+                                                  'PCAPKIT_CONDA_TAG_EXISTS': UNSET}),
     ('the run sha unset where it is named', {**ELSEWHERE, **ALL_DONE, 'PCAPKIT_RUN_SHA': UNSET}),
 )
 
@@ -375,7 +390,7 @@ STATUS_BRANCHES = {
     'the gate did not pass': (0, r'::warning title=Release blocked by the test gate::'),
     'released elsewhere, complete': (0, r'::notice title=Nothing to release::v.* names '),
     'released elsewhere, unfinished': (0, r'::warning title=v.* is unfinished \(#1634\)::'),
-    'a dev release skipped every publisher': (0, r"::notice title=Nothing to release::main's version, "),
+    'a dev release skipped every publisher': (0, r"::notice title=Nothing to release::this run's version, "),
     'already released': (0, r'::notice title=Nothing to release::pypcapkit '),
     'released': (0, r'::notice title=Release complete::'),
     'a publisher broke': (0, r'::warning title=Release did not complete::'),
@@ -517,6 +532,7 @@ def sampled_status_cases(count: 'int' = 150) -> 'list[tuple[str, dict[str, Optio
         'PCAPKIT_UNIT_TESTS': (results, [4, 4, 1, 1, 1]),
         'PCAPKIT_VERSION_CHECK': (results, [12, 3, 1, 1, 1]),
         'PCAPKIT_RELEASED_ELSEWHERE': (flags, [2, 4, 1]),
+        'PCAPKIT_DEV_RELEASE': (flags, [2, 4, 1]),
         'PCAPKIT_PYPI_KTLO_310': (['', 'success', 'failure'], [4, 1, 1]),
         'PCAPKIT_PYPI_KTLO_PYPY310': (['', 'success', 'failure'], [4, 1, 1]),
         'PCAPKIT_VERSION': (['1.5.0', '1.5.0b12'], [1, 1]),
