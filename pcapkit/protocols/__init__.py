@@ -56,6 +56,9 @@ __all__ = [
     # Internet Layer
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
 
+    # IP Pseudo-Header
+    'IP_Pseudo',
+
     # IPv6 Extension Header
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext', 'IPv6_Opts',
     'IPv6_Route', 'MH',

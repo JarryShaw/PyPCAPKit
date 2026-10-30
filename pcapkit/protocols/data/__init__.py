@@ -112,6 +112,9 @@ __all__ = [
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
+    # IP Pseudo-Header
+    'IP_Pseudo',
+
     # Internet Protocol version 4
     'IPv4',
     'IPv4_ToSField', 'IPv4_Flags',
