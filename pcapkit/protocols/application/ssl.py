@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.tls import Alert as Data_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as Data_ChangeCipherSpec
@@ -42,6 +43,7 @@ from pcapkit.protocols.data.application.tls import ClientHello as Data_ClientHel
 from pcapkit.protocols.data.application.tls import Extension as Data_Extension
 from pcapkit.protocols.data.application.tls import Handshake as Data_Handshake
 from pcapkit.protocols.data.application.tls import ServerHello as Data_ServerHello
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -95,6 +97,56 @@ _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.ack,
     Enum_ContentType.return_routability_check,
 })
+
+#: The IANA ``supported_versions`` extension type (:rfc:`9846#section-4.2.1`).
+#: TLS 1.3 and DTLS 1.3 negotiate the *real* version here rather than in the
+#: record header's own legacy version, which both freeze at their immediate
+#: predecessor's value for backward compatibility -- see :data:`TLS13_VERSION`
+#: and :data:`DTLS13_VERSION`.
+_EXT_SUPPORTED_VERSIONS = 43
+
+#: The wire value a ``supported_versions`` extension carries for TLS 1.3
+#: (:rfc:`9846#section-4.2.1`). Never the record layer's own
+#: ``legacy_version``, which TLS 1.3 freezes at TLS 1.2's ``0x0303``.
+TLS13_VERSION = 0x0304
+#: Same, for DTLS 1.3 (:rfc:`9147#section-5.3`). The record layer stays
+#: frozen at DTLS 1.2's ``0xFEFD``.
+DTLS13_VERSION = 0xFEFC
+
+
+def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
+    """The versions a ``supported_versions`` extension on ``message`` lists.
+
+    Args:
+        message: A decoded handshake message's body -- typically
+            :class:`~pcapkit.protocols.data.application.tls.ClientHello` or
+            :class:`~pcapkit.protocols.data.application.tls.ServerHello`.
+            Any other type (raw :obj:`bytes`, or a message with no
+            ``extensions`` attribute) yields nothing.
+
+    Returns:
+        Every version the extension lists, in order: zero or more for a
+        ``ClientHello`` (a list), exactly one for a ``ServerHello`` (a bare
+        selection), or nothing at all when ``message`` carries no
+        ``supported_versions`` extension -- including when it carries no
+        ``extensions`` at all.
+
+    """
+    extensions = getattr(message, 'extensions', None)
+    if not extensions:
+        return ()
+    for extension in extensions:
+        if int(extension.type) != _EXT_SUPPORTED_VERSIONS:
+            continue
+        data = extension.data
+        # A ``ClientHello`` lists several versions behind a 1-octet length
+        # prefix; a ``ServerHello`` selects exactly one, with no length
+        # prefix of its own (:rfc:`9846#section-4.2.1`).
+        versions = data[1:] if isinstance(message, Data_ClientHello) else data
+        return tuple(
+            int.from_bytes(versions[i:i + 2], 'big') for i in range(0, len(versions) - 1, 2)
+        )
+    return ()
 
 
 def _take(data: 'bytes', pos: 'int', size: 'int', *, what: 'str', alias: 'str') -> 'bytes':
@@ -266,6 +318,72 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             raise ProtocolError(
                 f'{self.alias}: invalid format: record length {schema.length} runs past '
                 'the end of the buffer')
+
+    def _tls_negotiates(self, schema: 'Any', target: 'int', *, dtls: 'bool') -> 'bool':
+        """Whether this record's first handshake message negotiates ``target``.
+
+        TLS 1.3 and DTLS 1.3 freeze the record layer's own legacy version at
+        their predecessor's value and negotiate the real version through a
+        ``supported_versions`` extension on the ``ClientHello``/``ServerHello``
+        instead (:data:`TLS13_VERSION`, :data:`DTLS13_VERSION`). A dispatcher
+        picking a concrete version tier for an ambiguous legacy version
+        consults this to tell the two apart.
+
+        This is used from a dispatcher's own version guess, *before* the real
+        parse that follows: any failure to decode here -- a malformed
+        message, a non-handshake record, ciphertext that happens not to tile
+        -- is reported as "no", never propagated, since the real parse the
+        dispatcher goes on to run is what reports a genuine error, not this
+        best-effort peek.
+
+        Args:
+            schema: The just-parsed record header.
+            target: The negotiated-version value to look for
+                (:data:`TLS13_VERSION` or :data:`DTLS13_VERSION`).
+            dtls: Whether this is a DTLS record.
+
+        Returns:
+            Whether the record's fragment decodes as cleartext handshake
+            messages whose first one carries a ``supported_versions``
+            extension listing ``target``.
+
+        """
+        try:
+            content = self._read_tls_content(schema.content_type, schema.fragment,
+                                             dtls=dtls, epoch=getattr(schema, 'epoch', 0))
+        except ProtocolError:
+            return False
+        if not isinstance(content, tuple) or not content:
+            return False
+        body = getattr(content[0], 'body', None)
+        return target in _negotiated_versions(body)
+
+    def _adopt_dispatched(self, obj: 'Any') -> 'Any':
+        """Adopt a dispatched tier's parse result as this dispatcher's own.
+
+        Shared by every family's version-dispatching ``read()`` --
+        :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>` and
+        :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>` --
+        mirroring :meth:`HTTP.read <pcapkit.protocols.application.http.HTTP.read>`'s
+        own adoption of whichever versioned object it constructed: the
+        dispatcher's own :attr:`alias <pcapkit.protocols.protocol.ProtocolBase.alias>`
+        becomes the identified tier's, and a next layer the tier's own parse
+        already decoded is carried over rather than decoded twice.
+
+        Args:
+            obj: The concrete tier's own, already-parsed instance.
+
+        Returns:
+            ``obj``'s parsed data model, which becomes this dispatcher's own
+            :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`.
+
+        """
+        self._alias = obj.alias  # pylint: disable=attribute-defined-outside-init
+        next_ = getattr(obj, '_next', None)
+        if next_ is not None and not isinstance(next_, NoPayload):
+            self._next = next_  # pylint: disable=attribute-defined-outside-init
+            self._protos = ProtoChain(self.__class__, self.alias, basis=next_.protochain)  # pylint: disable=attribute-defined-outside-init
+        return obj.info
 
     def _tls_content_is_cleartext(self, content_type: 'Enum_ContentType', fragment: 'bytes', *,
                                   dtls: 'bool', epoch: 'int') -> 'bool':
@@ -629,7 +747,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         # octet rather than fail, and :meth:`_make_tls_client_hello` would then
         # re-pad it to 2 octets on rebuild, losing byte-exactness silently
         # rather than refusing to parse.
-        if cipher_suites_len % 2 != 0:
+        if cipher_suites_len % 2:
             raise ProtocolError(
                 f'{alias}: invalid format: client_hello.cipher_suites length '
                 f'{cipher_suites_len} is not a multiple of 2')
