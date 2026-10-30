@@ -44,6 +44,9 @@ All notable changes to PyPCAPKit are recorded here.
 Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
 carries only the version being released; this page is the whole recorded history.
 
+* **1.6.0** (unreleased) -- Wave 2 of the roadmap: the protocol pairs that
+  wanted a shared abstract base, and the two that had no dissector at all.
+  :doc:`Full changelog <changelog/1.6.0>`.
 * **1.5.0** (2026-10-29) -- The largest release since 1.0, and the first
   recorded here as it happened rather than reconstructed: more extraction
   engines, ESP with payload decryption, SCTP and NGAP over SCTP,
@@ -174,6 +177,7 @@ carries only the version being released; this page is the whole recorded history
    :hidden:
    :maxdepth: 1
 
+   changelog/1.6.0
    changelog/1.5.0
    changelog/1.4.1
    changelog/1.4.0
