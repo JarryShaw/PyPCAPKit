@@ -57,6 +57,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from packaging.version import Version
+
 #: Test tier (#1958): drives util/bump_version.py, which runs on one interpreter.
 __tier__ = 'LATEST'
 
@@ -427,6 +429,73 @@ class VersionBumpTests(unittest.TestCase):
 
     def test_a_development_release_bumps_its_counter(self) -> None:
         self.assertEqual(bump_version.bump('1.5.0.dev1'), '1.5.0.dev2')
+
+    def test_a_development_release_with_a_prerelease_segment_keeps_it(self) -> None:
+        # #2459: bumping the dev counter on ``1.6.0rc1.dev2`` was dropping the
+        # ``rc1`` segment, returning ``1.6.0.dev3``. Under PEP 440 a bare dev
+        # release sorts *before* one carrying ``rc1``, so that "bump" actually
+        # moved the version backwards.
+        bumped = bump_version.bump('1.6.0rc1.dev2')
+        self.assertEqual(bumped, '1.6.0rc1.dev3')
+
+        parsed = Version(bumped)
+        self.assertEqual(parsed.pre, ('rc', 1))
+        self.assertEqual(parsed.dev, 3)
+
+        # And the ordering regression the bug produced is gone: the bumped
+        # version must sort after the one it was bumped from.
+        self.assertGreater(parsed, Version('1.6.0rc1.dev2'))
+
+    def test_a_development_release_with_an_alpha_or_beta_segment_keeps_it(self) -> None:
+        self.assertEqual(bump_version.bump('1.6.0a1.dev1'), '1.6.0a1.dev2')
+        self.assertEqual(bump_version.bump('1.6.0b2.dev5'), '1.6.0b2.dev6')
+
+    def test_a_development_release_with_a_post_release_segment_keeps_it(self) -> None:
+        # The same #2459 bug, for post-releases rather than pre-releases: the
+        # dev branch rebuilt its output from ``base_version`` (major.minor.micro
+        # only) plus the preserved pre-release string plus ``.devN``, but never
+        # carried ``post`` forward, so ``1.6.0.post1.dev0`` bumped to
+        # ``1.6.0.dev1`` -- which sorts *before* the version it was bumped from.
+        bumped = bump_version.bump('1.6.0.post1.dev0')
+        self.assertEqual(bumped, '1.6.0.post1.dev1')
+
+        parsed = Version(bumped)
+        self.assertEqual(parsed.post, 1)
+        self.assertEqual(parsed.dev, 1)
+        self.assertGreater(parsed, Version('1.6.0.post1.dev0'))
+
+    def test_a_development_release_with_both_pre_and_post_segments_keeps_both(self) -> None:
+        bumped = bump_version.bump('1.6.0rc1.post1.dev2')
+        self.assertEqual(bumped, '1.6.0rc1.post1.dev3')
+
+        parsed = Version(bumped)
+        self.assertEqual(parsed.pre, ('rc', 1))
+        self.assertEqual(parsed.post, 1)
+        self.assertEqual(parsed.dev, 3)
+        self.assertGreater(parsed, Version('1.6.0rc1.post1.dev2'))
+
+    def test_every_dev_bump_sorts_after_its_input(self) -> None:
+        # #2459 twice over: dropping ``pre`` and dropping ``post`` both produce
+        # a "bumped" version that sorts *before* the input under PEP 440. Sweep
+        # a grid of shapes -- plain dev, pre+dev, post+dev, pre+post+dev, each
+        # with and without an epoch -- so a third dropped segment would be
+        # caught here rather than requiring another hand-picked case.
+        pres = (None, 'a1', 'b2', 'rc1')
+        posts = (None, 'post1')
+        epochs = (None, '1!')
+        for epoch in epochs:
+            for pre in pres:
+                for post in posts:
+                    epoch_str = epoch or ''
+                    pre_str = pre or ''
+                    post_str = ('.' + post) if post else ''
+                    current = f'{epoch_str}1.6.0{pre_str}{post_str}.dev2'
+                    with self.subTest(current=current):
+                        bumped = bump_version.bump(current)
+                        self.assertGreater(
+                            Version(bumped), Version(current),
+                            f'{current!r} bumped to {bumped!r}, which does not sort after it',
+                        )
 
     def test_a_post_release_bumps_its_counter(self) -> None:
         self.assertEqual(bump_version.bump('1.3.5.post42'), '1.3.5.post43')

@@ -230,6 +230,19 @@ def bump(version: str) -> str:
     release gains ``.post1``. Every result therefore carries a non-numeric
     suffix, which is worth knowing when reading it back out of YAML.
 
+    A dev release that also carries a pre-release and/or post-release segment --
+    ``1.6.0rc1.dev2``, ``1.6.0.post1.dev0``, ``1.6.0rc1.post1.dev2`` -- which
+    :attr:`~packaging.version.Version.is_devrelease` reports regardless of
+    whether :attr:`~packaging.version.Version.pre` or
+    :attr:`~packaging.version.Version.post` is set -- keeps both segments rather
+    than dropping either. ``base_version`` discards ``pre`` *and* ``post``
+    entirely, so the dev branch has to rebuild both from
+    :attr:`~packaging.version.Version.pre` and
+    :attr:`~packaging.version.Version.post` itself; omitting either would hand
+    back a version that sorts *before* the one it was bumped from under
+    :pep:`440` -- e.g. a bare ``1.6.0.dev1`` sorts before both ``1.6.0rc1.dev2``
+    and ``1.6.0.post1.dev0``.
+
     Args:
         version: The current version string.
 
@@ -242,7 +255,12 @@ def bump(version: str) -> str:
 
     if ver_obj.is_devrelease:
         dev = cast('int', ver_obj.dev)
-        return base_version + '.dev' + str(dev + 1)
+        pre_str = ''
+        if ver_obj.pre is not None:
+            pre_tuple = cast('tuple[str, int]', ver_obj.pre)
+            pre_str = pre_tuple[0] + str(pre_tuple[1])
+        post_str = '' if ver_obj.post is None else '.post' + str(ver_obj.post)
+        return base_version + pre_str + post_str + '.dev' + str(dev + 1)
 
     if ver_obj.is_prerelease:
         pre = cast('tuple[str, int]', ver_obj.pre)
