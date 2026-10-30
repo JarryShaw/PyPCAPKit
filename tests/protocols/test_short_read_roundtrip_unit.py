@@ -90,12 +90,6 @@ def _quiet(case: unittest.TestCase) -> None:
     warnings.simplefilter('ignore')
 
 
-def _has_fallback(proto: object) -> bool:
-    from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-
-    return any(type(ext) is IPv6_Ext for ext in getattr(proto, 'extension_headers', {}).values())
-
-
 def _resolve(path: str) -> type:
     module, _, name = path.partition(':')
     return getattr(importlib.import_module(f'pcapkit.protocols.{module}'), name)
@@ -124,11 +118,6 @@ class TestShortReadRoundTrip(unittest.TestCase):
                             continue
                         self.assertEqual(proto.data, raw)
                         self.assertEqual(type(proto).from_data(proto.info).data, raw)
-                        if _has_fallback(proto):
-                            # from the dict form, IPv6.from_data rebuilds an
-                            # IPv6_Ext standing in for a dedicated parser with
-                            # that parser's class: a separate defect, in ipv6.py
-                            continue
                         self.assertEqual(type(proto).from_data(proto.info.to_dict()).data, raw)
 
     def test_extension_header_cut_at_every_offset(self) -> None:

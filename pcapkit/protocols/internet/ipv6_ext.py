@@ -7,9 +7,8 @@
 :mod:`pcapkit.protocols.internet.ipv6_ext` contains
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
 only, which is both (GitHub issue :issue:`917`) the shared **base class** of
-every IPv6 extension header in this package and a **generic** extractor that
-stands in for a header whose dedicated parser is unavailable or has failed.
-The class docstring separates these roles.
+every IPv6 extension header in this package and a **generic** extractor for
+a header with no dedicated parser. The class docstring separates these roles.
 
 Length Rules
 ------------
@@ -89,31 +88,25 @@ carry a ``next`` at all?) rather than on a list of codes.
 Entry Paths
 -----------
 
-This class is reached in these ways:
+This class is reached by direct dispatch only.
+:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real
+IANA extension header (:rfc:`5533`) with no dedicated parser, so
+:meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
+would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose
+missing ``next`` field would end the walk in
+:meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+there (GitHub issue :issue:`891`). This module registers this class for that
+code instead (see the bottom of the module), so dispatch reaches a working
+generic parser directly. The registration is global, shared by every
+:class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
+:meth:`__post_init__` gates on ``version == 6`` to keep it from also activating
+for an IPv4 payload that carries protocol number 140; see its docstring.
 
-1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
-   is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so
-   :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
-   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That
-   has no ``next`` field, so the walk in
-   :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
-   would crash on it (GitHub issue :issue:`891`). This module registers this
-   class for that code instead (see the bottom of the module), so dispatch
-   reaches a working generic parser directly. The registration is global, shared by
-   every :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
-   :meth:`__post_init__` gates on ``version == 6`` to keep it from also
-   activating for an IPv4 payload that carries protocol number 140; see its
-   docstring.
-2. **A recognised header whose own parser raises.** ``HOPOPT``,
-   ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
-   have dedicated classes. When one of *those* raises,
-   :func:`~pcapkit.corekit.decorators.beholder`
-   (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`)
-   would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
-   ``next`` and crashes the walk as in path 1.
-   :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
-   catches the failure itself, one layer in from ``beholder``, and substitutes
-   this class: the bad header costs only itself, not the rest of the chain.
+A header with a dedicated class whose parser raises does not reach this class.
+:func:`~pcapkit.corekit.decorators.beholder` makes it plain
+:class:`~pcapkit.protocols.misc.raw.Raw`, and the walk stops there, as
+:rfc:`8200#section-4` has a node discard such a packet (GitHub issue
+:issue:`2477`).
 
 The Overrun Guard
 -----------------
@@ -199,7 +192,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     One class plays both, on the owner's ruling for GitHub issue :issue:`917`:
 
     1. **The concrete fallback parser** for an :rfc:`6564`-conforming header
-       with no dedicated class, or whose dedicated class raised. :meth:`read`,
+       with no dedicated class, which is Shim6. :meth:`read`,
        :meth:`make`, :attr:`name`, :attr:`alias` and the ``schema=``/``data=``
        class keywords implement it.
     2. **The base class** of the implemented extension headers
@@ -234,6 +227,14 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         does, over every subclass discovered at runtime.
 
     .. versionadded:: 1.5.0
+
+    .. versionchanged:: 1.6.0
+
+       The library no longer passes ``error`` to :meth:`read`, so
+       :attr:`Data_IPv6_Ext.error <pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.error>`
+       is :data:`None` unless a caller passes one. A header whose dedicated
+       parser raises is :class:`~pcapkit.protocols.misc.raw.Raw`, whose
+       ``info.error`` holds the error (:issue:`2477`).
 
     """
 
@@ -386,8 +387,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         Returns:
             Index ID of every direct concrete subclass, each of which narrows
-            its own :meth:`id` to itself. A header parsed by this class as the
-            generic fallback therefore matches every one of these names.
+            its own :meth:`id` to itself. A Shim6 header, which this class
+            parses, therefore matches every one of these names.
 
         Note:
             ``== 'IPv6_Ext'`` is :data:`False`, as ``== 'IP'`` is on
@@ -404,16 +405,14 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             length: Length of packet data.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments, including these, which are
-                this class's own and are supplied by :meth:`IPv6._import_next_layer
-                <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
-                rather than typed by a caller:
+                this class's own:
 
                 * ``alias`` -- the numeric extension header code this instance
                   stands in for, e.g. ``0`` for ``HOPOPT`` or ``140`` for
-                  ``Shim6``.
-                * ``error`` -- the parsing error, when this instance was
-                  reached as a :func:`~pcapkit.corekit.decorators.beholder`
-                  fallback rather than by direct dispatch.
+                  ``Shim6``, supplied by :meth:`IPv6._import_next_layer
+                  <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`.
+                * ``error`` -- a parsing error to record in the result, if
+                  any, which the library does not pass.
 
         Returns:
             Parsed packet data.

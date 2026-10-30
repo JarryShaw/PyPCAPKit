@@ -1713,8 +1713,7 @@ class MHUnitTests(unittest.TestCase):
         properties the issue measured that are not specific to any one of
         them: the ``get()``-level aliasing defect, the ``_missing_`` range
         invariant, and the consequence of the raise once it reaches a real
-        capture -- which turns out to differ by wrapping protocol, see the
-        last two subtests.
+        capture, over IPv4 and over IPv6.
         """
         import socket
         import struct
@@ -1792,9 +1791,7 @@ class MHUnitTests(unittest.TestCase):
             # any exception. Over IPv4, which dispatches to Mobility Header
             # through the base, non-chain-walking ``_import_next_layer``,
             # that is the whole story: the raise costs one MH message, not
-            # the packet or the capture. IPv4 is deliberately the wrapping
-            # protocol in *this* subtest -- the next one shows IPv6 does not
-            # get off this lightly.
+            # the packet or the capture.
             def wrap_in_ipv4(mh_payload: bytes) -> IPv4:
                 header = struct.pack(
                     '>BBHHHBBH4s4s', 0x45, 0, 20 + len(mh_payload), 0, 0, 64,
@@ -1823,35 +1820,12 @@ class MHUnitTests(unittest.TestCase):
             self.assertIsInstance(ip.payload, Raw)
             self.assertEqual(bytes(ip.payload), bytes(lra_raw))
 
-        with self.subTest('over IPv6, the raise costs only the MH slot (GitHub issue #891)'):
-            # Mobility Header is *also* one of IPv6's own chained extension
-            # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135, in
-            # ``pcapkit/const/ipv6/extension_header.py``), so IPv6 never
-            # reaches the fallback through the base ``_import_next_layer`` at
-            # all -- it walks its own ``@beholder``-decorated override
-            # (``pcapkit/protocols/internet/ipv6.py:_import_next_layer``).
-            #
-            # Without GitHub issue #891's catch, that override lets any
-            # exception from MH's own parser reach ``@beholder`` unchanged,
-            # which substitutes plain ``Raw`` for the MH slot; ``Raw``'s info
-            # carries no ``.next``, so ``proto = info.next``
-            # (``pcapkit/protocols/internet/ipv6.py:_decode_next_layer``)
-            # raises ``AttributeError`` on it regardless -- and it is *that*,
-            # unrelated, exception that a further-out ``@beholder``
-            # (Ethernet's) catches, degrading the whole IPv6 packet, header
-            # fields and MH message alike, to ``Raw``.
-            #
-            # ``IPv6._import_next_layer`` has its own catch (#891), one layer
-            # in from ``@beholder``: for an extension header whose wire
-            # format RFC 6564 guarantees (Mobility Header among them), the MH
-            # slot becomes
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-            # instead of ``Raw``. It parses the two guaranteed octets
-            # generically -- next header ``UDP`` and a length that exactly
-            # matches this ``fback_raw`` payload -- so ``IPv6.read`` returns
-            # normally: IPv6's own header fields (source, destination, hop
-            # limit) survive, and the chain ends honestly at the bad
-            # header's replacement rather than swallowing the packet.
+        with self.subTest('over IPv6, the raise ends the walk at the MH slot (GitHub issue #2477)'):
+            # IPv6 walks Mobility Header as an extension header through its own
+            # ``@beholder``-decorated ``_import_next_layer``, which makes the
+            # slot ``Raw``. ``Raw`` carries no ``next``, so the walk stops
+            # there, as RFC 8200 §4 discards the packet, and IPv6's own header
+            # fields survive.
             def wrap_in_ethernet_ipv6(mh_payload: bytes) -> Ethernet:
                 ipv6_header = struct.pack(
                     '>IHBB', 6 << 28, len(mh_payload), int(TransType.Mobility_Header), 64,
@@ -1861,16 +1835,13 @@ class MHUnitTests(unittest.TestCase):
                 return Ethernet(io.BytesIO(raw), len(raw))
 
             from pcapkit.protocols.internet.ipv6 import IPv6
-            from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 
             eth = wrap_in_ethernet_ipv6(bytes(fback_raw))
             self.assertIsInstance(eth.payload, IPv6)
-            self.assertEqual(str(eth.protochain), 'Ethernet:IPv6:IPv6-Ext')
-
-            genext = next(iter(eth.payload.extension_headers.items(multi=True)))[1]
-            self.assertIsInstance(genext, IPv6_Ext)
-            self.assertEqual(genext.next, TransType.UDP)
-            self.assertEqual(genext.length, len(fback_raw))
+            self.assertEqual(str(eth.protochain), 'Ethernet:IPv6:Mobility_Header')
+            self.assertEqual(list(eth.payload.extension_headers.items(multi=True)), [])
+            self.assertIs(type(eth.payload.payload), Raw)
+            self.assertEqual(bytes(eth.payload.payload), bytes(fback_raw))
 
     def test_mh_message_flags_pack_each_bit_independently(self) -> None:
         """Regression test: a cleared flag must not be emitted as a set bit.

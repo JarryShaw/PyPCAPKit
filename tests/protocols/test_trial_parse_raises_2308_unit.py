@@ -41,7 +41,7 @@ def _ipv6(next_header: 'int') -> 'bytes':
             + bytes(15) + b'\x01' + bytes(15) + b'\x02' + b'\x00')
 
 
-#: The warnings of the kept, cut ``IPv6_Ext`` that each :func:`_ipv6` frame ends in.
+#: The warnings of the kept, cut ``IPv6_Ext`` that a Shim6 :func:`_ipv6` frame ends in.
 IPV6_EXT_CUT = ['packet length < 0: -1',
                 'IPv6: extension header declares a length of 8 octet(s) with 1 octet(s) '
                 'left in the chain; stopping the walk instead of skipping past it']
@@ -86,11 +86,14 @@ class TestTrialParseRaises(unittest.TestCase):
         self.assertEqual(parsed.payload.info.error, ERROR)  # type: ignore[attr-defined]
         self.assertEqual(messages, [])
 
-    def test_replaced_by_ipv6_ext_reports_only_the_replacement(self) -> None:
-        """A cut Hop-by-Hop header raises and is parsed as ``IPv6_Ext``, which alone warns."""
+    def test_cut_ipv6_extension_header_is_raw_and_warns_nothing(self) -> None:
+        """A cut Hop-by-Hop header raises and is kept as ``Raw`` (#2477), which warns nothing."""
+        from pcapkit.protocols.misc.raw import Raw
+
         parsed, messages = self._parse(_ipv6(0))
-        self.assertEqual(str(parsed.protochain), 'Ethernet:IPv6:IPv6-Ext')  # type: ignore[attr-defined]
-        self.assertEqual(messages, IPV6_EXT_CUT)
+        self.assertEqual(str(parsed.protochain), 'Ethernet:IPv6:HOPOPT')  # type: ignore[attr-defined]
+        self.assertIs(type(parsed.payload.payload), Raw)  # type: ignore[attr-defined]
+        self.assertEqual(messages, [])
 
     def test_kept_trial_still_warns(self) -> None:
         """A cut Shim6 header is held, kept, and reports its warnings as before."""
