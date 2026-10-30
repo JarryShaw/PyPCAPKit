@@ -34,7 +34,6 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.tls import Alert as Data_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as Data_ChangeCipherSpec
@@ -42,7 +41,6 @@ from pcapkit.protocols.data.application.tls import ClientHello as Data_ClientHel
 from pcapkit.protocols.data.application.tls import Extension as Data_Extension
 from pcapkit.protocols.data.application.tls import Handshake as Data_Handshake
 from pcapkit.protocols.data.application.tls import ServerHello as Data_ServerHello
-from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -61,31 +59,14 @@ _TLS_VERSION_MAJOR = 0x03
 #: DTLS encodes its legacy version as the one's complement of TLS's).
 _DTLS_VERSION_MAJOR = 0xFE
 
-#: The content types a genuine record may carry, i.e. every value IANA's ``TLS
-#: ContentType`` registry assigns. Written out rather than taken as "every
-#: member :class:`~pcapkit.const.tls.content_type.ContentType` names" for two
-#: reasons: :attr:`~pcapkit.const.tls.content_type.ContentType.invalid` is a
-#: named member that is *not* a wire value -- :rfc:`9846#section-5.1` defines
-#: ``invalid(0)`` as a sentinel to be rejected, and IANA keeps 0 inside its
-#: Unassigned 0-19 band -- and iterating the registry would also be a moving
-#: target, since a lookup of an unassigned value mints a member rather than
-#: raising. An allowlist is what makes this a *decision* about the wire rather
-#: than a restatement of whatever the registry happens to hold.
+#: The content types a genuine record may carry. An allowlist rather than
+#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: the
+#: registry names ``invalid(0)``, a sentinel :rfc:`9846#section-5.1` rejects,
+#: and mints a member for any unassigned value it is asked for.
 #:
-#: :attr:`~pcapkit.const.tls.content_type.ContentType.tls12_cid` (25,
-#: :rfc:`9146`) is deliberately left out. Every other type here keeps
-#: ``length`` at the fixed offset :class:`~pcapkit.protocols.schema.application.tls.TLS`/
-#: :class:`~pcapkit.protocols.schema.application.dtls.DTLS` declare it at, but
-#: a Connection ID record inserts the CID *before* ``length``
-#: (:rfc:`9146#section-4`), and the CID's own length is negotiated out of band
-#: during the handshake -- it is not on the wire of the record itself. Reading
-#: ``length`` at the fixed offset for a type-25 record decodes the tail of the
-#: CID as the length field, fabricating a fragment that was never on the wire
-#: (an 8-octet CID makes an 8-octet fragment read back as ``length=17``).
-#: Parsing it correctly needs the negotiated CID length per connection, which
-#: the stateless, per-packet schema read has nowhere to keep, so type 25 is
-#: excluded here and falls back to
-#: :class:`~pcapkit.protocols.misc.raw.Raw` instead of being decoded wrong.
+#: ``tls12_cid`` (25, :rfc:`9146#section-4`) is left out: its connection ID
+#: precedes ``length`` and has a negotiated length the record does not carry,
+#: so reading ``length`` at the fixed offset would fabricate a fragment.
 _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.change_cipher_spec,
     Enum_ContentType.alert,
@@ -96,19 +77,13 @@ _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.return_routability_check,
 })
 
-#: The IANA ``supported_versions`` extension type (:rfc:`9846#section-4.3.1`).
-#: TLS 1.3 and DTLS 1.3 negotiate the *real* version here rather than in the
-#: record header's own legacy version, which both freeze at their immediate
-#: predecessor's value for backward compatibility -- see :data:`TLS13_VERSION`
-#: and :data:`DTLS13_VERSION`.
+#: The ``supported_versions`` extension type (:rfc:`9846#section-4.3.1`), where
+#: TLS 1.3 and DTLS 1.3 negotiate the version their record header does not carry.
 _EXT_SUPPORTED_VERSIONS = 43
 
-#: The wire value a ``supported_versions`` extension carries for TLS 1.3
-#: (:rfc:`9846#section-4.3.1`). Never the record layer's own
-#: ``legacy_version``, which TLS 1.3 freezes at TLS 1.2's ``0x0303``.
+#: The ``supported_versions`` value for TLS 1.3 (:rfc:`9846#section-4.3.1`).
 TLS13_VERSION = 0x0304
-#: Same, for DTLS 1.3 (:rfc:`9147#section-5.3`). The record layer stays
-#: frozen at DTLS 1.2's ``0xFEFD``.
+#: The ``supported_versions`` value for DTLS 1.3 (:rfc:`9147#section-5.3`).
 DTLS13_VERSION = 0xFEFC
 
 
@@ -150,10 +125,8 @@ def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
 def _take(data: 'bytes', pos: 'int', size: 'int', *, what: 'str', alias: 'str') -> 'bytes':
     """Slice ``size`` octets out of ``data`` at ``pos``, refusing a short read.
 
-    Plain slicing never raises on a short buffer -- ``b'ab'[0:4]`` is ``b'ab'``
-    -- so a truncated handshake message would otherwise parse a few octets
-    short rather than fail. This is what makes each caller's spec-shaped slice
-    actually bounds-checked.
+    Plain slicing silently returns fewer octets, which would let a truncated
+    message parse short rather than fail.
 
     Args:
         data: Buffer being read.
@@ -178,14 +151,9 @@ def _take(data: 'bytes', pos: 'int', size: 'int', *, what: 'str', alias: 'str') 
 def _tls_handshake_tiles(fragment: 'bytes') -> 'bool':
     """Whether ``fragment`` is tiled exactly by handshake-message headers.
 
-    A ``handshake`` record's fragment is cleartext only until the handshake
-    derives keys; after that a record still typed ``handshake`` (a ``Finished``,
-    a post-handshake ``NewSessionTicket`` or ``KeyUpdate``) carries ciphertext,
-    and nothing in the cleartext header says which it is. What does distinguish
-    them is self-consistency: a cleartext fragment is a whole number of
-    messages, each a 4-octet ``msg_type``/``length`` header followed by exactly
-    ``length`` octets, so walking those headers lands on the fragment's last
-    octet exactly. Ciphertext is pseudorandom and overwhelmingly does not.
+    Once keys are derived a ``handshake`` record carries ciphertext, and its
+    header does not say so. A cleartext fragment is a whole number of
+    ``msg_type``/``length``-framed messages; ciphertext almost never is.
 
     Args:
         fragment: Record fragment, i.e. the candidate handshake messages.
@@ -194,18 +162,9 @@ def _tls_handshake_tiles(fragment: 'bytes') -> 'bool':
         Whether the walk lands exactly on the end of ``fragment``.
 
     Notes:
-        This is a heuristic, and an imperfect one in both directions. A
-        ciphertext fragment whose octets happen to tile is still taken for
-        cleartext -- telling the two apart needs the session keys, which a
-        passive dissector does not have. And a genuine cleartext handshake
-        message that :rfc:`9846#section-5.1` has split across more than one
-        TLS record does *not* tile within a single record either, so this
-        walk fails it the same way it fails ciphertext; the "always tiles"
-        case holds only for a message that fits in one record, which is the
-        common one. Both misses land on the same, conservative side, though:
-        this method is consulted only to decide whether to decode, and
-        keeping either case's octets opaque loses nothing, while mis-decoding
-        ciphertext fabricates messages.
+        A heuristic: ciphertext that happens to tile is decoded, and a
+        message split across records is not. Keeping a cleartext message
+        opaque loses nothing; decoding ciphertext would fabricate messages.
 
     """
     pos = 0
@@ -233,7 +192,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
     @classmethod
     def id(cls) -> 'tuple[Literal["TLS"], Literal["DTLS"]]':
-        """Index ID of the protocol.
+        """Index ID of the protocol. The SSLv2 class joins it in its own PR.
 
         Returns:
             Index ID of the protocol.
@@ -248,19 +207,12 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     def _validate_tls_record(self, schema: 'Any', *, available: 'int', dtls: 'bool') -> 'None':
         """Reject octets that cannot be a genuine TLS/DTLS record.
 
-        Dispatch hands this class *every* payload on TCP port 443 (or UDP
-        port 5684), and once a connection is past its handshake most of those
-        are mid-stream ciphertext continuations with no record header in them
-        at all -- not an edge case, the common case. Without this check, any
-        content-type octet and legacy version decode as *some* record:
-        :class:`~pcapkit.corekit.enum.EnumRegistry`'s ``_missing_`` mints an
-        ``Unassigned`` pseudo-member for a value no :class:`~pcapkit.const.tls.content_type.ContentType`
-        names rather than refusing it, and a declared :attr:`~pcapkit.protocols.schema.application.tls.TLS.length`
-        longer than what is actually left is silently zero-padded out to that
-        length by :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`'s
-        truncated-capture tolerance -- fabricating record content from octets
-        that were never on the wire, rather than signalling that this was not
-        a record to begin with.
+        Dispatch hands this class every payload on its port, most of them
+        mid-stream continuations with no record header. Without this check
+        any octets decode as a record: the content-type registry mints a
+        member for unknown values, and a ``length`` past the buffer is
+        zero-padded by :meth:`FieldBase.unpack
+        <pcapkit.corekit.fields.field.FieldBase.unpack>`.
 
         Args:
             schema: The just-parsed record header.
@@ -276,17 +228,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 of accepting a fabricated one.
 
         Note:
-            **A record split across two TCP segments is rejected**, since its
-            first segment carries a header whose declared ``length`` genuinely
-            does run past the end of that segment. A TLS record may be up to
-            16 KiB (:rfc:`9846#section-5.1`) against a typical 1460-octet MSS,
-            so this is routine rather than rare -- a post-quantum
-            ``ClientHello`` alone exceeds one segment. Accepting it would need
-            the record reassembled across the stream first, which is
-            :class:`~pcapkit.foundation.reassembly.tcp.TCP`'s job and not
-            something this layer can see; until a record arrives whole,
-            degrading to :class:`~pcapkit.protocols.misc.raw.Raw` is the honest
-            answer, because the fragment this layer holds is not a record.
+            A record split across TCP segments is rejected too: this layer
+            holds only a fragment of it, and reassembly is
+            :class:`~pcapkit.foundation.reassembly.tcp.TCP`'s job.
 
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
@@ -313,19 +257,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     def _tls_negotiates(self, schema: 'Any', target: 'int', *, dtls: 'bool') -> 'bool':
         """Whether this record's first handshake message negotiates ``target``.
 
-        TLS 1.3 and DTLS 1.3 freeze the record layer's own legacy version at
-        their predecessor's value and negotiate the real version through a
-        ``supported_versions`` extension on the ``ClientHello``/``ServerHello``
-        instead (:data:`TLS13_VERSION`, :data:`DTLS13_VERSION`). A dispatcher
-        picking a concrete version tier for an ambiguous legacy version
-        consults this to tell the two apart.
-
-        This is used from a dispatcher's own version guess, *before* the real
-        parse that follows: any failure to decode here -- a malformed
-        message, a non-handshake record, ciphertext that happens not to tile
-        -- is reported as "no", never propagated, since the real parse the
-        dispatcher goes on to run is what reports a genuine error, not this
-        best-effort peek.
+        A best-effort peek ahead of the real parse: any decoding failure here
+        is reported as "no", leaving the real parse to raise.
 
         Args:
             schema: The just-parsed record header.
@@ -349,70 +282,22 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         body = getattr(content[0], 'body', None)
         return target in _negotiated_versions(body)
 
-    def _adopt_dispatched(self, obj: 'Any') -> 'Any':
-        """Adopt a dispatched tier's parse result as this dispatcher's own.
-
-        Used where a version-dispatching ``read()`` hands the payload to a
-        different class -- :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>`
-        delegating an SSLv2-shaped payload -- mirroring
-        :meth:`HTTP.read <pcapkit.protocols.application.http.HTTP.read>`'s
-        own adoption of whichever versioned object it constructed: the
-        dispatcher's own :attr:`alias <pcapkit.protocols.protocol.ProtocolBase.alias>`
-        and :attr:`name <pcapkit.protocols.protocol.ProtocolBase.name>` both
-        become the delegate's -- the same pair ``read()`` sets when it parses
-        the record itself -- and a next layer the delegate's own parse
-        already decoded is carried over rather than decoded twice.
-
-        Args:
-            obj: The concrete tier's own, already-parsed instance.
-
-        Returns:
-            ``obj``'s parsed data model, which becomes this dispatcher's own
-            :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`.
-
-        """
-        self._alias = obj.alias  # pylint: disable=attribute-defined-outside-init
-        self._name = obj.name  # pylint: disable=attribute-defined-outside-init
-        next_ = getattr(obj, '_next', None)
-        if next_ is not None and not isinstance(next_, NoPayload):
-            self._next = next_  # pylint: disable=attribute-defined-outside-init
-            self._protos = ProtoChain(self.__class__, self.alias, basis=next_.protochain)  # pylint: disable=attribute-defined-outside-init
-        return obj.info
-
     def _tls_content_is_cleartext(self, content_type: 'Enum_ContentType', fragment: 'bytes', *,
                                   dtls: 'bool', epoch: 'int') -> 'bool':
         """Whether a record's fragment is cleartext to decode structurally.
 
-        Three content types -- ``handshake``, ``alert``, and
-        ``change_cipher_spec`` -- carry a record format that is genuine only
-        before keys are derived; once they are, a record still typed the same
-        way carries ciphertext, with nothing in the cleartext record header to
-        say which it is. Decoding the ciphertext case structurally either
-        fabricates content out of pseudorandom octets or fails and drops the
-        whole record to :class:`~pcapkit.protocols.misc.raw.Raw`, losing the
-        record header that *was* in the clear -- the bug this method exists to
-        avoid for all three types rather than just ``handshake``.
+        ``handshake``, ``alert`` and ``change_cipher_spec`` carry ciphertext
+        once keys are derived, and the record header does not say so.
+        Decoding ciphertext would fabricate content, or fail and lose the
+        cleartext header to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
-        The two protocols answer this differently because DTLS gives a direct
-        answer and TLS does not:
+        * **DTLS**: epoch 0 is cleartext, any later epoch encrypted
+          (:rfc:`9147#section-4.2`).
+        * **TLS**: ``handshake`` must tile (:func:`_tls_handshake_tiles`);
+          ``alert`` must be exactly 2 octets and ``change_cipher_spec``
+          exactly 1, which encryption overhead never yields.
 
-        * **DTLS** states it in the record header, for every content type:
-          the epoch counts cipher changes (:rfc:`9147#section-4.2`), so epoch
-          0 is exactly the cleartext initial handshake and any later epoch is
-          encrypted.
-        * **TLS** has no such field, so each type falls back to its own
-          self-consistency check instead:
-
-          * ``handshake`` -- :func:`_tls_handshake_tiles` asks whether the
-            fragment is a whole number of messages.
-          * ``alert`` -- a genuine cleartext alert is always exactly 2 octets
-            (``level`` + ``description``); an encrypted one can never land on
-            exactly 2, because of the MAC/tag overhead encryption adds.
-          * ``change_cipher_spec`` -- the same reasoning, at exactly 1 octet.
-
-        Any other content type is reported as *not* cleartext -- a miss lands
-        on the conservative side, same as :func:`_tls_handshake_tiles` -- so a
-        content type without a branch here fails closed.
+        Any other content type is reported as not cleartext.
 
         Args:
             content_type: Record content type.
@@ -462,21 +347,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             ProtocolError: If ``fragment`` is malformed for ``content_type``.
 
         Notes:
-            None of ``handshake``, ``alert``, or ``change_cipher_spec`` are
-            necessarily *cleartext* just because of their content type.
-            TLS 1.2's ``Finished`` and any renegotiation handshake travel as
-            ciphertext under ``handshake`` once keys are derived, with no
-            flag in the cleartext header to say so -- and TLS 1.3's
-            post-handshake messages (``NewSessionTicket``, ``KeyUpdate``) are
-            not under this type at all, since TLS 1.3's outer record type is
-            always ``application_data`` once encryption starts, and
-            ``KeyUpdate`` has no TLS 1.2 equivalent to begin with. An
-            encrypted TLS 1.2 ``alert`` -- including the ``close_notify``
-            that ends nearly every connection -- or a ``change_cipher_spec``
-            sent mid-renegotiation is the same shape of problem under those
-            two types. Every one of the three is kept as opaque :obj:`bytes`
-            rather than decoded when it is not cleartext, which is what
-            :meth:`_tls_content_is_cleartext` decides.
+            ``handshake``, ``alert`` and ``change_cipher_spec`` are kept as
+            :obj:`bytes` when :meth:`_tls_content_is_cleartext` says they are
+            encrypted.
 
         """
         if content_type == Enum_ContentType.handshake:
@@ -527,10 +400,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                                      dtls: 'bool') -> 'tuple[Any, ...]':
         """Decode a ``handshake`` record fragment into its handshake messages.
 
-        A TLS record may coalesce several handshake messages (e.g.
-        ``Certificate``, ``ServerKeyExchange`` and ``ServerHelloDone`` in one
-        record), so this reads however many fit in ``fragment`` rather than
-        exactly one.
+        A record may coalesce several handshake messages.
 
         Args:
             fragment: Record fragment, i.e. one or more concatenated
@@ -548,16 +418,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 ``fragment``.
 
         Notes:
-            A ``ClientHello``/``ServerHello`` body is decoded into
-            :class:`~pcapkit.protocols.data.application.tls.ClientHello`/
-            :class:`~pcapkit.protocols.data.application.tls.ServerHello`
-            only when the whole message is present -- always true for TLS,
-            and true for DTLS only when the message is not fragmented across
-            several records. A DTLS message that is split across records is
-            not reassembled (:issue:`2440`), so its body is
-            kept as the single fragment's raw octets regardless of
-            ``msg_type``. Every other ``msg_type`` is message-TYPE-level
-            framing only: its body is kept undecoded (:issue:`2437`).
+            Only an unfragmented ``ClientHello``/``ServerHello`` body is
+            decoded; a fragmented DTLS message is not reassembled
+            (:issue:`2440`), and other bodies stay undecoded (:issue:`2437`).
 
         """
         from pcapkit.protocols.data.application.dtls import \
@@ -672,11 +535,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                Extension extensions<7..2^16-1>;
            } ClientHello;
 
-        DTLS's ``ClientHello`` is identical except for one insertion: a
-        length-prefixed ``cookie`` directly after ``legacy_session_id`` and
-        before ``cipher_suites`` [:rfc:`6347#section-4.2.1`;
-        :rfc:`9147#section-5.3`'s ``legacy_cookie`` carries it forward
-        unchanged], which TLS's ``ClientHello`` does not carry at all:
+        DTLS inserts a ``cookie`` after ``legacy_session_id``
+        [:rfc:`6347#section-4.2.1`, :rfc:`9147#section-5.3`]:
 
         .. code-block:: text
 
@@ -884,9 +744,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                opaque extension_data<0..2^16-1>;
            } Extension;
 
-        An extension's own body is not decoded (:issue:`2437`): it is kept
-        as :attr:`~pcapkit.protocols.data.application.tls.Extension.data`,
-        undecoded.
+        An extension's body is kept undecoded (:issue:`2437`).
 
         Args:
             data: The extension list, i.e. one or more concatenated

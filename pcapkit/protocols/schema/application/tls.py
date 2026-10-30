@@ -20,17 +20,10 @@ if TYPE_CHECKING:
 class TLS(Schema):
     """Header schema for TLS record layer packet.
 
-    The record header is byte-identical in shape to :class:`DTLS
-    <pcapkit.protocols.schema.application.dtls.DTLS>`'s, minus the epoch and
-    sequence number DTLS inserts before ``length`` (:rfc:`9846#section-5.1`).
-    :attr:`fragment` is kept as the raw record fragment; everything it may
-    hold -- a list of handshake messages, an alert, change-cipher-spec, or
-    opaque application data -- is decoded in
-    :meth:`TLS.read <pcapkit.protocols.application.tls.TLS.read>` by the
-    shared helpers on
-    :class:`~pcapkit.protocols.application.ssl.SSL`, rather than here, so that
-    :class:`~pcapkit.protocols.schema.application.dtls.DTLS` can reuse the same
-    decoding logic over its own (fragment-headered) handshake messages.
+    The record header has :class:`DTLS
+    <pcapkit.protocols.schema.application.dtls.DTLS>`'s fields minus the epoch
+    and sequence number (:rfc:`9846#section-5.1`). :attr:`fragment` is decoded
+    by :class:`~pcapkit.protocols.application.ssl.SSL`, which DTLS shares.
 
     """
 

@@ -8,8 +8,8 @@ TLS/SSL - Transport Layer Security
 :class:`~pcapkit.protocols.application.tls.SSLv3`, which implement an
 extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
 TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
-1.3 (:rfc:`9846`, which obsoletes :rfc:`8446` and :rfc:`5246`) -- at the
-record layer, plus
+1.3 (:rfc:`9846`, which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`,
+:rfc:`7627`, :rfc:`8422` and :rfc:`8446`) -- at the record layer, plus
 handshake message TYPE-level framing.
 
 Version Identification
@@ -70,46 +70,25 @@ so the alias still follows the wire. Dispatch never constructs one.
 Decoded Fields
 --------------
 
-* The record header -- content type, legacy version, length -- in full,
-  regardless of encryption: this part is always in the clear.
-* For a **cleartext** ``handshake``, ``alert``, or ``change_cipher_spec``
-  record -- i.e. one that has not yet started carrying ciphertext, decided
-  per-record by
-  :meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`:
+* The record header, always: it is never encrypted.
+* A **cleartext** ``handshake``, ``alert`` or ``change_cipher_spec`` record
+  (:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`
+  decides which are):
 
-  * ``ClientHello``/``ServerHello`` down to their cipher suite(s),
-    compression method(s), and extension list, TYPE+LENGTH framed (extension
-    bodies are not decoded).
-  * Every other handshake message (``Certificate``, ``ServerKeyExchange``,
-    ``ClientKeyExchange``, etc.) at the message-type/length level only: its
-    body is kept undecoded. ``Finished`` is always ciphertext -- there is no
-    cleartext ``Finished`` -- so it is never decoded even at this level and
-    always stays opaque bytes.
-  * ``Alert`` and ``ChangeCipherSpec`` records in full.
+  * ``ClientHello``/``ServerHello`` down to their cipher suites, compression
+    methods and extensions (type and length only).
+  * Every other handshake message at type and length only.
+  * ``Alert`` and ``ChangeCipherSpec`` in full.
 
-* An **encrypted** ``handshake``, ``alert``, or ``change_cipher_spec``
-  record -- which is the common case for TLS 1.2 traffic once the handshake
-  completes -- plus ``application_data`` and every other content type, as
-  opaque :obj:`bytes`.
-
-The record header is visible on the wire regardless of encryption, but the
-record *content* is not: once the handshake has derived keys, a
-``handshake``/``alert``/``change_cipher_spec`` record may carry ciphertext
-indistinguishable at the header level from its cleartext counterpart, and
-only the content stays undecoded in that case -- see
-:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`
-for how each case is told apart. Decrypting ``application_data`` is out of
-scope.
+* Everything else -- the same types once encrypted, ``application_data``
+  and every other content type -- as opaque :obj:`bytes`.
 
 Known Limitation
------------------
+----------------
 
-**A record split across two TCP segments is not reassembled**, and so decodes
-as :class:`~pcapkit.protocols.misc.raw.Raw` rather than as the record it is the
-start of. A record may be up to 16 KiB against a typical 1460-octet MSS, so
-this is routine rather than rare. See
-:meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-for why rejecting such a fragment is the honest answer at this layer.
+**A record split across two TCP segments is not reassembled**, and decodes as
+:class:`~pcapkit.protocols.misc.raw.Raw`. A record may be up to 16 KiB
+against a typical 1460-octet MSS, so this is routine.
 
 .. versionadded:: 1.6.0
 

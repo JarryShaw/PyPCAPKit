@@ -43,35 +43,19 @@ generic ``DTLS`` alias rather than claiming a specific one.
 Known Limitations
 -----------------
 
-**A handshake message split across several DTLS records is not reassembled.**
-DTLS fragments a handshake message when it does not fit in one datagram
-(:rfc:`6347#section-4.2.3`); reassembling that would need
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` keyed on the
-UDP 5-tuple plus epoch (:issue:`2440`). A fragment's
+**A handshake message split across DTLS records is not reassembled**
+(:rfc:`6347#section-4.2.3`, :issue:`2440`). Such a message is flagged
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
-says whether this is the case; such a message's
-:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body` is kept
-as that one fragment's raw octets rather than attempted as a (necessarily
-wrong, since only a slice of it is present) decode. An *unfragmented* message
--- ``fragment_offset == 0`` and ``fragment_length == length`` -- decodes
-exactly as :class:`~pcapkit.protocols.application.tls.TLS` would, which is
-the common case: a ``ClientHello`` or ``ServerHello`` that fits one datagram
-never fragments.
+and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
+kept as raw octets.
 
-**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). DTLS 1.3
-sends its cleartext records with the legacy ``DTLSPlaintext`` header this
-module reads -- the DTLS 1.2 shape, with ``legacy_record_version`` frozen at
-DTLS 1.2's value (:rfc:`9147#section-4`). The *unified header* the same
-section defines for encrypted records has no content-type octet, so
-:meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-rejects it -- its first octet is never an accepted content type -- and it
-degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
+**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). It has
+no content-type octet (:rfc:`9147#section-4`), so it degrades to
+:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS 1.3's cleartext records use
+the legacy ``DTLSPlaintext`` header and are decoded.
 
-**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`). Their
-connection ID precedes ``length``, and its length is negotiated during the
-handshake rather than carried in the record, so
-:meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-rejects content type 25 and the record degrades to
+**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`): the
+connection ID's length is not carried in the record, so they degrade to
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 .. versionadded:: 1.6.0

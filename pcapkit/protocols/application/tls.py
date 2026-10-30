@@ -9,61 +9,36 @@
 :class:`~pcapkit.protocols.application.tls.SSLv3`,
 which implement an extractor for the TLS/SSLv3+ record-layer family --
 SSLv3, TLS 1.0, TLS 1.1, TLS 1.2 (:rfc:`5246`) and TLS 1.3 (:rfc:`9846`,
-which obsoletes :rfc:`8446` and :rfc:`5246`). :attr:`TCP.__proto__
+which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`, :rfc:`7627`,
+:rfc:`8422` and :rfc:`8446`). :attr:`TCP.__proto__
 <pcapkit.protocols.transport.tcp.TCP.__proto__>` binds :class:`TLS` at port
-443; its own :meth:`~TLS.read` parses the (always wire-identical) record
-header, then sets :attr:`~TLS.alias` (and, for SSLv3, :attr:`~TLS.name`)
-according to the record's legacy version -- mirroring
-:class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch over
-RARP/DRARP/InARP by operation code, rather than
-:class:`~pcapkit.protocols.application.http.HTTP`'s dispatch over distinct
-per-version classes. Where the payload is SSLv2-shaped instead,
-:meth:`~TLS.read` delegates to
-:class:`~pcapkit.protocols.application.sslv2.SSLv2`.
+443. Every tier shares one record header, so :meth:`~TLS.read` sets
+:attr:`~TLS.alias` (and, for SSLv3, :attr:`~TLS.name`) from the record's
+legacy version, as :class:`~pcapkit.protocols.link.arp.ARP` does by
+operation code, rather than dispatching to per-version classes.
 
 Decoded Fields
 --------------
 
-* The record header -- content type, legacy version, length -- in full,
-  regardless of encryption: this part is always in the clear.
-* For a **cleartext** ``handshake``, ``alert``, or ``change_cipher_spec``
-  record -- i.e. one that has not yet started carrying ciphertext, decided
-  per-record by
-  :meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`:
+* The record header, always: it is never encrypted.
+* A **cleartext** ``handshake``, ``alert`` or ``change_cipher_spec`` record
+  (:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`
+  decides which are):
 
-  * ``ClientHello``/``ServerHello`` down to their cipher suite(s),
-    compression method(s), and extension list, TYPE+LENGTH framed (extension
-    bodies are not decoded).
-  * Every other handshake message (``Certificate``, ``ServerKeyExchange``,
-    ``ClientKeyExchange``, etc.) at the message-type/length level only: its
-    body is kept undecoded. ``Finished`` is always ciphertext -- there is no
-    cleartext ``Finished`` -- so it is never decoded even at this level and
-    always stays opaque bytes.
-  * ``Alert`` and ``ChangeCipherSpec`` records in full.
+  * ``ClientHello``/``ServerHello`` down to their cipher suites, compression
+    methods and extensions (type and length only).
+  * Every other handshake message at type and length only.
+  * ``Alert`` and ``ChangeCipherSpec`` in full.
 
-* An **encrypted** ``handshake``, ``alert``, or ``change_cipher_spec``
-  record -- which is the common case for TLS 1.2 traffic once the handshake
-  completes -- plus ``application_data`` and every other content type, as
-  opaque :obj:`bytes`.
-
-The record header is visible on the wire regardless of encryption, but the
-record *content* is not: once the handshake has derived keys, a
-``handshake``/``alert``/``change_cipher_spec`` record may carry ciphertext
-indistinguishable at the header level from its cleartext counterpart, and
-only the content stays undecoded in that case -- see
-:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`
-for how each case is told apart. Decrypting ``application_data`` is out of
-scope.
+* Everything else -- the same types once encrypted, ``application_data``
+  and every other content type -- as opaque :obj:`bytes`.
 
 Known Limitation
------------------
+----------------
 
-**A record split across two TCP segments is not reassembled**, and so decodes
-as :class:`~pcapkit.protocols.misc.raw.Raw` rather than as the record it is the
-start of. A record may be up to 16 KiB against a typical 1460-octet MSS, so
-this is routine rather than rare. See
-:meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-for why rejecting such a fragment is the honest answer at this layer.
+**A record split across two TCP segments is not reassembled**, and decodes as
+:class:`~pcapkit.protocols.misc.raw.Raw`. A record may be up to 16 KiB
+against a typical 1460-octet MSS, so this is routine.
 
 .. versionadded:: 1.6.0
 
@@ -88,23 +63,11 @@ if TYPE_CHECKING:
 
 __all__ = ['TLS', 'SSLv3']
 
-#: Legacy record-version major octet TLS/SSLv3+ records carry (``0x03xx``,
-#: SSLv3 through the TLS 1.3 wire value). Mirrors
-#: :data:`~pcapkit.protocols.application.ssl._TLS_VERSION_MAJOR`, which this
-#: module does not import -- that constant is private to
-#: :mod:`~pcapkit.protocols.application.ssl` -- but the value the two check
-#: is the same one by definition.
-_TLS_VERSION_MAJOR = 0x03
-
-#: Legacy record version SSLv3 carries -- the one tier in this family with a
-#: different full :attr:`~TLS.name` as well as a different :attr:`~TLS.alias`.
+#: Legacy record version SSLv3 carries, the one tier with its own :attr:`~TLS.name`.
 _SSLV3_VERSION = 0x0300
 
-#: Legacy record version to alias, for every tier the record layer's own
-#: version names directly. ``0x0303`` reads as TLS 1.2 unless the
-#: ``supported_versions`` peek finds TLS 1.3 (see
-#: :data:`_TLS13_LEGACY_VERSIONS`). A version not listed here keeps the
-#: generic ``'TLS'`` alias.
+#: Legacy record version to alias. TLS 1.3 reuses ``0x0303``; see
+#: :data:`_TLS13_LEGACY_VERSIONS`.
 _TLS_VERSION_ALIASES = {
     _SSLV3_VERSION: 'SSLv3',
     0x0301: 'TLS 1.0',
@@ -115,43 +78,6 @@ _TLS_VERSION_ALIASES = {
 #: Legacy record versions a TLS 1.3 record may carry: ``0x0303`` always, and
 #: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
 _TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
-
-#: Exclusive upper bound of a TLS content type that :func:`_looks_like_sslv2`
-#: accepts: the first octets SSLv2's padded 3-octet header also uses (top bits
-#: ``00``). IANA assigns no content type above it, and :rfc:`9443` reserves
-#: 64-255 for other protocols multiplexed on the same port.
-_TLS_FIRST_OCTET_LIMIT = 0x40
-
-
-def _looks_like_sslv2(data: 'bytes') -> 'bool':
-    """Whether ``data`` opens with an SSLv2 record header rather than a TLS one.
-
-    A TLS record header (:rfc:`9846#section-5.1`) opens with a content type
-    and the legacy version's major octet, :data:`_TLS_VERSION_MAJOR`. An
-    SSLv2 header (draft-hickman-netscape-ssl-00, "SSL Record Header") has no
-    content type: a first octet with the top bit set opens a 2-octet header,
-    one with top bits ``01`` an escaped 3-octet header, and one with top bits
-    ``00`` a padded 3-octet header whose second octet is the low half of the
-    record length (see :mod:`~pcapkit.protocols.application.sslv2`).
-
-    ``data`` is read as TLS when its first octet is below
-    :data:`_TLS_FIRST_OCTET_LIMIT` and its second is
-    :data:`_TLS_VERSION_MAJOR`, whether or not the content type is one
-    :meth:`SSL._validate_tls_record
-    <pcapkit.protocols.application.ssl.SSL._validate_tls_record>` accepts, so
-    that it, not SSLv2, rejects the others. Everything else reads as SSLv2,
-    including a buffer too short to hold both octets.
-
-    Args:
-        data: The payload, from its first octet.
-
-    Returns:
-        :data:`False` when ``data`` opens with a TLS record header;
-        :data:`True` otherwise.
-
-    """
-    return not (len(data) >= 2 and data[0] < _TLS_FIRST_OCTET_LIMIT
-                and data[1] == _TLS_VERSION_MAJOR)
 
 
 class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
@@ -171,17 +97,10 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
     """
 
-    #: Name of corresponding protocol -- dynamic only for SSLv3, the one
-    #: tier in this family with a genuinely different full name; every other
-    #: tier keeps this default. Mirrors
-    #: :attr:`ARP._name <pcapkit.protocols.link.arp.ARP._name>`.
+    #: Name of corresponding protocol; only SSLv3 has a different one.
     _name = 'Transport Layer Security'  # type: Literal["Transport Layer Security", "Secure Sockets Layer version 3"]  # pylint: disable=line-too-long
 
-    #: Resolved alias once :meth:`read` has identified the concrete tier --
-    #: e.g. ``'SSLv3'`` or ``'TLS 1.2'``. The class name itself until then,
-    #: same as the unversioned default every
-    #: :class:`~pcapkit.protocols.protocol.ProtocolBase` falls back to.
-    #: Mirrors :attr:`ARP._acnm <pcapkit.protocols.link.arp.ARP._acnm>`.
+    #: Tier :meth:`read` identified, e.g. ``'TLS 1.2'``; ``'TLS'`` until then.
     _alias = 'TLS'  # type: Literal["TLS", "SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2", "TLS 1.3"]
 
     ##########################################################################
@@ -216,32 +135,15 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """Index ID of the protocol.
 
         Returns:
-            Index ID of the protocol. Fixed, regardless of which tier
-            :meth:`read` identifies the record as: a dynamically dispatched
-            record never becomes a different *class*, only a different
-            :attr:`alias`, so a genuine TLS 1.2 record must not stop
-            matching a lookup keyed on this value just because *some*
-            instance of this class happened to parse as, say, SSLv3.
-            Inspect :attr:`alias`, or the type of :attr:`info
-            <pcapkit.protocols.protocol.ProtocolBase.info>`, to tell the
-            identified tier apart instead. SSLv2 is not among them either:
-            :meth:`read` may still delegate to it when the payload is shaped
-            that way (see :func:`_looks_like_sslv2`), but doing so hands back
-            an :class:`~pcapkit.protocols.application.sslv2.SSLv2` instance,
-            which carries its own, distinct :meth:`id`.
+            Index ID of the protocol. Fixed whatever tier :meth:`read`
+            identifies, so a lookup by ID matches every record; inspect
+            :attr:`alias` for the tier.
 
         """
         return ('TLS',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Any':
-        """Read Transport Layer Security (TLS), or whatever port 443 actually carries.
-
-        Where the payload is SSLv2-shaped instead (:func:`_looks_like_sslv2`),
-        delegates to :class:`~pcapkit.protocols.application.sslv2.SSLv2` and
-        adopts its parse. Otherwise parses the TLS/SSLv3+ record itself via
-        :meth:`_read_tls_record`, which also sets :attr:`alias` (and, for
-        SSLv3, :attr:`name`) according to the record's legacy version --
-        :data:`self <TLS>` throughout, never a distinct instance.
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_TLS':
+        """Read Transport Layer Security (TLS).
 
         Args:
             length: Length of packet data.
@@ -252,25 +154,9 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
         Raises:
             ProtocolError: If the record cannot be a genuine TLS/SSLv3+
-                record -- see :meth:`_read_tls_record` -- or, where
-                delegated, if :class:`~pcapkit.protocols.application.sslv2.SSLv2`'s
-                own :meth:`read <pcapkit.protocols.application.sslv2.SSLv2.read>`
-                fails.
+                record -- see :meth:`_read_tls_record`.
 
         """
-        if length is None:
-            length = len(self)
-
-        if _looks_like_sslv2(self._data[:length]):
-            try:
-                from pcapkit.protocols.application.sslv2 import SSLv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-            except ImportError:
-                pass  # SSLv2 support (#2457) is unavailable -- fall through
-                      # to the TLS/SSLv3+ parse below.
-            else:
-                obj = SSLv2(self._data, length, **kwargs)
-                return self._adopt_dispatched(obj)
-
         return self._read_tls_record(length, **kwargs)
 
     def make(self,
@@ -283,12 +169,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
              data: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_TLS':
-        """Make (construct) packet data.
-
-        Shared by every tier in the TLS family -- SSLv3 through TLS 1.3 wrap
-        the identical record header and content shapes, so there is nothing
-        version-specific for this to dispatch on; the ``version`` argument is
-        simply written through to the record's legacy version field.
+        """Make (construct) packet data, for every tier: ``version`` is written as is.
 
         Args:
             content_type: Record content type.
@@ -372,22 +253,11 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
                opaque fragment[TLSPlaintext.length];
            } TLSPlaintext;
 
-        Parses the record first, then identifies the concrete tier from its
-        legacy version and sets :attr:`alias` (and, for SSLv3, :attr:`name`)
-        accordingly -- mirroring :meth:`ARP.read <pcapkit.protocols.link.arp.ARP.read>`'s
-        own ``self._acnm = ...`` dispatch by operation code. TLS 1.3 records
-        carry a legacy version of ``0x0303`` -- or ``0x0301`` on an initial
-        ``ClientHello`` (:rfc:`9846#section-5.1`) -- and are told apart by
-        peeking the ``supported_versions`` extension
-        (:meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`).
-        Otherwise SSLv3 (``0x0300``), TLS 1.0 (``0x0301``), TLS 1.1
-        (``0x0302``) and TLS 1.2 (``0x0303``) are named directly by the
-        record's legacy version. Any other ``0x03xx`` value names no known
-        tier and keeps the generic ``'TLS'`` alias rather than claiming one.
-        Any legacy version outside SSLv3+'s ``0x03xx`` range
-        never reaches this dispatch at all: :meth:`SSL._validate_tls_record
-        <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`, called
-        first, already raises for it.
+        The legacy version names the tier, except that TLS 1.3 reuses
+        ``0x0303`` (or ``0x0301`` on an initial ``ClientHello``) and is found
+        by peeking ``supported_versions`` (:meth:`SSL._tls_negotiates
+        <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`). An unknown
+        ``0x03xx`` keeps the generic ``'TLS'`` alias.
 
         Args:
             length: Length of packet data.
@@ -433,20 +303,11 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
 
 class SSLv3(TLS, schema=Schema_TLS, data=Data_TLS):
-    """This class implements Secure Sockets Layer version 3, for explicit,
-    manual construction only.
+    """This class implements Secure Sockets Layer version 3.
 
-    :meth:`TLS.read <TLS.read>`'s own dispatch never constructs an instance
-    of this class -- a record identified as SSLv3 stays a :class:`TLS`
-    instance throughout, with :attr:`~TLS.alias` and :attr:`~TLS.name` set
-    accordingly. This class exists for a caller who already knows they want
-    to build or represent something as specifically SSLv3, mirroring
-    :class:`~pcapkit.protocols.link.arp.InARP`'s relationship to
-    :class:`~pcapkit.protocols.link.arp.ARP`: it narrows :meth:`id` only, and
-    inherits :meth:`~TLS.read` unparsed -- parsing SSLv3-shaped data through
-    this class sets :attr:`~TLS.alias` to ``'SSLv3'`` the same way parsing it
-    through :class:`TLS` would, since the wire format and the dispatch logic
-    are both :class:`TLS`'s.
+    Dispatch never constructs it: an SSLv3 record parses as :class:`TLS` with
+    :attr:`~TLS.alias` ``'SSLv3'``. Like :class:`~pcapkit.protocols.link.arp.InARP`
+    to :class:`~pcapkit.protocols.link.arp.ARP`, it narrows :meth:`id` only.
 
     """
 

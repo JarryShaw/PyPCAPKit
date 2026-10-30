@@ -237,8 +237,6 @@ class DispatchRegistryTests(unittest.TestCase):
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
-            # tcp/443 (TLS) and udp/5684 (DTLS) added alongside this PR's
-            # dissector.
             'link': 7, 'internet': 17, 'tcp': 5, 'udp': 4, 'sctp': 2,
             'pcap-frame': 5, 'pcapng-frame': 5, 'loopback': 4,
         })

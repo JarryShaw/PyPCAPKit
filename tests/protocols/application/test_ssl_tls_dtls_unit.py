@@ -17,38 +17,6 @@ from tests._support import reimport_once_per_class
 #: :mod:`tests.protocols.transport.test_tcp_http_dispatch_unit`'s port-80 header.
 _TCP_TO_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
 
-#: Module the SSLv2 dissector (:issue:`2457`) lives in, which :meth:`TLS.read
-#: <pcapkit.protocols.application.tls.TLS.read>` imports.
-_SSLV2_MODULE = 'pcapkit.protocols.application.sslv2'
-
-
-def _stand_in_sslv2() -> object:
-    """A stand-in :mod:`~pcapkit.protocols.application.sslv2` module whose
-    ``SSLv2`` records each delegation, so a test does not depend on the real
-    dissector.
-
-    """
-    import types
-
-    from pcapkit.const.tls.content_type import ContentType
-    from pcapkit.protocols.data.application.tls import TLS as Data_TLS
-
-    class StandInSSLv2:
-        alias = 'SSLv2'
-        name = 'Secure Sockets Layer version 2'
-        info = Data_TLS(content_type=ContentType.handshake, version=0x0002,
-                        length=3, content=b'\x01\x00\x00')
-        _next = None
-        calls = []  # type: list[bytes]
-
-        def __init__(self, data: bytes, length: int, **kwargs: object) -> None:
-            self.calls.append(data[:length])
-
-    module = types.ModuleType(_SSLV2_MODULE)
-    module.SSLv2 = StandInSSLv2  # type: ignore[attr-defined]
-    return module
-
-
 def _udp_to_5684(payload: bytes) -> bytes:
     """An 8-octet UDP header to port 5684 -- where DTLS is bound -- plus
     ``payload``. The checksum is left zero, which UDP permits over IPv4 and
@@ -260,9 +228,9 @@ class RecordValidationTests(unittest.TestCase):
     def test_content_types_outside_the_assigned_range_are_rejected(self) -> None:
         """One from each band IANA does not assign a content type in.
 
-        19 is the top of the Unassigned 0-19 band, 28 the bottom of 28-31, and
-        32 and 63 the ends of the 32-63 band :rfc:`9147` reserves; 64-255 is
-        SSLv2-shaped (:class:`SSLv2HeuristicTests`). 27, :rfc:`9853`'s
+        19 is the top of the Unassigned 0-19 band, 28 the bottom of 28-31, 32
+        and 63 the ends of the 32-63 band :rfc:`9147` reserves, and 64 and 255
+        the ends of 64-255. 27, :rfc:`9853`'s
         ``return_routability_check``, is on the other side of the boundary and
         must *not* be rejected, so it is asserted here rather than left to the
         round-trip module, where a regression would read as an unrelated
@@ -273,7 +241,7 @@ class RecordValidationTests(unittest.TestCase):
         from pcapkit.protocols.application.tls import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
-        for content_type in (19, 28, 32, 63):
+        for content_type in (19, 28, 32, 63, 64, 255):
             with self.subTest(content_type=content_type):
                 wire = bytes([content_type]) + b'\x03\x03\x00\x04\xde\xad\xbe\xef'
                 with self.assertRaises(ProtocolError):
@@ -334,18 +302,12 @@ class RecordValidationTests(unittest.TestCase):
         value neither uses, so neither half can pass by accepting everything.
 
         """
-        import sys
-        from unittest import mock
-
         from pcapkit.protocols.application.dtls import DTLS
         from pcapkit.protocols.application.tls import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # NOTE: a second octet other than 0x03 is SSLv2-shaped, so SSLv2 is
-        # blocked to reach the TLS validator.
         for version in (b'\x02\x03', b'\xfe\xfd'):
-            with self.subTest(protocol='TLS', version=version.hex()), \
-                    mock.patch.dict(sys.modules, {_SSLV2_MODULE: None}):
+            with self.subTest(protocol='TLS', version=version.hex()):
                 wire = b'\x17' + version + b'\x00\x05hello'
                 with self.assertRaises(ProtocolError):
                     TLS(wire, len(wire))
@@ -402,9 +364,6 @@ class RecordValidationTests(unittest.TestCase):
         to ``Raw`` unconditionally.
 
         """
-        import sys
-        from unittest import mock
-
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.protocols.transport.udp import UDP
 
@@ -418,13 +377,10 @@ class RecordValidationTests(unittest.TestCase):
             ('a DTLS legacy version', b'\x17\xfe\xfd\x00\x05hello', 'TCP:Raw'),
             ('a length past the buffer', b'\x17\x03\x03\xff\xffhello', 'TCP:Raw'),
         )
-        # NOTE: SSLv2 is blocked, since the DTLS legacy version case is
-        # SSLv2-shaped.
         for name, payload, expected in tls_cases:
             with self.subTest(transport='TCP:443', payload=name):
                 raw = _TCP_TO_443 + payload
-                with mock.patch.dict(sys.modules, {_SSLV2_MODULE: None}), \
-                        warnings.catch_warnings():
+                with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     proto = TCP(raw, len(raw))
                 self.assertEqual(str(proto.protochain), expected)
@@ -928,137 +884,49 @@ class VersionDispatchTests(unittest.TestCase):
             TLS(wire, len(wire))
 
 
-class SSLv2HeuristicTests(unittest.TestCase):
-    """:func:`pcapkit.protocols.application.tls._looks_like_sslv2` -- the
-    disambiguation :meth:`TLS.read
-    <pcapkit.protocols.application.tls.TLS.read>` uses to route
-    port-443 traffic to :class:`~pcapkit.protocols.application.sslv2.SSLv2`
-    rather than the TLS family.
-
-    """
+class NonRecordPayloadTests(unittest.TestCase):
+    """A port-443 payload that is not a TLS record degrades to
+    :class:`~pcapkit.protocols.misc.raw.Raw`."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_two_octet_sslv2_header_is_recognised(self) -> None:
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        self.assertTrue(_looks_like_sslv2(b'\x81\x00\x01'))
-
-    def test_three_octet_escaped_sslv2_header_is_recognised(self) -> None:
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        self.assertTrue(_looks_like_sslv2(b'\x41\x00\x01'))
-
-    def test_three_octet_plain_sslv2_header_is_recognised(self) -> None:
-        """The genuinely ambiguous case: top bits ``00``, like a real content type."""
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        # Second octet is not 0x03, so this cannot be a TLS record either.
-        self.assertTrue(_looks_like_sslv2(b'\x01\x00\x01'))
-
-    def test_a_genuine_tls_record_is_not_misread_as_sslv2(self) -> None:
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        for content_type in range(0x40):
-            with self.subTest(content_type=hex(content_type)):
-                self.assertFalse(_looks_like_sslv2(bytes([content_type, 0x03, 0x03])))
-
-    def test_a_first_octet_no_content_type_can_take_reads_as_sslv2(self) -> None:
-        """64-255 opens an SSLv2 2-octet or escaped header even when a
-        ``0x03`` follows."""
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        for first in range(0x40, 0x100):
-            with self.subTest(first=hex(first)):
-                self.assertTrue(_looks_like_sslv2(bytes([first, 0x03, 0x03])))
-
-    def test_too_short_to_tell_reads_as_sslv2(self) -> None:
-        from pcapkit.protocols.application.tls import _looks_like_sslv2
-
-        self.assertTrue(_looks_like_sslv2(b''))
-        self.assertTrue(_looks_like_sslv2(b'\x16'))  # no second octet to check
-
-    def test_sslv2_shaped_payload_degrades_to_raw_when_sslv2_is_unavailable(self) -> None:
-        """With SSLv2 support (:issue:`2457`) unavailable, dispatch still
-        identifies the shape and tries to import it; the :exc:`ImportError`
-        falls through to the TLS-family dispatch, whose own validation then
-        rejects the payload -- degrading to
-        :class:`~pcapkit.protocols.misc.raw.Raw` rather than crashing.
-
-        """
-        import sys
-        from unittest import mock
-
-        from pcapkit.protocols.transport.tcp import TCP
-
-        sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
-        raw = _TCP_TO_443 + sslv2_shaped
-        with mock.patch.dict(sys.modules, {_SSLV2_MODULE: None}), warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            proto = TCP(raw, len(raw))
-        self.assertEqual(str(proto.protochain), 'TCP:Raw')
-
-    def test_delegated_parse_adopts_both_alias_and_name(self) -> None:
-        """:meth:`SSL._adopt_dispatched` carries the delegate's :attr:`name`
-        over alongside its :attr:`alias`, as :meth:`TLS.read` sets both when
-        it parses the record itself.
-
-        """
-        import sys
-        from unittest import mock
-
-        from pcapkit.protocols.application.tls import TLS
-
-        module = _stand_in_sslv2()
-        sslv2_shaped = b'\x81\x00\x01\x00\x00'  # 2-octet SSLv2 header
-        with mock.patch.dict(sys.modules, {_SSLV2_MODULE: module}):
-            parsed = TLS(sslv2_shaped, len(sslv2_shaped))
-        self.assertEqual(parsed.alias, 'SSLv2')
-        self.assertEqual(parsed.name, 'Secure Sockets Layer version 2')
-        self.assertIs(parsed.info, module.SSLv2.info)  # type: ignore[attr-defined]
-
-    def test_sslv2_client_hello_on_port_443_dispatches_to_sslv2(self) -> None:
-        """An SSLv2 ``CLIENT-HELLO`` (2-octet header, ``MSG-TYPE`` 1) on TCP
-        port 443 reaches the SSLv2 dissector."""
-        import sys
-        from unittest import mock
-
-        from pcapkit.protocols.transport.tcp import TCP
-
-        module = _stand_in_sslv2()
-        body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
-        hello = (0x8000 | len(body)).to_bytes(2, 'big') + body
-        raw = _TCP_TO_443 + hello
-        with mock.patch.dict(sys.modules, {_SSLV2_MODULE: module}):
-            proto = TCP(raw, len(raw))
-        self.assertEqual(str(proto.protochain), 'TCP:SSLv2')
-        self.assertEqual(module.SSLv2.calls, [hello])  # type: ignore[attr-defined]
-
-    def test_every_tls_record_shape_stays_tls(self) -> None:
-        """A record of each content type
-        :data:`~pcapkit.protocols.application.ssl._WIRE_CONTENT_TYPES` accepts
-        parses as TLS, and every other first octet below 64 is rejected as
-        TLS, never delegated to SSLv2."""
-        import sys
-        from unittest import mock
-
+    def test_every_first_octet_parses_only_as_an_accepted_content_type(self) -> None:
         from pcapkit.protocols.application.ssl import _WIRE_CONTENT_TYPES
         from pcapkit.protocols.application.tls import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
-        module = _stand_in_sslv2()
-        with mock.patch.dict(sys.modules, {_SSLV2_MODULE: module}):
-            for content_type in range(0x40):
-                with self.subTest(content_type=content_type):
-                    wire = bytes([content_type]) + b'\x03\x03\x00\x04\xde\xad\xbe\xef'
-                    if content_type in _WIRE_CONTENT_TYPES:
-                        self.assertEqual(int(TLS(wire, len(wire)).info.content_type),
-                                         content_type)
-                    else:
-                        with self.assertRaises(ProtocolError):
-                            TLS(wire, len(wire))
-        self.assertEqual(module.SSLv2.calls, [])  # type: ignore[attr-defined]
+        for content_type in range(0x100):
+            with self.subTest(content_type=content_type):
+                wire = bytes([content_type]) + b'\x03\x03\x00\x04\xde\xad\xbe\xef'
+                if content_type in _WIRE_CONTENT_TYPES:
+                    self.assertEqual(int(TLS(wire, len(wire)).info.content_type), content_type)
+                else:
+                    with self.assertRaises(ProtocolError):
+                        TLS(wire, len(wire))
+
+    def test_an_sslv2_client_hello_is_raw(self) -> None:
+        from pcapkit.protocols.transport.tcp import TCP
+
+        body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain), 'TCP:Raw')
+
+    def test_random_segments_are_raw(self) -> None:
+        import random
+
+        from pcapkit.protocols.transport.tcp import TCP
+
+        rng = random.Random(2441)
+        for _ in range(200):
+            raw = _TCP_TO_443 + rng.getrandbits(1460 * 8).to_bytes(1460, 'big')
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                proto = TCP(raw, len(raw))
+            self.assertEqual(str(proto.protochain), 'TCP:Raw', raw[20:25].hex())
 
 
 class ExportTests(unittest.TestCase):
