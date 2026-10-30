@@ -205,6 +205,12 @@ DISTINCTIVE = (10 ** 6, 10 ** 9, 0x1A2B3C4D)
 #: the module, the expression (see :func:`_context`) and why. A hit here is in a
 #: module whose own protocol owns a constant of that value, or that reads one.
 NOT_A_COPY = {
+    ('pcapkit/protocols/application/ssl.py', '_take(32)'):
+        "a TLS/DTLS ClientHello/ServerHello Random is 32 octets (:rfc:`9846#section-4.2.2`), "
+        'not an Interface Description Block minimum',
+    ('pcapkit/protocols/schema/application/dtls.py', 'NumberField(length=6)'):
+        "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
+        'Header offset',
     ('pcapkit/protocols/internet/ipv6.py', "schema.hextet['version'] != 6"):
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', 'self._import_next_layer(version=6)'):

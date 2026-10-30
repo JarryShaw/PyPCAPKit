@@ -99,6 +99,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #
             #   80    http       World Wide Web HTTP
             #   1701  l2tp       l2tp
+            #   5684  coaps      CoAP over DTLS
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
             # The HTTP entries bind the version-dispatching
@@ -106,6 +107,15 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # does. See the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
+
+            # CoAP over DTLS (RFC 7252) is bound here, but it is not the only
+            # fixed port a DTLS-borne protocol is registered at -- IANA also
+            # registers DTLS at 853 (domain-s), 4740 (ipfixs), 5349
+            # (stuns/turns), 6514 (syslog-tls) and 10161/10162 (snmpdtls),
+            # among others -- and plenty of deployments negotiate DTLS on a
+            # dynamic port no registry can name. See
+            # pcapkit.protocols.application.dtls.
+            5684: ModuleDescriptor('pcapkit.protocols.application.dtls', 'DTLS'),
 
             # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version
             # implemented, so the concrete class is bound rather than the

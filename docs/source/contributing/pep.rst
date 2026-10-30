@@ -43,14 +43,19 @@ the ones outstanding are,
 * Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
 * Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
 * Transport Layer: DCCP, RSVP
-* Application Layer: BGP, DHCP, DHCPv6, DNS, DTLS, IMAP, LDAP, MQTT, NNTP,
-  NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL,
+* Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
+  NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
   XMPP
 
 Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
-ICMPv6, TLS/SSL with DTLS, and ``LINUX_SLL`` with ``LINUX_SLL2``.
+ICMPv6, and ``LINUX_SLL`` with ``LINUX_SLL2``. **Done** for the third such
+pair, TLS/SSL with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is
+the shared record-layer base, with
+:class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.application.dtls.DTLS` as its two concrete
+implementations -- see the `DTLS`_ section below.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
@@ -62,7 +67,7 @@ whose *layout* is identical -- it holds the whole of the tag, and
    ``NotImplemented`` folder. **Those files are not a roadmap.** They are
    scratch reminders, so a stub's presence does not mean a protocol is planned or
    claimed, and its absence does not mean the protocol is unwanted:
-   ``LINUX_SLL``, ``LINUX_SLL2``, ``QUIC`` and **DTLS** have no stub and are on the
+   ``LINUX_SLL``, ``LINUX_SLL2`` and ``QUIC`` have no stub and are on the
    list above,
    while **NGAP** has none either and is implemented. Take this page as the
    record and ignore the folder.
@@ -222,35 +227,43 @@ looks like an ordinary field and is not:
 DTLS
 ~~~~
 
-**Not started**, and it has no stub in the tree -- of the TLS/SSL and DTLS pair,
-only TLS/SSL does. It earns its own entry because the registries
-have moved ahead of it, and a growing part of SCTP's surface names a protocol
-that does not exist:
+**Done** for the record layer and handshake message framing:
+:class:`~pcapkit.protocols.application.tls.TLS` (TLS 1.2, :rfc:`5246`; TLS
+1.3, :rfc:`9846`) and :class:`~pcapkit.protocols.application.dtls.DTLS`
+(DTLS 1.2, :rfc:`6347`; DTLS 1.3, :rfc:`9147`) share
+:class:`~pcapkit.protocols.application.ssl.SSL` as their record-layer base --
+content type, legacy version, length, and content-type dispatch -- with
+DTLS's own divergence (the epoch/sequence-number pair in its record header,
+and the fragment header each handshake message carries) staying in
+:class:`~pcapkit.protocols.application.dtls.DTLS` alone. ``ClientHello`` and
+``ServerHello`` decode down to their cipher suite(s), compression method(s)
+and extension list (TYPE+LENGTH framed, extension bodies undecoded); every
+other handshake message is message-TYPE-level framing only. Decryption is a
+separate question and was never needed to make the record structure legible,
+in the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
+without keys.
 
-* the DTLS chunk, type 65 of :class:`~pcapkit.const.sctp.chunk.Chunk`, and the
-  DTLS Key Management chunk parameter, ``0x8006`` of
-  :class:`~pcapkit.const.sctp.parameter.Parameter` -- both fall through to the
-  generic handlers, so they parse as opaque;
-* its error causes, 100 to 103 of
-  :class:`~pcapkit.const.sctp.cause_code.CauseCode`;
-* payload protocol identifiers -- 47 (Diameter over DTLS/SCTP), 66 to 69
-  (NGAP, XnAP, F1AP and E1AP, each over DTLS over SCTP) and 4242 (DTLS chunk
-  key management).
+**Not yet done: reassembling a handshake message DTLS has fragmented across
+several records** (:rfc:`6347#section-4.2.3`). That needs a
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass keyed
+on the UDP 5-tuple plus epoch, which is substantial enough that it was left
+for a follow-up rather than landing alongside the dissector
+(:issue:`2440`). Until then, a fragmented message's body is kept as that one
+fragment's raw octets -- see
+:attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`
+-- rather than attempted as a decode only a slice of the message could ever
+back correctly. An unfragmented message, the common case, is unaffected.
 
-That last group is the one that bites. NGAP over DTLS over SCTP is PPID 66, and
-even with an NGAP dissector registered against it the bytes arriving are a DTLS
-record rather than an NGAP PDU, so they can only degrade to
-:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS therefore blocks NGAP over DTLS,
+NGAP over DTLS over SCTP (PPID 66,
+:class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`),
 asked for in `discussion #251
-<https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, independently of
-whether NGAP itself is implemented.
-
-A record-layer dissector is enough to unblock that -- content type, version,
-epoch, sequence number, length, and the fragment offset and length DTLS adds to
-handshake messages. Decryption is a separate question and is not needed to make
-the record structure legible, in the same way :class:`ESP
-<pcapkit.protocols.internet.esp.ESP>` parses without keys. DTLS over UDP is the
-other half of the same work and wants the same dissector.
+<https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, is **not**
+unblocked by this: :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+still maps PPID 66 straight to :class:`~pcapkit.protocols.application.ngap.NGAP`
+rather than through :class:`~pcapkit.protocols.application.dtls.DTLS`, so those
+bytes still degrade straight to :class:`~pcapkit.protocols.misc.raw.Raw`. Rewiring
+that dispatch, and deciding what an undecrypted DTLS-wrapped NGAP PDU should
+report, is left to its own follow-up.
 
 Registered, but Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,10 +320,15 @@ Some wanted only a table entry, because the dissector was already there:
   *name* rather than a parse -- which is the right answer for a data channel
   carrying an arbitrary file.
 * **Done.** HTTP is additionally bound on 8080 (IANA ``http-alt``, "HTTP
-  Alternate (see port 80)") on both TCP and UDP. **8443 is deliberately left
-  unbound**: IANA registers it as ``pcsync-https``, not as an HTTP alternate,
-  and de-facto 8443 traffic is TLS-wrapped, which pcapkit cannot parse -- see
-  the ``tls`` stub above. Binding it would feed a TLS record to an HTTP parser.
+  Alternate (see port 80)") on both TCP and UDP, and TCP 443 (IANA ``https``)
+  is bound to :class:`~pcapkit.protocols.application.tls.TLS`, now that it
+  parses the record layer de-facto 443 traffic carries; UDP 5684 (IANA
+  ``coaps``) is bound to :class:`~pcapkit.protocols.application.dtls.DTLS`
+  likewise. **8443 is deliberately left unbound**: IANA registers it as
+  ``pcsync-https``, not as an HTTP alternate, and binding it to HTTP would
+  feed a TLS record to an HTTP parser; binding it to TLS instead would be a
+  guess this registry does not make for a service IANA does not actually
+  name there.
 * **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
   :class:`~pcapkit.protocols.link.s_tag.S_Tag`, and the customer tag ``0x8100``
   to :class:`~pcapkit.protocols.link.c_tag.C_Tag`. Both subclass the abstract
@@ -1077,6 +1095,11 @@ because the shared-base question is the design work and doing either half of a
 pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
 size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
 stub.
+
+**Done within wave 2 — TLS/SSL with DTLS.** See the `DTLS`_ section above for
+what landed (the shared :class:`~pcapkit.protocols.application.ssl.SSL` base,
+both concrete protocols, and handshake message framing) and what is left
+(DTLS handshake-fragment reassembly, tracked as its own follow-up).
 
 **Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``
 **link types.** Both are genuine DLTs that a capture can legitimately be rooted

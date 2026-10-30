@@ -121,8 +121,8 @@ class DispatchRegistryTests(unittest.TestCase):
                 'library defect'),
             'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
                 ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-                'pcapkit implements no DTLS, and the same placeholder payload '
-                'is not a DTLS record either'),
+                'PPID 66 is not routed through DTLS, and the same placeholder '
+                'payload is not a DTLS record either'),
         }.items()
     }
 
@@ -227,8 +227,8 @@ class DispatchRegistryTests(unittest.TestCase):
         # registered at IPv6_Ext rather than defaulting to Raw, plus #1574's
         # LinkType.NULL and LinkType.LOOP in both link-type tables and the four
         # address families of Loopback.__proto__.
-        self.assertEqual(len(cases), 47,
-                         'expected exactly 47 entries across the seven __proto__ '
+        self.assertEqual(len(cases), 49,
+                         'expected exactly 49 entries across the seven __proto__ '
                          'tables named in GitHub issue #496 and the loopback table '
                          'of #1574; a different count means a registry changed '
                          'shape and this module was not updated to match')
@@ -237,7 +237,9 @@ class DispatchRegistryTests(unittest.TestCase):
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
-            'link': 7, 'internet': 17, 'tcp': 4, 'udp': 3, 'sctp': 2,
+            # tcp/443 (TLS) and udp/5684 (DTLS) added alongside this PR's
+            # dissector.
+            'link': 7, 'internet': 17, 'tcp': 5, 'udp': 4, 'sctp': 2,
             'pcap-frame': 5, 'pcapng-frame': 5, 'loopback': 4,
         })
 

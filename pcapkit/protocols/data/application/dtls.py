@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+"""data models for DTLS protocol"""
+
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import info_final
+from pcapkit.protocols.data.application.tls import Handshake
+from pcapkit.protocols.data.protocol import Protocol
+
+if TYPE_CHECKING:
+    from typing import Any, Union
+
+    from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
+    from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+    from pcapkit.protocols.data.application.tls import ClientHello, ServerHello
+
+__all__ = [
+    'DTLS',
+
+    'DTLSHandshake',
+]
+
+
+@info_final
+class DTLSHandshake(Handshake):
+    """Data model for a DTLS handshake message.
+
+    DTLS adds a fragment header -- ``message_seq``, ``fragment_offset`` and
+    ``fragment_length`` -- on top of the TLS handshake header shared with
+    :class:`~pcapkit.protocols.data.application.tls.Handshake`
+    (:rfc:`6347#section-4.2.2`), so that a handshake message that does not fit
+    in one datagram can be split across several.
+
+    :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`
+    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` only when
+    :attr:`is_fragmented` is :data:`False`; a genuinely fragmented message is
+    not reassembled in this version (:issue:`2440`; see
+    :class:`~pcapkit.protocols.application.dtls.DTLS` for why), so its
+    :attr:`body` is the single fragment's raw, undecoded octets regardless of
+    :attr:`msg_type`.
+
+    """
+
+    #: Handshake message type.
+    msg_type: 'Enum_HandshakeType'
+    #: Total message length (24-bit), fragment headers and bodies excluded.
+    length: 'int'
+    #: Message body -- see the class docstring for when this decodes.
+    body: 'Union[ClientHello, ServerHello, bytes]'
+    #: Message sequence number.
+    message_seq: 'int'
+    #: Fragment offset (24-bit) into the reassembled message.
+    fragment_offset: 'int'
+    #: Length (24-bit) of this fragment.
+    fragment_length: 'int'
+    #: Whether this fragment is a strict subset of the message, i.e.
+    #: ``fragment_offset != 0`` or ``fragment_length != length``.
+    is_fragmented: 'bool'
+
+    if TYPE_CHECKING:
+        def __init__(self, msg_type: 'Enum_HandshakeType', length: 'int', body: 'Union[ClientHello, ServerHello, bytes]', message_seq: 'int', fragment_offset: 'int', fragment_length: 'int', is_fragmented: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+
+
+@info_final
+class DTLS(Protocol):
+    """Data model for DTLS protocol."""
+
+    #: Content type.
+    content_type: 'Enum_ContentType'
+    #: Legacy record version (``major << 8 | minor``).
+    version: 'int'
+    #: Epoch -- incremented on every change of cipher state.
+    epoch: 'int'
+    #: Sequence number within :attr:`epoch` (48-bit).
+    sequence_number: 'int'
+    #: Length of the record fragment.
+    length: 'int'
+    #: Decoded record content. For ``handshake``, ``alert``, and
+    #: ``change_cipher_spec``, this is a tuple of :class:`DTLSHandshake`, an
+    #: :class:`~pcapkit.protocols.data.application.tls.Alert`, or a
+    #: :class:`~pcapkit.protocols.data.application.tls.ChangeCipherSpec`
+    #: respectively *only when the record is cleartext*, i.e. ``epoch == 0``
+    #: (as decided by :meth:`SSL._tls_content_is_cleartext
+    #: <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`) --
+    #: an encrypted record of any of those three types, which is any record
+    #: at a later epoch, stays raw :obj:`bytes` instead, same as every other
+    #: content type.
+    content: 'Any'
+
+    if TYPE_CHECKING:
+        def __init__(self, content_type: 'Enum_ContentType', version: 'int', epoch: 'int', sequence_number: 'int', length: 'int', content: 'Any') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """header schema for application layer protocols"""
 
+# Datagram Transport Layer Security
+from pcapkit.protocols.schema.application.dtls import DTLS
+
 # File Transfer Protocol
 from pcapkit.protocols.schema.application.ftp import FTP
 
@@ -32,7 +35,13 @@ from pcapkit.protocols.schema.application.ospf import OSPF
 from pcapkit.protocols.schema.application.ospf import \
     CryptographicAuthentication as OSPF_CryptographicAuthentication
 
+# Transport Layer Security
+from pcapkit.protocols.schema.application.tls import TLS
+
 __all__ = [
+    # Datagram Transport Layer Security
+    'DTLS',
+
     # File Transfer Protocol
     'FTP',
 
@@ -51,4 +60,7 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Transport Layer Security
+    'TLS',
 ]

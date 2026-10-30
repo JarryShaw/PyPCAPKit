@@ -58,10 +58,11 @@ reaching :class:`~pcapkit.protocols.application.ngap.NGAP`, and neither is a
 defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
 a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
-already does, and for the same documented reason -- one PPID is DTLS-wrapped,
-and pcapkit implements no DTLS; the other degrades identically
-because the payload is not an aligned PER encoding, exactly as that test's own
-docstring records.
+already does, and for the same documented reason -- one PPID is DTLS-wrapped
+and :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+still maps it straight to NGAP rather than through DTLS; the other degrades
+identically because the payload is not an aligned PER encoding, exactly as
+that test's own docstring records.
 
 This module constructs its own octets and reads no capture under
 :file:`examples/captures/`, so -- like its sibling -- it belongs to the unit
@@ -423,10 +424,22 @@ def _internet_build(code: 'int') -> 'Any':
 # TCP / UDP -- port.
 ###############################################################################
 
+#: A minimal, genuine TLS record: ``application_data`` (23), legacy version
+#: 3.3, and a zero-length fragment -- content type and legacy version both in
+#: range, and the (zero) declared length fits the (zero) remaining buffer, so
+#: :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
+#: accepts it rather than degrading it to :class:`Raw`.
+_TLS_RECORD = b'\x17\x03\x03\x00\x00'
+
+#: The DTLS equivalent of :data:`_TLS_RECORD`: ``application_data``, legacy
+#: version 0xFEFD, epoch 0, sequence number 1, zero-length fragment.
+_DTLS_RECORD = b'\x17\xfe\xfd\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
+
 _TCP_PORT_PAYLOAD = {
     20: b'binary-file-contents',
     21: b'USER anonymous\r\n',
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
+    443: _TLS_RECORD,
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
 }
 
@@ -437,6 +450,7 @@ _L2TP_DATA = struct.pack('!HHH', 0x0002, 0x1234, 0x5678) + b'\xff\x03\x00\x21PPP
 _UDP_PORT_PAYLOAD = {
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
     1701: _L2TP_DATA,
+    5684: _DTLS_RECORD,
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
 }
 
@@ -662,11 +676,13 @@ PINNED_TARGETS = {
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
     # below.
     'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
+    'tcp/443': ('pcapkit.protocols.application.tls', 'TLS'),
     'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
     # -- UDP.__proto__ (port) --------------------------------------------------
     'udp/80': ('pcapkit.protocols.application.http', 'HTTP'),
     'udp/1701': ('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
+    'udp/5684': ('pcapkit.protocols.application.dtls', 'DTLS'),
     'udp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
     # -- SCTP.__proto__ (payload protocol identifier) --------------------------
@@ -913,14 +929,15 @@ KNOWN_DEGRADED = {
         'placeholder payload is not an aligned PER NGAP-PDU; building '
             'one is out of scope for a minimal dispatch probe, not a '
             'library defect'),
-    # PPID 66 is NGAP wrapped in a DTLS record, and pcapkit implements no
-    # DTLS -- registered so the PPID is *named*, per the registry's own
-    # comment in pcapkit/protocols/transport/sctp.py, not because it decodes.
-    # The same placeholder payload fails the same way, for the same reason.
+    # PPID 66 is NGAP wrapped in a DTLS record, and the registry still maps
+    # it straight to NGAP rather than through DTLS -- registered so the PPID
+    # is *named*, per the registry's own comment in
+    # pcapkit/protocols/transport/sctp.py, not because it decodes. The same
+    # placeholder payload fails the same way, for the same reason.
     'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-        'pcapkit implements no DTLS, and the same placeholder payload '
-            'is not a DTLS record either'),
+        'PPID 66 is not routed through DTLS, and the same placeholder '
+            'payload is not a DTLS record either'),
 }
 
 

@@ -893,9 +893,10 @@ class SCTPUnitTests(unittest.TestCase):
 
         Dispatching is all the two have in common, and the assertion is
         deliberately no stronger than that. Only PPID 60 can decode: a PPID 66
-        payload is an NGAP PDU inside a DTLS record, and with no DTLS
-        implementation those bytes are never aligned PER, so 66 degrades to
-        :class:`Raw` on every well-formed capture as well as on this junk one.
+        payload is an NGAP PDU inside a DTLS record, and the registry still
+        maps it straight to NGAP rather than through DTLS, so those bytes are
+        never aligned PER and 66 degrades to :class:`Raw` on every
+        well-formed capture as well as on this junk one.
 
         ``b'ngap-pdu'`` is not an aligned PER ``NGAP-PDU``, which is the point:
         the failure has to reach :class:`Raw` through

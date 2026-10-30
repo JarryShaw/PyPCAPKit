@@ -200,7 +200,7 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         # ``_iter_const_int_flags``'s, and so are GitHub issue #880's
         # ngap.ProcedureCode and ngap.ProtocolIE, which are on EnumRegistry.
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
-        self.assertEqual(len(self.enums), 114)
+        self.assertEqual(len(self.enums), 116)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
                         f'expected reject-list entries missing from the sweep: '
                         f'{EXPECTED_TO_REJECT_ZERO - names}')
