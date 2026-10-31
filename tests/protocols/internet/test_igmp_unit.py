@@ -60,6 +60,16 @@ def igmp_class(version: 'str'):
     return igmpv1.IGMP if version == 'IGMPv1' else igmpv2.IGMP
 
 
+def expected_alias(version: 'str') -> 'str':
+    """The alias a parsed layer reports for ``version``.
+
+    :rfc:`1112` names the protocol ``IGMP``, without a version, so IGMPv1's
+    alias is the bare family name; :rfc:`2236` names IGMPv2 with its own
+    version, so IGMPv2's alias carries it.
+    """
+    return 'IGMP' if version == 'IGMPv1' else version
+
+
 #: One fixture per message type IGMPv1 and IGMPv2 define, each a correctly
 #: checksummed 8-octet message, with the version it is read as. Type
 #: octets per :rfc:`1112#page-11` (``0x11``/``0x12``, v1) and
@@ -268,7 +278,7 @@ class IGMPReadTests(unittest.TestCase):
             with self.subTest(packet=name):
                 parsed = igmp_class(version)(io.BytesIO(packet), len(packet))
                 self.assertIsInstance(parsed, IGMPBase)
-                self.assertEqual(parsed.alias, version)
+                self.assertEqual(parsed.alias, expected_alias(version))
 
     def test_refusals_name_the_version_refused(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
@@ -276,7 +286,7 @@ class IGMPReadTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         v1_report, v2_report = IGMP_PACKETS['v1-report'][0], IGMP_PACKETS['v2-report'][0]
-        with self.assertRaisesRegex(ProtocolError, r'^IGMPv1: .+ is not an IGMPv1 message \(8 octets\)'):
+        with self.assertRaisesRegex(ProtocolError, r'^IGMP: .+ is not an IGMPv1 message \(8 octets\)'):
             IGMPv1(io.BytesIO(v2_report), len(v2_report))
         with self.assertRaisesRegex(ProtocolError, r'^IGMPv2: .+ is not an IGMPv2 message \(8 octets\)'):
             IGMPv2(io.BytesIO(v1_report), len(v1_report))
@@ -286,7 +296,7 @@ class IGMPReadTests(unittest.TestCase):
 
         packet = igmp_packet(0x11, 0, '0.0.0.0')
         parsed = IGMP(io.BytesIO(packet), len(packet))
-        self.assertEqual(parsed.alias, 'IGMPv1')
+        self.assertEqual(parsed.alias, 'IGMP')
 
     def test_membership_query_max_resp_time_nonzero_is_v2(self) -> None:
         from pcapkit.protocols.internet.igmpv2 import IGMP
@@ -340,21 +350,22 @@ class IGMPVersionedClassTests(unittest.TestCase):
         from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
         from pcapkit.protocols.internet.igmpv2 import IGMP as IGMPv2
 
-        self.assertEqual(IGMPv1.id(), ('IGMP', 'IGMPv1'))
-        self.assertEqual(IGMPv2.id(), ('IGMP', 'IGMPv2'))
+        self.assertEqual(IGMPv1.id(), ('IGMP',))
+        self.assertEqual(IGMPv2.id(), ('IGMPv2',))
         self.assertEqual(object.__new__(IGMPv1).version, 1)
         self.assertEqual(object.__new__(IGMPv2).version, 2)
 
     def test_base_id_covers_both_versions(self) -> None:
         from pcapkit.protocols.internet.igmp import IGMP
 
-        self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv1', 'IGMPv2'))
+        self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv2'))
 
     def test_each_version_narrows_the_base_id(self) -> None:
         v1, v2 = igmp_class('IGMPv1'), igmp_class('IGMPv2')
-        self.assertEqual(v1.id(), ('IGMP', 'IGMPv1'))
-        self.assertEqual(v2.id(), ('IGMP', 'IGMPv2'))
+        self.assertEqual(v1.id(), ('IGMP',))
+        self.assertEqual(v2.id(), ('IGMPv2',))
         self.assertNotIn('IGMPv2', v1.id())
+        self.assertNotIn('IGMPv1', v1.id())
         self.assertNotIn('IGMPv1', v2.id())
 
     def test_igmpv1_parses_its_own_messages_directly(self) -> None:
@@ -364,7 +375,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
             packet, _version = IGMP_PACKETS[name]
             with self.subTest(packet=name):
                 parsed = IGMPv1(io.BytesIO(packet), len(packet))
-                self.assertEqual(parsed.alias, 'IGMPv1')
+                self.assertEqual(parsed.alias, 'IGMP')
 
     def test_igmpv1_rejects_a_v2_only_message(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
@@ -448,7 +459,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
             packet, version = IGMP_PACKETS[name]
             with self.subTest(version=version):
                 parsed = cls(packet)
-                self.assertEqual(parsed.alias, version)
+                self.assertEqual(parsed.alias, expected_alias(version))
                 self.assertEqual(len(parsed), 8)
 
                 with warnings.catch_warnings():
@@ -556,7 +567,7 @@ class IGMPUnitTests(unittest.TestCase):
                 parsed = cls(io.BytesIO(packet), len(packet))
                 self.assertEqual(packet[1], value)
                 self.assertEqual(parsed.info.max_resp_time, value)
-                self.assertEqual(parsed.alias, version)
+                self.assertEqual(parsed.alias, expected_alias(version))
                 self.assertEqual(cls.from_data(parsed.info).data, packet)
 
 
@@ -607,7 +618,7 @@ class IGMPDispatchTests(unittest.TestCase):
                     parsed = IPv4(io.BytesIO(outer), len(outer))
                 expected = IGMPv1 if version == 'IGMPv1' else IGMPv2
                 self.assertIsInstance(parsed.payload, expected)
-                self.assertEqual(parsed.payload.alias, version)
+                self.assertEqual(parsed.payload.alias, expected_alias(version))
 
 
 if __name__ == '__main__':
