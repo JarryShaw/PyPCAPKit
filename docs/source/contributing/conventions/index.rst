@@ -24,7 +24,10 @@ House Conventions
      reference, rather than any code at all;
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
-     :mod:`pcapkit.corekit` a support module belongs in.
+     :mod:`pcapkit.corekit` a support module belongs in;
+   * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
+     new engine there needs from :mod:`pcapkit.toolkit` and
+     :mod:`pcapkit.foundation.analysis`.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -48,3 +51,4 @@ House Conventions
    documentation
    test-coverage
    utilities-or-corekit
+   reassembly-integration

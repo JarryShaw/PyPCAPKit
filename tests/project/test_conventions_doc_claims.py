@@ -120,6 +120,7 @@ ANCHORS = (
     'documentation',
     'test-coverage',
     'utilities-or-corekit',
+    'reassembly-integration',
 )
 
 #: Each anchor's own file, one-to-one -- there is no shared page to slice between
