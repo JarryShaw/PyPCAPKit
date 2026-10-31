@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -820,10 +826,13 @@
 <span class="sd">    resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
 
 <span class="sd">    Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in</span>
-<span class="sd">    a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so the bytes</span>
-<span class="sd">    are not aligned PER and the parse always degrades to</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the PPID</span>
-<span class="sd">    is *named* in the protochain rather than reported as an unassigned number.</span>
+<span class="sd">    a DTLS record, and this registry maps it straight to</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.ngap.NGAP` rather than through</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.dtls.DTLS`, so the bytes are not</span>
+<span class="sd">    aligned PER and the parse always degrades to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the</span>
+<span class="sd">    PPID is *named* in the protochain rather than reported as an unassigned</span>
+<span class="sd">    number.</span>
 
 <span class="sd">    This class supports parsing of the following SCTP chunks, which</span>
 <span class="sd">    are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`</span>
@@ -951,9 +960,10 @@
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
             <span class="c1"># PPID 66 is NGAP wrapped in a DTLS record rather than a bare</span>
-            <span class="c1"># NGAP-PDU, and pcapkit implements no DTLS. It is registered so</span>
-            <span class="c1"># that the PPID is *named*: the payload fails in NGAP's own decoder</span>
-            <span class="c1"># and `beholder` degrades it to Raw, as an unregistered PPID would.</span>
+            <span class="c1"># NGAP-PDU, and this table maps it to NGAP rather than through</span>
+            <span class="c1"># DTLS. It is registered so that the PPID is</span>
+            <span class="c1"># *named*: the payload fails in NGAP's own decoder and</span>
+            <span class="c1"># `beholder` degrades it to Raw, as an unregistered PPID would.</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP over DTLS</span>
         <span class="p">},</span>

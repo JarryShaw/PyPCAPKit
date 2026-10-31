@@ -42,7 +42,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph application [Application Layer]
-           Application --> HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP
+           Application --> HTTP & FTP & FTP_DATA & NGAP & OSPF & RARP & SSL
 
            subgraph http [HTTP Family]
                HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
@@ -54,6 +54,11 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
            subgraph rarp [RARP Family]
                RARP --> DRARP
+           end
+
+           subgraph ssl [SSL Family]
+               SSL --> TLS & DTLS
+               TLS --> SSLv3
            end
        end
 
@@ -150,6 +155,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click OSPF "application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.RARP"
        click DRARP "application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
+       click SSL "application/ssl.html#pcapkit.protocols.application.ssl.SSL"
+       click TLS "application/tls.html#pcapkit.protocols.application.tls.TLS"
+       click SSLv3 "application/tls.html#pcapkit.protocols.application.tls.SSLv3"
+       click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.Raw"
        click NoPayload "misc/null.html#pcapkit.protocols.misc.null.NoPayload"

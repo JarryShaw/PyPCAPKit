@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -514,6 +520,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span> <span class="k">as</span> <span class="n">Data_IPv6_Frag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span> <span class="k">as</span> <span class="n">Schema_IPv6_Frag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
@@ -647,6 +654,9 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="c1"># NOTE: As an IPv6 extension header the upper layer belongs to the enclosing</span>
+            <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2487).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">ipv6_frag</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 

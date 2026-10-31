@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -492,9 +498,8 @@
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_ext` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
 <span class="sd">only, which is both (GitHub issue :issue:`917`) the shared **base class** of</span>
-<span class="sd">every IPv6 extension header in this package and a **generic** extractor that</span>
-<span class="sd">stands in for a header whose dedicated parser is unavailable or has failed.</span>
-<span class="sd">The class docstring separates these roles.</span>
+<span class="sd">every IPv6 extension header in this package and a **generic** extractor for</span>
+<span class="sd">a header with no dedicated parser. The class docstring separates these roles.</span>
 
 <span class="sd">Length Rules</span>
 <span class="sd">------------</span>
@@ -574,31 +579,25 @@
 <span class="sd">Entry Paths</span>
 <span class="sd">-----------</span>
 
-<span class="sd">This class is reached in these ways:</span>
+<span class="sd">This class is reached by direct dispatch only.</span>
+<span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real</span>
+<span class="sd">IANA extension header (:rfc:`5533`) with no dedicated parser, so</span>
+<span class="sd">:meth:`Internet._lookup_next_layer &lt;pcapkit.protocols.protocol.Protocol._lookup_next_layer&gt;`</span>
+<span class="sd">would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose</span>
+<span class="sd">missing ``next`` field would end the walk in</span>
+<span class="sd">:meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
+<span class="sd">there (GitHub issue :issue:`891`). This module registers this class for that</span>
+<span class="sd">code instead (see the bottom of the module), so dispatch reaches a working</span>
+<span class="sd">generic parser directly. The registration is global, shared by every</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.internet.Internet` subclass, so</span>
+<span class="sd">:meth:`__post_init__` gates on ``version == 6`` to keep it from also activating</span>
+<span class="sd">for an IPv4 payload that carries protocol number 140; see its docstring.</span>
 
-<span class="sd">1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
-<span class="sd">   is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so</span>
-<span class="sd">   :meth:`Internet._lookup_next_layer &lt;pcapkit.protocols.protocol.Protocol._lookup_next_layer&gt;`</span>
-<span class="sd">   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That</span>
-<span class="sd">   has no ``next`` field, so the walk in</span>
-<span class="sd">   :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
-<span class="sd">   would crash on it (GitHub issue :issue:`891`). This module registers this</span>
-<span class="sd">   class for that code instead (see the bottom of the module), so dispatch</span>
-<span class="sd">   reaches a working generic parser directly. The registration is global, shared by</span>
-<span class="sd">   every :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so</span>
-<span class="sd">   :meth:`__post_init__` gates on ``version == 6`` to keep it from also</span>
-<span class="sd">   activating for an IPv4 payload that carries protocol number 140; see its</span>
-<span class="sd">   docstring.</span>
-<span class="sd">2. **A recognised header whose own parser raises.** ``HOPOPT``,</span>
-<span class="sd">   ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all</span>
-<span class="sd">   have dedicated classes. When one of *those* raises,</span>
-<span class="sd">   :func:`~pcapkit.corekit.decorators.beholder`</span>
-<span class="sd">   (:meth:`Protocol._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`)</span>
-<span class="sd">   would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses</span>
-<span class="sd">   ``next`` and crashes the walk as in path 1.</span>
-<span class="sd">   :meth:`IPv6._import_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._import_next_layer&gt;`</span>
-<span class="sd">   catches the failure itself, one layer in from ``beholder``, and substitutes</span>
-<span class="sd">   this class: the bad header costs only itself, not the rest of the chain.</span>
+<span class="sd">A header with a dedicated class whose parser raises does not reach this class.</span>
+<span class="sd">:func:`~pcapkit.corekit.decorators.beholder` makes it plain</span>
+<span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`, and the walk stops there, as</span>
+<span class="sd">:rfc:`8200#section-4` has a node discard such a packet (GitHub issue</span>
+<span class="sd">:issue:`2477`).</span>
 
 <span class="sd">The Overrun Guard</span>
 <span class="sd">-----------------</span>
@@ -633,6 +632,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Data_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Schema_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
@@ -686,7 +686,7 @@
 <span class="sd">    One class plays both, on the owner's ruling for GitHub issue :issue:`917`:</span>
 
 <span class="sd">    1. **The concrete fallback parser** for an :rfc:`6564`-conforming header</span>
-<span class="sd">       with no dedicated class, or whose dedicated class raised. :meth:`read`,</span>
+<span class="sd">       with no dedicated class, which is Shim6. :meth:`read`,</span>
 <span class="sd">       :meth:`make`, :attr:`name`, :attr:`alias` and the ``schema=``/``data=``</span>
 <span class="sd">       class keywords implement it.</span>
 <span class="sd">    2. **The base class** of the implemented extension headers</span>
@@ -721,6 +721,14 @@
 <span class="sd">        does, over every subclass discovered at runtime.</span>
 
 <span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       The library no longer passes ``error`` to :meth:`read`, so</span>
+<span class="sd">       :attr:`Data_IPv6_Ext.error &lt;pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.error&gt;`</span>
+<span class="sd">       is :data:`None` unless a caller passes one. A header whose dedicated</span>
+<span class="sd">       parser raises is :class:`~pcapkit.protocols.misc.raw.Raw`, whose</span>
+<span class="sd">       ``info.error`` holds the error (:issue:`2477`).</span>
 
 <span class="sd">    """</span>
 
@@ -790,9 +798,8 @@
 <span class="sd">        :attr:`Protocol.protocol &lt;pcapkit.protocols.protocol.Protocol.protocol&gt;`</span>
 <span class="sd">        meaning ("name of next layer protocol"). On the owner's ruling for</span>
 <span class="sd">        GitHub issue :issue:`891` it is deliberately repointed at this</span>
-<span class="sd">        instance's *own* identity, i.e. which header's format it parsed, such as</span>
-<span class="sd">        :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`</span>
-<span class="sd">        or :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.</span>
+<span class="sd">        instance's *own* identity, i.e. which header's format it parsed, which</span>
+<span class="sd">        for this class is only :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.</span>
 <span class="sd">        The identity is resolved per instance from the numeric code handed to</span>
 <span class="sd">        the constructor (``alias``), which</span>
 <span class="sd">        :meth:`pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer` already</span>
@@ -875,8 +882,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of every direct concrete subclass, each of which narrows</span>
-<span class="sd">            its own :meth:`id` to itself. A header parsed by this class as the</span>
-<span class="sd">            generic fallback therefore matches every one of these names.</span>
+<span class="sd">            its own :meth:`id` to itself. A Shim6 header, which this class</span>
+<span class="sd">            parses, therefore matches every one of these names.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            ``== 'IPv6_Ext'`` is :data:`False`, as ``== 'IP'`` is on</span>
@@ -896,16 +903,14 @@
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            extension: If the protocol is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments, including these, which are</span>
-<span class="sd">                this class's own and are supplied by :meth:`IPv6._import_next_layer</span>
-<span class="sd">                &lt;pcapkit.protocols.internet.ipv6.IPv6._import_next_layer&gt;`</span>
-<span class="sd">                rather than typed by a caller:</span>
+<span class="sd">                this class's own:</span>
 
-<span class="sd">                * ``alias`` -- the numeric extension header code this instance</span>
-<span class="sd">                  stands in for, e.g. ``0`` for ``HOPOPT`` or ``140`` for</span>
-<span class="sd">                  ``Shim6``.</span>
-<span class="sd">                * ``error`` -- the parsing error, when this instance was</span>
-<span class="sd">                  reached as a :func:`~pcapkit.corekit.decorators.beholder`</span>
-<span class="sd">                  fallback rather than by direct dispatch.</span>
+<span class="sd">                * ``alias`` -- the numeric code of the extension header this</span>
+<span class="sd">                  instance parses, ``140`` for ``Shim6`` (the only code</span>
+<span class="sd">                  registered to this class), supplied by :meth:`IPv6._import_next_layer</span>
+<span class="sd">                  &lt;pcapkit.protocols.internet.ipv6.IPv6._import_next_layer&gt;`.</span>
+<span class="sd">                * ``error`` -- a parsing error to record in the result, if</span>
+<span class="sd">                  any, which the library does not pass.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
@@ -978,6 +983,9 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="c1"># NOTE: As an IPv6 extension header the upper layer belongs to the enclosing</span>
+            <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2487).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">),</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">,</span>
                                        <span class="n">payload</span><span class="o">=</span><span class="n">rest</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">ext_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):])</span></div>
@@ -1158,10 +1166,9 @@
 <span class="sd">                because :class:`~pcapkit.protocols.misc.raw.Raw` has no</span>
 <span class="sd">                identity to report at all, this class *does* have one --</span>
 <span class="sd">                see :attr:`protocol` -- but it is resolved per instance,</span>
-<span class="sd">                not per class: one :class:`IPv6_Ext` stands in for</span>
-<span class="sd">                :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`,</span>
+<span class="sd">                not per class: one :class:`IPv6_Ext` parses</span>
 <span class="sd">                :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
-<span class="sd">                and any other RFC 6564-conforming code alike, while</span>
+<span class="sd">                (and any other RFC 6564-format code registered to it), while</span>
 <span class="sd">                :meth:`__index__` is a ``@classmethod`` with nowhere to put</span>
 <span class="sd">                a value that differs per instance.</span>
 

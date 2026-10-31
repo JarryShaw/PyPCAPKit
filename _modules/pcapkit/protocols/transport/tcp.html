@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -835,11 +841,12 @@
             <span class="c1">#   20    ftp-data   File Transfer [Default Data]</span>
             <span class="c1">#   21    ftp        File Transfer Protocol [Control]</span>
             <span class="c1">#   80    http       World Wide Web HTTP</span>
+            <span class="c1">#   443   https      http protocol over TLS/SSL</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
             <span class="c1"># 8443 is deliberately absent: IANA registers it as ``pcsync-https``</span>
-            <span class="c1"># rather than as an HTTP alternate, and traffic there is TLS-wrapped,</span>
-            <span class="c1"># which pcapkit does not parse.</span>
+            <span class="c1"># rather than as an HTTP alternate or a TLS one, so nothing here</span>
+            <span class="c1"># names it.</span>
             <span class="c1">#</span>
             <span class="c1"># The HTTP ports bind the version-dispatching</span>
             <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP` rather than</span>
@@ -853,6 +860,7 @@
             <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp_data'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
             <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP'</span><span class="p">),</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
+            <span class="mi">443</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.tls'</span><span class="p">,</span> <span class="s1">'TLS'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>

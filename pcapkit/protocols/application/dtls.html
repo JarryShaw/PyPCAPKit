@@ -1,0 +1,983 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="DTLS - Datagram Transport Layer Security" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/dtls.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="pcapkit.protocols.application.dtls contains DTLS only, which implements an extractor for Datagram Transport Layer Security (DTLS)* – DTLS 1.0 ( RFC 4347), DTLS 1.2 ( RFC 6347) and DTLS 1.3’s legacy..." />
+<meta name="description" content="pcapkit.protocols.application.dtls contains DTLS only, which implements an extractor for Datagram Transport Layer Security (DTLS)* – DTLS 1.0 ( RFC 4347), DTLS 1.2 ( RFC 6347) and DTLS 1.3’s legacy..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Auxiliary Protocols" href="../misc/index.html"><link rel="prev" title="TLS/SSL - Transport Layer Security" href="tls.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>DTLS - Datagram Transport Layer Security - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --font-stack: Georgia, serif;
+  --font-stack--monospace: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">PyPCAPKit</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">Module Documentation</a><input aria-label="Toggle navigation of Module Documentation" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/extraction.html">File Extractor</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/engines/index.html">Engine Support</a><input aria-label="Toggle navigation of Engine Support" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/engine.html">Base Engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/reassembly.html">Reassembly Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ip.html">IP Reassembly Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../foundation/registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../internet/internet.html">Internet Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="application.html">Application Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">DTLS - Datagram Transport Layer Security</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/decorators.html">Decorator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../engines.html">Engine Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.3.4.html">1.3.4 – 2024-11-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.3.3.html">1.3.3 – 2024-11-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.3.1.html">1.3.1 – 2023-12-21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.3.0.html">1.3.0 – 2023-10-04</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.2.2.html">1.2.2 – 2023-09-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.2.1.html">1.2.1 – 2023-08-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.2.0.html">1.2.0 – 2023-08-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.1.1.html">1.1.1 – 2023-08-15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.1.0.html">1.1.0 – 2023-07-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.0.3.html">1.0.3 – 2023-06-29</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.0.2.html">1.0.2 – 2023-06-05</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.0.1.html">1.0.1 – 2023-05-14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.0.0.html">1.0.0 – 2023-05-09</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.16.3.html">0.16.3 – 2022-10-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.16.2.html">0.16.2 – 2022-08-03</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.16.1.html">0.16.1 – 2022-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.16.0.html">0.16.0 – 2022-05-31</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.5.html">0.15.5 – 2020-10-11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.4.html">0.15.4 – 2020-08-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.3.html">0.15.3 – 2020-08-17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.2.html">0.15.2 – 2020-06-27</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.1.html">0.15.1 – 2020-06-18</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.15.0.html">0.15.0 – 2020-06-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.5.html">0.14.5 – 2019-10-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.4.html">0.14.4 – 2019-09-01</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.3.html">0.14.3 – 2019-08-08</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.2.html">0.14.2 – 2019-03-28</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.1.html">0.14.1 – 2019-03-07</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.14.0.html">0.14.0 – 2019-03-02</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.13.3.html">0.13.3 – 2019-02-26</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.13.2.html">0.13.2 – 2019-01-24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.13.1.html">0.13.1 – 2019-01-23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/testing.html">Testing</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/workflows.html">GitHub Actions Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/protocols/application/dtls.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/protocols/application/dtls.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-pcapkit.protocols.application.dtls">
+<span id="dtls-datagram-transport-layer-security"></span><h1>DTLS - Datagram Transport Layer Security<a class="headerlink" href="#module-pcapkit.protocols.application.dtls" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application.dtls" title="pcapkit.protocols.application.dtls"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.dtls</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS" title="pcapkit.protocols.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> only, which implements an
+extractor for Datagram Transport Layer Security (DTLS) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> – DTLS 1.0
+(<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4347.html"><strong>RFC 4347</strong></a>), DTLS 1.2 (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>) and DTLS 1.3’s legacy-format records
+(<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>) – at the record layer, plus the epoch/sequence-number fields and
+the handshake-message fragment header that set DTLS apart from
+<a class="reference internal" href="tls.html#pcapkit.protocols.application.tls.TLS" title="pcapkit.protocols.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a>, whose reliable, ordered
+transport needs neither.</p>
+<section id="version-identification">
+<h2>Version Identification<a class="headerlink" href="#version-identification" title="Link to this heading">¶</a></h2>
+<p>As with <a class="reference internal" href="tls.html#pcapkit.protocols.application.tls.TLS" title="pcapkit.protocols.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a>, one class parses
+every version and <a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.read" title="pcapkit.protocols.application.dtls.DTLS.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> sets
+<a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.alias" title="pcapkit.protocols.application.dtls.DTLS.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> from the record;
+<a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.id" title="pcapkit.protocols.application.dtls.DTLS.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a> stays <code class="docutils literal notranslate"><span class="pre">('DTLS',)</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Legacy record version</p></th>
+<th class="head"><p><a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.alias" title="pcapkit.protocols.application.dtls.DTLS.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0xFEFF</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DTLS</span> <span class="pre">1.0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0xFEFD</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DTLS</span> <span class="pre">1.2</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0xFEFD</span></code>, or <code class="docutils literal notranslate"><span class="pre">0xFEFF</span></code> on an initial <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>, whose
+<code class="docutils literal notranslate"><span class="pre">supported_versions</span></code> extension lists <code class="docutils literal notranslate"><span class="pre">0xFEFC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DTLS</span> <span class="pre">1.3</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>any other <code class="docutils literal notranslate"><span class="pre">0xFExx</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DTLS</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>DTLS 1.3 never puts its own <code class="docutils literal notranslate"><span class="pre">0xFEFC</span></code> on the record layer
+(<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-4"><strong>RFC 9147 Section 4</strong></a>), so it is told apart only by the
+<code class="docutils literal notranslate"><span class="pre">supported_versions</span></code> peek. A version the table does not name keeps the
+generic <code class="docutils literal notranslate"><span class="pre">DTLS</span></code> alias rather than claiming a specific one.</p>
+</section>
+<section id="known-limitations">
+<h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
+<p><strong>A handshake message split across DTLS records is not reassembled</strong>
+(<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.3"><strong>RFC 6347 Section 4.2.3</strong></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>). Such a message is flagged
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_fragmented</span></code></a>
+and its <a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.body" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">body</span></code></a>
+kept as raw octets.</p>
+<p><strong>DTLS 1.3’s unified record header is not decoded</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2467">#2467</a>). It has
+no content-type octet (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-4"><strong>RFC 9147 Section 4</strong></a>), so it degrades to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. DTLS 1.3’s cleartext records use
+the legacy <code class="docutils literal notranslate"><span class="pre">DTLSPlaintext</span></code> header and are decoded.</p>
+<p><strong>Connection ID records are not decoded</strong> (<code class="docutils literal notranslate"><span class="pre">tls12_cid</span></code>, <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9146.html"><strong>RFC 9146</strong></a>): the
+connection ID’s length is not carried in the record, so they degrade to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.dtls.</span></span><span class="sig-name descname"><span class="pre">DTLS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLS" title="pcapkit.protocols.data.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.application.dtls.DTLS" title="pcapkit.protocols.schema.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>]</p>
+<p>This class implements all protocols in the DTLS record-layer family.</p>
+<ul class="simple">
+<li><p>Datagram Transport Layer Security 1.0 [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4347.html"><strong>RFC 4347</strong></a>]</p></li>
+<li><p>Datagram Transport Layer Security 1.2 [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>]</p></li>
+<li><p>Datagram Transport Layer Security 1.3, legacy-format records only [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The subpackage does not track the dispatch tier: DTLS is dispatched
+from <a class="reference internal" href="../transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a>
+at port 5684 (<code class="docutils literal notranslate"><span class="pre">coaps</span></code>, <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7252.html"><strong>RFC 7252</strong></a>) only, though IANA registers
+other DTLS-borne services; bind more with
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp" title="pcapkit.foundation.registry.protocols.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_udp()</span></code></a>.</p>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Datagram</span> <span class="pre">Transport</span> <span class="pre">Layer</span> <span class="pre">Security'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of current protocol.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.alias">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'DTLS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DTLS</span> <span class="pre">1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DTLS</span> <span class="pre">1.2'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DTLS</span> <span class="pre">1.3'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.alias" title="Link to this definition">¶</a></dt>
+<dd><p>Acronym of current protocol – the concrete tier <a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.read" title="pcapkit.protocols.application.dtls.DTLS.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> identified.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.length">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">13</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.length" title="Link to this definition">¶</a></dt>
+<dd><p>Header length of current protocol – the fixed record header,
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLS.length" title="pcapkit.protocols.data.application.dtls.DTLS.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>’s
+fragment excluded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.id">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.id" title="Link to this definition">¶</a></dt>
+<dd><p>Index ID of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'DTLS'</span></span></code></span>]]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index ID of the protocol. Fixed, regardless of which tier
+<a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.read" title="pcapkit.protocols.application.dtls.DTLS.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> identifies the record as – see
+<a class="reference internal" href="tls.html#pcapkit.protocols.application.tls.TLS.id" title="pcapkit.protocols.application.tls.TLS.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TLS.id</span></code></a> for why.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.read" title="Link to this definition">¶</a></dt>
+<dd><p>Read Datagram Transport Layer Security (DTLS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLS" title="pcapkit.protocols.data.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the record cannot be a genuine DTLS record –
+    see <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_dtls_record()</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ContentType.application_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0xFEFD</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.make" title="Link to this definition">¶</a></dt>
+<dd><p>Make (construct) packet data, for every tier: <code class="docutils literal notranslate"><span class="pre">version</span></code> is written as is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Record content type.</p></li>
+<li><p><strong>content_type_default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Default value for <code class="docutils literal notranslate"><span class="pre">content_type</span></code>.</p></li>
+<li><p><strong>content_type_namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Namespace for <code class="docutils literal notranslate"><span class="pre">content_type</span></code>.</p></li>
+<li><p><strong>content_type_reversed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Reverse namespace for <code class="docutils literal notranslate"><span class="pre">content_type</span></code>.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Legacy record version (<code class="docutils literal notranslate"><span class="pre">major</span> <span class="pre">&lt;&lt;</span> <span class="pre">8</span> <span class="pre">|</span> <span class="pre">minor</span></code>), e.g.
+<code class="docutils literal notranslate"><span class="pre">0xFEFD</span></code> for DTLS 1.2 and (the legacy value DTLS 1.3 keeps
+here) DTLS 1.3.</p></li>
+<li><p><strong>epoch</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Epoch.</p></li>
+<li><p><strong>sequence_number</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Sequence number within <code class="docutils literal notranslate"><span class="pre">epoch</span></code> (48-bit).</p></li>
+<li><p><strong>content</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Record content: a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake" title="pcapkit.protocols.data.application.dtls.DTLSHandshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLSHandshake</span></code></a>
+for <code class="docutils literal notranslate"><span class="pre">handshake</span></code>, an
+<a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.Alert" title="pcapkit.protocols.data.application.tls.Alert"><code class="xref py py-class docutils literal notranslate"><span class="pre">Alert</span></code></a>, a
+<a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ChangeCipherSpec" title="pcapkit.protocols.data.application.tls.ChangeCipherSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChangeCipherSpec</span></code></a>,
+or raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, as <a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS.read" title="pcapkit.protocols.application.dtls.DTLS.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> would decode it.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Pre-encoded record fragment. When given, it is used
+verbatim in place of <code class="docutils literal notranslate"><span class="pre">content</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> is computed
+from it.</p></li>
+<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Octets after the record, e.g. a further record
+coalesced in the same buffer.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.application.dtls.DTLS" title="pcapkit.protocols.schema.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed packet data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS.__length_hint__">
+<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS.__length_hint__" title="Link to this definition">¶</a></dt>
+<dd><p>Return an estimated length for the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">13</span></span></code></span>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.dtls.DTLS._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/dtls.html#DTLS._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.dtls.DTLS._make_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLS" title="pcapkit.protocols.data.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a></span>) – protocol data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.protocols.schema.application.dtls">
+<span id="header-schema"></span><h2>Header Schema<a class="headerlink" href="#module-pcapkit.protocols.schema.application.dtls" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.application.dtls.</span></span><span class="sig-name descname"><span class="pre">DTLS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/application/dtls.html#DTLS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<p>Header schema for DTLS record layer packet.</p>
+<p>Same <a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a>,
+legacy-version and length fields as <a class="reference internal" href="tls.html#pcapkit.protocols.schema.application.tls.TLS" title="pcapkit.protocols.schema.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a>’s record header, with the
+explicit <code class="docutils literal notranslate"><span class="pre">epoch</span></code>/<code class="docutils literal notranslate"><span class="pre">sequence_number</span></code> pair DTLS inserts between the
+version and the length (<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-4"><strong>RFC 9147 Section 4</strong></a>) – the divergence a
+reliable TLS stream never needs, since DTLS runs over an unreliable,
+unordered datagram transport.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.content_type">
+<span class="sig-name descname"><span class="pre">content_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><span class="pre">ContentType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">content_type&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.content_type" title="Link to this definition">¶</a></dt>
+<dd><p>Content type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">version&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.version" title="Link to this definition">¶</a></dt>
+<dd><p>Legacy record version (<code class="docutils literal notranslate"><span class="pre">major</span> <span class="pre">&lt;&lt;</span> <span class="pre">8</span> <span class="pre">|</span> <span class="pre">minor</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.epoch">
+<span class="sig-name descname"><span class="pre">epoch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">epoch&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.epoch" title="Link to this definition">¶</a></dt>
+<dd><p>Epoch – incremented on every change of cipher state.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.sequence_number">
+<span class="sig-name descname"><span class="pre">sequence_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NumberField</span> <span class="pre">sequence_number&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.sequence_number" title="Link to this definition">¶</a></dt>
+<dd><p>Sequence number within <a class="reference internal" href="#pcapkit.protocols.schema.application.dtls.DTLS.epoch" title="pcapkit.protocols.schema.application.dtls.DTLS.epoch"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epoch</span></code></a> (48-bit).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.length" title="Link to this definition">¶</a></dt>
+<dd><p>Length of <a class="reference internal" href="#pcapkit.protocols.schema.application.dtls.DTLS.fragment" title="pcapkit.protocols.schema.application.dtls.DTLS.fragment"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fragment</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.fragment">
+<span class="sig-name descname"><span class="pre">fragment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">fragment&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.fragment" title="Link to this definition">¶</a></dt>
+<dd><p>Record fragment, undecoded.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.dtls.DTLS.payload">
+<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.dtls.DTLS.payload" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after the record, e.g. a further record coalesced in the same
+buffer.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.protocols.data.application.dtls">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.application.dtls" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.dtls.</span></span><span class="sig-name descname"><span class="pre">DTLS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/dtls.html#DTLS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<p>Data model for DTLS protocol.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.content_type">
+<span class="sig-name descname"><span class="pre">content_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><span class="pre">ContentType</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.content_type" title="Link to this definition">¶</a></dt>
+<dd><p>Content type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.version" title="Link to this definition">¶</a></dt>
+<dd><p>Legacy record version (<code class="docutils literal notranslate"><span class="pre">major</span> <span class="pre">&lt;&lt;</span> <span class="pre">8</span> <span class="pre">|</span> <span class="pre">minor</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.epoch">
+<span class="sig-name descname"><span class="pre">epoch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.epoch" title="Link to this definition">¶</a></dt>
+<dd><p>Epoch – incremented on every change of cipher state.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.sequence_number">
+<span class="sig-name descname"><span class="pre">sequence_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.sequence_number" title="Link to this definition">¶</a></dt>
+<dd><p>Sequence number within <a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLS.epoch" title="pcapkit.protocols.data.application.dtls.DTLS.epoch"><code class="xref py py-attr docutils literal notranslate"><span class="pre">epoch</span></code></a> (48-bit).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.length" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the record fragment.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLS.content">
+<span class="sig-name descname"><span class="pre">content</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLS.content" title="Link to this definition">¶</a></dt>
+<dd><p>Decoded record content. For <code class="docutils literal notranslate"><span class="pre">handshake</span></code>, <code class="docutils literal notranslate"><span class="pre">alert</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">change_cipher_spec</span></code>, this is a tuple of <a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake" title="pcapkit.protocols.data.application.dtls.DTLSHandshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLSHandshake</span></code></a>, an
+<a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.Alert" title="pcapkit.protocols.data.application.tls.Alert"><code class="xref py py-class docutils literal notranslate"><span class="pre">Alert</span></code></a>, or a
+<a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ChangeCipherSpec" title="pcapkit.protocols.data.application.tls.ChangeCipherSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChangeCipherSpec</span></code></a>
+respectively <em>only when the record is cleartext</em>, i.e. <code class="docutils literal notranslate"><span class="pre">epoch</span> <span class="pre">==</span> <span class="pre">0</span></code>
+(as decided by <a class="reference internal" href="ssl.html#pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext" title="pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SSL._tls_content_is_cleartext</span></code></a>) –
+an encrypted record of any of those three types, which is any record
+at a later epoch, stays raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> instead, same as every other
+content type.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.dtls.</span></span><span class="sig-name descname"><span class="pre">DTLSHandshake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fragmented</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/dtls.html#DTLSHandshake"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.Handshake" title="pcapkit.protocols.data.application.tls.Handshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">Handshake</span></code></a></p>
+<p>Data model for a DTLS handshake message.</p>
+<p>DTLS adds a fragment header – <code class="docutils literal notranslate"><span class="pre">message_seq</span></code>, <code class="docutils literal notranslate"><span class="pre">fragment_offset</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fragment_length</span></code> – on top of the TLS handshake header shared with
+<a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.Handshake" title="pcapkit.protocols.data.application.tls.Handshake"><code class="xref py py-class docutils literal notranslate"><span class="pre">Handshake</span></code></a>
+(<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.2.2"><strong>RFC 6347 Section 4.2.2</strong></a>), so that a handshake message that does not fit
+in one datagram can be split across several.</p>
+<p><a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.body" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">body</span></code></a> decodes to a <a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ClientHello" title="pcapkit.protocols.data.application.tls.ClientHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientHello</span></code></a>
+or <a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ServerHello" title="pcapkit.protocols.data.application.tls.ServerHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ServerHello</span></code></a> only when
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_fragmented</span></code></a> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>; a genuinely fragmented message is
+not reassembled (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>; see
+<a class="reference internal" href="#pcapkit.protocols.application.dtls.DTLS" title="pcapkit.protocols.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> for why), so its
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.body" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.body"><code class="xref py py-attr docutils literal notranslate"><span class="pre">body</span></code></a> is the single fragment’s raw, undecoded octets regardless of
+<a class="reference internal" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.msg_type" title="pcapkit.protocols.data.application.dtls.DTLSHandshake.msg_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">msg_type</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.msg_type">
+<span class="sig-name descname"><span class="pre">msg_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.msg_type" title="Link to this definition">¶</a></dt>
+<dd><p>Handshake message type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.length" title="Link to this definition">¶</a></dt>
+<dd><p>Total message length (24-bit), fragment headers and bodies excluded.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.body">
+<span class="sig-name descname"><span class="pre">body</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ClientHello" title="pcapkit.protocols.data.application.tls.ClientHello"><span class="pre">ClientHello</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ssl.html#pcapkit.protocols.data.application.tls.ServerHello" title="pcapkit.protocols.data.application.tls.ServerHello"><span class="pre">ServerHello</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.body" title="Link to this definition">¶</a></dt>
+<dd><p>Message body – see the class docstring for when this decodes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.message_seq">
+<span class="sig-name descname"><span class="pre">message_seq</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.message_seq" title="Link to this definition">¶</a></dt>
+<dd><p>Message sequence number.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.fragment_offset">
+<span class="sig-name descname"><span class="pre">fragment_offset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.fragment_offset" title="Link to this definition">¶</a></dt>
+<dd><p>Fragment offset (24-bit) into the reassembled message.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.fragment_length">
+<span class="sig-name descname"><span class="pre">fragment_length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.fragment_length" title="Link to this definition">¶</a></dt>
+<dd><p>Length (24-bit) of this fragment.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented">
+<span class="sig-name descname"><span class="pre">is_fragmented</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented" title="Link to this definition">¶</a></dt>
+<dd><p>Whether this fragment is a strict subset of the message, i.e.
+<code class="docutils literal notranslate"><span class="pre">fragment_offset</span> <span class="pre">!=</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">fragment_length</span> <span class="pre">!=</span> <span class="pre">length</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>See <a class="reference internal" href="ssl.html"><span class="doc">SSL - Secure Sockets Layer</span></a> for <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>, <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code>, <code class="docutils literal notranslate"><span class="pre">Extension</span></code>, <code class="docutils literal notranslate"><span class="pre">Alert</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ChangeCipherSpec</span></code>, shared verbatim with
+<a class="reference internal" href="tls.html#pcapkit.protocols.application.tls.TLS" title="pcapkit.protocols.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a>.</p>
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security">https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security</a></p>
+</aside>
+</aside>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../misc/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Auxiliary Protocols</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="tls.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">TLS/SSL - Transport Layer Security</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2026, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">DTLS - Datagram Transport Layer Security</a><ul>
+<li><a class="reference internal" href="#version-identification">Version Identification</a></li>
+<li><a class="reference internal" href="#known-limitations">Known Limitations</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.schema.application.dtls">Header Schema</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.data.application.dtls">Data Models</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=cb7e6255"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled, in review of the rename tha..." />
 <meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled, in review of the rename tha..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Layer Placement" href="protocol-layer-placement.html"><link rel="prev" title="The Registry Protocol" href="registry-protocol.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Family Grouping" href="protocol-family-grouping.html"><link rel="prev" title="The Registry Protocol" href="registry-protocol.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Extension-Header Base Classes - PyPCAPKit</title>
@@ -291,6 +291,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -363,6 +366,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -447,6 +451,8 @@
 <li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
@@ -653,23 +659,19 @@ carries the same extension-mode contract as its siblings.</p>
 inside the <em>encrypted</em> trailer, so with no key material there is nothing to continue
 on: ESP’s own data model reports <code class="docutils literal notranslate"><span class="pre">next</span></code> as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, and
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>
-ends the ordinary way one iteration later. So ESP is absent from
-<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__" title="pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__generic_ext_codes__</span></code></a>
-– not because it lacks a parser, which it has, but because it cannot hand the walk a
-successor.</p>
+ends the ordinary way one iteration later – not because ESP lacks a parser, which
+it has, but because it cannot hand the walk a successor.</p>
 <p>The full reasoning, including how ESP’s terminal case differs from 253/254’s, is
-written where the code is and is deliberately not restated at length here: see the
-<code class="docutils literal notranslate"><span class="pre">#:</span></code> comment on
-<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__" title="pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__generic_ext_codes__</span></code></a>
-(<code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/internet/ipv6.py</span></code>) and the module docstring of
-<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext" title="pcapkit.protocols.internet.ipv6_ext"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext</span></code></a>.</p>
+written where the code is and is deliberately not restated at length here: see
+<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._import_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._import_next_layer</span></code></a>
+and the module docstring of <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext" title="pcapkit.protocols.internet.ipv6_ext"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext</span></code></a>.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>The two facts have to be kept apart when reading any of this. “ESP is not an
 extension header” (wrong, and <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> quoted out of scope) is a
 different claim from “ESP cannot be walked past” (right, and about
 <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>’s wire format). Collapsing them is how ESP ends up either dropped
-from the extension-header contract or wrongly added to the generic-dispatch set.</p>
+from the extension-header contract or wrongly walked past.</p>
 </div>
 </section>
 </section>
@@ -679,12 +681,12 @@ from the extension-header contract or wrongly added to the generic-dispatch set.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="protocol-layer-placement.html">
+          <a class="next-page" href="protocol-family-grouping.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Protocol Layer Placement</div>
+                <div class="title">Protocol Family Grouping</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

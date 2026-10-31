@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -770,6 +776,7 @@
     <span class="n">UpdateNotificationMessage</span> <span class="k">as</span> <span class="n">Data_UpdateNotificationMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorSpecificOption</span> <span class="k">as</span> <span class="n">Data_VendorSpecificOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Schema_MH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">AccessNetworkIdentifierOption</span> <span class="k">as</span> <span class="n">Schema_AccessNetworkIdentifierOption</span>
@@ -1053,10 +1060,9 @@
 <span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
 <span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
-<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
-<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
-<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain the Mobility Header and everything</span>
+<span class="sd">        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as</span>
+<span class="sd">        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).</span>
 
 <span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
 <span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other</span>
@@ -1130,10 +1136,9 @@
 <span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
 <span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
-<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
-<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
-<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain the Mobility Header and everything</span>
+<span class="sd">        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as</span>
+<span class="sd">        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).</span>
 
 <span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
 <span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, like every other</span>
@@ -1202,10 +1207,9 @@
 <span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
 <span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
-<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
-<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
-<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain the Mobility Header and everything</span>
+<span class="sd">        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as</span>
+<span class="sd">        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).</span>
 
 <span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
 <span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an</span>
@@ -1263,10 +1267,9 @@
 <span class="sd">        unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,</span>
 <span class="sd">        because this RFC-inline value set stays immutable (decided on</span>
-<span class="sd">        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is</span>
-<span class="sd">        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a</span>
-<span class="sd">        Mobility Header whose parser raises, and the rest of the packet is kept.</span>
+<span class="sd">        :issue:`877`). Within an IPv6 chain the Mobility Header and everything</span>
+<span class="sd">        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as</span>
+<span class="sd">        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).</span>
 
 <span class="sd">        The class defines no ``get`` of its own: ``get``/``get_all`` come from</span>
 <span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an</span>
@@ -1906,6 +1909,9 @@
         <span class="n">mh</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="c1"># NOTE: As an IPv6 extension header the upper layer belongs to the enclosing</span>
+            <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2487).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">mh</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">mh</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">mh</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 

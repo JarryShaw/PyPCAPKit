@@ -284,6 +284,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -356,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -440,6 +444,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -586,6 +592,7 @@
             <span class="c1">#</span>
             <span class="c1">#   80    http       World Wide Web HTTP</span>
             <span class="c1">#   1701  l2tp       l2tp</span>
+            <span class="c1">#   5684  coaps      CoAP over DTLS</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
             <span class="c1"># The HTTP entries bind the version-dispatching</span>
@@ -593,6 +600,15 @@
             <span class="c1"># does. See the note in the class docstring.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
+
+            <span class="c1"># CoAP over DTLS (RFC 7252) is bound here, but it is not the only</span>
+            <span class="c1"># fixed port a DTLS-borne protocol is registered at -- IANA also</span>
+            <span class="c1"># registers DTLS at 853 (domain-s), 4740 (ipfixs), 5349</span>
+            <span class="c1"># (stuns/turns), 6514 (syslog-tls) and 10161/10162 (snmpdtls),</span>
+            <span class="c1"># among others -- and plenty of deployments negotiate DTLS on a</span>
+            <span class="c1"># dynamic port no registry can name. See</span>
+            <span class="c1"># pcapkit.protocols.application.dtls.</span>
+            <span class="mi">5684</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.dtls'</span><span class="p">,</span> <span class="s1">'DTLS'</span><span class="p">),</span>
 
             <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version</span>
             <span class="c1"># implemented, so the concrete class is bound rather than the</span>

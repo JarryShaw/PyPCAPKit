@@ -291,6 +291,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -363,6 +366,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
@@ -447,6 +451,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/extension-header-subclassing.html">Extension-Header Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-family-grouping.html">Protocol Family Grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-member-order.html">Protocol Member Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/protocol-layer-placement.html">Protocol Layer Placement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
@@ -567,10 +573,13 @@ registered to
 <a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>, and every other PPID
 resolves to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 <p>Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
-a DTLS record, and <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has no DTLS implementation, so the bytes
-are not aligned PER and the parse always degrades to
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. It is registered so that the PPID
-is <em>named</em> in the protochain rather than reported as an unassigned number.</p>
+a DTLS record, and this registry maps it straight to
+<a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> rather than through
+<a class="reference internal" href="../application/dtls.html#pcapkit.protocols.application.dtls.DTLS" title="pcapkit.protocols.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, so the bytes are not
+aligned PER and the parse always degrades to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. It is registered so that the
+PPID is <em>named</em> in the protochain rather than reported as an unassigned
+number.</p>
 <p>This class supports parsing of the following SCTP chunks, which
 are directly mapped to the <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.chunk.Chunk</span></code></a>
 enumeration:</p>
