@@ -21,7 +21,10 @@ The Order
 
    a. **Data.** ``_make_data()`` comes first in the group, before everything else.
    b. **Helpers.** The helpers that ``read()`` or ``make()`` call, one helper at a
-      time, in the order ``read()`` or ``make()`` first uses them. Each helper's
+      time, in the order ``read()`` or ``make()`` first uses them. "Uses" means a
+      direct reference in the body of ``read()`` or ``make()``. Helpers reached only
+      through ``getattr``, or through the registry maps (``__proto__``,
+      ``__option__``, ``__parameter__`` and similar), do not count. Each helper's
       ``_read_`` and ``_make_`` methods stay together, with the reader first:
       ``_read_mac_addr()`` then ``_make_mac_addr()``.
    c. **Specific readers and makers.** The option, type and parameter methods,
