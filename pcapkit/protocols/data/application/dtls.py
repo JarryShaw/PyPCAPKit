@@ -8,7 +8,7 @@ from pcapkit.protocols.data.application.tls import Handshake
 from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
-    from typing import Any, Union
+    from typing import Any, Optional, Union
 
     from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'DTLS',
+    'DTLSCiphertext',
 
     'DTLSHandshake',
 ]
@@ -89,3 +90,30 @@ class DTLS(Protocol):
 
     if TYPE_CHECKING:
         def __init__(self, content_type: 'Enum_ContentType', version: 'int', epoch: 'int', sequence_number: 'int', length: 'int', content: 'Any') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+
+
+@info_final
+class DTLSCiphertext(Protocol):
+    """Data model for a DTLS 1.3 ciphertext record (:rfc:`9147#section-4`).
+
+    The unified header carries neither a content type nor a version, and only
+    the low two bits of the epoch, so those fields are absent here: the
+    content type is inside :attr:`content`.
+
+    """
+
+    #: Low two bits of the epoch; the full 16-bit epoch is not on the wire.
+    epoch: 'int'
+    #: Sequence number as carried, 8 or 16 bits per :attr:`sequence_long`. It
+    #: is header-protected, so it is the value on the wire, not the record's.
+    sequence_number: 'int'
+    #: Whether :attr:`sequence_number` is 16 bits rather than 8.
+    sequence_long: 'bool'
+    #: Length of :attr:`content`, or :data:`None` when the record runs to the
+    #: end of the datagram.
+    length: 'Optional[int]'
+    #: Encrypted record content, undecoded.
+    content: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, epoch: 'int', sequence_number: 'int', sequence_long: 'bool', length: 'Optional[int]', content: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

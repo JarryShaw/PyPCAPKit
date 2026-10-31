@@ -211,6 +211,9 @@ NOT_A_COPY = {
     ('pcapkit/protocols/schema/application/dtls.py', 'NumberField(length=6)'):
         "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
         'Header offset',
+    ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
+        "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
+        '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', "schema.hextet['version'] != 6"):
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', 'self._import_next_layer(version=6)'):

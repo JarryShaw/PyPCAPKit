@@ -5,12 +5,12 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt16Field
-from pcapkit.corekit.fields.strings import BytesField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SwitchField
+from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt16Field
+from pcapkit.corekit.fields.strings import BitField, BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
-__all__ = ['DTLS']
+__all__ = ['DTLS', 'DTLSCiphertext']
 
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
@@ -50,3 +50,46 @@ class DTLS(Schema):
         def __init__(self, content_type: 'Enum_ContentType', version: 'int', epoch: 'int',
                      sequence_number: 'int', length: 'int', fragment: 'bytes',
                      payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+
+
+@schema_final
+class DTLSCiphertext(Schema):
+    """Header schema for a DTLS 1.3 ciphertext record, which has a unified header.
+
+    The first octet is ``001CSLEE`` (:rfc:`9147#section-4.1`): ``C`` names a
+    connection ID, ``S`` an 8- or 16-bit sequence number, ``L`` a length field,
+    and ``EE`` the low two bits of the epoch. The record has no content type or
+    version octet, since both are inside the ciphertext, so
+    :class:`DTLS <pcapkit.protocols.schema.application.dtls.DTLS>`'s legacy
+    header cannot describe it.
+
+    """
+
+    #: Unified-header first octet: fixed prefix, ``C``, ``S``, ``L`` and ``EE``.
+    flags: 'dict[str, int]' = BitField(length=1, namespace={
+        'fixed': (0, 3),
+        'connection_id': (3, 1),
+        'sequence_long': (4, 1),
+        'length_present': (5, 1),
+        'epoch': (6, 2),
+    })
+    #: Sequence number, 8 or 16 bits as ``S`` says (header-protected on the wire).
+    sequence_number: 'int' = SwitchField(
+        selector=lambda pkt: UInt16Field() if pkt['flags']['sequence_long'] else UInt8Field(),
+    )
+    #: Length of :attr:`fragment`; absent when ``L`` is clear.
+    length: 'int | None' = ConditionalField(
+        UInt16Field(),
+        condition=lambda pkt: bool(pkt['flags']['length_present']),
+    )
+    #: Ciphertext, undecoded. Without a length it runs to the end of the buffer.
+    fragment: 'bytes' = SwitchField(
+        selector=lambda pkt: (BytesField(length=pkt['length'])
+                              if pkt['flags']['length_present'] else PayloadField()),
+    )
+    #: Octets after the record, e.g. a further record coalesced in the same
+    #: buffer. Empty when :attr:`fragment` runs to the end of the buffer.
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, flags: 'dict[str, int]', sequence_number: 'int', length: 'int | None', fragment: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

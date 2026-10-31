@@ -7,10 +7,11 @@
 :mod:`pcapkit.protocols.application.dtls` contains
 :class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an
 extractor for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
-1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format records (:rfc:`9147`).
-:attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` binds
-it at port 5684. As with :class:`~pcapkit.protocols.application.tls.TLS`,
-:meth:`~DTLS.read` sets :attr:`~DTLS.alias` from the record's legacy version.
+1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format and unified-header records
+(:rfc:`9147`). :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
+binds it at port 5684. As with :class:`~pcapkit.protocols.application.tls.TLS`,
+:meth:`~DTLS.read` sets :attr:`~DTLS.alias` from the record's legacy version,
+or to ``DTLS 1.3`` for a unified-header record.
 
 Known Limitations
 -----------------
@@ -21,14 +22,14 @@ Known Limitations
 and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
 kept as raw octets.
 
-**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). It has
-no content-type octet (:rfc:`9147#section-4`), so it degrades to
-:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS 1.3's cleartext records use
-the legacy ``DTLSPlaintext`` header and are decoded.
+**A unified-header record with a connection ID is not decoded**
+(:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the
+record, so it degrades to :class:`~pcapkit.protocols.misc.raw.Raw`. The same
+holds for ``tls12_cid`` records (:rfc:`9146`).
 
-**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`): the
-connection ID's length is not carried in the record, so they degrade to
-:class:`~pcapkit.protocols.misc.raw.Raw`.
+**A unified-header record carries only the low two bits of the epoch**, and
+its sequence number is header-protected, so the values it reports are the
+ones on the wire.
 
 .. versionadded:: 1.6.0
 
@@ -38,7 +39,10 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.protocols.application.ssl import DTLS13_VERSION, SSL
 from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
+from pcapkit.protocols.data.application.dtls import DTLSCiphertext as Data_DTLSCiphertext
 from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
+from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as Schema_DTLSCiphertext
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -60,6 +64,37 @@ _DTLSV1_2_VERSION = 0xFEFD
 #: Legacy record versions a DTLS 1.3 record may carry: DTLS 1.2's always, and
 #: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`).
 _DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
+#: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).
+_UNIFIED_PREFIX = 0b001
+
+
+def _is_unified_header(octet: int) -> bool:
+    """Whether ``octet`` opens a unified-header record.
+
+    Legacy records open with a content type of 20 through 27, whose top three
+    bits are ``000``, so the ``001`` prefix never matches one of them.
+
+    Args:
+        octet: First octet of the record.
+
+    Returns:
+        Whether the octet's top three bits are the unified-header prefix.
+
+    """
+    return octet >> 5 == _UNIFIED_PREFIX
+
+
+def _ciphertext_header_length(flags: 'dict[str, int]') -> 'int':
+    """Length of a unified header, from its first octet's decoded flags.
+
+    Args:
+        flags: Decoded first octet, as the header schema holds it.
+
+    Returns:
+        First octet, sequence number and, if present, the length field.
+
+    """
+    return 1 + (2 if flags['sequence_long'] else 1) + (2 if flags['length_present'] else 0)
 
 
 class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
@@ -67,7 +102,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
     - Datagram Transport Layer Security 1.0 [:rfc:`4347`]
     - Datagram Transport Layer Security 1.2 [:rfc:`6347`]
-    - Datagram Transport Layer Security 1.3, legacy-format records only [:rfc:`9147`]
+    - Datagram Transport Layer Security 1.3, legacy-format and unified-header records [:rfc:`9147`]
 
     Note:
         The subpackage does not track the dispatch tier: DTLS is dispatched
@@ -96,12 +131,15 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         return self._alias
 
     @property
-    def length(self) -> 'Literal[13]':
-        """Header length of current protocol -- the fixed record header,
-        :attr:`~pcapkit.protocols.data.application.dtls.DTLS.length`'s
-        fragment excluded.
+    def length(self) -> 'int':
+        """Header length of current protocol -- the record header, the
+        fragment excluded. Fixed at 13 octets for a legacy record; a unified
+        header's length follows from its first octet.
 
         """
+        schema = getattr(self, '__header__', None)
+        if isinstance(schema, Schema_DTLSCiphertext):
+            return _ciphertext_header_length(schema.flags)
         return 13
 
     ##########################################################################
@@ -148,7 +186,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
              content: 'Any' = b'',
              data: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
-             **kwargs: 'Any') -> 'Schema_DTLS':
+             ciphertext: 'bool' = False,
+             sequence_long: 'bool' = False,
+             length_present: 'bool' = True,
+             **kwargs: 'Any') -> 'Schema_DTLS | Schema_DTLSCiphertext':
         """Make (construct) packet data, for every tier: ``version`` is written as is.
 
         Args:
@@ -159,25 +200,50 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             version: Legacy record version (``major << 8 | minor``), e.g.
                 ``0xFEFD`` for DTLS 1.2 and (the legacy value DTLS 1.3 keeps
                 here) DTLS 1.3.
-            epoch: Epoch.
-            sequence_number: Sequence number within ``epoch`` (48-bit).
+            epoch: Epoch. A unified-header record carries only its low two
+                bits, so a larger value is refused.
+            sequence_number: Sequence number within ``epoch`` (48-bit); for a
+                unified-header record, 8 or 16 bits as ``sequence_long`` says.
             content: Record content: a :obj:`tuple` of
                 :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`
                 for ``handshake``, an
                 :class:`~pcapkit.protocols.data.application.tls.Alert`, a
                 :class:`~pcapkit.protocols.data.application.tls.ChangeCipherSpec`,
-                or raw :obj:`bytes`, as :meth:`read` would decode it.
+                or raw :obj:`bytes`, as :meth:`read` would decode it. For a
+                unified-header record, the ciphertext as :obj:`bytes`.
             data: Pre-encoded record fragment. When given, it is used
                 verbatim in place of ``content`` and ``length`` is computed
                 from it.
             payload: Octets after the record, e.g. a further record
                 coalesced in the same buffer.
+            ciphertext: Make a unified-header record (:rfc:`9147#section-4.1`)
+                instead of a legacy one; ``content_type``, ``version`` and
+                ``data`` do not apply.
+            sequence_long: Whether a unified-header record's sequence number is
+                16 bits rather than 8.
+            length_present: Whether a unified-header record carries its length;
+                if not, it runs to the end of the datagram.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
+        if ciphertext:
+            return Schema_DTLSCiphertext(
+                flags={
+                    'fixed': _UNIFIED_PREFIX,
+                    'connection_id': 0,
+                    'sequence_long': int(sequence_long),
+                    'length_present': int(length_present),
+                    'epoch': epoch,
+                },
+                sequence_number=sequence_number,
+                length=len(content) if length_present else None,
+                fragment=content,
+                payload=payload,
+            )
+
         content_type_ = cast('Enum_ContentType', self._make_index(
             content_type, content_type_default, namespace=content_type_namespace,
             reversed=content_type_reversed, pack=False))
@@ -193,6 +259,29 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             payload=payload,
         )
 
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS | Data_DTLSCiphertext':
+        """Unpack (parse) packet data, with the header schema its first octet selects.
+
+        A unified-header record (:rfc:`9147#section-4.1`) is parsed by
+        :class:`~pcapkit.protocols.schema.application.dtls.DTLSCiphertext`
+        rather than the legacy header; every other record uses the inherited
+        behaviour.
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        octets = self._data[:1]
+        if self.__header__ is None and octets and _is_unified_header(octets[0]):
+            packet = kwargs.get('__packet__', {})  # packet data
+            self.__header__ = Schema_DTLSCiphertext.unpack(self._file, length, packet)  # type: ignore[assignment]
+            return self.read(length, **kwargs)
+        return super().unpack(length, **kwargs)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -206,7 +295,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
     ##########################################################################
 
     @classmethod
-    def _make_data(cls, data: 'Data_DTLS') -> 'dict[str, Any]':  # type: ignore[override]
+    def _make_data(cls, data: 'Data_DTLS | Data_DTLSCiphertext') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
 
         Args:
@@ -216,6 +305,16 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             Key-value pairs for protocol construction.
 
         """
+        if isinstance(data, Data_DTLSCiphertext):
+            return {
+                'ciphertext': True,
+                'epoch': data.epoch,
+                'sequence_number': data.sequence_number,
+                'sequence_long': data.sequence_long,
+                'length_present': data.length is not None,
+                'content': data.content,
+                'payload': cls._make_payload(data),
+            }
         return {
             'content_type': data.content_type,
             'version': data.version,
@@ -225,8 +324,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             'payload': cls._make_payload(data),
         }
 
-    def _read_dtls_record(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS':  # pylint: disable=unused-argument
+    def _read_dtls_record(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS | Data_DTLSCiphertext':  # pylint: disable=unused-argument
         """Read a DTLS record, identifying its concrete tier as it goes.
+
+        A unified-header record is handed to :meth:`_read_dtls_ciphertext`.
 
         Structure of DTLS record layer [:rfc:`9147#section-4`]:
 
@@ -262,6 +363,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 malformed for its content type.
 
         """
+        if isinstance(self.__header__, Schema_DTLSCiphertext):
+            return self._read_dtls_ciphertext(length, **kwargs)
+
         schema = self.__header__
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=True)
@@ -289,4 +393,45 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         )
 
         remaining = available - (self.length + schema.length)
+        return self._decode_next_layer(dtls, -1, remaining)
+
+    def _read_dtls_ciphertext(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLSCiphertext':  # pylint: disable=unused-argument
+        """Read a unified-header ciphertext record (:rfc:`9147#section-4.1`).
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If the header carries a connection ID, whose length
+                is negotiated and not in the record; if the header or its
+                declared length runs past the buffer; or if there is no
+                ciphertext after the header.
+
+        """
+        self._alias = 'DTLS 1.3'
+        schema = self.__header__
+        flags = schema.flags
+        available = length if length is not None else len(self)
+
+        if flags['connection_id']:
+            raise ProtocolError(f'{self.alias}: invalid format: connection ID records are not decoded')
+        needed = self.length + (schema.length or 0)
+        if needed > available:
+            raise ProtocolError(f'{self.alias}: invalid format: record of {needed} octets '
+                                'runs past the end of the buffer')
+        if not schema.fragment:
+            raise ProtocolError(f'{self.alias}: invalid format: no ciphertext after the record header')
+
+        dtls = Data_DTLSCiphertext(
+            epoch=flags['epoch'],
+            sequence_number=schema.sequence_number,
+            sequence_long=bool(flags['sequence_long']),
+            length=schema.length,
+            content=schema.fragment,
+        )
+        remaining = available - (self.length + len(schema.fragment))
         return self._decode_next_layer(dtls, -1, remaining)
