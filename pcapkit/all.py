@@ -119,7 +119,6 @@ __all__ = [
     'PCAPNG',                                               # PCAPNG Format
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
-<<<<<<< HEAD
     'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
     'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',               # Link Layer
     'AH', 'ESP', 'IGMP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',  # Internet Layer
