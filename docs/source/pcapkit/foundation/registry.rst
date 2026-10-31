@@ -90,6 +90,8 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_ipv4_option
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_icmp_type
+
 .. autofunction:: pcapkit.foundation.registry.protocols.register_hip_parameter
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_hopopt_option

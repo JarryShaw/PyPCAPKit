@@ -72,8 +72,8 @@ Here are some usage samples:
 
       $ pcapkit-cli in --auto-extension --format plist --verbose
       🚨 Loading file 'in.pcap'
-      Frame   1: Ethernet:IPv6:IPv6_ICMP
-      Frame   2: Ethernet:IPv6:IPv6_ICMP
+      Frame   1: Ethernet:IPv6:ICMPv6
+      Frame   2: Ethernet:IPv6:ICMPv6
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP
@@ -93,8 +93,8 @@ Here are some usage samples:
 
       $ pcapkit-cli in --auto-extension --output out.json --format json --verbose
       🚨 Loading file 'in.pcap'
-      Frame   1: Ethernet:IPv6:IPv6_ICMP
-      Frame   2: Ethernet:IPv6:IPv6_ICMP
+      Frame   1: Ethernet:IPv6:ICMPv6
+      Frame   2: Ethernet:IPv6:ICMPv6
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP
@@ -107,8 +107,8 @@ Here are some usage samples:
 
       $ pcapkit-cli in.pcap --output out.txt --format tree --verbose
       🚨 Loading file 'in.pcap'
-      Frame   1: Ethernet:IPv6:IPv6_ICMP
-      Frame   2: Ethernet:IPv6:IPv6_ICMP
+      Frame   1: Ethernet:IPv6:ICMPv6
+      Frame   2: Ethernet:IPv6:ICMPv6
       Frame   3: Ethernet:IPv4:TCP
       Frame   4: Ethernet:IPv4:TCP
       Frame   5: Ethernet:IPv4:TCP

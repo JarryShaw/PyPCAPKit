@@ -41,7 +41,7 @@ one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
-* Internet Layer: ECN, ICMP, ICMPv6, Shim6
+* Internet Layer: ECN, Shim6
 * Transport Layer: DCCP, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
   NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
@@ -49,12 +49,15 @@ the ones outstanding are,
 
 Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
-:class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP
-with ICMPv6, and TLS/SSL with DTLS. **Done** for TLS/SSL with DTLS:
-:class:`~pcapkit.protocols.application.ssl.SSL` is the shared record-layer base
-of :class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.internet.ip.IP` and
+:class:`~pcapkit.protocols.internet.icmp.ICMP` already cover their families:
+IP and IPsec, and TLS/SSL with DTLS. **Done** for TLS/SSL
+with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
+record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
 :class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
-below.
+below. Neighbor Discovery (:rfc:`4861`, the ``NDP`` above) and Multicast
+Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented,
+nor is ICMP/ICMPv6 checksum computation or verification (:issue:`2470`).
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
@@ -362,8 +365,9 @@ Follow-ups to the bindings above:
   port number. That depends on the proxy identifying the version positively
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
-Beyond those, the gaps most likely to be met in a real capture are ICMP (1)
-and ICMPv6 (58) on the internet layer, each of which has a stub.
+**Done.** ICMP (1), ICMPv6 (58) and IGMP (2) -- the internet layer gaps most
+likely to be met in a real capture -- are all now implemented; ECN and Shim6
+above remain the open ones.
 
 PCAPNG Support
 --------------
@@ -1082,11 +1086,19 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6** and **TLS/SSL with DTLS**,
-plus **IGMP** and **DCCP** on their own. These are grouped because the shared-base
-question is the design work and doing either half of a pair alone would answer it
-twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
-blocked on :issue:`2479` for its pseudo-header checksum.
+Protocols, More!!!`_ above: **TLS/SSL with DTLS** and **IGMP** and **DCCP** on
+their own. These are grouped because the shared-base question is the design work
+and doing either half of a pair alone would answer it twice. **DCCP** is the
+transport-layer implementation, tracked by :issue:`2489`, and blocked on
+:issue:`2479` for its pseudo-header checksum.
+
+**Done within wave 2 — ICMP/ICMPv6 shared base.** :class:`~pcapkit.protocols.internet.icmp.ICMP`
+is the abstract base :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` and
+:class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` share for selector composition
+(:issue:`2436`); each implements its own message-type parsing independently rather than
+through a shared method body. The two are distinguished by whether they carry pseudo-header
+checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation or verification
+(:issue:`2470`).
 
 **IGMP v1/v2 — done within wave 2** (:issue:`2439`).
 The versioned classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` and
@@ -1132,8 +1144,11 @@ above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
 sequenced *after* wave 2 rather than by preference: the multicast options embed
-:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group
-records — ICMPv6 a wave 2 deliverable, IGMPv3 :issue:`2448`. Landing the
+:rfc:`9777` MLD (which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which
+rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
+IGMPv1/v2 are both wave 2 deliverables, now done; MLD itself remains a
+follow-up to ICMPv6 (see `More Protocols, More!!!`_ above), and IGMPv3 is
+:issue:`2448` -- neither is part of wave 2's own scope. Landing the
 registry first would give a dispatch table with nothing but
 :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
