@@ -379,11 +379,11 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # and ngap.ProtocolIE, which are on EnumRegistry, and GitHub issue
         # #2457's sslv2.HandshakeType and sslv2.Version, hand-curated rather than
         # generated but the same EnumRegistry-plus-IntEnum shape.
-        self.assertEqual(len(ints), 118)
+        self.assertEqual(len(ints), 119)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)
-        self.assertEqual(len(self.enums), 134)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 128)
+        self.assertEqual(len(self.enums), 135)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 129)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.
