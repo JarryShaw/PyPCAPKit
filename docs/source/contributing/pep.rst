@@ -242,14 +242,15 @@ separate question and is not needed to make the record structure legible, in
 the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
 without keys.
 
-**Not done: reassembling a handshake message DTLS has fragmented across
-several records** (:rfc:`6347#section-4.2.3`, :issue:`2440`). That needs a
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass keyed
-on the UDP 4-tuple plus epoch. A fragmented message's body is kept as that one
-fragment's raw octets -- see
-:attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`
--- rather than decoded from a slice of the message. An unfragmented message is
-unaffected.
+**Done: reassembling a handshake message DTLS has fragmented across several
+records** (:rfc:`6347#section-4.2.3`, :issue:`2440`), via
+:class:`~pcapkit.foundation.reassembly.dtls.DTLS`, keyed on the UDP 4-tuple.
+Pass ``reassembly=`` and ``flow=`` to
+:class:`~pcapkit.protocols.application.dtls.DTLS` to opt in; the completing
+fragment's body decodes to the full reassembled message, while every other
+fragment's body stays that one fragment's raw octets -- see
+:attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`.
+An unfragmented message is unaffected either way.
 
 NGAP over DTLS over SCTP (PPID 66,
 :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`),
@@ -1088,9 +1089,9 @@ twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`,
 blocked on :issue:`2479` for its pseudo-header checksum.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
-what is decoded (the shared :class:`~pcapkit.protocols.application.ssl.SSL`
-base, TLS, DTLS, and handshake message framing) and what is not (DTLS
-handshake-fragment reassembly, :issue:`2440`).
+what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
+base, TLS, DTLS, handshake message framing, and handshake-fragment
+reassembly (:issue:`2440`).
 
 **Done ahead of wave 2 — handlers for the** ``DLT_NULL``, ``DLT_RAW``,
 ``DLT_LINUX_SLL`` **and** ``DLT_LINUX_SLL2`` **link types.** Each is a
