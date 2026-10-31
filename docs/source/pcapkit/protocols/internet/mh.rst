@@ -36,6 +36,8 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
+   .. automethod:: id
+
    .. automethod:: register_message
    .. automethod:: register_option
    .. automethod:: register_extension

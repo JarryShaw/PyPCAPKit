@@ -299,6 +299,110 @@ class IPv6ExtUnitTests(unittest.TestCase):
         # so the hyphen matters, not just the dash-free text either side of it.
         self.assertEqual(inst.alias.lstrip('IPv6-').lower(), 'ext')
 
+    # -- id(): the family composes its members, each member narrows -------
+
+    def test_id_composes_every_direct_concrete_subclass(self) -> None:
+        """Derived from the live hierarchy, so a new member cannot drift."""
+        import inspect
+
+        import pcapkit.protocols  # noqa: F401  # pylint: disable=unused-import
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        members = [klass for klass in IPv6_Ext.__subclasses__() if not inspect.isabstract(klass)]
+        self.assertCountEqual(IPv6_Ext.id(), [klass.__name__ for klass in members])
+        for klass in members:
+            with self.subTest(cls=klass.__qualname__):
+                self.assertEqual(klass.id(), (klass.__name__,))
+                self.assertIn(klass.__name__.upper(), IPv6_Ext.expand_comp('IPv6_Ext'))
+
+    @staticmethod
+    def _member_packets() -> 'dict[str, bytes]':
+        """One real IPv6 packet per family member, keyed by its class name."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.const.reg.transtype import TransType
+
+        udp = _udp_bytes(b'ok')
+        nxt = int(TransType.UDP)
+        hit = bytes(15)
+        headers = {
+            'HOPOPT': (EH.HOPOPT, bytes([nxt, 0]) + bytes(6) + udp),
+            'IPv6_Opts': (EH.IPv6_Opts, bytes([nxt, 0]) + bytes(6) + udp),
+            'IPv6_Frag': (EH.IPv6_Frag, bytes([nxt]) + bytes(7) + udp),
+            'IPv6_Route': (EH.IPv6_Route, bytes([nxt, 1, 253, 0]) + bytes(12) + udp),
+            'MH': (EH.Mobility_Header, bytes([nxt, 0, 0, 0]) + bytes(4) + udp),
+            'AH': (EH.AH, bytes([nxt, 2, 0, 0]) + bytes(12) + udp),
+            'ESP': (EH.ESP, struct.pack('>II', 0x66, 1) + bytes(16)),
+            'HIP': (EH.HIP, bytes([nxt, 4, 0x01, 0x21]) + b'\x12\x34\x00\x00'
+                    + hit + b'\x01' + hit + b'\x02' + udp),
+        }
+        return {name: _ipv6_bytes(int(code), body) for name, (code, body) in headers.items()}
+
+    def test_selector_matches_by_member_and_by_family(self) -> None:
+        """A member name matches only that member; the family name matches all."""
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        packets = self._member_packets()
+        for name, raw in packets.items():
+            ipv6 = IPv6(io.BytesIO(raw), len(raw))
+            with self.subTest(header=name):
+                (_, ext), = ipv6.extension_headers.items(multi=True)
+                self.assertEqual(type(ext).__name__, name)
+                self.assertIn(name, ipv6.protochain)
+                self.assertIn('IPv6_Ext', ipv6.protochain)
+                for other in packets:
+                    if other != name:
+                        self.assertNotIn(other, ipv6.protochain)
+                if name in ('AH', 'ESP'):
+                    self.assertIn('IPsec', ipv6.protochain)
+                else:
+                    self.assertNotIn('IPsec', ipv6.protochain)
+
+    def test_eq_on_the_family_name_is_false_like_ip_and_ipsec(self) -> None:
+        """``==`` tests a layer's own :meth:`id`, which omits a family name."""
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        ah = bytes([int(TransType.UDP), 2, 0, 0]) + bytes(12) + _udp_bytes(b'ok')
+        raw = _ipv4_bytes(int(TransType.AH), ah)
+        ipv4 = IPv4(io.BytesIO(raw), len(raw))
+        self.assertTrue(ipv4 == 'IPv4')
+        self.assertFalse(ipv4 == 'IP')
+        self.assertTrue(ipv4.payload == 'AH')
+        self.assertFalse(ipv4.payload == 'IPsec')
+
+        for name, raw in self._member_packets().items():
+            (_, ext), = IPv6(io.BytesIO(raw), len(raw)).extension_headers.items(multi=True)
+            with self.subTest(header=name):
+                self.assertTrue(ext == name)
+                self.assertFalse(ext == 'IPv6_Ext')
+
+        generic = bytes([int(TransType.UDP), 0]) + bytes(6)
+        fallback = IPv6_Ext(io.BytesIO(generic), len(generic), extension=True, alias=0)
+        self.assertFalse(fallback == 'IPv6_Ext')
+        self.assertTrue(fallback == IPv6_Ext)
+
+    def test_fallback_for_a_malformed_member_matches_every_member_name(self) -> None:
+        """A HOPOPT that its own parser rejects is parsed by ``IPv6_Ext``."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        # Router Alert declaring 10 octets of data in a 6-octet option area
+        hopopt = bytes([int(TransType.UDP), 0, 0x05, 10]) + bytes(4)
+        raw = _ipv6_bytes(int(ExtensionHeader.HOPOPT), hopopt + _udp_bytes(b'ok'))
+        ipv6 = IPv6(io.BytesIO(raw), len(raw))
+
+        (_, ext), = ipv6.extension_headers.items(multi=True)
+        self.assertIs(type(ext), IPv6_Ext)
+        self.assertIsInstance(ext.info.error, Exception)
+        self.assertEqual(str(ipv6.protochain), 'IPv6:IPv6-Ext:UDP:Raw')
+        for name in (*IPv6_Ext.id(), 'IPv6_Ext', 'IPsec'):
+            with self.subTest(selector=name):
+                self.assertIn(name, ipv6.protochain)
+
     # -- the version gate: this class only ever activates for IPv6 ----------
 
     def test_version_gate_rejects_non_ipv6_construction(self) -> None:
@@ -438,8 +542,9 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     #: header in every :class:`~pcapkit.corekit.protochain.ProtoChain` string
     #: and in the packet dict key, ``protocol`` reads a field the subclass's
     #: data model does not have, ``length`` likewise (``IPv6_Frag``'s data model
-    #: has no ``length`` field at all), and ``__index__`` raises.
-    REQUIRED_OVERRIDES = ('name', 'alias', 'protocol', 'length', '__index__')
+    #: has no ``length`` field at all), ``__index__`` raises, and ``id`` matches
+    #: every member's name.
+    REQUIRED_OVERRIDES = ('name', 'alias', 'protocol', 'length', '__index__', 'id')
 
     #: The expected family, so a member silently *leaving* the base is
     #: caught as well as one joining without the overrides. Named rather than

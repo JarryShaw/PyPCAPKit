@@ -417,6 +417,16 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["HOPOPT"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('HOPOPT',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

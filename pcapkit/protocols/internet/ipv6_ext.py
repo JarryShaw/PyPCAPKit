@@ -223,14 +223,15 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
     Warning:
         A subclass **must** define :attr:`name`, :attr:`alias`,
-        :attr:`protocol`, :attr:`length` and :meth:`__index__` itself. Each
-        carries this class's *fallback-role* answer, which is wrong for a
-        header with an identity of its own: it would report itself as
-        ``IPv6 Extension Header`` / ``IPv6-Ext``, read its length off a data
-        model that is not its own, and :meth:`__index__` would raise rather
-        than return its IANA number. The language cannot enforce the override,
-        so ``tests/protocols/internet/test_ipv6_ext_unit.py`` does, over every
-        subclass discovered at runtime.
+        :attr:`protocol`, :attr:`length`, :meth:`__index__` and :meth:`id`
+        itself. Each carries this class's *fallback-role* answer, which is
+        wrong for a header with an identity of its own: it would report itself
+        as ``IPv6 Extension Header`` / ``IPv6-Ext``, read its length off a data
+        model that is not its own, :meth:`__index__` would raise rather than
+        return its IANA number, and :meth:`id` would match every member's name
+        rather than narrow to its own class name. The language cannot enforce
+        the override, so ``tests/protocols/internet/test_ipv6_ext_unit.py``
+        does, over every subclass discovered at runtime.
 
     .. versionadded:: 1.5.0
 
@@ -378,6 +379,22 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
     # Methods.
     ##########################################################################
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["HOPOPT"], Literal["IPv6_Route"], Literal["IPv6_Frag"], Literal["ESP"], Literal["AH"], Literal["IPv6_Opts"], Literal["MH"], Literal["HIP"]]':  # pylint: disable=line-too-long
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of every direct concrete subclass, each of which narrows
+            its own :meth:`id` to itself. A header parsed by this class as the
+            generic fallback therefore matches every one of these names.
+
+        Note:
+            ``== 'IPv6_Ext'`` is :data:`False`, as ``== 'IP'`` is on
+            :class:`~pcapkit.protocols.internet.ipv4.IPv4`; ``== IPv6_Ext`` is :data:`True`.
+
+        """
+        return ('HOPOPT', 'IPv6_Route', 'IPv6_Frag', 'ESP', 'AH', 'IPv6_Opts', 'MH', 'HIP')
 
     def read(self, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
              extension: 'bool' = False, **kwargs: 'Any') -> '_PT':

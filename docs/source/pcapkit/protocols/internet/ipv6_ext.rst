@@ -45,6 +45,8 @@ instead of clipping it.
    .. autoproperty:: payload
    .. autoproperty:: protochain
 
+   .. automethod:: id
+
    .. automethod:: read
    .. automethod:: make
 
