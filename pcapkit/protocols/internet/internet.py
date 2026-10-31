@@ -76,8 +76,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.internet.ah.AH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IGMP`
          - :class:`pcapkit.protocols.internet.igmp.IGMP`, which dispatches to
-           :class:`pcapkit.protocols.internet.igmpv1.IGMP` or
-           :class:`pcapkit.protocols.internet.igmpv2.IGMP`
+           :class:`pcapkit.protocols.internet.igmpv1.IGMP`,
+           :class:`pcapkit.protocols.internet.igmpv2.IGMP` or
+           :class:`pcapkit.protocols.internet.igmpv3.IGMP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
          - :class:`pcapkit.protocols.misc.raw.Raw`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`

@@ -29,6 +29,7 @@ internet layer, with detailed implementation and methods.
    igmp
    igmpv1
    igmpv2
+   igmpv3
    ipx
 
 .. todo::

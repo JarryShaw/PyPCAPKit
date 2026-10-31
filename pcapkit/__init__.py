@@ -114,7 +114,7 @@ __all__ = [
     'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP',            # Link Layer
     'L2TPv2', 'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',
 
-    'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2',                # Internet Layer
+    'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',      # Internet Layer
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header

@@ -13,11 +13,15 @@ crawlers include:
 
    * - :class:`IGMP_Type <pcapkit.vendor.igmp.type.Type>`
      - IGMP Type Numbers [*]_
+   * - :class:`IGMP_RecordType <pcapkit.vendor.igmp.record_type.RecordType>`
+     - IGMP Group Record Types [*]_
 
 .. [*] https://www.iana.org/assignments/igmp-type-numbers/igmp-type-numbers.xhtml
+.. [*] https://www.rfc-editor.org/rfc/rfc3376#section-4.2.12
 
 """
 
+from pcapkit.vendor.igmp.record_type import RecordType as IGMP_RecordType
 from pcapkit.vendor.igmp.type import Type as IGMP_Type
 
-__all__ = ['IGMP_Type']
+__all__ = ['IGMP_Type', 'IGMP_RecordType']

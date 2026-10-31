@@ -1082,17 +1082,23 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6** and **TLS/SSL with DTLS**,
-plus **IGMP** and **DCCP** on their own. These are grouped because the shared-base
-question is the design work and doing either half of a pair alone would answer it
-twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
+Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
+``LINUX_SLL`` with ``LINUX_SLL2``, plus **DCCP** on its own. These are
+grouped because the shared-base question is the design work and doing either half of
+a pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
+size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
+stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
-**IGMP v1/v2 — done within wave 2** (:issue:`2439`).
-The versioned classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` and
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` share one read path on the
-abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base.
-:rfc:`3376` IGMPv3 is :issue:`2448`.
+**IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
+The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`,
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` and
+:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` share one read path on
+the abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base, which
+:meth:`~pcapkit.protocols.internet.igmp.IGMP._classify` dispatches to the right
+one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (:rfc:`3376`) adds the
+Membership Query's source-list extension and the Membership Report's
+group-record list, each a shape of its own.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
@@ -1132,9 +1138,10 @@ above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
 sequenced *after* wave 2 rather than by preference: the multicast options embed
-:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group
-records — ICMPv6 a wave 2 deliverable, IGMPv3 :issue:`2448`. Landing the
-registry first would give a dispatch table with nothing but
+:rfc:`3810` MLD, which rides in **ICMPv6** — still a wave 2 deliverable — and
+:rfc:`3376` IGMP records, which :mod:`pcapkit.protocols.internet.igmp` now
+dissects in full, including IGMPv3 (see above). Landing the registry first
+would give a dispatch table with nothing but
 :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the

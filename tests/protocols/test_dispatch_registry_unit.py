@@ -228,7 +228,7 @@ class DispatchRegistryTests(unittest.TestCase):
         # LinkType.NULL and LinkType.LOOP in both link-type tables, the four
         # address families of Loopback.__proto__, #2438's
         # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
-        # pcap and pcapng frame tables, and #2439's IGMP.
+        # pcap and pcapng frame tables, and #2448's Internet.__proto__[TransType.IGMP].
         self.assertEqual(len(cases), 54,
                          'expected exactly 54 entries across the seven __proto__ '
 

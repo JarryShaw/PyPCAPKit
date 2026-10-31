@@ -19,6 +19,7 @@ from pcapkit.protocols.internet.ah import AH
 from pcapkit.protocols.internet.esp import ESP
 from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
 from pcapkit.protocols.internet.igmpv2 import IGMP as IGMPv2
+from pcapkit.protocols.internet.igmpv3 import IGMP as IGMPv3
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
 from pcapkit.protocols.internet.ipx import IPX
@@ -42,7 +43,7 @@ from pcapkit.protocols.internet.ipsec import IPsec
 
 __all__ = [
     'ETHERTYPE',                                        # Protocol Numbers
-    'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2',            # Internet Layer
+    'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',  # Internet Layer
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext',
     'IPv6_Opts', 'IPv6_Route', 'MH',                    # IPv6 Extension Header

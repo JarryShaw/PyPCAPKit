@@ -80,6 +80,9 @@ __all__ = [
     # Encapsulating Security Payload
     'ESP',
 
+    # Internet Group Management Protocol
+    'IGMP', 'IGMP_GroupAddressMessage', 'IGMP_GroupRecord', 'IGMP_Version3MembershipReport',
+
     # Host Identity Protocol
     'HIP', 'HIP_Control',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_HostIdentity', 'HIP_Lifetime', 'HIP_Flags',
