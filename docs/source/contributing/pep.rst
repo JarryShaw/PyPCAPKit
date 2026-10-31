@@ -40,7 +40,7 @@ step-by-step guide for adding a protocol, and is worth reading before starting
 one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
+* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
 * Internet Layer: ECN, ICMP, ICMPv6, Shim6
 * Transport Layer: DCCP, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
@@ -362,9 +362,7 @@ Follow-ups to the bindings above:
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1)
-and ICMPv6 (58) on the internet layer, each of which has a stub; and
-``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
-``tcpdump -i any`` capture uses and which have no stub.
+and ICMPv6 (58) on the internet layer, each of which has a stub.
 
 PCAPNG Support
 --------------
@@ -1083,12 +1081,10 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
-``LINUX_SLL`` with ``LINUX_SLL2``, plus **DCCP** on its own. These are
-grouped because the shared-base question is the design work and doing either half of
-a pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
-size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
-stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
+Protocols, More!!!`_ above: **ICMP with ICMPv6** and **TLS/SSL with DTLS**,
+plus **IGMP** and **DCCP** on their own. These are grouped because the shared-base
+question is the design work and doing either half of a pair alone would answer it
+twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
 **IGMP — done ahead of wave 2**, as one of the items that needed no
