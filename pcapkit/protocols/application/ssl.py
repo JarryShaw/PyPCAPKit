@@ -372,30 +372,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             return Data_ChangeCipherSpec(msg=fragment[0])
         return fragment
 
-    def _make_tls_content(self, content_type: 'Enum_ContentType', content: 'Any', *,
-                          dtls: 'bool') -> 'bytes':
-        """Encode a record fragment by its content type -- the inverse of
-        :meth:`_read_tls_content`.
-
-        Args:
-            content_type: Record content type.
-            content: Decoded record content, or already-encoded :obj:`bytes`.
-            dtls: Whether this is a DTLS record.
-
-        Returns:
-            Encoded record fragment.
-
-        """
-        if isinstance(content, bytes):
-            return content
-        if content_type == Enum_ContentType.handshake:
-            return self._make_tls_handshake_messages(content, dtls=dtls)
-        if content_type == Enum_ContentType.alert:
-            return bytes([int(content.level), int(content.description)])
-        if content_type == Enum_ContentType.change_cipher_spec:
-            return bytes([int(content.msg)])
-        return bytes(content)
-
     def _read_tls_handshake_messages(self, fragment: 'bytes', *,
                                      dtls: 'bool') -> 'tuple[Any, ...]':
         """Decode a ``handshake`` record fragment into its handshake messages.
@@ -469,50 +445,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             else:
                 messages.append(Data_Handshake(msg_type=msg_type, length=length, body=body))
         return tuple(messages)
-
-    def _make_tls_handshake_messages(self, messages: 'tuple[Any, ...]', *,
-                                     dtls: 'bool') -> 'bytes':
-        """Encode handshake messages back into a record fragment -- the
-        inverse of :meth:`_read_tls_handshake_messages`.
-
-        Args:
-            messages: Handshake messages, as returned by
-                :meth:`_read_tls_handshake_messages`, or already-encoded
-                :obj:`bytes` per message.
-            dtls: Whether to write DTLS's fragment header after each
-                message's ``msg_type``/``length`` header.
-
-        Returns:
-            Encoded record fragment.
-
-        """
-        out = bytearray()
-        for message in messages:
-            if isinstance(message, bytes):
-                out += message
-                continue
-
-            body = message.body
-            if isinstance(body, Data_ClientHello):
-                body_bytes = self._make_tls_client_hello(body, dtls=dtls)
-            elif isinstance(body, Data_ServerHello):
-                body_bytes = self._make_tls_server_hello(body)
-            else:
-                body_bytes = bytes(body)
-
-            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
-            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
-            is_fragmented = dtls and message.is_fragmented
-            length = message.length if is_fragmented else len(body_bytes)
-
-            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
-            if dtls:
-                fragment_length = message.fragment_length if is_fragmented else len(body_bytes)
-                out += (message.message_seq.to_bytes(2, 'big')
-                       + message.fragment_offset.to_bytes(3, 'big')
-                       + fragment_length.to_bytes(3, 'big'))
-            out += body_bytes
-        return bytes(out)
 
     def _read_tls_client_hello(self, body: 'bytes', *, dtls: 'bool') -> 'Data_ClientHello':
         """Decode a ``ClientHello`` handshake message body.
@@ -618,39 +550,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             extensions=extensions,
         )
 
-    def _make_tls_client_hello(self, data: 'Data_ClientHello', *, dtls: 'bool') -> 'bytes':
-        """Encode a ``ClientHello`` handshake message body -- the inverse of
-        :meth:`_read_tls_client_hello`.
-
-        Args:
-            data: Decoded ``ClientHello``.
-            dtls: Whether this is a DTLS ``ClientHello``, i.e. whether to
-                write the ``cookie`` field.
-
-        Returns:
-            Encoded message body.
-
-        """
-        out = bytearray()
-        out += int(data.version).to_bytes(2, 'big')
-        out += data.random
-        out += bytes([len(data.session_id)]) + data.session_id
-
-        if dtls:
-            cookie = data.cookie if data.cookie is not None else b''
-            out += bytes([len(cookie)]) + cookie
-
-        cipher_suites = b''.join(int(suite).to_bytes(2, 'big') for suite in data.cipher_suites)
-        out += len(cipher_suites).to_bytes(2, 'big') + cipher_suites
-
-        compression_methods = bytes(int(method) for method in data.compression_methods)
-        out += bytes([len(compression_methods)]) + compression_methods
-
-        if data.extensions is not None:
-            extensions_raw = self._make_tls_extensions(data.extensions)
-            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
-        return bytes(out)
-
     def _read_tls_server_hello(self, body: 'bytes') -> 'Data_ServerHello':
         """Decode a ``ServerHello`` handshake message body.
 
@@ -709,29 +608,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             compression_method=compression_method, extensions=extensions,
         )
 
-    def _make_tls_server_hello(self, data: 'Data_ServerHello') -> 'bytes':
-        """Encode a ``ServerHello`` handshake message body -- the inverse of
-        :meth:`_read_tls_server_hello`.
-
-        Args:
-            data: Decoded ``ServerHello``.
-
-        Returns:
-            Encoded message body.
-
-        """
-        out = bytearray()
-        out += int(data.version).to_bytes(2, 'big')
-        out += data.random
-        out += bytes([len(data.session_id)]) + data.session_id
-        out += int(data.cipher_suite).to_bytes(2, 'big')
-        out += bytes([int(data.compression_method)])
-
-        if data.extensions is not None:
-            extensions_raw = self._make_tls_extensions(data.extensions)
-            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
-        return bytes(out)
-
     def _read_tls_extensions(self, data: 'bytes') -> 'tuple[Data_Extension, ...]':
         """Decode an extension list -- TYPE and LENGTH framing only.
 
@@ -770,6 +646,130 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             pos += ext_len
             extensions.append(Data_Extension(type=ext_type, data=ext_data))
         return tuple(extensions)
+
+    def _make_tls_content(self, content_type: 'Enum_ContentType', content: 'Any', *,
+                          dtls: 'bool') -> 'bytes':
+        """Encode a record fragment by its content type -- the inverse of
+        :meth:`_read_tls_content`.
+
+        Args:
+            content_type: Record content type.
+            content: Decoded record content, or already-encoded :obj:`bytes`.
+            dtls: Whether this is a DTLS record.
+
+        Returns:
+            Encoded record fragment.
+
+        """
+        if isinstance(content, bytes):
+            return content
+        if content_type == Enum_ContentType.handshake:
+            return self._make_tls_handshake_messages(content, dtls=dtls)
+        if content_type == Enum_ContentType.alert:
+            return bytes([int(content.level), int(content.description)])
+        if content_type == Enum_ContentType.change_cipher_spec:
+            return bytes([int(content.msg)])
+        return bytes(content)
+
+    def _make_tls_handshake_messages(self, messages: 'tuple[Any, ...]', *,
+                                     dtls: 'bool') -> 'bytes':
+        """Encode handshake messages back into a record fragment -- the
+        inverse of :meth:`_read_tls_handshake_messages`.
+
+        Args:
+            messages: Handshake messages, as returned by
+                :meth:`_read_tls_handshake_messages`, or already-encoded
+                :obj:`bytes` per message.
+            dtls: Whether to write DTLS's fragment header after each
+                message's ``msg_type``/``length`` header.
+
+        Returns:
+            Encoded record fragment.
+
+        """
+        out = bytearray()
+        for message in messages:
+            if isinstance(message, bytes):
+                out += message
+                continue
+
+            body = message.body
+            if isinstance(body, Data_ClientHello):
+                body_bytes = self._make_tls_client_hello(body, dtls=dtls)
+            elif isinstance(body, Data_ServerHello):
+                body_bytes = self._make_tls_server_hello(body)
+            else:
+                body_bytes = bytes(body)
+
+            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
+            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
+            is_fragmented = dtls and message.is_fragmented
+            length = message.length if is_fragmented else len(body_bytes)
+
+            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
+            if dtls:
+                fragment_length = message.fragment_length if is_fragmented else len(body_bytes)
+                out += (message.message_seq.to_bytes(2, 'big')
+                       + message.fragment_offset.to_bytes(3, 'big')
+                       + fragment_length.to_bytes(3, 'big'))
+            out += body_bytes
+        return bytes(out)
+
+    def _make_tls_client_hello(self, data: 'Data_ClientHello', *, dtls: 'bool') -> 'bytes':
+        """Encode a ``ClientHello`` handshake message body -- the inverse of
+        :meth:`_read_tls_client_hello`.
+
+        Args:
+            data: Decoded ``ClientHello``.
+            dtls: Whether this is a DTLS ``ClientHello``, i.e. whether to
+                write the ``cookie`` field.
+
+        Returns:
+            Encoded message body.
+
+        """
+        out = bytearray()
+        out += int(data.version).to_bytes(2, 'big')
+        out += data.random
+        out += bytes([len(data.session_id)]) + data.session_id
+
+        if dtls:
+            cookie = data.cookie if data.cookie is not None else b''
+            out += bytes([len(cookie)]) + cookie
+
+        cipher_suites = b''.join(int(suite).to_bytes(2, 'big') for suite in data.cipher_suites)
+        out += len(cipher_suites).to_bytes(2, 'big') + cipher_suites
+
+        compression_methods = bytes(int(method) for method in data.compression_methods)
+        out += bytes([len(compression_methods)]) + compression_methods
+
+        if data.extensions is not None:
+            extensions_raw = self._make_tls_extensions(data.extensions)
+            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
+        return bytes(out)
+
+    def _make_tls_server_hello(self, data: 'Data_ServerHello') -> 'bytes':
+        """Encode a ``ServerHello`` handshake message body -- the inverse of
+        :meth:`_read_tls_server_hello`.
+
+        Args:
+            data: Decoded ``ServerHello``.
+
+        Returns:
+            Encoded message body.
+
+        """
+        out = bytearray()
+        out += int(data.version).to_bytes(2, 'big')
+        out += data.random
+        out += bytes([len(data.session_id)]) + data.session_id
+        out += int(data.cipher_suite).to_bytes(2, 'big')
+        out += bytes([int(data.compression_method)])
+
+        if data.extensions is not None:
+            extensions_raw = self._make_tls_extensions(data.extensions)
+            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
+        return bytes(out)
 
     def _make_tls_extensions(self, extensions: 'tuple[Data_Extension, ...]') -> 'bytes':
         """Encode an extension list -- the inverse of :meth:`_read_tls_extensions`.

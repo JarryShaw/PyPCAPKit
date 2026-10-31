@@ -379,6 +379,37 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         #_addr = '.'.join(str(_) for _ in _byte)
         return ipaddress.ip_address(id)  # type: ignore[return-value]
 
+    def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
+        """Read Authentication field when Cryptographic Authentication is employed,
+        i.e. :attr:`~pcapkit.protocols.data.application.ospf.OSPF.autype` is ``2``.
+
+        Structure of Cryptographic Authentication [:rfc:`2328`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |              0                |    Key ID     | Auth Data Len |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Cryptographic sequence number                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed authentication data
+
+        Returns:
+            Parsed packet data.
+
+        """
+        auth = Data_CryptographicAuthentication(
+            reserved=schema.reserved,
+            key_id=schema.key_id,
+            len=schema.len,
+            seq=schema.seq,
+        )
+        return auth
+
     def _make_id_numbers(self, id: 'IPv4Address | str | bytes | bytearray') -> 'bytes':
         """Make router and area IDs.
 
@@ -411,37 +442,6 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         """
         return cast('IPv4Address', parse_ip_address(
             id, f'{self.__class__.__name__}: invalid ID', version=4)).packed
-
-    def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
-        """Read Authentication field when Cryptographic Authentication is employed,
-        i.e. :attr:`~pcapkit.protocols.data.application.ospf.OSPF.autype` is ``2``.
-
-        Structure of Cryptographic Authentication [:rfc:`2328`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |              0                |    Key ID     | Auth Data Len |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                 Cryptographic sequence number                 |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            schema: parsed authentication data
-
-        Returns:
-            Parsed packet data.
-
-        """
-        auth = Data_CryptographicAuthentication(
-            reserved=schema.reserved,
-            key_id=schema.key_id,
-            len=schema.len,
-            seq=schema.seq,
-        )
-        return auth
 
     def _make_encrypt_auth(self,
                            auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]'  # pylint: disable=line-too-long
