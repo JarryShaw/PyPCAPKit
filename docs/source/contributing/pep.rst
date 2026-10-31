@@ -245,7 +245,7 @@ without keys.
 **Not done: reassembling a handshake message DTLS has fragmented across
 several records** (:rfc:`6347#section-4.2.3`, :issue:`2440`). That needs a
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass keyed
-on the UDP 5-tuple plus epoch. A fragmented message's body is kept as that one
+on the UDP 4-tuple plus epoch. A fragmented message's body is kept as that one
 fragment's raw octets -- see
 :attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`
 -- rather than decoded from a slice of the message. An unfragmented message is

@@ -20,7 +20,7 @@ from pcapkit.foundation.traceflow import *
 __all__ = [
     'Extractor',
 
-    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly',
+    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
     'ReassemblyManager',
 
     'TCP_TraceFlow',
