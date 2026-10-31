@@ -114,6 +114,7 @@ ANCHORS = (
     'registry-protocol',
     'extension-header-subclassing',
     'protocol-family-grouping',
+    'protocol-member-order',
     'protocol-layer-placement',
     'process',
     'documentation',
