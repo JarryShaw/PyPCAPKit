@@ -22,6 +22,9 @@ The Order
    pair. Within each group the order is the enum value order of the code or type
    each method handles, not alphabetical by name.
 
+   **Exception:** ``_make_data()`` goes first in the utilities group, before the
+   reads.
+
 Example
 ~~~~~~~
 
@@ -37,6 +40,9 @@ Example
            ...
 
        # Utilities.
+       def _make_data(cls, data, ...):  # exception: first in the group
+           ...
+
        def _read_foo_field(self, ...):
            ...
 
