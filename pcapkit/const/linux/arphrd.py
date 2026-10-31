@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Linux ARP Hardware Types
+# pylint: disable=line-too-long,consider-using-f-string
+"""Linux ARP hardware types
 ==============================
 
 .. module:: pcapkit.const.linux.arphrd
 
-This module contains the constant enumeration for the Linux ``ARPHRD_*``
-hardware types of ``<linux/if_arp.h>``, the ``arphrd_type`` of the Linux
-"cooked" capture encapsulations. Only the values that pcapkit names are listed.
-The rest of the numbering is IANA's, see
-:class:`~pcapkit.const.arp.hardware.Hardware`, which differs for most
-non-Ethernet types.
+This module contains the constant enumeration for **Linux ARP hardware types**,
+which is automatically generated from :class:`pcapkit.vendor.linux.arphrd.ARPHRD`.
 
 """
 
@@ -49,14 +46,21 @@ class ARPHRD(EnumRegistry, IntEnum):
 
     @classmethod
     def _validate_value(cls, value: 'Any') -> 'None':
-        """Reject ``value`` unless it is an ``arphrd_type`` (a 16-bit value).
+        """Reject ``value`` unless it passes the range check :meth:`_missing_` makes.
 
         Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
-        so that :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses
-        the values :meth:`_missing_` refuses.
+        with that check and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
+        Args:
+            value: Value about to be looked up or minted.
 
         Raises:
-            EnumValueError: If ``value`` is not an integer in ``0..0xFFFF``.
+            EnumValueError: If ``value`` fails that check. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
 
         """
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
@@ -64,13 +68,10 @@ class ARPHRD(EnumRegistry, IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'ARPHRD':
-        """Resolve an unnamed ``arphrd_type`` to an unregistered member.
+        """Lookup function used when value is not found.
 
         Args:
             value: Value to get enum item.
-
-        Raises:
-            ValueError: If ``value`` is not a 16-bit integer.
 
         """
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
