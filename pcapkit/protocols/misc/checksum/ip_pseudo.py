@@ -39,26 +39,20 @@ import ipaddress
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
-from pcapkit.const.ipv6.extension_header import \
-    ExtensionHeader as Enum_ExtensionHeader
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.data.misc.checksum.ip_pseudo import \
-    IP_Pseudo as Data_IP_Pseudo
+from pcapkit.protocols.data.misc.checksum.ip_pseudo import IP_Pseudo as Data_IP_Pseudo
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPv6
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.internet.ipv6 import (IP_MAX_LENGTH,
-                                                    jumbo_payload_length)
-from pcapkit.protocols.schema.misc.checksum.ip_pseudo import (IPV4_PSEUDO_LEN,
-                                                              IPV6_PSEUDO_LEN)
-from pcapkit.protocols.schema.misc.checksum.ip_pseudo import \
-    IP_Pseudo as Schema_IP_Pseudo
-from pcapkit.utilities.exceptions import (FieldValueError, ProtocolError,
-                                          UnsupportedCall)
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH, jumbo_payload_length
+from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
+from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IP_Pseudo as Schema_IP_Pseudo
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -530,9 +524,14 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                 # Check if the upper layer is Raw, indicating an unparsed extension header.
                 # Only raise a specific error if this extension header is NOT in the parsed headers.
                 if hasattr(ip, 'payload') and type(ip.payload) is Raw:
-                    # Try to identify which extension header failed
+                    # Try to identify which extension header failed. ``ProtocolError``
+                    # subclasses ``ValueError``, so only the enum lookup itself -- not
+                    # the raises below -- may sit inside this ``except ValueError``.
                     try:
-                        ext_header = Enum_ExtensionHeader(code)
+                        ext_header = Enum_ExtensionHeader(code)  # type: 'Optional[Enum_ExtensionHeader]'
+                    except ValueError:
+                        ext_header = None
+                    if ext_header is not None:
                         # Check if this header type was successfully parsed by looking in extension_headers
                         ext_list = ip.extension_headers.getlist(ext_header)
                         # If the header is not in the parsed list, it failed to parse
@@ -542,8 +541,6 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                                                     'parsed; give src')
                             elif ext_header == Enum_ExtensionHeader.IPv6_Route:
                                 raise ProtocolError(f'{self.alias}: Routing header of {ip.alias} not parsed; give dst')
-                    except ValueError:
-                        pass
                     # Fall through to generic error message if not a recognized case
 
         if code is None or unparsed:
