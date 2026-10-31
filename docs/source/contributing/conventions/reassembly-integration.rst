@@ -13,7 +13,7 @@ The Rule
    dissector stays a parser; it does not reach into
    :mod:`pcapkit.foundation.reassembly` directly.
 #. **A new engine needs a new** :mod:`pcapkit.toolkit` **helper** that declares which
-   output engines (``dpkt``, ``pyshark``, ``scapy``, the default) support it.
+   output engines (|dpkt|_, |pyshark|_, ``scapy``, the default) support it.
 #. **A new engine's reassembled outcome needs a new**
    :mod:`pcapkit.foundation.analysis` **method** to parse that outcome into a usable
    result, rather than leaving the caller to interpret raw reassembled bytes.
