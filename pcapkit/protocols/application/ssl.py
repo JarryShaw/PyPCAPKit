@@ -503,6 +503,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                        + fragment_length.to_bytes(3, 'big'))
             out += body_bytes
         return bytes(out)
+
     def _read_tls_client_hello(self, body: 'bytes', *, dtls: 'bool') -> 'Data_ClientHello':
         """Decode a ``ClientHello`` handshake message body.
 
@@ -727,50 +728,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if content_type == Enum_ContentType.change_cipher_spec:
             return bytes([int(content.msg)])
         return bytes(content)
-
-    def _make_tls_handshake_messages(self, messages: 'tuple[Any, ...]', *,
-                                     dtls: 'bool') -> 'bytes':
-        """Encode handshake messages back into a record fragment -- the
-        inverse of :meth:`_read_tls_handshake_messages`.
-
-        Args:
-            messages: Handshake messages, as returned by
-                :meth:`_read_tls_handshake_messages`, or already-encoded
-                :obj:`bytes` per message.
-            dtls: Whether to write DTLS's fragment header after each
-                message's ``msg_type``/``length`` header.
-
-        Returns:
-            Encoded record fragment.
-
-        """
-        out = bytearray()
-        for message in messages:
-            if isinstance(message, bytes):
-                out += message
-                continue
-
-            body = message.body
-            if isinstance(body, Data_ClientHello):
-                body_bytes = self._make_tls_client_hello(body, dtls=dtls)
-            elif isinstance(body, Data_ServerHello):
-                body_bytes = self._make_tls_server_hello(body)
-            else:
-                body_bytes = bytes(body)
-
-            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
-            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
-            is_fragmented = dtls and message.is_fragmented
-            length = message.length if is_fragmented else len(body_bytes)
-
-            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
-            if dtls:
-                fragment_length = message.fragment_length if is_fragmented else len(body_bytes)
-                out += (message.message_seq.to_bytes(2, 'big')
-                       + message.fragment_offset.to_bytes(3, 'big')
-                       + fragment_length.to_bytes(3, 'big'))
-            out += body_bytes
-        return bytes(out)
 
     def _make_tls_client_hello(self, data: 'Data_ClientHello', *, dtls: 'bool') -> 'bytes':
         """Encode a ``ClientHello`` handshake message body -- the inverse of
