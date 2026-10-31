@@ -525,6 +525,16 @@ class IGMPUnitTests(unittest.TestCase):
                     self.assertRaisesRegex(ProtocolError, 'invalid max_resp_time'):
                 proto.make(max_resp_time=value)  # type: ignore[arg-type]
 
+    def test_make_rejects_bool_type(self) -> None:
+        from pcapkit.protocols.internet.igmpv1 import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(IGMP)
+        for value in (True, False):
+            with self.subTest(value=value), \
+                    self.assertRaisesRegex(ProtocolError, 'invalid type'):
+                proto.make(type=value)  # type: ignore[arg-type]
+
     def test_max_resp_time_bounds_round_trip(self) -> None:
         for value, version in ((0, 'IGMPv1'), (255, 'IGMPv2')):
             with self.subTest(max_resp_time=value):

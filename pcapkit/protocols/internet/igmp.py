@@ -154,10 +154,8 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         type_value = self._make_index(type, type_default, namespace=type_namespace,
                                       reversed=type_reversed, pack=False)
         for name, value in (('type', type_value), ('max_resp_time', max_resp_time)):
-            if not isinstance(value, int) or not 0 <= value <= 255:
+            if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 255:
                 raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
-        if isinstance(max_resp_time, bool):
-            raise ProtocolError(f'{self.alias}: invalid max_resp_time: {max_resp_time!r}')
 
         return Schema_IGMP(
             type=type_value,  # type: ignore[arg-type]
