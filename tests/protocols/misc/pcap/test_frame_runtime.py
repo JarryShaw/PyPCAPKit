@@ -22,8 +22,8 @@ class PcapFrameRuntimeTests(unittest.TestCase):
         frame = extractor.frame[0]
 
         self.assertEqual(frame.name, 'Frame 1')
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6_ICMP')
-        self.assertEqual(frame.protochain.aliases, ('Ethernet', 'IPv6', 'IPv6_ICMP'))
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:ICMPv6')
+        self.assertEqual(frame.protochain.aliases, ('Ethernet', 'IPv6', 'ICMPv6'))
         self.assertEqual(frame.index('IPv6'), 1)
         self.assertEqual(frame.info.number, 1)
         # equal because ``in.pcap`` was captured whole, not because the two mean

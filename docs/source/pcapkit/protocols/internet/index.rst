@@ -25,12 +25,15 @@ internet layer, with detailed implementation and methods.
    ipsec
    ah
    esp
+   icmp
+   icmpv4
+   icmpv6
    hip
    ipx
 
 .. todo::
 
-   Implement ECN, ICMP, ICMPv6, IGMP, Shim6.
+   Implement ECN, IGMP, Shim6.
 
 Protocol Registry
 -----------------
