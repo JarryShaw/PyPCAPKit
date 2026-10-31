@@ -354,6 +354,10 @@ NOT_A_COPY = {
         'the last code point of the Basic Multilingual Plane, not an IP length',
     ('pcapkit/dumpkit/common.py', 'codepoint > 65535'):
         'above the Basic Multilingual Plane, needs a UTF-16 surrogate pair, not an IP length',
+    ('pcapkit/protocols/application/sslv2.py', "b'\\x00' * 16"):
+        "the default length of an SSLv2 CLIENT-HELLO challenge or SERVER-HELLO "
+        "connection ID (the draft's own 16-32 octet minimum), not the PCAP classic "
+        'record header length',
 }
 
 #: Sweep hits of a homed value in a module whose own protocol owns no constant

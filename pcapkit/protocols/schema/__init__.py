@@ -177,6 +177,8 @@ __all__ = [
     'FTP',
     'NGAP',
     'OSPF', 'OSPF_CryptographicAuthentication',
+    'SSLv2', 'SSLv2_HandshakeBody', 'SSLv2_UnknownHandshakeBody',
+    'SSLv2_ClientHello', 'SSLv2_ServerHello',
     'HTTPv1',
     'HTTPv2',
     'HTTPv2_FrameType',

@@ -104,6 +104,7 @@ Application Layer
    http
    ngap
    ospf
+   sslv2
    tls
 
 Miscellaneous
