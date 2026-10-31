@@ -287,30 +287,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         """
         return (cls.__name__, 'HTTPv1')  # type: ignore[return-value]
 
-    @staticmethod
-    def _check_raw(raw: 'bytes', *values: 'str', fold: 'bool') -> 'None':
-        """Refuse a raw line that would write a line break its values lack.
-
-        Reading a line back strips the whitespace around its tokens, and that
-        includes a lone CR or LF, so a raw line can read back as values that
-        carry no line break while writing one to the wire.
-
-        Args:
-            raw: Raw start line or field line, CRLF excluded.
-            *values: The values ``raw`` reads back as.
-            fold: Whether the CRLF of an ``obs-fold``, followed by SP or HTAB,
-                is allowed in ``raw``.
-
-        Raises:
-            ProtocolError: If ``raw`` carries a CR or LF that ``values`` do not.
-
-        """
-        if fold:
-            raw = re.sub(rb'\r\n(?=[ \t])', b'', raw)
-        for char in ('\r', '\n'):
-            if raw.count(char.encode()) != sum(value.count(char) for value in values):
-                raise ProtocolError('HTTP: raw line carries a CR or LF its values do not')
-
     ##########################################################################
     # Utilities.
     ##########################################################################
@@ -409,6 +385,20 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         return header_line, header_fields
 
+    def _read_http_body(self, body: 'bytes', *,
+                        headers: 'OrderedMultiDict[str, str]') -> 'Any':
+        """Read HTTP/1.* body.
+
+        Args:
+            body: HTTP body data.
+            headers: HTTP header fields.
+
+        Returns:
+            Raw HTTP body.
+
+        """
+        return body
+
     @staticmethod
     def _split_field_lines(headerfield: 'bytes') -> 'tuple[bytes, ...]':
         """Split the field lines of an HTTP/1.* header.
@@ -444,42 +434,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 continue
             raw_fields.append(line)
         return tuple(raw_fields)
-
-    def _read_field_line(self, line: 'bytes') -> 'tuple[str, str]':
-        """Read one HTTP/1.* field line.
-
-        Args:
-            line: Field line as received, CRLF excluded, with any ``obs-fold``
-                continuations still in it.
-
-        Returns:
-            The field name and the field value, the latter unfolded and without
-            the optional whitespace around it.
-
-        Raises:
-            ProtocolError: If the line is not a field line.
-
-        """
-        # NOTE: The accumulator is right-stripped as well as the continuation,
-        # because the production is ``obs-fold = OWS CRLF RWS`` and it is the
-        # *whole* obs-fold that is replaced by a single space -- the RFC's own
-        # remedy (:rfc:`9112#section-5.2`). The OWS before the CRLF belongs to
-        # the fold, not to the value, so ``X: a \t\r\n\tb`` unfolds to ``'a b'``.
-        field, *continuations = line.split(b'\r\n')
-        for continuation in continuations:
-            if not continuation.startswith((b' ', b'\t')):
-                raise ProtocolError('HTTP: invalid format')
-            field = field.rstrip() + b' ' + continuation.strip()
-
-        # NOTE: Checked rather than left to ``item[1]``, and refused rather than
-        # skipped: a field line with no colon is not a header field, and dropping
-        # it would hand back a message whose fields are quietly not the ones on
-        # the wire. ``ProtocolError`` for the reason ``read`` gives, and to the
-        # same message.
-        item = re.split(rb'\s*:\s*', field, maxsplit=1)
-        if len(item) != 2:
-            raise ProtocolError('HTTP: invalid format')
-        return self.decode(item[0].strip()), self.decode(item[1].strip())
 
     def _read_start_line(self, startline: 'bytes') -> 'Data_Header':
         """Read an HTTP/1.* start line.
@@ -534,20 +488,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         else:
             raise ProtocolError('HTTP: invalid format')
         return header_line
-
-    def _read_http_body(self, body: 'bytes', *,
-                        headers: 'OrderedMultiDict[str, str]') -> 'Any':
-        """Read HTTP/1.* body.
-
-        Args:
-            body: HTTP body data.
-            headers: HTTP header fields.
-
-        Returns:
-            Raw HTTP body.
-
-        """
-        return body
 
     def _make_start_line(self, http_version: 'str | bytes', *,
                          method: 'Optional[Enum_Method | str | bytes]' = None,
@@ -620,3 +560,63 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             raise ProtocolError('HTTP: invalid start line: must have either a method or a status, '
                                 f'not method={method!r} and status={status!r}')
         return header_line
+
+    @staticmethod
+    def _check_raw(raw: 'bytes', *values: 'str', fold: 'bool') -> 'None':
+        """Refuse a raw line that would write a line break its values lack.
+
+        Reading a line back strips the whitespace around its tokens, and that
+        includes a lone CR or LF, so a raw line can read back as values that
+        carry no line break while writing one to the wire.
+
+        Args:
+            raw: Raw start line or field line, CRLF excluded.
+            *values: The values ``raw`` reads back as.
+            fold: Whether the CRLF of an ``obs-fold``, followed by SP or HTAB,
+                is allowed in ``raw``.
+
+        Raises:
+            ProtocolError: If ``raw`` carries a CR or LF that ``values`` do not.
+
+        """
+        if fold:
+            raw = re.sub(rb'\r\n(?=[ \t])', b'', raw)
+        for char in ('\r', '\n'):
+            if raw.count(char.encode()) != sum(value.count(char) for value in values):
+                raise ProtocolError('HTTP: raw line carries a CR or LF its values do not')
+
+    def _read_field_line(self, line: 'bytes') -> 'tuple[str, str]':
+        """Read one HTTP/1.* field line.
+
+        Args:
+            line: Field line as received, CRLF excluded, with any ``obs-fold``
+                continuations still in it.
+
+        Returns:
+            The field name and the field value, the latter unfolded and without
+            the optional whitespace around it.
+
+        Raises:
+            ProtocolError: If the line is not a field line.
+
+        """
+        # NOTE: The accumulator is right-stripped as well as the continuation,
+        # because the production is ``obs-fold = OWS CRLF RWS`` and it is the
+        # *whole* obs-fold that is replaced by a single space -- the RFC's own
+        # remedy (:rfc:`9112#section-5.2`). The OWS before the CRLF belongs to
+        # the fold, not to the value, so ``X: a \t\r\n\tb`` unfolds to ``'a b'``.
+        field, *continuations = line.split(b'\r\n')
+        for continuation in continuations:
+            if not continuation.startswith((b' ', b'\t')):
+                raise ProtocolError('HTTP: invalid format')
+            field = field.rstrip() + b' ' + continuation.strip()
+
+        # NOTE: Checked rather than left to ``item[1]``, and refused rather than
+        # skipped: a field line with no colon is not a header field, and dropping
+        # it would hand back a message whose fields are quietly not the ones on
+        # the wire. ``ProtocolError`` for the reason ``read`` gives, and to the
+        # same message.
+        item = re.split(rb'\s*:\s*', field, maxsplit=1)
+        if len(item) != 2:
+            raise ProtocolError('HTTP: invalid format')
+        return self.decode(item[0].strip()), self.decode(item[1].strip())
