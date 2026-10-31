@@ -111,7 +111,7 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
 
-    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP',            # Link Layer
+    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP',    # Link Layer
     'L2TPv2', 'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',
 
     'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2',                # Internet Layer

@@ -62,6 +62,9 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Frame Relay Access Device
+    'FRAD',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
