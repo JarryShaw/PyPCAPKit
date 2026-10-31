@@ -35,7 +35,6 @@ __all__ = [
     # Internet Layer Protocols
     'AH',
     'ESP',
-    'IGMP', 'IGMP_GroupBody', 'IGMP_QueryExtension', 'IGMP_ReportBody', 'IGMP_GroupRecord',
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
     'HIP_EdDSACurveHostIdentity', 'HIP_HostIdentity',
@@ -85,7 +84,8 @@ __all__ = [
     'IPv6_Route',
     'IPv6_Route_RoutingType',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
-    'IGMP',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_QueryExtension', 'IGMPv3_Report',
+    'IGMPv3_GroupRecord',
     'IPv6',
     'IPX',
     'MH',

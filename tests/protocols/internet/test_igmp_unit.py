@@ -332,12 +332,18 @@ class IGMPReadTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         v1_report, v2_report = IGMP_PACKETS['v1-report'][0], IGMP_PACKETS['v2-report'][0]
+        v2_query = IGMP_PACKETS['v2-query-general'][0]
         with self.assertRaisesRegex(ProtocolError, r'^IGMPv1: .+ is not an IGMPv1 message \(8 octets\)'):
             IGMPv1(io.BytesIO(v2_report), len(v2_report))
         with self.assertRaisesRegex(ProtocolError, r'^IGMPv2: .+ is not an IGMPv2 message \(8 octets\)'):
             IGMPv2(io.BytesIO(v1_report), len(v1_report))
+        # An 8-octet Query (the one shape IGMPv1/v2/v3 all share the type
+        # value for) reaches the same ``read()``-level refusal; a Report or
+        # Leave type is not even Query-shaped, so IGMPv3's schema selector
+        # refuses it before ``read()`` -- see
+        # ``test_igmpv3_rejects_an_8_octet_v1_or_v2_message``.
         with self.assertRaisesRegex(ProtocolError, r'^IGMPv3: .+ is not an IGMPv3 message \(8 octets\)'):
-            IGMPv3(io.BytesIO(v1_report), len(v1_report))
+            IGMPv3(io.BytesIO(v2_query), len(v2_query))
 
     def test_membership_query_max_resp_time_zero_is_v1(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMP

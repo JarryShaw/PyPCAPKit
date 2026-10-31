@@ -54,8 +54,8 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
 from pcapkit.const.igmp.type import Type as Enum_Type
-from pcapkit.protocols.data.internet.igmpv3 import GroupRecord as Data_GroupRecord
 from pcapkit.protocols.data.internet.igmpv3 import IGMP as Data_IGMP
+from pcapkit.protocols.data.internet.igmpv3 import GroupRecord as Data_GroupRecord
 from pcapkit.protocols.data.internet.igmpv3 import Query as Data_Query
 from pcapkit.protocols.data.internet.igmpv3 import Report as Data_Report
 from pcapkit.protocols.internet.igmp import IGMP as IGMPBase

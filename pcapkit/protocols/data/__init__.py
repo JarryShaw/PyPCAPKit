@@ -80,9 +80,6 @@ __all__ = [
     # Encapsulating Security Payload
     'ESP',
 
-    # Internet Group Management Protocol
-    'IGMP', 'IGMP_GroupAddressMessage', 'IGMP_GroupRecord', 'IGMP_Version3MembershipReport',
-
     # Host Identity Protocol
     'HIP', 'HIP_Control',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_HostIdentity', 'HIP_Lifetime', 'HIP_Flags',
@@ -148,7 +145,7 @@ __all__ = [
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Internet Group Management Protocol
-    'IGMP',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_Report', 'IGMPv3_GroupRecord',
 
     # Internet Protocol version 6
     'IPv6',
