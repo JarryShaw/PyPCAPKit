@@ -82,6 +82,7 @@ __all__ = [
     'ReassemblyManager',                                    # Reassembly Manager
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
+    'DTLS_Reassembly',                                      # DTLS Reassembly
 
     # pcapkit.foundation.registry
     'register_protocol',
