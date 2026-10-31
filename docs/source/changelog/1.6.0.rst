@@ -4,3 +4,16 @@
 Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the
 protocol pairs that wanted a shared abstract base, and the two that simply had
 no dissector at all.
+
+* **Added** -- :class:`~pcapkit.protocols.link.frad.FRAD`, a dissector for Frame
+  Relay's multiprotocol encapsulation (:rfc:`2427`, obsoleting :rfc:`1490`).
+  :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`/
+  :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`/
+  :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dispatch to it for the
+  ``ARPHRD_FRAD`` case instead of falling back to
+  :class:`~pcapkit.protocols.misc.raw.Raw`; the direct NLPID and SNAP-encapsulated
+  forms both dispatch onward, to IPv4/IPv6 and (via the EtherType registry every
+  Ethernet/VLAN/LinuxSLL frame shares) ARP among others. The first of :issue:`2460`'s
+  five ``arphrd_type`` follow-ups to get a dissector; the other four
+  (``NETLINK``, ``IPGRE``/``IP6GRE``, ``IEEE80211_RADIOTAP``) remain
+  :class:`~pcapkit.protocols.misc.raw.Raw`.
