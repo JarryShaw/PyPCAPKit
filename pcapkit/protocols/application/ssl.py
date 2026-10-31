@@ -60,9 +60,10 @@ _TLS_VERSION_MAJOR = 0x03
 _DTLS_VERSION_MAJOR = 0xFE
 
 #: The content types a genuine record may carry. An allowlist rather than
-#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: the
-#: registry names ``invalid(0)``, a sentinel :rfc:`9846#section-5.1` rejects,
-#: and mints a member for any unassigned value it is asked for.
+#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: 0 is
+#: never assigned, a value :rfc:`9846#section-5.1` rejects outright, and the
+#: enum mints an ``Unassigned``/``Reserved`` member for any value IANA has
+#: not named.
 #:
 #: ``tls12_cid`` (25, :rfc:`9146#section-4`) is left out: its connection ID
 #: precedes ``length`` and has a negotiated length the record does not carry,
@@ -235,8 +236,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
         # parse yields, so resolve it through the registry to cover both.
-        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: ``invalid(0)`` is
-        # named yet never a record's content type.
+        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: an
+        # unassigned or reserved value still resolves to a named member via
+        # ``_missing_``, yet is never a record's genuine content type.
         content_type = Enum_ContentType.get(int(schema.content_type))
         if content_type not in _WIRE_CONTENT_TYPES:
             raise ProtocolError(
