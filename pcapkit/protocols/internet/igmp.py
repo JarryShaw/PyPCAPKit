@@ -68,9 +68,9 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         """IGMP version this class reads: ``1`` or ``2``."""
 
     @property
+    @abc.abstractmethod
     def alias(self) -> 'str':
-        """Acronym of corresponding protocol, ``'IGMPv1'`` or ``'IGMPv2'``."""
-        return f'IGMPv{self.version}'
+        """Acronym of corresponding protocol, ``'IGMP'`` or ``'IGMPv2'``."""
 
     @property
     def length(self) -> 'Literal[8]':
@@ -82,15 +82,19 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"]]':
+    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv2"]]':
         """Index ID of the protocol.
 
+        :rfc:`1112` names the protocol ``IGMP``, without a version, the same
+        shape :class:`~pcapkit.protocols.internet.icmp.ICMP` takes for
+        :rfc:`792` -- so the family base's own name doubles as IGMPv1's
+        canonical name. :rfc:`2236` names IGMPv2 with its own version.
+
         Returns:
-            Index ID of the protocol, the family name and both versions; the
-            concrete IGMPv1 and IGMPv2 classes narrow it to their own version.
+            Index ID of the protocol.
 
         """
-        return ('IGMP', 'IGMPv1', 'IGMPv2')
+        return ('IGMP', 'IGMPv2')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Read Internet Group Management Protocol.
@@ -112,7 +116,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         schema = cast('Schema_IGMP', self.__header__)
 
         if self._classify(schema.type, schema.max_resp_time, length) != self.version:
-            raise ProtocolError(f'{self.alias}: {schema.type!r} is not an {self.alias} '
+            raise ProtocolError(f'{self.alias}: {schema.type!r} is not an IGMPv{self.version} '
                                 f'message ({length} octets)')
 
         igmp = Data_IGMP(
