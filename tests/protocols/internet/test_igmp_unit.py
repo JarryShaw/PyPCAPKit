@@ -345,6 +345,18 @@ class IGMPVersionedClassTests(unittest.TestCase):
         self.assertEqual(object.__new__(IGMPv1).version, 1)
         self.assertEqual(object.__new__(IGMPv2).version, 2)
 
+    def test_base_id_covers_both_versions(self) -> None:
+        from pcapkit.protocols.internet.igmp import IGMP
+
+        self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv1', 'IGMPv2'))
+
+    def test_each_version_narrows_the_base_id(self) -> None:
+        v1, v2 = igmp_class('IGMPv1'), igmp_class('IGMPv2')
+        self.assertEqual(v1.id(), ('IGMP', 'IGMPv1'))
+        self.assertEqual(v2.id(), ('IGMP', 'IGMPv2'))
+        self.assertNotIn('IGMPv2', v1.id())
+        self.assertNotIn('IGMPv1', v2.id())
+
     def test_igmpv1_parses_its_own_messages_directly(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
 

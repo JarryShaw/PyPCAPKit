@@ -81,6 +81,17 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     # Methods.
     ##########################################################################
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"]]':
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol, the family name and both versions; the
+            concrete IGMPv1 and IGMPv2 classes narrow it to their own version.
+
+        """
+        return ('IGMP', 'IGMPv1', 'IGMPv2')
+
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Read Internet Group Management Protocol.
 
