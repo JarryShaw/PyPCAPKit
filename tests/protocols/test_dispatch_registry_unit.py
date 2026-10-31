@@ -230,7 +230,7 @@ class DispatchRegistryTests(unittest.TestCase):
         # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
         # pcap and pcapng frame tables, and #2448's Internet.__proto__[TransType.IGMP].
         self.assertEqual(len(cases), 54,
-                         'expected exactly 54 entries across the seven __proto__ ' (feat(internet): implement IGMPv3 (#2448))
+                         'expected exactly 54 entries across the seven __proto__ '
                          'tables named in GitHub issue #496 and the loopback table '
                          'of #1574; a different count means a registry changed '
                          'shape and this module was not updated to match')
@@ -240,7 +240,7 @@ class DispatchRegistryTests(unittest.TestCase):
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
             'link': 7, 'internet': 18, 'tcp': 5, 'udp': 4, 'sctp': 2,
-            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4, (feat(internet): implement IGMPv3 (#2448))
+            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4,
         })
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:
