@@ -243,7 +243,7 @@ __all__ = [
     'UDP',
 
     # Datagram Transport Layer Security
-    'DTLS', 'DTLS_Handshake',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_Handshake',
 
     # File Transfer Protocol
     'FTP',

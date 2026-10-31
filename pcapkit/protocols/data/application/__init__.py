@@ -3,6 +3,7 @@
 
 # Datagram Transport Layer Security
 from pcapkit.protocols.data.application.dtls import DTLS
+from pcapkit.protocols.data.application.dtls import DTLSCiphertext as DTLS_Ciphertext
 from pcapkit.protocols.data.application.dtls import DTLSHandshake as DTLS_Handshake
 
 # File Transfer Protocol
@@ -64,7 +65,7 @@ from pcapkit.protocols.data.application.tls import ServerHello as TLS_ServerHell
 
 __all__ = [
     # Datagram Transport Layer Security
-    'DTLS', 'DTLS_Handshake',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_Handshake',
 
     # File Transfer Protocol
     'FTP',
