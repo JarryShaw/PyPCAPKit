@@ -9,7 +9,7 @@
 in the internet layer, with detailed implementation and methods.
 
 """
-# TODO: Implement ECN, ICMP, ICMPv6, IGMP, Shim6.
+# TODO: Implement ECN, ICMP, ICMPv6, Shim6.
 
 # Base Class for Internet Layer
 from pcapkit.protocols.internet.internet import Internet
@@ -17,6 +17,7 @@ from pcapkit.protocols.internet.internet import Internet
 # Utility Classes for Protocols
 from pcapkit.protocols.internet.ah import AH
 from pcapkit.protocols.internet.esp import ESP
+from pcapkit.protocols.internet.igmp import IGMP
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
 from pcapkit.protocols.internet.ipx import IPX
@@ -39,7 +40,7 @@ from pcapkit.protocols.internet.ipsec import IPsec
 
 __all__ = [
     'ETHERTYPE',                                        # Protocol Numbers
-    'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',  # Internet Layer
+    'AH', 'ESP', 'IGMP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',  # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext',
     'IPv6_Opts', 'IPv6_Route', 'MH',                    # IPv6 Extension Header
 ]
