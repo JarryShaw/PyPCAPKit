@@ -13,15 +13,24 @@ non-Ethernet types.
 
 """
 
+from typing import TYPE_CHECKING
+
 from aenum import IntEnum
 
-from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
+
+if TYPE_CHECKING:
+    from typing import Any
 
 __all__ = ['ARPHRD']
 
 
-class ARPHRD(EnumLookup, IntEnum):
+class ARPHRD(EnumRegistry, IntEnum):
     """[ARPHRD] Linux ARP hardware types [``<linux/if_arp.h>``]"""
+
+    #: NET/ROM pseudo.
+    NETROM = 0
 
     #: Frame Relay Access Device
     FRAD = 770
@@ -37,3 +46,33 @@ class ARPHRD(EnumLookup, IntEnum):
 
     #: Kernel Netlink socket
     NETLINK = 824
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is an ``arphrd_type`` (a 16-bit value).
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        so that :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses
+        the values :meth:`_missing_` refuses.
+
+        Raises:
+            EnumValueError: If ``value`` is not an integer in ``0..0xFFFF``.
+
+        """
+        if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'ARPHRD':
+        """Resolve an unnamed ``arphrd_type`` to an unregistered member.
+
+        Args:
+            value: Value to get enum item.
+
+        Raises:
+            ValueError: If ``value`` is not a 16-bit integer.
+
+        """
+        if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        return cls._unregistered_member(value, 'Unassigned')

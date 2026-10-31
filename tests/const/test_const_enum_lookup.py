@@ -86,8 +86,6 @@ EXPECTED_TO_REJECT_ZERO = frozenset({
     'pcapkit.const.sctp.cause_code.CauseCode',
     'pcapkit.const.sctp.parameter.Parameter',
     'pcapkit.const.mh.mn_id_subtype.MNIDSubtype',
-    # Names no ARPHRD 0 (Linux's ARPHRD_NETROM is not named by pcapkit).
-    'pcapkit.const.linux.arphrd.ARPHRD',
 })
 
 #: The four Mobility Header flag enumerations of GitHub issue #623, as
