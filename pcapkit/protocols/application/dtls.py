@@ -16,11 +16,13 @@ or to ``DTLS 1.3`` for a unified-header record.
 Known Limitations
 -----------------
 
-**A handshake message split across DTLS records is not reassembled**
-(:rfc:`6347#section-4.2.3`, :issue:`2440`). Such a message is flagged
-:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
-and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
-kept as raw octets.
+**A handshake message split across DTLS records decodes only with
+reassembly** (:rfc:`6347#section-4.2.3`, :issue:`2440`). Otherwise its body
+stays raw octets, flagged
+:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`.
+Pass a :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine as
+``reassembly`` to decode the completing fragment. The caller supplies the UDP
+4-tuple as ``flow``. Only the first record of each datagram is reassembled.
 
 **A unified-header record with a connection ID is not decoded**
 (:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the
@@ -33,13 +35,21 @@ ones on the wire.
 
 .. versionadded:: 1.6.0
 
+.. versionchanged:: 1.6.0
+
+   :meth:`read` reassembles a fragmented handshake message and decodes it,
+   given a :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine via its
+   new ``reassembly`` argument (:issue:`2440`).
+
 """
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
+from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
 from pcapkit.protocols.application.ssl import DTLS13_VERSION, SSL
 from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
 from pcapkit.protocols.data.application.dtls import DTLSCiphertext as Data_DTLSCiphertext
+from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
 from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as Schema_DTLSCiphertext
 from pcapkit.utilities.exceptions import ProtocolError
@@ -51,6 +61,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
+    from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -161,11 +172,25 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """
         return ('DTLS',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS':
+    def read(self, length: 'Optional[int]' = None, *, reassembly: 'Optional[DTLS_Reassembly[Any]]' = None,
+             flow: 'Optional[tuple[Any, int, Any, int]]' = None, frame_num: 'int' = 0,
+             frame_timestamp: 'float' = 0.0, **kwargs: 'Any') -> 'Data_DTLS':
         """Read Datagram Transport Layer Security (DTLS).
 
         Args:
             length: Length of packet data.
+            reassembly: A :class:`~pcapkit.foundation.reassembly.dtls.DTLS`
+                engine to feed fragmented handshake messages to; the fragment
+                that completes a message is decoded in place. :data:`None`
+                leaves fragments undecoded.
+            flow: ``(src, sport, dst, dport)`` of the UDP association, which
+                with the record's epoch keys the reassembly buffer. Required
+                when ``reassembly`` is given, so that interleaved associations
+                do not share a buffer.
+            frame_num: Packet number, recorded on the reassembled message's
+                :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.index`.
+            frame_timestamp: Capture timestamp in seconds, recorded on the
+                fragment; reassembly does not expire buffers by time.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -173,10 +198,12 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         Raises:
             ProtocolError: If the record cannot be a genuine DTLS record --
-                see :meth:`_read_dtls_record`.
+                see :meth:`_read_dtls_record` -- or if ``reassembly`` is
+                given without ``flow``.
 
         """
-        return self._read_dtls_record(length, **kwargs)
+        return self._read_dtls_record(length, reassembly=reassembly, flow=flow, frame_num=frame_num,
+                                      frame_timestamp=frame_timestamp, **kwargs)
 
     def make(self,
              content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
@@ -297,6 +324,118 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
     # Utilities.
     ##########################################################################
 
+    def _reassemble_dtls_handshake(self, content: 'tuple[Any, ...]', reassembly: 'DTLS_Reassembly[Any]',  # pylint: disable=too-many-arguments
+                                   flow: 'Optional[tuple[Any, int, Any, int]]', epoch: 'int',
+                                   frame_num: 'int', frame_timestamp: 'float') -> 'tuple[Any, ...]':
+        """Feed a ``handshake`` record's fragmented messages to ``reassembly``
+        and decode whichever one it just completed.
+
+        Args:
+            content: This record's decoded ``handshake`` content, as
+                :meth:`SSL._read_tls_handshake_messages
+                <pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages>`
+                built it -- a tuple of
+                :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`.
+            reassembly: Engine to reassemble a fragmented message with.
+            flow: Buffer key, as documented on :meth:`read`, which
+                enforces this unconditionally before this method is ever
+                reached -- the check below is only for a direct call that
+                bypasses it. Required: :data:`None` would default every
+                caller that omits it onto the same buffer ID, corrupting two
+                interleaved associations' reassembly together.
+            epoch: This record's epoch, appended to ``flow`` to form the
+                reassembly buffer ID (:rfc:`6347#section-4.1`).
+            frame_num: This record's packet number.
+            frame_timestamp: This record's capture timestamp.
+
+        Returns:
+            ``content``, with a message that :meth:`reassembly` completes
+            decoded as a ``ClientHello`` or ``ServerHello`` in place of its raw
+            octets; any other message is unchanged. A completed message that
+            does not decode keeps its raw reassembled bytes as ``body``
+            instead of raising.
+
+        Raises:
+            ProtocolError: If ``flow`` is :data:`None`.
+
+        """
+        # NOTE: imported here, as pcapkit.foundation.reassembly imports pcapkit.protocols,
+        # whose package import reaches this module (a cycle at import time).
+        from pcapkit.foundation.reassembly.data.dtls import \
+            Packet as _ReasmPacket  # pylint: disable=import-outside-toplevel
+
+        if flow is None:
+            raise ProtocolError(f'{self.alias}: flow is required when reassembly is given -- '
+                                'defaulting it would collide two concurrent DTLS associations '
+                                'on the same buffer ID')
+        bufid = (*flow, epoch)
+
+        messages = []
+        for message in content:
+            if not isinstance(message, Data_DTLSHandshake) or not message.is_fragmented:
+                messages.append(message)
+                continue
+
+            # A fragmented message's body is always raw bytes --
+            # :meth:`SSL._read_tls_handshake_messages
+            # <pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages>`
+            # only decodes one when it is *not* fragmented -- so this is a type
+            # narrowing for mypy's benefit, not a runtime check.
+            body = cast('bytes', message.body)
+            reassembly(_ReasmPacket(
+                bufid=bufid,
+                num=frame_num,
+                msg_type=message.msg_type,
+                length=message.length,
+                message_seq=message.message_seq,
+                fragment_offset=message.fragment_offset,
+                fragment_length=message.fragment_length,
+                payload=body,
+                timestamp=frame_timestamp,
+            ))
+
+            datagram = reassembly.last
+            if datagram is None or not datagram.completed:
+                messages.append(message)
+                continue
+
+            # A malformed record may have ``fragment_offset + fragment_length``
+            # past ``length`` (:rfc:`6347#section-4.2.3`). Then
+            # :meth:`SSL._make_tls_handshake_messages` cannot reliably slice its
+            # share back out of the reassembled body, so keep the raw bytes.
+            if message.fragment_offset + message.fragment_length > message.length:
+                messages.append(message)
+                continue
+
+            reassembled = datagram.body
+            if isinstance(reassembled, tuple):  # pragma: no cover -- COMPLETE never reports runs
+                reassembled = b''.join(reassembled)
+
+            try:
+                if message.msg_type == Enum_HandshakeType.client_hello:
+                    decoded = self._read_tls_client_hello(reassembled, dtls=True)  # type: Any
+                elif message.msg_type == Enum_HandshakeType.server_hello:
+                    decoded = self._read_tls_server_hello(reassembled)
+                else:
+                    decoded = reassembled
+            except ProtocolError:
+                # The reassembled bytes do not decode as a valid message of
+                # this ``msg_type`` -- keep them raw rather than failing the
+                # whole record; without ``reassembly`` the same bytes would
+                # have stayed undecoded too; see :meth:`read`'s docstring.
+                decoded = reassembled
+
+            messages.append(Data_DTLSHandshake(
+                msg_type=message.msg_type,
+                length=message.length,
+                body=decoded,
+                message_seq=message.message_seq,
+                fragment_offset=message.fragment_offset,
+                fragment_length=message.fragment_length,
+                is_fragmented=message.is_fragmented,
+            ))
+        return tuple(messages)
+
     @classmethod
     def _make_data(cls, data: 'Data_DTLS | Data_DTLSCiphertext') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
@@ -327,7 +466,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             'payload': cls._make_payload(data),
         }
 
-    def _read_dtls_record(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLS | Data_DTLSCiphertext':  # pylint: disable=unused-argument
+    def _read_dtls_record(self, length: 'Optional[int]' = None, *,  # pylint: disable=unused-argument
+                          reassembly: 'Optional[DTLS_Reassembly[Any]]' = None,
+                          flow: 'Optional[tuple[Any, int, Any, int]]' = None, frame_num: 'int' = 0,
+                          frame_timestamp: 'float' = 0.0, **kwargs: 'Any') -> 'Data_DTLS | Data_DTLSCiphertext':
         """Read a DTLS record, identifying its concrete tier as it goes.
 
         A unified-header record is handed to :meth:`_read_dtls_ciphertext`.
@@ -353,6 +495,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         Args:
             length: Length of packet data.
+            reassembly: Reassembly engine, as documented on :meth:`read`.
+            flow: Reassembly buffer key, as documented on :meth:`read`.
+            frame_num: Packet number, as documented on :meth:`read`.
+            frame_timestamp: Capture timestamp, as documented on :meth:`read`.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -363,7 +509,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 record -- an unrecognised content type, a legacy version
                 outside DTLS's range, or a declared ``length`` that runs past
                 the end of the buffer -- or if the record fragment is
-                malformed for its content type.
+                malformed for its content type; or if ``reassembly`` is given
+                without ``flow``.
 
         """
         if isinstance(self.__header__, Schema_DTLSCiphertext):
@@ -372,6 +519,13 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         schema = self.__header__
         available = length if length is not None else len(self)
         self._validate_tls_record(schema, available=available, dtls=True)
+
+        # NOTE: checked for every content type, not only handshake records that reach
+        # _reassemble_dtls_handshake, so interleaved associations never share a buffer.
+        if reassembly is not None and flow is None:
+            raise ProtocolError(f'{self.alias}: flow is required when reassembly is given -- '
+                                'defaulting it would collide two concurrent DTLS associations '
+                                'on the same buffer ID')
 
         # NOTE: DTLS 1.3 is checked first, at 0xFEFF too: an initial ClientHello may carry
         # {254, 255} (RFC 9147, section 4). Unknown versions keep the generic alias.
@@ -386,6 +540,12 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         content = self._read_tls_content(schema.content_type, schema.fragment,
                                          dtls=True, epoch=schema.epoch)
+        # NOTE: a handshake record past epoch 0 is ciphertext, so ``content`` is raw
+        # bytes rather than a tuple of messages, and is passed through unchanged.
+        if (reassembly is not None and schema.content_type == Enum_ContentType.handshake
+                and isinstance(content, tuple)):
+            content = self._reassemble_dtls_handshake(content, reassembly, flow, schema.epoch,
+                                                       frame_num, frame_timestamp)
         dtls = Data_DTLS(
             content_type=schema.content_type,
             version=schema.version,
