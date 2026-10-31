@@ -1091,7 +1091,7 @@ size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
 stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
-**IGMP — done ahead of wave 2**, as the one item of the three that needed no
+**IGMP — done ahead of wave 2**, as one of the items that needed no
 shared base: :rfc:`1112`, :rfc:`2236` and :rfc:`3376` all dispatch through
 one schema/data/protocol triple (:mod:`pcapkit.protocols.internet.igmp`) --
 IGMPv1/v2 share one 8-octet message shape, which an IGMPv3 Membership Query
