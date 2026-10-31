@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """data models for application layer protocols"""
 
+# Datagram Transport Layer Security
+from pcapkit.protocols.data.application.dtls import DTLS
+from pcapkit.protocols.data.application.dtls import DTLSHandshake as DTLS_Handshake
+
 # File Transfer Protocol
 from pcapkit.protocols.data.application.ftp import FTP
 from pcapkit.protocols.data.application.ftp import Request as FTP_Request
@@ -49,7 +53,19 @@ from pcapkit.protocols.data.application.ospf import OSPF
 from pcapkit.protocols.data.application.ospf import \
     CryptographicAuthentication as OSPF_CryptographicAuthentication
 
+# Transport Layer Security
+from pcapkit.protocols.data.application.tls import TLS
+from pcapkit.protocols.data.application.tls import Alert as TLS_Alert
+from pcapkit.protocols.data.application.tls import ChangeCipherSpec as TLS_ChangeCipherSpec
+from pcapkit.protocols.data.application.tls import ClientHello as TLS_ClientHello
+from pcapkit.protocols.data.application.tls import Extension as TLS_Extension
+from pcapkit.protocols.data.application.tls import Handshake as TLS_Handshake
+from pcapkit.protocols.data.application.tls import ServerHello as TLS_ServerHello
+
 __all__ = [
+    # Datagram Transport Layer Security
+    'DTLS', 'DTLS_Handshake',
+
     # File Transfer Protocol
     'FTP',
     'FTP_Request', 'FTP_Response',
@@ -74,4 +90,9 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Transport Layer Security
+    'TLS',
+    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_Extension',
+    'TLS_Alert', 'TLS_ChangeCipherSpec',
 ]

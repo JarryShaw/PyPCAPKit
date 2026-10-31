@@ -172,6 +172,7 @@ __all__ = [
     'SCTP_ProtocolViolationCause',
 
     # Application Layer Protocols
+    'DTLS',
     'FTP',
     'NGAP',
     'OSPF', 'OSPF_CryptographicAuthentication',
@@ -181,6 +182,7 @@ __all__ = [
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+    'TLS',
 
     # PCAP file format
     'Header',

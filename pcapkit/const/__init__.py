@@ -29,6 +29,7 @@ from pcapkit.const.ngap import *
 from pcapkit.const.ospf import *
 from pcapkit.const.sctp import *
 from pcapkit.const.tcp import *
+from pcapkit.const.tls import *
 from pcapkit.const.vlan import *
 
 __all__ = [
@@ -81,6 +82,8 @@ __all__ = [
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS/DTLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

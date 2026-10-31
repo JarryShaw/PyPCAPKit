@@ -239,6 +239,9 @@ __all__ = [
     # User Datagram Protocol
     'UDP',
 
+    # Datagram Transport Layer Security
+    'DTLS', 'DTLS_Handshake',
+
     # File Transfer Protocol
     'FTP',
     'FTP_Request', 'FTP_Response',
@@ -263,6 +266,11 @@ __all__ = [
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+
+    # Transport Layer Security
+    'TLS',
+    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_Extension',
+    'TLS_Alert', 'TLS_ChangeCipherSpec',
 
     # No Payload
     'NoPayload',
