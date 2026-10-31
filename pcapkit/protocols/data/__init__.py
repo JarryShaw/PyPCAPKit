@@ -155,7 +155,7 @@ __all__ = [
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Internet Group Management Protocol
-    'IGMP',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_Report', 'IGMPv3_GroupRecord',
 
     # Internet Protocol version 6
     'IPv6',

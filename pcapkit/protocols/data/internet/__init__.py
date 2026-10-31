@@ -125,6 +125,10 @@ from pcapkit.protocols.data.internet.icmpv6 import Unknown as ICMPv6_Unknown
 
 # Internet Group Management Protocol
 from pcapkit.protocols.data.internet.igmp import IGMP
+from pcapkit.protocols.data.internet.igmpv3 import GroupRecord as IGMPv3_GroupRecord
+from pcapkit.protocols.data.internet.igmpv3 import IGMP as IGMPv3
+from pcapkit.protocols.data.internet.igmpv3 import Query as IGMPv3_Query
+from pcapkit.protocols.data.internet.igmpv3 import Report as IGMPv3_Report
 
 # Internet Protocol version 4
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as IPv4_EOOLOption
@@ -446,7 +450,7 @@ __all__ = [
     'ICMPv6_ParameterProblem', 'ICMPv6_Echo',
 
     # Internet Group Management Protocol
-    'IGMP',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_Report', 'IGMPv3_GroupRecord',
 
     # Internet Protocol version 4
     'IPv4',

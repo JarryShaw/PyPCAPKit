@@ -6,16 +6,23 @@
 
 :mod:`pcapkit.protocols.internet.igmp` contains
 :class:`~pcapkit.protocols.internet.igmp.IGMP`, the abstract base of
-IGMPv1 (:rfc:`1112`) and IGMPv2 (:rfc:`2236`) messages. Both versions share
-one 8-octet layout, so the base holds the schema, the data model and the read
-path. :class:`~pcapkit.protocols.internet.igmpv1.IGMP` and
-:class:`~pcapkit.protocols.internet.igmpv2.IGMP` set :attr:`version`. The
+IGMPv1 (:rfc:`1112`), IGMPv2 (:rfc:`2236`) and IGMPv3 (:rfc:`3376`) messages.
+IGMPv1 and IGMPv2 share one 8-octet layout, so the base holds that shared
+schema, data model and read path. :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,
+:class:`~pcapkit.protocols.internet.igmpv2.IGMP` and
+:class:`~pcapkit.protocols.internet.igmpv3.IGMP` set :attr:`version`; IGMPv3's
+wire format differs materially (a Query's source-list extension, a Report's
+group-record list), so it carries its own schema and data model instead. The
 registry entry for IP protocol 2 is this base, and :meth:`IGMP._dispatch
 <pcapkit.protocols.internet.igmp.IGMP._dispatch>` picks the version class.
 
 .. versionadded:: 1.6.0
 
    IGMPv1 (:rfc:`1112`) and IGMPv2 (:rfc:`2236`) (:issue:`2439`).
+
+.. versionadded:: 1.6.0
+
+   IGMPv3 (:rfc:`3376`) (:issue:`2448`).
 
 """
 
@@ -47,9 +54,9 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
            schema=Schema_IGMP, data=Data_IGMP):
     """This class implements Internet Group Management Protocol.
 
-    The class is abstract: :attr:`version` is set by the concrete IGMPv1 and
-    IGMPv2 classes. :meth:`read` refuses a message that :meth:`_classify` does
-    not place in :attr:`version`.
+    The class is abstract: :attr:`version` is set by the concrete IGMPv1,
+    IGMPv2 and IGMPv3 classes. :meth:`read` refuses a message that
+    :meth:`_classify` does not place in :attr:`version`.
 
     """
 
@@ -64,12 +71,12 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     @property
     @abc.abstractmethod
-    def version(self) -> 'Literal[1, 2]':
-        """IGMP version this class reads: ``1`` or ``2``."""
+    def version(self) -> 'Literal[1, 2, 3]':
+        """IGMP version this class reads: ``1``, ``2`` or ``3``."""
 
     @property
     def alias(self) -> 'str':
-        """Acronym of corresponding protocol, ``'IGMPv1'`` or ``'IGMPv2'``."""
+        """Acronym of corresponding protocol, ``'IGMPv1'``, ``'IGMPv2'`` or ``'IGMPv3'``."""
         return f'IGMPv{self.version}'
 
     @property
@@ -82,15 +89,16 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"]]':
+    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"], Literal["IGMPv3"]]':
         """Index ID of the protocol.
 
         Returns:
-            Index ID of the protocol, the family name and both versions; the
-            concrete IGMPv1 and IGMPv2 classes narrow it to their own version.
+            Index ID of the protocol, the family name and all three
+            versions; the concrete IGMPv1, IGMPv2 and IGMPv3 classes narrow
+            it to their own version.
 
         """
-        return ('IGMP', 'IGMPv1', 'IGMPv2')
+        return ('IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Read Internet Group Management Protocol.
@@ -99,12 +107,12 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
-        Returns:
-            Parsed packet data.
-
         Raises:
             ProtocolError: If :meth:`_classify` does not place the message in
                 :attr:`version`.
+
+        Returns:
+            Parsed packet data.
 
         """
         if length is None:
@@ -221,30 +229,39 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     @classmethod
     def _classify(cls, type: 'Enum_Type | int', max_resp_time: 'int',
-                  length: 'int') -> 'Literal[0, 1, 2]':
-        """Classify a parsed IGMP header as IGMPv1 or IGMPv2.
+                  length: 'int') -> 'Literal[0, 1, 2, 3]':
+        """Classify a parsed IGMP header as IGMPv1, IGMPv2 or IGMPv3.
 
         A Membership Query is IGMPv1/v2 only at exactly 8 octets: IGMPv1 if
-        ``max_resp_time`` is zero, IGMPv2 otherwise. Longer queries are IGMPv3
-        and other lengths are ignored (:rfc:`9776#section-7.1`).
+        ``max_resp_time`` is zero, IGMPv2 otherwise. A Membership Query of 12
+        or more octets is IGMPv3's Query, carrying the source-list extension
+        (:rfc:`3376#section-7.1`); one of 9 to 11 octets is neither and is
+        ignored. The IGMPv3 Membership Report (``0x22``) is always IGMPv3,
+        whatever its length.
 
         Args:
             type: The header's message type.
-            max_resp_time: The header's max response time.
+            max_resp_time: The header's max response time (the raw Max Resp
+                Code octet; unused for a type whose version does not depend
+                on it).
             length: The whole IGMP message's length, in octets.
 
         Returns:
-            ``1`` or ``2`` for that version, ``0`` for neither.
+            ``1``, ``2`` or ``3`` for that version, ``0`` for none of them.
 
         """
         if type == Enum_Type.IGMPv1_Membership_Report:
             return 1
         if type in (Enum_Type.IGMPv2_Membership_Report, Enum_Type.IGMPv2_Leave_Group):
             return 2
+        if type == Enum_Type.IGMPv3_Membership_Report:
+            return 3
         if type == Enum_Type.IGMP_Membership_Query:
-            if length != 8:
-                return 0
-            return 2 if max_resp_time else 1
+            if length == 8:
+                return 2 if max_resp_time else 1
+            if length >= 12:
+                return 3
+            return 0
         return 0
 
     @classmethod
@@ -259,17 +276,19 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             length: The IGMP message's length, in octets.
 
         Returns:
-            :class:`~pcapkit.protocols.internet.igmpv1.IGMP` or
-            :class:`~pcapkit.protocols.internet.igmpv2.IGMP` for the version
+            :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,
+            :class:`~pcapkit.protocols.internet.igmpv2.IGMP` or
+            :class:`~pcapkit.protocols.internet.igmpv3.IGMP` for the version
             the message classifies as; :class:`~pcapkit.protocols.misc.raw.Raw`
             for any other message, which then keeps its octets undissected.
 
         """
         from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.internet.igmpv2 import IGMP as IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv3 import IGMP as IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
         if len(data) < 2:
             return Raw
         version = cls._classify(data[0], data[1], length)
-        return {1: IGMPv1, 2: IGMPv2}.get(version, Raw)
+        return {1: IGMPv1, 2: IGMPv2, 3: IGMPv3}.get(version, Raw)

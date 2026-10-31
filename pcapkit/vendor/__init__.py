@@ -152,7 +152,7 @@ __all__ = [
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
     'ICMPv6_ParameterProblemCode',
     # IGMP
-    'IGMP_Type',
+    'IGMP_Type', 'IGMP_RecordType',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',

@@ -88,7 +88,7 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: The ICMP and ICMPv6 ``type`` crawlers seed ``miss`` with an empty list and
 #: build every line dynamically, so they do not count here. The code, time_exceeded,
 #: destination_unreachable, and parameter_problem crawlers emit constant bodies.
-EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 42
+EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 43
 
 
 def _constant_miss_lines() -> 'dict[str, list[str]]':
