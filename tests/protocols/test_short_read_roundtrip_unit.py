@@ -52,6 +52,7 @@ CASES = (
     ('l2tpv2', 'link.l2tpv2:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
     ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
+    ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
     ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
     ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
     ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
