@@ -33,6 +33,10 @@ The Order
       all ``_read_*()`` before all ``_make_*()``. Each set is ordered by the enum
       value of the code or type it handles, not alphabetically by name.
 
+**Registry maps.** The registry maps themselves (``__proto__``, ``__option__``,
+``__parameter__`` and similar) are ordered by their enum values, or alphabetically
+by key where there is no enum.
+
 Example
 ~~~~~~~
 
