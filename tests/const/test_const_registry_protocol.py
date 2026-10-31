@@ -848,7 +848,6 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
 
         self.assertEqual(len(all_files), 129)
         self.assertEqual(len(generated), 112)
-
         for relpath in generated:
             with self.subTest(module=relpath):
                 source = (REPO_ROOT / relpath).read_text()

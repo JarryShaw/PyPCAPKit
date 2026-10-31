@@ -231,7 +231,6 @@ class DispatchRegistryTests(unittest.TestCase):
         # pcap and pcapng frame tables, and #2448's Internet.__proto__[TransType.IGMP].
         self.assertEqual(len(cases), 54,
                          'expected exactly 54 entries across the seven __proto__ '
-
                          'tables named in GitHub issue #496 and the loopback table '
                          'of #1574; a different count means a registry changed '
                          'shape and this module was not updated to match')
