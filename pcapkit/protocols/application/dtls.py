@@ -66,6 +66,9 @@ _DTLSV1_2_VERSION = 0xFEFD
 _DTLS13_LEGACY_VERSIONS = frozenset({_DTLSV1_0_VERSION, _DTLSV1_2_VERSION})
 #: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).
 _UNIFIED_PREFIX = 0b001
+#: Shortest ciphertext a unified-header record may carry: the record-number
+#: sample is taken from its first 16 octets (:rfc:`9147#section-4.2.3`).
+_CIPHERTEXT_MIN_LENGTH = 16
 
 
 def _is_unified_header(octet: int) -> bool:
@@ -408,8 +411,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         Raises:
             ProtocolError: If the header carries a connection ID, whose length
                 is negotiated and not in the record; if the header or its
-                declared length runs past the buffer; or if there is no
-                ciphertext after the header.
+                declared length runs past the buffer; or if the ciphertext is
+                shorter than the record-number sample (:rfc:`9147#section-4.2.3`).
 
         """
         self._alias = 'DTLS 1.3'
@@ -423,8 +426,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         if needed > available:
             raise ProtocolError(f'{self.alias}: invalid format: record of {needed} octets '
                                 'runs past the end of the buffer')
-        if not schema.fragment:
-            raise ProtocolError(f'{self.alias}: invalid format: no ciphertext after the record header')
+        # Receivers MUST reject shorter records as if they failed deprotection.
+        if len(schema.fragment or b'') < _CIPHERTEXT_MIN_LENGTH:
+            raise ProtocolError(f'{self.alias}: invalid format: ciphertext is shorter than the '
+                                'record-number sample (RFC 9147 section 4.2.3)')
 
         dtls = Data_DTLSCiphertext(
             epoch=flags['epoch'],

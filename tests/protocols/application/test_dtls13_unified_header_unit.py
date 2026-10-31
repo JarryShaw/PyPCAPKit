@@ -20,8 +20,9 @@ _L_LONG_SEQ_EPOCH2 = 0x2E   # S=1, L=1, EE=10
 _NO_LENGTH_EPOCH3 = 0x23    # S=0, L=0, EE=11
 _CID_PRESENT = 0x38         # C=1, S=0, L=1, EE=00
 
-#: A 12-octet stand-in for an AEAD ciphertext.
-_FRAGMENT = bytes(range(0xA0, 0xAC))
+#: A 16-octet stand-in for an AEAD ciphertext, the shortest the record-number
+#: sample allows (:rfc:`9147#section-4.2.3`).
+_FRAGMENT = bytes(range(0xA0, 0xB0))
 
 
 def _unified(first: int, sequence: bytes, length: 'bytes | None', fragment: bytes) -> bytes:
@@ -121,6 +122,30 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             DTLS(wire, len(wire))
 
+    def test_a_ciphertext_shorter_than_the_sample_is_refused(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # RFC 9147 section 4.2.3: a record under 16 octets of ciphertext MUST
+        # be rejected as if it had failed deprotection.
+        short = _FRAGMENT[:15]
+        for name, length in (('length present', len(short).to_bytes(2, 'big')), ('length absent', None)):
+            with self.subTest(case=name):
+                wire = _unified(_L_SHORT_SEQ_EPOCH1 if length else _NO_LENGTH_EPOCH3, b'\x07', length, short)
+                with self.assertRaises(ProtocolError):
+                    DTLS(wire, len(wire))
+
+    def test_a_ciphertext_of_the_minimum_length_is_accepted(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+
+        for name, first, length in (('length present', _L_SHORT_SEQ_EPOCH1, len(_FRAGMENT).to_bytes(2, 'big')),
+                                    ('length absent', _NO_LENGTH_EPOCH3, None)):
+            with self.subTest(case=name):
+                wire = _unified(first, b'\x07', length, _FRAGMENT)
+                parsed = DTLS(wire, len(wire))
+                self.assertEqual(parsed.alias, 'DTLS 1.3')
+                self.assertEqual(parsed.info.content, _FRAGMENT)
+
     def test_udp_port_5684_dispatches_the_unified_record(self) -> None:
         from pcapkit.protocols.transport.udp import UDP
 
@@ -147,6 +172,19 @@ class UnifiedHeaderParseTests(unittest.TestCase):
                     warnings.simplefilter('ignore')
                     proto = UDP(wire, len(wire))
                 self.assertEqual(str(proto.protochain), expected)
+
+
+    def test_a_datagram_the_record_format_forbids_degrades_to_raw_on_dispatch(self) -> None:
+        from pcapkit.protocols.transport.udp import UDP
+
+        # First octet in the 001 range and the header fits, but the ciphertext
+        # is under the sample length, so it is not a DTLS 1.3 record.
+        wire = _udp_to_5684(_unified(_L_SHORT_SEQ_EPOCH1, b'\x2a',
+                                     len(_FRAGMENT[:15]).to_bytes(2, 'big'), _FRAGMENT[:15]))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = UDP(wire, len(wire))
+        self.assertEqual(str(proto.protochain), 'UDP:Raw')
 
 
 class UnifiedHeaderMakeTests(unittest.TestCase):
