@@ -114,6 +114,7 @@ else:
     from pcapkit.vendor.ipv6 import *
     from pcapkit.vendor.ipx import *
     from pcapkit.vendor.l2tp import *
+    from pcapkit.vendor.linux import *
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
@@ -153,6 +154,8 @@ __all__ = [
     'IPX_Packet', 'IPX_Socket',
     # L2TP
     'L2TP_Type',
+    # Linux
+    'Linux_ARPHRD',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
