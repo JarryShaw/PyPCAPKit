@@ -86,6 +86,8 @@ EXPECTED_TO_REJECT_ZERO = frozenset({
     'pcapkit.const.sctp.cause_code.CauseCode',
     'pcapkit.const.sctp.parameter.Parameter',
     'pcapkit.const.mh.mn_id_subtype.MNIDSubtype',
+    # Names no ARPHRD 0 (Linux's ARPHRD_NETROM is not named by pcapkit).
+    'pcapkit.const.linux.arphrd.ARPHRD',
 })
 
 #: The four Mobility Header flag enumerations of GitHub issue #623, as
@@ -200,7 +202,7 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         # ``_iter_const_int_flags``'s, and so are GitHub issue #880's
         # ngap.ProcedureCode and ngap.ProtocolIE, which are on EnumRegistry.
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
-        self.assertEqual(len(self.enums), 116)
+        self.assertEqual(len(self.enums), 117)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
                         f'expected reject-list entries missing from the sweep: '
                         f'{EXPECTED_TO_REJECT_ZERO - names}')

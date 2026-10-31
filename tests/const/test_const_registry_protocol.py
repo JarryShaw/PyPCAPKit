@@ -788,6 +788,10 @@ EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
     # either (b) file above); TransportProtocol, in the same file, never
     # mixes in the base at all.
     'pcapkit/const/reg/apptype/apptype.py',   # AppType, TransportProtocol
+
+    # (d) hand-written on EnumLookup rather than the generated EnumRegistry
+    # shape; added by the LINUX_SLL work.
+    'pcapkit/const/linux/arphrd.py',          # ARPHRD
 })
 
 
@@ -846,7 +850,7 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         generated = [path for path in all_files
                      if path not in converted_relpaths and path not in EXCLUDED_FROM_INTENUM_CENSUS]
 
-        self.assertEqual(len(all_files), 126)
+        self.assertEqual(len(all_files), 127)
         self.assertEqual(len(generated), 109)
 
         for relpath in generated:
