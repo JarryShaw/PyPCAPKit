@@ -91,6 +91,7 @@ __all__ = [
     'register_pcap', 'register_pcapng',
     'register_ethertype',
     'register_transtype',
+    'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
@@ -122,8 +123,9 @@ __all__ = [
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
     'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',               # Link Layer
-    'AH', 'ESP', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',      # Internet Layer
-    'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
+    'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
+    'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',                   # Internet Layer
+
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer

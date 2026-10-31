@@ -107,6 +107,27 @@ from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
 
+# Internet Control Message Protocol
+from pcapkit.protocols.schema.internet.icmpv4 import ICMPv4
+from pcapkit.protocols.schema.internet.icmpv4 import \
+    DestinationUnreachable as ICMPv4_DestinationUnreachable
+from pcapkit.protocols.schema.internet.icmpv4 import Echo as ICMPv4_Echo
+from pcapkit.protocols.schema.internet.icmpv4 import ICMPv4Type as ICMPv4_ICMPv4Type
+from pcapkit.protocols.schema.internet.icmpv4 import ParameterProblem as ICMPv4_ParameterProblem
+from pcapkit.protocols.schema.internet.icmpv4 import TimeExceeded as ICMPv4_TimeExceeded
+from pcapkit.protocols.schema.internet.icmpv4 import Unknown as ICMPv4_Unknown
+
+# Internet Control Message Protocol for IPv6
+from pcapkit.protocols.schema.internet.icmpv6 import ICMPv6
+from pcapkit.protocols.schema.internet.icmpv6 import \
+    DestinationUnreachable as ICMPv6_DestinationUnreachable
+from pcapkit.protocols.schema.internet.icmpv6 import Echo as ICMPv6_Echo
+from pcapkit.protocols.schema.internet.icmpv6 import ICMPv6Type as ICMPv6_ICMPv6Type
+from pcapkit.protocols.schema.internet.icmpv6 import PacketTooBig as ICMPv6_PacketTooBig
+from pcapkit.protocols.schema.internet.icmpv6 import ParameterProblem as ICMPv6_ParameterProblem
+from pcapkit.protocols.schema.internet.icmpv6 import TimeExceeded as ICMPv6_TimeExceeded
+from pcapkit.protocols.schema.internet.icmpv6 import Unknown as ICMPv6_Unknown
+
 # Internet Group Management Protocol
 from pcapkit.protocols.schema.internet.igmp import IGMP
 from pcapkit.protocols.schema.internet.igmpv3 import GroupRecord as IGMPv3_GroupRecord
@@ -428,6 +449,18 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+
+    # Internet Control Message Protocol
+    'ICMPv4',
+    'ICMPv4_ICMPv4Type',
+    'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',
+    'ICMPv4_ParameterProblem',
+
+    # Internet Control Message Protocol for IPv6
+    'ICMPv6',
+    'ICMPv6_ICMPv6Type',
+    'ICMPv6_Unknown', 'ICMPv6_DestinationUnreachable', 'ICMPv6_PacketTooBig', 'ICMPv6_TimeExceeded',
+    'ICMPv6_ParameterProblem', 'ICMPv6_Echo',
 
     # Internet Group Management Protocol
     'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_QueryExtension', 'IGMPv3_Report',
