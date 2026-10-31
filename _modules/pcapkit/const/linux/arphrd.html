@@ -495,17 +495,14 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.const.linux.arphrd</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""Linux ARP Hardware Types</span>
+<span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="sd">"""Linux ARP hardware types</span>
 <span class="sd">==============================</span>
 
 <span class="sd">.. module:: pcapkit.const.linux.arphrd</span>
 
-<span class="sd">This module contains the constant enumeration for the Linux ``ARPHRD_*``</span>
-<span class="sd">hardware types of ``&lt;linux/if_arp.h&gt;``, the ``arphrd_type`` of the Linux</span>
-<span class="sd">"cooked" capture encapsulations. Only the values that pcapkit names are listed.</span>
-<span class="sd">The rest of the numbering is IANA's, see</span>
-<span class="sd">:class:`~pcapkit.const.arp.hardware.Hardware`, which differs for most</span>
-<span class="sd">non-Ethernet types.</span>
+<span class="sd">This module contains the constant enumeration for **Linux ARP hardware types**,</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.linux.arphrd.ARPHRD`.</span>
 
 <span class="sd">"""</span>
 
@@ -549,14 +546,21 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/linux_sll.html#pcapkit.const.linux.arphrd.ARPHRD._validate_value">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Reject ``value`` unless it is an ``arphrd_type`` (a 16-bit value).</span>
+<span class="w">        </span><span class="sd">"""Reject ``value`` unless it passes the range check :meth:`_missing_` makes.</span>
 
 <span class="sd">        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
-<span class="sd">        so that :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses</span>
-<span class="sd">        the values :meth:`_missing_` refuses.</span>
+<span class="sd">        with that check and the message it raises, so</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the</span>
+<span class="sd">        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the</span>
+<span class="sd">        same words (:issue:`1816`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value about to be looked up or minted.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            EnumValueError: If ``value`` is not an integer in ``0..0xFFFF``.</span>
+<span class="sd">            EnumValueError: If ``value`` fails that check. A</span>
+<span class="sd">                :exc:`ValueError`, so an ``except ValueError`` caller is</span>
+<span class="sd">                unaffected.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
@@ -567,13 +571,10 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/linux_sll.html#pcapkit.const.linux.arphrd.ARPHRD._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ARPHRD'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve an unnamed ``arphrd_type`` to an unregistered member.</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If ``value`` is not a 16-bit integer.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
