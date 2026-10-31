@@ -278,6 +278,18 @@ def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> '
     return bytes(Loopback(family=family, byteorder=byteorder, payload=payload))
 
 
+def _linux_sll(payload: 'bytes') -> 'bytes':
+    """A ``LINUX_SLL`` header carrying ``payload``."""
+    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+    return bytes(LinuxSLL1(payload=payload))
+
+
+def _linux_sll2(payload: 'bytes') -> 'bytes':
+    """A ``LINUX_SLL2`` header carrying ``payload``."""
+    from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+    return bytes(LinuxSLL2(payload=payload))
+
+
 ###############################################################################
 # Link -- EtherType.
 ###############################################################################
@@ -536,6 +548,10 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
         return _loopback(2, _ip4(6, _tcp(9999))), False
     if code == LinkType.LOOP:  # in network byte order (#1574)
         return _loopback(2, _ip4(6, _tcp(9999)), byteorder='big'), False
+    if code == LinkType.LINUX_SLL:
+        return _linux_sll(_ip4(6, _tcp(9999))), False
+    if code == LinkType.LINUX_SLL2:
+        return _linux_sll2(_ip4(6, _tcp(9999))), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -697,6 +713,8 @@ PINNED_TARGETS = {
     'pcap-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcap-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
+    'pcap-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
+    'pcap-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
 
     # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
     'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
@@ -704,6 +722,8 @@ PINNED_TARGETS = {
     'pcapng-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcapng-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
+    'pcapng-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
+    'pcapng-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
 
     # -- Loopback.__proto__ (address family) ------------------------------------
     'loopback/2': ('pcapkit.protocols.internet.ipv4', 'IPv4'),

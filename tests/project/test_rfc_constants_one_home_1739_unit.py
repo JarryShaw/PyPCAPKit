@@ -219,6 +219,10 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
+    ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
+        'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
+    ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
+        'the fixed length of the LINUX_SLL2 header, not the IPv4 or TCP minimum header',
     ('pcapkit/protocols/misc/pcap/frame.py', 'version == 6'):
         'the IP version number, not the decimal places of a resolution',
     ('pcapkit/protocols/misc/pcapng.py', 'version == 6'):
@@ -397,6 +401,9 @@ UNRELATED = {
     'pcapkit/protocols/link/loopback.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
     'pcapkit/protocols/link/l2tpv2.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
+    'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
+                                            '2-octet link_addr_length field, not an IP total '
+                                            'length'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),

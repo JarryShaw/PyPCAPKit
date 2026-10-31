@@ -846,8 +846,8 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         generated = [path for path in all_files
                      if path not in converted_relpaths and path not in EXCLUDED_FROM_INTENUM_CENSUS]
 
-        self.assertEqual(len(all_files), 126)
-        self.assertEqual(len(generated), 109)
+        self.assertEqual(len(all_files), 127)
+        self.assertEqual(len(generated), 110)
 
         for relpath in generated:
             with self.subTest(module=relpath):

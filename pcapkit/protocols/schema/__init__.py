@@ -28,6 +28,7 @@ __all__ = [
     'ARP',
     'Ethernet',
     'L2TP',
+    'LinuxSLL1', 'LinuxSLL2',
     'Loopback',
     'VLAN', 'VLAN_TCI',
 
