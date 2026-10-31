@@ -47,8 +47,13 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.protocols.application.ssl import SSL, TLS13_VERSION
+from pcapkit.protocols.application.sslv2 import SSLv2
+from pcapkit.protocols.data.application.sslv2 import ClientHello as SSLv2_ClientHello
+from pcapkit.protocols.data.application.sslv2 import ServerHello as SSLv2_ServerHello
+from pcapkit.protocols.data.application.sslv2 import SSLv2 as SSLv2_Data
 from pcapkit.protocols.data.application.tls import TLS as Data_TLS
 from pcapkit.protocols.schema.application.tls import TLS as Schema_TLS
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -103,6 +108,9 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
     #: Tier :meth:`read` identified, e.g. ``'TLS 1.2'``; ``'TLS'`` until then.
     _alias = 'TLS'  # type: Literal["TLS", "SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2", "TLS 1.3"]
 
+    #: Header length of the SSLv2 record :meth:`read` adopted; ``None`` for TLS's own.
+    _adopted_length = None  # type: Optional[int]
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -118,12 +126,15 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         return self._alias
 
     @property
-    def length(self) -> 'Literal[5]':
+    def length(self) -> 'int':
         """Header length of current protocol -- the fixed record header,
         :attr:`~pcapkit.protocols.data.application.tls.TLS.length`'s fragment
-        excluded.
+        excluded; or, once :meth:`read` has adopted an SSLv2 record, that
+        record's own 2- or 3-octet header.
 
         """
+        if self._adopted_length is not None:
+            return self._adopted_length
         return 5
 
     ##########################################################################
@@ -142,8 +153,13 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """
         return ('TLS',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_TLS':
-        """Read Transport Layer Security (TLS).
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Any':
+        """Read Transport Layer Security (TLS), or the SSLv2 record port 443 may carry.
+
+        TLS is tried first. Only when :meth:`_read_tls_record` rejects the
+        record is the payload offered to
+        :class:`~pcapkit.protocols.application.sslv2.SSLv2`, whose own header
+        checks are strict, so a genuine TLS record is never taken as SSLv2.
 
         Args:
             length: Length of packet data.
@@ -153,11 +169,19 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the record cannot be a genuine TLS/SSLv3+
-                record -- see :meth:`_read_tls_record`.
+            ProtocolError: If the payload is neither a TLS record (see
+                :meth:`_read_tls_record`) nor an SSLv2 record.
 
         """
-        return self._read_tls_record(length, **kwargs)
+        if length is None:
+            length = len(self)
+        try:
+            return self._read_tls_record(length, **kwargs)
+        except ProtocolError:
+            parsed = self._read_sslv2_fallback(length, **kwargs)
+            if parsed is None:
+                raise
+            return parsed
 
     def make(self,
              content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
@@ -208,6 +232,28 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             fragment=fragment,
             payload=payload,
         )
+
+    @classmethod
+    def from_data(cls, data: 'Any', **kwargs: 'Any') -> 'Any':
+        """Create protocol instance from data.
+
+        An SSLv2 record that :meth:`read` adopted from port 443 is rebuilt as
+        the SSLv2 record it was parsed from, since TLS's record layout cannot
+        carry its 2- or 3-octet header.
+
+        Args:
+            data: Protocol data.
+            **kwargs: As :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance: an :class:`~pcapkit.protocols.application.sslv2.SSLv2`
+            for an SSLv2 record, otherwise a TLS instance.
+
+        """
+        if isinstance(data, SSLv2_Data):
+            return SSLv2.from_data(data, **kwargs)
+        return super().from_data(data, **kwargs)
 
     ##########################################################################
     # Data models.
@@ -300,6 +346,50 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
         remaining = available - (self.length + schema.length)
         return self._decode_next_layer(tls, -1, remaining)
+
+    def _read_sslv2_fallback(self, length: 'int', **kwargs: 'Any') -> 'Optional[Any]':
+        """Parse the payload as SSLv2 once TLS has rejected it.
+
+        Only a complete CLIENT-HELLO or SERVER-HELLO is accepted: the whole
+        record must sit in this segment, and its body must pass the hello
+        length probe. Anything else stays :class:`~pcapkit.protocols.misc.raw.Raw`.
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            The SSLv2 data model, adopted as this dispatcher's own, or
+            :data:`None` if the payload is not a complete SSLv2 hello.
+
+        """
+        try:
+            obj = SSLv2(self._data, length, **kwargs)
+        except ProtocolError:
+            return None
+        info = obj.info
+        if info.header_len + info.record_length > length:
+            return None
+        if not isinstance(info.body, (SSLv2_ClientHello, SSLv2_ServerHello)):
+            return None
+        return self._adopt_dispatched(obj)
+
+    def _adopt_dispatched(self, obj: 'Any') -> 'Any':
+        """Adopt the SSLv2 parse, including its 2- or 3-octet header length.
+
+        :attr:`length` and :attr:`packet` must describe the header the record
+        really has, as a direct SSLv2 parse does.
+
+        Args:
+            obj: The SSLv2 instance, already parsed.
+
+        Returns:
+            ``obj``'s parsed data model, as :meth:`SSL._adopt_dispatched` returns it.
+
+        """
+        self._adopted_length = obj.length  # pylint: disable=attribute-defined-outside-init
+        return super()._adopt_dispatched(obj)
+
 
 
 class SSLv3(TLS, schema=Schema_TLS, data=Data_TLS):

@@ -36,6 +36,14 @@ from pcapkit.protocols.schema.application.ospf import OSPF
 from pcapkit.protocols.schema.application.ospf import \
     CryptographicAuthentication as OSPF_CryptographicAuthentication
 
+# Secure Sockets Layer version 2
+from pcapkit.protocols.schema.application.sslv2 import ClientHello as SSLv2_ClientHello
+from pcapkit.protocols.schema.application.sslv2 import HandshakeBody as SSLv2_HandshakeBody
+from pcapkit.protocols.schema.application.sslv2 import ServerHello as SSLv2_ServerHello
+from pcapkit.protocols.schema.application.sslv2 import SSLv2
+from pcapkit.protocols.schema.application.sslv2 import \
+    UnknownHandshakeBody as SSLv2_UnknownHandshakeBody
+
 # Transport Layer Security
 from pcapkit.protocols.schema.application.tls import TLS
 
@@ -61,6 +69,10 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Secure Sockets Layer version 2
+    'SSLv2', 'SSLv2_HandshakeBody', 'SSLv2_UnknownHandshakeBody',
+    'SSLv2_ClientHello', 'SSLv2_ServerHello',
 
     # Transport Layer Security
     'TLS',

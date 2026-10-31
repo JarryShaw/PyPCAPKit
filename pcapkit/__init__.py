@@ -123,7 +123,7 @@ __all__ = [
 
     'FTP', 'FTP_DATA',                                      # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF',
-    'RARP', 'DRARP', 'SSL', 'SSLv3', 'TLS', 'DTLS',
+    'RARP', 'DRARP', 'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 
     'Data',                                                 # Protocol Data
     'Schema',                                               # Protocol Schema

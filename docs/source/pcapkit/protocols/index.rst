@@ -57,7 +57,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
            end
 
            subgraph ssl [SSL Family]
-               SSL --> TLS & DTLS
+               SSL --> TLS & DTLS & SSLv2
                TLS --> SSLv3
            end
        end
@@ -170,6 +170,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.RARP"
        click DRARP "application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.SSL"
+       click SSLv2 "application/sslv2.html#pcapkit.protocols.application.sslv2.SSLv2"
        click TLS "application/tls.html#pcapkit.protocols.application.tls.TLS"
        click SSLv3 "application/tls.html#pcapkit.protocols.application.tls.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"

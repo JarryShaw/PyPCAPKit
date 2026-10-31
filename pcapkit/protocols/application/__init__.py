@@ -28,6 +28,7 @@ from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.application.ngap import NGAP
 from pcapkit.protocols.application.ospf import OSPF
 from pcapkit.protocols.application.rarp import RARP, DRARP
+from pcapkit.protocols.application.sslv2 import SSLv2
 from pcapkit.protocols.application.tls import TLS, SSLv3
 from pcapkit.protocols.application.dtls import DTLS
 
@@ -45,5 +46,5 @@ __all__ = [
     'NGAP',
     'OSPF',
     'RARP', 'DRARP',
-    'SSL', 'SSLv3', 'TLS', 'DTLS',
+    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 ]

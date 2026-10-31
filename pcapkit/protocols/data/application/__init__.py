@@ -54,6 +54,11 @@ from pcapkit.protocols.data.application.ospf import OSPF
 from pcapkit.protocols.data.application.ospf import \
     CryptographicAuthentication as OSPF_CryptographicAuthentication
 
+# Secure Sockets Layer version 2
+from pcapkit.protocols.data.application.sslv2 import ClientHello as SSLv2_ClientHello
+from pcapkit.protocols.data.application.sslv2 import ServerHello as SSLv2_ServerHello
+from pcapkit.protocols.data.application.sslv2 import SSLv2
+
 # Transport Layer Security
 from pcapkit.protocols.data.application.tls import TLS
 from pcapkit.protocols.data.application.tls import Alert as TLS_Alert
@@ -91,6 +96,9 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Secure Sockets Layer version 2
+    'SSLv2', 'SSLv2_ClientHello', 'SSLv2_ServerHello',
 
     # Transport Layer Security
     'TLS',

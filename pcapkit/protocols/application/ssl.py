@@ -34,6 +34,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.tls import Alert as Data_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as Data_ChangeCipherSpec
@@ -41,6 +42,7 @@ from pcapkit.protocols.data.application.tls import ClientHello as Data_ClientHel
 from pcapkit.protocols.data.application.tls import Extension as Data_Extension
 from pcapkit.protocols.data.application.tls import Handshake as Data_Handshake
 from pcapkit.protocols.data.application.tls import ServerHello as Data_ServerHello
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -179,6 +181,7 @@ def _tls_handshake_tiles(fragment: 'bytes') -> 'bool':
 class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Umbrella base class for the SSL protocol family: the SSL versions, TLS and DTLS.
 
+    - SSL 2.0 (:class:`~pcapkit.protocols.application.sslv2.SSLv2`) [draft-hickman-netscape-ssl-00]
     - Transport Layer Security, SSLv3 through TLS 1.3
       (:class:`~pcapkit.protocols.application.tls.TLS`) [:rfc:`6101`, :rfc:`5246`, :rfc:`9846`]
     - Datagram TLS, DTLS 1.0 through DTLS 1.3
@@ -191,18 +194,43 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["TLS"], Literal["DTLS"]]':
+    def id(cls) -> 'tuple[Literal["SSLv2"], Literal["TLS"], Literal["DTLS"]]':
         """Index ID of the protocol.
 
         Returns:
-            Index ID of the protocol.
+            Index ID of the protocol: the direct concrete members of the family.
+            SSLv3 is not listed, as it is a subclass of
+            :class:`~pcapkit.protocols.application.tls.TLS`.
 
         """
-        return ('TLS', 'DTLS')
+        return ('SSLv2', 'TLS', 'DTLS')
 
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _adopt_dispatched(self, obj: 'Any') -> 'Any':
+        """Adopt the parse of a sibling tier this dispatcher delegated to.
+
+        Copies the delegate's :attr:`alias` and :attr:`name`, and any next
+        layer it already decoded, so the dispatcher reports the tier that
+        actually parsed the record.
+
+        Args:
+            obj: The delegate's own, already-parsed instance.
+
+        Returns:
+            ``obj``'s parsed data model, which becomes this dispatcher's own
+            :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`.
+
+        """
+        self._alias = obj.alias  # pylint: disable=attribute-defined-outside-init
+        self._name = obj.name  # pylint: disable=attribute-defined-outside-init
+        next_ = getattr(obj, '_next', None)
+        if next_ is not None and not isinstance(next_, NoPayload):
+            self._next = next_  # pylint: disable=attribute-defined-outside-init
+            self._protos = ProtoChain(self.__class__, self.alias, basis=next_.protochain)  # pylint: disable=attribute-defined-outside-init
+        return obj.info
 
     def _validate_tls_record(self, schema: 'Any', *, available: 'int', dtls: 'bool') -> 'None':
         """Reject octets that cannot be a genuine TLS/DTLS record.
