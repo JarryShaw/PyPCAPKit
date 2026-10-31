@@ -17,6 +17,7 @@ House Conventions
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members
      spell :meth:`~pcapkit.protocols.protocol.Protocol.id`;
+   * :ref:`protocol-member-order` -- the order of members in a protocol class body;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;
    * :ref:`documentation` -- the prose itself, on these pages and in the API
@@ -41,6 +42,7 @@ House Conventions
    registry-protocol
    extension-header-subclassing
    protocol-family-grouping
+   protocol-member-order
    protocol-layer-placement
    process
    documentation
