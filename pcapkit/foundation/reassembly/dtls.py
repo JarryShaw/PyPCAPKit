@@ -49,6 +49,8 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         a protocol instance never sees the addresses, so a caller supplies the
         5-tuple as ``flow`` to :meth:`DTLS.read
         <pcapkit.protocols.application.dtls.DTLS.read>`.
+        Each message's buffer is allocated at its declared length, the unit
+        :rfc:`6347#section-4.2.3` buffers, so at most 16 MiB (a 24-bit field).
 
     Example:
         >>> from pcapkit.foundation.reassembly.dtls import DTLS

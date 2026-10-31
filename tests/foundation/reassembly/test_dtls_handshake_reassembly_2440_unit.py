@@ -409,6 +409,64 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         self.assertTrue(engine.last.completed)
         self.assertEqual(engine.last.body, body)
 
+    def test_partial_message_buffer_is_sized_by_declared_length(self) -> None:
+        """A partial message buffers its declared length from the first
+        fragment, not the highest offset received. With ``strict=False``, a
+        timeout reports it at that length with the gaps zero-filled;
+        ``strict=True`` reports only the received runs."""
+        from pcapkit.const.tls.handshake_type import HandshakeType
+        from pcapkit.foundation.reassembly.data.data import Completion
+
+        size = 2 ** 24 - 1
+        bufid = ('103.0.0.1', 1, '103.0.0.2', 5684, 0)
+        engine = self._engine(strict=False)
+        engine(self._packet(bufid, 1, HandshakeType.certificate, size, 0, 0, 100,
+                            b'A' * 100, 0.0))
+        engine(self._packet(bufid, 2, HandshakeType.certificate, size, 0, 1000, 10,
+                            b'B' * 10, 0.0))
+        frag = engine._buffer[bufid].msg[0]  # pylint: disable=protected-access
+        self.assertEqual(len(frag.raw), size)
+        self.assertIsNone(engine.last)
+
+        (datagram,) = engine.submit(engine._buffer[bufid],  # pylint: disable=protected-access
+                                    bufid=bufid, timeout=True)
+        self.assertEqual(datagram.completed, Completion.TIMEOUT)
+        self.assertEqual(datagram.body,
+                         b'A' * 100 + bytes(900) + b'B' * 10 + bytes(size - 1010))
+
+    def test_overlapping_fragments_reassemble_byte_exact_in_any_order(self) -> None:
+        """Each fragment overlaps its predecessor by 4 KiB. The buffer is at the
+        declared length from the first fragment on, and the message reassembles
+        byte-exact whatever the arrival order."""
+        from pcapkit.const.tls.handshake_type import HandshakeType
+
+        overlap = 4096
+        for size in (64 * 1024 + 1, 2 ** 24 - 1):
+            body = (bytes(range(256)) * (size // 256 + 1))[:size]
+            chunk = size // 4 + 1
+            frags = []
+            for start in range(0, size, chunk):
+                lo = max(0, start - overlap)
+                hi = min(size, start + chunk)
+                frags.append((lo, hi - lo))
+            count = len(frags)
+            orders = (list(range(count)), list(range(count))[::-1], [2, 0, 3, 1])
+            for order in orders:
+                with self.subTest(size=size, order=order):
+                    bufid = ('104.0.0.1', 1, '104.0.0.2', 5684, 0)
+                    engine = self._engine()
+                    for num, idx in enumerate(order, 1):
+                        fo, length = frags[idx]
+                        engine(self._packet(bufid, num, HandshakeType.certificate, size, 0,
+                                            fo, length, body[fo:fo + length], 0.0))
+                        if num == 1:
+                            frag = engine._buffer[bufid].msg[0]  # pylint: disable=protected-access
+                            self.assertEqual(len(frag.raw), size)
+                    self.assertIsNotNone(engine.last)
+                    self.assertTrue(engine.last.completed)
+                    self.assertEqual(engine.last.length, size)
+                    self.assertEqual(engine.last.body, body)
+
 
 class TestDTLSReadReassemblyWiring(unittest.TestCase):
     """:meth:`DTLS.read`'s ``reassembly``/``flow`` arguments, exercised
