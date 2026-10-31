@@ -63,6 +63,7 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+    'IP_Pseudo',
     'IPv4',
     'IPv4_Option',
     'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',

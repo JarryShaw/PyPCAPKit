@@ -38,6 +38,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
                PCAPNG
            end
 
+           subgraph checksum [Checksum Pseudo-Headers]
+               IP_Pseudo
+           end
+
            Raw & NoPayload
        end
 
@@ -104,7 +108,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
        B --> Link & Internet & Transport & Application
 
-       B --> Header & Frame & PCAPNG & Raw & NoPayload
+       B --> Header & Frame & PCAPNG & Raw & NoPayload & IP_Pseudo
        Raw --> FTP_DATA
        ARP --> RARP
        IPv6_Ext --> AH & ESP
@@ -144,6 +148,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click IPv6-Frag "internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
        click IPv6-Opts "internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
        click IPv6-Route "internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
+       click IP_Pseudo "misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo"
        click IPX "internet/ipx.html#pcapkit.protocols.internet.ipx.IPX"
        click MH "internet/mh.html#pcapkit.protocols.internet.mh.MH"
 

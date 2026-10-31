@@ -19,3 +19,4 @@ empty payload.
    pcapng
    raw
    null
+   checksum
