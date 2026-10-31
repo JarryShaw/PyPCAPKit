@@ -17,8 +17,9 @@ The Order
    ``register_xxx()``.
 #. **Data models.** Every dunder name: ``__index__``, ``__length_hint__``,
    ``__init__``, ``__new__``, ``__post_init__`` and any other.
-#. **Utilities.** Everything else, mostly private methods. A ``_read_xxx()`` comes
-   before its ``_make_xxx()``, and any such pair keeps that order.
+#. **Utilities.** Everything else, mostly private methods. All ``_read_*()`` methods
+   come first, in order, then all ``_make_*()`` methods, in order. The two are not
+   interleaved pair by pair.
 
 Example
 ~~~~~~~
@@ -38,7 +39,13 @@ Example
        def _read_foo_field(self, ...):
            ...
 
+       def _read_foo_option(self, ...):
+           ...
+
        def _make_foo_field(self, ...):
+           ...
+
+       def _make_foo_option(self, ...):
            ...
 
 The Reference
@@ -46,7 +53,6 @@ The Reference
 
 :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.transport.tcp.TCP`,
-:class:`~pcapkit.protocols.transport.udp.UDP`,
-:class:`~pcapkit.protocols.link.arp.ARP` and
-:class:`~pcapkit.protocols.link.ethernet.Ethernet` follow this order. When a
+:class:`~pcapkit.protocols.transport.udp.UDP` and
+:class:`~pcapkit.protocols.link.arp.ARP` follow this order. When a
 new class is unclear, match them.
