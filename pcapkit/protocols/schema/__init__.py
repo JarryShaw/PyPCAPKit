@@ -30,6 +30,7 @@ __all__ = [
     'L2TP',
     'LinuxSLL1', 'LinuxSLL2',
     'Loopback',
+    'Radiotap',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols

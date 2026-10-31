@@ -11,7 +11,8 @@ which is a base class for link layer protocols, e.g.
 :class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.arp.InARP`,
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`,
 :class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.loopback.Loopback` and
+:class:`~pcapkit.protocols.link.loopback.Loopback`,
+:class:`~pcapkit.protocols.link.radiotap.Radiotap` and
 :class:`~pcapkit.protocols.link.vlan.VLAN`.
 
 """

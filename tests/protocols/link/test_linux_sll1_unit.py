@@ -73,16 +73,18 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE``, ``IEEE80211_RADIOTAP`` and
-        ``FRAD``, per tcpdump.org's LINUX_SLL page, never have ``protocol_type`` looked up as an
-        EtherType, even though 0x0800 is IPv4's.
+        """``NETLINK``, ``IPGRE``, ``IP6GRE`` and ``FRAD``, per tcpdump.org's
+        LINUX_SLL page, never have ``protocol_type`` looked up as an
+        EtherType, even though 0x0800 is IPv4's. ``IEEE80211_RADIOTAP`` is
+        also in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`
+        but dispatches to :class:`~pcapkit.protocols.link.radiotap.Radiotap`
+        instead; see :meth:`test_radiotap_arphrd_dispatches_to_radiotap`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.FRAD):
             with self.subTest(arphrd=arphrd):
                 # protocol_type 0x0800 is IPv4's EtherType, but these
                 # hardware types never carry an EtherType in protocol_type.
@@ -96,6 +98,24 @@ class TestLinuxSLL1(unittest.TestCase):
                 self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Raw')
                 self.assertEqual(parsed.data, raw)
                 self._assert_rebuilds(parsed)
+
+    def test_radiotap_arphrd_dispatches_to_radiotap(self) -> None:
+        """GitHub issue #2502: ``ARPHRD_IEEE80211_RADIOTAP`` dispatches to
+        :class:`~pcapkit.protocols.link.radiotap.Radiotap` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+
+        radiotap = bytes.fromhex('00' '00' '0800' '00000000') + b'\xaa' * 10
+        raw = _header(2, ARPHRD.IEEE80211_RADIOTAP, b'', 0, 0x0800) + radiotap
+        parsed = LinuxSLL1(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.IEEE80211_RADIOTAP)
+        self.assertEqual(type(parsed.payload).__name__, 'Radiotap')
+        self.assertEqual(parsed.payload.info.it_len, 8)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Radiotap:Raw')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
 
     def test_non_ethernet_non_excluded_arphrds_still_dispatch_by_ethertype(self) -> None:
         """Loopback, PPP and SLIP/CSLIP are not
