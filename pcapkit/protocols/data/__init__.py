@@ -65,6 +65,9 @@ __all__ = [
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
+    # Linux "Cooked" Capture Encapsulation
+    'LinuxSLL1', 'LinuxSLL2',
+
     # BSD Loopback Encapsulation
     'Loopback',
 

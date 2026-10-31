@@ -89,6 +89,10 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.LINUX_SLL`
+         - :class:`pcapkit.protocols.link.linux_sll1.LinuxSLL1`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.LINUX_SLL2`
+         - :class:`pcapkit.protocols.link.linux_sll2.LinuxSLL2`
 
     :attr:`pcapkit.const.reg.linktype.LinkType.RAW` has no entry of its own:
     its data is dispatched as ``IPV4`` or ``IPV6`` by the version nibble of
@@ -108,11 +112,13 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            Enum_LinkType.NULL:     ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
-            Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
-            Enum_LinkType.LOOP:     ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
-            Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
-            Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
+            Enum_LinkType.NULL:       ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
+            Enum_LinkType.ETHERNET:   ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.LOOP:       ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
+            Enum_LinkType.IPV4:       ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
+            Enum_LinkType.IPV6:       ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
+            Enum_LinkType.LINUX_SLL:  ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL1'),
+            Enum_LinkType.LINUX_SLL2: ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL2'),
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 

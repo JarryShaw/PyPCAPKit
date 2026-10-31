@@ -40,7 +40,7 @@ step-by-step guide for adding a protocol, and is worth reading before starting
 one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
+* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
 * Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
 * Transport Layer: DCCP, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
@@ -49,10 +49,10 @@ the ones outstanding are,
 
 Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
-:class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
-ICMPv6, and ``LINUX_SLL`` with ``LINUX_SLL2``. **Done** for TLS/SSL with
-DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
-record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP
+with ICMPv6, and TLS/SSL with DTLS. **Done** for TLS/SSL with DTLS:
+:class:`~pcapkit.protocols.application.ssl.SSL` is the shared record-layer base
+of :class:`~pcapkit.protocols.application.tls.TLS` and
 :class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
 below.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
@@ -66,8 +66,7 @@ whose *layout* is identical -- it holds the whole of the tag, and
    ``NotImplemented`` folder. **Those files are not a roadmap.** They are
    scratch reminders, so a stub's presence does not mean a protocol is planned or
    claimed, and its absence does not mean the protocol is unwanted:
-   ``LINUX_SLL``, ``LINUX_SLL2`` and ``QUIC`` have no stub and are on the
-   list above,
+   ``QUIC`` has no stub and is on the list above,
    while **NGAP** has none either and is implemented. Take this page as the
    record and ignore the folder.
 
@@ -363,9 +362,7 @@ Follow-ups to the bindings above:
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub;
-and ``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
-``tcpdump -i any`` capture uses and which have no stub.
+ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub.
 
 PCAPNG Support
 --------------
@@ -1084,12 +1081,10 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
-``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** and **DCCP** on their own. These are
-grouped because the shared-base question is the design work and doing either half of
-a pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
-size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
-stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
+Protocols, More!!!`_ above: **ICMP with ICMPv6** and **TLS/SSL with DTLS**,
+plus **IGMP** and **DCCP** on their own. These are grouped because the shared-base
+question is the design work and doing either half of a pair alone would answer it
+twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
@@ -1097,17 +1092,24 @@ what is decoded (the shared :class:`~pcapkit.protocols.application.ssl.SSL`
 base, TLS, DTLS, and handshake message framing) and what is not (DTLS
 handshake-fragment reassembly, :issue:`2440`).
 
-**Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``
-**link types.** Both are genuine DLTs that a capture can legitimately be rooted
-in — ``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP
-packet with no link header at all.
+**Done ahead of wave 2 — handlers for the** ``DLT_NULL``, ``DLT_RAW``,
+``DLT_LINUX_SLL`` **and** ``DLT_LINUX_SLL2`` **link types.** Each is a
+genuine DLT that a capture can legitimately be rooted in — ``DLT_NULL`` (0)
+is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP packet with no link
+header at all, and ``DLT_LINUX_SLL`` (113) with ``DLT_LINUX_SLL2`` (276) the
+Linux "cooked" capture header every ``tcpdump -i any`` capture uses.
 :class:`~pcapkit.protocols.link.loopback.Loopback` dissects ``DLT_NULL`` and
-``DLT_LOOP`` (:issue:`1574`), and the frame dispatcher reads ``DLT_RAW`` as IPv4
-or IPv6 by its version nibble (:issue:`1502`), so of the link types this
-section names only ``LINUX_SLL`` and ``LINUX_SLL2`` remain enumerated but
-unparsed. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown link
-type", which is why the toolkit raises for an unresolvable link-layer name
-instead of defaulting to :attr:`LinkType.NULL <pcapkit.const.reg.linktype.LinkType.NULL>`.
+``DLT_LOOP`` (:issue:`1574`), the frame dispatcher reads ``DLT_RAW`` as IPv4
+or IPv6 by its version nibble (:issue:`1502`), and
+:class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` with
+:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dissect the Linux
+cooked-capture variants (:issue:`2438`). The ``arphrd_type`` values
+neither header treats as carrying an EtherType (``NETLINK``, ``IPGRE``, ``IP6GRE``,
+``IEEE80211_RADIOTAP``, ``FRAD``) have no dissector of their own, tracked
+as :issue:`2460`. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown
+link type", which is why the toolkit raises for an unresolvable link-layer
+name instead of defaulting to :attr:`LinkType.NULL
+<pcapkit.const.reg.linktype.LinkType.NULL>`.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a

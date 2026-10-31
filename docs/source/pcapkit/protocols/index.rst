@@ -63,7 +63,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph link [Link Layer]
-           Link --> Ethernet & L2TP & Loopback & VLAN & ARP
+           Link --> Ethernet & L2TP & LinuxSLL & Loopback & VLAN & ARP
 
            subgraph arp [ARP Family]
                ARP --> InARP
@@ -75,6 +75,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
            subgraph l2tp [L2TP Family]
                L2TP --> L2TPv2
+           end
+
+           subgraph sll [LinuxSLL Family]
+               LinuxSLL --> LinuxSLL1 & LinuxSLL2
            end
        end
 
@@ -117,6 +121,9 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click Ethernet "link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
        click L2TP "link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click L2TPv2 "link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
+       click LinuxSLL "link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL"
+       click LinuxSLL1 "link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1"
+       click LinuxSLL2 "link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2"
        click Loopback "link/loopback.html#pcapkit.protocols.link.loopback.Loopback"
        click VLAN "link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"

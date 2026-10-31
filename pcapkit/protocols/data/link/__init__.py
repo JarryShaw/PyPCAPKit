@@ -13,6 +13,10 @@ from pcapkit.protocols.data.link.ethernet import Ethernet
 from pcapkit.protocols.data.link.l2tp import L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as L2TP_Flags
 
+# Linux "Cooked" Capture Encapsulation
+from pcapkit.protocols.data.link.linux_sll1 import LinuxSLL1
+from pcapkit.protocols.data.link.linux_sll2 import LinuxSLL2
+
 # BSD Loopback Encapsulation
 from pcapkit.protocols.data.link.loopback import Loopback
 
@@ -29,6 +33,9 @@ __all__ = [
 
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
+
+    # Linux "Cooked" Capture Encapsulation
+    'LinuxSLL1', 'LinuxSLL2',
 
     # BSD Loopback Encapsulation
     'Loopback',
