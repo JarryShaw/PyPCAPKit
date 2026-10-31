@@ -110,6 +110,7 @@ else:
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
     from pcapkit.vendor.http import *
+    from pcapkit.vendor.igmp import *
     from pcapkit.vendor.ipv4 import *
     from pcapkit.vendor.ipv6 import *
     from pcapkit.vendor.ipx import *
@@ -143,6 +144,8 @@ __all__ = [
     'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_StatusCode',
+    # IGMP
+    'IGMP_Type',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',

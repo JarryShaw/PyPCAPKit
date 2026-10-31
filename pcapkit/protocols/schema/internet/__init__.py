@@ -107,6 +107,9 @@ from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
 
+# Internet Group Management Protocol
+from pcapkit.protocols.schema.internet.igmp import IGMP
+
 # Internet Protocol version 4
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as IPv4_ESECOption
@@ -420,6 +423,9 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+
+    # Internet Group Management Protocol
+    'IGMP',
 
     # Internet Protocol version 4
     'IPv4',
