@@ -40,8 +40,8 @@ step-by-step guide for adding a protocol, and is worth reading before starting
 one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
-* Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
+* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
+* Internet Layer: ECN, ICMP, ICMPv6, Shim6
 * Transport Layer: DCCP, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
   NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
@@ -361,10 +361,8 @@ Follow-ups to the bindings above:
   port number. That depends on the proxy identifying the version positively
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
-Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub;
-and ``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
-``tcpdump -i any`` capture uses and are now implemented.
+Beyond those, the gaps most likely to be met in a real capture are ICMP (1)
+and ICMPv6 (58) on the internet layer, each of which has a stub.
 
 PCAPNG Support
 --------------
@@ -1090,8 +1088,8 @@ twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`,
 blocked on :issue:`2479` for its pseudo-header checksum.
 
 **IGMP v1/v2 — done within wave 2** (:issue:`2439`).
-The versioned classes :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1` and
-:class:`~pcapkit.protocols.internet.igmpv2.IGMPv2` share one read path on the
+The versioned classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` and
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` share one read path on the
 abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base.
 :rfc:`3376` IGMPv3 is :issue:`2448`.
 
