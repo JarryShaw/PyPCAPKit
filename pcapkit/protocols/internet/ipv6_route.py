@@ -36,6 +36,7 @@ from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_Sourc
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as Data_Type2
 from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_UnknownType
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as Schema_RPL
 from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
@@ -234,6 +235,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         ipv6_route = meth(schema.data, header=schema)
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return ipv6_route
         return self._decode_next_layer(ipv6_route, schema.next, length - ipv6_route.length)
 

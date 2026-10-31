@@ -1062,3 +1062,82 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         self.assertEqual(
             IPv6_Frag(io.BytesIO(frag_wire), len(frag_wire), version=6,
                       extension=True).next, TransType.UDP)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class ExtensionLayerMembershipTests(unittest.TestCase):
+    """``in`` on a terminal extension-header layer parsed from an IPv6 chain (#2487).
+
+    A layer taken from ``IPv6.extension_headers`` in extension mode holds
+    ``NoPayload``, so ``in`` answers for its own name and does not raise. Frames
+    are built in memory; no capture is read.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def _ipv6(first: int, body: bytes) -> bytes:
+        return struct.pack('!IHBB', 6 << 28, len(body), first, 64) + bytes(32) + body
+
+    def _parse(self, first: int, body: bytes):  # type: ignore[no-untyped-def]
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        data = self._ipv6(first, body)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return IPv6(io.BytesIO(data), len(data))
+
+    def _layer(self, first: int, body: bytes, cls):  # type: ignore[no-untyped-def]
+        ipv6 = self._parse(first, body)
+        return next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, cls))
+
+    def test_terminal_hopopt_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        # next=59 (No Next Header), Hdr Ext Len 0, PadN(4)
+        body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
+        hopopt = self._layer(0, body, HOPOPT)
+
+        self.assertIn('HOPOPT', hopopt)
+        self.assertNotIn('ESP', hopopt)
+
+    def test_terminal_ipv6_opts_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
+        opts = self._layer(60, body, IPv6_Opts)
+
+        self.assertIn('IPv6_Opts', opts)
+        self.assertNotIn('ESP', opts)
+
+    def test_terminal_ipv6_route_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        # next=59, Hdr Ext Len 0, Routing Type 0, Segments Left 0, reserved
+        body = struct.pack('!BBBBI', 59, 0, 0, 0, 0)
+        route = self._layer(43, body, IPv6_Route)
+
+        self.assertIn('IPv6_Route', route)
+        self.assertNotIn('ESP', route)
+
+    def test_terminal_ipv6_frag_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+
+        body = struct.pack('!BBHI', 59, 0, 0, 0x1234)
+        frag = self._layer(44, body, IPv6_Frag)
+
+        self.assertIn('IPv6_Frag', frag)
+        self.assertNotIn('ESP', frag)
+
+    def test_terminal_shim6_membership_does_not_raise(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        # Shim6 (140) has no dedicated parser: the generic fallback handles it.
+        # next=59 (No Next Header), Hdr Ext Len 0, padding to 8 octets
+        body = struct.pack('!BB', 59, 0) + bytes(6)
+        shim6 = self._layer(int(ExtensionHeader.Shim6), body, IPv6_Ext)
+
+        self.assertIn('IPv6_Ext', shim6)
+        self.assertNotIn('TCP', shim6)

@@ -3556,5 +3556,37 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(hints['return'], 'Schema_EchoResponseUnsignedParameter')
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class HIPExtensionMembershipTests(unittest.TestCase):
+    """``in`` on a terminal HIP layer parsed from an IPv6 chain (#2487).
+
+    The HIP layer is taken from ``IPv6.extension_headers`` in extension mode.
+    ``in`` on it answers for its own name and does not raise. The frame is
+    built in memory; no capture is read.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_terminal_hip_membership_does_not_raise(self) -> None:
+        import io  # pylint: disable=import-outside-toplevel
+        import struct  # pylint: disable=import-outside-toplevel
+        import warnings  # pylint: disable=import-outside-toplevel
+
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        # HIP: next=59, Hdr Len 4 (40 octets), packet type 1, version 1, checksum, controls
+        hip_body = struct.pack('!BBBBHH', 59, 4, 0x01, 0x10, 0, 0) + bytes(32)
+        data = struct.pack('!IHBB', 6 << 28, len(hip_body), 139, 64) + bytes(32) + hip_body
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv6 = IPv6(io.BytesIO(data), len(data))
+        (hip,) = [ext for ext in ipv6.extension_headers.values() if isinstance(ext, HIP)]
+
+        self.assertIn('HIP', hip)
+        self.assertNotIn('ESP', hip)
+
+
 if __name__ == '__main__':
     unittest.main()

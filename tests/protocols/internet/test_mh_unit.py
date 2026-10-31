@@ -3619,5 +3619,36 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(option.parameters[0].prefix, 0x20010db8)
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class MHExtensionMembershipTests(unittest.TestCase):
+    """``in`` on a terminal MH layer parsed from an IPv6 chain (#2487).
+
+    The MH layer is taken from ``IPv6.extension_headers`` in extension mode.
+    ``in`` on it answers for its own name and does not raise. The frame is
+    built in memory; no capture is read.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_terminal_mh_membership_does_not_raise(self) -> None:
+        import struct  # pylint: disable=import-outside-toplevel
+        import warnings  # pylint: disable=import-outside-toplevel
+
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.mh import MH
+
+        # MH: next=59, Hdr Len 0 (8 octets), MH type 0, reserved, checksum
+        mh_body = struct.pack('!BBBBH', 59, 0, 0, 0, 0) + bytes(4)
+        data = struct.pack('!IHBB', 6 << 28, len(mh_body), 135, 64) + bytes(32) + mh_body
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv6 = IPv6(io.BytesIO(data), len(data))
+        (mh,) = [ext for ext in ipv6.extension_headers.values() if isinstance(ext, MH)]
+
+        self.assertIn('MH', mh)
+        self.assertNotIn('ESP', mh)
+
+
 if __name__ == '__main__':
     unittest.main()

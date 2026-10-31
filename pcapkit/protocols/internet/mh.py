@@ -285,6 +285,7 @@ from pcapkit.protocols.data.internet.mh import \
     UpdateNotificationMessage as Data_UpdateNotificationMessage
 from pcapkit.protocols.data.internet.mh import VendorSpecificOption as Data_VendorSpecificOption
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
 from pcapkit.protocols.schema.internet.mh import \
     AccessNetworkIdentifierOption as Schema_AccessNetworkIdentifierOption
@@ -1389,6 +1390,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         mh = meth(schema.data, header=schema)
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return mh
         return self._decode_next_layer(mh, schema.next, length - mh.length)
 
