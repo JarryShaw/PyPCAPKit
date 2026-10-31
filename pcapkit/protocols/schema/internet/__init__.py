@@ -107,9 +107,6 @@ from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
 
-# IP Pseudo-Header
-from pcapkit.protocols.schema.internet.ip_pseudo import IP_Pseudo
-
 # Internet Protocol version 4
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as IPv4_ESECOption
@@ -423,9 +420,6 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
-
-    # IP Pseudo-Header
-    'IP_Pseudo',
 
     # Internet Protocol version 4
     'IPv4',

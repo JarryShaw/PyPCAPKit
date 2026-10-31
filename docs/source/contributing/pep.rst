@@ -885,7 +885,7 @@ model for how to spell "expected, not an error".
 
 Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
 ESP has already laid the groundwork. The checksum half builds on the IP
-pseudo-header class, :class:`~pcapkit.protocols.internet.ip_pseudo.IP_Pseudo`
+pseudo-header class, :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
 (:issue:`2471`).
 
 Deterministic Construction Arguments
@@ -1255,7 +1255,7 @@ one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is :issue:`2470` and
 :issue:`2472` to :issue:`2475`.
 
 **IP pseudo-header — done** (:issue:`2471`).
-:class:`~pcapkit.protocols.internet.ip_pseudo.IP_Pseudo` is the
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is the
 **pseudo-protocol class** for the IP family the owner settled on, serving both
 the parsing and the constructing path, rather than a back-reference from a
 parsed protocol to its parent.

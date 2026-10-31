@@ -65,13 +65,13 @@ ADDRESS_TYPED_SWITCH_BRANCHES = [
 
     # The layout follows ``__length__`` when no address is given yet, 12 for IPv4
     # and 40 for IPv6.
-    ('pcapkit.protocols.schema.internet.ip_pseudo', 'IP_Pseudo', 'src',
+    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'src',
      'ip_pseudo src IPv4', {'__length__': 12}),
-    ('pcapkit.protocols.schema.internet.ip_pseudo', 'IP_Pseudo', 'src',
+    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'src',
      'ip_pseudo src IPv6', {'__length__': 40}),
-    ('pcapkit.protocols.schema.internet.ip_pseudo', 'IP_Pseudo', 'dst',
+    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'dst',
      'ip_pseudo dst IPv4', {'__length__': 12}),
-    ('pcapkit.protocols.schema.internet.ip_pseudo', 'IP_Pseudo', 'dst',
+    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'dst',
      'ip_pseudo dst IPv6', {'__length__': 40}),
 ]
 

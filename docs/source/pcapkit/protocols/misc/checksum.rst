@@ -1,10 +1,10 @@
 IP Pseudo-Header
 ================
 
-.. module:: pcapkit.protocols.internet.ip_pseudo
+.. module:: pcapkit.protocols.misc.checksum.ip_pseudo
 
-:mod:`pcapkit.protocols.internet.ip_pseudo` contains
-:class:`~pcapkit.protocols.internet.ip_pseudo.IP_Pseudo` only,
+:mod:`pcapkit.protocols.misc.checksum.ip_pseudo` contains
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` only,
 which implements the pseudo-header of the IP protocol family
 that the upper-layer checksums cover, whose structure is
 described as below:
@@ -33,7 +33,7 @@ Octets      Bits        Name                    Description
   39        312   ``ip_pseudo.protocol``      Next Header
 ======= ========= ========================= ===============================
 
-.. autoclass:: pcapkit.protocols.internet.ip_pseudo.IP_Pseudo
+.. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo
    :no-members:
    :show-inheritance:
 
@@ -59,27 +59,27 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ip_pseudo
+.. module:: pcapkit.protocols.schema.misc.checksum.ip_pseudo
 
-.. autodata:: pcapkit.protocols.schema.internet.ip_pseudo.IPV4_PSEUDO_LEN
-.. autodata:: pcapkit.protocols.schema.internet.ip_pseudo.IPV6_PSEUDO_LEN
+.. autodata:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.IPV4_PSEUDO_LEN
+.. autodata:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.IPV6_PSEUDO_LEN
 
-.. autoclass:: pcapkit.protocols.schema.internet.ip_pseudo.IP_Pseudo
+.. autoclass:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.IP_Pseudo
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.ip_pseudo.is_ipv6
-.. autofunction:: pcapkit.protocols.schema.internet.ip_pseudo.ip_pseudo_address_selector
-.. autofunction:: pcapkit.protocols.schema.internet.ip_pseudo.ip_pseudo_zero_selector
+.. autofunction:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.is_ipv6
+.. autofunction:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.ip_pseudo_address_selector
+.. autofunction:: pcapkit.protocols.schema.misc.checksum.ip_pseudo.ip_pseudo_zero_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ip_pseudo
+.. module:: pcapkit.protocols.data.misc.checksum.ip_pseudo
 
-.. autoclass:: pcapkit.protocols.data.internet.ip_pseudo.IP_Pseudo
+.. autoclass:: pcapkit.protocols.data.misc.checksum.ip_pseudo.IP_Pseudo
    :members:
    :show-inheritance:
