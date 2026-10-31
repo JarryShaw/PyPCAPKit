@@ -4,3 +4,20 @@
 Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the
 protocol pairs that wanted a shared abstract base, and the two that simply had
 no dissector at all.
+
+* **Added** -- :class:`~pcapkit.protocols.link.gre.GRE`, a dissector for the
+  Generic Routing Encapsulation base header (:rfc:`2784`) plus the optional Key
+  and Sequence Number extensions (:rfc:`2890`).
+  :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`/
+  :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`/
+  :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dispatch to it for both
+  the ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` cases -- the same GRE framing either
+  way, the "IP"/"IP6" distinction being only which outer IP version the tunnel
+  carries -- instead of falling back to
+  :class:`~pcapkit.protocols.misc.raw.Raw`. The Protocol Type field dispatches
+  onward as an EtherType, through the same family registry
+  (:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`)
+  Ethernet, VLAN and LinuxSLL already share. One of :issue:`2460`'s five
+  ``arphrd_type`` follow-ups to get a dissector (``NETLINK`` and ``FRAD`` are
+  tracked separately on :pr:`2507` and :pr:`2499`); ``IEEE80211_RADIOTAP``
+  remains :class:`~pcapkit.protocols.misc.raw.Raw`.

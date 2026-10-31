@@ -73,16 +73,16 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE``, ``IEEE80211_RADIOTAP`` and
-        ``FRAD``, per tcpdump.org's LINUX_SLL page, never have ``protocol_type`` looked up as an
-        EtherType, even though 0x0800 is IPv4's.
+        """``NETLINK``, ``IEEE80211_RADIOTAP`` and ``FRAD``, per tcpdump.org's
+        LINUX_SLL page, never have ``protocol_type`` looked up as an
+        EtherType, even though 0x0800 is IPv4's. ``IPGRE``/``IP6GRE`` are the
+        exception: see :meth:`test_ipgre_and_ip6gre_arphrd_dispatch_to_gre`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.NETLINK, ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
             with self.subTest(arphrd=arphrd):
                 # protocol_type 0x0800 is IPv4's EtherType, but these
                 # hardware types never carry an EtherType in protocol_type.
@@ -94,6 +94,29 @@ class TestLinuxSLL1(unittest.TestCase):
                 self.assertIs(type(parsed.payload.info.protocol), int)
                 self.assertEqual(parsed.payload.info.protocol, 0x0800)
                 self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Raw')
+                self.assertEqual(parsed.data, raw)
+                self._assert_rebuilds(parsed)
+
+    def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
+        """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both
+        dispatch to :class:`~pcapkit.protocols.link.gre.GRE` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`;
+        ``protocol_type`` is ignored (GRE's own Protocol Type field, inside
+        the GRE header, is what actually selects the payload), per
+        tcpdump.org's LINUX_SLL page.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+            with self.subTest(arphrd=arphrd):
+                gre = bytes.fromhex('00000800') + IPV4
+                raw = _header(2, arphrd, b'', 0, 0x0800) + gre
+                parsed = LinuxSLL1(raw, len(raw))
+                self.assertEqual(parsed.info.arphrd_type, arphrd)
+                self.assertEqual(type(parsed.payload).__name__, 'GRE')
+                self.assertEqual(parsed.payload.info.protocol_type, 0x0800)
+                self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:GRE:IPv4:UDP')
                 self.assertEqual(parsed.data, raw)
                 self._assert_rebuilds(parsed)
 

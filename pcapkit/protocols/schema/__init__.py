@@ -27,6 +27,7 @@ __all__ = [
     # Link Layer Protocols
     'ARP',
     'Ethernet',
+    'GRE',
     'L2TP',
     'LinuxSLL1', 'LinuxSLL2',
     'Loopback',

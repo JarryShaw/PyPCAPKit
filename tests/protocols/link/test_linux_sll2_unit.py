@@ -75,15 +75,15 @@ class TestLinuxSLL2(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE``, ``IEEE80211_RADIOTAP`` and
-        ``FRAD``, per tcpdump.org's LINUX_SLL2 page, are kept raw.
+        """``NETLINK``, ``IEEE80211_RADIOTAP`` and ``FRAD``, per tcpdump.org's
+        LINUX_SLL2 page, are kept raw. ``IPGRE``/``IP6GRE`` are the
+        exception: see :meth:`test_ipgre_and_ip6gre_arphrd_dispatch_to_gre`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.NETLINK, ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
             with self.subTest(arphrd=arphrd):
                 raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
                 parsed = LinuxSLL2(raw, len(raw))
@@ -93,6 +93,26 @@ class TestLinuxSLL2(unittest.TestCase):
                 self.assertIs(type(parsed.payload.info.protocol), int)
                 self.assertEqual(parsed.payload.info.protocol, 0x0800)
                 self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Raw')
+                self.assertEqual(parsed.data, raw)
+                self._assert_rebuilds(parsed)
+
+    def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
+        """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both
+        dispatch to :class:`~pcapkit.protocols.link.gre.GRE` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+            with self.subTest(arphrd=arphrd):
+                gre = bytes.fromhex('00000800') + IPV4
+                raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + gre
+                parsed = LinuxSLL2(raw, len(raw))
+                self.assertEqual(parsed.info.arphrd_type, arphrd)
+                self.assertEqual(type(parsed.payload).__name__, 'GRE')
+                self.assertEqual(parsed.payload.info.protocol_type, 0x0800)
+                self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:GRE:IPv4:UDP')
                 self.assertEqual(parsed.data, raw)
                 self._assert_rebuilds(parsed)
 

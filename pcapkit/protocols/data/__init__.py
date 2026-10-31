@@ -62,6 +62,9 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
