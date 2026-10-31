@@ -224,6 +224,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,6 +268,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -352,6 +356,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
@@ -371,9 +376,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
@@ -572,6 +579,10 @@
 <span class="sd">         - :class:`pcapkit.protocols.internet.esp.ESP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ah.AH`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IGMP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.igmp.IGMP`, which dispatches to</span>
+<span class="sd">           :class:`pcapkit.protocols.internet.igmpv1.IGMP` or</span>
+<span class="sd">           :class:`pcapkit.protocols.internet.igmpv2.IGMP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`</span>
 <span class="sd">         - :class:`pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`</span>
@@ -619,6 +630,7 @@
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_frag'</span><span class="p">,</span>  <span class="s1">'IPv6_Frag'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ESP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.esp'</span><span class="p">,</span>        <span class="s1">'ESP'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah'</span><span class="p">,</span>         <span class="s1">'AH'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IGMP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmp'</span><span class="p">,</span>       <span class="s1">'IGMP'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx'</span><span class="p">,</span>        <span class="s1">'IPX'</span><span class="p">),</span>
@@ -931,7 +943,11 @@
                 <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
 
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="n">IGMPBase</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">IGMPBase</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">depth</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Internet</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="p">{</span><span class="s1">'_exthdr_depth'</span><span class="p">:</span> <span class="n">depth</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="p">{}</span></div>

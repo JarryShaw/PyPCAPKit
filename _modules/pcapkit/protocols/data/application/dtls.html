@@ -224,6 +224,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,6 +268,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -352,6 +356,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
@@ -371,9 +376,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
@@ -531,12 +538,13 @@
 <span class="sd">    in one datagram can be split across several.</span>
 
 <span class="sd">    :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`</span>
-<span class="sd">    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` only when</span>
-<span class="sd">    :attr:`is_fragmented` is :data:`False`; a genuinely fragmented message is</span>
-<span class="sd">    not reassembled (:issue:`2440`; see</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.dtls.DTLS` for why), so its</span>
-<span class="sd">    :attr:`body` is the single fragment's raw, undecoded octets regardless of</span>
-<span class="sd">    :attr:`msg_type`.</span>
+<span class="sd">    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` when</span>
+<span class="sd">    :attr:`is_fragmented` is :data:`False`, or when a</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine passed to</span>
+<span class="sd">    :meth:`DTLS.read &lt;pcapkit.protocols.application.dtls.DTLS.read&gt;` completed</span>
+<span class="sd">    the message on this fragment (:issue:`2440`). Otherwise a fragmented</span>
+<span class="sd">    message's :attr:`body` is the fragment's raw octets. :attr:`is_fragmented`</span>
+<span class="sd">    reports whether the message was split on the wire, either way.</span>
 
 <span class="sd">    """</span>
 

@@ -45,6 +45,7 @@ Link Layer
 
    arp
    l2tp
+   linux
    vlan
 
 Internet Layer
@@ -55,6 +56,7 @@ Internet Layer
 
    esp
    hip
+   igmp
    ipv4
    ipv6
    ipx

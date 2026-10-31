@@ -224,6 +224,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -267,6 +268,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -352,6 +356,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
@@ -371,9 +376,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
@@ -512,11 +519,13 @@
 <span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
 
-<span class="sd">**A handshake message split across DTLS records is not reassembled**</span>
-<span class="sd">(:rfc:`6347#section-4.2.3`, :issue:`2440`). Such a message is flagged</span>
-<span class="sd">:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`</span>
-<span class="sd">and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`</span>
-<span class="sd">kept as raw octets.</span>
+<span class="sd">**A handshake message split across DTLS records decodes only with</span>
+<span class="sd">reassembly** (:rfc:`6347#section-4.2.3`, :issue:`2440`). Otherwise its body</span>
+<span class="sd">stays raw octets, flagged</span>
+<span class="sd">:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`.</span>
+<span class="sd">Pass a :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine as</span>
+<span class="sd">``reassembly`` to decode the completing fragment. The caller supplies the UDP</span>
+<span class="sd">4-tuple as ``flow``. Only the first record of each datagram is reassembled.</span>
 
 <span class="sd">**A unified-header record with a connection ID is not decoded**</span>
 <span class="sd">(:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the</span>
@@ -533,9 +542,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.content_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContentType</span> <span class="k">as</span> <span class="n">Enum_ContentType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS13_VERSION</span><span class="p">,</span> <span class="n">SSL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCiphertext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Schema_DTLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Schema_DTLSCiphertext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
@@ -547,6 +558,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">DTLS_Reassembly</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
@@ -664,11 +676,25 @@
 
 <div class="viewcode-block" id="DTLS.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[DTLS_Reassembly[Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">flow</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, int, Any, int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">frame_timestamp</span><span class="p">:</span> <span class="s1">'float'</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read Datagram Transport Layer Security (DTLS).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
+<span class="sd">            reassembly: A :class:`~pcapkit.foundation.reassembly.dtls.DTLS`</span>
+<span class="sd">                engine to feed fragmented handshake messages to; the fragment</span>
+<span class="sd">                that completes a message is decoded in place. :data:`None`</span>
+<span class="sd">                leaves fragments undecoded.</span>
+<span class="sd">            flow: ``(src, sport, dst, dport)`` of the UDP association, which</span>
+<span class="sd">                with the record's epoch keys the reassembly buffer. Required</span>
+<span class="sd">                when ``reassembly`` is given, so that interleaved associations</span>
+<span class="sd">                do not share a buffer.</span>
+<span class="sd">            frame_num: Packet number, recorded on the reassembled message's</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.index`.</span>
+<span class="sd">            frame_timestamp: Capture timestamp in seconds, recorded on the</span>
+<span class="sd">                fragment; reassembly does not expire buffers by time.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -676,10 +702,12 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the record cannot be a genuine DTLS record --</span>
-<span class="sd">                see :meth:`_read_dtls_record`.</span>
+<span class="sd">                see :meth:`_read_dtls_record` -- or if ``reassembly`` is</span>
+<span class="sd">                given without ``flow``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dtls_record</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dtls_record</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">flow</span><span class="o">=</span><span class="n">flow</span><span class="p">,</span> <span class="n">frame_num</span><span class="o">=</span><span class="n">frame_num</span><span class="p">,</span>
+                                      <span class="n">frame_timestamp</span><span class="o">=</span><span class="n">frame_timestamp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DTLS.make">
@@ -810,6 +838,118 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reassemble_dtls_handshake</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'DTLS_Reassembly[Any]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=too-many-arguments</span>
+                                   <span class="n">flow</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, int, Any, int]]'</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                                   <span class="n">frame_num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">frame_timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Feed a ``handshake`` record's fragmented messages to ``reassembly``</span>
+<span class="sd">        and decode whichever one it just completed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            content: This record's decoded ``handshake`` content, as</span>
+<span class="sd">                :meth:`SSL._read_tls_handshake_messages</span>
+<span class="sd">                &lt;pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages&gt;`</span>
+<span class="sd">                built it -- a tuple of</span>
+<span class="sd">                :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`.</span>
+<span class="sd">            reassembly: Engine to reassemble a fragmented message with.</span>
+<span class="sd">            flow: Buffer key, as documented on :meth:`read`, which</span>
+<span class="sd">                enforces this unconditionally before this method is ever</span>
+<span class="sd">                reached -- the check below is only for a direct call that</span>
+<span class="sd">                bypasses it. Required: :data:`None` would default every</span>
+<span class="sd">                caller that omits it onto the same buffer ID, corrupting two</span>
+<span class="sd">                interleaved associations' reassembly together.</span>
+<span class="sd">            epoch: This record's epoch, appended to ``flow`` to form the</span>
+<span class="sd">                reassembly buffer ID (:rfc:`6347#section-4.1`).</span>
+<span class="sd">            frame_num: This record's packet number.</span>
+<span class="sd">            frame_timestamp: This record's capture timestamp.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``content``, with a message that :meth:`reassembly` completes</span>
+<span class="sd">            decoded as a ``ClientHello`` or ``ServerHello`` in place of its raw</span>
+<span class="sd">            octets; any other message is unchanged. A completed message that</span>
+<span class="sd">            does not decode keeps its raw reassembled bytes as ``body``</span>
+<span class="sd">            instead of raising.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``flow`` is :data:`None`.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: imported here, as pcapkit.foundation.reassembly imports pcapkit.protocols,</span>
+        <span class="c1"># whose package import reaches this module (a cycle at import time).</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.dtls</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">Packet</span> <span class="k">as</span> <span class="n">_ReasmPacket</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="n">flow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: flow is required when reassembly is given -- '</span>
+                                <span class="s1">'defaulting it would collide two concurrent DTLS associations '</span>
+                                <span class="s1">'on the same buffer ID'</span><span class="p">)</span>
+        <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">flow</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">Data_DTLSHandshake</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">message</span><span class="o">.</span><span class="n">is_fragmented</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># A fragmented message's body is always raw bytes --</span>
+            <span class="c1"># :meth:`SSL._read_tls_handshake_messages</span>
+            <span class="c1"># &lt;pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages&gt;`</span>
+            <span class="c1"># only decodes one when it is *not* fragmented -- so this is a type</span>
+            <span class="c1"># narrowing for mypy's benefit, not a runtime check.</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">reassembly</span><span class="p">(</span><span class="n">_ReasmPacket</span><span class="p">(</span>
+                <span class="n">bufid</span><span class="o">=</span><span class="n">bufid</span><span class="p">,</span>
+                <span class="n">num</span><span class="o">=</span><span class="n">frame_num</span><span class="p">,</span>
+                <span class="n">msg_type</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                <span class="n">message_seq</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">message_seq</span><span class="p">,</span>
+                <span class="n">fragment_offset</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">fragment_offset</span><span class="p">,</span>
+                <span class="n">fragment_length</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">fragment_length</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+                <span class="n">timestamp</span><span class="o">=</span><span class="n">frame_timestamp</span><span class="p">,</span>
+            <span class="p">))</span>
+
+            <span class="n">datagram</span> <span class="o">=</span> <span class="n">reassembly</span><span class="o">.</span><span class="n">last</span>
+            <span class="k">if</span> <span class="n">datagram</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">datagram</span><span class="o">.</span><span class="n">completed</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># A malformed record may have ``fragment_offset + fragment_length``</span>
+            <span class="c1"># past ``length`` (:rfc:`6347#section-4.2.3`). Then</span>
+            <span class="c1"># :meth:`SSL._make_tls_handshake_messages` cannot reliably slice its</span>
+            <span class="c1"># share back out of the reassembled body, so keep the raw bytes.</span>
+            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_offset</span> <span class="o">+</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_length</span> <span class="o">&gt;</span> <span class="n">message</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">reassembled</span> <span class="o">=</span> <span class="n">datagram</span><span class="o">.</span><span class="n">body</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reassembled</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>  <span class="c1"># pragma: no cover -- COMPLETE never reports runs</span>
+                <span class="n">reassembled</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reassembled</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">msg_type</span> <span class="o">==</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">client_hello</span><span class="p">:</span>
+                    <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tls_client_hello</span><span class="p">(</span><span class="n">reassembled</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># type: Any</span>
+                <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">msg_type</span> <span class="o">==</span> <span class="n">Enum_HandshakeType</span><span class="o">.</span><span class="n">server_hello</span><span class="p">:</span>
+                    <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tls_server_hello</span><span class="p">(</span><span class="n">reassembled</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">decoded</span> <span class="o">=</span> <span class="n">reassembled</span>
+            <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+                <span class="c1"># The reassembled bytes do not decode as a valid message of</span>
+                <span class="c1"># this ``msg_type`` -- keep them raw rather than failing the</span>
+                <span class="c1"># whole record; without ``reassembly`` the same bytes would</span>
+                <span class="c1"># have stayed undecoded too; see :meth:`read`'s docstring.</span>
+                <span class="n">decoded</span> <span class="o">=</span> <span class="n">reassembled</span>
+
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data_DTLSHandshake</span><span class="p">(</span>
+                <span class="n">msg_type</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                <span class="n">body</span><span class="o">=</span><span class="n">decoded</span><span class="p">,</span>
+                <span class="n">message_seq</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">message_seq</span><span class="p">,</span>
+                <span class="n">fragment_offset</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">fragment_offset</span><span class="p">,</span>
+                <span class="n">fragment_length</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">fragment_length</span><span class="p">,</span>
+                <span class="n">is_fragmented</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">is_fragmented</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+
 <div class="viewcode-block" id="DTLS._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -843,7 +983,10 @@
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dtls_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS | Data_DTLSCiphertext'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dtls_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                          <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'Optional[DTLS_Reassembly[Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">flow</span><span class="p">:</span> <span class="s1">'Optional[tuple[Any, int, Any, int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">frame_timestamp</span><span class="p">:</span> <span class="s1">'float'</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS | Data_DTLSCiphertext'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read a DTLS record, identifying its concrete tier as it goes.</span>
 
 <span class="sd">        A unified-header record is handed to :meth:`_read_dtls_ciphertext`.</span>
@@ -869,6 +1012,10 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
+<span class="sd">            reassembly: Reassembly engine, as documented on :meth:`read`.</span>
+<span class="sd">            flow: Reassembly buffer key, as documented on :meth:`read`.</span>
+<span class="sd">            frame_num: Packet number, as documented on :meth:`read`.</span>
+<span class="sd">            frame_timestamp: Capture timestamp, as documented on :meth:`read`.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -879,7 +1026,8 @@
 <span class="sd">                record -- an unrecognised content type, a legacy version</span>
 <span class="sd">                outside DTLS's range, or a declared ``length`` that runs past</span>
 <span class="sd">                the end of the buffer -- or if the record fragment is</span>
-<span class="sd">                malformed for its content type.</span>
+<span class="sd">                malformed for its content type; or if ``reassembly`` is given</span>
+<span class="sd">                without ``flow``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">Schema_DTLSCiphertext</span><span class="p">):</span>
@@ -888,6 +1036,13 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
         <span class="n">available</span> <span class="o">=</span> <span class="n">length</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_tls_record</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">available</span><span class="o">=</span><span class="n">available</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: checked for every content type, not only handshake records that reach</span>
+        <span class="c1"># _reassemble_dtls_handshake, so interleaved associations never share a buffer.</span>
+        <span class="k">if</span> <span class="n">reassembly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">flow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: flow is required when reassembly is given -- '</span>
+                                <span class="s1">'defaulting it would collide two concurrent DTLS associations '</span>
+                                <span class="s1">'on the same buffer ID'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: DTLS 1.3 is checked first, at 0xFEFF too: an initial ClientHello may carry</span>
         <span class="c1"># {254, 255} (RFC 9147, section 4). Unknown versions keep the generic alias.</span>
@@ -902,6 +1057,12 @@
 
         <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tls_content</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
                                          <span class="n">dtls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+        <span class="c1"># NOTE: a handshake record past epoch 0 is ciphertext, so ``content`` is raw</span>
+        <span class="c1"># bytes rather than a tuple of messages, and is passed through unchanged.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">handshake</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble_dtls_handshake</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span>
+                                                       <span class="n">frame_num</span><span class="p">,</span> <span class="n">frame_timestamp</span><span class="p">)</span>
         <span class="n">dtls</span> <span class="o">=</span> <span class="n">Data_DTLS</span><span class="p">(</span>
             <span class="n">content_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
