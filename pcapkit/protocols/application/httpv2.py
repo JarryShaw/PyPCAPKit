@@ -452,49 +452,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             self.__header__ = None  # type: ignore[assignment]
         return data
 
-    @staticmethod
-    def _make_http_length(frame: 'bytes | Schema_FrameType', flags: 'Flags') -> 'int':
-        """Calculate HTTP/2 frame payload length for construction.
-
-        Several frame payload schemas use conditional fields keyed by the
-        containing HTTP/2 header flags, so packing them without that context can
-        produce incorrect lengths or fail outright.
-        """
-        if isinstance(frame, bytes):
-            return len(frame)
-
-        flags_int = int(flags)
-        if isinstance(frame, Schema_UnassignedFrame):
-            return len(frame.data)
-        if isinstance(frame, Schema_DataFrame):
-            padded = flags_int & int(Schema_DataFrame.Flags.PADDED)
-            return len(frame.data) + ((frame.pad_len or 0) + 1 if padded else 0)
-        if isinstance(frame, Schema_HeadersFrame):
-            padded = flags_int & int(Schema_HeadersFrame.Flags.PADDED)
-            priority_len = 5 if flags_int & int(Schema_HeadersFrame.Flags.PRIORITY) else 0
-            return len(frame.fragment) + priority_len + ((frame.pad_len or 0) + 1 if padded else 0)
-        if isinstance(frame, Schema_PriorityFrame):
-            return 5
-        if isinstance(frame, Schema_RSTStreamFrame):
-            return 4
-        if isinstance(frame, Schema_SettingsFrame):
-            settings = cast('object', frame.settings)
-            if isinstance(settings, bytes):
-                return len(settings)
-            return len(frame.settings) * 6
-        if isinstance(frame, Schema_PushPromiseFrame):
-            padded = flags_int & int(Schema_PushPromiseFrame.Flags.PADDED)
-            return len(frame.fragment) + 4 + ((frame.pad_len or 0) + 1 if padded else 0)
-        if isinstance(frame, Schema_PingFrame):
-            return 8
-        if isinstance(frame, Schema_GoawayFrame):
-            return len(frame.debug) + 8
-        if isinstance(frame, Schema_WindowUpdateFrame):
-            return 4
-        if isinstance(frame, Schema_ContinuationFrame):
-            return len(frame.fragment)
-        return len(frame.pack())
-
     @classmethod
     def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv2"]]':  # type: ignore[override]
         """Index ID of the protocol.
@@ -565,6 +522,49 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             'frame': data,
             'payload': cls._make_payload(data),
         }
+
+    @staticmethod
+    def _make_http_length(frame: 'bytes | Schema_FrameType', flags: 'Flags') -> 'int':
+        """Calculate HTTP/2 frame payload length for construction.
+
+        Several frame payload schemas use conditional fields keyed by the
+        containing HTTP/2 header flags, so packing them without that context can
+        produce incorrect lengths or fail outright.
+        """
+        if isinstance(frame, bytes):
+            return len(frame)
+
+        flags_int = int(flags)
+        if isinstance(frame, Schema_UnassignedFrame):
+            return len(frame.data)
+        if isinstance(frame, Schema_DataFrame):
+            padded = flags_int & int(Schema_DataFrame.Flags.PADDED)
+            return len(frame.data) + ((frame.pad_len or 0) + 1 if padded else 0)
+        if isinstance(frame, Schema_HeadersFrame):
+            padded = flags_int & int(Schema_HeadersFrame.Flags.PADDED)
+            priority_len = 5 if flags_int & int(Schema_HeadersFrame.Flags.PRIORITY) else 0
+            return len(frame.fragment) + priority_len + ((frame.pad_len or 0) + 1 if padded else 0)
+        if isinstance(frame, Schema_PriorityFrame):
+            return 5
+        if isinstance(frame, Schema_RSTStreamFrame):
+            return 4
+        if isinstance(frame, Schema_SettingsFrame):
+            settings = cast('object', frame.settings)
+            if isinstance(settings, bytes):
+                return len(settings)
+            return len(frame.settings) * 6
+        if isinstance(frame, Schema_PushPromiseFrame):
+            padded = flags_int & int(Schema_PushPromiseFrame.Flags.PADDED)
+            return len(frame.fragment) + 4 + ((frame.pad_len or 0) + 1 if padded else 0)
+        if isinstance(frame, Schema_PingFrame):
+            return 8
+        if isinstance(frame, Schema_GoawayFrame):
+            return len(frame.debug) + 8
+        if isinstance(frame, Schema_WindowUpdateFrame):
+            return 4
+        if isinstance(frame, Schema_ContinuationFrame):
+            return len(frame.fragment)
+        return len(frame.pack())
 
     @staticmethod
     def _read_http_flags(schema: 'Schema_FrameType') -> 'Data_Flags':

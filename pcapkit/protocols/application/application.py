@@ -67,6 +67,26 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         return self.__layer__
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1458`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
@@ -114,22 +134,6 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         """
         raise IntError(f'{cls.__name__!r} object cannot be interpreted as an integer')
-
-    @classmethod
-    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
-        """Create protocol instance from data.
-
-        Args:
-            data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
-                <pcapkit.protocols.protocol.Protocol.from_data>`.
-
-        Returns:
-            Protocol instance, cut back to what was captured when the header
-            it was parsed from was cut short (:issue:`1458`).
-
-        """
-        return replay_short_read(super().from_data(data, **kwargs), data)
 
     ##########################################################################
     # Utilities.
