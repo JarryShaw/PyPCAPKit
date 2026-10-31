@@ -7,11 +7,9 @@ since :func:`~pcapkit.corekit.decorators.beholder` ignored the ``payload`` it
 was handed, so the rebuild wrote the extension headers twice -- Destination
 Options, TCP cut at 57 octets rebuilt 65.
 
-GitHub issue #1473: a header whose dedicated parser raised is parsed by
-:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` and written under its
-``ext`` key, but the ``to_dict`` rebuild chose the dedicated class from the
-``next`` code, which then missed fields only it parses -- ``AttributeError:
-'HOPOPT' object has no attribute 'options'``.
+GitHub issue #2477: a header whose dedicated parser raises is kept as
+:class:`~pcapkit.protocols.misc.raw.Raw`, and the walk ends there, so a cut one
+rebuilds from that :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -27,7 +25,7 @@ from tests._support import reimport_once_per_class
 #: Test tier (#1958): a sweep that rebuilds every cut of each extension header.
 __tier__ = 'LATEST'
 
-HOP, TCP, DST, AH, NONXT, HIP = 0, 6, 60, 51, 59, 139
+HOP, TCP, DST, AH, NONXT, HIP, SHIM6 = 0, 6, 60, 51, 59, 139, 140
 
 #: A TCP header and one octet of data.
 SEGMENT = struct.pack('!HHIIBBHHH', 1, 2, 0, 0, 0x50, 2, 0, 0, 0) + b'x'
@@ -57,6 +55,7 @@ CHAINS = {
     'hop-nonxt': (HOP, bytes([NONXT, 1, 1, 12]) + bytes(12)),
     'hip': (HIP, hip(NONXT)),
     'dst-hip': (DST, opts(HIP) + hip(NONXT)),
+    'shim6-tcp': (SHIM6, opts(TCP) + SEGMENT),
 }
 
 
@@ -102,18 +101,18 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
         self.assertEqual(ip6.payload.data, data[48:])
         self.assertEqual(len(IPv6.from_data(ip6.info).data), 57)
 
-    def test_dict_rebuild_keeps_the_generic_parser(self) -> None:
-        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+    def test_cut_header_is_raw_and_ends_the_walk(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.misc.raw import Raw
 
         for cut in (48, 50, 52, 55):
             data = packet('hop-nonxt')[:cut]
             with self.subTest(cut=cut):
                 ip6 = IPv6(data, len(data))
-                self.assertIs(type(ip6._exthdr[ExtensionHeader.HOPOPT]), IPv6_Ext)
-                chain = ip6.info.to_dict()['__exthdr__']
-                self.assertEqual([parser for parser, _ in chain], [IPv6_Ext])
+                self.assertEqual(list(ip6.extension_headers.items(multi=True)), [])
+                self.assertIs(type(ip6.payload), Raw)
+                self.assertEqual(ip6.payload.data, data[40:])
+                self.assertEqual(ip6.info.to_dict()['__exthdr__'], ())
                 self.assertEqual(IPv6.from_data(ip6.info.to_dict()).data, data)
 
 

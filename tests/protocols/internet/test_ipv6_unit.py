@@ -162,7 +162,7 @@ class IPv6UnitTests(unittest.TestCase):
             'dst': ip_address('2001:db8::2'),
         })
         fragment = object.__new__(IPv6_Frag)
-        fragment._info = DummyDict(next=TransType.UDP)
+        fragment._info = DummyDict(next=TransType.UDP, offset=0)
 
         with mock.patch.object(proto, '_import_next_layer', return_value=fragment) as import_next:
             with mock.patch.object(Internet, '_decode_next_layer', return_value='decoded') as decode:

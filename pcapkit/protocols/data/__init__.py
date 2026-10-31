@@ -123,7 +123,7 @@ __all__ = [
     # IPv6 Fragment Header
     'IPv6_Frag',
 
-    # IPv6 Extension Header (base + generic fallback)
+    # IPv6 Extension Header (base + generic)
     'IPv6_Ext',
 
     # IPv6 Destination Options Header

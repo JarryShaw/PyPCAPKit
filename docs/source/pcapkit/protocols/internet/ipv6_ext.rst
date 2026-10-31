@@ -14,8 +14,8 @@ unavailable on a header parsed as part of an IPv6 chain. Each subclass guards
 its own ``protocol`` the same way; this class's
 :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol` deliberately
 does not. It also implements a
-**generic** extractor for IPv6 extension headers [*]_, standing in whenever a
-header's own dedicated parser is unavailable or has failed. :rfc:`6564#section-4`
+**generic** extractor for IPv6 extension headers [*]_, for a header with no
+dedicated parser. :rfc:`6564#section-4`
 requires, with an RFC 2119 **MUST**, that any IPv6 extension header defined since
 April 2012 carry the same first two octets:
 
@@ -123,32 +123,25 @@ carry a ``next`` at all?) rather than on a list of codes.
 Entry Paths
 -----------
 
-This class is reached in these ways:
+This class is reached by direct dispatch only.
+:attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real
+IANA extension header (:rfc:`5533`) with no dedicated parser, so
+:meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
+would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose
+missing ``next`` field would end the walk in
+:meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+there (:issue:`891`). This module registers this class for that code instead,
+at the bottom of the module, so dispatch reaches a working generic parser
+directly. The registration is global, shared by every
+:class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
+:meth:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__post_init__` gates on
+``version == 6`` to keep it from also activating for an IPv4 payload that
+carries protocol number 140; see its docstring.
 
-1. **An unrecognised protocol number.**
-   :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real
-   IANA extension header (:rfc:`5533`) with no dedicated parser, so
-   :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
-   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That
-   has no ``next`` field, so the walk in
-   :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` would
-   crash on it (:issue:`891`). This module registers this class for that code
-   instead, at the bottom of the module, so dispatch reaches a working generic
-   parser directly. The registration is global, shared by every
-   :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
-   :meth:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__post_init__` gates on ``version == 6`` to
-   keep it from also activating for an IPv4 payload that carries protocol
-   number 140; see its docstring.
-2. **A recognised header whose own parser raises.** ``HOPOPT``,
-   ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
-   have dedicated classes. When one of *those* raises,
-   :func:`~pcapkit.corekit.decorators.beholder`
-   (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`)
-   would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
-   ``next`` and crashes the walk as in path 1.
-   :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>` catches
-   the failure itself, one layer in from ``beholder``, and substitutes this
-   class: the bad header costs only itself, not the rest of the chain.
+A header with a dedicated class whose parser raises does not reach this class.
+:func:`~pcapkit.corekit.decorators.beholder` makes it plain
+:class:`~pcapkit.protocols.misc.raw.Raw`, and the walk stops there, as
+:rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).
 
 .. _ipv6-ext-overrun-guard:
 
