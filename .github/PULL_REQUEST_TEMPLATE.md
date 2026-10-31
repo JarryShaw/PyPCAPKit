@@ -7,7 +7,7 @@
 - [ ] [Searched](https://github.com/JarryShaw/PyPCAPKit/pulls?q=is%3Apr) for similar pull requests
 - [ ] Followed the [coding style](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBUTING.md#coding-style) (`make pylint`, `make mypy`, `make isort`)
 - [ ] `make test` passes, and a test case covers the change
-- [ ] Added a [changelog entry](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBUTING.md#changelog-entries) under `docs/source/changelog/` and regenerated `CHANGELOG.md`, if the change is user-visible
+- [ ] Described the user-visible change below and left its [changelog entry](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBUTING.md#changelog-entries) to the maintainer, keeping `docs/source/changelog/` and `CHANGELOG.md` out of the diff, if the change is user-visible
 
 ### What is the purpose of your *pull request*?
 
