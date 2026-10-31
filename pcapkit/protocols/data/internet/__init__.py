@@ -135,7 +135,7 @@ from pcapkit.protocols.data.internet.ipv6 import IPv6
 # IPv6 Fragment Header
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
 
-# IPv6 Extension Header (generic fallback)
+# IPv6 Extension Header (generic)
 from pcapkit.protocols.data.internet.ipv6_ext import IPv6_Ext
 
 # IPv6 Destination Options
@@ -427,7 +427,7 @@ __all__ = [
     # IPv6 Fragment Header
     'IPv6_Frag',
 
-    # IPv6 Extension Header (generic fallback)
+    # IPv6 Extension Header (generic)
     'IPv6_Ext',
 
     # IPv6 Destination Options Header

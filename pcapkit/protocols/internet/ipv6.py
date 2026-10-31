@@ -105,7 +105,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     """
 
-    #: The layer a header-walk stopped on, returned unparsed as the upper layer.
+    #: The ``Raw`` a header-walk stopped on, returned unparsed as the upper layer.
     _walk_upper = None  # type: Optional[ProtocolBase]
 
     ##########################################################################
@@ -527,27 +527,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 _frame_depth.reset(token)
             info = next_.info
 
-            # A layer with no ``next`` field cannot safely continue the walk.
-            # This is a *structural* check, not a fixed set of codes: every
-            # dedicated parser and
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry
-            # ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no
-            # dedicated parser but is registered to ``IPv6_Ext`` directly --
-            # while plain :class:`~pcapkit.protocols.misc.raw.Raw` does not.
-            # That is what a code with no dedicated parser -- ``253``,
-            # ``254``, or whatever IANA assigns next -- resolves to, and what
-            # :func:`~pcapkit.corekit.decorators.beholder` makes of a header
-            # whose dedicated parser raises, so a malformed header ends the
-            # walk, as :rfc:`8200#section-4` has a node discard the packet
-            # (#2477). Reading ``info.next`` on that would raise
-            # ``AttributeError`` and let a further-out ``beholder`` degrade the
-            # *whole* packet.
-            #
-            # Not recorded as an extension header, as it consumed nothing and
-            # would be rebuilt twice. It is the upper layer instead, returned
-            # unparsed by :meth:`_import_next_layer`, so its error is logged once.
+            # A layer with no ``next`` field ends the walk, as RFC 8200 section 4
+            # has a node discard the packet on a malformed header (#2477).
+            # It is not recorded as an extension header.
+            # A Raw is reused as the upper layer, so its error logs once.
             if not hasattr(info, 'next'):
-                self._walk_upper = next_
+                from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+                # Exact type on purpose: Raw subclasses exist, so isinstance would over-match.
+                if type(next_) is Raw:  # pylint: disable=unidiomatic-typecheck
+                    self._walk_upper = next_
                 break
 
             # NOTE: Added through a :class:`MultiDict`, so a repeated header
@@ -660,8 +648,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             :rfc:`8200#section-4` has a node discard such a packet
             (:issue:`2477`). ``253`` and ``254`` have no dedicated parser and
             reach plain :class:`~pcapkit.protocols.misc.raw.Raw` with no
-            exception involved, which stops the walk the same way. The layer
-            the walk stopped on is then returned as the upper layer, not parsed
+            exception involved, which stops the walk the same way. A ``Raw`` the
+            walk stopped on is then returned as the upper layer, not parsed
             again.
             :class:`~pcapkit.protocols.internet.esp.ESP`'s info always carries
             a ``next``, :data:`None` unless its payload was decrypted, since

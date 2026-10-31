@@ -115,5 +115,6 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
                 self.assertEqual(ip6.info.to_dict()['__exthdr__'], ())
                 self.assertEqual(IPv6.from_data(ip6.info.to_dict()).data, data)
 
+
 if __name__ == '__main__':
     unittest.main()

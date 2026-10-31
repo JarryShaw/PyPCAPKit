@@ -304,9 +304,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         :attr:`Protocol.protocol <pcapkit.protocols.protocol.Protocol.protocol>`
         meaning ("name of next layer protocol"). On the owner's ruling for
         GitHub issue :issue:`891` it is deliberately repointed at this
-        instance's *own* identity, i.e. which header's format it parsed, such as
-        :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`
-        or :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.
+        instance's *own* identity, i.e. which header's format it parsed, which
+        for this class is only :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.
         The identity is resolved per instance from the numeric code handed to
         the constructor (``alias``), which
         :meth:`pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer` already
@@ -407,9 +406,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             **kwargs: Arbitrary keyword arguments, including these, which are
                 this class's own:
 
-                * ``alias`` -- the numeric extension header code this instance
-                  stands in for, e.g. ``0`` for ``HOPOPT`` or ``140`` for
-                  ``Shim6``, supplied by :meth:`IPv6._import_next_layer
+                * ``alias`` -- the numeric code of the extension header this
+                  instance parses, ``140`` for ``Shim6`` (the only code
+                  registered to this class), supplied by :meth:`IPv6._import_next_layer
                   <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`.
                 * ``error`` -- a parsing error to record in the result, if
                   any, which the library does not pass.
@@ -656,10 +655,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
                 because :class:`~pcapkit.protocols.misc.raw.Raw` has no
                 identity to report at all, this class *does* have one --
                 see :attr:`protocol` -- but it is resolved per instance,
-                not per class: one :class:`IPv6_Ext` stands in for
-                :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`,
+                not per class: one :class:`IPv6_Ext` parses
                 :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
-                and any other RFC 6564-conforming code alike, while
+                (and any other RFC 6564-format code registered to it), while
                 :meth:`__index__` is a ``@classmethod`` with nowhere to put
                 a value that differs per instance.
 

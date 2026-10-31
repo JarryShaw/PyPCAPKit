@@ -1463,8 +1463,9 @@ class MHUnitTests(unittest.TestCase):
         *name*, aliases a second unknown key onto the first at a shared ``-1``
         sentinel. So an unassigned code does not grow the class. Over IPv4
         ``@beholder`` replaces the MH layer and everything above it with
-        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 only the MH header
-        is replaced, by ``IPv6_Ext``, and the layers above it still parse --
+        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 the MH header is
+        replaced by ``Raw``, which ends the walk, so the layers above stay
+        unparsed (:issue:`2477`) --
         see ``test_mh_local_enums_raise_and_do_not_alias`` for that distinction
         and the other two RFC-inline enums.
         """

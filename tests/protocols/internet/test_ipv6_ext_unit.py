@@ -292,6 +292,25 @@ class IPv6ExtUnitTests(unittest.TestCase):
         self.assertEqual(IPv6.from_data(ipv6.info).data, raw)
         self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
 
+    def test_overrun_routing_with_nothing_after_is_empty_raw(self) -> None:
+        """A Routing header overrunning the payload, with nothing after it, is an
+        empty ``Raw``, not ``NoPayload``: the walk reuses its upper layer only
+        when that is ``Raw``.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.raw import Raw
+
+        routing = bytes([int(EH.IPv6_Route), 2]) + bytes(6)  # 24 octets declared, 8 present
+        raw = _ipv6_bytes(int(EH.IPv6_Route), routing)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv6 = IPv6(io.BytesIO(raw), len(raw))
+
+        self.assertIs(type(ipv6.payload), Raw)
+        self.assertEqual(bytes(ipv6.payload), b'')
+        self.assertEqual(ipv6.info.protocol, EH.IPv6_Route)
+
     def test_overrun_inside_a_real_chain_stops_the_walk_honestly(self) -> None:
         """A Shim6 header whose ``Hdr Ext Len`` overruns the chain warns and
         stops the walk, not inventing a layer from trailing bytes.
@@ -780,7 +799,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                     self.assertTrue(
                         member in klass.__dict__,
                         f'{klass.__qualname__} inherits {member!r} from IPv6_Ext, whose '
-                        f'value is the generic fallback parser\'s and is wrong for a '
+                        f'value is the generic parser\'s and is wrong for a '
                         f'header with an identity of its own; define it on '
                         f'{klass.__qualname__} itself',
                     )
