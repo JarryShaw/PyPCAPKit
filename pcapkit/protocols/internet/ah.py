@@ -30,6 +30,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
 from pcapkit.protocols.schema.internet.ah import AH_HEADER_LEN
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -190,6 +191,9 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         )
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2484).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return ah
         return self._decode_next_layer(ah, schema.next, length - ah.length)
 
