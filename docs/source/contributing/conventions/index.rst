@@ -27,7 +27,9 @@ House Conventions
      :mod:`pcapkit.corekit` a support module belongs in;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
-     :mod:`pcapkit.foundation.analysis`.
+     :mod:`pcapkit.foundation.analysis`;
+   * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const` and the
+     :mod:`pcapkit.vendor` crawler each module needs.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -52,3 +54,4 @@ House Conventions
    test-coverage
    utilities-or-corekit
    reassembly-integration
+   const-vendor-pairing

@@ -121,6 +121,7 @@ ANCHORS = (
     'test-coverage',
     'utilities-or-corekit',
     'reassembly-integration',
+    'const-vendor-pairing',
 )
 
 #: Each anchor's own file, one-to-one -- there is no shared page to slice between
