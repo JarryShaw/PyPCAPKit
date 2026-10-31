@@ -341,8 +341,10 @@ def _link_build(code: 'int') -> 'Any':
 # Internet -- TransType.
 ###############################################################################
 
-#: Codes dispatched over an IPv4 outer header.
-_INTERNET_OVER_IPV4 = frozenset({4, 6, 17, 50, 51, 89, 111, 132})
+#: Codes dispatched over an IPv4 outer header. IGMP (2) is canonically
+#: IPv4-only -- multicast's IPv6 equivalent is MLD, which rides in ICMPv6
+#: rather than as its own IP protocol number (:issue:`2439`).
+_INTERNET_OVER_IPV4 = frozenset({2, 4, 6, 17, 50, 51, 89, 111, 132})
 
 
 def _internet_registry() -> 'Any':
@@ -380,6 +382,13 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.internet.ah import AH
         return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
                         payload=_tcp(9999)))
+    if code == TransType.IGMP:
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmp import IGMP
+
+        # A General Query: an IGMPv1/v2 message is the 8-octet header and
+        # nothing else, so there is no further payload to wrap.
+        return bytes(IGMP(type=Type.IGMP_Membership_Query, group='0.0.0.0'))
     if code == TransType.IPv6_NoNxt:
         # The registered target for this code *is* Raw -- there is no
         # dissector to hand it, "no next header" is the whole point -- so any
@@ -674,6 +683,7 @@ PINNED_TARGETS = {
     'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
     'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
     'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
+    'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
     'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw', 'Raw'),
     'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
     'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx', 'IPX'),

@@ -35,6 +35,7 @@ __all__ = [
     # Internet Layer Protocols
     'AH',
     'ESP',
+    'IGMP', 'IGMP_GroupBody', 'IGMP_QueryExtension', 'IGMP_ReportBody', 'IGMP_GroupRecord',
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
     'HIP_EdDSACurveHostIdentity', 'HIP_HostIdentity',

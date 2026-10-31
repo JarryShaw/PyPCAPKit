@@ -41,7 +41,7 @@ one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
-* Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
+* Internet Layer: ECN, ICMP, ICMPv6, Shim6
 * Transport Layer: DCCP, RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
   NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
@@ -361,8 +361,8 @@ Follow-ups to the bindings above:
   port number. That depends on the proxy identifying the version positively
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
-Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub.
+Beyond those, the gaps most likely to be met in a real capture are ICMP (1)
+and ICMPv6 (58) on the internet layer, each of which has a stub.
 
 PCAPNG Support
 --------------
@@ -1087,6 +1087,14 @@ question is the design work and doing either half of a pair alone would answer i
 twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
+**IGMP — done ahead of wave 2**, as one of the items that needed no
+shared base: :rfc:`1112`, :rfc:`2236` and :rfc:`3376` all dispatch through
+one schema/data/protocol triple (:mod:`pcapkit.protocols.internet.igmp`) --
+IGMPv1/v2 share one 8-octet message shape, which an IGMPv3 Membership Query
+reuses and extends with a source-list suffix, and only the IGMPv3 Membership
+Report's group-record list needed a shape of its own (:issue:`2439`,
+:issue:`2448`).
+
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded (the shared :class:`~pcapkit.protocols.application.ssl.SSL`
 base, TLS, DTLS, and handshake message framing) and what is not (DTLS
@@ -1125,8 +1133,10 @@ above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
 sequenced *after* wave 2 rather than by preference: the multicast options embed
-:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMP** records —
-both wave 2 deliverables. Landing the registry first would give a dispatch table
+:rfc:`3810` MLD, which rides in **ICMPv6** — still a wave 2 deliverable — and
+:rfc:`3376` IGMP records, which :mod:`pcapkit.protocols.internet.igmp` now
+dissects, done ahead of wave 2 (see above). Landing the registry first would
+give a dispatch table
 with nothing but :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the

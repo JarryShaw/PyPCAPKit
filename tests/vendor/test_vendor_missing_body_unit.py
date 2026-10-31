@@ -85,7 +85,7 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: or under a different variable name entirely is skipped by construction too,
 #: same as one built by ``.append()``. Those are covered behaviourally, not
 #: statically, by :file:`tests/const/test_const_enum_lookup.py`.
-EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 36
+EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 37
 
 
 def _constant_miss_lines() -> 'dict[str, list[str]]':

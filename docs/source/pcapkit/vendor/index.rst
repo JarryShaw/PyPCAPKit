@@ -55,6 +55,7 @@ Internet Layer
 
    esp
    hip
+   igmp
    ipv4
    ipv6
    ipx

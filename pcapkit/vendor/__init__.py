@@ -110,6 +110,7 @@ else:
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
     from pcapkit.vendor.http import *
+    from pcapkit.vendor.igmp import *
     from pcapkit.vendor.ipv4 import *
     from pcapkit.vendor.ipv6 import *
     from pcapkit.vendor.ipx import *
@@ -136,6 +137,8 @@ __all__ = [
     'ESP_Cipher', 'ESP_Integrity',
     # FTP
     'FTP_Command', 'FTP_ReturnCode',
+    # IGMP
+    'IGMP_Type', 'IGMP_RecordType',
     # HIP
     'HIP_Certificate', 'HIP_Cipher', 'HIP_DITypes', 'HIP_ECDSACurve', 'HIP_ECDSALowCurve',
     'HIP_ESPTransformSuite', 'HIP_Group', 'HIP_HIAlgorithm', 'HIP_HITSuite', 'HIP_NATTraversal',
