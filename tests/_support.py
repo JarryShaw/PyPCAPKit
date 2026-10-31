@@ -1171,38 +1171,38 @@ def close_extractor(extractor: object) -> None:
         _close_quietly(engine)
 
 
-#: Seconds :func:`collect_until` keeps collecting for a finaliser after the first
-#: :func:`gc.collect`. CPython runs the finaliser before ``collect`` returns, so it
-#: gets no grace. GraalPy's ``collect`` forces a full Java GC, sleeps 15 ms "just
-#: trying to give the GC more time" and then runs only the weak reference
-#: callbacks queued by then (graalpython ``GcModuleBuiltins.javaCollect``, at
-#: graal-25.4.4), so on a loaded runner the finaliser can run after it returns
-#: (#1963). A finaliser that never runs still fails once the grace is spent.
-#: PyPy frees an extractor, and so runs the finaliser, one collection later
-#: than CPython: the class still defines ``__del__`` (#1958, measured on PyPy
-#: 8.0.1), so a short grace lets a second collection run there. Shared by
-#: every test that waits on a finaliser, a reader's buffer file among them
-#: (#2134).
+#: Seconds, counted from the call, that :func:`collect_until` keeps collecting for a
+#: finaliser. CPython runs the finaliser before ``collect`` returns, so it gets no
+#: grace. GraalPy's ``collect`` can return before a loaded runner has run the
+#: finaliser (#1963). PyPy runs it one collection later than CPython, so the grace
+#: gives the finaliser time to run there. A finaliser that never runs still fails
+#: once the grace is spent. Shared by every test that waits on one (#2134).
 FINALISER_GRACE = {'graalpy': 10.0, 'pypy': 1.0}.get(sys.implementation.name, 0.0)
+
+#: :func:`collect_until` cannot give up before this many :func:`gc.collect` calls
+#: when given a grace. On PyPy 7.3.19 an abandoned extractor's finaliser ran only
+#: after two (observed), so the grace is not spent on a first collection alone.
+MIN_COLLECTIONS_WITH_GRACE = 2
 
 
 def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) -> bool:
-    """Collect garbage until ``done()`` holds or ``grace`` seconds have passed.
+    """Collect garbage until ``done()`` holds or ``grace`` seconds pass from the call.
 
-    Args:
-        done: Zero-argument callable, checked after each collection.
-        grace: Seconds to keep collecting after the first collection.
-
-    Returns:
-        Whether ``done()`` held before the grace ran out.
-
+    ``done`` is checked after each collection. With a grace, the wait cannot give
+    up before :data:`MIN_COLLECTIONS_WITH_GRACE` collections; with ``0``, one runs.
+    Returns whether ``done()`` held after one of them.
     """
     deadline = time.monotonic() + grace
+    attempts = 0
     while True:
         gc.collect()
+        attempts += 1
         if done():
             return True
-        if time.monotonic() >= deadline:
+        # NOTE: with a grace, a first collection that outlasts it must not end the
+        # wait: PyPy's finaliser needs a second one (#2481), so run that too.
+        enough = grace <= 0 or attempts >= MIN_COLLECTIONS_WITH_GRACE
+        if enough and time.monotonic() >= deadline:
             return False
         time.sleep(0.05)
 
