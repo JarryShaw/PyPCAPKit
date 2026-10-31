@@ -113,6 +113,7 @@ ANCHORS = (
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
+    'protocol-family-grouping',
     'protocol-layer-placement',
     'process',
     'documentation',
