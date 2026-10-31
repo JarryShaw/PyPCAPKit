@@ -1082,12 +1082,10 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
-``LINUX_SLL`` with ``LINUX_SLL2``, plus **DCCP** on its own. These are
-grouped because the shared-base question is the design work and doing either half of
-a pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
-size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
-stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
+Protocols, More!!!`_ above: **ICMP with ICMPv6** and **TLS/SSL with DTLS**,
+plus **IGMP** and **DCCP** on their own. These are grouped because the shared-base
+question is the design work and doing either half of a pair alone would answer it
+twice. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
 blocked on :issue:`2479` for its pseudo-header checksum.
 
 **IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
