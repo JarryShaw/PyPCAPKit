@@ -383,6 +383,15 @@ UNRELATED = {
     'pcapkit/protocols/application/ospf.py': ((24, 65535), 'OSPF header length and field bounds'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
+    'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
+                                             "decode's mantissa mask (RFC 3376 section 4.1.1's "
+                                             "own 0x10), not the PCAP record header length"),
+    'pcapkit/protocols/internet/igmp.py': ((12,), "the minimum overall length (RFC 3376 "
+                                           "section 7.1) at which a Membership Query carries "
+                                           "IGMPv3's source-list extension rather than being "
+                                           "IGMPv1/v2; unrelated to AH_HEADER_LEN, "
+                                           "TCP_DATA_OFFSET_OCTET or GENERIC_BLOCK_MINIMUM, "
+                                           "which happen to share the value"),
     'pcapkit/protocols/internet/hip.py': ((6, 12, 16, 20, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '
                                           'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '

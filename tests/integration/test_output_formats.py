@@ -24,7 +24,7 @@ from tests.integration._helpers import (HAS_RUNTIME, EndToEndTestCase, plist_key
 #: Sections a report of :file:`in.pcap` has: the global header and six frames.
 IN_PCAP_SECTIONS = ['Global Header', 'Frame 1', 'Frame 2', 'Frame 3', 'Frame 4', 'Frame 5', 'Frame 6']
 #: Protocol chain of the first frame of :file:`in.pcap`.
-IN_PCAP_FIRST_CHAIN = 'Ethernet:IPv6:IPv6_ICMP'
+IN_PCAP_FIRST_CHAIN = 'Ethernet:IPv6:ICMPv6'
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

@@ -54,7 +54,8 @@ __all__ = [
     'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',
 
     # Internet Layer
-    'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
+    'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
+    'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
 
     # IPv6 Extension Header
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext', 'IPv6_Opts',
