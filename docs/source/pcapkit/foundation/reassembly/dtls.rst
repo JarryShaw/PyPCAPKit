@@ -22,7 +22,6 @@ DTLS handshake message split across several records back to origin
    .. automethod:: _update_hole_descriptors
 
    .. autoattribute:: __protocol_name__
-   .. autoattribute:: __timeout__
 
 Algorithm
 =========

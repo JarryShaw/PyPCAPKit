@@ -78,10 +78,10 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         reimport_once_per_class(self)
 
     @staticmethod
-    def _engine(strict: bool = True, timeout=None):
+    def _engine(strict: bool = True):
         from pcapkit.foundation.reassembly.dtls import DTLS
 
-        return DTLS(strict=strict, timeout=timeout)
+        return DTLS(strict=strict)
 
     @staticmethod
     def _packet(bufid, num, msg_type, length, message_seq, fragment_offset, fragment_length,
@@ -343,12 +343,12 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         self.assertEqual(len(partial), 1)
         self.assertEqual(partial[0].index, (1,))
 
-    def test_stale_buffer_expires_as_timeout_not_partial_or_hang(self) -> None:
-        """A buffer older than :attr:`~pcapkit.foundation.reassembly.dtls.DTLS.__timeout__`
-        reports :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`
-        once abandoned, rather than staying PARTIAL forever or raising
-        (``expire``, defined in reassembly/reassembly.py, exercised through
-        this engine)."""
+    def test_stale_buffer_is_held_not_expired_by_time(self) -> None:
+        """A buffer whose first fragment is arbitrarily old is never abandoned
+        as :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`:
+        DTLS handshake reassembly has no time-based deadline
+        (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). Its late
+        fragments still complete it."""
         from pcapkit.const.tls.handshake_type import HandshakeType
 
         body = _server_hello_body()
@@ -357,30 +357,33 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         bufid = ('17.0.0.1', 1, '17.0.0.2', 5684, 0)
         other_bufid = ('18.0.0.1', 2, '18.0.0.2', 5684, 0)
 
-        engine = self._engine(timeout=5.0)
+        engine = self._engine()
         fo, length = frags[0]
         engine(self._packet(bufid, 1, HandshakeType.server_hello, len(body),
                             1, fo, length, body[fo:fo + length], 0.0))
         self.assertIsNone(engine.last)
 
-        # A fragment under an UNRELATED buffer, 10 seconds later, is this
-        # capture's only evidence that time has passed -- it must still
-        # abandon the first buffer under its own 5-second timeout.
+        # A fragment under an UNRELATED buffer, a million seconds later, must
+        # not abandon the first buffer.
         fo2, length2 = frags[0]
         engine(self._packet(other_bufid, 2, HandshakeType.server_hello, len(body),
-                            1, fo2, length2, body[fo2:fo2 + length2], 10.0))
+                            1, fo2, length2, body[fo2:fo2 + length2], 1e6))
 
+        # The late fragments complete the stale message as COMPLETE. Reading
+        # ``engine.datagram`` flushes held buffers, so it is read only after.
+        for num, idx in ((3, 1), (4, 2)):
+            fo3, length3 = frags[idx]
+            engine(self._packet(bufid, num, HandshakeType.server_hello, len(body),
+                                1, fo3, length3, body[fo3:fo3 + length3], 1e6 + num))
+        self.assertIsNotNone(engine.last)
+        self.assertEqual(engine.last.completed.name, 'COMPLETE')
+        self.assertEqual(engine.last.body, body)
         stale = [d for d in engine.datagram if d.id.src == '17.0.0.1']
-        self.assertEqual(len(stale), 1)
-        self.assertEqual(stale[0].completed.name, 'TIMEOUT')
+        self.assertEqual([d.completed.name for d in stale], ['COMPLETE'])
 
-    def test_idle_deadline_extends_on_each_fragment(self) -> None:
-        """Fragments arriving with delays between them extend the reassembly
-        deadline (idle timeout): three fragments of one message at default
-        engine timeout (120 seconds) arrive at t=0, t=100, t=200 and complete
-        successfully, whereas without idle deadline the buffer would expire
-        after the first fragment (t=0 + 120 = t=120, and fragments at t=100
-        and t=200 arrive after that)."""
+    def test_delayed_fragments_complete_with_no_deadline(self) -> None:
+        """Fragments arriving minutes apart still complete their message: with
+        no time-based deadline, a delay between fragments abandons nothing."""
         from pcapkit.const.tls.handshake_type import HandshakeType
 
         body = _client_hello_body(cookie=b'\xaa\xbb\xcc\xdd')
@@ -388,11 +391,7 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         frags = _split(body, (third, 2 * third))
         bufid = ('19.0.0.1', 1, '19.0.0.2', 5684, 0)
 
-        # Default timeout is 120 seconds. Fragments at t=0, t=100, t=200:
-        # - t=0: buffer created, deadline = t=0 + timeout (if not idle deadline)
-        # - t=100: with idle deadline, deadline = max(0, 100) + 120 = t=220
-        # - t=200: with idle deadline, deadline = max(100, 200) + 120 = t=320
-        # Message arrives complete on the final fragment.
+        # Fragments at t=0, t=100, t=200 seconds of capture time.
         engine = self._engine()
         for i, (fo, length) in enumerate(frags):
             payload = body[fo:fo + length]
@@ -403,8 +402,6 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
                 # Message completed on this fragment.
                 break
 
-        # Should have completed (all three fragments arrived within the
-        # idle deadline).
         self.assertIsNotNone(engine.last)
         self.assertTrue(engine.last.completed)
         self.assertEqual(engine.last.body, body)

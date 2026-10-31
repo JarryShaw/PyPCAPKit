@@ -189,8 +189,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 do not share a buffer.
             frame_num: Packet number, recorded on the reassembled message's
                 :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.index`.
-            frame_timestamp: Capture timestamp in seconds, driving
-                ``reassembly``'s timeout.
+            frame_timestamp: Capture timestamp in seconds, recorded on the
+                fragment; reassembly does not expire buffers by time.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

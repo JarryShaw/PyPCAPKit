@@ -37,8 +37,6 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
-        timeout: reassembly timeout in seconds, on the capture's own clock;
-            :data:`None` selects :attr:`__timeout__`
 
     Note:
         The buffer ID is the UDP 4-tuple plus the DTLS **epoch**: the record
@@ -72,21 +70,16 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
     #: looks :attr:`name` up in the protocol registry instead.
     __protocol_name__ = 'DTLS'
 
-    #: float: Default reassembly timeout, in seconds, on the capture's clock.
-    #: Not :data:`math.inf`: a DTLS handshake is not open-ended.
-    #: :rfc:`6347#section-4.2.4.1` gives 60 seconds only as
-    #: the floor a retransmission backoff's cap must not go below, so 120
-    #: seconds leaves room for a live handshake while still expiring a stale
-    #: one. The deadline runs from each buffer's latest fragment; ``timeout``
-    #: overrides it.
-    __timeout__ = 120.0
+    # No ``__timeout__``: RFC 6347 section 4.2.3 and RFC 9147 section 5.5 give
+    # DTLS handshake reassembly no timeout, so it inherits the base default,
+    # :data:`math.inf`, and a buffer is never expired by time. It is held until
+    # its messages complete or the capture ends.
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True,
-                 timeout: 'Optional[float]' = None) -> 'None':
+    def __init__(self, *, strict: 'bool' = True, store: 'bool' = True) -> 'None':
         """Initialise packet reassembly.
 
         Args:
@@ -94,11 +87,9 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
                 reassembled as the tuple of its received runs; otherwise as
                 one contiguous payload, its holes zero-filled
             store: if store reassembled datagram in memory
-            timeout: reassembly timeout in seconds, on the capture's own
-                clock; :data:`None` selects :attr:`__timeout__`
 
         """
-        super().__init__(strict=strict, store=store, timeout=timeout)
+        super().__init__(strict=strict, store=store)
 
         #: Optional[Datagram[_AT]]: The message, if any, that the most recent
         #: call to :meth:`reassembly` completed; see :attr:`last`.
@@ -145,25 +136,13 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         MSN = info.message_seq      # Message Sequence Number
         FO = info.fragment_offset   # Fragment Offset
         FL = info.fragment_length   # Fragment Length
-        TS = info.timestamp         # Capture timestamp, i.e. the only clock we have
 
-        # This fragment's arrival is the evidence that capture time has
-        # reached ``TS``, so abandon whatever the deadline has passed for,
-        # including buffers this fragment does not belong to.
-        self._dtgram.extend(self.expire(TS))
-
+        # No time-based expiry: a buffer is held until its messages complete,
+        # so a fragment is never abandoned for arriving late.
         buf = self._buffer.get(BUFID)
         if buf is None:
-            buf = Buffer(msg={}, timestamp=TS)
-        else:
-            # :meth:`expire` abandons a buffer by one ``timestamp``, but a
-            # buffer holds several in-flight messages (:attr:`Buffer.msg`)
-            # with no shared deadline. Pinning that timestamp to the first
-            # fragment lets a stale message expire a live one, so every
-            # fragment under this ``BufferID`` refreshes it: an idle timeout.
-            # ``max`` tolerates non-monotonic capture timestamps.
-            buf = Buffer(msg=buf.msg, timestamp=max(buf.timestamp, TS))
-        self._buffer[BUFID] = buf
+            buf = Buffer(msg={}, timestamp=info.timestamp)
+            self._buffer[BUFID] = buf
 
         frag = buf.msg.get(MSN)
         # A fresh buffer for this MSN, or a disagreement with the one held

@@ -53,7 +53,7 @@ class Packet(Info, Generic[_AT]):
     #: Raw fragment payload.
     payload: 'bytes'
     #: Capture timestamp of the fragment, in seconds since the Unix epoch,
-    #: i.e. the *capture's* clock. Drives the reassembly timeout.
+    #: i.e. the *capture's* clock. Recorded only; it does not expire anything.
     timestamp: 'float'
 
     if TYPE_CHECKING:
@@ -173,11 +173,9 @@ class Buffer(Info):
     #: and a ``ServerHelloDone`` can each fragment independently in the same
     #: flight.
     msg: 'dict[int, Fragment]'
-    #: Capture timestamp of the most recent fragment buffered under this buffer
-    #: ID, in seconds since the Unix epoch. Origin of the reassembly timer as an
-    #: idle deadline; later fragments extend the deadline by updating this
-    #: timestamp, allowing in-flight reassembly to complete despite
-    #: inter-fragment delays.
+    #: Capture timestamp of the first fragment buffered under this buffer ID,
+    #: in seconds since the Unix epoch. Recorded only: the buffer has no
+    #: time-based deadline, so it is never expired by time.
     timestamp: 'float'
 
     if TYPE_CHECKING:
