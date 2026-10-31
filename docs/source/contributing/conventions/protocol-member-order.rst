@@ -17,7 +17,7 @@ The Order
    ``register_xxx()``.
 #. **Data models.** Every dunder name: ``__index__``, ``__length_hint__``,
    ``__init__``, ``__new__``, ``__post_init__`` and any other.
-#. **Utilities.** Everything else, mostly private methods, in three subgroups:
+#. **Utilities.** Everything else, mostly private methods, in three subgroups. Every private helper, including ``_check_*``, sits here, never before ``_make_data()``.
 
    a. **Data.** ``_make_data()`` comes first in the group, before everything else.
    b. **Helpers.** The helpers that ``read()`` or ``make()`` call, one helper at a
