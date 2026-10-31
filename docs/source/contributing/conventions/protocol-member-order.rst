@@ -24,7 +24,9 @@ The Order
       time, in the order ``read()`` or ``make()`` first uses them. "Uses" means a
       direct reference in the body of ``read()`` or ``make()``. Helpers reached only
       through ``getattr``, or through the registry maps (``__proto__``,
-      ``__option__``, ``__parameter__`` and similar), do not count. Each helper's
+      ``__option__``, ``__parameter__`` and similar), do not count. They are ordered
+      by the enum value order of the corresponding code, or by the registry's order
+      where there is no enum. Each helper's
       ``_read_`` and ``_make_`` methods stay together, with the reader first:
       ``_read_mac_addr()`` then ``_make_mac_addr()``.
    c. **Specific readers and makers.** The option, type and parameter methods,
