@@ -17,49 +17,38 @@ The Order
    ``register_xxx()``.
 #. **Data models.** Every dunder name: ``__index__``, ``__length_hint__``,
    ``__init__``, ``__new__``, ``__post_init__`` and any other.
-#. **Utilities.** Everything else, mostly private methods. All ``_read_*()`` methods
-   come first, then all ``_make_*()`` methods. The two are not interleaved pair by
-   pair. Within each group the order is the enum value order of the code or type
-   each method handles, not alphabetical by name.
+#. **Utilities.** Everything else, mostly private methods, in three subgroups:
 
-   **Exception:** ``_make_data()`` goes first in the utilities group, before the
-   reads.
+   a. **Data.** ``_make_data()`` comes first in the group, before everything else.
+   b. **Helpers.** The helpers that ``read()`` or ``make()`` call, one helper at a
+      time. Each helper's ``_read_`` and ``_make_`` methods stay together, with the
+      reader first: ``_read_mac_addr()`` then ``_make_mac_addr()``.
+   c. **Specific readers and makers.** The option, type and parameter methods,
+      all ``_read_*()`` before all ``_make_*()``. Each set is ordered by the enum
+      value of the code or type it handles, not alphabetically by name.
 
 Example
 ~~~~~~~
 
+The utilities of :class:`~pcapkit.protocols.link.ethernet.Ethernet`, reduced to
+its member names:
+
 .. code-block:: python
 
-   class Foo(Protocol[Data_Foo, Schema_Foo]):
-
-       # Methods.
-       def read(self, length, *, ...):
-           ...
-
-       def make(self, ...):
-           ...
+   class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
 
        # Utilities.
-       def _make_data(cls, data, ...):  # exception: first in the group
+       def _make_data(cls, data, ...):      # a. data first
            ...
 
-       def _read_foo_field(self, ...):
+       def _read_mac_addr(self, ...):       # b. helper: reader ...
            ...
 
-       def _read_foo_option(self, ...):
-           ...
-
-       def _make_foo_field(self, ...):
-           ...
-
-       def _make_foo_option(self, ...):
+       def _make_mac_addr(self, ...):       # ... then its maker
            ...
 
 The Reference
 ~~~~~~~~~~~~~
 
-:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.transport.tcp.TCP`,
-:class:`~pcapkit.protocols.transport.udp.UDP` and
-:class:`~pcapkit.protocols.link.arp.ARP` follow this order. When a
-new class is unclear, match them.
+:class:`~pcapkit.protocols.link.ethernet.Ethernet` is the reference for the
+utilities order.
