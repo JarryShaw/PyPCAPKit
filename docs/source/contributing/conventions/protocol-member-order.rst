@@ -18,8 +18,9 @@ The Order
 #. **Data models.** Every dunder name: ``__index__``, ``__length_hint__``,
    ``__init__``, ``__new__``, ``__post_init__`` and any other.
 #. **Utilities.** Everything else, mostly private methods. All ``_read_*()`` methods
-   come first, in order, then all ``_make_*()`` methods, in order. The two are not
-   interleaved pair by pair.
+   come first, then all ``_make_*()`` methods. The two are not interleaved pair by
+   pair. Within each group the order is the enum value order of the code or type
+   each method handles, not alphabetical by name.
 
 Example
 ~~~~~~~
