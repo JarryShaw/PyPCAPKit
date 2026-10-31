@@ -71,6 +71,9 @@ __all__ = [
     # BSD Loopback Encapsulation
     'Loopback',
 
+    # Netlink Socket Framing
+    'Netlink',
+
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 
