@@ -65,6 +65,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.ipv6_opts import CALIPSOOption as Schema_CALIPSOOption
 from pcapkit.protocols.schema.internet.ipv6_opts import \
     HomeAddressOption as Schema_HomeAddressOption
@@ -336,6 +337,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return ipv6_opts
         return self._decode_next_layer(ipv6_opts, schema.next, length - ipv6_opts.length)
 

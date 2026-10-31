@@ -128,6 +128,7 @@ from pcapkit.protocols.data.internet.hip import UnassignedParameter as Data_Unas
 from pcapkit.protocols.data.internet.hip import ViaRVSParameter as Data_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
 from pcapkit.protocols.schema.internet.hip import AckDataParameter as Schema_AckDataParameter
 from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKParameter
@@ -616,6 +617,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             ])
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return hip
 
         # NOTE: ``_decode_next_layer`` builds the protocol chain from

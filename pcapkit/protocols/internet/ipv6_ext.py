@@ -148,6 +148,7 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_ext import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.internet.ipv6_ext import IPv6_Ext as Schema_IPv6_Ext
 from pcapkit.protocols.schema.schema import Schema
@@ -486,6 +487,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         )
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return cast('_PT', generic_ext)
         return self._decode_next_layer(cast('_PT', generic_ext), next_header, length - ext_len,
                                        payload=rest[max(ext_len - 2, 0):])
