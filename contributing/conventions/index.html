@@ -249,6 +249,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -458,6 +461,8 @@
 <li class="toctree-l2"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Process</a></li>
@@ -529,7 +534,12 @@ spell <a class="reference internal" href="../../pcapkit/protocols/protocol.html#
 reference, rather than any code at all;</p></li>
 <li><p><a class="reference internal" href="test-coverage.html#test-coverage"><span class="std std-ref">Testing a Change</span></a> – what the test suite has to prove;</p></li>
 <li><p><a class="reference internal" href="utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a> – which of <a class="reference internal" href="../../pcapkit/utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> and
-<a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> a support module belongs in.</p></li>
+<a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> a support module belongs in;</p></li>
+<li><p><a class="reference internal" href="reassembly-integration.html#reassembly-integration"><span class="std std-ref">Reassembly Integration</span></a> – <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> and what a
+new engine there needs from <a class="reference internal" href="../../pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code>;</p></li>
+<li><p><a class="reference internal" href="const-vendor-pairing.html#const-vendor-pairing"><span class="std std-ref">Const-Vendor Pairing</span></a> – <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> and the
+<a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawler each module needs.</p></li>
 </ul>
 <p><strong>A ruling that stays in its thread is a ruling that gets rediscovered.</strong> So
 when a question is answered in a way the code cannot express on its own – a
@@ -552,6 +562,8 @@ standing ask on
 <li class="toctree-l1"><a class="reference internal" href="documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </div>
 </section>

@@ -242,6 +242,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -451,6 +454,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -498,10 +503,11 @@
 <span class="sd">:mod:`pcapkit.protocols.application.dtls` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an</span>
 <span class="sd">extractor for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS</span>
-<span class="sd">1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format records (:rfc:`9147`).</span>
-<span class="sd">:attr:`UDP.__proto__ &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;` binds</span>
-<span class="sd">it at port 5684. As with :class:`~pcapkit.protocols.application.tls.TLS`,</span>
-<span class="sd">:meth:`~DTLS.read` sets :attr:`~DTLS.alias` from the record's legacy version.</span>
+<span class="sd">1.2 (:rfc:`6347`), and DTLS 1.3's legacy-format and unified-header records</span>
+<span class="sd">(:rfc:`9147`). :attr:`UDP.__proto__ &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;`</span>
+<span class="sd">binds it at port 5684. As with :class:`~pcapkit.protocols.application.tls.TLS`,</span>
+<span class="sd">:meth:`~DTLS.read` sets :attr:`~DTLS.alias` from the record's legacy version,</span>
+<span class="sd">or to ``DTLS 1.3`` for a unified-header record.</span>
 
 <span class="sd">Known Limitations</span>
 <span class="sd">-----------------</span>
@@ -512,14 +518,14 @@
 <span class="sd">and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`</span>
 <span class="sd">kept as raw octets.</span>
 
-<span class="sd">**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). It has</span>
-<span class="sd">no content-type octet (:rfc:`9147#section-4`), so it degrades to</span>
-<span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS 1.3's cleartext records use</span>
-<span class="sd">the legacy ``DTLSPlaintext`` header and are decoded.</span>
+<span class="sd">**A unified-header record with a connection ID is not decoded**</span>
+<span class="sd">(:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the</span>
+<span class="sd">record, so it degrades to :class:`~pcapkit.protocols.misc.raw.Raw`. The same</span>
+<span class="sd">holds for ``tls12_cid`` records (:rfc:`9146`).</span>
 
-<span class="sd">**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`): the</span>
-<span class="sd">connection ID's length is not carried in the record, so they degrade to</span>
-<span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+<span class="sd">**A unified-header record carries only the low two bits of the epoch**, and</span>
+<span class="sd">its sequence number is header-protected, so the values it reports are the</span>
+<span class="sd">ones on the wire.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
@@ -529,7 +535,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.content_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContentType</span> <span class="k">as</span> <span class="n">Enum_ContentType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS13_VERSION</span><span class="p">,</span> <span class="n">SSL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCiphertext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Schema_DTLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Schema_DTLSCiphertext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -551,6 +560,40 @@
 <span class="c1">#: Legacy record versions a DTLS 1.3 record may carry: DTLS 1.2's always, and</span>
 <span class="c1">#: DTLS 1.0's on an initial ``ClientHello`` (:rfc:`9147#section-4`).</span>
 <span class="n">_DTLS13_LEGACY_VERSIONS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">_DTLSV1_0_VERSION</span><span class="p">,</span> <span class="n">_DTLSV1_2_VERSION</span><span class="p">})</span>
+<span class="c1">#: Top three bits of a unified-header first octet, ``001`` (:rfc:`9147#section-4.1`).</span>
+<span class="n">_UNIFIED_PREFIX</span> <span class="o">=</span> <span class="mb">0b001</span>
+<span class="c1">#: Shortest ciphertext a unified-header record may carry: the record-number</span>
+<span class="c1">#: sample is taken from its first 16 octets (:rfc:`9147#section-4.2.3`).</span>
+<span class="n">_CIPHERTEXT_MIN_LENGTH</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_unified_header</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``octet`` opens a unified-header record.</span>
+
+<span class="sd">    Legacy records open with a content type of 20 through 27, whose top three</span>
+<span class="sd">    bits are ``000``, so the ``001`` prefix never matches one of them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        octet: First octet of the record.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether the octet's top three bits are the unified-header prefix.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">octet</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span> <span class="o">==</span> <span class="n">_UNIFIED_PREFIX</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ciphertext_header_length</span><span class="p">(</span><span class="n">flags</span><span class="p">:</span> <span class="s1">'dict[str, int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Length of a unified header, from its first octet's decoded flags.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        flags: Decoded first octet, as the header schema holds it.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        First octet, sequence number and, if present, the length field.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'sequence_long'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'length_present'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="DTLS">
@@ -560,7 +603,7 @@
 
 <span class="sd">    - Datagram Transport Layer Security 1.0 [:rfc:`4347`]</span>
 <span class="sd">    - Datagram Transport Layer Security 1.2 [:rfc:`6347`]</span>
-<span class="sd">    - Datagram Transport Layer Security 1.3, legacy-format records only [:rfc:`9147`]</span>
+<span class="sd">    - Datagram Transport Layer Security 1.3, legacy-format and unified-header records [:rfc:`9147`]</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The subpackage does not track the dispatch tier: DTLS is dispatched</span>
@@ -589,12 +632,15 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alias</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[13]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Header length of current protocol -- the fixed record header,</span>
-<span class="sd">        :attr:`~pcapkit.protocols.data.application.dtls.DTLS.length`'s</span>
-<span class="sd">        fragment excluded.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol -- the record header, the</span>
+<span class="sd">        fragment excluded. Fixed at 13 octets for a legacy record; a unified</span>
+<span class="sd">        header's length follows from its first octet.</span>
 
 <span class="sd">        """</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__header__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_DTLSCiphertext</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_ciphertext_header_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">13</span>
 
     <span class="c1">##########################################################################</span>
@@ -649,7 +695,10 @@
              <span class="n">content</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_DTLS'</span><span class="p">:</span>
+             <span class="n">ciphertext</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">sequence_long</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">length_present</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_DTLS | Schema_DTLSCiphertext'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data, for every tier: ``version`` is written as is.</span>
 
 <span class="sd">        Args:</span>
@@ -660,25 +709,50 @@
 <span class="sd">            version: Legacy record version (``major &lt;&lt; 8 | minor``), e.g.</span>
 <span class="sd">                ``0xFEFD`` for DTLS 1.2 and (the legacy value DTLS 1.3 keeps</span>
 <span class="sd">                here) DTLS 1.3.</span>
-<span class="sd">            epoch: Epoch.</span>
-<span class="sd">            sequence_number: Sequence number within ``epoch`` (48-bit).</span>
+<span class="sd">            epoch: Epoch. A unified-header record carries only its low two</span>
+<span class="sd">                bits, so a larger value is refused.</span>
+<span class="sd">            sequence_number: Sequence number within ``epoch`` (48-bit); for a</span>
+<span class="sd">                unified-header record, 8 or 16 bits as ``sequence_long`` says.</span>
 <span class="sd">            content: Record content: a :obj:`tuple` of</span>
 <span class="sd">                :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`</span>
 <span class="sd">                for ``handshake``, an</span>
 <span class="sd">                :class:`~pcapkit.protocols.data.application.tls.Alert`, a</span>
 <span class="sd">                :class:`~pcapkit.protocols.data.application.tls.ChangeCipherSpec`,</span>
-<span class="sd">                or raw :obj:`bytes`, as :meth:`read` would decode it.</span>
+<span class="sd">                or raw :obj:`bytes`, as :meth:`read` would decode it. For a</span>
+<span class="sd">                unified-header record, the ciphertext as :obj:`bytes`.</span>
 <span class="sd">            data: Pre-encoded record fragment. When given, it is used</span>
 <span class="sd">                verbatim in place of ``content`` and ``length`` is computed</span>
 <span class="sd">                from it.</span>
 <span class="sd">            payload: Octets after the record, e.g. a further record</span>
 <span class="sd">                coalesced in the same buffer.</span>
+<span class="sd">            ciphertext: Make a unified-header record (:rfc:`9147#section-4.1`)</span>
+<span class="sd">                instead of a legacy one; ``content_type``, ``version`` and</span>
+<span class="sd">                ``data`` do not apply.</span>
+<span class="sd">            sequence_long: Whether a unified-header record's sequence number is</span>
+<span class="sd">                16 bits rather than 8.</span>
+<span class="sd">            length_present: Whether a unified-header record carries its length;</span>
+<span class="sd">                if not, it runs to the end of the datagram.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">ciphertext</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Schema_DTLSCiphertext</span><span class="p">(</span>
+                <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">'fixed'</span><span class="p">:</span> <span class="n">_UNIFIED_PREFIX</span><span class="p">,</span>
+                    <span class="s1">'connection_id'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s1">'sequence_long'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">sequence_long</span><span class="p">),</span>
+                    <span class="s1">'length_present'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">length_present</span><span class="p">),</span>
+                    <span class="s1">'epoch'</span><span class="p">:</span> <span class="n">epoch</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="k">if</span> <span class="n">length_present</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">fragment</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="n">content_type_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_ContentType'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span>
             <span class="n">content_type</span><span class="p">,</span> <span class="n">content_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">content_type_namespace</span><span class="p">,</span>
             <span class="nb">reversed</span><span class="o">=</span><span class="n">content_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
@@ -693,6 +767,32 @@
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DTLS.unpack">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.unpack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS | Data_DTLSCiphertext'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack (parse) packet data, with the header schema its first octet selects.</span>
+
+<span class="sd">        A unified-header record (:rfc:`9147#section-4.1`) is parsed by</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.application.dtls.DTLSCiphertext`</span>
+<span class="sd">        rather than the legacy header; every other record uses the inherited</span>
+<span class="sd">        behaviour.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">octets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">octets</span> <span class="ow">and</span> <span class="n">_is_unified_header</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">Schema_DTLSCiphertext</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -713,7 +813,7 @@
 <div class="viewcode-block" id="DTLS._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_DTLS'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_DTLS | Data_DTLSCiphertext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Args:</span>
@@ -723,6 +823,16 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_DTLSCiphertext</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">'ciphertext'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">'epoch'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span>
+                <span class="s1">'sequence_number'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+                <span class="s1">'sequence_long'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">sequence_long</span><span class="p">,</span>
+                <span class="s1">'length_present'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">'content'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+                <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="p">}</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'content_type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
@@ -733,8 +843,10 @@
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dtls_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dtls_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLS | Data_DTLSCiphertext'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Read a DTLS record, identifying its concrete tier as it goes.</span>
+
+<span class="sd">        A unified-header record is handed to :meth:`_read_dtls_ciphertext`.</span>
 
 <span class="sd">        Structure of DTLS record layer [:rfc:`9147#section-4`]:</span>
 
@@ -770,6 +882,9 @@
 <span class="sd">                malformed for its content type.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">Schema_DTLSCiphertext</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dtls_ciphertext</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
         <span class="n">available</span> <span class="o">=</span> <span class="n">length</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_tls_record</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">available</span><span class="o">=</span><span class="n">available</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -797,6 +912,49 @@
         <span class="p">)</span>
 
         <span class="n">remaining</span> <span class="o">=</span> <span class="n">available</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">dtls</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_dtls_ciphertext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_DTLSCiphertext'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read a unified-header ciphertext record (:rfc:`9147#section-4.1`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the header carries a connection ID, whose length</span>
+<span class="sd">                is negotiated and not in the record; if the header or its</span>
+<span class="sd">                declared length runs past the buffer; or if the ciphertext is</span>
+<span class="sd">                shorter than the record-number sample (:rfc:`9147#section-4.2.3`).</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alias</span> <span class="o">=</span> <span class="s1">'DTLS 1.3'</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="n">length</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'connection_id'</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid format: connection ID records are not decoded'</span><span class="p">)</span>
+        <span class="n">needed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">needed</span> <span class="o">&gt;</span> <span class="n">available</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid format: record of </span><span class="si">{</span><span class="n">needed</span><span class="si">}</span><span class="s1"> octets '</span>
+                                <span class="s1">'runs past the end of the buffer'</span><span class="p">)</span>
+        <span class="c1"># Receivers MUST reject shorter records as if they failed deprotection.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_CIPHERTEXT_MIN_LENGTH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid format: ciphertext is shorter than the '</span>
+                                <span class="s1">'record-number sample (RFC 9147 section 4.2.3)'</span><span class="p">)</span>
+
+        <span class="n">dtls</span> <span class="o">=</span> <span class="n">Data_DTLSCiphertext</span><span class="p">(</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="n">flags</span><span class="p">[</span><span class="s1">'epoch'</span><span class="p">],</span>
+            <span class="n">sequence_number</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+            <span class="n">sequence_long</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="s1">'sequence_long'</span><span class="p">]),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">available</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">fragment</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">dtls</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span></div>
 
 </pre></div>

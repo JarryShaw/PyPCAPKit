@@ -242,6 +242,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -451,6 +454,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -877,33 +882,6 @@
         <span class="k">return</span> <span class="n">fragment</span></div>
 
 
-<div class="viewcode-block" id="SSL._make_tls_content">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_content">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content_type</span><span class="p">:</span> <span class="s1">'Enum_ContentType'</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode a record fragment by its content type -- the inverse of</span>
-<span class="sd">        :meth:`_read_tls_content`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            content_type: Record content type.</span>
-<span class="sd">            content: Decoded record content, or already-encoded :obj:`bytes`.</span>
-<span class="sd">            dtls: Whether this is a DTLS record.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Encoded record fragment.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">content</span>
-        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">handshake</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_handshake_messages</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">alert</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">level</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">description</span><span class="p">)])</span>
-        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">change_cipher_spec</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">msg</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="SSL._read_tls_handshake_messages">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_tls_handshake_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -979,53 +957,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data_Handshake</span><span class="p">(</span><span class="n">msg_type</span><span class="o">=</span><span class="n">msg_type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SSL._make_tls_handshake_messages">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_handshake_messages">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_handshake_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                     <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode handshake messages back into a record fragment -- the</span>
-<span class="sd">        inverse of :meth:`_read_tls_handshake_messages`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            messages: Handshake messages, as returned by</span>
-<span class="sd">                :meth:`_read_tls_handshake_messages`, or already-encoded</span>
-<span class="sd">                :obj:`bytes` per message.</span>
-<span class="sd">            dtls: Whether to write DTLS's fragment header after each</span>
-<span class="sd">                message's ``msg_type``/``length`` header.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Encoded record fragment.</span>
-
-<span class="sd">        """</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-                <span class="n">out</span> <span class="o">+=</span> <span class="n">message</span>
-                <span class="k">continue</span>
-
-            <span class="n">body</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">body</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Data_ClientHello</span><span class="p">):</span>
-                <span class="n">body_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_client_hello</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Data_ServerHello</span><span class="p">):</span>
-                <span class="n">body_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_server_hello</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">body_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-
-            <span class="c1"># NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;</span>
-            <span class="c1"># otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.</span>
-            <span class="n">is_fragmented</span> <span class="o">=</span> <span class="n">dtls</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">is_fragmented</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">is_fragmented</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_bytes</span><span class="p">)</span>
-
-            <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">msg_type</span><span class="p">)])</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">dtls</span><span class="p">:</span>
-                <span class="n">fragment_length</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_length</span> <span class="k">if</span> <span class="n">is_fragmented</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_bytes</span><span class="p">)</span>
-                <span class="n">out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">message_seq</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-                       <span class="o">+</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_offset</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-                       <span class="o">+</span> <span class="n">fragment_length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">))</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="n">body_bytes</span>
-        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SSL._read_tls_client_hello">
@@ -1135,42 +1066,6 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SSL._make_tls_client_hello">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_client_hello">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_client_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_ClientHello'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode a ``ClientHello`` handshake message body -- the inverse of</span>
-<span class="sd">        :meth:`_read_tls_client_hello`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: Decoded ``ClientHello``.</span>
-<span class="sd">            dtls: Whether this is a DTLS ``ClientHello``, i.e. whether to</span>
-<span class="sd">                write the ``cookie`` field.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Encoded message body.</span>
-
-<span class="sd">        """</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">random</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">session_id</span><span class="p">)])</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">session_id</span>
-
-        <span class="k">if</span> <span class="n">dtls</span><span class="p">:</span>
-            <span class="n">cookie</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cookie</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">cookie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">cookie</span><span class="p">)])</span> <span class="o">+</span> <span class="n">cookie</span>
-
-        <span class="n">cipher_suites</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="k">for</span> <span class="n">suite</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">cipher_suites</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cipher_suites</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">cipher_suites</span>
-
-        <span class="n">compression_methods</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">compression_methods</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">compression_methods</span><span class="p">)])</span> <span class="o">+</span> <span class="n">compression_methods</span>
-
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">extensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">extensions_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">extensions_raw</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">extensions_raw</span>
-        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="SSL._read_tls_server_hello">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._read_tls_server_hello">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_tls_server_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ServerHello'</span><span class="p">:</span>
@@ -1232,32 +1127,6 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SSL._make_tls_server_hello">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_server_hello">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_server_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_ServerHello'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode a ``ServerHello`` handshake message body -- the inverse of</span>
-<span class="sd">        :meth:`_read_tls_server_hello`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: Decoded ``ServerHello``.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Encoded message body.</span>
-
-<span class="sd">        """</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">random</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">session_id</span><span class="p">)])</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">session_id</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">cipher_suite</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">compression_method</span><span class="p">)])</span>
-
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">extensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">extensions_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">extensions_raw</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">extensions_raw</span>
-        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="SSL._read_tls_extensions">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._read_tls_extensions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_tls_extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Data_Extension, ...]'</span><span class="p">:</span>
@@ -1298,6 +1167,142 @@
             <span class="n">pos</span> <span class="o">+=</span> <span class="n">ext_len</span>
             <span class="n">extensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Data_Extension</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">ext_type</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ext_data</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extensions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSL._make_tls_content">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_content">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content_type</span><span class="p">:</span> <span class="s1">'Enum_ContentType'</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a record fragment by its content type -- the inverse of</span>
+<span class="sd">        :meth:`_read_tls_content`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            content_type: Record content type.</span>
+<span class="sd">            content: Decoded record content, or already-encoded :obj:`bytes`.</span>
+<span class="sd">            dtls: Whether this is a DTLS record.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Encoded record fragment.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">content</span>
+        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">handshake</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_handshake_messages</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">alert</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">level</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">description</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">change_cipher_spec</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">msg</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSL._make_tls_handshake_messages">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_handshake_messages">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_handshake_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                     <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode handshake messages back into a record fragment -- the</span>
+<span class="sd">        inverse of :meth:`_read_tls_handshake_messages`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            messages: Handshake messages, as returned by</span>
+<span class="sd">                :meth:`_read_tls_handshake_messages`, or already-encoded</span>
+<span class="sd">                :obj:`bytes` per message.</span>
+<span class="sd">            dtls: Whether to write DTLS's fragment header after each</span>
+<span class="sd">                message's ``msg_type``/``length`` header.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Encoded record fragment.</span>
+
+<span class="sd">        """</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="n">message</span>
+                <span class="k">continue</span>
+
+            <span class="n">body</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">body</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Data_ClientHello</span><span class="p">):</span>
+                <span class="n">body_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_client_hello</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">dtls</span><span class="o">=</span><span class="n">dtls</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Data_ServerHello</span><span class="p">):</span>
+                <span class="n">body_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_server_hello</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">body_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;</span>
+            <span class="c1"># otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.</span>
+            <span class="n">is_fragmented</span> <span class="o">=</span> <span class="n">dtls</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">is_fragmented</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">is_fragmented</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_bytes</span><span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">msg_type</span><span class="p">)])</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dtls</span><span class="p">:</span>
+                <span class="n">fragment_length</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_length</span> <span class="k">if</span> <span class="n">is_fragmented</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_bytes</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">message_seq</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="n">message</span><span class="o">.</span><span class="n">fragment_offset</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="n">fragment_length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">))</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="n">body_bytes</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSL._make_tls_client_hello">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_client_hello">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_client_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_ClientHello'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtls</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a ``ClientHello`` handshake message body -- the inverse of</span>
+<span class="sd">        :meth:`_read_tls_client_hello`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Decoded ``ClientHello``.</span>
+<span class="sd">            dtls: Whether this is a DTLS ``ClientHello``, i.e. whether to</span>
+<span class="sd">                write the ``cookie`` field.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Encoded message body.</span>
+
+<span class="sd">        """</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">random</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">session_id</span><span class="p">)])</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">session_id</span>
+
+        <span class="k">if</span> <span class="n">dtls</span><span class="p">:</span>
+            <span class="n">cookie</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cookie</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">cookie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">cookie</span><span class="p">)])</span> <span class="o">+</span> <span class="n">cookie</span>
+
+        <span class="n">cipher_suites</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="k">for</span> <span class="n">suite</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">cipher_suites</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cipher_suites</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">cipher_suites</span>
+
+        <span class="n">compression_methods</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">compression_methods</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">compression_methods</span><span class="p">)])</span> <span class="o">+</span> <span class="n">compression_methods</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">extensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">extensions_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">extensions_raw</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">extensions_raw</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSL._make_tls_server_hello">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL._make_tls_server_hello">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_tls_server_hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_ServerHello'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a ``ServerHello`` handshake message body -- the inverse of</span>
+<span class="sd">        :meth:`_read_tls_server_hello`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Decoded ``ServerHello``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Encoded message body.</span>
+
+<span class="sd">        """</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">random</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">session_id</span><span class="p">)])</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">session_id</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">cipher_suite</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">compression_method</span><span class="p">)])</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">extensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">extensions_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tls_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">extensions_raw</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">+</span> <span class="n">extensions_raw</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SSL._make_tls_extensions">

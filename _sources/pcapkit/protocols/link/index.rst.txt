@@ -26,6 +26,9 @@ link layer, with detailed implementation and methods.
    arp
    l2tp
    l2tpv2
+   linux_sll
+   linux_sll1
+   linux_sll2
    loopback
    vlan
    c_tag

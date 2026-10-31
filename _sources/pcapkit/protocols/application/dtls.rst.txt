@@ -6,8 +6,8 @@ DTLS - Datagram Transport Layer Security
 :mod:`pcapkit.protocols.application.dtls` contains
 :class:`~pcapkit.protocols.application.dtls.DTLS` only, which implements an
 extractor for Datagram Transport Layer Security (DTLS) [*]_ -- DTLS 1.0
-(:rfc:`4347`), DTLS 1.2 (:rfc:`6347`) and DTLS 1.3's legacy-format records
-(:rfc:`9147`) -- at the record layer, plus the epoch/sequence-number fields and
+(:rfc:`4347`), DTLS 1.2 (:rfc:`6347`) and DTLS 1.3's legacy-format and
+unified-header records (:rfc:`9147`) -- at the record layer, plus the epoch/sequence-number fields and
 the handshake-message fragment header that set DTLS apart from
 :class:`~pcapkit.protocols.application.tls.TLS`, whose reliable, ordered
 transport needs neither.
@@ -34,11 +34,17 @@ every version and :meth:`~pcapkit.protocols.application.dtls.DTLS.read` sets
      - ``DTLS 1.3``
    * - any other ``0xFExx``
      - ``DTLS``
+   * - unified header (first octet ``001CSLEE``, :rfc:`9147#section-4.1`)
+     - ``DTLS 1.3``
 
 DTLS 1.3 never puts its own ``0xFEFC`` on the record layer
-(:rfc:`9147#section-4`), so it is told apart only by the
+(:rfc:`9147#section-4`), so a legacy-format record is told apart only by the
 ``supported_versions`` peek. A version the table does not name keeps the
 generic ``DTLS`` alias rather than claiming a specific one.
+
+A unified-header record has no legacy version to read. Its first octet's top
+three bits are ``001``, which no legacy content type (20 through 27) sets, so
+the two formats are told apart by that octet alone.
 
 Known Limitations
 -----------------
@@ -49,14 +55,14 @@ Known Limitations
 and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
 kept as raw octets.
 
-**DTLS 1.3's unified record header is not decoded** (:issue:`2467`). It has
-no content-type octet (:rfc:`9147#section-4`), so it degrades to
-:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS 1.3's cleartext records use
-the legacy ``DTLSPlaintext`` header and are decoded.
+**A unified-header record with a connection ID is not decoded**
+(:rfc:`9147#section-4.1`, :issue:`2467`). Its length is negotiated, not carried
+in the record, so it degrades to :class:`~pcapkit.protocols.misc.raw.Raw`. The
+same holds for ``tls12_cid`` records (:rfc:`9146`).
 
-**Connection ID records are not decoded** (``tls12_cid``, :rfc:`9146`): the
-connection ID's length is not carried in the record, so they degrade to
-:class:`~pcapkit.protocols.misc.raw.Raw`.
+**A unified-header record carries only the low two bits of the epoch**, and
+its sequence number is header-protected, so the values it reports are the
+ones on the wire.
 
 .. versionadded:: 1.6.0
 
@@ -76,6 +82,7 @@ connection ID's length is not carried in the record, so they degrade to
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: unpack
 
    .. automethod:: __length_hint__
 
@@ -90,12 +97,20 @@ Header Schema
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.application.dtls.DTLSCiphertext
+   :members:
+   :show-inheritance:
+
 Data Models
 -----------
 
 .. module:: pcapkit.protocols.data.application.dtls
 
 .. autoclass:: pcapkit.protocols.data.application.dtls.DTLS
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.dtls.DTLSCiphertext
    :members:
    :show-inheritance:
 

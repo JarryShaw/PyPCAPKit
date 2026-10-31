@@ -249,6 +249,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -458,6 +461,8 @@
 <li class="toctree-l2"><a class="reference internal" href="conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Process</a></li>
@@ -540,7 +545,7 @@ step-by-step guide for adding a protocol, and is worth reading before starting
 one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,</p>
 <ul class="simple">
-<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP</p></li>
+<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP</p></li>
 <li><p>Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6</p></li>
 <li><p>Transport Layer: DCCP, RSVP</p></li>
 <li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
@@ -549,10 +554,10 @@ XMPP</p></li>
 </ul>
 <p>Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
-<a class="reference internal" href="../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> already covers its family: ICMP with
-ICMPv6, and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>. <strong>Done</strong> for TLS/SSL with
-DTLS: <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> is the shared
-record-layer base of <a class="reference internal" href="../pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.TLS" title="pcapkit.protocols.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a> and
+<a class="reference internal" href="../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> already covers its family: ICMP
+with ICMPv6, and TLS/SSL with DTLS. <strong>Done</strong> for TLS/SSL with DTLS:
+<a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> is the shared record-layer base
+of <a class="reference internal" href="../pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.TLS" title="pcapkit.protocols.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a> and
 <a class="reference internal" href="../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS" title="pcapkit.protocols.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> – see the <a class="reference internal" href="#dtls">DTLS</a> section
 below.
 <a class="reference internal" href="../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> is the closer precedent for a pair
@@ -565,8 +570,7 @@ whose <em>layout</em> is identical – it holds the whole of the tag, and
 <code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folder. <strong>Those files are not a roadmap.</strong> They are
 scratch reminders, so a stub’s presence does not mean a protocol is planned or
 claimed, and its absence does not mean the protocol is unwanted:
-<code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code>, <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code> and <code class="docutils literal notranslate"><span class="pre">QUIC</span></code> have no stub and are on the
-list above,
+<code class="docutils literal notranslate"><span class="pre">QUIC</span></code> has no stub and is on the list above,
 while <strong>NGAP</strong> has none either and is implemented. Take this page as the
 record and ignore the folder.</p>
 </div>
@@ -838,9 +842,7 @@ port number. That depends on the proxy identifying the version positively
 instead of guessing, since a guess path is wrong on non-HTTP input.</p></li>
 </ul>
 <p>Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub;
-and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code> at the link layer, which every
-<code class="docutils literal notranslate"><span class="pre">tcpdump</span> <span class="pre">-i</span> <span class="pre">any</span></code> capture uses and which have no stub.</p>
+ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub.</p>
 </section>
 </section>
 <section id="pcapng-support">
@@ -1512,28 +1514,32 @@ bidirectional flow tracing. Its defect tail closed out through the
 post-wave-1 consistency sweep described under <a class="reference internal" href="#release-plan-1-5-0-in-two-steps">Release Plan — 1.5.0 in Two
 Steps</a> above.</p>
 <p><strong>Wave 2 — the protocol pairs that want a shared abstract base</strong>, per <a class="reference internal" href="#more-protocols-more">More
-Protocols, More!!!</a> above: <strong>ICMP with ICMPv6</strong>, <strong>TLS/SSL with DTLS</strong>, and
-<code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> with <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code>, plus <strong>IGMP</strong> and <strong>DCCP</strong> on their own. These are
-grouped because the shared-base question is the design work and doing either half of
-a pair alone would answer it twice. <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> matters out of proportion to its
-size: every <code class="docutils literal notranslate"><span class="pre">tcpdump</span> <span class="pre">-i</span> <span class="pre">any</span></code> capture uses it, and neither variant has even a
-stub. <strong>DCCP</strong> is the transport-layer implementation, tracked by <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>, and
+Protocols, More!!!</a> above: <strong>ICMP with ICMPv6</strong> and <strong>TLS/SSL with DTLS</strong>,
+plus <strong>IGMP</strong> and <strong>DCCP</strong> on their own. These are grouped because the shared-base
+question is the design work and doing either half of a pair alone would answer it
+twice. <strong>DCCP</strong> is the transport-layer implementation, tracked by <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>, and
 blocked on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2479">#2479</a> for its pseudo-header checksum.</p>
 <p><strong>Done within wave 2 — TLS/SSL with DTLS.</strong> The <a class="reference internal" href="#dtls">DTLS</a> section above lists
 what is decoded (the shared <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>
 base, TLS, DTLS, and handshake message framing) and what is not (DTLS
 handshake-fragment reassembly, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>).</p>
-<p><strong>Done ahead of wave 2 — handlers for the</strong> <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code>
-<strong>link types.</strong> Both are genuine DLTs that a capture can legitimately be rooted
-in — <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> (0) is BSD’s loopback encapsulation, <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> (101) an IP
-packet with no link header at all.
+<p><strong>Done ahead of wave 2 — handlers for the</strong> <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code>,
+<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code> <strong>link types.</strong> Each is a
+genuine DLT that a capture can legitimately be rooted in — <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> (0)
+is BSD’s loopback encapsulation, <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> (101) an IP packet with no link
+header at all, and <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code> (113) with <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code> (276) the
+Linux “cooked” capture header every <code class="docutils literal notranslate"><span class="pre">tcpdump</span> <span class="pre">-i</span> <span class="pre">any</span></code> capture uses.
 <a class="reference internal" href="../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.Loopback" title="pcapkit.protocols.link.loopback.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a> dissects <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> and
-<code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1574">#1574</a>), and the frame dispatcher reads <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> as IPv4
-or IPv6 by its version nibble (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1502">#1502</a>), so of the link types this
-section names only <code class="docutils literal notranslate"><span class="pre">LINUX_SLL</span></code> and <code class="docutils literal notranslate"><span class="pre">LINUX_SLL2</span></code> remain enumerated but
-unparsed. Neither <code class="docutils literal notranslate"><span class="pre">NULL</span></code> nor <code class="docutils literal notranslate"><span class="pre">RAW</span></code> is an honest stand-in for “unknown link
-type”, which is why the toolkit raises for an unresolvable link-layer name
-instead of defaulting to <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.NULL" title="pcapkit.const.reg.linktype.LinkType.NULL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinkType.NULL</span></code></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1574">#1574</a>), the frame dispatcher reads <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> as IPv4
+or IPv6 by its version nibble (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1502">#1502</a>), and
+<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a> with
+<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dissect the Linux
+cooked-capture variants (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2438">#2438</a>). The <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> values
+neither header treats as carrying an EtherType (<code class="docutils literal notranslate"><span class="pre">NETLINK</span></code>, <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code>, <code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code>, <code class="docutils literal notranslate"><span class="pre">FRAD</span></code>) have no dissector of their own, tracked
+as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>. Neither <code class="docutils literal notranslate"><span class="pre">NULL</span></code> nor <code class="docutils literal notranslate"><span class="pre">RAW</span></code> is an honest stand-in for “unknown
+link type”, which is why the toolkit raises for an unresolvable link-layer
+name instead of defaulting to <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.NULL" title="pcapkit.const.reg.linktype.LinkType.NULL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinkType.NULL</span></code></a>.</p>
 <p><strong>Wave 3 — the remaining protocols</strong> from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
 new transport and wants that settled first, the rest because a capture in

@@ -242,6 +242,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
@@ -451,6 +454,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/reassembly-integration.html">Reassembly Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/const-vendor-pairing.html">Const-Vendor Pairing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -954,49 +959,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_length</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'bytes | Schema_FrameType'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Calculate HTTP/2 frame payload length for construction.</span>
-
-<span class="sd">        Several frame payload schemas use conditional fields keyed by the</span>
-<span class="sd">        containing HTTP/2 header flags, so packing them without that context can</span>
-<span class="sd">        produce incorrect lengths or fail outright.</span>
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-
-        <span class="n">flags_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_UnassignedFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_DataFrame</span><span class="p">):</span>
-            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_DataFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_HeadersFrame</span><span class="p">):</span>
-            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
-            <span class="n">priority_len</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="n">priority_len</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PriorityFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="mi">5</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_RSTStreamFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="mi">4</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_SettingsFrame</span><span class="p">):</span>
-            <span class="n">settings</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'object'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PushPromiseFrame</span><span class="p">):</span>
-            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_PushPromiseFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PingFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="mi">8</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_GoawayFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span> <span class="o">+</span> <span class="mi">8</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_WindowUpdateFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="mi">4</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_ContinuationFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-
 <div class="viewcode-block" id="HTTP.id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.id">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1076,6 +1038,49 @@
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_http_length</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'bytes | Schema_FrameType'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'Flags'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Calculate HTTP/2 frame payload length for construction.</span>
+
+<span class="sd">        Several frame payload schemas use conditional fields keyed by the</span>
+<span class="sd">        containing HTTP/2 header flags, so packing them without that context can</span>
+<span class="sd">        produce incorrect lengths or fail outright.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+        <span class="n">flags_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_UnassignedFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_DataFrame</span><span class="p">):</span>
+            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_DataFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_HeadersFrame</span><span class="p">):</span>
+            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
+            <span class="n">priority_len</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_HeadersFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="n">priority_len</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PriorityFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">5</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_RSTStreamFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_SettingsFrame</span><span class="p">):</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'object'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span> <span class="o">*</span> <span class="mi">6</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PushPromiseFrame</span><span class="p">):</span>
+            <span class="n">padded</span> <span class="o">=</span> <span class="n">flags_int</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="n">Schema_PushPromiseFrame</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">PADDED</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_PingFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_GoawayFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span> <span class="o">+</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_WindowUpdateFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Schema_ContinuationFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_flags</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FrameType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Flags'</span><span class="p">:</span>
