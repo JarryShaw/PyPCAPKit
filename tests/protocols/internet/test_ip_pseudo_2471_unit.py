@@ -358,10 +358,14 @@ class IPPseudoBoundaryTests(unittest.TestCase):
                     with self.assertRaisesRegex(FieldValueError, f'length {value} out of range'):
                         IP_Pseudo(src=src, dst=dst, protocol=6, upper_length=value)
 
-        # Total Length 0, as a TSO capture has it.
+        # Total Length 0, as a TSO capture has it: the UDP Length field gives the length.
         ip = IPv4(bytes.fromhex('450000000001000040118e99c0000201c6336402') + self.UDP)
+        self.assertEqual(IP_Pseudo(ip=ip).info.len, 8)
+
+        # Without one, the IP layer's length is negative.
+        tcp = IPv4(bytes.fromhex('450000000001000040068e99c0000201c6336402') + bytes(20))
         with self.assertRaisesRegex(FieldValueError, 'length -20 out of range'):
-            IP_Pseudo(ip=ip)
+            IP_Pseudo(ip=tcp)
 
     def test_zero_is_kept_at_the_layout_width(self) -> None:
         from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
@@ -397,6 +401,265 @@ class IPPseudoBoundaryTests(unittest.TestCase):
             IP_Pseudo(bytes(40), length=12)
         with self.assertRaisesRegex(ProtocolError, 'length 12 disagrees with 5 octets'):
             IP_Pseudo(io.BytesIO(bytes(5)), length=12)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class IPPseudoWalkTests(unittest.TestCase):
+    """Upper layers the IP walk gives wrong values for, and malformed headers.
+
+    Each expected pseudo-header is spelled out from its RFC, not from the code.
+
+    """
+
+    SRC6 = ipaddress.IPv6Address('2001:db8::1').packed
+    DST6 = ipaddress.IPv6Address('2001:db8::2').packed
+    #: An 8-octet UDP header, ports 53, with no checksum.
+    UDP = bytes.fromhex('0035' '0035' '0008' '0000')
+    #: An 8-octet ICMPv6 echo request, whose checksum is not filled in.
+    ICMPV6 = bytes.fromhex('8000' '0000' '00000000')
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def ipv6(self, next_: int, rest: bytes, payload: 'int | None' = None) -> object:
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        length = len(rest) if payload is None else payload
+        return IPv6(bytes.fromhex('60000000') + length.to_bytes(2, 'big') + bytes([next_, 64])
+                    + self.SRC6 + self.DST6 + rest)
+
+    @staticmethod
+    def ipv4_route(kind: int, pointer: int, route: 'list[str]') -> object:
+        """An IPv4 packet whose first hop is 192.0.2.10, with a source route option."""
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        option = bytes([kind, 3 + 4 * len(route), pointer])
+        option += b''.join(ipaddress.IPv4Address(address).packed for address in route)
+        option += bytes(-len(option) % 4)
+        header = (bytes([0x40 | (5 + len(option) // 4), 0]) + (20 + len(option) + 8).to_bytes(2, 'big')
+                  + bytes(4) + bytes([64, 17, 0, 0]) + ipaddress.IPv4Address('10.0.0.1').packed
+                  + ipaddress.IPv4Address('192.0.2.10').packed)
+        return IPv4(header + option + bytes.fromhex('0035' '0035' '0008' '0000'))
+
+    @staticmethod
+    def ipv4(proto: int, rest: bytes) -> object:
+        """An IPv4 packet from 192.0.2.1 to 198.51.100.2 carrying ``rest``."""
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        header = (bytes([0x45, 0]) + (20 + len(rest)).to_bytes(2, 'big') + bytes(4)
+                  + bytes([64, proto, 0, 0]) + ipaddress.IPv4Address('192.0.2.1').packed
+                  + ipaddress.IPv4Address('198.51.100.2').packed)
+        return IPv4(header + rest)
+
+    def test_udp_length_field(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        # The UDP Length field is 8, though the IP layer carries 12 octets (RFC 768).
+        ip = self.ipv6(17, self.UDP + bytes(4))
+        self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+
+        ipv4 = IPv4(bytes.fromhex('45000020' '00010000' '4011' '0000' 'c0000201' 'c6336402')
+                    + self.UDP + bytes(4))
+        self.assertEqual(IP_Pseudo(ip=ipv4).info.len, 8)
+
+    def test_source_route_final_destination(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # LSR (131) and SSR (137). With the pointer on or before the last address,
+        # that address is the destination; once the route is exhausted (RFC 791
+        # section 3.1), the destination field is.
+        for kind in (131, 137):
+            for pointer, final in ((4, '192.0.2.30'), (8, '192.0.2.30'), (12, '192.0.2.10')):
+                with self.subTest(kind=kind, pointer=pointer):
+                    ip = self.ipv4_route(kind, pointer, ['192.0.2.20', '192.0.2.30'])
+                    self.assertEqual(ip.info.dst, ipaddress.IPv4Address('192.0.2.10'))  # type: ignore[attr-defined]
+                    self.assertEqual(IP_Pseudo(ip=ip).data[4:8],  # type: ignore[arg-type]
+                                     ipaddress.IPv4Address(final).packed)
+
+    def test_source_route_without_addresses_keeps_the_header_destination(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        ip = self.ipv4_route(131, 4, [])
+        self.assertEqual(IP_Pseudo(ip=ip).data[4:8], ipaddress.IPv4Address('192.0.2.10').packed)
+
+    def test_udp_length_after_an_atomic_fragment(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # An atomic fragment (Offset 0, More Fragments clear) whose Next Header is
+        # Destination Options, then UDP. The UDP header sits 16 octets past the
+        # fixed header, so its Length field is read from there (RFC 8200 section 4.5).
+        fragment = bytes([60, 0]) + bytes.fromhex('0000' '01020304')
+        # Tunnel Encapsulation Limit (type 4), then Pad1s; non-zero, so a wrong offset shows.
+        dest_opts = bytes([17, 0, 4, 1, 5, 0, 0, 0])
+        ip = self.ipv6(44, fragment + dest_opts + self.UDP)
+        self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+
+    def test_authentication_header_is_walked(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # AH (RFC 4302 section 2.2): Next Header, then Payload Len in 32-bit words
+        # less two, so 24 octets with a 12-octet ICV. Two nested, then UDP: the
+        # upper layer is UDP, and the length is the UDP header's alone.
+        first = bytes([51, 4]) + bytes(22)
+        second = bytes([17, 4]) + bytes(22)
+        pseudo = IP_Pseudo(ip=self.ipv4(51, first + second + self.UDP))
+        self.assertEqual(pseudo.data[8:], bytes.fromhex('00' '11' '0008'))
+        # A lone one cut short after its first octets.
+        with self.assertRaisesRegex(ProtocolError, 'Authentication Header of IPv4 not parsed'):
+            IP_Pseudo(ip=self.ipv4(51, bytes([17, 4]) + bytes(4)))
+
+    def test_esp_is_never_walked(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # ESP (RFC 4303): the upper layer is encrypted, so an IPv4 packet with
+        # one needs its protocol and length given, as an IPv6 packet does.
+        with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv4 not parsed'):
+            IP_Pseudo(ip=self.ipv4(50, bytes(16)))
+        self.assertEqual(IP_Pseudo(ip=self.ipv4(50, bytes(16)), protocol=50, upper_length=24)
+                         .data[8:], bytes.fromhex('00' '32' '0018'))
+
+    def test_authentication_header_over_tcp(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # AH (RFC 4302) of 24 octets naming TCP, then a 20-octet TCP header: the length
+        # is the TCP octets alone, not the 44 that a walk ignoring the AH would count.
+        pseudo = IP_Pseudo(ip=self.ipv4(51, bytes([6, 4]) + bytes(22) + bytes(20)))
+        self.assertEqual(pseudo.info.len, 20)
+        self.assertEqual(pseudo.protocol, 6)
+
+    def test_authentication_header_offsets_the_udp_length_field(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # The UDP header follows the 24-octet AH; a walk that drops the AH reads the
+        # Length field from the ICV, 0xAAAA, not 8. The 4 padding octets keep the two apart.
+        ip = self.ipv4(51, bytes([17, 4]) + bytes([0xAA] * 22) + self.UDP + bytes(4))
+        self.assertEqual(IP_Pseudo(ip=ip).data[8:], bytes.fromhex('00' '11' '0008'))
+
+    def test_authentication_header_in_a_non_first_fragment_is_not_walked(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # Fragment Offset 1 (8 octets), More Fragments clear: the payload is a continuation,
+        # not an AH header, so the 6 it starts with must not be read as the Next Header.
+        payload = bytes([6, 4]) + bytes(22) + self.UDP
+        header = (bytes([0x45, 0]) + (20 + len(payload)).to_bytes(2, 'big') + bytes(2)
+                  + (1).to_bytes(2, 'big') + bytes([64, 51, 0, 0])
+                  + ipaddress.IPv4Address('192.0.2.1').packed
+                  + ipaddress.IPv4Address('198.51.100.2').packed)
+        fragment = IPv4(header + payload)
+        with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv4 not parsed'):
+            IP_Pseudo(ip=fragment, upper_length=8)
+        self.assertEqual(IP_Pseudo(ip=fragment, protocol=51, upper_length=8).data[8:],
+                         bytes.fromhex('00' '33' '0008'))
+
+    def test_esp_under_ipv6_with_an_sa_is_never_walked(self) -> None:
+        from pcapkit.corekit.context import ContextRegistry
+        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # ESP (SPI 0x4321, seq 1) under an ENCR_NULL SA, whose plaintext is UDP then a
+        # trailer naming UDP. The SA gives the ESP header a Next Header of 17, which
+        # the walk must not follow: the upper layer is encrypted (RFC 4303).
+        packet = bytes.fromhex('00004321' '00000001') + self.UDP + bytes([0, 17])
+        registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=0x4321)))
+        ip = IPv6(bytes.fromhex('60000000') + len(packet).to_bytes(2, 'big') + bytes([50, 64])
+                  + self.SRC6 + self.DST6 + packet, __context__=registry)
+        with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
+            IP_Pseudo(ip=ip)
+
+    def test_truncated_udp_header_keeps_the_layer_length(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # Payload Length 8, but the octets end before the UDP header does.
+        ip = self.ipv6(17, b'', payload=8)
+        self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '11'))
+
+    def test_mobility_header_and_hip_are_the_upper_layer(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # Mobility Header, Next Header TCP, 8 octets: the chain ends at it, so it is
+        # the upper layer, and the TCP named inside it is not (RFC 6275 section 6.1.1).
+        ip = self.ipv6(135, bytes([6, 0, 5, 0]) + bytes(4))
+        pseudo = IP_Pseudo(ip=ip)
+        self.assertEqual(pseudo.data[32:], bytes.fromhex('00000008' '000000' '87'))
+        self.assertEqual(pseudo.protocol, 135)
+
+        # Headers after it are not walked past it: 8 octets of HIP ahead of 8 of UDP.
+        ip = self.ipv6(139, bytes([17, 1, 0, 0, 0, 0, 0, 0]) + self.UDP)
+        pseudo = IP_Pseudo(ip=ip)
+        self.assertEqual(pseudo.data[32:], bytes.fromhex('00000010' '000000' '8b'))
+        self.assertEqual(pseudo.protocol, 139)
+
+    def test_extension_header_limit(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # The walk takes at most 32 headers; a 33rd Destination Options is unparsed.
+        def chain(count: int) -> bytes:
+            return b''.join(bytes([60 if index < count - 1 else 17, 0]) + bytes(6)
+                            for index in range(count))
+
+        self.assertEqual(IP_Pseudo(ip=self.ipv6(60, chain(32) + self.UDP)).info.len, 8)
+        with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
+            IP_Pseudo(ip=self.ipv6(60, chain(33) + self.UDP))
+
+    def test_truncated_headers_are_unparsed(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # A Type 0 Routing header claiming two segments, cut by snaplen.
+        with self.assertRaisesRegex(ProtocolError, 'Routing header of IPv6 not parsed; give dst'):
+            IP_Pseudo(ip=self.ipv6(43, bytes([17, 2, 0, 1, 0, 0, 0, 0])))
+        # A Fragment header cut by snaplen.
+        with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
+            IP_Pseudo(ip=self.ipv6(44, bytes([17, 0, 0, 0])))
+
+    def test_malformed_extension_headers_raise_protocol_error(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # Destination Options whose length runs past the payload.
+        with self.assertRaisesRegex(ProtocolError, 'Destination Options of IPv6 not parsed; give src'):
+            IP_Pseudo(ip=self.ipv6(60, bytes([17, 2]) + bytes(22), payload=8))
+        # A Type 0 Routing header with an odd Hdr Ext Len.
+        with self.assertRaisesRegex(ProtocolError, 'Routing header of IPv6 not parsed; give dst'):
+            IP_Pseudo(ip=self.ipv6(43, bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8)))
+
+    def test_last_fragment_needs_the_reassembled_length(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # Fragment Offset 1 (8 octets), More Fragments clear: the last fragment of a packet.
+        last = self.ipv6(44, bytes([17, 0]) + bytes.fromhex('0008' '00000005') + self.UDP)
+        with self.assertRaisesRegex(ProtocolError, 'fragment; give upper_length'):
+            IP_Pseudo(ip=last)
+        self.assertEqual(IP_Pseudo(ip=last, upper_length=8).info.len, 8)
+
+    def test_extension_header_lengths_are_summed(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # Hop-by-Hop Options, then Destination Options, then ICMPv6: 16 octets of
+        # headers ahead of the 8-octet ICMPv6 message in a 24-octet payload. ICMPv6
+        # has no length field, so the walk alone gives the 8.
+        hop_by_hop = bytes([60, 0]) + bytes(6)
+        dest_opts = bytes([58, 0]) + bytes(6)
+        ip = self.ipv6(0, hop_by_hop + dest_opts + self.ICMPV6)
+        self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
+
+    def test_duplicate_header_types_are_each_summed(self) -> None:
+        from pcapkit.protocols.internet.ip_pseudo import IP_Pseudo
+
+        # Two Destination Options headers, the second one carrying ICMPv6.
+        first = bytes([60, 0]) + bytes(6)
+        second = bytes([58, 0]) + bytes(6)
+        ip = self.ipv6(60, first + second + self.ICMPV6)
+        self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
 
 
 if __name__ == '__main__':

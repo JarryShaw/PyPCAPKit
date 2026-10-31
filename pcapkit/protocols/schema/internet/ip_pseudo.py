@@ -20,15 +20,17 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
 
-#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1`.
+#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1`: source, destination,
+#: zero, protocol and length.
 #:
 #: .. versionadded:: 1.6.0
-IPV4_PSEUDO_LEN = 12
+IPV4_PSEUDO_LEN = 2 * (ipaddress.IPV4LENGTH // 8) + 1 + 1 + 2
 
-#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1`.
+#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1`: source, destination,
+#: length, zero and next header.
 #:
 #: .. versionadded:: 1.6.0
-IPV6_PSEUDO_LEN = 40
+IPV6_PSEUDO_LEN = 2 * (ipaddress.IPV6LENGTH // 8) + 4 + 3 + 1
 
 
 def is_ipv6(packet: 'dict[str, Any]') -> 'bool':
@@ -46,7 +48,7 @@ def is_ipv6(packet: 'dict[str, Any]') -> 'bool':
     """
     src = packet.get('src')
     if isinstance(src, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-        return src.version == 6
+        return isinstance(src, ipaddress.IPv6Address)
     return packet['__length__'] >= IPV6_PSEUDO_LEN
 
 
