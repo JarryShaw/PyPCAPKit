@@ -21,8 +21,9 @@ The Order
 
    a. **Data.** ``_make_data()`` comes first in the group, before everything else.
    b. **Helpers.** The helpers that ``read()`` or ``make()`` call, one helper at a
-      time. Each helper's ``_read_`` and ``_make_`` methods stay together, with the
-      reader first: ``_read_mac_addr()`` then ``_make_mac_addr()``.
+      time, in the order ``read()`` or ``make()`` first uses them. Each helper's
+      ``_read_`` and ``_make_`` methods stay together, with the reader first:
+      ``_read_mac_addr()`` then ``_make_mac_addr()``.
    c. **Specific readers and makers.** The option, type and parameter methods,
       all ``_read_*()`` before all ``_make_*()``. Each set is ordered by the enum
       value of the code or type it handles, not alphabetically by name.
