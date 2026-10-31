@@ -1085,11 +1085,12 @@ Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
 Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
-``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** on its own. These are grouped
-because the shared-base question is the design work and doing either half of a
-pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
+``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** and **DCCP** on their own. These are
+grouped because the shared-base question is the design work and doing either half of
+a pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
 size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
-stub.
+stub. **DCCP** is the transport-layer implementation, tracked by :issue:`2489`, and
+blocked on :issue:`2479` for its pseudo-header checksum.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded (the shared :class:`~pcapkit.protocols.application.ssl.SSL`
