@@ -103,17 +103,19 @@ INDEX = CONVENTIONS_DIR / 'index.rst'
 #: a Mermaid graph beats a paragraph, and what a sentence on these pages may claim.
 #: ``protocol-layer-placement`` carries the other ruling that thread settled -- which
 #: subpackage a dissector belongs in, decided by designed function rather than by
-#: encapsulation -- and sits beside the other class-hierarchy page. ``test-coverage``
-#: carries GitHub issue #1203's rules for what the test suite has to prove, and
-#: ``utilities-or-corekit`` GitHub issue #1712's rule for which of those two packages
-#: a module belongs in. Every anchor is the bare file stem, which is what
-#: :data:`PAGES` below depends on.
+#: encapsulation -- and sits beside the other class-hierarchy page.
+#: ``protocol-member-order`` carries the ruling on the order of members in a protocol
+#: class body. ``test-coverage`` carries GitHub issue #1203's rules for what the test
+#: suite has to prove, and ``utilities-or-corekit`` GitHub issue #1712's rule for
+#: which of those two packages a module belongs in. Every anchor is the bare file
+#: stem, which is what :data:`PAGES` below depends on.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
     'protocol-family-grouping',
+    'protocol-member-order',
     'protocol-layer-placement',
     'process',
     'documentation',
