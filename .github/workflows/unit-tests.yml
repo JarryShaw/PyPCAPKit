@@ -205,10 +205,15 @@ jobs:
         # pytest once per directory `SHARDS` names, then once over the rest,
         # and every run starts its workers afresh. Each run but the last writes
         # a JUnit file of its own, beside junit.xml; the step fails if any did.
+        #
+        # #2600: run whole, tests/protocols took the workers past the runner's
+        # 16 GB, and its tail stalled past tests._support.time_limit's 30 s. So
+        # its internet, application and misc subpackages run first, each a shard
+        # of its own, and `tests/protocols` then takes the remainder.
         env:
           COVERAGE: ${{ matrix.coverage }}
           LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
-          SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols tests/corekit' || '' }}
+          SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols/internet tests/protocols/application tests/protocols/misc tests/protocols tests/corekit' || '' }}
         run: |
           if [ "$LATEST" = "true" ]; then
             if ! skipped=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then

@@ -1046,12 +1046,21 @@ extras cap |cryptography|_ below 46, as 45.0.7 is the newest release with a Linu
 On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg's ``Run unit tests`` hands its pytest command to
 :file:`util/pytest_shards.py`, as GraalPy's leg does (see below), which runs it once per
-directory its ``SHARDS`` names, ``tests/protocols`` and then ``tests/corekit``, and once
-more over the rest, ignoring each (:issue:`2005`).
+directory its ``SHARDS`` names and once more over the rest, ignoring each
+(:issue:`2005`). The directories are ``tests/protocols/internet``,
+``tests/protocols/application``, ``tests/protocols/misc``, ``tests/protocols`` and
+``tests/corekit``, in that order, so ``tests/protocols`` runs after its own
+subpackages and takes only what they left.
 Each run starts its workers afresh. Measured on PyPy 8.0.1 at ``-n 4``, one run
 over the whole ``ALL`` tier took each worker to 5.4-5.9 GB and the workers together
 past 20 GB, beyond the runner's 16 GB; split, the largest run peaked at 2.6 GB a
-worker and 8.5 GB in all, and the tier took 383 s rather than 493 s. A smaller
+worker and 8.5 GB in all, and the tier took 383 s rather than 493 s. With
+:issue:`2543`'s checksum tests, ``tests/protocols`` run whole outgrew the runner as
+well, and on CI the tests at its tail stalled past ``tests._support.time_limit``'s
+30-second deadline, which counts wall-clock time, so it is split (:issue:`2600`).
+Measured on PyPy 7.3.19 at ``-n 4``, its one run peaked at 17.7 GiB and took 267 s,
+its slowest test 16.4 s; split, the largest of its runs peaked at 5.7 GiB, they took
+224 s together, and the slowest test 11.9 s. A smaller
 ``-n`` would only hand each worker more tests, and a ``PYPY_GC_MAX`` heap cap turns
 the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of its
 own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
