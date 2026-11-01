@@ -27,9 +27,9 @@ if TYPE_CHECKING:
     from pcapkit.const.ipv4.tos_thr import ToSThroughput
     from pcapkit.const.ipv4.ts_flag import TSFlag
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
     from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
 __all__ = [
     'IPv4',

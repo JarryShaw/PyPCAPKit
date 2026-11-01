@@ -59,11 +59,11 @@ class ChecksumTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.protocols.internet.icmpv4 import ICMPv4
         from pcapkit.protocols.internet.icmpv6 import ICMPv6
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning

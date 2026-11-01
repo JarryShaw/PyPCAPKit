@@ -25,3 +25,15 @@ question belongs here instead. :mod:`pcapkit.corekit.decorators` is the worked e
 protocol's file and falls back to protocol classes, so it moved out of ``utilities``
 on :issue:`1735`. ``corekit`` may import ``utilities``; the reverse is what the rule
 forbids.
+
+A second worked example is :mod:`pcapkit.corekit.checksum`, settled on :issue:`2580`.
+It fails the ``utilities`` question because
+:class:`~pcapkit.corekit.checksum.internet.ChecksumStatus` subclasses
+:class:`~pcapkit.corekit.enum.EnumLookup`. The protocols compute and verify their
+checksums through it, so it imports
+:mod:`pcapkit` only from ``corekit`` and ``utilities``, never from
+:mod:`pcapkit.protocols`; :file:`tests/corekit/test_checksum_import_boundary_2580_unit.py`
+checks that. What needs IPv4 and IPv6 stays beside
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`. The package holds one
+module per checksum family, so a new family sits beside
+:mod:`~pcapkit.corekit.checksum.internet`.

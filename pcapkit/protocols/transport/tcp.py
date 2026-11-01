@@ -447,7 +447,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     )  # type: DefaultDict[int, str | tuple[MPOptionParser, MPOptionConstructor]]
 
     #: Whether :meth:`make` left the checksum for the enclosing IP layer to
-    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo`.
     _checksum_pending = False
 
     ##########################################################################
@@ -725,7 +725,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             if pseudo is None:
                 self._checksum_pending = True
             else:
-                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.checksum.ip_pseudo import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
                 octets = schema.pack()
                 schema.checksum = compute_checksum(octets, prefix=pseudo_header(pseudo, len(octets)))
         return schema
@@ -842,16 +843,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         """Verify the checksum over the pseudo-header of the enclosing IP layer.
 
         That layer calls this once parsed, see
-        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`. A zero
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper`. A zero
         checksum, or the pseudo-header's sum alone, is what checksum offload
         leaves on the sending host, and is
-        :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`.
+        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`.
 
         Args:
             pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
 
         """
-        from pcapkit.protocols.misc.checksum.checksum import (  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
             ChecksumStatus, partial_checksum, verify_checksum)
 
         if pseudo is None:

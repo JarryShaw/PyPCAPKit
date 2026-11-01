@@ -226,7 +226,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         # NOTE: The checksum leaves out the 8-octet Authentication field at
         # octet 16, and is unused under cryptographic authentication (RFC 2328).
         if config.CHECKSUM_VERIFY and ospf.version == 2:
-            from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
             if ospf.autype == Enum_Authentication.Cryptographic_authentication:
                 status = ChecksumStatus.NOT_COMPUTED
             else:
@@ -345,7 +345,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         if (checksum is None and config.CHECKSUM_COMPUTE and version == 2
                 and auth_type_ != Enum_Authentication.Cryptographic_authentication):
-            from pcapkit.protocols.misc.checksum.checksum import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
             # NOTE: Over the packet but the Authentication field, as read() checks it (#2475).
             octets = schema.pack()
             schema.checksum = compute_checksum(octets[:16] + octets[self.length:max(packet_length, self.length)])

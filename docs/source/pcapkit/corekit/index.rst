@@ -5,7 +5,8 @@ Core Utilities
 
 :mod:`pcapkit.corekit` holds the core utilities :mod:`pcapkit` is built on:
 the :class:`~pcapkit.corekit.fields.field.Field` family for data parsing, the
-:class:`~pcapkit.corekit.context.ContextRegistry` channel for caller-supplied
+:mod:`~pcapkit.corekit.checksum` algorithms the protocols compute and verify,
+the :class:`~pcapkit.corekit.context.ContextRegistry` channel for caller-supplied
 information a protocol needs but the wire does not carry, the
 :mod:`~pcapkit.corekit.decorators` that protocols and schemas parse through,
 the :class:`~pcapkit.corekit.enum.EnumLookup`/
@@ -25,6 +26,7 @@ parsed on first read, the protocol collection
    :maxdepth: 2
 
    fields/index
+   checksum/index
    context
    decorators
    enum
