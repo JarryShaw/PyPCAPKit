@@ -10,11 +10,13 @@ a one-line ruling once offered the choice: one module for all of them.
 So :mod:`pcapkit.corekit.sentinels` is the single defining module for every
 sentinel -- :class:`~pcapkit.corekit.sentinels.NullType`,
 :class:`~pcapkit.corekit.sentinels.NoValueType`,
-:class:`~pcapkit.corekit.sentinels.NoDefaultType` and
-:class:`~pcapkit.corekit.sentinels.AbsentType`, and their instances. The
+:class:`~pcapkit.corekit.sentinels.NoDefaultType`,
+:class:`~pcapkit.corekit.sentinels.AbsentType` and
+:class:`~pcapkit.corekit.sentinels.MissingType`, and their instances. The
 modules that use them (:mod:`pcapkit.corekit.module`,
-:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
-:mod:`pcapkit.protocols.protocol`) import the *object* they use from here and
+:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum`,
+:mod:`pcapkit.protocols.protocol` and
+:mod:`pcapkit.foundation.registry.protocols`) import the *object* they use from here and
 keep no re-export of it (GitHub issue #1744), under the ruling on #1715 that a
 moved name keeps no re-export at its old path;
 ``tests/project/test_no_moved_name_re_exports_1744_unit.py`` pins that.
@@ -65,9 +67,10 @@ import pcapkit.corekit.enum as enum_module
 import pcapkit.corekit.fields.field as field_module
 import pcapkit.corekit.module as module_module
 import pcapkit.corekit.sentinels as sentinels
+import pcapkit.foundation.registry.protocols as registry_module
 import pcapkit.protocols.protocol as protocol_module
-from pcapkit.corekit.sentinels import (ABSENT, NO_DEFAULT, NO_VALUE, NULL, AbsentType,
-                                       NoDefaultType, NoValueType, NullType)
+from pcapkit.corekit.sentinels import (ABSENT, MISSING, NO_DEFAULT, NO_VALUE, NULL, AbsentType,
+                                       MissingType, NoDefaultType, NoValueType, NullType)
 from tests._support import purge_modules
 
 #: Test tier (#1958): exercises pickling and copying, whose protocols differ by
@@ -82,6 +85,7 @@ CONSUMED_SENTINELS = (
     ('NO_VALUE', field_module, NO_VALUE, NoValueType),
     ('NO_DEFAULT', enum_module, NO_DEFAULT, NoDefaultType),
     ('ABSENT', protocol_module, ABSENT, AbsentType),
+    ('MISSING', registry_module, MISSING, MissingType),
 )
 
 
@@ -129,8 +133,8 @@ class NoImportCycleTests(unittest.TestCase):
 
         A cycle here would need :mod:`pcapkit.corekit.sentinels` to import from
         :mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
-        :mod:`pcapkit.corekit.enum` or :mod:`pcapkit.protocols.protocol` -- each
-        of which imports *it*. Walked with :mod:`ast` rather than grepped for the
+        :mod:`pcapkit.corekit.enum`, :mod:`pcapkit.protocols.protocol` or
+        :mod:`pcapkit.foundation.registry.protocols` -- each of which imports *it*. Walked with :mod:`ast` rather than grepped for the
         dotted name as plain text, because the sentinels module's own docstring
         names those modules *in prose*, explaining that they import from it --
         a text search would flag that explanation as if it were the cycle this
@@ -151,7 +155,8 @@ class NoImportCycleTests(unittest.TestCase):
                 imported_modules.append(node.module)
 
         forbidden = ('pcapkit.corekit.module', 'pcapkit.corekit.fields.field',
-                    'pcapkit.corekit.enum', 'pcapkit.protocols.protocol')
+                    'pcapkit.corekit.enum', 'pcapkit.protocols.protocol',
+                    'pcapkit.foundation.registry.protocols')
         for name in forbidden:
             with self.subTest(forbidden=name):
                 self.assertFalse(
@@ -189,7 +194,8 @@ class NoImportCycleTests(unittest.TestCase):
 
         """
         for name in ('pcapkit.corekit.module', 'pcapkit.corekit.fields.field',
-                    'pcapkit.corekit.enum', 'pcapkit.protocols.protocol'):
+                    'pcapkit.corekit.enum', 'pcapkit.protocols.protocol',
+                    'pcapkit.foundation.registry.protocols'):
             with self.subTest(first_import=name):
                 purge_modules(['pcapkit'])
                 try:
@@ -214,13 +220,13 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
     """
 
     def test_all_names_the_public_objects_and_no_types(self) -> 'None':
-        """``ABSENT`` stays out too: it is private regardless of which module
-        defines it."""
+        """``ABSENT`` and ``MISSING`` stay out too: they are private regardless
+        of which module defines them."""
         self.assertIn('NULL', sentinels.__all__)
         self.assertIn('NO_VALUE', sentinels.__all__)
         self.assertIn('NO_DEFAULT', sentinels.__all__)
         for name in ('NullType', 'NoValueType', 'NoDefaultType',
-                     'ABSENT', 'AbsentType'):
+                     'ABSENT', 'AbsentType', 'MISSING', 'MissingType'):
             with self.subTest(name=name):
                 self.assertNotIn(name, sentinels.__all__)
 

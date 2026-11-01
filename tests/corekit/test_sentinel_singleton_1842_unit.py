@@ -57,6 +57,7 @@ SENTINELS = (
     ('NO_VALUE', 'NO_VALUE', False),
     ('NO_DEFAULT', 'NO_DEFAULT', True),
     ('ABSENT', 'ABSENT', False),
+    ('MISSING', 'MISSING', False),
 )
 
 #: Python's own singletons, which a sentinel is to behave like.

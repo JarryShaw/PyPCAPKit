@@ -49,7 +49,7 @@ from pcapkit.const.sctp.payload_protocol_identifier import \
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
 from pcapkit.const.tcp.option import Option as TCP_Option
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.corekit.sentinels import NULL
+from pcapkit.corekit.sentinels import MISSING, NULL
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTPv2
 from pcapkit.protocols.internet.hip import HIP
@@ -279,10 +279,6 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     logger.debug('registered protocol: %s', protocol.__name__)
 
 
-#: Sentinel for a name :data:`pcapkit.protocols.__proto__` did not hold.
-_MISSING = object()
-
-
 class _NameLease:
     """A :data:`pcapkit.protocols.__proto__` entry a code registration put there.
 
@@ -308,7 +304,7 @@ class _NameLease:
         self.name = name
         #: The class written under it.
         self.protocol = protocol
-        #: The entry it displaced, or :data:`_MISSING` for a new name.
+        #: The entry it displaced, or :data:`~pcapkit.corekit.sentinels.MISSING` for a new name.
         self.displaced = displaced
         #: ``(destination, code)`` registrations still holding the lease.
         self.codes = set()  # type: set[tuple[type, Any]]
@@ -384,7 +380,7 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
             if above.displaced is above.protocol:
                 _fold_lease(stack, index)
     elif protocol_registry.get(lease.name) is lease.protocol:
-        if lease.displaced is _MISSING:
+        if lease.displaced is MISSING:
             protocol_registry.pop(lease.name, None)
         else:
             protocol_registry[lease.name] = lease.displaced
@@ -420,7 +416,7 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
             if current is None or _CODE_LEASES.get(target) is not current:
                 _release_name(target)
 
-        incumbent = protocol_registry.get(name, _MISSING)
+        incumbent = protocol_registry.get(name, MISSING)
         register_protocol(protocol)
         if protocol_registry.get(name) is not protocol:
             return
