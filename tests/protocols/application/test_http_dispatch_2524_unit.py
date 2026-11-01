@@ -137,6 +137,7 @@ class HTTPDispatchTests(unittest.TestCase):
                 self.assertEqual(layer.data, payload)
 
     def test_an_unidentified_payload_is_kept_raw(self) -> None:
+        """An unrecognised payload is Raw with no ``error``, as IGMP's is (#2544)."""
         from pcapkit.protocols.misc.raw import Raw
 
         for label, payload in UNIDENTIFIED.items():
@@ -144,6 +145,7 @@ class HTTPDispatchTests(unittest.TestCase):
                 tcp = self.tcp(payload)
                 self.assertIs(type(tcp.payload), Raw)
                 self.assertEqual(tcp.payload.data, payload)
+                self.assertIsNone(tcp.payload.info.error)
 
     def test_a_preface_alone_is_raw_to_the_dispatcher_and_the_parse(self) -> None:
         """A preface with no frame after it is kept as Raw, byte for byte.
@@ -165,6 +167,7 @@ class HTTPDispatchTests(unittest.TestCase):
         self.assertIs(type(tcp.payload), Raw)
         self.assertEqual(str(tcp.protochain), 'TCP:Raw')
         self.assertEqual(tcp.payload.data, _PREFACE)
+        self.assertIsNone(tcp.payload.info.error)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             self.assertEqual(TCP.from_data(tcp.info).data, tcp.data)
@@ -208,8 +211,12 @@ class HTTPDispatchTests(unittest.TestCase):
                 self.assertRegex(tcp.payload.info.error, fragment)
 
     def test_a_preface_counts_as_header_and_is_kept(self) -> None:
+        """The preface and SETTINGS frame parse as one HTTPv2 layer, the preface
+        counted in its header and kept in its data model."""
         tcp = self.tcp(_PREFACE + _SETTINGS)
         layer = tcp.payload
+        self.assertIs(type(layer), self.member('HTTPv2'))
+        self.assertIs(tcp.info['httpv2'], layer.info)
         self.assertEqual(layer.length, len(_PREFACE) + 9)
         self.assertEqual(layer.info.preface, _PREFACE)
         self.assertEqual(int(layer.info.type), 0x4)

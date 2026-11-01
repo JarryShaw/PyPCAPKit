@@ -48,14 +48,21 @@ HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 sh
 
 :class:`~pcapkit.protocols.internet.ip.IP` and
 :class:`~pcapkit.protocols.internet.ipsec.IPsec` define no ``read()``. The HTTP class
-does, for a caller that builds it directly, but a dispatched payload is parsed by its
-version's class: as the :class:`~pcapkit.protocols.internet.igmp.IGMP` base picks
-the member for an IGMP message,
-:meth:`HTTP._dispatch_version
-<pcapkit.protocols.application.http.HTTP._dispatch_version>` picks
-:class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
-:class:`~pcapkit.protocols.application.httpv2.HTTPv2` for the payload a transport
-port binds to HTTP (:issue:`2524`).
+does, but yields no instance of itself (:ref:`below <protocol-family-dispatch>`).
+
+.. _protocol-family-dispatch:
+
+Dispatching Bases
+~~~~~~~~~~~~~~~~~
+
+**A versioned family's base dispatches on both paths** (:pr:`2544`). Parsing octets
+through it, constructing it from fields and its ``from_data`` give the member the
+octets, fields or data model describe, never an instance of the base. In
+:class:`~pcapkit.protocols.application.http.HTTP`,
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks the member
+from the octets, for a payload a transport port binds to HTTP as well
+(:issue:`2524`), and :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields`
+from the fields. The other versioned families are tracked on :issue:`2574`.
 
 .. _protocol-family-shapes:
 

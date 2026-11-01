@@ -53,6 +53,20 @@ def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+def base_read(raw: bytes) -> object:
+    """Parse ``raw`` with the base's own ``read``, on a bare instance.
+
+    ``HTTP(...)`` gives the member and never runs the base's ``read`` (#2544), so
+    ``_guess_version`` is reached this way.
+    """
+    from pcapkit.protocols.application.http import HTTP
+
+    http = object.__new__(HTTP)
+    http._data = raw
+    http.__cached__ = {}
+    return http.read(len(raw))
+
+
 class HTTPUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -898,7 +912,7 @@ class HTTPUnitTests(unittest.TestCase):
         raw = http2_frame_bytes(0x06, 0x00, 0, b'')  # PING, declared length 0
 
         with self.assertRaises(ProtocolError) as ctx:
-            HTTP(io.BytesIO(raw), len(raw))
+            base_read(raw)
         self.assertEqual(str(ctx.exception), 'HTTP: unknown version')
 
     def test_guess_version_reports_unknown_version_for_a_short_payload(self) -> None:
@@ -1450,7 +1464,7 @@ class HTTPUnitTests(unittest.TestCase):
                                 mock.Mock(side_effect=error)):
                     # It must propagate, not be swallowed into an HTTP/2 answer.
                     with self.assertRaises(struct.error):
-                        HTTP(io.BytesIO(raw), len(raw))
+                        base_read(raw)
 
     def test_guess_version_does_not_leak_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
         """A buffer that clears nine octets must not crash one field further in.
