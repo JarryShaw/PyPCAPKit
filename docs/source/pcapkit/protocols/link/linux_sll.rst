@@ -50,11 +50,8 @@ Auxiliary Constants
 Hardware Types
 --------------
 
-The ``arphrd_type`` keys of ``LinuxSLL.__proto__`` are named by the enumeration below.
-
-.. autoclass:: pcapkit.const.linux.arphrd.ARPHRD
-   :members:
-   :show-inheritance:
+The ``arphrd_type`` keys of ``LinuxSLL.__proto__`` are named by
+:class:`~pcapkit.const.linux.arphrd.ARPHRD`.
 
 .. _linux-sll-labels:
 
