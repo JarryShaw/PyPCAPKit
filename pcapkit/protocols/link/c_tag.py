@@ -12,12 +12,10 @@ the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag) [*]_, EtherType
 identity and its registry index.
 
 It lives in a module of its own rather than beside
-:class:`~pcapkit.protocols.link.s_tag.S_Tag` because the two are reached through
-*different* registry indices -- ``0x8100`` against ``0x88A8`` -- which is the
-project's rule for when protocols share a module. Contrast
-:class:`~pcapkit.protocols.link.arp.InARP`, which shares
-:mod:`~pcapkit.protocols.link.arp` with :class:`~pcapkit.protocols.link.arp.ARP`
-precisely because it inherits its index.
+:class:`~pcapkit.protocols.link.s_tag.S_Tag`, since a module holds one protocol
+class, named after it, with only the framework bases in
+:mod:`pcapkit.protocols.protocol` exempt (:issue:`2529`). The two tags are
+reached through different registry indices, ``0x8100`` against ``0x88A8``.
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 

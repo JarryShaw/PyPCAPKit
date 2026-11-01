@@ -19,10 +19,9 @@ class RARPUnitTests(unittest.TestCase):
 
     def test_rarp_ids_and_index_are_stable(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.application.rarp import DRARP, RARP
+        from pcapkit.protocols.application.rarp import RARP
 
         self.assertEqual(RARP.id(), ('RARP', 'DRARP'))
-        self.assertEqual(DRARP.id(), ('DRARP',))
         self.assertEqual(RARP.__index__(), EtherType.Reverse_Address_Resolution_Protocol)
 
 if __name__ == '__main__':

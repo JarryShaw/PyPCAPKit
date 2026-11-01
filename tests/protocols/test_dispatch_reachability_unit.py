@@ -70,6 +70,16 @@ def _resolve(entry: 'Any') -> 'tuple[Any, Any]':
     return getattr(entry, '__module__', None), getattr(entry, '__name__', None)
 
 
+def _inherits_index(cls: 'type', module: 'Any', name: 'Any') -> 'bool':
+    """Whether ``cls`` inherits its ``__index__`` from the class ``module.name``."""
+    if module is None or name is None:
+        return False
+    target = getattr(importlib.import_module(module), name, None)
+    if not isinstance(target, type) or not issubclass(cls, target):
+        return False
+    return getattr(cls.__index__, '__func__', None) is getattr(target.__index__, '__func__', None)
+
+
 def _descendants(cls: 'type') -> 'Any':
     """Every subclass of ``cls``, transitively."""
     for sub in cls.__subclasses__():
@@ -121,13 +131,11 @@ def audit() -> 'tuple[list[Gap], int]':
             #   re-export rather than the defining module -- ``Frame.__proto__``
             #   holds ``pcapkit.protocols.link:Ethernet``, not
             #   ``pcapkit.protocols.link.ethernet:Ethernet``;
-            # * the same *module*, because the project's rule is that a shared
-            #   index may share a module -- ``InARP`` shares ``ARP``'s, and
-            #   ``DRARP`` shares ``RARP``'s -- and a distinct one may not, per
-            #   ``test_vlan_indices_follow_the_one_module_per_index_rule``. Both
-            #   classes answer to the code and the module they share is what
-            #   dispatches between them, so the sibling's name is not a mismatch.
-            if name == cls.__name__ or module == cls.__module__:
+            # * a class this one inherits its ``__index__`` from, because a
+            #   member sharing its family base's index is parsed by the base and
+            #   reported through its alias -- ``InARP`` by ``ARP``, ``DRARP`` by
+            #   ``RARP`` (#2529).
+            if name == cls.__name__ or _inherits_index(cls, module, name):
                 checked += 1
                 continue
 
@@ -155,7 +163,7 @@ class DispatchReachabilityTests(unittest.TestCase):
 
         # A walk that found nothing to check would also report no gaps, so pin
         # a floor of 23 claims (measured: the 21 distinct classes plus ``InARP``
-        # and ``DRARP`` reaching their siblings' entries, and ``Ethernet``
+        # and ``DRARP`` reaching their family bases' entries, and ``Ethernet``
         # counted once for ``Frame`` and once for ``PCAPNG``).
         self.assertGreaterEqual(checked, 23)
 

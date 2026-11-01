@@ -89,8 +89,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     ##########################################################################
 
     def test_ospf_and_rarp_report_the_application_layer(self) -> None:
+        from pcapkit.protocols.application.drarp import DRARP
         from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import DRARP, RARP
+        from pcapkit.protocols.application.rarp import RARP
 
         for cls in (OSPF, RARP, DRARP):
             with self.subTest(cls=cls.__name__):
@@ -118,7 +119,8 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_rarp_subclasses_both_application_and_arp_in_that_order(self) -> None:
         """The order is load-bearing: ``Link`` owns ``__layer__``, ``Raw`` does not."""
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.rarp import DRARP, RARP
+        from pcapkit.protocols.application.drarp import DRARP
+        from pcapkit.protocols.application.rarp import RARP
         from pcapkit.protocols.link.arp import ARP
         from pcapkit.protocols.link.link import Link
 
@@ -176,8 +178,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_the_top_level_packages_re_export_the_classes(self) -> None:
         import pcapkit
         import pcapkit.protocols
+        from pcapkit.protocols.application.drarp import DRARP
         from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import DRARP, RARP
+        from pcapkit.protocols.application.rarp import RARP
 
         for name, cls in (('OSPF', OSPF), ('RARP', RARP), ('DRARP', DRARP)):
             with self.subTest(name=name):
@@ -273,8 +276,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_ospf_and_rarp_override_none_of_the_next_layer_hooks(self) -> None:
         """Both inherit the hooks from ``Application`` rather than re-pointing them."""
         from pcapkit.protocols.application.application import Application
+        from pcapkit.protocols.application.drarp import DRARP
         from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import DRARP, RARP
+        from pcapkit.protocols.application.rarp import RARP
 
         hooks = ('__post_init__', '_decode_next_layer', '_import_next_layer')
         for cls in (OSPF, RARP, DRARP):

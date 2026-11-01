@@ -25,12 +25,11 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_vlan_indices_follow_the_one_module_per_index_rule(self) -> None:
+    def test_vlan_tags_declare_their_ethertypes_in_modules_of_their_own(self) -> None:
         """Each tag declares the EtherType it is reached by; the base declares none.
 
-        The two indices differing is *why* the tags live in separate modules --
-        the project's rule is that a shared index may share a module (as
-        ``InARP`` shares ``ARP``'s), and a distinct one may not.
+        Each class is in a module of its own, since a module holds one protocol
+        class, named after it (#2529).
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -50,7 +49,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         with self.assertRaises(UnsupportedCall):
             VLAN.__index__()
 
-        # ... and each tag is in a module of its own, keyed on that difference.
+        # ... and each class is in a module named after it.
         self.assertEqual(C_Tag.__module__, 'pcapkit.protocols.link.c_tag')
         self.assertEqual(S_Tag.__module__, 'pcapkit.protocols.link.s_tag')
         self.assertEqual(VLAN.__module__, 'pcapkit.protocols.link.vlan')

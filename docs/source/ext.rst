@@ -108,7 +108,7 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.rarp.RARP`                                    |
 +                                                                  + RARP Family    +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.application.rarp.DRARP`                                   |
+|                                                                  |                | :class:`pcapkit.protocols.application.drarp.DRARP`                                  |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ssl.SSL`                                      |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+

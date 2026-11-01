@@ -16,9 +16,10 @@ identity -- :attr:`~pcapkit.protocols.link.c_tag.C_Tag.name`,
 :meth:`~pcapkit.protocols.link.c_tag.C_Tag.id` -- and its registry index.
 
 It has a module of its own, apart from
-:class:`~pcapkit.protocols.link.s_tag.S_Tag`, because the two are reached through
-*different* registry indices, ``0x8100`` against ``0x88A8``; see
-:mod:`pcapkit.protocols.link.vlan` for the rule.
+:class:`~pcapkit.protocols.link.s_tag.S_Tag`, since a module holds one protocol
+class, named after it, with only the framework bases in
+:mod:`pcapkit.protocols.protocol` exempt (:issue:`2529`). The two tags are
+reached through different registry indices, ``0x8100`` against ``0x88A8``.
 
 .. autoclass:: pcapkit.protocols.link.c_tag.C_Tag
    :no-members:
