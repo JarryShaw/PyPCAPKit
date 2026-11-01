@@ -83,6 +83,8 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_ethertype
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_loopback
+
 Internet Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

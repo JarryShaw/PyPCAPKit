@@ -436,6 +436,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
     def _assert_rejected_unchanged(self, call: 'Any') -> None:
         from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -445,7 +446,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import RegistryError
 
         tables = {klass.__name__: klass.__proto__
-                  for klass in (Link, Internet, Frame, PCAPNG, TCP, UDP, SCTP)}
+                  for klass in (Link, Internet, IPX, Frame, PCAPNG, TCP, UDP, SCTP)}
         tables['pcapkit.protocols'] = protocol_registry
         before = {name: dict(table) for name, table in tables.items()}
         try:
@@ -540,7 +541,8 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
           the check exists for, so a class that stops being checked, or one
           checked against the wrong enum, fails here.
         * ``number`` -- a bare :class:`int` is accepted where the registrar
-          accepts one (a port, a payload protocol identifier) and rejected
+          accepts one (a port, a payload protocol identifier, an IPX Packet
+          Type) and rejected
           where it does not, which is the only observable difference the flag
           makes. The :class:`int` given to a rejecting class is the *value* of a
           member its registry already ships an entry at, so the check is pinned
@@ -552,6 +554,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
         reads it: an inherited one would not be its own declaration.
         """
+        from pcapkit.const.ipx.packet import Packet
         from pcapkit.const.reg.apptype import AppType
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
@@ -559,6 +562,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -573,6 +577,9 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
             Link: (EtherType, False, TransType.ICMP, 0x0800),
             # 6 is TransType.TCP, where Internet ships TCP.
             Internet: (TransType, False, EtherType.XEROX_NS_IDP, 6),
+            # TransType.UDP is 17, Packet.NCP: IPX's registry of its own exists so
+            # that the one cannot key the other (#2169).
+            IPX: (Packet, True, TransType.UDP, 4),
             # The issue's own example: TransType.ICMP == LinkType.ETHERNET, where
             # both Frame and PCAPNG ship Ethernet.
             Frame: (LinkType, False, TransType.ICMP, 1),
@@ -624,17 +631,19 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
 
         The pairing is read from the owning class's own :func:`vars`, not with
         :func:`getattr`, which walks the MRO: :class:`~pcapkit.protocols.link.\
-loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link` and
-        :class:`~pcapkit.protocols.internet.ipx.IPX` subclasses
-        :class:`~pcapkit.protocols.internet.internet.Internet`, so each
+loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link`, so it
         *inherits* the attribute while owning a registry keyed by something
-        else entirely. A key is therefore registered here rather than only the
-        absent declaration asserted: checking address family ``2`` against
-        :class:`~pcapkit.const.reg.ethertype.EtherType`, or an
-        :class:`~pcapkit.const.ipx.packet.Packet` member against
-        :class:`~pcapkit.const.reg.transtype.TransType`, rejects every key
-        these registries do accept, and an assertion on
-        :func:`vars` alone passes either way.
+        else entirely, and no enum names its keys for it to declare one of its
+        own. A key is therefore registered here rather than only the absent
+        declaration asserted: checking address family ``2`` against
+        :class:`~pcapkit.const.reg.ethertype.EtherType` rejects every key this
+        registry does accept, and an assertion on :func:`vars` alone passes
+        either way.
+
+        :class:`~pcapkit.protocols.internet.ipx.IPX` declares a pairing of its
+        own instead (#2511), so a bare packet type and a member of its own enum
+        both reach it, where :class:`~pcapkit.protocols.internet.internet.Internet`'s
+        would refuse the first and misread the second as an IP protocol number.
         """
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.foundation.registry.protocols import register_protocol_code
@@ -651,9 +660,12 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link` and
         for destination, parent, key in cases:
             with self.subTest(destination=destination.__name__, key=key):
                 self.assertIn('__proto__', vars(destination))  # it owns a registry
-                self.assertNotIn('__proto_key__', vars(destination))  # declares no pairing
-                # inherited, not declared -- which is what makes the ``vars()`` read load-bearing
-                self.assertEqual(destination.__proto_key__, parent.__proto_key__)
+                if destination is IPX:
+                    self.assertNotEqual(vars(destination)['__proto_key__'], parent.__proto_key__)
+                else:
+                    self.assertNotIn('__proto_key__', vars(destination))  # declares no pairing
+                    # inherited, not declared -- which is what makes the ``vars()`` read load-bearing
+                    self.assertEqual(destination.__proto_key__, parent.__proto_key__)
 
                 class FakeProtocol:
                     pass

@@ -62,6 +62,7 @@ from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.internet.ipx import IPX
 from pcapkit.protocols.internet.mh import MH
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.link.loopback import Loopback
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import ProtocolBase
@@ -147,6 +148,7 @@ __all__ = [
     'register_pcap', 'register_pcapng',
 
     'register_ethertype',
+    'register_loopback',
 
     'register_transtype',
     'register_ipx',
@@ -585,7 +587,7 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
                      destination.__name__, key)
 
 
-def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
+def _check_code(code: 'Any', kind: 'Optional[type]', target: 'Type[ProtocolBase]', *,
                 number: 'bool' = False) -> 'None':
     """Reject a registration key that is not a member of the enum its
     destination registry is keyed by.
@@ -602,13 +604,16 @@ def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
 
     Args:
         code: Registration key handed to the registrar.
-        kind: Enum the registrar is typed on.
+        kind: Enum the registrar is typed on, or :data:`None` for a registry
+            keyed by a number no enum names, which takes a bare :class:`int`
+            only (:issue:`2511`).
         target: Protocol class whose registry ``code`` is destined for, named in
             the error message so a rejection says *whose* registry rejected the
             key rather than only what it wanted -- its callers share one
             message, and several of them are typed on the same enum.
         number: Whether a bare :class:`int` is a valid key too, as for the
             registrars keyed on a port number or a payload protocol identifier.
+            Implied when ``kind`` is :data:`None`.
 
     Raises:
         RegistryError: If ``code`` is not a member of ``kind`` and, with
@@ -618,12 +623,18 @@ def _check_code(code: 'Any', kind: 'type', target: 'Type[ProtocolBase]', *,
             (:issue:`2269`).
 
     """
-    if isinstance(code, kind):
+    if kind is not None and isinstance(code, kind):
         return
+    number = number or kind is None
     member = isinstance(code, (enum.Enum, aenum.Enum))
     if number and isinstance(code, int) and not isinstance(code, bool) and not member:
         return
-    expected = f'an int or a member of {kind.__name__}' if number else f'a member of {kind.__name__}'
+    if kind is None:
+        expected = 'an int'
+    elif number:
+        expected = f'an int or a member of {kind.__name__}'
+    else:
+        expected = f'a member of {kind.__name__}'
     if member:
         raise RegistryError(f'{target.__name__}: code must be {expected}, not a member of '
                             f'{type(code).__name__}: {code!r}')
@@ -826,6 +837,57 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
     _register_name(module, (Link, code))
 
 
+@overload
+def register_loopback(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_loopback(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.loopback.Loopback.__proto__
+def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                      class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.loopback.Loopback.__proto__` registry.
+
+    Arguments:
+        code: BSD address family
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Important:
+        Unlike :func:`register_ethertype`, ``code`` is an address family,
+        **not** an EtherType: :class:`~pcapkit.protocols.link.loopback.Loopback`
+        keeps a registry of its own.
+
+    Raises:
+        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
+            not accepted, even though it is one), or is a member of an enum, or
+            ``module`` is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+            subclass.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, None, Loopback)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    Loopback.register(code, module)
+    logger.debug('registered loopback address family: %s', code)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (Loopback, code))
+
+
 ###############################################################################
 # Internet Layer Registries
 ###############################################################################
@@ -876,13 +938,13 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
 
 
 @overload
-def register_ipx(code: 'IPX_Packet', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+def register_ipx(code: 'int | IPX_Packet', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
-def register_ipx(code: 'IPX_Packet', module: 'str', class_: 'str') -> 'None': ...
+def register_ipx(code: 'int | IPX_Packet', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.internet.ipx.IPX.__proto__
-def register_ipx(code: 'IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+def register_ipx(code: 'int | IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                  class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -894,7 +956,7 @@ def register_ipx(code: 'IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBas
     :data:`pcapkit.protocols.internet.ipx.IPX.__proto__` registry.
 
     Arguments:
-        code: IPX Packet Type as in :class:`~pcapkit.const.ipx.packet.Packet`
+        code: IPX Packet Type, as in :class:`~pcapkit.const.ipx.packet.Packet`
         module: module name or module descriptor or a
             :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
         class\_: class name
@@ -905,20 +967,21 @@ def register_ipx(code: 'IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBas
         keeps a registry of its own (:issue:`2169`).
 
     Raises:
-        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipx.packet.Packet`
-            member, e.g. a :class:`~pcapkit.const.reg.transtype.TransType`
-            member, or ``module`` is not a
-            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
+            is not accepted, even though it is one) nor a
+            :class:`~pcapkit.const.ipx.packet.Packet` member, e.g. a
+            :class:`~pcapkit.const.reg.transtype.TransType` member, or ``module``
+            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
     .. versionadded:: 1.6.0
 
     """
-    _check_code(code, IPX_Packet, IPX)
+    _check_code(code, IPX_Packet, IPX, number=True)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     IPX.register(code, module)
-    logger.debug('registered IPX packet type protocol: %s', code.name)
+    logger.debug('registered IPX packet type protocol: %s', code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):

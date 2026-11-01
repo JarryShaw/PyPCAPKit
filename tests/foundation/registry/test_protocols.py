@@ -474,6 +474,7 @@ class ProtocolRegistryTests(unittest.TestCase):
             (registry.register_pcapng, LinkType.ETHERNET, [(registry.PCAPNG, 'register')]),
             (registry.register_ethertype, EtherType.Internet_Protocol_version_4,
              [(registry.Link, 'register')]),
+            (registry.register_loopback, 2, [(registry.Loopback, 'register')]),
             (registry.register_transtype, TransType.TCP, [(registry.Internet, 'register')]),
             (registry.register_ipx, IPXPacket.NCP, [(registry.IPX, 'register')]),
         ]

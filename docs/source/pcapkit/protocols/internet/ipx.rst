@@ -32,6 +32,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register
 
    .. automethod:: _make_data
    .. automethod:: _next_exthdr_depth
@@ -39,6 +40,8 @@ Octets      Bits        Name                    Description
    .. automethod:: __index__
 
    .. autoattribute:: __proto__
+      :no-value:
+   .. autoattribute:: __proto_key__
       :no-value:
 
 Header Schemas

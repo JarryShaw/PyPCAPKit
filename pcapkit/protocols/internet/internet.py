@@ -158,9 +158,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: ``code=`` key is checked exactly as
     #: :func:`~pcapkit.foundation.registry.protocols.register_transtype` checks
     #: its own -- a subclass sharing this registry is therefore checked as
-    #: :class:`Internet` is, while :class:`~pcapkit.protocols.internet.ipx.IPX`,
-    #: which keeps one of its own, declares its own pairing or none at all
-    #: (:issue:`2268`).
+    #: :class:`Internet` is (:issue:`2268`), while
+    #: :class:`~pcapkit.protocols.internet.ipx.IPX`, which keeps one of its own,
+    #: declares its own pairing (:issue:`2511`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_TransType, False)
 
     #: int: How many IPv6 extension headers in a row the next layer follows:

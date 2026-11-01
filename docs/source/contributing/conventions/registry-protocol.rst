@@ -651,16 +651,40 @@ public wrapper in :mod:`pcapkit.foundation.registry`, carrying the validation th
 established ones carry. A map's registration comes in two parts:
 
 1. **A** ``register`` **or** ``register_<kind>`` **classmethod** on the class owning
-   the map, which writes it and warns when it displaces an entry.
+   the map -- ``register`` for ``__proto__``, ``register_<kind>`` for ``__<kind>__``
+   -- which writes it and warns when it displaces an entry. An inherited one counts
+   only when it is typed and validated for exactly that map's keys, which the owner
+   chose over an override on every class (:issue:`2511`). So
+   :class:`~pcapkit.protocols.transport.tcp.TCP` and
+   :class:`~pcapkit.protocols.transport.udp.UDP` keep
+   :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
+   typed for the port their maps are keyed by, while
+   :class:`~pcapkit.protocols.internet.ipx.IPX` and
+   :class:`~pcapkit.protocols.link.loopback.Loopback` override
+   :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
+   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`, typed for
+   TransType and EtherType.
 2. **A** ``register_<name>`` **function** in
    :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
    line above its ``def``. It calls the classmethod and logs, and a bad argument
-   writes nothing: the code is checked against the map's enum with ``_check_code``,
-   a parser named by string has to exist as a ``_read_*`` method, and a
-   ``__proto__`` entry has to be a :class:`~pcapkit.protocols.protocol.ProtocolBase`
-   subclass or a descriptor naming one. A wrapper writing a ``__proto__`` map also
-   records the class's name with ``_register_name``, and one whose entries have a
-   schema registry takes a keyword-only ``schema``.
+   writes nothing: ``_check_code`` checks the code against the map's enum, or, with
+   ``kind=None``, as a bare :class:`int` where no enum keys the map; a parser named
+   by string has to exist as a ``_read_*`` method; and a ``__proto__`` entry has to
+   be a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass or a descriptor
+   naming one. A wrapper writing a ``__proto__`` map also records the class's name
+   with ``_register_name``, and one whose entries have a schema registry takes a
+   keyword-only ``schema``.
+
+**A** ``__proto__`` **wrapper is named after its keys.** One taking only an enum's
+members takes the enum's name, as
+:func:`~pcapkit.foundation.registry.protocols.register_ethertype` does; one taking
+bare :class:`int` keys, with or without an enum beside them, takes the owning
+protocol's name, as :func:`~pcapkit.foundation.registry.protocols.register_tcp` and
+:func:`~pcapkit.foundation.registry.protocols.register_loopback` do.
+:func:`~pcapkit.foundation.registry.protocols.register_pcap` and
+:func:`~pcapkit.foundation.registry.protocols.register_pcapng`, which split
+:func:`~pcapkit.foundation.registry.protocols.register_linktype` by capture format,
+take their format's name.
 
 :func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk` is the shape for a
 parser map:
@@ -680,5 +704,7 @@ parser map:
 
 :file:`tests/foundation/registry/test_registry_wrapper_coverage_2511_unit.py` walks
 every protocol class for such a map, and fails on one that no wrapper's tag names
-unless its ``EXCUSED`` table gives the reason.
+unless its ``EXCUSED`` table gives the reason. It fails as well on a map whose owner
+defines no ``register*`` classmethod of its own, unless its ``INHERITED`` table names
+the one typed for that map's keys.
 

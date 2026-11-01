@@ -196,7 +196,9 @@ The registry function per protocol type:
 
 A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
 number, so it registers through
-:func:`~pcapkit.foundation.registry.protocols.register_ipx`.
+:func:`~pcapkit.foundation.registry.protocols.register_ipx`; one carried over BSD
+loopback is keyed by address family rather than by EtherType, and registers through
+:func:`~pcapkit.foundation.registry.protocols.register_loopback`.
 
 Samples
 ~~~~~~~

@@ -31,6 +31,7 @@ __all__ = [
     'register_linktype',
     'register_pcap', 'register_pcapng',
     'register_ethertype',
+    'register_loopback',
     'register_transtype',
     'register_ipx',
     'register_icmp_type',
