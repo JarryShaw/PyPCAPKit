@@ -58,6 +58,13 @@ as below:
    length from the payload and dropped those octets; it takes them as
    ``packet_length`` and ``trailer`` (:issue:`1249`, :issue:`1455`).
 
+.. versionchanged:: 1.6.0
+
+   The OSPFv2 checksum is computed when
+   :meth:`~pcapkit.protocols.application.ospf.OSPF.make` is given none, and
+   verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+   (:issue:`2475`).
+
 """
 import ipaddress
 from typing import TYPE_CHECKING, cast
@@ -74,6 +81,7 @@ from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.application.ospf import OSPF as Schema_OSPF
 from pcapkit.protocols.schema.application.ospf import \
     CryptographicAuthentication as Schema_CryptographicAuthentication
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -214,6 +222,21 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             ospf.__update__([
                 ('trailer', schema.trailer),
             ])
+
+        # NOTE: The checksum leaves out the 8-octet Authentication field at
+        # octet 16, and is unused under cryptographic authentication (RFC 2328).
+        if config.CHECKSUM_VERIFY and ospf.version == 2:
+            from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            if ospf.autype == Enum_Authentication.Cryptographic_authentication:
+                status = ChecksumStatus.NOT_COMPUTED
+            else:
+                end = max(ospf.len, self.length)
+                status = verify_checksum(self.alias, self._data[:16] + self._data[self.length:end],
+                                         ospf.chksum, length=end - 8)
+            ospf.__update__([
+                ('checksum_status', status),
+            ])
+
         # OSPF carries no next-protocol field -- the body is LSAs and packet-type
         # specific fields, which pcapkit does not dissect -- so dispatch on the
         # -1 sentinel, as ARP does, rather than on a code read off the wire;
@@ -229,7 +252,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
              packet_length: 'Optional[int]' = None,
              router_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              area_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              auth_type: 'Enum_Authentication | StdlibEnum | AenumEnum | str | int' = Enum_Authentication.No_Authentication,
              auth_type_default: 'Optional[int]' = None,
              auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -252,7 +275,11 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 packet, or pass those as ``trailer`` instead.
             router_id: Router ID.
             area_id: Area ID.
-            checksum: Checksum.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, computed
+                for OSPFv2 over the packet but its authentication field
+                (:rfc:`2328#appendix-A.3.1`); zero otherwise, as cryptographic
+                authentication leaves it (:rfc:`2328#appendix-D.4.3`).
             auth_type: Authentication type.
             auth_type_default: Default value for ``auth_type`` if not specified.
             auth_type_namespace: Namespace for ``auth_type``.
@@ -303,18 +330,26 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
               or not 0 <= packet_length <= 0xFFFF):
             raise ProtocolError(f'OSPF: invalid packet length: {packet_length!r}')
 
-        return Schema_OSPF(
+        schema = Schema_OSPF(
             version=version,
             type=type_,  # type: ignore[arg-type]
             length=packet_length,
             router_id=router_id,
             area_id=area_id,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             auth_type=auth_type_,  # type: ignore[arg-type]
             auth_data=data,
             payload=payload,
             trailer=trailer,
         )
+
+        if (checksum is None and config.CHECKSUM_COMPUTE and version == 2
+                and auth_type_ != Enum_Authentication.Cryptographic_authentication):
+            from pcapkit.protocols.misc.checksum.checksum import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            # NOTE: Over the packet but the Authentication field, as :meth:`read` checks it.
+            octets = schema.pack()
+            schema.checksum = compute_checksum(octets[:16] + octets[self.length:max(packet_length, self.length)])
+        return schema
 
     ##########################################################################
     # Data models.
