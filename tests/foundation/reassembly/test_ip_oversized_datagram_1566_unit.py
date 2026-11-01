@@ -5,7 +5,8 @@ GitHub issue #1566. The data buffer holds 65,535 octets and ``RCVBT`` 8,192
 blocks. Guards against a completion check of ``all(RCVBT[0:(TDL + 7) // 8])``,
 whose slice stops silently at the table's end, so a final fragment declaring
 more data than fits completes its datagram short. A datagram completes only if its
-total data length fits the buffer.
+total data length fits the buffer. Both of those cases overlap a fragment, so on
+IPv6 they are abandoned first, per RFC 8200 section 4.5 (#2547).
 
 A fragment the buffer's end clips counts as cut there: its partial last block is
 a hole. An 8-octet non-final fragment at the largest offset therefore receives
@@ -58,38 +59,68 @@ class TestIPReassemblyOversizedDatagram(unittest.TestCase):
         # the buffer: 65579 is the issue's, and 65536 the shortest -- which a
         # check of ``(TDL + 7) // 8`` against ``len(RCVBT)`` lets through.
         from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
 
-        for cls in self._classes():
-            for tdl in (65579, 65536):
-                for strict in (True, False):
-                    with self.subTest(cls=cls.__name__, tdl=tdl, strict=strict):
-                        reasm = cls(strict=strict)
-                        reasm(self._packet(num=1, fo=LAST, mf=False, payload=DATA[LAST:BUFFER]))
-                        reasm(self._packet(num=2, fo=0, mf=True, payload=DATA[:64]))
-                        reasm(self._packet(num=3, fo=64, mf=False, payload=DATA[64:tdl]))
-                        datagram, = reasm.datagram
-                        self.assertIs(datagram.completed, Completion.PARTIAL)
-                        self.assertEqual(datagram.index, (1, 2, 3))
-                        self.assertEqual(datagram.payload,
-                                         (DATA[:BUFFER],) if strict else DATA[:BUFFER])
-                        self.assertEqual(datagram.conflict, ())
+        for tdl in (65579, 65536):
+            for strict in (True, False):
+                with self.subTest(tdl=tdl, strict=strict):
+                    reasm = IPv4(strict=strict)
+                    reasm(self._packet(num=1, fo=LAST, mf=False, payload=DATA[LAST:BUFFER]))
+                    reasm(self._packet(num=2, fo=0, mf=True, payload=DATA[:64]))
+                    reasm(self._packet(num=3, fo=64, mf=False, payload=DATA[64:tdl]))
+                    datagram, = reasm.datagram
+                    self.assertIs(datagram.completed, Completion.PARTIAL)
+                    self.assertEqual(datagram.index, (1, 2, 3))
+                    self.assertEqual(datagram.payload,
+                                     (DATA[:BUFFER],) if strict else DATA[:BUFFER])
+                    self.assertEqual(datagram.conflict, ())
 
     def test_the_issues_repro_is_partial(self) -> None:
         # Octets 0-65527, a malformed 7-octet non-final fragment at the largest
         # offset, then a final fragment at 64 declaring Total Length 65535,
         # of which 8 octets were captured.
         from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
 
-        for cls in self._classes():
+        for strict in (True, False):
+            with self.subTest(strict=strict):
+                reasm = IPv4(strict=strict)
+                for num, fo in enumerate(range(0, LAST, 4096), 1):
+                    reasm(self._packet(num=num, fo=fo, mf=True, payload=DATA[fo:min(fo + 4096, LAST)]))
+                reasm(self._packet(num=20, fo=LAST, mf=True, payload=b'M' * 7))
+                reasm(self._packet(num=21, fo=64, mf=False, payload=DATA[64:72], tl=65535))
+                datagram, = reasm.datagram
+                self.assertIs(datagram.completed, Completion.PARTIAL)
+
+    def test_ipv6_abandons_both_datagrams_on_their_overlap_first(self) -> None:
+        # In both cases above the long final fragment reaches into the one at
+        # the largest offset, so RFC 8200 section 4.5 abandons the datagram on
+        # its arrival, before the length bound is reached (#2547).
+        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv6 import IPv6
+
+        cases = {
+            'final-past-buffer': [
+                self._packet(num=1, fo=LAST, mf=False, payload=DATA[LAST:BUFFER]),
+                self._packet(num=2, fo=0, mf=True, payload=DATA[:64]),
+                self._packet(num=3, fo=64, mf=False, payload=DATA[64:65579]),
+            ],
+            'issue-repro': [
+                *(self._packet(num=num, fo=fo, mf=True, payload=DATA[fo:min(fo + 4096, LAST)])
+                  for num, fo in enumerate(range(0, LAST, 4096), 1)),
+                self._packet(num=20, fo=LAST, mf=True, payload=b'M' * 7),
+                self._packet(num=21, fo=64, mf=False, payload=DATA[64:72], tl=65535),
+            ],
+        }
+        for name, packets in cases.items():
             for strict in (True, False):
-                with self.subTest(cls=cls.__name__, strict=strict):
-                    reasm = cls(strict=strict)
-                    for num, fo in enumerate(range(0, LAST, 4096), 1):
-                        reasm(self._packet(num=num, fo=fo, mf=True, payload=DATA[fo:min(fo + 4096, LAST)]))
-                    reasm(self._packet(num=20, fo=LAST, mf=True, payload=b'M' * 7))
-                    reasm(self._packet(num=21, fo=64, mf=False, payload=DATA[64:72], tl=65535))
+                with self.subTest(case=name, strict=strict):
+                    reasm = IPv6(strict=strict)
+                    for packet in packets:
+                        reasm(packet)
                     datagram, = reasm.datagram
-                    self.assertIs(datagram.completed, Completion.PARTIAL)
+                    self.assertIs(datagram.completed, Completion.OVERLAP)
+                    self.assertEqual(datagram.index[-1], packets[-1].num)
 
     def test_a_fragment_the_buffer_clips_counts_like_a_cut_one(self) -> None:
         # 8 octets at the largest offset are clipped to 7; 7 octets on a

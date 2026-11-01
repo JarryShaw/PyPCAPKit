@@ -14,6 +14,8 @@ algorithm, replacing ``RCVBT``, but this implementation
 uses the elder one.
 
 """
+import bisect
+import sys
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.foundation.reassembly.data.data import Completion
@@ -21,14 +23,19 @@ from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagr
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
+from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
-    from typing import Type
+    from typing import Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.internet.ip import IP as IP_Protocol
 
 __all__ = ['IP']
+
+#: logging.Logger: Module-level logger, a child of the package-wide
+#: :data:`pcapkit.utilities.logging.logger`.
+logger = get_logger(__name__)
 
 
 class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
@@ -71,6 +78,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
        IPv6) clear is reported even when its BUFID is already buffered,
        rather than dropped (:issue:`2270`).
 
+    .. versionchanged:: 1.6.0
+
+       A subclass setting :attr:`__discard_overlap__` abandons a datagram on an
+       overlapping fragment instead of overwriting, and
+       :class:`~pcapkit.foundation.reassembly.ipv6.IPv6` does (:issue:`2547`).
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[IP_Protocol]'
@@ -81,6 +94,16 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
     #: overrides this, since :rfc:`6946#section-4` keeps an atomic fragment's
     #: buffer intact (:issue:`2270`).
     __isolate_atomic__: 'bool' = False
+
+    #: bool: Whether a fragment overlapping another of its datagram abandons
+    #: that datagram, reported as
+    #: :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`,
+    #: rather than overwriting the octets it overlaps. IPv4 overwrites them
+    #: (:rfc:`791#section-3.2`); IPv6 overrides this, since
+    #: :rfc:`8200#section-4.5` discards the datagram (:issue:`2547`).
+    #:
+    #: .. versionadded:: 1.6.0
+    __discard_overlap__: 'bool' = False
 
     ##########################################################################
     # Methods.
@@ -183,7 +206,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # would cover octets 0 to 65527 only, so a fragment reaching octet 65528,
         # e.g. at the largest Fragment Offset, would index past it (#1565)
         buf: 'Buffer[_AT]'
-        if isolated or BUFID not in self._buffer:
+        fresh = isolated or BUFID not in self._buffer
+        if fresh:
             buf = Buffer(
                 TDL=-1,                              # Total Data Length
                 RCVBT=bytearray(8192),              # Fragment Received Bit Table
@@ -192,14 +216,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 datagram=bytearray(IP_MAX_LENGTH),  # data buffer
                 timestamp=TS,                       # first-arriving fragment's clock reading
                 conflict=[],                        # conflicting octet ranges
+                extent=[],                          # merged fragments' extents
             )
             if not isolated:
                 self._buffer[BUFID] = buf
         else:
             buf = self._buffer[BUFID]
-            # put header into header buffer
-            if not FO:
-                buf.__update__(header=header)
 
         # append packet index
         buf.index.append(info.num)
@@ -253,6 +275,31 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         conflicts = self._detect_conflicts(buf.RCVBT, buf.TDL, buf.datagram, payload, start, stop)
         if conflicts:
             buf.conflict.extend(conflicts)
+
+        # :rfc:`8200#section-4.5` abandons a datagram, and discards every
+        # fragment received for it, once one fragment overlaps another; it lets
+        # an implementation drop an exact duplicate instead, which this does.
+        # The span is the length the fragment declares, not the octets it
+        # holds. A fresh buffer has no extent to overlap, so the ``pop`` below
+        # never reaches an isolated one.
+        if self.__discard_overlap__:
+            span = (FO, FO + max(length, 0), MF)
+            other = self._find_overlap(buf.extent, span[0], span[1])
+            if other is not None:
+                if other == span and buf.datagram[start:stop] == payload:
+                    return
+                logger.debug('%s: abandoning buffer %s on frame %d, which overlaps '
+                             'octets %d-%d', self.name, BUFID, info.num, other[0], other[1] - 1)
+                self._dtgram.extend(
+                    self.submit(self._buffer.pop(BUFID), bufid=BUFID, overlap=True)
+                )
+                return
+            if span[1] > span[0]:
+                bisect.insort(buf.extent, span)
+
+        # put header into header buffer, once the fragment is known to be kept
+        if not FO and not fresh:
+            buf.__update__(header=header)
 
         # :rfc:`791` is explicit that an overlapping fragment's data "will use
         # the more recently arrived copy in the data buffer" -- the opposite of
@@ -410,8 +457,39 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             index = run_stop
         return conflicts
 
+    @staticmethod
+    def _find_overlap(extent: 'list[tuple[int, int, bool]]', start: 'int',
+                      stop: 'int') -> 'Optional[tuple[int, int, bool]]':
+        """Find a merged fragment that an arriving one overlaps.
+
+        Arguments:
+            extent: this buffer's
+                :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.extent`,
+                sorted and pairwise disjoint.
+            start: the arriving fragment's first octet, i.e. its ``FO``.
+            stop: one past the arriving fragment's last octet.
+
+        Returns:
+            The extent of a merged fragment sharing an octet with the arriving
+            one, or :data:`None` if none does.
+
+        Since the extents are disjoint, only the last one starting at or before
+        ``start`` and the first one starting after it can reach the arriving
+        fragment.
+
+        """
+        if stop <= start:
+            return None
+        after = bisect.bisect_right(extent, (start, sys.maxsize, True))
+        if after and extent[after - 1][1] > start:
+            return extent[after - 1]
+        if after < len(extent) and extent[after][0] < stop:
+            return extent[after]
+        return None
+
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
-               checked: 'bool' = False, timeout: 'bool' = False) -> 'list[Datagram[_AT]]':
+               checked: 'bool' = False, timeout: 'bool' = False,
+               overlap: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
         Arguments:
@@ -425,6 +503,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
                 from
                 :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
+            overlap: whether this buffer is being submitted because an
+                overlapping fragment abandoned it (:attr:`__discard_overlap__`),
+                reported as :attr:`Completion.OVERLAP
+                <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`
+                and never as complete
 
         Returns:
             Reassembled packets.
@@ -437,13 +520,13 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         datagram = buf.datagram
         conflict = tuple(buf.conflict)
 
-        flag = checked or self._is_complete(buf)
+        flag = not overlap and (checked or self._is_complete(buf))
         ret = []  # type: list[Datagram[_AT]]
 
         # How completely this datagram came out, and why it stopped. Derived once,
         # so the two branches below cannot disagree about it.
         completion = Completion.COMPLETE if flag else (
-            Completion.TIMEOUT if timeout else Completion.PARTIAL
+            Completion.OVERLAP if overlap else Completion.TIMEOUT if timeout else Completion.PARTIAL
         )
 
         # if datagram is incomplete
