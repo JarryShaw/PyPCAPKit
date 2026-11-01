@@ -274,6 +274,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmp.html">ICMP - Internet Control Message Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmpv4.html">ICMPv4 - Internet Control Message Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
@@ -363,6 +366,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/icmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/icmpv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
@@ -387,6 +392,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/icmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/icmpv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/igmp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
@@ -1200,6 +1207,34 @@ It should be a subclass of <a class="reference internal" href="../protocols/inte
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.protocols.register_icmp_type">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.protocols.</span></span><span class="sig-name descname"><span class="pre">register_icmp_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry/protocols.html#register_icmp_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.protocols.register_icmp_type" title="Link to this definition">¶</a></dt>
+<dd><p>Register a message body parser.</p>
+<p>The function will register the given message body parser to the
+<a class="reference internal" href="../protocols/internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.ICMPv4.__type__" title="pcapkit.protocols.internet.icmpv4.ICMPv4.__type__"><code class="xref py py-data docutils literal notranslate"><span class="pre">__type__</span></code></a> registry when
+<code class="docutils literal notranslate"><span class="pre">code</span></code> is an ICMPv4 type, or to
+<a class="reference internal" href="../protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.ICMPv6.__type__" title="pcapkit.protocols.internet.icmpv6.ICMPv6.__type__"><code class="xref py py-data docutils literal notranslate"><span class="pre">__type__</span></code></a> when it is an
+ICMPv6 type. Each registry is written by that class’s own
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register_type()</span></code> classmethod.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/icmp.html#pcapkit.const.icmp.type.Type" title="pcapkit.const.icmp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> | <a class="reference internal" href="../const/icmpv6.html#pcapkit.const.icmpv6.type.Type" title="pcapkit.const.icmpv6.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></span>) – ICMP type as in <a class="reference internal" href="../const/icmp.html#pcapkit.const.icmp.type.Type" title="pcapkit.const.icmp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> or
+<a class="reference internal" href="../const/icmpv6.html#pcapkit.const.icmpv6.type.Type" title="pcapkit.const.icmpv6.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>.</p></li>
+<li><p><strong>meth</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span>) – Method name, or a <code class="docutils literal notranslate"><span class="pre">(parser,</span> <span class="pre">constructor)</span></code> pair of callables, to
+parse and construct the message body. A name names the
+<code class="docutils literal notranslate"><span class="pre">_read_data_type_*</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_data_type_*</span></code> methods of the
+protocol, and has to name an existing <code class="docutils literal notranslate"><span class="pre">_read_data_type_*</span></code> one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is not a member of either ICMP type enum,
+    or <code class="docutils literal notranslate"><span class="pre">meth</span></code> is a name with no matching <code class="docutils literal notranslate"><span class="pre">_read_data_type_*</span></code> method.</p>
 </dd>
 </dl>
 </dd></dl>
