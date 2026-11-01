@@ -186,3 +186,16 @@ class.** :mod:`~pcapkit.protocols.protocol` is exempt: its
 :class:`~pcapkit.protocols.protocol.ProtocolBase` and
 :class:`~pcapkit.protocols.protocol.Protocol` are framework bases rather than
 dissectors. Both ruled on :issue:`2529`.
+
+The name match ignores case and underscores: :mod:`~pcapkit.protocols.link.c_tag` holds
+:class:`~pcapkit.protocols.link.c_tag.C_Tag` and :mod:`~pcapkit.protocols.link.linux_sll1`
+holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/`` **and**
+``data/`` **modules follow the same layout**: the top-level class takes the module's
+name, and sub-structure classes such as
+:class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
+:issue:`2529`, where the classes that do not match yet are pending:
+:class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>`,
+:class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`,
+:class:`arp.InARP <pcapkit.protocols.link.arp.InARP>`,
+:class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
+:class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

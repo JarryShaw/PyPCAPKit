@@ -17,13 +17,16 @@ instead -- see :doc:`igmpv3`.
 message is read as: ``'IGMP'`` for IGMPv1, the name :rfc:`1112` gives it, and
 ``'IGMPv2'`` or ``'IGMPv3'`` for the others.
 
+The structure is keyed as for IGMPv1; an IGMPv2 message's keys start ``igmpv2``
+instead:
+
 ======= ========= ========================= ===================================
 Octets      Bits        Name                    Description
 ======= ========= ========================= ===================================
-  0           0   ``igmp.type``             Type
-  1           8   ``igmp.max_resp_time``    Max Response Time
-  2          16   ``igmp.checksum``         Checksum
-  4          32   ``igmp.group``            Group Address
+  0           0   ``igmpv1.type``           Type
+  1           8   ``igmpv1.max_resp_time``  Max Response Time
+  2          16   ``igmpv1.checksum``       Checksum
+  4          32   ``igmpv1.group``          Group Address
 ======= ========= ========================= ===================================
 
 .. autoclass:: pcapkit.protocols.internet.igmp.IGMP
