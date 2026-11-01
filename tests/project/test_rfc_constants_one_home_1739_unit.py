@@ -214,6 +214,15 @@ NOT_A_COPY = {
     ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
         "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
         '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'dlci_hi': (0, 6)}"):
+        "the 6-bit width of a Q.922 address field's high-order DLCI bits "
+        '(:rfc:`2427#section-3`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'cr': (6, 1)}"):
+        'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'fecn': (12, 1)}"):
+        'the FECN bit at bit offset 12 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the TCP Data Offset octet',
     ('pcapkit/protocols/application/dtls.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
         "the shortest DTLS 1.3 ciphertext, the record-number sample length "
         '(:rfc:`9147#section-4.2.3`), not a pcap record header',
@@ -225,6 +234,9 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
+    ('pcapkit/protocols/link/frad.py', '0 <= snap_pid <= 65535'):
+        "the max value of a SNAP PID, FRAD's own 2-octet field (:rfc:`2427#section-3`), "
+        'not an IP total length',
     ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
         'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
     ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
@@ -358,6 +370,19 @@ NOT_A_COPY = {
         "the default length of an SSLv2 CLIENT-HELLO challenge or SERVER-HELLO "
         "connection ID (the draft's own 16-32 octet minimum), not the PCAP classic "
         'record header length',
+    ('pcapkit/protocols/link/gre.py', 'return 16'):
+        "GRE's own longest possible header -- the 4-octet base plus all three optional "
+        'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
+    ('pcapkit/protocols/link/gre.py', '0 <= checksum <= 65535'):
+        "the max value of GRE's own 2-octet Checksum field (:rfc:`2784#section-2.5`), "
+        'not an IP total length',
+    ('pcapkit/protocols/link/gre.py', '0 <= reserved1 <= 65535'):
+        "the max value of GRE's own 2-octet Reserved1 field (:rfc:`2784#section-2.6`), "
+        'not an IP total length',
+    ('pcapkit/protocols/schema/link/gre.py', "{'reserved_2': (4, 9)}"):
+        "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
+        'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
+        'table',
 }
 
 #: Sweep hits of a homed value in a module whose own protocol owns no constant
@@ -423,6 +448,10 @@ UNRELATED = {
     'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
+    'pcapkit/protocols/link/netlink.py': ((16, 65535), "the nlmsghdr fixed header length (16 "
+                                          'octets, not a PCAP record header) and the max value '
+                                          "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
+                                          'an IPv4 total length)'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),

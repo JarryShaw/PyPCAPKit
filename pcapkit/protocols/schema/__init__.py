@@ -27,9 +27,12 @@ __all__ = [
     # Link Layer Protocols
     'ARP',
     'Ethernet',
+    'FRAD',
+    'GRE',
     'L2TP',
     'LinuxSLL1', 'LinuxSLL2',
     'Loopback',
+    'Netlink',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols
@@ -63,6 +66,8 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+    'IP_Pseudo',
+
     'ICMPv4',
     'ICMPv4_ICMPv4Type',
     'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',

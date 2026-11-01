@@ -124,6 +124,7 @@ else:
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.sslv2 import *
     from pcapkit.vendor.tcp import *
+    from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
 
 # Crawlers only. This list is also the default target list of
@@ -193,6 +194,8 @@ __all__ = [
     'SSLv2_HandshakeType', 'SSLv2_Version',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

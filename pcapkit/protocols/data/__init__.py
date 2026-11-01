@@ -62,6 +62,12 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Frame Relay Access Device
+    'FRAD',
+
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
@@ -70,6 +76,9 @@ __all__ = [
 
     # BSD Loopback Encapsulation
     'Loopback',
+
+    # Netlink Socket Framing
+    'Netlink',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
@@ -111,6 +120,9 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+
+    # IP Pseudo-Header
+    'IP_Pseudo',
 
     # Internet Control Message Protocol
     'ICMPv4',

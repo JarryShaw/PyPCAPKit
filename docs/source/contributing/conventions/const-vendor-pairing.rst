@@ -40,15 +40,47 @@ module docstring and comments, alongside the ``DATA`` literal it documents; the
 generated ``const`` module carries only the plain, templated docstring every
 other generated module does.
 
-Known Violation
-~~~~~~~~~~~~~~~
+``LINK``-and-Scrape Pairing: TLS Content Types and HandshakeType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`~pcapkit.const.tls.content_type.ContentType` and
-:class:`~pcapkit.const.tls.handshake_type.HandshakeType` (:pr:`2441`) both cite a live
-IANA registry and claim to name every value IANA assigns, with no
-:mod:`pcapkit.vendor` crawler behind either one -- no ``pcapkit/vendor/tls/``
-directory exists, and neither class appears in :data:`pcapkit.vendor.__all__`. This
-was flagged in that PR's own review and merged anyway on the stated reasoning that the
-crawler would follow later. Tracked as :issue:`2495`. Unlike ARPHRD, TLS's source
-*is* a live, web-published IANA table, so its eventual crawler takes the normal
-``LINK``-and-scrape shape, not the ``DATA`` attribute.
+:class:`~pcapkit.const.tls.handshake_type.HandshakeType` (:pr:`2441`) now have
+matching crawlers -- :mod:`pcapkit.vendor.tls.content_type` and
+:mod:`pcapkit.vendor.tls.handshake_type`, exported as ``TLS_ContentType`` and
+``TLS_HandshakeType`` -- closing the gap :issue:`2495` tracked. Both take the
+normal ``LINK``-and-scrape shape against IANA's ``tls-parameters-5.csv`` and
+``tls-parameters-7.csv``, as this doc said the eventual crawler would; unlike
+ARPHRD, TLS's source is a live, web-published table, so neither reads a
+``DATA`` literal.
+
+Running either crawler is a true no-op against the committed ``const``
+modules: regenerating both reproduces the tree byte-for-byte, the same
+guarantee ARPHRD and the ``sslv2`` restack carry. Getting there meant
+regenerating the ``const`` modules committed alongside :pr:`2441`, which
+predated the crawler and had drifted from it in three ways, caught in
+cross-review of :pr:`2503`:
+
+* the committed ``ContentType`` resolved values 32-63 to ``Unassigned`` via a
+  flat ``_missing_`` fallback, while IANA's registry -- and the crawler --
+  call that band ``Reserved`` (:rfc:`9147`); the committed docstring already
+  said "Reserved", the code did not. Regenerating fixes the resolved name for
+  that band.
+* the committed ``ContentType`` carried an ``invalid = 0`` sentinel with no
+  IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
+  inside its 0-19 ``Unassigned`` band, unnamed); it is dropped, and value 0
+  now resolves to ``Unassigned`` like the rest of that band.
+  :class:`~pcapkit.protocols.application.ssl.SSL` never checked this member
+  by name -- its wire-type allowlist already excluded value 0 by construction
+  -- so the sentinel's removal is behaviourally a no-op there too.
+* the committed ``HandshakeType`` cited RFC 5246, 6066 and 4680 for several
+  members where IANA's registry now cites :rfc:`9846`, and left IANA's two
+  single-row ``Unassigned`` entries (values 7 and 255) to ``_missing_``
+  rather than naming them; the crawler renders both as explicit members
+  (``unassigned_7``, ``unassigned_255``), matching the registry.
+
+The protocol-specific prose the hand-curated modules carried -- the
+record-layer header citations, the Unassigned/Reserved band rationale, the
+``_RESERVED``-suffix handling -- moved into the crawlers' own module
+docstrings and comments, the way :mod:`pcapkit.vendor.linux.arphrd` already
+does for ARPHRD; the generated ``const`` modules carry only the plain,
+templated docstring every other generated module does.

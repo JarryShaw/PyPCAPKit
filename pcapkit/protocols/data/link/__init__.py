@@ -9,6 +9,12 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
+# Frame Relay Access Device
+from pcapkit.protocols.data.link.frad import FRAD
+
+# Generic Routing Encapsulation
+from pcapkit.protocols.data.link.gre import GRE
+
 # Layer Two Tunnelling Protocol
 from pcapkit.protocols.data.link.l2tp import L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as L2TP_Flags
@@ -19,6 +25,9 @@ from pcapkit.protocols.data.link.linux_sll2 import LinuxSLL2
 
 # BSD Loopback Encapsulation
 from pcapkit.protocols.data.link.loopback import Loopback
+
+# Netlink Socket Framing
+from pcapkit.protocols.data.link.netlink import Netlink
 
 # 802.1Q/802.1ad VLAN Tag Types
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
@@ -31,6 +40,12 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Frame Relay Access Device
+    'FRAD',
+
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
@@ -39,6 +54,9 @@ __all__ = [
 
     # BSD Loopback Encapsulation
     'Loopback',
+
+    # Netlink Socket Framing
+    'Netlink',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
