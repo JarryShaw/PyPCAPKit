@@ -269,10 +269,10 @@ class DispatchBindingTests(unittest.TestCase):
         )
 
         self.assertEqual(str(frames[0].protochain), 'Ethernet:IPv4:TCP:HTTP/1.1')
-        self.assertIn('http', frames[0].info.to_dict()['ethernet']['ipv4']['tcp'])
+        self.assertIn('httpv1', frames[0].info.to_dict()['ethernet']['ipv4']['tcp'])
 
         self.assertEqual(str(frames[1].protochain), 'Ethernet:IPv4:UDP:HTTP/1.1')
-        self.assertIn('http', frames[1].info.to_dict()['ethernet']['ipv4']['udp'])
+        self.assertIn('httpv1', frames[1].info.to_dict()['ethernet']['ipv4']['udp'])
 
     def test_registered_ports_are_exactly_those_intended(self) -> None:
         from pcapkit.protocols.transport.tcp import TCP

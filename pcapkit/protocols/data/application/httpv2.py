@@ -50,13 +50,7 @@ class Flags(Data):
 
 
 class HTTPv2(Protocol):
-    """Data model for HTTP/2 protocol.
-
-    .. versionchanged:: 1.6.0
-
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
-
-    """
+    """Data model for HTTP/2 protocol."""
 
     #: Length of the frame payload, the 9-octet header excluded.
     length: 'int'

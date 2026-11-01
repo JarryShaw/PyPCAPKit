@@ -200,8 +200,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         """
         port = ports[0] if ports[0] in cls.__proto__ else ports[1]
-        protocol = cls._lookup_next_layer(
-            cls.__proto__, int(port) if isinstance(port, Enum_AppType) else port)
+        protocol = cls._dispatch_family(cls._lookup_next_layer(
+            cls.__proto__, int(port) if isinstance(port, Enum_AppType) else port), payload, len(payload))
 
         payload_io = io.BytesIO(payload)
         try:
@@ -260,6 +260,55 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @staticmethod
+    def _dispatch_family(klass: 'Type[ProtocolBase]', file_: 'bytes',
+                         length: 'int') -> 'Type[ProtocolBase]':
+        r"""Resolve a family base the registry binds to the member that parses ``file_``.
+
+        The HTTP ports bind the family base
+        :class:`~pcapkit.protocols.application.http.HTTP`, whose
+        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch` picks
+        :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+        :class:`~pcapkit.protocols.application.httpv2.HTTPv2` from the payload,
+        as :meth:`Internet._import_next_layer
+        <pcapkit.protocols.internet.internet.Internet._import_next_layer>` does
+        for :class:`~pcapkit.protocols.internet.igmp.IGMP` (:issue:`2524`).
+
+        Arguments:
+            klass: next layer protocol class, as the registry binds it
+            file\_: payload of the current layer
+            length: valid (*non-padding*) length
+
+        Returns:
+            The member for a family base, otherwise ``klass`` itself.
+
+        """
+        from pcapkit.protocols.application.http import HTTP as HTTPBase  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if klass is HTTPBase:
+            return HTTPBase._dispatch(file_, length)
+        return klass
+
+    @staticmethod
+    def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
+                          **kwargs: 'Any') -> 'ProtocolBase':
+        r"""Parse the next layer, resolving a family base to its member first.
+
+        Arguments:
+            klass: next layer protocol class
+            file\_: payload of the current layer
+            length: valid (*non-padding*) length
+            **kwargs: keyword arguments for the next layer's constructor
+
+        Returns:
+            As :meth:`Protocol._parse_next_layer
+            <pcapkit.protocols.protocol.Protocol._parse_next_layer>`, for the
+            class :meth:`_dispatch_family` resolves ``klass`` to.
+
+        """
+        return ProtocolBase._parse_next_layer(Transport._dispatch_family(klass, file_, length),
+                                              file_, length, **kwargs)
 
     @classmethod
     def _make_port(cls, port: 'Enum_AppType | int',

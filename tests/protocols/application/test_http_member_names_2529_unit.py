@@ -8,10 +8,11 @@ classes follow: :mod:`~pcapkit.protocols.application.httpv1`,
 ``httpv2`` modules ``HTTPv2``. The old module-level name ``HTTP`` keeps no alias
 (#1715, #1744), while the package-level names are unchanged.
 
-A parsed HTTP layer is the family base, so the key its enclosing layer stores it
-under stays ``http``; a member built directly reports its own class's name. Since
-the members no longer share the base's name, registering one keeps its own key
-rather than displacing the base under ``'HTTP'``.
+A dispatched layer is its version's class (#2524), so the key its enclosing layer
+stores it under follows that class's name, ``httpv1`` or ``httpv2``, as a member
+built directly does. Since the members no longer share the base's name,
+registering one keeps its own key rather than displacing the base under
+``'HTTP'``.
 
 This module is unit-tier: the segments are built in memory.
 
@@ -98,20 +99,22 @@ class HTTPMemberNameTests(unittest.TestCase):
                 self.assertIs(klass.__schema__, getattr(schema, class_name))
                 self.assertIs(klass.__data__, getattr(data, class_name))
 
-    def test_a_parsed_layer_keeps_the_http_key(self) -> None:
-        """The dispatched layer is the base, so its key is unchanged."""
-        from pcapkit.protocols.application.http import HTTP
+    def test_a_dispatched_layer_sits_under_its_versions_key(self) -> None:
+        """The dispatched layer is the member, so its key is the member's name."""
         from pcapkit.protocols.transport.tcp import TCP
 
-        for label, payload in PAYLOADS.items():
+        for class_name, payload in PAYLOADS.items():
+            klass = getattr(importlib.import_module(
+                f'pcapkit.protocols.application.{class_name.lower()}'), class_name)
             data = _TCP_TO_80 + payload
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 tcp = TCP(io.BytesIO(data), len(data))
-            with self.subTest(payload=label):
-                self.assertIs(type(tcp.payload), HTTP)
-                self.assertEqual(tcp.payload.info_name, 'http')
-                self.assertIs(tcp.info['http'], tcp.payload.info)
+            with self.subTest(payload=class_name):
+                self.assertIs(type(tcp.payload), klass)
+                self.assertEqual(tcp.payload.info_name, class_name.lower())
+                self.assertIs(tcp.info[class_name.lower()], tcp.payload.info)
+                self.assertNotIn('http', tcp.info)
 
     def test_a_member_built_directly_reports_its_own_name(self) -> None:
         for class_name, payload in PAYLOADS.items():

@@ -173,7 +173,7 @@ class ExtractionLimitTests(EndToEndTestCase):
                 self.assertIn(pcapkit.HTTP, frame)
                 self.assertEqual(
                     [type(protocol).__name__ for protocol in stack(frame)],
-                    ['Ethernet', 'IPv6', 'TCP', 'HTTP'],
+                    ['Ethernet', 'IPv6', 'TCP', 'HTTPv1'],
                 )
 
     def test_layer_limit_stops_at_the_named_layer_and_leaves_raw_above_it(self) -> None:

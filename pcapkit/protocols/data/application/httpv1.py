@@ -34,13 +34,7 @@ __all__ = [
 
 @info_final
 class HTTPv1(Protocol):
-    """Data model for HTTP/1.* protocol.
-
-    .. versionchanged:: 1.6.0
-
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
-
-    """
+    """Data model for HTTP/1.* protocol."""
 
     #: HTTP receipt.
     receipt: 'Header'

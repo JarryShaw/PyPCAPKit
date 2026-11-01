@@ -20,13 +20,7 @@ __all__ = ['HTTPv1']
 
 @schema_final
 class HTTPv1(Schema):
-    r"""Header schema for HTTP/1.\* packet.
-
-    .. versionchanged:: 1.6.0
-
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
-
-    """
+    r"""Header schema for HTTP/1.\* packet."""
 
     #: Packet data.
     data: 'bytes' = BytesField(lambda pkt: pkt['__length__'])

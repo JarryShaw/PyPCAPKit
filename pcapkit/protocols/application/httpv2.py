@@ -48,6 +48,7 @@ from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
 from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.protocols.application.http import _HTTP2_PREFACE
 from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
@@ -161,7 +162,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
     .. versionchanged:: 1.6.0
 
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
+       A payload opening with the connection preface parses, with the preface
+       kept as ``preface`` and counted in :attr:`length`, and :meth:`make` takes
+       ``preface``, since a dispatched HTTP/2 payload reaches this class rather
+       than :class:`~pcapkit.protocols.application.http.HTTP` (:issue:`2524`).
 
     """
 
@@ -200,9 +204,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         return 'HTTP/2'
 
     @property
-    def length(self) -> 'Literal[9]':
-        """Header length of current protocol."""
-        return 9
+    def length(self) -> 'int':
+        """Header length of current protocol: the 9-octet frame header, after the
+        24-octet connection preface when one opens the payload."""
+        return 9 + self._preface_length
 
     @property
     def version(self) -> 'Literal["2"]':
@@ -257,7 +262,24 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             *non-zero* short buffer is malformed either way, so it is rejected
             here whether or not ``length`` was given.
 
+            A payload opening with the HTTP/2 connection preface
+            (:rfc:`9113#section-3.4`) has the frame parsed from the octets after
+            it, as :meth:`HTTP._guess_version
+            <pcapkit.protocols.application.http.HTTP._guess_version>` parses it,
+            since a dispatched payload reaches this class rather than that one
+            (:issue:`2524`); the preface counts towards :attr:`length`.
+
         """
+        preface_len = len(_HTTP2_PREFACE)
+        if self.__header__ is None and self._data[:preface_len] == _HTTP2_PREFACE \
+                and (length is None or length >= preface_len):
+            remaining = (len(self) if length is None else length) - preface_len
+            if remaining == 0:
+                raise ProtocolError('HTTP/2: connection preface with no frame')
+            self._preface_length = preface_len
+            self._file.seek(preface_len)
+            length = remaining
+
         if length is None:
             # ``0 < ... < 9`` rather than ``... < 9``: an exhausted stream
             # (``len(self) == 0``) is left alone, so ``length`` reaches
@@ -306,7 +328,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if length is None:
-            length = len(self)
+            length = len(self) - self._preface_length
         schema = self.__header__
 
         # NOTE: ``schema.length`` is the *declared* length off the wire -- the
@@ -332,6 +354,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         else:
             meth = name[0]
         http = meth(schema.frame, header=schema)
+        if self._preface_length:
+            http.__update__({
+                'preface': _HTTP2_PREFACE,
+            })
 
         # The frame ends at its declared Length; whatever follows it in the
         # buffer (e.g. the next frame) is the undissected remainder.
@@ -347,6 +373,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
              sid: 'int' = 0,
              frame: 'Optional[bytes | Data_HTTP | Schema_FrameType | dict[str, Any]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             preface: 'bool' = False,  # pylint: disable=unused-argument
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
 
@@ -364,6 +391,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
                 does. An explicit :obj:`bytes` value, ``b''`` included, is
                 packed as raw octets instead.
             payload: Octets after the frame, e.g. the next frame.
+            preface: Whether the HTTP/2 connection preface goes ahead of the
+                frame; :meth:`pack` writes it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -538,6 +567,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             'sid': data.sid,
             'frame': data,
             'payload': cls._make_payload(data),
+            'preface': bool(data.get('preface')),
         }
 
     @staticmethod

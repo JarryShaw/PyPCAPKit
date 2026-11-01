@@ -94,13 +94,7 @@ class Type(EnumLookup, StrEnum):
 
 class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
            data=Data_HTTP, schema=Schema_HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/1.*).
-
-    .. versionchanged:: 1.6.0
-
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
-
-    """
+    """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
     ##########################################################################
     # Defaults.

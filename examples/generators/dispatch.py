@@ -718,7 +718,7 @@ PINNED_TARGETS = {
     'tcp/20': ('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
-    # below.
+    # below; it dispatches to HTTPv1 or HTTPv2 (#2524).
     'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
     'tcp/443': ('pcapkit.protocols.application.tls', 'TLS'),
     'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
@@ -936,10 +936,11 @@ def probe(case: 'Case') -> 'Outcome':
     # protochain`` on the string alone, even though no AH instance exists
     # anywhere in the chain. ``.protocols`` holds the actual ``type(instance)``
     # for each layer, which that substitution cannot spoof.
-    # An abstract target is a dispatcher: the chain holds the concrete class it
-    # picked, so a subclass of it counts as reaching it (IGMP -> IGMPv1/IGMPv2).
-    reached = any(klass is case.target
-                  or (inspect.isabstract(case.target) and issubclass(klass, case.target))
+    # A dispatcher target -- abstract, or defining ``_dispatch`` -- puts the
+    # member it picked in the chain, so a subclass of it counts as reaching it
+    # (IGMP -> IGMPv1/IGMPv2, HTTP -> HTTPv1/HTTPv2, #2524).
+    dispatcher = inspect.isabstract(case.target) or '_dispatch' in vars(case.target)
+    reached = any(klass is case.target or (dispatcher and issubclass(klass, case.target))
                   for klass in frame.protochain.protocols)
     error = '' if reached else _find_error(frame.info.to_dict())
     return Outcome(case, chain, reached, '', error)

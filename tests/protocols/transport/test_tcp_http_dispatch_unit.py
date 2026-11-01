@@ -9,7 +9,8 @@ reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those 
 wire -- :rfc:`9113#section-3` gives HTTP/2 the ``http`` scheme and HTTP/1.1's
 default port numbers -- so the
 port cannot decide the version and the payload has to, which is what
-:class:`pcapkit.protocols.application.http.HTTP` does.
+:class:`pcapkit.protocols.application.http.HTTP` does: its ``_dispatch`` picks
+``HTTPv1`` or ``HTTPv2``, and the layer is that class (#2524).
 
 Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
 segments below are built in memory, and the HTTP/2 payload is the nine octets
@@ -92,21 +93,21 @@ class TCPHTTPDispatchTests(unittest.TestCase):
         them and :func:`~pcapkit.corekit.decorators.beholder` turns the refusal
         into ``Raw``. The HTTP/1.1 half guards the HTTP/1.1 frames in the
         fixture corpus, which these ports route through
-        :meth:`HTTP._guess_version
-        <pcapkit.protocols.application.http.HTTP._guess_version>`: they have to
-        come back HTTP/1.1, and both halves are asserted here so neither can be
-        satisfied at the other's expense.
+        :meth:`HTTP._dispatch
+        <pcapkit.protocols.application.http.HTTP._dispatch>`: they have to
+        come back HTTP/1.1, each as its own version's class, and both halves are
+        asserted here so neither can be satisfied at the other's expense.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
 
         cases = (
-            (_TCP_TO_80, _HTTP2_FRAME, 'TCP:HTTP/2'),
-            (_TCP_TO_8080, _HTTP2_FRAME, 'TCP:HTTP/2'),
-            (_TCP_TO_80, _HTTP1_REQUEST, 'TCP:HTTP/1.1'),
-            (_TCP_TO_8080, _HTTP1_REQUEST, 'TCP:HTTP/1.1'),
+            (_TCP_TO_80, _HTTP2_FRAME, 'TCP:HTTP/2', 'httpv2'),
+            (_TCP_TO_8080, _HTTP2_FRAME, 'TCP:HTTP/2', 'httpv2'),
+            (_TCP_TO_80, _HTTP1_REQUEST, 'TCP:HTTP/1.1', 'httpv1'),
+            (_TCP_TO_8080, _HTTP1_REQUEST, 'TCP:HTTP/1.1', 'httpv1'),
         )
-        for header, payload, expected in cases:
+        for header, payload, expected, module in cases:
             with self.subTest(port=int.from_bytes(header[2:4], 'big'), chain=expected):
                 raw = header + payload
                 with warnings.catch_warnings():
@@ -119,7 +120,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
 
                 self.assertEqual(str(proto.protochain), expected)
                 self.assertEqual(type(proto.payload).__module__,
-                                 'pcapkit.protocols.application.http')
+                                 f'pcapkit.protocols.application.{module}')
 
 
 if __name__ == '__main__':

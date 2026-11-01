@@ -369,10 +369,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # ``httpv1.HTTPv1``, because HTTP/1 and HTTP/2 share these ports on the
             # wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on
             # 80 -- so the port cannot decide the version and the payload has to.
-            # That dispatch identifies the payload positively (the RFC 9113 §3.4
-            # connection preface, then an HTTP/1 start line) and trial-parses
-            # only as a last resort. UDP's table binds the same class for the
-            # same ports.
+            # ``HTTP._dispatch`` identifies the payload (the RFC 9113 §3.4
+            # connection preface, an HTTP/1 start line, then a plausible HTTP/2
+            # frame header) and the layer is ``HTTPv1`` or ``HTTPv2`` (#2524).
+            # UDP's table binds the same class for the same ports.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),

@@ -169,7 +169,7 @@ class HandshakeBody(EnumSchema[Enum_HandshakeType]):
     the same arrangement
     :class:`~pcapkit.protocols.schema.application.httpv2.FrameType` uses for
     HTTP/2 frame payloads, where ``type`` is consumed by the outer
-    :class:`~pcapkit.protocols.schema.application.httpv2.HTTP` schema.
+    :class:`~pcapkit.protocols.schema.application.httpv2.HTTPv2` schema.
 
     """
 
@@ -266,8 +266,8 @@ class SSLv2(Schema):
     :attr:`msg_type` is the one octet the `SSLv2 draft`_ puts at the front of
     every record's data rather than in the header proper, and it is read
     here, ahead of :attr:`body`, for the same reason
-    :attr:`~pcapkit.protocols.schema.application.httpv2.HTTP.type` is read
-    ahead of :attr:`~pcapkit.protocols.schema.application.httpv2.HTTP.frame`.
+    :attr:`~pcapkit.protocols.schema.application.httpv2.HTTPv2.type` is read
+    ahead of :attr:`~pcapkit.protocols.schema.application.httpv2.HTTPv2.frame`.
 
     .. _SSLv2 draft: https://datatracker.ietf.org/doc/html/draft-hickman-netscape-ssl-00
 

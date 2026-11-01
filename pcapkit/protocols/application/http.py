@@ -15,6 +15,16 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
+.. versionchanged:: 1.6.0
+
+   A payload a transport port binds to
+   :class:`~pcapkit.protocols.application.http.HTTP` is parsed by
+   :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+   :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, which
+   :meth:`~pcapkit.protocols.application.http.HTTP._dispatch` picks, rather than by
+   this class, so its data sits under ``httpv1`` or ``httpv2`` rather than ``http``
+   (:issue:`2524`).
+
 """
 import contextlib
 import re
@@ -29,9 +39,11 @@ from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Optional, Type
 
     from typing_extensions import Literal, Self
+
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['HTTP', 'test_start_line']
 
@@ -268,10 +280,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         The family base lists its members' names alone, as
         :meth:`IP.id() <pcapkit.protocols.internet.ip.IP.id>` does: ``HTTP/1``
         for :rfc:`9112`'s HTTP/1.1 and the versions before it, and :rfc:`9113`'s
-        ``HTTP/2``. A parsed layer is this class, so either name selects it
-        whichever version it holds, and :attr:`alias` tells the versions apart.
-        String ``==`` compares against ``(cls, *id())``, so ``== 'HTTP'`` is
-        :data:`False`, while ``'HTTP' in`` matches by class.
+        ``HTTP/2``. A dispatched layer is the member :meth:`_dispatch` picks, so
+        each name selects its own version, and the ``HTTP`` key selects either
+        through this tuple.
 
         Returns:
             Index ID of the protocol; the versioned classes narrow it to their
@@ -470,6 +481,43 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             return {'version': 2, 'preface': bool(data.get('preface')), **HTTPv2._make_data(data)}
         raise ProtocolError(f'HTTP: invalid data: must be HTTP/1.* or HTTP/2 data, '
                             f'not {type(data).__name__}')
+
+    @classmethod
+    def _dispatch(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase]':
+        """Pick the class that parses the HTTP message at the start of ``data``.
+
+        The payload is identified before any class is built, as
+        :meth:`_guess_version` identifies it: the connection preface, or else a
+        frame header a conforming sender could write, is HTTP/2, and an HTTP/1
+        start line is HTTP/1. A transport layer whose port binds this class
+        parses its payload with the class this returns, so a dispatched layer
+        is :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+        :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, never this base
+        (:issue:`2524`).
+
+        Args:
+            data: Payload of the transport layer, starting at the HTTP message.
+            length: The HTTP message's length, in octets.
+
+        Returns:
+            :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+            :class:`~pcapkit.protocols.application.httpv2.HTTPv2` for the version
+            the payload identifies as; :class:`~pcapkit.protocols.misc.raw.Raw`
+            for one it does not, which then keeps its octets undissected.
+
+        """
+        from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+
+        data = data[:length]
+        if data.startswith(_HTTP2_PREFACE):
+            return HTTPv2
+        if test_start_line(data):
+            return HTTPv1
+        if _test_http2_frame(data):
+            return HTTPv2
+        return Raw
 
     def _test_preface(self, length: 'int') -> 'bool':
         """Test whether the first ``length`` octets open with the HTTP/2 connection preface.

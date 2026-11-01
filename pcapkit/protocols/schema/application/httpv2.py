@@ -104,13 +104,7 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
 
 @schema_final
 class HTTPv2(Schema):
-    """Header schema for HTTP/2 packet.
-
-    .. versionchanged:: 1.6.0
-
-       Renamed from ``HTTP``, after its module (:issue:`2529`).
-
-    """
+    """Header schema for HTTP/2 packet."""
 
     #: Length of the frame payload, the 9-octet header excluded.
     length: 'int' = NumberField(length=3, signed=False)

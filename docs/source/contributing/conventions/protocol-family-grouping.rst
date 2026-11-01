@@ -48,7 +48,13 @@ HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 sh
 
 :class:`~pcapkit.protocols.internet.ip.IP` and
 :class:`~pcapkit.protocols.internet.ipsec.IPsec` define no ``read()``. The HTTP class
-does, and a parsed HTTP/1.1 or HTTP/2 layer is the HTTP class itself.
+does, for a caller that builds it directly, but a dispatched payload is parsed by its
+version's class: as the :class:`~pcapkit.protocols.internet.igmp.IGMP` base picks
+the member for an IGMP message,
+:meth:`HTTP._dispatch <pcapkit.protocols.application.http.HTTP._dispatch>` picks
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2` for the payload a transport
+port binds to HTTP (:issue:`2524`).
 
 .. _protocol-family-shapes:
 
@@ -160,10 +166,9 @@ Selector Matching
 :pr:`2443`. On an IPv4 frame, ``'IP' in`` is ``True`` and ``'IPv6' in`` is ``False``.
 On an IPv6 frame, ``'IP' in`` is ``True`` and ``'IPv4' in`` is ``False``.
 
-HTTP does not separate its versions this way. A parsed HTTP/1.1 or HTTP/2 layer is
-the family base, whose ``id()`` lists every member, so on either frame ``'HTTP/1' in``,
-``'HTTP/2' in`` and the ``HTTPv1`` and ``HTTPv2`` keys are all ``True``; ``alias``
-and ``version`` tell the versions apart.
+HTTP follows it too (:issue:`2524`). On an HTTP/1.1 frame, ``'HTTP' in`` and
+``'HTTP/1' in`` are ``True`` and ``'HTTP/2' in`` is ``False``, since the layer is
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1`; an HTTP/2 frame is the reverse.
 
 What a selector on a frame or a layer reaches is defined by
 :meth:`~pcapkit.protocols.protocol.Protocol.expand_comp`,
@@ -175,9 +180,9 @@ Selectors are case-insensitive: ``'ipv4' in`` an IPv4 frame is ``True``.
   is not expanded. On a parsed IPv4 layer, ``ipv4 == 'IPv4'`` is ``True`` and
   ``ipv4 == 'IP'`` is ``False``. On a parsed C-Tag layer, ``== 'VLAN'`` is ``True``,
   since ``VLAN`` is in its ``id()``, and ``== 'S_Tag'`` is ``False``, though
-  ``'S_Tag' in`` the layer is ``True``. On a parsed HTTP layer, ``== 'HTTP'`` is
-  ``False``, since the base's ``id()`` lists only its members, though ``'HTTP' in``
-  the layer is ``True``.
+  ``'S_Tag' in`` the layer is ``True``. On a parsed HTTP/1.1 layer, ``== 'HTTP/1'`` is
+  ``True`` and ``== 'HTTP'`` is ``False``, since no member's ``id()`` carries
+  ``HTTP``, though ``'HTTP' in`` the layer is ``True``.
 * ``in`` **and** ``[]`` expand the selector first. A registry key becomes its class
   plus that class's ``id()``, as does a class object, and a layer matches when any of
   those appears among its own class and ``id()``. So ``'S_Tag' in`` a C-Tag frame is
