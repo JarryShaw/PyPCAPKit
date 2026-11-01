@@ -89,21 +89,22 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"], Literal["IGMPv3"]]':
+    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv2"], Literal["IGMPv3"]]':
         """Index ID of the protocol.
 
         :rfc:`1112` names the protocol ``IGMP``, without a version, the same
         shape :class:`~pcapkit.protocols.internet.icmp.ICMP` takes for
         :rfc:`792` -- so the family base's own name doubles as IGMPv1's
-        canonical name. :rfc:`2236` names IGMPv2 with its own version.
+        canonical name. :rfc:`2236` and :rfc:`3376` name IGMPv2 and IGMPv3
+        with their own versions.
 
         Returns:
-            Index ID of the protocol, the family name and all three
-            versions; the concrete IGMPv1, IGMPv2 and IGMPv3 classes narrow
-            it to their own version.
+            Index ID of the protocol, the family name and the IGMPv2 and
+            IGMPv3 names; the concrete IGMPv1, IGMPv2 and IGMPv3 classes
+            narrow it to their own canonical name.
 
         """
-        return ('IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3')
+        return ('IGMP', 'IGMPv2', 'IGMPv3')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Read Internet Group Management Protocol.

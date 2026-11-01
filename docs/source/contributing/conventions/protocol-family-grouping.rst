@@ -66,7 +66,8 @@ Member Shapes
      - the member's own name only
      - :class:`~pcapkit.protocols.internet.ah.AH` ``('AH',)``,
        :class:`~pcapkit.protocols.internet.esp.ESP` ``('ESP',)``;
-       :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` ``('IGMPv2',)`` --
+       :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` ``('IGMPv2',)`` and
+       :class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` ``('IGMPv3',)`` --
        :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` narrows the same way,
        but to the RFC canonical name rather than a versioned one
        (:ref:`protocol-family-canonical-names`)
@@ -122,11 +123,13 @@ and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own version, since
 :rfc:`1112` names IGMPv1's protocol plain ``IGMP``, so
 :meth:`IGMPv1.id() <pcapkit.protocols.internet.igmpv1.IGMP.id>` is ``('IGMP',)`` and
 its ``alias`` is ``'IGMP'``, while
-:meth:`IGMPv2.id() <pcapkit.protocols.internet.igmpv2.IGMP.id>` keeps its own version,
-``('IGMPv2',)``, since :rfc:`2236` names it with one. The family base's ``id()``
-follows: :meth:`IGMP.id() <pcapkit.protocols.internet.igmp.IGMP.id>` is
-``('IGMP', 'IGMPv2')``, the family-inclusive shape, because IGMPv1's canonical name
-and the family's own name are the same string -- the same shape
+:meth:`IGMPv2.id() <pcapkit.protocols.internet.igmpv2.IGMP.id>` and
+:meth:`IGMPv3.id() <pcapkit.protocols.internet.igmpv3.IGMP.id>` keep their own
+versions, ``('IGMPv2',)`` and ``('IGMPv3',)``, since :rfc:`2236` and :rfc:`3376` name
+them with one. The family base's ``id()`` follows:
+:meth:`IGMP.id() <pcapkit.protocols.internet.igmp.IGMP.id>` is
+``('IGMP', 'IGMPv2', 'IGMPv3')``, the family-inclusive shape, because IGMPv1's
+canonical name and the family's own name are the same string -- the same shape
 :meth:`ICMP.id() <pcapkit.protocols.internet.icmp.ICMP.id>` takes, ``('ICMP', 'ICMPv6')``.
 
 .. _protocol-family-selectors:
