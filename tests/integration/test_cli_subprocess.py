@@ -96,7 +96,7 @@ class CommandLineTests(EndToEndTestCase):
             ])
 
         self.assertIn(sample_path('in.pcap'), completed.stdout)
-        self.assertIn('Frame   1: Ethernet:IPv6:IPv6_ICMP', completed.stdout)
+        self.assertIn('Frame   1: Ethernet:IPv6:ICMPv6', completed.stdout)
         self.assertIn('Frame   6: Ethernet:IPv4:UDP:Raw', completed.stdout)
         # ``-o report`` is relative, and the run happens in the temporary
         # directory, so the name the tool reports is relative too.

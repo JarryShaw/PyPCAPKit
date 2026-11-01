@@ -75,18 +75,15 @@ class TestLinuxSLL2(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``IPGRE``, ``IP6GRE``, ``IEEE80211_RADIOTAP`` and ``FRAD``, per
-        tcpdump.org's LINUX_SLL2 page, are kept raw. ``NETLINK`` is also in
-        :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE` but
-        dispatches to :class:`~pcapkit.protocols.link.netlink.Netlink`
-        instead; see :meth:`test_netlink_arphrd_dispatches_to_netlink`.
+        """The generic ``arphrd_type``s that never have ``protocol_type`` looked
+        up as an EtherType are kept raw; ``NETLINK`` and ``FRAD`` are the
+        exceptional dispatch cases, covered by their dedicated tests.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.IEEE80211_RADIOTAP):
             with self.subTest(arphrd=arphrd):
                 raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
                 parsed = LinuxSLL2(raw, len(raw))
@@ -118,6 +115,24 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertIsInstance(parsed.payload, Netlink)
         self.assertEqual(parsed.payload.info.nlmsg_type, 3)
         self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Netlink:Raw')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
+
+    def test_frad_arphrd_dispatches_to_frad(self) -> None:
+        """GitHub issue #2460: ``ARPHRD_FRAD`` dispatches to
+        :class:`~pcapkit.protocols.link.frad.FRAD` rather than falling back to
+        :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        frad = bytes.fromhex('0c21') + b'\x03\xcc' + IPV4
+        raw = _header(0x0800, 0, 0, ARPHRD.FRAD, 2, b'', 0) + frad
+        parsed = LinuxSLL2(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.FRAD)
+        self.assertEqual(type(parsed.payload).__name__, 'FRAD')
+        self.assertEqual(parsed.payload.info.dlci, 50)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:FRAD:IPv4:UDP')
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 

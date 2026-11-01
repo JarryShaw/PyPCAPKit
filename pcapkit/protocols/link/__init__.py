@@ -17,6 +17,7 @@ from pcapkit.protocols.link.link import Link
 # Link Layer Protocols
 from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
+from pcapkit.protocols.link.frad import FRAD
 from pcapkit.protocols.link.loopback import Loopback
 from pcapkit.protocols.link.netlink import Netlink
 
@@ -42,6 +43,7 @@ __all__ = [
     'LINKTYPE',
 
     # Link Layer Protocols
-    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
+    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
     'LinuxSLL2', 'Loopback', 'Netlink', 'S_Tag', 'VLAN',
+
 ]

@@ -24,6 +24,7 @@ link layer, with detailed implementation and methods.
    link
    ethernet
    arp
+   frad
    l2tp
    l2tpv2
    linux_sll
