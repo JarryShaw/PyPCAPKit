@@ -66,9 +66,9 @@ Member Shapes
      - the member's own name only
      - :class:`~pcapkit.protocols.internet.ah.AH` ``('AH',)``,
        :class:`~pcapkit.protocols.internet.esp.ESP` ``('ESP',)``;
-       :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` ``('IGMPv2',)`` and
-       :class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` ``('IGMPv3',)`` --
-       :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` narrows the same way,
+       :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMPv2>` ``('IGMPv2',)`` and
+       :class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMPv3>` ``('IGMPv3',)`` --
+       :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>` narrows the same way,
        but to the RFC canonical name rather than a versioned one
        (:ref:`protocol-family-canonical-names`)
    * - Family-inclusive
@@ -131,10 +131,10 @@ and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own version, since
 
 **IGMPv1 follows the same shape, by the same reasoning** (:issue:`2439`, :pr:`2506`).
 :rfc:`1112` names IGMPv1's protocol plain ``IGMP``, so
-:meth:`IGMPv1.id() <pcapkit.protocols.internet.igmpv1.IGMP.id>` is ``('IGMP',)`` and
+:meth:`IGMPv1.id() <pcapkit.protocols.internet.igmpv1.IGMPv1.id>` is ``('IGMP',)`` and
 its ``alias`` is ``'IGMP'``, while
-:meth:`IGMPv2.id() <pcapkit.protocols.internet.igmpv2.IGMP.id>` and
-:meth:`IGMPv3.id() <pcapkit.protocols.internet.igmpv3.IGMP.id>` keep their own
+:meth:`IGMPv2.id() <pcapkit.protocols.internet.igmpv2.IGMPv2.id>` and
+:meth:`IGMPv3.id() <pcapkit.protocols.internet.igmpv3.IGMPv3.id>` keep their own
 versions, ``('IGMPv2',)`` and ``('IGMPv3',)``, since :rfc:`2236` and :rfc:`3376` name
 them with one. The family base's ``id()`` follows:
 :meth:`IGMP.id() <pcapkit.protocols.internet.igmp.IGMP.id>` is
@@ -185,5 +185,27 @@ No Invented Suffixes
 :class:`~pcapkit.protocols.application.http.HTTP`,
 :class:`~pcapkit.protocols.link.vlan.VLAN` and
 :class:`~pcapkit.protocols.link.l2tp.L2TP` are the precedent. No ``_Family`` suffix is
-added (:pr:`2446`). A member may take a versioned class name, as
-:ref:`above <protocol-family-canonical-names>` describes.
+added (:pr:`2446`).
+
+**A protocol class takes its module's name**, whatever its canonical name and
+``id()``. The family base takes the family's name and a member its module's versioned
+name: :mod:`~pcapkit.protocols.internet.igmpv1` holds
+:class:`~pcapkit.protocols.internet.igmpv1.IGMPv1`, though its ``id()`` is ``('IGMP',)``
+(:ref:`above <protocol-family-canonical-names>`). **A module holds one protocol
+class.** :mod:`~pcapkit.protocols.protocol` is exempt: its
+:class:`~pcapkit.protocols.protocol.ProtocolBase` and
+:class:`~pcapkit.protocols.protocol.Protocol` are framework bases rather than
+dissectors. Both ruled on :issue:`2529`.
+
+The name match ignores case and underscores: :mod:`~pcapkit.protocols.link.c_tag` holds
+:class:`~pcapkit.protocols.link.c_tag.C_Tag` and :mod:`~pcapkit.protocols.link.linux_sll1`
+holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/`` **and**
+``data/`` **modules follow the same layout**: the top-level class takes the module's
+name, and sub-structure classes such as
+:class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
+:issue:`2529`, where the classes that do not match yet are pending:
+:class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>`,
+:class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`,
+:class:`arp.InARP <pcapkit.protocols.link.arp.InARP>`,
+:class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
+:class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

@@ -1103,9 +1103,9 @@ checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation 
 (:issue:`2470`).
 
 **IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
-The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`,
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` and
-:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` share one read path on
+The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>`,
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMPv2>` and
+:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMPv3>` share one read path on
 the abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base, which
 :meth:`~pcapkit.protocols.internet.igmp.IGMP._classify` dispatches to the right
 one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (:rfc:`3376`) adds the
