@@ -83,12 +83,23 @@ Decoded Fields
 * Everything else -- the same types once encrypted, ``application_data``
   and every other content type -- as opaque :obj:`bytes`.
 
+Records in One Segment
+----------------------
+
+Every whole record in a TCP segment is dissected, each as a
+:class:`~pcapkit.protocols.application.tls.TLS` layer whose payload is the next
+record (:issue:`2517`): a ``ServerHello`` followed by a ``ChangeCipherSpec``
+reads ``TCP:TLS 1.3:TLS 1.2``. Each record is a layer, so
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` bounds how many are
+dissected.
+
 Known Limitation
 ----------------
 
 **A record split across two TCP segments is not reassembled**, and decodes as
-:class:`~pcapkit.protocols.misc.raw.Raw`. A record may be up to 16 KiB
-against a typical 1460-octet MSS, so this is routine.
+:class:`~pcapkit.protocols.misc.raw.Raw`, as does the partial record a segment
+ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
+this is routine.
 
 .. versionadded:: 1.6.0
 
