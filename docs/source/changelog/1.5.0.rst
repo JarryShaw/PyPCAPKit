@@ -958,7 +958,7 @@ Changed
   :rfc:`791` specifies the opposite resolution, and records the disagreement
   instead (:pr:`482`).
 * renames with no compatibility alias left behind: ``HoleDiscriptor`` is spelled
-  :class:`.HoleDescriptor` and its package alias ``TCP_HoleDiscriptor`` is
+  :class:`~pcapkit.foundation.reassembly.data.tcp.HoleDescriptor` and its package alias ``TCP_HoleDiscriptor`` is
   ``TCP_HoleDescriptor`` (:pr:`350`).
 * subclass registration is **opt-in** for :class:`.Engine`, :class:`.Reassembly`,
   :class:`.TraceFlow` and ``dumpkit``'s :class:`.Dumper` (:issue:`514`). Each registers

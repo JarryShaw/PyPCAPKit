@@ -60,9 +60,10 @@ _TLS_VERSION_MAJOR = 0x03
 _DTLS_VERSION_MAJOR = 0xFE
 
 #: The content types a genuine record may carry. An allowlist rather than
-#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: the
-#: registry names ``invalid(0)``, a sentinel :rfc:`9846#section-5.1` rejects,
-#: and mints a member for any unassigned value it is asked for.
+#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: 0 is
+#: never assigned, a value :rfc:`9846#section-5.1` rejects outright, and the
+#: enum mints an ``Unassigned``/``Reserved`` member for any value IANA has
+#: not named.
 #:
 #: ``tls12_cid`` (25, :rfc:`9146#section-4`) is left out: its connection ID
 #: precedes ``length`` and has a negotiated length the record does not carry,
@@ -235,8 +236,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
         # parse yields, so resolve it through the registry to cover both.
-        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: ``invalid(0)`` is
-        # named yet never a record's content type.
+        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: an
+        # unassigned or reserved value still resolves to a named member via
+        # ``_missing_``, yet is never a record's genuine content type.
         content_type = Enum_ContentType.get(int(schema.content_type))
         if content_type not in _WIRE_CONTENT_TYPES:
             raise ProtocolError(
@@ -394,9 +396,12 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 ``fragment``.
 
         Notes:
-            Only an unfragmented ``ClientHello``/``ServerHello`` body is
-            decoded; a fragmented DTLS message is not reassembled
-            (:issue:`2440`), and other bodies stay undecoded (:issue:`2437`).
+            Only a whole ``ClientHello``/``ServerHello`` body is decoded: an
+            unfragmented one, or a fragmented DTLS message completed by a
+            :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine passed as
+            :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>`'s
+            ``reassembly`` (:issue:`2440`). Other bodies stay undecoded
+            (:issue:`2437`).
 
         """
         from pcapkit.protocols.data.application.dtls import \
@@ -445,6 +450,61 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             else:
                 messages.append(Data_Handshake(msg_type=msg_type, length=length, body=body))
         return tuple(messages)
+
+    def _make_tls_handshake_messages(self, messages: 'tuple[Any, ...]', *,
+                                     dtls: 'bool') -> 'bytes':
+        """Encode handshake messages back into a record fragment -- the
+        inverse of :meth:`_read_tls_handshake_messages`.
+
+        Args:
+            messages: Handshake messages, as returned by
+                :meth:`_read_tls_handshake_messages`, or already-encoded
+                :obj:`bytes` per message.
+            dtls: Whether to write DTLS's fragment header after each
+                message's ``msg_type``/``length`` header.
+
+        Returns:
+            Encoded record fragment.
+
+        """
+        out = bytearray()
+        for message in messages:
+            if isinstance(message, bytes):
+                out += message
+                continue
+
+            body = message.body
+            if isinstance(body, Data_ClientHello):
+                body_bytes = self._make_tls_client_hello(body, dtls=dtls)
+            elif isinstance(body, Data_ServerHello):
+                body_bytes = self._make_tls_server_hello(body)
+            else:
+                body_bytes = bytes(body)
+
+            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
+            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
+            is_fragmented = dtls and message.is_fragmented
+            length = message.length if is_fragmented else len(body_bytes)
+
+            if is_fragmented:
+                fragment_length = message.fragment_length
+                # ``body_bytes`` is this fragment's own octets, unless decoding the
+                # completing fragment replaced it with the full reassembled message
+                # (see :meth:`DTLS._reassemble_dtls_handshake`). Slice back to this
+                # record's own byte range so parse-then-rebuild stays byte-exact.
+                if len(body_bytes) != fragment_length:
+                    start = message.fragment_offset
+                    body_bytes = body_bytes[start:start + fragment_length]
+            else:
+                fragment_length = len(body_bytes)
+
+            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
+            if dtls:
+                out += (message.message_seq.to_bytes(2, 'big')
+                       + message.fragment_offset.to_bytes(3, 'big')
+                       + fragment_length.to_bytes(3, 'big'))
+            out += body_bytes
+        return bytes(out)
 
     def _read_tls_client_hello(self, body: 'bytes', *, dtls: 'bool') -> 'Data_ClientHello':
         """Decode a ``ClientHello`` handshake message body.
@@ -670,50 +730,6 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if content_type == Enum_ContentType.change_cipher_spec:
             return bytes([int(content.msg)])
         return bytes(content)
-
-    def _make_tls_handshake_messages(self, messages: 'tuple[Any, ...]', *,
-                                     dtls: 'bool') -> 'bytes':
-        """Encode handshake messages back into a record fragment -- the
-        inverse of :meth:`_read_tls_handshake_messages`.
-
-        Args:
-            messages: Handshake messages, as returned by
-                :meth:`_read_tls_handshake_messages`, or already-encoded
-                :obj:`bytes` per message.
-            dtls: Whether to write DTLS's fragment header after each
-                message's ``msg_type``/``length`` header.
-
-        Returns:
-            Encoded record fragment.
-
-        """
-        out = bytearray()
-        for message in messages:
-            if isinstance(message, bytes):
-                out += message
-                continue
-
-            body = message.body
-            if isinstance(body, Data_ClientHello):
-                body_bytes = self._make_tls_client_hello(body, dtls=dtls)
-            elif isinstance(body, Data_ServerHello):
-                body_bytes = self._make_tls_server_hello(body)
-            else:
-                body_bytes = bytes(body)
-
-            # NOTE: the message's ``length`` is trusted only for a fragmented DTLS message;
-            # otherwise it is recomputed from ``body_bytes``, so a rebuild stays exact.
-            is_fragmented = dtls and message.is_fragmented
-            length = message.length if is_fragmented else len(body_bytes)
-
-            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
-            if dtls:
-                fragment_length = message.fragment_length if is_fragmented else len(body_bytes)
-                out += (message.message_seq.to_bytes(2, 'big')
-                       + message.fragment_offset.to_bytes(3, 'big')
-                       + fragment_length.to_bytes(3, 'big'))
-            out += body_bytes
-        return bytes(out)
 
     def _make_tls_client_hello(self, data: 'Data_ClientHello', *, dtls: 'bool') -> 'bytes':
         """Encode a ``ClientHello`` handshake message body -- the inverse of

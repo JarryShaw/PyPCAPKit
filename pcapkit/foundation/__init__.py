@@ -20,7 +20,7 @@ from pcapkit.foundation.traceflow import *
 __all__ = [
     'Extractor',
 
-    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly',
+    'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
     'ReassemblyManager',
 
     'TCP_TraceFlow',
@@ -32,6 +32,7 @@ __all__ = [
     'register_pcap', 'register_pcapng',
     'register_ethertype',
     'register_transtype',
+    'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',

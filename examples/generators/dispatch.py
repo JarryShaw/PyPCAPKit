@@ -71,6 +71,7 @@ tier and runs on a fresh checkout with nothing generated.
 """
 from __future__ import annotations
 
+import inspect
 import os
 import pathlib
 import struct
@@ -341,8 +342,12 @@ def _link_build(code: 'int') -> 'Any':
 # Internet -- TransType.
 ###############################################################################
 
-#: Codes dispatched over an IPv4 outer header.
-_INTERNET_OVER_IPV4 = frozenset({4, 6, 17, 50, 51, 89, 111, 132})
+#: Codes dispatched over an IPv4 outer header. ICMP (1) is canonically
+#: IPv4-only -- its IPv6 equivalent is ICMPv6 (58), dispatched separately
+#: below. IGMP (2) is likewise IPv4-only -- multicast's IPv6 equivalent is
+#: MLD, which rides in ICMPv6 rather than as its own IP protocol number
+#: (#2439).
+_INTERNET_OVER_IPV4 = frozenset({1, 2, 4, 6, 17, 50, 51, 89, 111, 132})
 
 
 def _internet_registry() -> 'Any':
@@ -359,6 +364,18 @@ def _internet_payload(code: 'int') -> 'bytes':
         return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPv4:  # IP-in-IP.
         return _ip4(6, _tcp(9999))
+    if code == TransType.ICMP:
+        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv4(type=8, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
+    if code == TransType.IPv6_ICMP:
+        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv6(type=128, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.TCP:
         return _tcp(9999)
     if code == TransType.UDP:
@@ -380,6 +397,14 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.internet.ah import AH
         return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
                         payload=_tcp(9999)))
+    if code == TransType.IGMP:
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmpv2 import IGMP
+
+        # A General Query: an IGMPv1/v2 message is the 8-octet header and
+        # nothing else, so there is no further payload to wrap. A nonzero
+        # max_resp_time makes it IGMPv2, the class IGMP dispatches it to.
+        return bytes(IGMP(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
     if code == TransType.IPv6_NoNxt:
         # The registered target for this code *is* Raw -- there is no
         # dissector to hand it, "no next header" is the whole point -- so any
@@ -667,13 +692,16 @@ PINNED_TARGETS = {
     # -- Internet.__proto__ (TransType) ---------------------------------------
     'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
     'internet/IPv4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
     'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
     'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
     'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
     'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
     'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
     'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
     'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
+    'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
     'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw', 'Raw'),
     'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
     'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx', 'IPX'),
@@ -908,7 +936,11 @@ def probe(case: 'Case') -> 'Outcome':
     # protochain`` on the string alone, even though no AH instance exists
     # anywhere in the chain. ``.protocols`` holds the actual ``type(instance)``
     # for each layer, which that substitution cannot spoof.
-    reached = case.target in frame.protochain.protocols
+    # An abstract target is a dispatcher: the chain holds the concrete class it
+    # picked, so a subclass of it counts as reaching it (IGMP -> IGMPv1/IGMPv2).
+    reached = any(klass is case.target
+                  or (inspect.isabstract(case.target) and issubclass(klass, case.target))
+                  for klass in frame.protochain.protocols)
     error = '' if reached else _find_error(frame.info.to_dict())
     return Outcome(case, chain, reached, '', error)
 

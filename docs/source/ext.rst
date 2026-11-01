@@ -68,9 +68,21 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +                +                       +-------------------------------------------------------------+
 |                                                                  |                |                       | :class:`pcapkit.protocols.internet.esp.ESP`                 |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.internet.icmp.ICMP`                                       |
++                                                                  +                +-----------------------+-------------------------------------------------------------+
+|                                                                  | ICMP Family    | :class:`pcapkit.protocols.internet.icmpv4.ICMPv4`                                   |
++                                                                  +                +-----------------------+-------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.internet.icmpv6.ICMPv6`                                   |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.internet.ipx.IPX`                                                          |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.internet.hip.HIP`                                                          |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.internet.igmp.IGMP`                                       |
++                                                                  +                +-----------------------+-------------------------------------------------------------+
+|                                                                  | IGMP Family    | :class:`pcapkit.protocols.internet.igmpv1.IGMP`                                     |
++                                                                  +                +-----------------------+-------------------------------------------------------------+
+|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv2.IGMP`                                     |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 | Transport Layer                                                  | :class:`pcapkit.protocols.transport.tcp.TCP`                                                         |
 + (:class:`~pcapkit.protocols.transport.transport.Transport`       +----------------+-----------------------+-------------------------------------------------------------+
@@ -369,6 +381,10 @@ writes them:
 |                   | :class:`~pcapkit.protocols.internet.mh.MH`                 | :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`                           | :func:`~pcapkit.foundation.registry.protocols.register_mh_option`          |
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`MH.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_mh_extension`       |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4`         | :attr:`ICMPv4.__type__ <pcapkit.protocols.internet.icmpv4.ICMPv4.__type__>`                   | :meth:`~pcapkit.protocols.internet.icmpv4.ICMPv4.register_type`            |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6`         | :attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.ICMPv6.__type__>`                   | :meth:`~pcapkit.protocols.internet.icmpv6.ICMPv6.register_type`            |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`TCP.__option__ <pcapkit.protocols.transport.tcp.TCP.__option__>`                       | :func:`~pcapkit.foundation.registry.protocols.register_tcp_option`         |
 + Transport Layer   + :class:`~pcapkit.protocols.transport.tcp.TCP`              +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+

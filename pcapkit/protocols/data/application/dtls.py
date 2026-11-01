@@ -33,12 +33,13 @@ class DTLSHandshake(Handshake):
     in one datagram can be split across several.
 
     :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`
-    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` only when
-    :attr:`is_fragmented` is :data:`False`; a genuinely fragmented message is
-    not reassembled (:issue:`2440`; see
-    :class:`~pcapkit.protocols.application.dtls.DTLS` for why), so its
-    :attr:`body` is the single fragment's raw, undecoded octets regardless of
-    :attr:`msg_type`.
+    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` when
+    :attr:`is_fragmented` is :data:`False`, or when a
+    :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine passed to
+    :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>` completed
+    the message on this fragment (:issue:`2440`). Otherwise a fragmented
+    message's :attr:`body` is the fragment's raw octets. :attr:`is_fragmented`
+    reports whether the message was split on the wire, either way.
 
     """
 

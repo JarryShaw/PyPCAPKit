@@ -200,9 +200,11 @@ class InternetBaseUnitTests(unittest.TestCase):
         :func:`~pcapkit.foundation.registry.protocols.register_transtype` warn
         about an overwrite of something nobody ever registered.
 
-        ICMP is the cheapest demonstration: it has a well-known number that the
-        default registry does *not* carry, so a 24-byte IPv4 datagram declaring
-        ``proto=1`` is enough to leak it.
+        253 (:rfc:`3692` experimentation) is the cheapest demonstration: it has
+        a well-known, reserved number that the default registry does *not*
+        carry, so a 24-byte IPv4 datagram declaring ``proto=253`` is enough to
+        leak it. ICMP does not serve: it has a real entry in
+        :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`.
 
         """
         from pcapkit.const.reg.transtype import TransType
@@ -211,14 +213,15 @@ class InternetBaseUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.misc.raw import Raw
 
-        # version/IHL, ToS, total length 24, id, flags/offset, TTL, proto=ICMP,
-        # checksum, 127.0.0.1 -> 127.0.0.1, then four bytes of payload.
-        packet = bytes.fromhex('450000180000000040010000' '7f000001' '7f000001') + b'abcd'
+        # version/IHL, ToS, total length 24, id, flags/offset, TTL, proto=253
+        # (RFC 3692 experimentation), checksum, 127.0.0.1 -> 127.0.0.1, then
+        # four bytes of payload.
+        packet = bytes.fromhex('450000180000000040fd0000' '7f000001' '7f000001') + b'abcd'
         self.assertEqual(len(packet), 24)
 
         registry = Internet.__dict__['__proto__']
         before = set(registry)
-        self.assertNotIn(TransType.ICMP, before)
+        self.assertNotIn(TransType.Use_for_experimentation_and_testing_253, before)
 
         try:
             ip = IPv4(packet)
@@ -227,7 +230,8 @@ class InternetBaseUnitTests(unittest.TestCase):
             # number it arrived with -- only the registry write is skipped.
             self.assertIsInstance(ip.payload, Raw)
             self.assertEqual(bytes(ip.payload), b'abcd')
-            self.assertEqual(ip.payload.info.protocol, TransType.ICMP)
+            self.assertEqual(ip.payload.info.protocol,
+                             TransType.Use_for_experimentation_and_testing_253)
             self.assertEqual(set(registry), before)
 
             # A second datagram must behave identically; a class-level leak from
@@ -237,10 +241,10 @@ class InternetBaseUnitTests(unittest.TestCase):
 
             # And the number is still registrable without a bogus warning.
             with mock.patch('pcapkit.protocols.internet.internet.warn') as warn:
-                register_transtype(TransType.ICMP, Raw)
+                register_transtype(TransType.Use_for_experimentation_and_testing_253, Raw)
             self.assertEqual(warn.call_count, 0)
         finally:
-            registry.pop(TransType.ICMP, None)
+            registry.pop(TransType.Use_for_experimentation_and_testing_253, None)
 
 
 if __name__ == '__main__':

@@ -87,10 +87,14 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph internet [Internet Layer]
-           Internet --> IPX & IP & IPsec & IPv6_Ext
+           Internet --> IPX & IP & ICMP & IPsec & IPv6_Ext & IGMP
 
            subgraph ip [IP Family]
                IP --> IPv4 & IPv6
+           end
+
+           subgraph icmp [ICMP Family]
+               ICMP --> ICMPv4 & ICMPv6
            end
 
            subgraph ipsec [IPsec Family]
@@ -99,6 +103,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
            subgraph ipv6ext [IPv6 Extension Header]
                IPv6_Ext --> IPv6-Frag & IPv6-Opts & IPv6-Route & HOPOPT & MH & HIP
+           end
+
+           subgraph igmp [IGMP Family]
+               IGMP --> IGMPv1 & IGMPv2
            end
        end
 
@@ -139,7 +147,13 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click AH "internet/ah.html#pcapkit.protocols.internet.ah.AH"
        click ESP "internet/esp.html#pcapkit.protocols.internet.esp.ESP"
        click HIP "internet/hip.html#pcapkit.protocols.internet.hip.HIP"
+       click IGMP "internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP"
+       click IGMPv1 "internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP"
+       click IGMPv2 "internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP"
        click HOPOPT "internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
+       click ICMP "internet/icmp.html#pcapkit.protocols.internet.icmp.ICMP"
+       click ICMPv4 "internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.ICMPv4"
+       click ICMPv6 "internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.ICMPv6"
        click IP "internet/ip.html#pcapkit.protocols.internet.ip.IP"
        click IPsec "internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
        click IPv4 "internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
