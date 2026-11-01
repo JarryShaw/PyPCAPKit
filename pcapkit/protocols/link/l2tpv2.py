@@ -398,8 +398,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             L2TPv2 is reached through **UDP port 1701**, and a port is not an
             ``__index__`` value anywhere in this package -- every non-raising
             ``__index__`` returns a :class:`~pcapkit.const.reg.transtype.TransType`,
-            :class:`~pcapkit.const.reg.ethertype.EtherType` or
-            :class:`~pcapkit.const.reg.linktype.LinkType`, bar the PCAP frame and
+            :class:`~pcapkit.const.reg.ethertype.EtherType`,
+            :class:`~pcapkit.const.reg.linktype.LinkType` or
+            :class:`~pcapkit.const.linux.arphrd.ARPHRD`, bar the PCAP frame and
             PCAP-NG block instances that return their own index number, and
             :meth:`Application.__index__
             <pcapkit.protocols.application.application.Application.__index__>`

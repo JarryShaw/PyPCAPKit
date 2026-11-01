@@ -235,8 +235,8 @@ class TestGRE(unittest.TestCase):
                 GRE(**kwargs)
 
     def test_id_and_index(self) -> None:
-        """``__index__`` is ``IPGRE``, one of the two ``arphrd_type`` keys LinuxSLL
-        dispatches here (#2510); ``IP6GRE`` is the other.
+        """``__index__`` is ``IPGRE``, which LinuxSLL dispatches here alongside
+        ``IP6GRE`` (#2510).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.gre import GRE

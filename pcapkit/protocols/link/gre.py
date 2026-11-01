@@ -321,11 +321,10 @@ class GRE(Link[Data_GRE, Schema_GRE],
 
         Returns:
             Numeral registry index of the protocol in Linux ARP hardware
-            types: :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE`, one of
-            the two ``arphrd_type`` keys
+            types: :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE`, which
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
-            dispatches here; :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`
-            is the other.
+            dispatches here alongside
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`.
 
         """
         return Enum_ARPHRD.IPGRE  # type: ignore[return-value]

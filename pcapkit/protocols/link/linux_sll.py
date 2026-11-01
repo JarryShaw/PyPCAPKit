@@ -179,8 +179,8 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             <pcapkit.protocols.link.link.Link.register>` because
             :attr:`self.__proto__ <LinuxSLL.__proto__>` is keyed by
             ``arphrd_type`` rather than by EtherType. A registered
-            ``arphrd_type`` no longer has its ``protocol_type`` read as an
-            EtherType.
+            ``arphrd_type`` dispatches through it, and its ``protocol_type``
+            is not read as an EtherType.
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
