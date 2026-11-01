@@ -15,6 +15,9 @@ lost octets on rebuild, and a way ``make`` refused its own input:
 * #1251 (HTTP/2 half) -- ``PING`` opaque data of the wrong width was padded or
   cut rather than refused.
 
+Segments of several frames rebuild both ways too, each frame a layer of its own
+(#2536).
+
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
@@ -49,6 +52,44 @@ FRAMES = {
     '1247 SETTINGS repeated id': bytes.fromhex('00000c040000000000' '000100001000' '000100002000'),
     '1247 SETTINGS A, B, A': bytes.fromhex('000012040000000000' '000100000001' '000200000000' '000100000003'),
 }
+
+SETTINGS = bytes.fromhex('000006040000000000' '000300000064')
+WINDOW_UPDATE = bytes.fromhex('000004080000000000' '0000ffff')
+
+#: Segments of several frames, every one dissected as an HTTP/2 layer (#2536).
+SEGMENTS = {
+    'SETTINGS + WINDOW_UPDATE': SETTINGS + WINDOW_UPDATE,
+    'SETTINGS + SETTINGS ACK + WINDOW_UPDATE': SETTINGS + SETTINGS_ACK + WINDOW_UPDATE,
+    'preface + SETTINGS + SETTINGS ACK + WINDOW_UPDATE': PREFACE + SETTINGS + SETTINGS_ACK + WINDOW_UPDATE,
+    'HEADERS + DATA PADDED + DATA END_STREAM': (bytes.fromhex('000002010400000001' '8286')
+                                                + FRAMES['1244 DATA PADDED, Pad Length 0']
+                                                + bytes.fromhex('000003000100000001616263')),
+}
+
+#: A frame the segment ends inside: 7 octets of a 13-octet ``WINDOW_UPDATE``.
+PARTIAL_FRAME = WINDOW_UPDATE[:7]
+
+
+def _split_frames(wire: bytes) -> 'list[bytes]':
+    """``wire`` past any preface, cut at each frame's Length (RFC 9113, section 4.1)."""
+    wire = wire[len(PREFACE):] if wire.startswith(PREFACE) else wire
+    frames = []
+    while wire:
+        end = 9 + int.from_bytes(wire[:3], 'big')
+        frames.append(wire[:end])
+        wire = wire[end:]
+    return frames
+
+
+def _layers(proto: 'object') -> 'tuple[list, object]':
+    """Each HTTP/2 layer of ``proto``'s chain, in order, and the layer that ends it."""
+    from pcapkit.protocols.application.httpv2 import HTTPv2
+
+    layers = []
+    while isinstance(proto, HTTPv2):
+        layers.append(proto)
+        proto = proto.payload
+    return layers, proto
 
 
 class TestHTTP2RoundTrip(unittest.TestCase):
@@ -178,6 +219,85 @@ class TestHTTP2RoundTrip(unittest.TestCase):
                     HTTPv2(type=Frame.PING, sid=0, frame={'opaque_data': data})
         self.assertEqual(bytes(HTTPv2(type=Frame.PING, sid=0, frame={'opaque_data': b'01234567'}))[9:],
                          b'01234567')
+
+
+class TestHTTP2SegmentRoundTrip(unittest.TestCase):
+    """Pin every frame of a segment as its own layer, rebuilt both directions (#2536)."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_every_frame_is_an_http2_layer(self) -> None:
+        """Each layer holds the frame header the specification frames (RFC 9113, section 4.1)."""
+        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.misc.null import NoPayload
+
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                frames = _split_frames(wire)
+                layers, rest = _layers(HTTPv2(wire, len(wire)))
+                self.assertEqual(len(layers), len(frames))
+                self.assertIsInstance(rest, NoPayload)
+                for layer, frame in zip(layers, frames):
+                    self.assertEqual(layer.info.length, len(frame) - 9)
+                    self.assertEqual(int(layer.info.type), frame[3])
+                    self.assertEqual(int(layer.info.flags.__value__), frame[4])
+                    self.assertEqual(layer.info.sid, int.from_bytes(frame[5:9], 'big') & 0x7FFFFFFF)
+
+    def test_parse_then_rebuild_is_byte_exact(self) -> None:
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.transport.tcp import TCP
+
+        tcp_to_80 = bytes.fromhex('c350005000000001000000015010ffff00000000')
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = HTTP(wire, len(wire))
+                for rebuilt in (HTTP.from_data(parsed.info), HTTPv2.from_data(parsed.info),
+                                HTTP.from_data(parsed.info.to_dict())):
+                    self.assertEqual(bytes(rebuilt).hex(), wire.hex())
+                    self.assertEqual(len(_layers(rebuilt)[0]), len(_split_frames(wire)))
+
+                segment = tcp_to_80 + wire
+                tcp = TCP(segment, len(segment))
+                self.assertEqual(str(tcp.protochain), f'TCP:{parsed.protochain}')
+                self.assertEqual(bytes(TCP.from_data(tcp.info)).hex(), segment.hex())
+
+    def test_make_then_parse_is_byte_exact(self) -> None:
+        """Each frame made from its parsed fields, carrying the next as ``payload``."""
+        from pcapkit.protocols.application.httpv2 import HTTPv2
+
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = HTTPv2(wire, len(wire))
+                layers, _ = _layers(parsed)
+                maker = object.__new__(HTTPv2)
+                schema = b''  # type: object
+                for layer in reversed(layers[1:]):
+                    schema = maker.make(type=layer.info.type, flags=layer.info.flags.__value__,
+                                        reserved=layer.info.reserved, sid=layer.info.sid,
+                                        frame=layer.info, payload=schema)
+                first = layers[0].info
+                made = HTTPv2(type=first.type, flags=first.flags.__value__, reserved=first.reserved,
+                              sid=first.sid, frame=first, payload=schema, preface='preface' in first)
+                self.assertEqual(bytes(made).hex(), wire.hex())
+                self.assertEqual(str(made.protochain), str(parsed.protochain))
+                self.assertEqual(str(HTTPv2(bytes(made), len(wire)).protochain), str(parsed.protochain))
+
+    def test_trailing_partial_frame_stays_raw(self) -> None:
+        """The frame a segment ends inside is the reassembly limit, kept as its own octets."""
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, segment in SEGMENTS.items():
+            with self.subTest(segment=name):
+                wire = segment + PARTIAL_FRAME
+                parsed = HTTP(wire, len(wire))
+                layers, rest = _layers(parsed)
+                self.assertEqual(len(layers), len(_split_frames(segment)))
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(bytes(rest), PARTIAL_FRAME)
+                self.assertEqual(bytes(HTTP.from_data(parsed.info)).hex(), wire.hex())
 
 
 if __name__ == '__main__':

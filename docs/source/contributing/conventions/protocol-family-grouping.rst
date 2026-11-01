@@ -237,6 +237,13 @@ previous record's payload, so a TLS record's dynamic alias names its own version
 ``CLIENT-HELLO`` then a ``CLIENT-MASTER-KEY`` read ``TCP:SSLv2:SSLv2``. DTLS does not
 chain: two DTLS records in one datagram read ``DTLS 1.2:Raw`` (:issue:`2535`).
 
+**HTTP/2 frames chain the same way** (:issue:`2536`): a ``SETTINGS`` frame then a
+``WINDOW_UPDATE`` read ``TCP:HTTP/2:HTTP/2``. A later whole frame that fails to decode
+is :class:`~pcapkit.protocols.misc.raw.Raw` with the rest of the segment and the
+parser's ``error``, a frame the segment ends inside stays
+:class:`~pcapkit.protocols.misc.raw.Raw` with none, and ``protocol=``, ``layer=`` and
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` stop the chain, as for TLS.
+
 .. _protocol-family-canonical-names:
 
 Canonical Names

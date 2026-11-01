@@ -20,6 +20,26 @@ Octets      Bits        Name                    Description
   9          72   ``http.payload``            Frame Payload
 ======= ========= ===================== ==========================
 
+Frames in One Segment
+---------------------
+
+A whole frame after the first in a TCP segment is dissected as a further
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2` layer, the previous
+frame's payload (:issue:`2536`), as
+:class:`~pcapkit.protocols.application.tls.TLS` chains records: a ``SETTINGS``
+frame followed by a ``WINDOW_UPDATE`` reads ``TCP:HTTP/2:HTTP/2``. The
+exceptions:
+
+* A whole frame that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  with the parser's ``error``.
+* A frame the segment ends inside, its header or its payload cut short, stays
+  raw, with no error.
+* A parse told to stop at HTTP/2 (``protocol='HTTP/2'`` or
+  ``layer='Application'``) keeps the rest of the segment raw.
+* Each frame is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 .. versionchanged:: 1.5.0
 
    A frame's Length counts its payload alone, not the 9-octet frame header,
