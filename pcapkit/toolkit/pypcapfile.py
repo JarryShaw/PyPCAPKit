@@ -62,7 +62,7 @@ from pcapkit.protocols.schema.transport import tcp as Schema_TCP_Module
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, hold_warnings, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
@@ -478,10 +478,21 @@ def _default_accepts(name: 'str', header: 'bytes') -> 'bool':
         dissected. The answer depends on the octets alone, so the most recent
         answers are remembered, as many as the cache's ``maxsize``.
 
+        A header the parser rejects is dropped with its warnings, as a replaced
+        next layer is, and one it accepts reports them from the caller's line
+        (:issue:`2308`, :issue:`2526`).
+
     """
     protocol = Protocol_IPv4 if name == 'IPv4' else Protocol_TCP
     try:
-        protocol(header, len(header), protocol=name)
+        # NOTE: The parser reads its own header, outside ``_parse_next_layer``,
+        # so ``_beholding`` would hold nothing here (#2526).
+        with hold_warnings() as held:
+            try:
+                protocol(header, len(header), protocol=name)
+            except Exception:
+                held.discard = True
+                raise
     except Exception:  # as beholder does
         return False
     return True
