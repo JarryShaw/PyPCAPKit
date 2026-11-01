@@ -4,7 +4,8 @@
 GitHub issue #496: the ``__proto__`` dispatch registries decide which
 :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the next layer.
 #496 names the tables, joined by #904's
-``Internet.__proto__[TransType.Shim6]`` and #1574's loopback table.
+``Internet.__proto__[TransType.Shim6]``, #1574's loopback table and #2560's
+FRAD table.
 :file:`test_registry_runtime.py` checks that a table entry *resolves* to the
 right class object, and
 :file:`test_dispatch_bindings_unit.py` checks that a hand-picked set of codes
@@ -215,7 +216,7 @@ class DispatchRegistryTests(unittest.TestCase):
                 )
 
     def test_cases_cover_every_table_named_in_the_issue(self) -> None:
-        """The enumeration finds every entry, across the tables of #496 and #1574's loopback table.
+        """The enumeration finds every entry, across the tables of #496, #1574 and #2560.
 
         A guard on the shape of the result rather than on any one case: if the
         registries grow or shrink without this module noticing, the per-family
@@ -229,20 +230,22 @@ class DispatchRegistryTests(unittest.TestCase):
         # address families of Loopback.__proto__, #2438's
         # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
         # pcap and pcapng frame tables, #2439's IGMP, #2436's
-        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], and
-        # #2489's Internet.__proto__[TransType.DCCP].
-        self.assertEqual(len(cases), 57,
-                         'expected exactly 57 entries across the seven __proto__ '
-                         'tables named in GitHub issue #496 and the loopback table '
-                         'of #1574; a different count means a registry changed '
-                         'shape and this module was not updated to match')
+        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], #2489's
+        # Internet.__proto__[TransType.DCCP], and #2560's two NLPIDs of
+        # FRAD.__proto__.
+        self.assertEqual(len(cases), 59,
+                         'expected exactly 59 entries across the seven __proto__ '
+                         'tables named in GitHub issue #496, the loopback table '
+                         'of #1574 and the FRAD table of #2560; a different count '
+                         'means a registry changed shape and this module was not '
+                         'updated to match')
 
         by_family = {}  # type: dict[str, int]
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
             'link': 7, 'internet': 21, 'tcp': 5, 'udp': 4, 'sctp': 2,
-            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4,
+            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4, 'frad': 2,
         })
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:
