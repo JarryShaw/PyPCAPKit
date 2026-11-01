@@ -446,8 +446,11 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             :data:`None` if the payload is not a complete SSLv2 hello.
 
         """
+        # NOTE: ``__init__`` consumed the stops, so they are handed on; a stop this
+        # dispatcher matched (``'TLS'``, ``'SSL'``) is passed as its layer (#2567).
+        stops = {'layer': self.__layer__} if self._sigterm else {'layer': self._exlayer, 'protocol': self._exproto}
         try:
-            obj = SSLv2(self._data, length, **kwargs)
+            obj = SSLv2(self._data, length, __context__=self._exctx, **stops, **kwargs)
         except ProtocolError:
             return None
         info = obj.info
