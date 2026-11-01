@@ -232,7 +232,7 @@ class DispatchBindingTests(unittest.TestCase):
         :rfc:`2661` framing :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`
         implements, so the binding waits on an ``L2TPv3`` class rather than on a
         framing decision. 115 is also the first index anything in this family
-        would carry, which is why v3 gets a module of its own when written.
+        would carry.
 
         """
         from pcapkit.const.reg.transtype import TransType

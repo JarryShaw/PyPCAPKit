@@ -92,7 +92,7 @@ Only :class:`~pcapkit.protocols.application.rarp.RARP` ``('RARP', 'DRARP')`` is 
 to EtherType ``0x8035``
 (:attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`).
 A parsed RARP takes ``DRARP`` as its alias for operation 5, and
-:class:`~pcapkit.protocols.application.rarp.DRARP` ``('DRARP',)`` inherits the
+:class:`~pcapkit.protocols.application.drarp.DRARP` ``('DRARP',)`` inherits the
 ``__index__`` of RARP.
 
 A family-inclusive member is selected by any sibling's registry key (a key of

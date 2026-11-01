@@ -22,6 +22,7 @@ function rather than encapsulation, see
    ngap
    ospf
    rarp
+   drarp
    ssl
    sslv2
    tls

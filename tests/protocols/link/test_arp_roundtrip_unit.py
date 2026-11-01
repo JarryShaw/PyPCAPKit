@@ -4,7 +4,7 @@
 GitHub issues:
 
 * #1204: :class:`~pcapkit.protocols.link.arp.InARP` and
-  :class:`~pcapkit.protocols.application.rarp.DRARP` did not pass
+  :class:`~pcapkit.protocols.application.drarp.DRARP` did not pass
   ``schema=``/``data=``, so they fell back to the ``Raw`` schema and could not
   parse any input.
 * #1205: an Ethernet hardware address whose ``hlen`` is not 6 was read as
@@ -36,7 +36,7 @@ CLASSES = (
     ('pcapkit.protocols.link.arp', 'ARP'),
     ('pcapkit.protocols.link.arp', 'InARP'),
     ('pcapkit.protocols.application.rarp', 'RARP'),
-    ('pcapkit.protocols.application.rarp', 'DRARP'),
+    ('pcapkit.protocols.application.drarp', 'DRARP'),
 )
 
 
@@ -73,7 +73,7 @@ class TestARPRoundTrip(unittest.TestCase):
     def test_subclasses_round_trip(self) -> None:
         """#1204: the issue's repro parses and rebuilds for InARP and DRARP."""
         for module, name, oper in (('pcapkit.protocols.link.arp', 'InARP', '0008'),
-                                   ('pcapkit.protocols.application.rarp', 'DRARP', '0005')):
+                                   ('pcapkit.protocols.application.drarp', 'DRARP', '0005')):
             with self.subTest(cls=name):
                 cls = self._cls(module, name)
                 data = bytes.fromhex('000108000604' + oper + '001122334455' '0a000001'

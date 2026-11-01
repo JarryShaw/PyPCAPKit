@@ -7,11 +7,10 @@
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
 the tag layout shared by every VLAN tag [*]_. The concrete tags live in
-modules of their own, since they are reached through different registry indices
--- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag
-(``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad
-service tag (``0x88A8``). The tag structure is described as below, keyed as for
-a customer tag; a service tag's keys start ``s_tag`` instead:
+modules of their own: :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the
+802.1Q customer tag (``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag`
+for the 802.1ad service tag (``0x88A8``). The tag structure is described as
+below, keyed as for a customer tag; a service tag's keys start ``s_tag`` instead:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
@@ -39,14 +38,11 @@ therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.Protocol.i
 would nest one ``c_tag`` inside another, leaving nothing in the output to say
 which of the two was the service tag.
 
-Two distinct EtherTypes also mean two distinct
-:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the
-project's rule for when protocols get separate modules: siblings that *share* an
-index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
-:mod:`~pcapkit.protocols.link.arp` and
-:class:`~pcapkit.protocols.application.rarp.DRARP` shares
-:mod:`~pcapkit.protocols.application.rarp`. This base declares no index of its own --
-it is abstract and nothing dispatches to it -- so its ``__index__`` raises.
+Each tag has a module of its own because a module holds one protocol class,
+named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`
+exempt (:issue:`2529`). This base declares no
+:meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own -- it is
+abstract and nothing dispatches to it -- so its ``__index__`` raises.
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 

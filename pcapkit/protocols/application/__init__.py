@@ -27,7 +27,8 @@ from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.application.ngap import NGAP
 from pcapkit.protocols.application.ospf import OSPF
-from pcapkit.protocols.application.rarp import RARP, DRARP
+from pcapkit.protocols.application.rarp import RARP
+from pcapkit.protocols.application.drarp import DRARP
 from pcapkit.protocols.application.sslv2 import SSLv2
 from pcapkit.protocols.application.tls import TLS, SSLv3
 from pcapkit.protocols.application.dtls import DTLS

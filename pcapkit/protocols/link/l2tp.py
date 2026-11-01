@@ -176,9 +176,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
         Note:
             An abstract base is reached by nothing, so it has no index of its
-            own. That is also the project's rule for module layout -- a distinct
-            ``__index__`` means a distinct module, and a base carrying none
-            claims no module of its own beyond holding the family together.
+            own.
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
