@@ -34,7 +34,7 @@ class IPsec(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-
     """
 
     ##########################################################################
-    # Data models.
+    # Methods.
     ##########################################################################
 
     @classmethod

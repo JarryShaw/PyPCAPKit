@@ -241,36 +241,6 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             return ipv6_route
         return self._decode_next_layer(ipv6_route, schema.next, length - ipv6_route.length)
 
-    @staticmethod
-    def _make_hdr_ext_len(data_length: 'int') -> 'int':
-        """Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.
-
-        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is the length of the
-        Routing header in 8-octet units, not including the first 8 octets. The
-        fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so
-        the on-the-wire header is ``4 + data_length`` octets; equating that to
-        ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.
-        :func:`~pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length`
-        is the inverse, used on the read side.
-
-        This is the *only* place ``Hdr Ext Len`` is computed on the write side:
-        separate per-branch copies in :meth:`make` drift apart, so keep one
-        helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
-        away: the units either side differ (octets vs. 8-octet units), and
-        dropping the offset silently reinterprets the field.
-
-        Args:
-            data_length: packed length, in octets, of the type-specific data
-                (i.e. ``len(data_val.pack())`` for a
-                :class:`~pcapkit.protocols.schema.schema.Schema`-based payload, or the padded raw
-                :obj:`bytes` length for the unknown/raw-bytes case).
-
-        Returns:
-            The ``Hdr Ext Len`` field value.
-
-        """
-        return math.ceil(max(0, data_length - 4) / 8)
-
     def make(self,
              dst: 'Optional[IPv6Address | str | int| bytes]' = None,
              next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
@@ -513,6 +483,36 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             'hdr_ext_len': (data.length - 8) // 8,
             'payload': cls._make_payload(data),
         }
+
+    @staticmethod
+    def _make_hdr_ext_len(data_length: 'int') -> 'int':
+        """Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.
+
+        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is the length of the
+        Routing header in 8-octet units, not including the first 8 octets. The
+        fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so
+        the on-the-wire header is ``4 + data_length`` octets; equating that to
+        ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.
+        :func:`~pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length`
+        is the inverse, used on the read side.
+
+        This is the *only* place ``Hdr Ext Len`` is computed on the write side:
+        separate per-branch copies in :meth:`make` drift apart, so keep one
+        helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
+        away: the units either side differ (octets vs. 8-octet units), and
+        dropping the offset silently reinterprets the field.
+
+        Args:
+            data_length: packed length, in octets, of the type-specific data
+                (i.e. ``len(data_val.pack())`` for a
+                :class:`~pcapkit.protocols.schema.schema.Schema`-based payload, or the padded raw
+                :obj:`bytes` length for the unknown/raw-bytes case).
+
+        Returns:
+            The ``Hdr Ext Len`` field value.
+
+        """
+        return math.ceil(max(0, data_length - 4) / 8)
 
     def _read_data_type_none(self, schema: 'Schema_UnknownType', *, header: 'Schema_IPv6_Route') -> 'Data_UnknownType':
         """Read IPv6-Route unknown type data.

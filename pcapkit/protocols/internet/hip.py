@@ -886,6 +886,80 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: invalid format')
         return options
 
+    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
+                        version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
+        """Make HIP parameter.
+
+        A ``(code, value)`` pair carries either a mapping of keyword arguments
+        for the parameter's constructor, or a parsed
+        :class:`~pcapkit.protocols.data.internet.hip.Parameter` data model,
+        which goes to the constructor positionally through
+        :meth:`_make_hip_param_data` rather than expanded as keyword arguments
+        (:issue:`2352`).
+
+        Args:
+            parameters: HIP parameters
+            version: HIP protocol version
+
+        Returns:
+            HIP parameters and total length.
+
+        """
+        total_length = 0
+        if isinstance(parameters, list):
+            parameters_list = []  # type: list[Schema_Parameter | bytes]
+            for schema in parameters:
+                if isinstance(schema, bytes):
+                    # :rfc:`7401#section-5.2.1` pads every parameter to a
+                    # multiple of 8 octets, and Header Length counts in those
+                    # units; a raw parameter is taken to omit its padding.
+                    schema += bytes(-len(schema) % 8)
+                    parameters_list.append(schema)
+                    total_length += len(schema)
+                elif isinstance(schema, Schema):
+                    schema_packed = schema.pack()
+
+                    parameters_list.append(schema_packed)
+                    total_length += len(schema_packed)
+                else:
+                    code, args = cast('tuple[Enum_Parameter, Data_Parameter | dict[str, Any]]',
+                                      schema)
+                    name = self._lookup_registry(self.__parameter__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_param_{name}'
+                        meth = cast('ParameterConstructor',
+                                    getattr(self, meth_name, self._make_param_unassigned))
+                    else:
+                        meth = name[1]
+
+                    if isinstance(args, Data_Parameter):
+                        data = self._make_hip_param_data(meth, code, args,
+                                                         version=version)  # type: Schema_Parameter
+                    else:
+                        data = meth(code, version=version, **args)
+                    data_packed = data.pack()
+
+                    parameters_list.append(data)
+                    total_length += len(data_packed)
+            return parameters_list, total_length
+
+        parameters_list = []
+        for code, param in parameters.items(multi=True):
+            name = self._lookup_registry(self.__parameter__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_param_{name}'
+                meth = cast('ParameterConstructor',
+                            getattr(self, meth_name, self._make_param_unassigned))
+            else:
+                meth = name[1]
+
+            data = self._make_hip_param_data(meth, code, param, version=version)
+            data_packed = data.pack()
+
+            parameters_list.append(data)
+            total_length += len(data_packed)
+        return parameters_list, total_length
+
     def _read_param_unassigned(self, schema: 'Schema_UnassignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_UnassignedParameter':  # pylint: disable=unused-argument
         """Read HIP unassigned parameters.
@@ -3198,80 +3272,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hmac=schema.hmac,
         )
         return relay_hmac
-
-    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
-                        version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
-        """Make HIP parameter.
-
-        A ``(code, value)`` pair carries either a mapping of keyword arguments
-        for the parameter's constructor, or a parsed
-        :class:`~pcapkit.protocols.data.internet.hip.Parameter` data model,
-        which goes to the constructor positionally through
-        :meth:`_make_hip_param_data` rather than expanded as keyword arguments
-        (:issue:`2352`).
-
-        Args:
-            parameters: HIP parameters
-            version: HIP protocol version
-
-        Returns:
-            HIP parameters and total length.
-
-        """
-        total_length = 0
-        if isinstance(parameters, list):
-            parameters_list = []  # type: list[Schema_Parameter | bytes]
-            for schema in parameters:
-                if isinstance(schema, bytes):
-                    # :rfc:`7401#section-5.2.1` pads every parameter to a
-                    # multiple of 8 octets, and Header Length counts in those
-                    # units; a raw parameter is taken to omit its padding.
-                    schema += bytes(-len(schema) % 8)
-                    parameters_list.append(schema)
-                    total_length += len(schema)
-                elif isinstance(schema, Schema):
-                    schema_packed = schema.pack()
-
-                    parameters_list.append(schema_packed)
-                    total_length += len(schema_packed)
-                else:
-                    code, args = cast('tuple[Enum_Parameter, Data_Parameter | dict[str, Any]]',
-                                      schema)
-                    name = self._lookup_registry(self.__parameter__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_param_{name}'
-                        meth = cast('ParameterConstructor',
-                                    getattr(self, meth_name, self._make_param_unassigned))
-                    else:
-                        meth = name[1]
-
-                    if isinstance(args, Data_Parameter):
-                        data = self._make_hip_param_data(meth, code, args,
-                                                         version=version)  # type: Schema_Parameter
-                    else:
-                        data = meth(code, version=version, **args)
-                    data_packed = data.pack()
-
-                    parameters_list.append(data)
-                    total_length += len(data_packed)
-            return parameters_list, total_length
-
-        parameters_list = []
-        for code, param in parameters.items(multi=True):
-            name = self._lookup_registry(self.__parameter__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_param_{name}'
-                meth = cast('ParameterConstructor',
-                            getattr(self, meth_name, self._make_param_unassigned))
-            else:
-                meth = name[1]
-
-            data = self._make_hip_param_data(meth, code, param, version=version)
-            data_packed = data.pack()
-
-            parameters_list.append(data)
-            total_length += len(data_packed)
-        return parameters_list, total_length
 
     def _make_hip_param_data(self, meth: 'ParameterConstructor', code: 'Enum_Parameter',
                              param: 'Data_Parameter', *,
