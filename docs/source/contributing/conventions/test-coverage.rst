@@ -143,6 +143,14 @@ Running the Tests
    ``purge_modules``, which re-imported the package before every test and dominated
    the suite's time (:issue:`1065`). Both live in :file:`tests/_support.py`; pass
    ``restore=True`` when the class must leave :data:`sys.modules` as it found it.
+
+   A class whose tests each need their own import purges in ``setUp`` instead of
+   calling the helper, and says why in a comment there: ``ConstEnumRegisterFallbackTests``
+   in :file:`tests/const/test_const_enum_builtin_parity.py` does, because a lookup in
+   one test grows the registries' tables the next one reads. Calling the helper and
+   then purging the whole package, later in ``setUp`` or in ``tearDown``, throws the
+   class's import away while reading as if it kept it;
+   :file:`tests/project/test_per_class_import_guard.py` fails on that (:issue:`1538`).
 *  **Check ordering under plain unittest.** :file:`tests/conftest.py` heals cross-module
    import pollution after every test, so pytest alone cannot see it (:issue:`981`).
    :file:`util/run_unittest_leg.py` runs one :file:`tests/` subdirectory, then the

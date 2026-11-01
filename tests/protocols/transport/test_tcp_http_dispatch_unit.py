@@ -26,7 +26,7 @@ import importlib.util
 import unittest
 import warnings
 
-from tests._support import purge_modules, time_limit
+from tests._support import reimport_once_per_class, time_limit
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -50,7 +50,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
     """TCP's port-80/8080 entries point at the proxy, and behave like it."""
 
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        reimport_once_per_class(self)
 
     def test_tcp_binds_the_http_proxy_on_both_http_ports(self) -> None:
         """Ports 80 and 8080 resolve to ``application.http``, not ``application.httpv1``.
