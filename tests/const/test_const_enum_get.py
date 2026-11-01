@@ -297,7 +297,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # pcapkit.protocols.application.ngap; neither needs an exception-set
         # entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
-        self.assertEqual(len(self.enums), 124)
+        self.assertEqual(len(self.enums), 133)
         for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
                           EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK):
             self.assertTrue(expected.issubset(names),
@@ -337,7 +337,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # registry excused above: ``EXPECTED_TO_RESOLVE_ANYTHING`` and
         # ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``, with
         # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` empty.
-        self.assertEqual(covered, 121)
+        self.assertEqual(covered, 130)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

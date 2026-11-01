@@ -6,19 +6,7 @@
 .. module:: pcapkit.const.tls.handshake_type
 
 This module contains the constant enumeration for **TLS/DTLS HandshakeType**,
-as assigned by IANA in the ``TLS HandshakeType`` registry [*]_, including the
-DTLS-only connection-ID messages :rfc:`9147#section-5.2` adds to that same
-registry. Every value IANA assigns is named below; the ranges it lists as
-Unassigned fall through to :meth:`_missing_` like any other unassigned value.
-
-Each member's name is the message name the protocol uses on the wire. IANA
-suffixes ``_RESERVED`` onto the ones TLS 1.3 retired -- it keeps the code point
-reserved rather than reassigning it -- which is a statement about the registry
-rather than a different message name, so the suffix is not carried into the
-member name and each such member instead records IANA's own comment on why the
-assignment is retired.
-
-.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
+which is automatically generated from :class:`pcapkit.vendor.tls.handshake_type.HandshakeType`.
 
 """
 
@@ -38,95 +26,110 @@ __all__ = ['HandshakeType']
 class HandshakeType(EnumRegistry, IntEnum):
     """[HandshakeType] TLS/DTLS HandshakeType"""
 
-    #: ``hello_request`` -- TLS 1.2 and earlier only [:rfc:`5246`]
+    #: hello_request [:rfc:`9846`] -- Used in TLS versions prior to 1.3.
     hello_request = 0
 
-    #: ``client_hello`` [:rfc:`9846`]
+    #: client_hello [:rfc:`9846`]
     client_hello = 1
 
-    #: ``server_hello`` [:rfc:`9846`]
+    #: server_hello [:rfc:`9846`]
     server_hello = 2
 
-    #: ``hello_verify_request`` -- DTLS 1.2 and earlier only; DTLS 1.3 moved
-    #: its return-routability role to the ``cookie`` extension
-    #: (:rfc:`9147#section-5.1`) [:rfc:`6347`]
+    #: hello_verify_request [:rfc:`6347`][:rfc:`9846`] -- Assigned for interim
+    #: draft, but the functionality was moved to a different message.
     hello_verify_request = 3
 
-    #: ``new_session_ticket`` [:rfc:`9846`]
+    #: new_session_ticket [:rfc:`4507`][:rfc:`9846`][:rfc:`8447`][RFC Errata 7250]
     new_session_ticket = 4
 
-    #: ``end_of_early_data`` [:rfc:`9846`]
+    #: end_of_early_data [:rfc:`9846`]
     end_of_early_data = 5
 
-    #: ``hello_retry_request`` -- historical; the functionality moved to an
-    #: extension, and TLS 1.3 carries it on a ``server_hello`` instead
-    #: (:rfc:`9846#section-4.2.4`) [:rfc:`9846`]
+    #: hello_retry_request [:rfc:`9846`] -- Assigned for interim draft, but the
+    #: functionality was moved to an extension.
     hello_retry_request = 6
 
-    #: ``encrypted_extensions`` [:rfc:`9846`]
+    #: Unassigned
+    unassigned_7 = 7
+
+    #: encrypted_extensions [:rfc:`9846`]
     encrypted_extensions = 8
 
-    #: ``request_connection_id`` -- DTLS 1.3 only [:rfc:`9147`]
+    #: request_connection_id [:rfc:`9147`]
     request_connection_id = 9
 
-    #: ``new_connection_id`` -- DTLS 1.3 only [:rfc:`9147`]
+    #: new_connection_id [:rfc:`9147`]
     new_connection_id = 10
 
-    #: ``certificate`` [:rfc:`9846`]
+    #: certificate [:rfc:`9846`]
     certificate = 11
 
-    #: ``server_key_exchange`` -- TLS 1.2 and earlier only [:rfc:`5246`]
+    #: server_key_exchange [:rfc:`9846`] -- Used in TLS versions prior to 1.3.
     server_key_exchange = 12
 
-    #: ``certificate_request`` [:rfc:`9846`]
+    #: certificate_request [:rfc:`9846`]
     certificate_request = 13
 
-    #: ``server_hello_done`` -- TLS 1.2 and earlier only [:rfc:`5246`]
+    #: server_hello_done [:rfc:`9846`] -- Used in TLS versions prior to 1.3.
     server_hello_done = 14
 
-    #: ``certificate_verify`` [:rfc:`9846`]
+    #: certificate_verify [:rfc:`9846`]
     certificate_verify = 15
 
-    #: ``client_key_exchange`` -- TLS 1.2 and earlier only [:rfc:`5246`]
+    #: client_key_exchange [:rfc:`9846`] -- Used in TLS versions prior to 1.3.
     client_key_exchange = 16
 
-    #: ``client_certificate_request`` -- TLS 1.2 and earlier only, per IANA's
-    #: own comment on this assignment [:rfc:`9261`]
+    #: client_certificate_request [:rfc:`9261`] -- Used in TLS versions prior to
+    #: 1.3.
     client_certificate_request = 17
 
-    #: ``finished`` [:rfc:`9846`]
+    #: finished [:rfc:`9846`]
     finished = 20
 
-    #: ``certificate_url`` -- TLS 1.2 and earlier only [:rfc:`6066`]
+    #: certificate_url [:rfc:`6066`][:rfc:`9846`] -- Used in TLS versions prior to
+    #: 1.3.
     certificate_url = 21
 
-    #: ``certificate_status`` -- TLS 1.2 and earlier only [:rfc:`6066`]
+    #: certificate_status [:rfc:`6066`][:rfc:`9846`] -- Used in TLS versions prior
+    #: to 1.3.
     certificate_status = 22
 
-    #: ``supplemental_data`` -- TLS 1.2 and earlier only [:rfc:`4680`]
+    #: supplemental_data [:rfc:`4680`][:rfc:`9846`] -- Used in TLS versions prior
+    #: to 1.3.
     supplemental_data = 23
 
-    #: ``key_update`` [:rfc:`9846`]
+    #: key_update [:rfc:`9846`]
     key_update = 24
 
-    #: ``compressed_certificate`` [:rfc:`8879`]
+    #: compressed_certificate [:rfc:`8879`]
     compressed_certificate = 25
 
-    #: ``ekt_key`` [:rfc:`8870`]
+    #: ekt_key [:rfc:`8870`]
     ekt_key = 26
 
-    #: ``message_hash`` [:rfc:`9846`]
+    #: message_hash [:rfc:`9846`]
     message_hash = 254
+
+    #: Unassigned
+    unassigned_255 = 255
 
     @classmethod
     def _validate_value(cls, value: 'Any') -> 'None':
         """Reject ``value`` unless it passes the range check :meth:`_missing_` makes.
 
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with that check and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
         Args:
             value: Value about to be looked up or minted.
 
         Raises:
-            EnumValueError: If ``value`` fails that check.
+            EnumValueError: If ``value`` fails that check. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
 
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
@@ -142,5 +145,10 @@ class HandshakeType(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return cls._unregistered_member(value, 'Unassigned')
+        if 18 <= value <= 19:
+            #: Unassigned
+            return cls._unregistered_member(value, 'Unassigned')
+        if 27 <= value <= 253:
+            #: Unassigned
+            return cls._unregistered_member(value, 'Unassigned')
+        return super()._missing_(value)

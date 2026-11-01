@@ -37,20 +37,27 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
         self.assertEqual(int(udp.info.dstport), 12345)
         self.assertEqual(type(udp.payload).__name__, 'Raw')
 
-    def test_ipv6_icmp_payload_falls_back_to_raw_with_protocol_hint(self) -> None:
+    def test_ipv6_icmpv6_payload_dispatches_to_icmpv6(self) -> None:
+        """``IPv6_ICMP`` (58) dispatches to :class:`ICMPv6`.
+
+        This frame's message (Neighbor Solicitation, type 135) is Neighbor
+        Discovery (:rfc:`4861`), which is unimplemented, so it is
+        :class:`~pcapkit.protocols.data.internet.icmpv6.Unknown`.
+        """
         extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[2]
         ipv6 = frame.payload.payload
-        raw = ipv6.payload
+        icmpv6 = ipv6.payload
 
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6_ICMP')
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:ICMPv6')
         self.assertEqual(ipv6.name, 'Internet Protocol version 6')
         self.assertEqual(str(ipv6.src), 'fe80::a423:b61d:7c92:70c6')
         self.assertEqual(str(ipv6.dst), 'fe80::821f:12ff:fec9:d13d')
         self.assertEqual(ipv6.info.limit, 255)
         self.assertEqual(ipv6.info.next.name, 'IPv6_ICMP')
-        self.assertEqual(type(raw).__name__, 'Raw')
-        self.assertEqual(raw.info.protocol.name, 'IPv6_ICMP')
+        self.assertEqual(type(icmpv6).__name__, 'ICMPv6')
+        self.assertEqual(icmpv6.info.type, 135)
+        self.assertEqual(type(icmpv6.info).__name__, 'Unknown')
 
     def test_ipv6_udp_packet_exposes_multicast_and_reply_addresses(self) -> None:
         extractor = self._extract('stream.pcap')

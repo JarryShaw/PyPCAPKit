@@ -202,9 +202,10 @@ class RecordValidationTests(unittest.TestCase):
 
     The content-type check is an allowlist of the assigned 20-27, not a test
     of whether :class:`~pcapkit.const.tls.content_type.ContentType` *names*
-    the value: ``invalid(0)`` is named -- a sentinel :rfc:`9846#section-5.1`
-    defines so a record carrying it can be rejected -- so a name-based check
-    accepts ``00 03 03 00 04 deadbeef`` on TCP:443 and decodes its fragment.
+    the value: 0 resolves to an ``Unassigned`` member via ``_missing_`` --
+    the registry never assigns it, and :rfc:`9846#section-5.1` rejects a
+    record carrying it outright -- so a name-based check would accept
+    ``00 03 03 00 04 deadbeef`` on TCP:443 and decode its fragment.
 
     """
 
