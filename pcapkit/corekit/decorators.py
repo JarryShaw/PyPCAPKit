@@ -54,10 +54,12 @@ __all__ = ['seekset', 'beholder', 'prepare']
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
-#: contextvars.ContextVar[bool]: Whether a call :func:`beholder` wraps is under
-#: way, so that an :exc:`Exception` raised inside it ends with the layer that
-#: raised replaced; see :meth:`Protocol._parse_next_layer
-#: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` (:issue:`2308`).
+#: contextvars.ContextVar[bool]: Whether a layer that raises is discarded by its
+#: caller, as :func:`beholder` replaces it and
+#: :func:`~pcapkit.toolkit.pypcapfile._default_extension_header` drops it, so
+#: that :meth:`Protocol._parse_next_layer
+#: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` drops its warnings
+#: with it (:issue:`2308`).
 _beholding = contextvars.ContextVar('_beholding', default=False)
 
 
