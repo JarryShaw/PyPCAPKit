@@ -69,13 +69,12 @@ RULES = {
 #: entry. ``#2490`` marks a file deferred from its reorder while another stream
 #: edits it; IPv4 and TCP wait for the rule c reorders (#2490).
 KNOWN_EXCEPTIONS = {
-    'pcapkit.protocols.application.dtls.DTLS': (frozenset({'data'}), '#2490'),
     'pcapkit.protocols.application.ospf.OSPF': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.internet.igmpv3.IGMP': (frozenset({'data'}), '#2490'),
+    'pcapkit.protocols.internet.igmpv3.IGMPv3': (frozenset({'data'}), '#2490'),
     'pcapkit.protocols.internet.ipv4.IPv4': (frozenset({'helpers'}), '#2490'),
     'pcapkit.protocols.internet.ipx.IPX': (frozenset({'helpers', 'pair'}), '#2490'),
     'pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.schema.internet.igmpv3.IGMP': (frozenset({'group'}), '#2490'),
+    'pcapkit.protocols.schema.internet.igmpv3.IGMPv3': (frozenset({'group'}), '#2490'),
     'pcapkit.protocols.schema.internet.igmpv3.Query': (frozenset({'group'}), '#2490'),
     'pcapkit.protocols.schema.internet.igmpv3.Report': (frozenset({'group'}), '#2490'),
     'pcapkit.protocols.transport.sctp.SCTP': (frozenset({'helpers'}), '#2490'),
