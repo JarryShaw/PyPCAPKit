@@ -161,7 +161,7 @@ from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-impor
 #: ``pytest-xdist`` installed (the ``test`` extra pulls it in, and this
 #: script's own CI job installs that extra for the other root modules'
 #: sake), its ``XdistSubprocessTests`` spawns a real, deliberately slow
-#: ``pytest -n auto --dist load`` subprocess that the pytest-based
+#: ``pytest -n 2 --dist load`` subprocess that the pytest-based
 #: ``test``/``integration``/``gate`` jobs already exercise -- duplicating
 #: that cost here would buy nothing against the ordering class of defect
 #: this script exists to catch.

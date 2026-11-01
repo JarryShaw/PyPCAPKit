@@ -559,7 +559,7 @@ def _tier_guard_lock_path() -> 'pathlib.Path':
     """Where the probe/scan mutex lives, one file per checkout.
 
     Keyed by :data:`tests._tiers.ROOT` rather than a fixed name, so two
-    worktrees of this repository each running their own ``-n auto`` session on
+    worktrees of this repository each running their own xdist session on
     the same host never share a lock file neither of them needs shared.
 
     """
