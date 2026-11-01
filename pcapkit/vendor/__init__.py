@@ -110,6 +110,8 @@ else:
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
     from pcapkit.vendor.http import *
+    from pcapkit.vendor.icmp import *
+    from pcapkit.vendor.icmpv6 import *
     from pcapkit.vendor.igmp import *
     from pcapkit.vendor.ipv4 import *
     from pcapkit.vendor.ipv6 import *
@@ -121,6 +123,7 @@ else:
     from pcapkit.vendor.ospf import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.tcp import *
+    from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
 
 # Crawlers only. This list is also the default target list of
@@ -144,8 +147,13 @@ __all__ = [
     'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_StatusCode',
+    # ICMP
+    'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
+    # ICMPv6
+    'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
+    'ICMPv6_ParameterProblemCode',
     # IGMP
-    'IGMP_Type',
+    'IGMP_Type', 'IGMP_RecordType',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
@@ -183,6 +191,8 @@ __all__ = [
     'SCTP_PayloadProtocolIdentifier',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

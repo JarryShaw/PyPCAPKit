@@ -75,6 +75,9 @@ OVERRIDES = {
     # The hash-assist value's first bit is the H-DPD mode bit [RFC 6621].
     'internet.hopopt:SMFHashBasedDPDOption': {'hav': b'\x80'},
     'internet.ipv6_opts:SMFHashBasedDPDOption': {'hav': b'\x80'},
+    # Type 0 is reserved, so the first member is no IGMP message at all; only
+    # IGMPv3's own schema switches on it (the flat base/v1/v2 one does not).
+    'internet.igmpv3:IGMP': {'type': lambda module: module.Enum_Type.IGMP_Membership_Query},
 }  # type: dict[str, dict[str, Any]]
 
 #: Packet context a dispatch target needs from its enclosing layer.
@@ -350,9 +353,13 @@ def _base_values(cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> 'dict[str,
     from pcapkit.corekit.fields.numbers import EnumField
     from pcapkit.corekit.fields.strings import BitField
 
+    module = importlib.import_module(cls.__module__)
+    overrides = {name: value(module) if callable(value) else value
+                 for name, value in OVERRIDES.get(label_of(cls), {}).items()}
     values = {}  # type: dict[str, Any]
     for name, field in cls.__fields__.items():
-        values[name] = minimal(field, cls, depth, {**ctx, **values, '__length__': -1})
+        # An override is visible to a selector that reads it, as it would be on the wire.
+        values[name] = minimal(field, cls, depth, {**ctx, **values, **overrides, '__length__': -1})
 
     # A dispatch target carries the dispatcher's code in its type field, and its
     # own code in the bit-field subfield the dispatcher selects on.
@@ -375,9 +382,7 @@ def _base_values(cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> 'dict[str,
                     if sub in field._namespace:  # pylint: disable=protected-access
                         values[name] = {**values[name], sub: int(code)}
 
-    module = importlib.import_module(cls.__module__)
-    for name, value in OVERRIDES.get(label_of(cls), {}).items():
-        values[name] = value(module) if callable(value) else value
+    values.update(overrides)
     return values
 
 

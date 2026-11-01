@@ -9,6 +9,9 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
+# Frame Relay Access Device
+from pcapkit.protocols.data.link.frad import FRAD
+
 # Generic Routing Encapsulation
 from pcapkit.protocols.data.link.gre import GRE
 
@@ -33,6 +36,9 @@ __all__ = [
 
     # Ethernet Protocol
     'Ethernet',
+
+    # Frame Relay Access Device
+    'FRAD',
 
     # Generic Routing Encapsulation
     'GRE',
