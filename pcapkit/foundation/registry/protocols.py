@@ -939,30 +939,6 @@ def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[Protoco
     _register_name(module, (LinuxSLL, code))
 
 
-def _check_number(code: 'Any', target: 'Type[ProtocolBase]') -> 'None':
-    """Reject a registration key that is not a bare :class:`int`.
-
-    :func:`_check_code` with ``number=True``, for a registry keyed by a
-    number no enum in :mod:`pcapkit.const` names.
-
-    Args:
-        code: Registration key handed to the registrar.
-        target: Protocol class whose registry ``code`` is destined for.
-
-    Raises:
-        RegistryError: If ``code`` is not an :class:`int`, or is a
-            :class:`bool` or a member of an enum.
-
-    """
-    member = isinstance(code, (enum.Enum, aenum.Enum))
-    if isinstance(code, int) and not isinstance(code, bool) and not member:
-        return
-    if member:
-        raise RegistryError(f'{target.__name__}: code must be an int, not a member of '
-                            f'{type(code).__name__}: {code!r}')
-    raise RegistryError(f'{target.__name__}: code must be an int, not {code!r}')
-
-
 @overload
 def register_frad(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
@@ -992,7 +968,7 @@ def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | T
             not accepted, even though it is one), or is a member of an enum.
 
     """
-    _check_number(code, FRAD)
+    _check_code(code, None, FRAD)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
@@ -1034,7 +1010,7 @@ def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] 
             not accepted, even though it is one), or is a member of an enum.
 
     """
-    _check_number(code, Netlink)
+    _check_code(code, None, Netlink)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 

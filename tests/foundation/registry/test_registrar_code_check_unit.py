@@ -277,9 +277,8 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         """No enum keys Loopback's, FRAD's or Netlink's registry, so only a plain
         ``int`` is a code (#2510, #2511).
 
-        ``_check_code`` with ``kind=None`` is Loopback's check, and
-        ``_check_number`` FRAD's and Netlink's, so each message keeps the shape
-        the enum-typed ones have.
+        ``_check_code`` with ``kind=None`` is the check, so its message keeps the
+        shape the enum-typed ones have.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.transtype import TransType
@@ -300,10 +299,10 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                     registrars._check_code(code, None, Loopback)
         registrars._check_code(2, None, Loopback)
         with self.assertRaisesRegex(RegistryError, r'^FRAD: code must be an int, not None$'):
-            registrars._check_number(None, FRAD)
+            registrars._check_code(None, None, FRAD)
         with self.assertRaisesRegex(RegistryError,
                                     r'^FRAD: code must be an int, not a member of ARPHRD: '):
-            registrars._check_number(ARPHRD.FRAD, FRAD)
+            registrars._check_code(ARPHRD.FRAD, None, FRAD)
 
     def test_every_rejection_names_the_destination_registry(self) -> None:
         """The message says *whose* registry rejected the key (#2268).
