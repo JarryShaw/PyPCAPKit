@@ -113,11 +113,15 @@ ANCHORS = (
     'sentinel-convention',
     'registry-protocol',
     'extension-header-subclassing',
+    'protocol-family-grouping',
+    'protocol-member-order',
     'protocol-layer-placement',
     'process',
     'documentation',
     'test-coverage',
     'utilities-or-corekit',
+    'reassembly-integration',
+    'const-vendor-pairing',
 )
 
 #: Each anchor's own file, one-to-one -- there is no shared page to slice between

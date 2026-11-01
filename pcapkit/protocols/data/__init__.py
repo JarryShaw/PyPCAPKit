@@ -62,11 +62,23 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Frame Relay Access Device
+    'FRAD',
+
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
+    # Linux "Cooked" Capture Encapsulation
+    'LinuxSLL1', 'LinuxSLL2',
+
     # BSD Loopback Encapsulation
     'Loopback',
+
+    # Netlink Socket Framing
+    'Netlink',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
@@ -109,6 +121,19 @@ __all__ = [
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
+    # IP Pseudo-Header
+    'IP_Pseudo',
+
+    # Internet Control Message Protocol
+    'ICMPv4',
+    'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',
+    'ICMPv4_ParameterProblem',
+
+    # Internet Control Message Protocol for IPv6
+    'ICMPv6',
+    'ICMPv6_Unknown', 'ICMPv6_DestinationUnreachable', 'ICMPv6_PacketTooBig', 'ICMPv6_TimeExceeded',
+    'ICMPv6_ParameterProblem', 'ICMPv6_Echo',
+
     # Internet Protocol version 4
     'IPv4',
     'IPv4_ToSField', 'IPv4_Flags',
@@ -123,7 +148,7 @@ __all__ = [
     # IPv6 Fragment Header
     'IPv6_Frag',
 
-    # IPv6 Extension Header (base + generic fallback)
+    # IPv6 Extension Header (base + generic)
     'IPv6_Ext',
 
     # IPv6 Destination Options Header
@@ -140,6 +165,9 @@ __all__ = [
     # IPv6 Routing Header
     'IPv6_Route',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
+
+    # Internet Group Management Protocol
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_Report', 'IGMPv3_GroupRecord',
 
     # Internet Protocol version 6
     'IPv6',
@@ -239,6 +267,9 @@ __all__ = [
     # User Datagram Protocol
     'UDP',
 
+    # Datagram Transport Layer Security
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_Handshake',
+
     # File Transfer Protocol
     'FTP',
     'FTP_Request', 'FTP_Response',
@@ -249,6 +280,9 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Secure Sockets Layer version 2
+    'SSLv2', 'SSLv2_ClientHello', 'SSLv2_ServerHello',
 
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',
@@ -263,6 +297,11 @@ __all__ = [
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+
+    # Transport Layer Security
+    'TLS',
+    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_Extension',
+    'TLS_Alert', 'TLS_ChangeCipherSpec',
 
     # No Payload
     'NoPayload',

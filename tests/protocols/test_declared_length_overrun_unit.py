@@ -9,9 +9,9 @@ parsed as 64 update IDs and rebuilt to 304 octets; an MH ``PadN`` declaring 3
 octets with none present rebuilt 24 octets from 16.
 
 Such an option raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
-Inside a parent layer the octets are kept as captured -- raw extension data
-under IPv6, a :class:`~pcapkit.protocols.misc.raw.Raw` payload elsewhere -- and
-the parent rebuilds byte for byte.
+Inside a parent layer the octets are kept as captured, as a
+:class:`~pcapkit.protocols.misc.raw.Raw` payload, and the parent rebuilds byte
+for byte.
 
 An option that begins at the end of the data reads nothing at all, and is still
 left to the end-of-option-list handling an over-long option area relies on. An
@@ -151,14 +151,9 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
                     warnings.simplefilter('ignore')
                     parsed = protocol(frame, len(frame))
 
-                if name == 'IPv6':
-                    # an extension header is kept as raw extension data
-                    self.assertIn('has an option that runs past the end of the data', str(parsed.info.ext.error))
-                else:
-                    # any other layer is kept as a raw payload, as captured
-                    self.assertIsInstance(parsed.payload, Raw)
-                    self.assertIn('has an option that runs past the end of the data', str(parsed.payload.info.error))
-                    self.assertEqual(parsed.payload.data, OVERRUNS[case][2])
+                self.assertIsInstance(parsed.payload, Raw)
+                self.assertIn('has an option that runs past the end of the data', str(parsed.payload.info.error))
+                self.assertEqual(parsed.payload.data, OVERRUNS[case][2])
                 self.assertEqual(protocol.from_data(parsed.info).data, frame)
 
     def test_an_option_area_declared_past_the_data_is_kept_as_captured(self) -> None:

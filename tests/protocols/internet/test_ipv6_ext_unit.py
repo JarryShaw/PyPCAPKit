@@ -33,9 +33,9 @@ def _ipv4_bytes(proto_byte: int, payload: bytes = b'') -> bytes:
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPv6ExtUnitTests(unittest.TestCase):
-    """Tests for GitHub issue #891: a generic RFC 6564 parser for IPv6
-    extension headers, so a failed or unimplemented one costs only itself
-    rather than the whole packet.
+    """Tests for GitHub issue #891: a generic RFC 6564 parser for an IPv6
+    extension header with no dedicated parser, so an unimplemented one costs
+    only itself rather than the whole packet.
     """
 
     def setUp(self) -> None:
@@ -172,63 +172,158 @@ class IPv6ExtUnitTests(unittest.TestCase):
                 self.assertEqual(values['next'], TransType.UDP)
                 self.assertEqual(values['len'], len_octet)
 
-    # -- entry path 2: a recognised header's own parser raises ---------------
+    # -- a recognised header whose own parser raises ends the walk ----------
 
-    def test_mh_own_parser_failure_falls_back_and_chain_reaches_real_udp(self) -> None:
-        """The actual #891 defect, with real bytes after the bad header this
-        time: proves the walk does not merely avoid crashing but genuinely
-        resumes at the real next layer.
-        """
+    @staticmethod
+    def _malformed_mh() -> bytes:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
         from pcapkit.protocols.internet.mh import MH, FastBindingAcknowledgmentStatus
-        from pcapkit.protocols.transport.udp import UDP
 
         mh_raw = bytearray(bytes(MH(
             next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
             data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
                   'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
         mh_raw[6] = 50  # unassigned FastBindingAcknowledgmentStatus byte -- MH.read raises
+        return bytes(mh_raw)
 
-        udp_payload = _udp_bytes(b'hello')
-        raw = _ipv6_bytes(int(TransType.Mobility_Header), bytes(mh_raw) + udp_payload)
+    def test_mh_own_parser_failure_is_raw_and_ends_the_walk(self) -> None:
+        """GitHub issue #2477: RFC 8200 §4 discards such a packet, so the bad
+        header and everything after it are ``Raw``, not walked past.
+        """
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.raw import Raw
+
+        body = self._malformed_mh() + _udp_bytes(b'hello')
+        raw = _ipv6_bytes(int(TransType.Mobility_Header), body)
         ipv6 = IPv6(io.BytesIO(raw), len(raw))
 
-        exthdrs = list(ipv6.extension_headers.items(multi=True))
-        self.assertEqual(len(exthdrs), 1)
-        genext = exthdrs[0][1]
-        self.assertIsInstance(genext, IPv6_Ext)
-        self.assertEqual(genext.next, TransType.UDP)
-        self.assertEqual(genext.length, len(mh_raw))
-        self.assertIsInstance(genext.info.error, Exception)
+        self.assertEqual(list(ipv6.extension_headers.items(multi=True)), [])
+        self.assertIs(type(ipv6.payload), Raw)
+        self.assertEqual(bytes(ipv6.payload), body)
+        self.assertIsInstance(ipv6.payload.info.error, str)
+        self.assertEqual(ipv6.info.protocol, TransType.Mobility_Header)
+        self.assertEqual(str(ipv6.protochain), 'IPv6:Mobility_Header')
+        self.assertEqual(IPv6.from_data(ipv6.info).data, raw)
+        self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
 
-        self.assertIsInstance(ipv6.payload, UDP)
-        self.assertEqual(bytes(ipv6.payload.payload), b'hello')
-        self.assertEqual(str(ipv6.protochain), 'IPv6:IPv6-Ext:UDP:Raw')
+    def test_failed_dedicated_parse_is_raw_and_ends_the_walk(self) -> None:
+        """GitHub issue #2477: a truncated or malformed header with a dedicated
+        parser is ``Raw`` behind the headers already walked, and rebuilds.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.misc.raw import Raw
+
+        udp = int(TransType.UDP)
+        router_alert = bytes([udp, 0, 0x05, 10]) + bytes(4)  # 10 octets in a 6-octet area
+        malformed = {
+            EH.HOPOPT: router_alert,
+            EH.IPv6_Route: bytes([udp, 0, 3, 0]) + bytes(4),  # Routing Type 3
+            EH.IPv6_Opts: router_alert,
+            EH.Mobility_Header: self._malformed_mh(),
+            EH.HIP: bytes([udp]) + bytes(7),  # Header Length 0
+        }
+        for code, header in malformed.items():
+            for form, bad in (('malformed', header), ('truncated', bytes([udp, 0, 1]))):
+                body = bad + _udp_bytes(b'ok') if form == 'malformed' else bad
+                dst = bytes([int(code), 0, 1, 4, 0, 0, 0, 0])
+                raw = _ipv6_bytes(int(EH.IPv6_Opts), dst + body)
+                with self.subTest(code=code.name, form=form):
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore')
+                        ipv6 = IPv6(io.BytesIO(raw), len(raw))
+                    exthdrs = [type(ext) for _, ext in ipv6.extension_headers.items(multi=True)]
+                    self.assertEqual(exthdrs, [IPv6_Opts])
+                    self.assertIs(type(ipv6.payload), Raw)
+                    self.assertEqual(bytes(ipv6.payload), body)
+                    self.assertEqual(ipv6.info.protocol, code)
+                    self.assertEqual(str(ipv6.protochain), f'IPv6:IPv6-Opts:{code.name}')
+                    self.assertEqual(IPv6.from_data(ipv6.info).data, raw)
+                    self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
+
+    def test_failed_dedicated_parse_is_logged_once(self) -> None:
+        """GitHub issue #2477: the ``Raw`` the walk ends on is the upper layer,
+        not parsed again, so its error is logged once and no
+        ``SchemaWarning`` is left from the header it replaced.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.raw import Raw
+
+        udp = int(TransType.UDP)
+        for form, hopopt in (('malformed', bytes([udp, 0, 0x05, 10]) + bytes(4) + _udp_bytes(b'ok')),
+                             ('truncated', bytes([udp, 0, 1]))):
+            raw = _ipv6_bytes(int(EH.HOPOPT), hopopt)
+            with self.subTest(form=form):
+                with warnings.catch_warnings(record=True) as caught, \
+                        self.assertLogs('pcapkit', level='WARNING') as logs:
+                    warnings.simplefilter('always')
+                    ipv6 = IPv6(io.BytesIO(raw), len(raw))
+                self.assertIs(type(ipv6.payload), Raw)
+                error = ipv6.payload.info.error
+                self.assertEqual([(rec.levelname, error in rec.getMessage()) for rec in logs.records],
+                                 [('CRITICAL', True), ('WARNING', True)])
+                self.assertEqual([w.category.__name__ for w in caught], [])
+
+    def test_failed_ah_parse_is_raw_and_ends_the_walk(self) -> None:
+        """GitHub issue #2477: an AH its own parser rejects is ``Raw``, too."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.raw import Raw
+
+        ah = bytes([int(TransType.UDP), 0]) + bytes(6)  # Payload Len 0: a negative ICV length
+        body = ah + _udp_bytes(b'ok')
+        raw = _ipv6_bytes(int(EH.AH), body)
+        with self.assertLogs('pcapkit', level='WARNING'):
+            ipv6 = IPv6(io.BytesIO(raw), len(raw))
+
+        self.assertEqual(list(ipv6.extension_headers.items(multi=True)), [])
+        self.assertIs(type(ipv6.payload), Raw)
+        self.assertEqual(bytes(ipv6.payload), body)
+        self.assertIsInstance(ipv6.payload.info.error, str)
+        self.assertEqual(ipv6.info.protocol, EH.AH)
+        self.assertEqual(str(ipv6.protochain), 'IPv6:AH')
+        self.assertEqual(IPv6.from_data(ipv6.info).data, raw)
+        self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
+
+    def test_overrun_routing_with_nothing_after_is_empty_raw(self) -> None:
+        """A Routing header overrunning the payload, with nothing after it, is an
+        empty ``Raw``, not ``NoPayload``: the walk reuses its upper layer only
+        when that is ``Raw``.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.raw import Raw
+
+        routing = bytes([int(EH.IPv6_Route), 2]) + bytes(6)  # 24 octets declared, 8 present
+        raw = _ipv6_bytes(int(EH.IPv6_Route), routing)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv6 = IPv6(io.BytesIO(raw), len(raw))
+
+        self.assertIs(type(ipv6.payload), Raw)
+        self.assertEqual(bytes(ipv6.payload), b'')
+        self.assertEqual(ipv6.info.protocol, EH.IPv6_Route)
 
     def test_overrun_inside_a_real_chain_stops_the_walk_honestly(self) -> None:
-        """Same failing MH message, but its own ``Header Len`` octet is also
-        corrupted to a value the generic fallback cannot trust either --
-        the walk must warn and stop, not invent a layer from trailing bytes.
+        """A Shim6 header whose ``Hdr Ext Len`` overruns the chain warns and
+        stops the walk, not inventing a layer from trailing bytes.
         """
-        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-        from pcapkit.protocols.internet.mh import MH, FastBindingAcknowledgmentStatus
         from pcapkit.utilities.warnings import SchemaWarning
 
-        mh_raw = bytearray(bytes(MH(
-            next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
-            data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
-                  'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
-        mh_raw[6] = 50    # MH.read raises
-        mh_raw[1] = 250   # and the generic fallback's own length would overrun
-
+        shim6 = bytes([int(TransType.UDP), 250]) + bytes(14)  # (250 + 1) * 8 overruns
         trailing = _udp_bytes(b'should-not-be-reached')
-        raw = _ipv6_bytes(int(TransType.Mobility_Header), bytes(mh_raw) + trailing)
+        raw = _ipv6_bytes(int(ExtensionHeader.Shim6), shim6 + trailing)
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -243,10 +338,10 @@ class IPv6ExtUnitTests(unittest.TestCase):
         self.assertIsNone(genext.next)
         # absorbed everything, including the bytes that would have been a
         # perfectly good UDP datagram -- the point is that it is not trusted
-        self.assertEqual(genext.length, len(mh_raw) + len(trailing))
+        self.assertEqual(genext.length, len(shim6) + len(trailing))
         self.assertEqual(str(ipv6.protochain), 'IPv6:IPv6-Ext')
 
-    # -- entry path 1: an unrecognised protocol number (Shim6) ---------------
+    # -- the entry path: direct dispatch for Shim6 ---------------------------
 
     def test_shim6_has_no_dedicated_parser_and_dispatches_directly(self) -> None:
         """``Shim6`` (140) is a real IANA extension header this package has
@@ -278,7 +373,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         code, genext = exthdrs[0]
         self.assertEqual(code, ExtensionHeader.Shim6)
         self.assertIsInstance(genext, IPv6_Ext)
-        self.assertIsNone(genext.info.error)  # direct dispatch, not a beholder fallback
+        self.assertIsNone(genext.info.error)
         self.assertIsInstance(ipv6.payload, UDP)
         self.assertEqual(bytes(ipv6.payload.payload), b'shim6-ok')
         self.assertEqual(str(ipv6.protochain), 'IPv6:IPv6-Ext:UDP:Raw')
@@ -383,21 +478,42 @@ class IPv6ExtUnitTests(unittest.TestCase):
         self.assertFalse(fallback == 'IPv6_Ext')
         self.assertTrue(fallback == IPv6_Ext)
 
-    def test_fallback_for_a_malformed_member_matches_every_member_name(self) -> None:
-        """A HOPOPT that its own parser rejects is parsed by ``IPv6_Ext``."""
+    def test_malformed_member_is_raw_and_matches_only_its_own_name(self) -> None:
+        """A HOPOPT that its own parser rejects is ``Raw`` (GitHub issue #2477)."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.misc.raw import Raw
 
         # Router Alert declaring 10 octets of data in a 6-octet option area
         hopopt = bytes([int(TransType.UDP), 0, 0x05, 10]) + bytes(4)
         raw = _ipv6_bytes(int(ExtensionHeader.HOPOPT), hopopt + _udp_bytes(b'ok'))
         ipv6 = IPv6(io.BytesIO(raw), len(raw))
 
+        self.assertEqual(list(ipv6.extension_headers.items(multi=True)), [])
+        self.assertIs(type(ipv6.payload), Raw)
+        self.assertEqual(str(ipv6.protochain), 'IPv6:HOPOPT')
+        for name in ('HOPOPT', 'Raw'):
+            with self.subTest(selector=name):
+                self.assertIn(name, ipv6.protochain)
+        for name in (*(other for other in IPv6_Ext.id() if other != 'HOPOPT'), 'IPsec', 'UDP'):
+            with self.subTest(selector=name):
+                self.assertNotIn(name, ipv6.protochain)
+
+    def test_shim6_matches_every_member_name(self) -> None:
+        """Shim6 is parsed by ``IPv6_Ext``, whose :meth:`id` names every member."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        shim6 = bytes([int(TransType.UDP), 0]) + bytes(6)
+        raw = _ipv6_bytes(int(ExtensionHeader.Shim6), shim6 + _udp_bytes(b'ok'))
+        ipv6 = IPv6(io.BytesIO(raw), len(raw))
+
         (_, ext), = ipv6.extension_headers.items(multi=True)
         self.assertIs(type(ext), IPv6_Ext)
-        self.assertIsInstance(ext.info.error, Exception)
         self.assertEqual(str(ipv6.protochain), 'IPv6:IPv6-Ext:UDP:Raw')
         for name in (*IPv6_Ext.id(), 'IPv6_Ext', 'IPsec'):
             with self.subTest(selector=name):
@@ -683,7 +799,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                     self.assertTrue(
                         member in klass.__dict__,
                         f'{klass.__qualname__} inherits {member!r} from IPv6_Ext, whose '
-                        f'value is the generic fallback parser\'s and is wrong for a '
+                        f'value is the generic parser\'s and is wrong for a '
                         f'header with an identity of its own; define it on '
                         f'{klass.__qualname__} itself',
                     )
@@ -946,3 +1062,82 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         self.assertEqual(
             IPv6_Frag(io.BytesIO(frag_wire), len(frag_wire), version=6,
                       extension=True).next, TransType.UDP)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class ExtensionLayerMembershipTests(unittest.TestCase):
+    """``in`` on a terminal extension-header layer parsed from an IPv6 chain (#2487).
+
+    A layer taken from ``IPv6.extension_headers`` in extension mode holds
+    ``NoPayload``, so ``in`` answers for its own name and does not raise. Frames
+    are built in memory; no capture is read.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def _ipv6(first: int, body: bytes) -> bytes:
+        return struct.pack('!IHBB', 6 << 28, len(body), first, 64) + bytes(32) + body
+
+    def _parse(self, first: int, body: bytes):  # type: ignore[no-untyped-def]
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        data = self._ipv6(first, body)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return IPv6(io.BytesIO(data), len(data))
+
+    def _layer(self, first: int, body: bytes, cls):  # type: ignore[no-untyped-def]
+        ipv6 = self._parse(first, body)
+        return next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, cls))
+
+    def test_terminal_hopopt_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        # next=59 (No Next Header), Hdr Ext Len 0, PadN(4)
+        body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
+        hopopt = self._layer(0, body, HOPOPT)
+
+        self.assertIn('HOPOPT', hopopt)
+        self.assertNotIn('ESP', hopopt)
+
+    def test_terminal_ipv6_opts_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
+        opts = self._layer(60, body, IPv6_Opts)
+
+        self.assertIn('IPv6_Opts', opts)
+        self.assertNotIn('ESP', opts)
+
+    def test_terminal_ipv6_route_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        # next=59, Hdr Ext Len 0, Routing Type 0, Segments Left 0, reserved
+        body = struct.pack('!BBBBI', 59, 0, 0, 0, 0)
+        route = self._layer(43, body, IPv6_Route)
+
+        self.assertIn('IPv6_Route', route)
+        self.assertNotIn('ESP', route)
+
+    def test_terminal_ipv6_frag_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+
+        body = struct.pack('!BBHI', 59, 0, 0, 0x1234)
+        frag = self._layer(44, body, IPv6_Frag)
+
+        self.assertIn('IPv6_Frag', frag)
+        self.assertNotIn('ESP', frag)
+
+    def test_terminal_shim6_membership_does_not_raise(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+        # Shim6 (140) has no dedicated parser: the generic fallback handles it.
+        # next=59 (No Next Header), Hdr Ext Len 0, padding to 8 octets
+        body = struct.pack('!BB', 59, 0) + bytes(6)
+        shim6 = self._layer(int(ExtensionHeader.Shim6), body, IPv6_Ext)
+
+        self.assertIn('IPv6_Ext', shim6)
+        self.assertNotIn('TCP', shim6)

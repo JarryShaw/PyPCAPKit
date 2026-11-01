@@ -76,10 +76,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     .. versionchanged:: 1.5.0
 
-       * A Shim6 header, which has no dedicated parser, and a header in
-         :attr:`__generic_ext_codes__` whose dedicated parser raises are parsed
-         by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, so the
-         rest of the chain is still walked (:issue:`891`).
+       * A Shim6 header, which has no dedicated parser, and an extension
+         header other than ESP whose dedicated parser raises are parsed by
+         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, so the rest
+         of the chain is still walked (:issue:`891`).
        * A rebuild from
          :meth:`~pcapkit.protocols.internet.internet.Internet.from_data`
          keeps the Payload Length a truncated capture declares
@@ -90,61 +90,23 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
          (:issue:`1231`), and a cut extension header chain rebuilds byte for
          byte (:issue:`1471`, :issue:`1473`).
 
+    .. versionchanged:: 1.6.0
+
+       An extension header whose dedicated parser raises is the upper layer,
+       parsed once as :class:`~pcapkit.protocols.misc.raw.Raw`, and the chain
+       walk stops there, as :rfc:`8200#section-4` has a node discard such a
+       packet (:issue:`2477`).
+
+    .. versionremoved:: 1.6.0
+
+       ``__generic_ext_codes__``, the extension headers whose dedicated parser
+       raising fell back to
+       :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` (:issue:`2477`).
+
     """
 
-    ##########################################################################
-    # Defaults.
-    ##########################################################################
-
-    #: Extension header codes with a *dedicated* parser class in this
-    #: package whose layout follows :rfc:`6564#section-4`'s generic ``next`` +
-    #: ``Hdr Ext Len`` format (see :ref:`ipv6-ext-length-rules` for the
-    #: exception table).
-    #: When that dedicated parser raises, :meth:`_import_next_layer`
-    #: substitutes :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-    #: instead of letting the generic
-    #: :func:`~pcapkit.corekit.decorators.beholder` fall back to plain
-    #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
-    #: and so cannot continue the walk in :meth:`_decode_next_layer`.
-    #:
-    #: These groups are deliberately absent:
-    #:
-    #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
-    #:   has no dedicated parser class in this package, so there is no "own
-    #:   parser" for it to raise from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-    #:   by *direct* registration (see :ref:`ipv6-ext-entry-paths`), which
-    #:   already produces exactly this class.
-    #: * ``ESP`` *does* have a dedicated, registered parser
-    #:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded
-    #:   because :rfc:`4303` places the real Next Header byte inside the
-    #:   encrypted trailer, so its own info always *carries* a ``next``
-    #:   attribute, just one that is :data:`None` whenever the payload could not
-    #:   be decrypted -- which, with no key material available to a generic
-    #:   parse, is always. The :meth:`_decode_next_layer` walk still ends
-    #:   there, one iteration later, because :data:`None` fails
-    #:   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`'s
-    #:   constructor at the top of the loop -- the ordinary end-of-chain path,
-    #:   unrelated to the structural check this set exists for.
-    #: * ``253`` and ``254`` have no dedicated parser at all, so they resolve
-    #:   to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no
-    #:   ``next`` *attribute*; the structural check in
-    #:   :meth:`_decode_next_layer` catches these. A next-header byte that is
-    #:   not in the extension-header registry at all (e.g. ``147``) fails the
-    #:   same constructor at the top of the loop, like any unrecognised
-    #:   upper-layer protocol code.
-    #:
-    #: :meth:`_decode_next_layer`'s walk stops cleanly at whichever of these
-    #: (or any other IANA code this package has not implemented) it meets, and
-    #: keeps this layer's own header intact.
-    __generic_ext_codes__ = frozenset({
-        Enum_ExtensionHeader.HOPOPT,
-        Enum_ExtensionHeader.IPv6_Route,
-        Enum_ExtensionHeader.IPv6_Opts,
-        Enum_ExtensionHeader.Mobility_Header,
-        Enum_ExtensionHeader.HIP,
-        Enum_ExtensionHeader.IPv6_Frag,
-        Enum_ExtensionHeader.AH,
-    })
+    #: The ``Raw`` a header-walk stopped on, returned unparsed as the upper layer.
+    _walk_upper = None  # type: Optional[ProtocolBase]
 
     ##########################################################################
     # Properties.
@@ -466,10 +428,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 <pcapkit.corekit.infoclass.Info.to_dict>`
 
         Returns:
-            :data:`True` at a Fragment Offset of zero. A header whose dedicated
-            parser raised was parsed by
-            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead and
-            has no offset, so it does not count as one.
+            :data:`True` at a Fragment Offset of zero.
 
         """
         return info.get('offset') == 0
@@ -568,27 +527,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 _frame_depth.reset(token)
             info = next_.info
 
-            # A layer with no ``next`` field cannot safely continue the walk.
-            # This is a *structural* check, not a fixed set of codes: every
-            # dedicated parser and
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` carry
-            # ``next`` (possibly :data:`None`, on an overrun) -- Shim6 has no
-            # dedicated parser but is registered to ``IPv6_Ext`` directly --
-            # while every other code with no dedicated parser -- ``253``,
-            # ``254``, or whatever IANA assigns next -- resolves to plain
-            # :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see
-            # :attr:`__generic_ext_codes__`). Reading ``info.next`` on that
-            # would raise ``AttributeError`` and let a further-out
-            # :func:`~pcapkit.corekit.decorators.beholder` degrade the
-            # *whole* packet.
-            #
-            # Such a layer is not recorded as an extension header: it consumed
-            # nothing (``Raw.length`` is 0), so recording it would emit its
-            # octets twice on rebuild, once from ``__exthdr__`` and once more as
-            # the upper layer. Stopping here with ``proto`` unchanged instead
-            # hands the remaining octets to ``super()._decode_next_layer``
-            # below, which decodes them once, as the upper layer.
+            # A layer with no ``next`` field ends the walk, as RFC 8200 section 4
+            # has a node discard the packet on a malformed header (#2477).
+            # It is not recorded as an extension header.
+            # A Raw is reused as the upper layer, so its error logs once.
             if not hasattr(info, 'next'):
+                from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+                # Exact type on purpose: Raw subclasses exist, so isinstance would over-match.
+                if type(next_) is Raw:  # pylint: disable=unidiomatic-typecheck
+                    self._walk_upper = next_
                 break
 
             # NOTE: Added through a :class:`MultiDict`, so a repeated header
@@ -642,8 +589,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 # fragment carries a slice of the Fragmentable Part from its
                 # offset on, and that slice starts with no header at all.
                 if not self._is_first_fragment(info):
-                    # a header parsed with no offset is not known to be later
-                    opaque = info.get('offset') is not None
+                    opaque = True
                     break
 
         # record real header & payload length (headers exclude)
@@ -655,8 +601,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'protocol': proto,
 
             # extension header chain in wire order, with the parser of each,
-            # for ``from_data``; the parser keeps the IPv6_Ext a header fell
-            # back to (#1473)
+            # for ``from_data`` (#1473)
             '__exthdr__': tuple(_exthdr),
         })
 
@@ -667,12 +612,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # with no protocol to alias it as, and ``'UDP' in frame`` does not hold
         # of a slice of UDP payload (#1545). Reassembly takes
         # ``fragment`` above, which this leaves as it was.
-        ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
         self._exthdr_depth = len(_protos)  # the headers the upper layer follows
         token = _frame_depth.set(depth + len(_protos))
         try:
             return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
-                                              ipv6_exthdr=ipv6_exthdr, payload=payload)
+                                              ipv6_exthdr=ProtoChain.from_list(_protos),  # type: ignore[arg-type]
+                                              payload=payload)
         finally:
             _frame_depth.reset(token)
 
@@ -695,27 +640,20 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Instance of next layer.
 
         Notes:
-            If the dedicated parser for a code in :attr:`__generic_ext_codes__`
-            raises, this substitutes
-            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for it
-            rather than letting the exception reach the
+            A header whose dedicated parser raises reaches the
             :func:`~pcapkit.corekit.decorators.beholder` decorating this
-            method, which would substitute plain
-            :class:`~pcapkit.protocols.misc.raw.Raw` -- and :class:`~pcapkit.protocols.misc.raw.Raw` has no
-            ``next`` field, so it could not continue
-            :meth:`_decode_next_layer`'s walk. Every other exception --
-            including one raised by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` itself,
-            or by :class:`~pcapkit.protocols.internet.esp.ESP`'s own dedicated parser -- still
-            reaches ``beholder`` unchanged, giving a plain :class:`~pcapkit.protocols.misc.raw.Raw`
-            for that one layer. ``253`` and ``254`` have no dedicated parser, so they reach plain
-            :class:`~pcapkit.protocols.misc.raw.Raw` with no exception involved;
-            :meth:`_decode_next_layer` stops its walk structurally on any layer whose info carries
-            no ``next`` attribute, :class:`~pcapkit.protocols.misc.raw.Raw` included.
-            :class:`~pcapkit.protocols.internet.esp.ESP`'s info always carries a ``next``
-            (:data:`None` unless its payload was decrypted, since :rfc:`4303` encrypts the real
-            value), so neither this substitution nor that structural check engages for it, and the
-            walk ends after it -- see :attr:`__generic_ext_codes__`'s docstring for the full
-            distinction.
+            method, which substitutes plain
+            :class:`~pcapkit.protocols.misc.raw.Raw`. That carries no ``next``,
+            so :meth:`_decode_next_layer`'s walk stops there, as
+            :rfc:`8200#section-4` has a node discard such a packet
+            (:issue:`2477`). ``253`` and ``254`` have no dedicated parser and
+            reach plain :class:`~pcapkit.protocols.misc.raw.Raw` with no
+            exception involved, which stops the walk the same way. A ``Raw`` the
+            walk stopped on is then returned as the upper layer, not parsed
+            again.
+            :class:`~pcapkit.protocols.internet.esp.ESP`'s info always carries
+            a ``next``, :data:`None` unless its payload was decrypted, since
+            :rfc:`4303` encrypts the real value, so the walk ends after it.
 
             The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT
             <pcapkit.utilities.config.EXTENSION_HEADER_LIMIT>` is the
@@ -726,6 +664,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             (:issue:`1604`).
 
         """
+        upper, self._walk_upper = self._walk_upper, None
+        if upper is not None:
+            return upper
+
         if payload is None:
             file_ = self.__header__.get_payload()
         else:
@@ -734,19 +676,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             length = len(file_)
 
         protocol, extra = self._next_layer_class(proto, file_, length, extension)
-        try:
-            next_ = self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
-                                           alias=proto, packet=packet, layer=self._exlayer,
-                                           protocol=self._exproto, __context__=self._exctx, **extra)
-        except Exception as exc:
-            from pcapkit.protocols.internet.ipv6_ext import \
-                IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
-
-            if not (extension and protocol is not IPv6_Ext
-                    and proto in self.__generic_ext_codes__):
-                raise
-
-            next_ = IPv6_Ext(file_, length, version=version, extension=extension,
-                             alias=proto, error=exc, packet=packet, layer=self._exlayer,
-                             protocol=self._exproto, __context__=self._exctx)
-        return next_
+        return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx, **extra)

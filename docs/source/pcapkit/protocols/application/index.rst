@@ -22,11 +22,15 @@ function rather than encapsulation, see
    ngap
    ospf
    rarp
+   ssl
+   sslv2
+   tls
+   dtls
 
 .. todo::
 
    Implement BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
-   POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, TLS/SSL, XMPP.
+   POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, XMPP.
 
 Protocol Registry
 -----------------

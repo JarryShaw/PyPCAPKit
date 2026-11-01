@@ -5,11 +5,12 @@ GitHub issue #1539: guards against :class:`~pcapkit.protocols.internet.ipv6.IPv6
 ending its extension header walk at every Fragment header and handing what
 follows to the upper-layer dispatch. That dispatch neither passes
 ``extension=True`` nor ``version=6``, so Shim6 fails
-:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate, and a
-zero-filled HIP header or a Routing header of type 3 raises with no
-:class:`IPv6_Ext` to stand in. Each becomes a plain
-:class:`~pcapkit.protocols.misc.raw.Raw` leaf, so the TCP behind it is never
-dissected, though it is without the Fragment header.
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate and
+becomes a plain :class:`~pcapkit.protocols.misc.raw.Raw` leaf, so the TCP
+behind it is never dissected, though it is without the Fragment header. A
+header whose dedicated parser raises, such as a zero-filled HIP header or a
+Routing header of type 3, is :class:`~pcapkit.protocols.misc.raw.Raw` either
+way (#2477).
 
 :rfc:`8200#section-4.5` puts every header through the upper-layer one in the
 first fragment, at offset zero, so the walk goes on past its Fragment header.
@@ -33,8 +34,9 @@ ADDRS = (bytes.fromhex('20010db8000000000000000000000001')
 #: A 20-octet TCP header and one octet of payload.
 TCP = bytes.fromhex('9c40000900000001000000005000ffff0000000078')
 
-#: Extension headers that :class:`IPv6_Ext` ends up parsing, by name: Next
-#: Header code, and the 8-octet header with TCP as its Next Header.
+#: Extension headers by name: Next Header code, and the 8-octet header with
+#: TCP as its Next Header. :class:`IPv6_Ext` parses Shim6, and the dedicated
+#: parsers of the others raise.
 HEADERS = {
     'Shim6': (140, bytes.fromhex('0600000112345678')),
     'HIP (zero-filled)': (139, bytes.fromhex('0600000000000000')),
@@ -93,31 +95,37 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
         self.assertEqual(str(fragmented.protochain), 'IPv6:IPv6-Frag:IPv6-Ext:TCP:Raw')
         self.assert_rebuilds(fragmented)
 
-    def test_direct_forms_reach_tcp(self) -> None:
+    def test_direct_forms(self) -> None:
         from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.misc.raw import Raw
 
         for name, (code, header) in HEADERS.items():
             with self.subTest(header=name):
                 ipv6 = self._parse(datagram(code, header + TCP))
-                self.assertIn('TCP', ipv6)
-                self.assertEqual(ipv6.info.protocol, TransType.TCP)
+                if name == 'Shim6':
+                    self.assertIn('TCP', ipv6)
+                    self.assertEqual(ipv6.info.protocol, TransType.TCP)
+                else:
+                    self.assertNotIn('TCP', ipv6)
+                    self.assertEqual(list(ipv6.extension_headers.values()), [])
+                    self.assertIs(type(ipv6.payload), Raw)
+                    self.assertEqual(int(ipv6.info.protocol), code)
                 self.assert_rebuilds(ipv6)
 
     def test_first_fragment_dissects_as_without_it(self) -> None:
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
         from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
 
         for name, (code, header) in HEADERS.items():
             direct = self._parse(datagram(code, header + TCP))
+            walked = list(direct.extension_headers.values())
             for more in (False, True):
                 with self.subTest(header=name, more=more):
                     ipv6 = self._parse(datagram(44, fragment(code, 0, more) + header + TCP))
-                    self.assertIn('TCP', ipv6)
+                    self.assertEqual('TCP' in ipv6, 'TCP' in direct)
                     exthdr = list(ipv6.extension_headers.values())
-                    self.assertEqual([type(ext) for ext in exthdr], [IPv6_Frag, IPv6_Ext])
-                    # ``error`` holds an exception, which compares by identity
-                    self.assertEqual(repr(exthdr[1].info),
-                                     repr(next(iter(direct.extension_headers.values())).info))
+                    self.assertEqual([type(ext) for ext in exthdr],
+                                     [IPv6_Frag, *(type(ext) for ext in walked)])
+                    self.assertEqual([ext.info for ext in exthdr[1:]], [ext.info for ext in walked])
                     self.assertEqual(ipv6.info.protocol, direct.info.protocol)
                     self.assertEqual(ipv6.payload.info, direct.payload.info)
                     self.assert_rebuilds(ipv6)

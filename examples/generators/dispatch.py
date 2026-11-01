@@ -58,10 +58,11 @@ reaching :class:`~pcapkit.protocols.application.ngap.NGAP`, and neither is a
 defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
 a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
-already does, and for the same documented reason -- one PPID is DTLS-wrapped,
-and pcapkit implements no DTLS; the other degrades identically
-because the payload is not an aligned PER encoding, exactly as that test's own
-docstring records.
+already does, and for the same documented reason -- one PPID is DTLS-wrapped
+and :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+maps it to NGAP rather than through DTLS; the other degrades
+identically because the payload is not an aligned PER encoding, exactly as
+that test's own docstring records.
 
 This module constructs its own octets and reads no capture under
 :file:`examples/captures/`, so -- like its sibling -- it belongs to the unit
@@ -70,6 +71,7 @@ tier and runs on a fresh checkout with nothing generated.
 """
 from __future__ import annotations
 
+import inspect
 import os
 import pathlib
 import struct
@@ -277,6 +279,18 @@ def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> '
     return bytes(Loopback(family=family, byteorder=byteorder, payload=payload))
 
 
+def _linux_sll(payload: 'bytes') -> 'bytes':
+    """A ``LINUX_SLL`` header carrying ``payload``."""
+    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+    return bytes(LinuxSLL1(payload=payload))
+
+
+def _linux_sll2(payload: 'bytes') -> 'bytes':
+    """A ``LINUX_SLL2`` header carrying ``payload``."""
+    from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+    return bytes(LinuxSLL2(payload=payload))
+
+
 ###############################################################################
 # Link -- EtherType.
 ###############################################################################
@@ -328,8 +342,12 @@ def _link_build(code: 'int') -> 'Any':
 # Internet -- TransType.
 ###############################################################################
 
-#: Codes dispatched over an IPv4 outer header.
-_INTERNET_OVER_IPV4 = frozenset({4, 6, 17, 50, 51, 89, 111, 132})
+#: Codes dispatched over an IPv4 outer header. ICMP (1) is canonically
+#: IPv4-only -- its IPv6 equivalent is ICMPv6 (58), dispatched separately
+#: below. IGMP (2) is likewise IPv4-only -- multicast's IPv6 equivalent is
+#: MLD, which rides in ICMPv6 rather than as its own IP protocol number
+#: (#2439).
+_INTERNET_OVER_IPV4 = frozenset({1, 2, 4, 6, 17, 50, 51, 89, 111, 132})
 
 
 def _internet_registry() -> 'Any':
@@ -346,6 +364,18 @@ def _internet_payload(code: 'int') -> 'bytes':
         return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPv4:  # IP-in-IP.
         return _ip4(6, _tcp(9999))
+    if code == TransType.ICMP:
+        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv4(type=8, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
+    if code == TransType.IPv6_ICMP:
+        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+
+        # NOTE: the checksum is left uncomputed (#2470).
+        return bytes(ICMPv6(type=128, code=0,
+                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.TCP:
         return _tcp(9999)
     if code == TransType.UDP:
@@ -367,6 +397,14 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.internet.ah import AH
         return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
                         payload=_tcp(9999)))
+    if code == TransType.IGMP:
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmpv2 import IGMP
+
+        # A General Query: an IGMPv1/v2 message is the 8-octet header and
+        # nothing else, so there is no further payload to wrap. A nonzero
+        # max_resp_time makes it IGMPv2, the class IGMP dispatches it to.
+        return bytes(IGMP(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
     if code == TransType.IPv6_NoNxt:
         # The registered target for this code *is* Raw -- there is no
         # dissector to hand it, "no next header" is the whole point -- so any
@@ -423,10 +461,22 @@ def _internet_build(code: 'int') -> 'Any':
 # TCP / UDP -- port.
 ###############################################################################
 
+#: A minimal, genuine TLS record: ``application_data`` (23), legacy version
+#: 3.3, and a zero-length fragment -- content type and legacy version both in
+#: range, and the (zero) declared length fits the (zero) remaining buffer, so
+#: :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
+#: accepts it rather than degrading it to :class:`Raw`.
+_TLS_RECORD = b'\x17\x03\x03\x00\x00'
+
+#: The DTLS equivalent of :data:`_TLS_RECORD`: ``application_data``, legacy
+#: version 0xFEFD, epoch 0, sequence number 1, zero-length fragment.
+_DTLS_RECORD = b'\x17\xfe\xfd\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
+
 _TCP_PORT_PAYLOAD = {
     20: b'binary-file-contents',
     21: b'USER anonymous\r\n',
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
+    443: _TLS_RECORD,
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
 }
 
@@ -437,6 +487,7 @@ _L2TP_DATA = struct.pack('!HHH', 0x0002, 0x1234, 0x5678) + b'\xff\x03\x00\x21PPP
 _UDP_PORT_PAYLOAD = {
     80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
     1701: _L2TP_DATA,
+    5684: _DTLS_RECORD,
     8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
 }
 
@@ -522,6 +573,10 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
         return _loopback(2, _ip4(6, _tcp(9999))), False
     if code == LinkType.LOOP:  # in network byte order (#1574)
         return _loopback(2, _ip4(6, _tcp(9999)), byteorder='big'), False
+    if code == LinkType.LINUX_SLL:
+        return _linux_sll(_ip4(6, _tcp(9999))), False
+    if code == LinkType.LINUX_SLL2:
+        return _linux_sll2(_ip4(6, _tcp(9999))), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -637,13 +692,16 @@ PINNED_TARGETS = {
     # -- Internet.__proto__ (TransType) ---------------------------------------
     'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
     'internet/IPv4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
     'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
     'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
     'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
     'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
     'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
     'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
     'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
+    'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
     'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw', 'Raw'),
     'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
     'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx', 'IPX'),
@@ -662,11 +720,13 @@ PINNED_TARGETS = {
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
     # below.
     'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
+    'tcp/443': ('pcapkit.protocols.application.tls', 'TLS'),
     'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
     # -- UDP.__proto__ (port) --------------------------------------------------
     'udp/80': ('pcapkit.protocols.application.http', 'HTTP'),
     'udp/1701': ('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
+    'udp/5684': ('pcapkit.protocols.application.dtls', 'DTLS'),
     'udp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
     # -- SCTP.__proto__ (payload protocol identifier) --------------------------
@@ -681,6 +741,8 @@ PINNED_TARGETS = {
     'pcap-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcap-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
+    'pcap-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
+    'pcap-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
 
     # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
     'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
@@ -688,6 +750,8 @@ PINNED_TARGETS = {
     'pcapng-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcapng-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
+    'pcapng-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
+    'pcapng-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
 
     # -- Loopback.__proto__ (address family) ------------------------------------
     'loopback/2': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
@@ -872,7 +936,11 @@ def probe(case: 'Case') -> 'Outcome':
     # protochain`` on the string alone, even though no AH instance exists
     # anywhere in the chain. ``.protocols`` holds the actual ``type(instance)``
     # for each layer, which that substitution cannot spoof.
-    reached = case.target in frame.protochain.protocols
+    # An abstract target is a dispatcher: the chain holds the concrete class it
+    # picked, so a subclass of it counts as reaching it (IGMP -> IGMPv1/IGMPv2).
+    reached = any(klass is case.target
+                  or (inspect.isabstract(case.target) and issubclass(klass, case.target))
+                  for klass in frame.protochain.protocols)
     error = '' if reached else _find_error(frame.info.to_dict())
     return Outcome(case, chain, reached, '', error)
 
@@ -913,14 +981,15 @@ KNOWN_DEGRADED = {
         'placeholder payload is not an aligned PER NGAP-PDU; building '
             'one is out of scope for a minimal dispatch probe, not a '
             'library defect'),
-    # PPID 66 is NGAP wrapped in a DTLS record, and pcapkit implements no
-    # DTLS -- registered so the PPID is *named*, per the registry's own
-    # comment in pcapkit/protocols/transport/sctp.py, not because it decodes.
-    # The same placeholder payload fails the same way, for the same reason.
+    # PPID 66 is NGAP wrapped in a DTLS record, and the registry maps it to
+    # NGAP rather than through DTLS -- registered so the PPID
+    # is *named*, per the registry's own comment in
+    # pcapkit/protocols/transport/sctp.py, not because it decodes. The same
+    # placeholder payload fails the same way, for the same reason.
     'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-        'pcapkit implements no DTLS, and the same placeholder payload '
-            'is not a DTLS record either'),
+        'PPID 66 is not routed through DTLS, and the same placeholder '
+            'payload is not a DTLS record either'),
 }
 
 

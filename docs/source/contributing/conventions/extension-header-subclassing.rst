@@ -158,17 +158,13 @@ carries the same extension-mode contract as its siblings.
 inside the *encrypted* trailer, so with no key material there is nothing to continue
 on: ESP's own data model reports ``next`` as :obj:`None`, and
 :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
-ends the ordinary way one iteration later. So ESP is absent from
-:attr:`IPv6.__generic_ext_codes__ <pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__>`
--- not because it lacks a parser, which it has, but because it cannot hand the walk a
-successor.
+ends the ordinary way one iteration later -- not because ESP lacks a parser, which
+it has, but because it cannot hand the walk a successor.
 
 The full reasoning, including how ESP's terminal case differs from 253/254's, is
-written where the code is and is deliberately not restated at length here: see the
-``#:`` comment on
-:attr:`IPv6.__generic_ext_codes__ <pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__>`
-(:file:`pcapkit/protocols/internet/ipv6.py`) and the module docstring of
-:mod:`pcapkit.protocols.internet.ipv6_ext`.
+written where the code is and is deliberately not restated at length here: see
+:meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
+and the module docstring of :mod:`pcapkit.protocols.internet.ipv6_ext`.
 
 .. caution::
 
@@ -176,4 +172,4 @@ written where the code is and is deliberately not restated at length here: see t
    extension header" (wrong, and :rfc:`8200#section-4.5` quoted out of scope) is a
    different claim from "ESP cannot be walked past" (right, and about
    :rfc:`4303`'s wire format). Collapsing them is how ESP ends up either dropped
-   from the extension-header contract or wrongly added to the generic-dispatch set.
+   from the extension-header contract or wrongly walked past.

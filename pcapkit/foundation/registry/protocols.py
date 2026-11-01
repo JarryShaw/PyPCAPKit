@@ -22,6 +22,8 @@ import aenum
 
 from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
 from pcapkit.const.http.frame import Frame as HTTP_Frame
+from pcapkit.const.icmp.type import Type as ICMPv4_Type
+from pcapkit.const.icmpv6.type import Type as ICMPv6_Type
 from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
 from pcapkit.const.ipv6.option import Option as IPv6_Option
 from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
@@ -47,6 +49,8 @@ from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.internet.hip import HIP
 from pcapkit.protocols.internet.hopopt import HOPOPT
+from pcapkit.protocols.internet.icmpv4 import ICMPv4
+from pcapkit.protocols.internet.icmpv6 import ICMPv6
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
@@ -81,7 +85,7 @@ from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Optional, Type
+    from typing import Any, Callable, Iterator, Optional, Type
 
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.const.reg.linktype import LinkType
@@ -131,6 +135,7 @@ __all__ = [
     'register_ethertype',
 
     'register_transtype',
+    'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
@@ -886,6 +891,40 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     if schema is not None:
         Schema_IPv4_Option.register(code, schema)
     logger.debug('registered IPv4 option parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.icmpv4.ICMPv4.__type__, pcapkit.protocols.internet.icmpv6.ICMPv6.__type__
+def register_icmp_type(code: 'ICMPv4_Type | ICMPv6_Type',
+                       meth: 'str | tuple[Callable[..., Any], Callable[..., Any]]') -> 'None':
+    """Register a message body parser.
+
+    The function will register the given message body parser to the
+    :data:`~pcapkit.protocols.internet.icmpv4.ICMPv4.__type__` registry when
+    ``code`` is an ICMPv4 type, or to
+    :data:`~pcapkit.protocols.internet.icmpv6.ICMPv6.__type__` when it is an
+    ICMPv6 type. Each registry is written by that class's own
+    :meth:`register_type` classmethod.
+
+    Args:
+        code: ICMP type as in :class:`~pcapkit.const.icmp.type.Type` or
+            :class:`~pcapkit.const.icmpv6.type.Type`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the message body. A name names the
+            ``_read_data_type_*`` and ``_make_data_type_*`` methods of the
+            protocol, and has to name an existing ``_read_data_type_*`` one.
+
+    Raises:
+        RegistryError: If ``code`` is not a member of either ICMP type enum,
+            or ``meth`` is a name with no matching ``_read_data_type_*`` method.
+
+    """
+    kind, protocol = (ICMPv6_Type, ICMPv6) if isinstance(code, ICMPv6_Type) else (ICMPv4_Type, ICMPv4)
+    _check_code(code, kind, protocol)
+    if isinstance(meth, str) and not hasattr(protocol, f'_read_data_type_{meth}'):
+        raise RegistryError('method must be a valid ICMP message parser function')
+
+    protocol.register_type(code, meth)
+    logger.debug('registered ICMP type parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hip.HIP.__parameter__

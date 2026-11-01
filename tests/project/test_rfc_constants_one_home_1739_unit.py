@@ -205,6 +205,27 @@ DISTINCTIVE = (10 ** 6, 10 ** 9, 0x1A2B3C4D)
 #: the module, the expression (see :func:`_context`) and why. A hit here is in a
 #: module whose own protocol owns a constant of that value, or that reads one.
 NOT_A_COPY = {
+    ('pcapkit/protocols/application/ssl.py', '_take(32)'):
+        "a TLS/DTLS ClientHello/ServerHello Random is 32 octets (:rfc:`9846#section-4.2.2`), "
+        'not an Interface Description Block minimum',
+    ('pcapkit/protocols/schema/application/dtls.py', 'NumberField(length=6)'):
+        "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
+        'Header offset',
+    ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
+        "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
+        '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'dlci_hi': (0, 6)}"):
+        "the 6-bit width of a Q.922 address field's high-order DLCI bits "
+        '(:rfc:`2427#section-3`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'cr': (6, 1)}"):
+        'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'fecn': (12, 1)}"):
+        'the FECN bit at bit offset 12 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the TCP Data Offset octet',
+    ('pcapkit/protocols/application/dtls.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
+        "the shortest DTLS 1.3 ciphertext, the record-number sample length "
+        '(:rfc:`9147#section-4.2.3`), not a pcap record header',
     ('pcapkit/protocols/internet/ipv6.py', "schema.hextet['version'] != 6"):
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', 'self._import_next_layer(version=6)'):
@@ -213,6 +234,13 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
+    ('pcapkit/protocols/link/frad.py', '0 <= snap_pid <= 65535'):
+        "the max value of a SNAP PID, FRAD's own 2-octet field (:rfc:`2427#section-3`), "
+        'not an IP total length',
+    ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
+        'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
+    ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
+        'the fixed length of the LINUX_SLL2 header, not the IPv4 or TCP minimum header',
     ('pcapkit/protocols/misc/pcap/frame.py', 'version == 6'):
         'the IP version number, not the decimal places of a resolution',
     ('pcapkit/protocols/misc/pcapng.py', 'version == 6'):
@@ -338,6 +366,23 @@ NOT_A_COPY = {
         'the last code point of the Basic Multilingual Plane, not an IP length',
     ('pcapkit/dumpkit/common.py', 'codepoint > 65535'):
         'above the Basic Multilingual Plane, needs a UTF-16 surrogate pair, not an IP length',
+    ('pcapkit/protocols/application/sslv2.py', "b'\\x00' * 16"):
+        "the default length of an SSLv2 CLIENT-HELLO challenge or SERVER-HELLO "
+        "connection ID (the draft's own 16-32 octet minimum), not the PCAP classic "
+        'record header length',
+    ('pcapkit/protocols/link/gre.py', 'return 16'):
+        "GRE's own longest possible header -- the 4-octet base plus all three optional "
+        'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
+    ('pcapkit/protocols/link/gre.py', '0 <= checksum <= 65535'):
+        "the max value of GRE's own 2-octet Checksum field (:rfc:`2784#section-2.5`), "
+        'not an IP total length',
+    ('pcapkit/protocols/link/gre.py', '0 <= reserved1 <= 65535'):
+        "the max value of GRE's own 2-octet Reserved1 field (:rfc:`2784#section-2.6`), "
+        'not an IP total length',
+    ('pcapkit/protocols/schema/link/gre.py', "{'reserved_2': (4, 9)}"):
+        "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
+        'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
+        'table',
 }
 
 #: Sweep hits of a homed value in a module whose own protocol owns no constant
@@ -355,6 +400,15 @@ UNRELATED = {
     'pcapkit/protocols/application/ospf.py': ((24, 65535), 'OSPF header length and field bounds'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
+    'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
+                                             "decode's mantissa mask (RFC 3376 section 4.1.1's "
+                                             "own 0x10), not the PCAP record header length"),
+    'pcapkit/protocols/internet/igmp.py': ((12,), "the minimum overall length (RFC 3376 "
+                                           "section 7.1) at which a Membership Query carries "
+                                           "IGMPv3's source-list extension rather than being "
+                                           "IGMPv1/v2; unrelated to AH_HEADER_LEN, "
+                                           "TCP_DATA_OFFSET_OCTET or GENERIC_BLOCK_MINIMUM, "
+                                           "which happen to share the value"),
     'pcapkit/protocols/internet/hip.py': ((6, 12, 16, 20, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '
                                           'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '
@@ -391,6 +445,13 @@ UNRELATED = {
     'pcapkit/protocols/link/loopback.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
     'pcapkit/protocols/link/l2tpv2.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
+    'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
+                                            '2-octet link_addr_length field, not an IP total '
+                                            'length'),
+    'pcapkit/protocols/link/netlink.py': ((16, 65535), "the nlmsghdr fixed header length (16 "
+                                          'octets, not a PCAP record header) and the max value '
+                                          "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
+                                          'an IPv4 total length)'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),

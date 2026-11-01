@@ -15,13 +15,21 @@ House Conventions
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
    * :ref:`registry-protocol` -- :mod:`pcapkit.const` again;
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
+   * :ref:`protocol-family-grouping` -- how a protocol family's base and members
+     spell :meth:`~pcapkit.protocols.protocol.Protocol.id`;
+   * :ref:`protocol-member-order` -- the order of members in a protocol class body;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;
    * :ref:`documentation` -- the prose itself, on these pages and in the API
      reference, rather than any code at all;
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
-     :mod:`pcapkit.corekit` a support module belongs in.
+     :mod:`pcapkit.corekit` a support module belongs in;
+   * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
+     new engine there needs from :mod:`pcapkit.toolkit` and
+     :mod:`pcapkit.foundation.analysis`;
+   * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const` and the
+     :mod:`pcapkit.vendor` crawler each module needs.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a
@@ -38,8 +46,12 @@ House Conventions
    sentinel-convention
    registry-protocol
    extension-header-subclassing
+   protocol-family-grouping
+   protocol-member-order
    protocol-layer-placement
    process
    documentation
    test-coverage
    utilities-or-corekit
+   reassembly-integration
+   const-vendor-pairing

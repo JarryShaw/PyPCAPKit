@@ -80,6 +80,9 @@ Internet Layer
 
    esp
    hip
+   icmp
+   icmpv6
+   igmp
    ipv4
    ipv6
    ipx
@@ -104,6 +107,8 @@ Application Layer
    http
    ngap
    ospf
+   sslv2
+   tls
 
 Miscellaneous
 -------------

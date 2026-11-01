@@ -40,17 +40,24 @@ step-by-step guide for adding a protocol, and is worth reading before starting
 one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
 the ones outstanding are,
 
-* Link Layer: DSL, EAPOL, FDDI, ISDN, LINUX_SLL, LINUX_SLL2, NDP, PPP
-* Internet Layer: ECN, ICMP, ICMPv6, IGMP, Shim6
+* Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
+* Internet Layer: ECN, Shim6
 * Transport Layer: DCCP, RSVP
-* Application Layer: BGP, DHCP, DHCPv6, DNS, DTLS, IMAP, LDAP, MQTT, NNTP,
-  NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL,
+* Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
+  NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
   XMPP
 
 Several of these come in pairs that want a shared abstract base rather than two
 independent implementations, in the way
-:class:`~pcapkit.protocols.internet.ip.IP` already covers its family: ICMP with
-ICMPv6, TLS/SSL with DTLS, and ``LINUX_SLL`` with ``LINUX_SLL2``.
+:class:`~pcapkit.protocols.internet.ip.IP` and
+:class:`~pcapkit.protocols.internet.icmp.ICMP` already cover their families:
+IP and IPsec, and TLS/SSL with DTLS. **Done** for TLS/SSL
+with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
+record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
+below. Neighbor Discovery (:rfc:`4861`, the ``NDP`` above) and Multicast
+Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented,
+nor is ICMP/ICMPv6 checksum computation or verification (:issue:`2470`).
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
@@ -62,8 +69,7 @@ whose *layout* is identical -- it holds the whole of the tag, and
    ``NotImplemented`` folder. **Those files are not a roadmap.** They are
    scratch reminders, so a stub's presence does not mean a protocol is planned or
    claimed, and its absence does not mean the protocol is unwanted:
-   ``LINUX_SLL``, ``LINUX_SLL2``, ``QUIC`` and **DTLS** have no stub and are on the
-   list above,
+   ``QUIC`` has no stub and is on the list above,
    while **NGAP** has none either and is implemented. Take this page as the
    record and ignore the folder.
 
@@ -222,35 +228,42 @@ looks like an ordinary field and is not:
 DTLS
 ~~~~
 
-**Not started**, and it has no stub in the tree -- of the TLS/SSL and DTLS pair,
-only TLS/SSL does. It earns its own entry because the registries
-have moved ahead of it, and a growing part of SCTP's surface names a protocol
-that does not exist:
+**Done** for the record layer and handshake message framing:
+:class:`~pcapkit.protocols.application.tls.TLS` (SSLv3, :rfc:`6101`; TLS
+1.0, :rfc:`2246`; TLS 1.1, :rfc:`4346`; TLS 1.2, :rfc:`5246`; TLS 1.3,
+:rfc:`9846`) and :class:`~pcapkit.protocols.application.dtls.DTLS` (DTLS
+1.0, :rfc:`4347`; DTLS 1.2, :rfc:`6347`; DTLS 1.3, :rfc:`9147`) share
+:class:`~pcapkit.protocols.application.ssl.SSL` as their record-layer base --
+content type, legacy version, length, and content-type dispatch -- with
+DTLS's own divergence (the epoch/sequence-number pair in its record header,
+and the fragment header each handshake message carries) staying in
+:class:`~pcapkit.protocols.application.dtls.DTLS` alone. ``ClientHello`` and
+``ServerHello`` decode down to their cipher suite(s), compression method(s)
+and extension list (TYPE+LENGTH framed, extension bodies undecoded); every
+other handshake message is message-TYPE-level framing only. Decryption is a
+separate question and is not needed to make the record structure legible, in
+the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
+without keys.
 
-* the DTLS chunk, type 65 of :class:`~pcapkit.const.sctp.chunk.Chunk`, and the
-  DTLS Key Management chunk parameter, ``0x8006`` of
-  :class:`~pcapkit.const.sctp.parameter.Parameter` -- both fall through to the
-  generic handlers, so they parse as opaque;
-* its error causes, 100 to 103 of
-  :class:`~pcapkit.const.sctp.cause_code.CauseCode`;
-* payload protocol identifiers -- 47 (Diameter over DTLS/SCTP), 66 to 69
-  (NGAP, XnAP, F1AP and E1AP, each over DTLS over SCTP) and 4242 (DTLS chunk
-  key management).
+**Done: reassembling a handshake message DTLS has fragmented across several
+records** (:rfc:`6347#section-4.2.3`, :issue:`2440`), via
+:class:`~pcapkit.foundation.reassembly.dtls.DTLS`, keyed on the UDP 4-tuple.
+Pass ``reassembly=`` and ``flow=`` to
+:class:`~pcapkit.protocols.application.dtls.DTLS` to opt in; the completing
+fragment's body decodes to the full reassembled message, while every other
+fragment's body stays that one fragment's raw octets -- see
+:attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`.
+An unfragmented message is unaffected either way.
 
-That last group is the one that bites. NGAP over DTLS over SCTP is PPID 66, and
-even with an NGAP dissector registered against it the bytes arriving are a DTLS
-record rather than an NGAP PDU, so they can only degrade to
-:class:`~pcapkit.protocols.misc.raw.Raw`. DTLS therefore blocks NGAP over DTLS,
+NGAP over DTLS over SCTP (PPID 66,
+:class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`),
 asked for in `discussion #251
-<https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, independently of
-whether NGAP itself is implemented.
-
-A record-layer dissector is enough to unblock that -- content type, version,
-epoch, sequence number, length, and the fragment offset and length DTLS adds to
-handshake messages. Decryption is a separate question and is not needed to make
-the record structure legible, in the same way :class:`ESP
-<pcapkit.protocols.internet.esp.ESP>` parses without keys. DTLS over UDP is the
-other half of the same work and wants the same dissector.
+<https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__, is **not**
+decoded: :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+maps PPID 66 to :class:`~pcapkit.protocols.application.ngap.NGAP` rather than
+through :class:`~pcapkit.protocols.application.dtls.DTLS`, so those bytes
+degrade to :class:`~pcapkit.protocols.misc.raw.Raw`. Rewiring that dispatch
+needs a decision on what an undecrypted DTLS-wrapped NGAP PDU reports.
 
 Registered, but Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,10 +320,13 @@ Some wanted only a table entry, because the dissector was already there:
   *name* rather than a parse -- which is the right answer for a data channel
   carrying an arbitrary file.
 * **Done.** HTTP is additionally bound on 8080 (IANA ``http-alt``, "HTTP
-  Alternate (see port 80)") on both TCP and UDP. **8443 is deliberately left
-  unbound**: IANA registers it as ``pcsync-https``, not as an HTTP alternate,
-  and de-facto 8443 traffic is TLS-wrapped, which pcapkit cannot parse -- see
-  the ``tls`` stub above. Binding it would feed a TLS record to an HTTP parser.
+  Alternate (see port 80)") on both TCP and UDP. TCP 443 (IANA ``https``) is
+  bound to :class:`~pcapkit.protocols.application.tls.TLS` and UDP 5684 (IANA
+  ``coaps``) to :class:`~pcapkit.protocols.application.dtls.DTLS`. **8443 is deliberately left unbound**: IANA registers it as
+  ``pcsync-https``, not as an HTTP alternate, and binding it to HTTP would
+  feed a TLS record to an HTTP parser; binding it to TLS instead would be a
+  guess this registry does not make for a service IANA does not actually
+  name there.
 * **Done.** The service VLAN tag identifier (S-Tag), ``0x88A8``, is bound to
   :class:`~pcapkit.protocols.link.s_tag.S_Tag`, and the customer tag ``0x8100``
   to :class:`~pcapkit.protocols.link.c_tag.C_Tag`. Both subclass the abstract
@@ -349,10 +365,9 @@ Follow-ups to the bindings above:
   port number. That depends on the proxy identifying the version positively
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
-Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub;
-and ``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
-``tcpdump -i any`` capture uses and which have no stub.
+**Done.** ICMP (1), ICMPv6 (58) and IGMP (2) -- the internet layer gaps most
+likely to be met in a real capture -- are all now implemented; ECN and Shim6
+above remain the open ones.
 
 PCAPNG Support
 --------------
@@ -874,9 +889,9 @@ from *wrong*, or it will cry wolf on the commonest capture there is —
 model for how to spell "expected, not an error".
 
 Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
-ESP has already laid the groundwork, but the checksum half needs the IP
-pseudo-header class defined first, and that is worth doing deliberately rather
-than as a side effect of a checksum patch.
+ESP has already laid the groundwork. The checksum half builds on the IP
+pseudo-header class, :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
+(:issue:`2471`).
 
 Deterministic Construction Arguments
 ------------------------------------
@@ -1071,24 +1086,53 @@ post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
-``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** on its own. These are grouped
-because the shared-base question is the design work and doing either half of a
-pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
-size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
-stub.
+Protocols, More!!!`_ above: **TLS/SSL with DTLS** and **IGMP** and **DCCP** on
+their own. These are grouped because the shared-base question is the design work
+and doing either half of a pair alone would answer it twice. **DCCP** is the
+transport-layer implementation, tracked by :issue:`2489`, and blocked on
+:issue:`2479` for its pseudo-header checksum.
 
-**Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``
-**link types.** Both are genuine DLTs that a capture can legitimately be rooted
-in — ``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP
-packet with no link header at all.
+**Done within wave 2 — ICMP/ICMPv6 shared base.** :class:`~pcapkit.protocols.internet.icmp.ICMP`
+is the abstract base :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` and
+:class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` share for selector composition
+(:issue:`2436`); each implements its own message-type parsing independently rather than
+through a shared method body. The two are distinguished by whether they carry pseudo-header
+checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation or verification
+(:issue:`2470`).
+
+**IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
+The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`,
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` and
+:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` share one read path on
+the abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base, which
+:meth:`~pcapkit.protocols.internet.igmp.IGMP._classify` dispatches to the right
+one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (:rfc:`3376`) adds the
+Membership Query's source-list extension and the Membership Report's
+group-record list, each a shape of its own.
+
+**Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
+what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
+base, TLS, DTLS, handshake message framing, and handshake-fragment
+reassembly (:issue:`2440`).
+
+**Done ahead of wave 2 — handlers for the** ``DLT_NULL``, ``DLT_RAW``,
+``DLT_LINUX_SLL`` **and** ``DLT_LINUX_SLL2`` **link types.** Each is a
+genuine DLT that a capture can legitimately be rooted in — ``DLT_NULL`` (0)
+is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP packet with no link
+header at all, and ``DLT_LINUX_SLL`` (113) with ``DLT_LINUX_SLL2`` (276) the
+Linux "cooked" capture header every ``tcpdump -i any`` capture uses.
 :class:`~pcapkit.protocols.link.loopback.Loopback` dissects ``DLT_NULL`` and
-``DLT_LOOP`` (:issue:`1574`), and the frame dispatcher reads ``DLT_RAW`` as IPv4
-or IPv6 by its version nibble (:issue:`1502`), so of the link types this
-section names only ``LINUX_SLL`` and ``LINUX_SLL2`` remain enumerated but
-unparsed. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown link
-type", which is why the toolkit raises for an unresolvable link-layer name
-instead of defaulting to :attr:`LinkType.NULL <pcapkit.const.reg.linktype.LinkType.NULL>`.
+``DLT_LOOP`` (:issue:`1574`), the frame dispatcher reads ``DLT_RAW`` as IPv4
+or IPv6 by its version nibble (:issue:`1502`), and
+:class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` with
+:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dissect the Linux
+cooked-capture variants (:issue:`2438`). The ``arphrd_type`` values
+neither header treats as carrying an EtherType (``NETLINK``, ``IPGRE``, ``IP6GRE``,
+``IEEE80211_RADIOTAP``, ``FRAD``) have no dissector of their own, tracked
+as :issue:`2460`. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown
+link type", which is why the toolkit raises for an unresolvable link-layer
+name instead of defaulting to :attr:`LinkType.NULL
+<pcapkit.const.reg.linktype.LinkType.NULL>`.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
@@ -1104,9 +1148,12 @@ above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
 sequenced *after* wave 2 rather than by preference: the multicast options embed
-:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMP** records —
-both wave 2 deliverables. Landing the registry first would give a dispatch table
-with nothing but :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
+:rfc:`9777` MLD (which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which
+rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
+IGMPv1/v2 are both wave 2 deliverables, now done; MLD itself remains a
+follow-up to ICMPv6 (see `More Protocols, More!!!`_ above), and IGMPv3 is
+:issue:`2448`. Landing the registry first would give a dispatch table with
+:class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the
 disruptive half, since it changes what existing captures dump to, so there is a case for
@@ -1230,12 +1277,14 @@ equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
 ``RELAY_HMAC`` and its signature parameters) could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
-one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP
-pseudo-header, and the owner has settled how: a **pseudo-protocol class** for the
-IP family, serving both the parsing and the constructing path, rather than a
-back-reference from a parsed protocol to its parent. So that half is not blocked
-on an open design question -- only on someone defining that class, which is a
-bounded piece of work and the natural first step.
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is :issue:`2470` and
+:issue:`2472` to :issue:`2475`.
+
+**IP pseudo-header — done** (:issue:`2471`).
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is the
+**pseudo-protocol class** for the IP family the owner settled on, serving both
+the parsing and the constructing path, rather than a back-reference from a
+parsed protocol to its parent.
 
 **Queued for wave 2 or 3 — deterministic construction arguments.** See
 `Deterministic Construction Arguments`_ above: dropping ``make()``'s implicit

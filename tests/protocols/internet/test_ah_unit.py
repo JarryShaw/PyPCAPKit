@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import unittest
+import warnings
 from unittest import mock
 
 from tests._support import reimport_once_per_class
@@ -183,6 +185,86 @@ class AHUnitTests(unittest.TestCase):
         self.assertIn('IPv6 header chain', doc)
         self.assertIn('travels directly as an IPv4 payload', doc)
         self.assertIn('qualifies it for a base besides', doc)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class AHMembershipTests(unittest.TestCase):
+    """``in`` on a terminal AH layer parsed from an IPv6 extension chain (#2484).
+
+    The AH layer is taken from ``IPv6.extension_headers`` in extension mode.
+    ``in`` on it does not raise, and is False for a selector that does not match AH.
+    Frames are built in memory; no capture is read.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def _ipv6(first: int, body: bytes) -> bytes:
+        import struct  # pylint: disable=import-outside-toplevel
+
+        return struct.pack('!IHBB', 6 << 28, len(body), first, 64) + bytes(32) + body
+
+    @staticmethod
+    def _ah(next_: int) -> bytes:
+        import struct  # pylint: disable=import-outside-toplevel
+
+        # 12-octet ICV: AH is 24 octets, so the Payload Len field is 4
+        return struct.pack('!BBHII', next_, 4, 0, 0x1234, 1) + bytes(12)
+
+    @staticmethod
+    def _esp() -> bytes:
+        import struct  # pylint: disable=import-outside-toplevel
+
+        return struct.pack('!II', 0x1234, 1) + bytes(16)
+
+    def _parse_ipv6(self, data: bytes):  # type: ignore[no-untyped-def]
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return IPv6(io.BytesIO(data), len(data))
+
+    def test_terminal_ah_membership_is_false_for_other_selectors(self) -> None:
+        from pcapkit.protocols.internet.ah import AH
+
+        ipv6 = self._parse_ipv6(self._ipv6(51, self._ah(59)))
+        (ah,) = [ext for ext in ipv6.extension_headers.values() if isinstance(ext, AH)]
+
+        self.assertIn('AH', ah)
+        self.assertNotIn('ESP', ah)
+        self.assertNotIn('TCP', ah)
+
+    def test_ah_followed_by_esp_membership_does_not_raise(self) -> None:
+        from pcapkit.protocols.internet.ah import AH
+
+        ipv6 = self._parse_ipv6(self._ipv6(51, self._ah(50) + self._esp()))
+        ah = next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, AH))
+
+        self.assertNotIn('ESP', ah)
+
+    def test_esp_extension_layer_membership_is_unchanged(self) -> None:
+        from pcapkit.protocols.internet.esp import ESP
+
+        ipv6 = self._parse_ipv6(self._ipv6(50, self._esp()))
+        esp = next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, ESP))
+
+        self.assertIn('ESP', esp)
+        self.assertNotIn('AH', esp)
+
+    def test_ipv4_ah_membership_is_unchanged(self) -> None:
+        import struct  # pylint: disable=import-outside-toplevel
+
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        body = self._ah(59)
+        data = struct.pack('!BBHHHBBH', 0x45, 0, 20 + len(body), 0, 0, 64, 51, 0) + bytes(8) + body
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv4 = IPv4(io.BytesIO(data), len(data))
+
+        self.assertNotIn('ESP', ipv4.payload)
+        self.assertIn('AH', ipv4.payload)
 
 
 if __name__ == '__main__':

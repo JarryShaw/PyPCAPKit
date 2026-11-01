@@ -27,8 +27,12 @@ __all__ = [
     # Link Layer Protocols
     'ARP',
     'Ethernet',
+    'FRAD',
+    'GRE',
     'L2TP',
+    'LinuxSLL1', 'LinuxSLL2',
     'Loopback',
+    'Netlink',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols
@@ -62,6 +66,16 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+    'IP_Pseudo',
+
+    'ICMPv4',
+    'ICMPv4_ICMPv4Type',
+    'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',
+    'ICMPv4_ParameterProblem',
+    'ICMPv6',
+    'ICMPv6_ICMPv6Type',
+    'ICMPv6_Unknown', 'ICMPv6_DestinationUnreachable', 'ICMPv6_PacketTooBig', 'ICMPv6_TimeExceeded',
+    'ICMPv6_ParameterProblem', 'ICMPv6_Echo',
     'IPv4',
     'IPv4_Option',
     'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
@@ -83,6 +97,8 @@ __all__ = [
     'IPv6_Route',
     'IPv6_Route_RoutingType',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_QueryExtension', 'IGMPv3_Report',
+    'IGMPv3_GroupRecord',
     'IPv6',
     'IPX',
     'MH',
@@ -172,15 +188,19 @@ __all__ = [
     'SCTP_ProtocolViolationCause',
 
     # Application Layer Protocols
+    'DTLS', 'DTLS_Ciphertext',
     'FTP',
     'NGAP',
     'OSPF', 'OSPF_CryptographicAuthentication',
+    'SSLv2', 'SSLv2_HandshakeBody', 'SSLv2_UnknownHandshakeBody',
+    'SSLv2_ClientHello', 'SSLv2_ServerHello',
     'HTTPv1',
     'HTTPv2',
     'HTTPv2_FrameType',
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
     'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+    'TLS',
 
     # PCAP file format
     'Header',

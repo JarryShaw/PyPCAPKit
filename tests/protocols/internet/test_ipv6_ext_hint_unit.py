@@ -20,9 +20,9 @@ from tests._support import reimport_once_per_class
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: ``alias`` values that reach the generic fallback: an absent alias, a number
-#: IANA has not registered, ``Shim6`` (registered to ``IPv6_Ext`` directly) and
-#: ``HOPOPT`` (the code ``IPv6`` substitutes the fallback for).
+#: ``alias`` values ``IPv6_Ext`` may be parsed with: an absent alias, a
+#: number IANA has not registered, ``Shim6`` (registered to ``IPv6_Ext``
+#: directly) and ``HOPOPT`` (a code with a dedicated parser).
 ALIASES = {'absent': {}, 'unregistered': {'alias': 200}, 'Shim6': {'alias': 140}, 'HOPOPT': {'alias': 0}}
 
 #: The IPv6 payload length the caller declares, longer than any tail below.
@@ -36,7 +36,7 @@ def tail(size: int) -> bytes:
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPv6ExtLengthHintTests(unittest.TestCase):
-    """The fallback's hint is the 8-octet minimum header."""
+    """The generic parser's hint is the 8-octet minimum header."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

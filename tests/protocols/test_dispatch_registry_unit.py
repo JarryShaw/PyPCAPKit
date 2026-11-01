@@ -121,8 +121,8 @@ class DispatchRegistryTests(unittest.TestCase):
                 'library defect'),
             'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
                 ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
-                'pcapkit implements no DTLS, and the same placeholder payload '
-                'is not a DTLS record either'),
+                'PPID 66 is not routed through DTLS, and the same placeholder '
+                'payload is not a DTLS record either'),
         }.items()
     }
 
@@ -225,10 +225,13 @@ class DispatchRegistryTests(unittest.TestCase):
         cases = self.dispatch.cases()
         # The tables of #496, including #904's Internet.__proto__[TransType.Shim6]
         # registered at IPv6_Ext rather than defaulting to Raw, plus #1574's
-        # LinkType.NULL and LinkType.LOOP in both link-type tables and the four
-        # address families of Loopback.__proto__.
-        self.assertEqual(len(cases), 47,
-                         'expected exactly 47 entries across the seven __proto__ '
+        # LinkType.NULL and LinkType.LOOP in both link-type tables, the four
+        # address families of Loopback.__proto__, #2438's
+        # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
+        # pcap and pcapng frame tables, #2439's IGMP, and #2436's
+        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP].
+        self.assertEqual(len(cases), 56,
+                         'expected exactly 56 entries across the seven __proto__ '
                          'tables named in GitHub issue #496 and the loopback table '
                          'of #1574; a different count means a registry changed '
                          'shape and this module was not updated to match')
@@ -237,8 +240,8 @@ class DispatchRegistryTests(unittest.TestCase):
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
-            'link': 7, 'internet': 17, 'tcp': 4, 'udp': 3, 'sctp': 2,
-            'pcap-frame': 5, 'pcapng-frame': 5, 'loopback': 4,
+            'link': 7, 'internet': 20, 'tcp': 5, 'udp': 4, 'sctp': 2,
+            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4,
         })
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:

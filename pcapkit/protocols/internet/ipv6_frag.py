@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as Data_IPv6_Frag
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6_Frag
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -158,6 +159,9 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         )
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return ipv6_frag
         return self._decode_next_layer(ipv6_frag, schema.next, length - self.length)
 

@@ -5,8 +5,8 @@ Packets Reassembly
 .. module:: pcapkit.foundation.reassembly
 
 :mod:`pcapkit.foundation.reassembly` implements datagram reassembly
-of IP and TCP packets, based on the algorithms described in :rfc:`791`
-and :rfc:`815`.
+of IP packets, TCP segments and DTLS handshake messages, based on the
+algorithms described in :rfc:`791`, :rfc:`815` and :rfc:`6347`.
 
 .. seealso::
 
@@ -19,6 +19,7 @@ and :rfc:`815`.
    reassembly
    ip/index
    tcp
+   dtls
 
 All reassembly classes are implemented as :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
 subclasses, which are responsible for processing extracted packets and
@@ -30,7 +31,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
    flowchart LR
        A{{ReassemblyMeta}} -.->|metaclass| B(ReassemblyBase)
 
-       B --> IP & TCP
+       B --> IP & TCP & DTLS
        IP --> IPv4 & IPv6
 
        B --> C(Reassembly)
@@ -45,6 +46,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
        click IPv4 "ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4"
        click IPv6 "ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6"
        click TCP "tcp.html#pcapkit.foundation.reassembly.tcp.TCP"
+       click DTLS "dtls.html#pcapkit.foundation.reassembly.dtls.DTLS"
 
 Auxiliary Data
 ==============

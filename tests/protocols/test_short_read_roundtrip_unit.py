@@ -50,8 +50,17 @@ CASES = (
     ('arp', 'link.arp:ARP', {}, bytes.fromhex('000186dd06100001') + bytes(range(44))),
     ('rarp', 'application.rarp:RARP', {}, bytes.fromhex('0001080006040003') + bytes(range(20))),
     ('l2tpv2', 'link.l2tpv2:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
+    ('gre', 'link.gre:GRE', {}, struct.pack('>HH', 0xB000, 0x0800) + struct.pack('>HH', 0, 0)
+     + struct.pack('>I', 0x11223344) + struct.pack('>I', 99)
+     + bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
     ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
+    ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
+    ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
+        '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
+    ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(
+        '0c21' '0300' '80' '000000' '0806'
+        '00010800060400010011223344550a0000010000000000000a000002')),
     ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
     ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
     ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
@@ -90,12 +99,6 @@ def _quiet(case: unittest.TestCase) -> None:
     warnings.simplefilter('ignore')
 
 
-def _has_fallback(proto: object) -> bool:
-    from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-
-    return any(type(ext) is IPv6_Ext for ext in getattr(proto, 'extension_headers', {}).values())
-
-
 def _resolve(path: str) -> type:
     module, _, name = path.partition(':')
     return getattr(importlib.import_module(f'pcapkit.protocols.{module}'), name)
@@ -124,11 +127,6 @@ class TestShortReadRoundTrip(unittest.TestCase):
                             continue
                         self.assertEqual(proto.data, raw)
                         self.assertEqual(type(proto).from_data(proto.info).data, raw)
-                        if _has_fallback(proto):
-                            # from the dict form, IPv6.from_data rebuilds an
-                            # IPv6_Ext standing in for a dedicated parser with
-                            # that parser's class: a separate defect, in ipv6.py
-                            continue
                         self.assertEqual(type(proto).from_data(proto.info.to_dict()).data, raw)
 
     def test_extension_header_cut_at_every_offset(self) -> None:

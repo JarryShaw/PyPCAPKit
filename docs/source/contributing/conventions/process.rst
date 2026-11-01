@@ -431,3 +431,15 @@ thresholds are on :doc:`../workflows`.
    comments that the report shows to be stale -- the coverage leg's headroom, the
    ordering cells' timings and their step cap's rationale.
 
+
+The PEP Discussion, Kept Current
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:file:`docs/source/contributing/pep.rst` is the source of truth for what each wave of
+the roadmap covers and where it stands. The owner's ruling on :pr:`2483`: upon each
+release, amend that page inline, and also post the update -- or edit it inline, either
+is fine -- to the roadmap's own GitHub Discussion,
+`PyPCAPKit Enhancement Proposals <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.
+The page stays authoritative; the Discussion is kept in step with it, not the other
+way round, so a contributor who only reads the Discussion is not working from a stale
+picture.

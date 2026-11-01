@@ -529,6 +529,34 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
             # the first to finish past the deadline.
             self.assertEqual(len(collections), 5)
 
+    def test_collect_until_does_not_stop_on_a_slow_first_collection(self) -> None:
+        """A first collection longer than the grace still gets a second (#2481).
+
+        PyPy's finaliser needs two collections. Each collection here costs two
+        fake seconds, more than the one-second grace, and the finaliser runs on
+        the second. Ending after the first would report it as never run.
+
+        """
+        clock = [0.0]
+        collections: 'list[None]' = []
+
+        def collect() -> int:
+            clock[0] += 2.0
+            collections.append(None)
+            return 0
+
+        def sleep(seconds: float) -> None:
+            clock[0] += seconds
+
+        def second() -> bool:
+            return len(collections) >= 2
+
+        with mock.patch.object(gc, 'collect', collect), \
+                mock.patch.object(time, 'monotonic', lambda: clock[0]), \
+                mock.patch.object(time, 'sleep', sleep):
+            self.assertTrue(collect_until(second, grace=1.0))
+            self.assertEqual(len(collections), 2)
+
     def test_finished_extraction_detaches_its_finaliser(self) -> None:
         """``_cleanup`` and the context manager unregister it, so nothing closes twice."""
         import pcapkit

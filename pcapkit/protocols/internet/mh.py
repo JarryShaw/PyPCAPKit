@@ -285,6 +285,7 @@ from pcapkit.protocols.data.internet.mh import \
     UpdateNotificationMessage as Data_UpdateNotificationMessage
 from pcapkit.protocols.data.internet.mh import VendorSpecificOption as Data_VendorSpecificOption
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
 from pcapkit.protocols.schema.internet.mh import \
     AccessNetworkIdentifierOption as Schema_AccessNetworkIdentifierOption
@@ -566,10 +567,9 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
         because this RFC-inline value set stays immutable (decided on
-        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
-        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
-        Mobility Header whose parser raises, and the rest of the packet is kept.
+        :issue:`877`). Within an IPv6 chain the Mobility Header and everything
+        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).
 
         The class defines no ``get`` of its own: ``get``/``get_all`` come from
         :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
@@ -637,10 +637,9 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
         because this RFC-inline value set stays immutable (decided on
-        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
-        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
-        Mobility Header whose parser raises, and the rest of the packet is kept.
+        :issue:`877`). Within an IPv6 chain the Mobility Header and everything
+        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).
 
         The class defines no ``get`` of its own: ``get``/``get_all`` come from
         :class:`~pcapkit.corekit.enum.EnumLookup`, like every other
@@ -703,10 +702,9 @@ class LocalizedRoutingStatus(EnumLookup, IntEnum):
         unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
         because this RFC-inline value set stays immutable (decided on
-        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
-        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
-        Mobility Header whose parser raises, and the rest of the packet is kept.
+        :issue:`877`). Within an IPv6 chain the Mobility Header and everything
+        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).
 
         The class defines no ``get`` of its own: ``get``/``get_all`` come from
         :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an
@@ -758,10 +756,9 @@ class LMAAddressCode(EnumLookup, IntEnum):
         unassigned raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         from :meth:`_missing_` instead of minting an ``Unassigned_N`` member,
         because this RFC-inline value set stays immutable (decided on
-        :issue:`877`). Within an IPv6 chain only the Mobility Header layer is
-        lost to it: :class:`~pcapkit.protocols.internet.ipv6.IPv6` substitutes
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for a
-        Mobility Header whose parser raises, and the rest of the packet is kept.
+        :issue:`877`). Within an IPv6 chain the Mobility Header and everything
+        after it are then :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).
 
         The class defines no ``get`` of its own: ``get``/``get_all`` come from
         :class:`~pcapkit.corekit.enum.EnumLookup`, and since it cannot mint, an
@@ -1393,6 +1390,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         mh = meth(schema.data, header=schema)
 
         if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return mh
         return self._decode_next_layer(mh, schema.next, length - mh.length)
 

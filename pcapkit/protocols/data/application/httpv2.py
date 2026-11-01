@@ -187,17 +187,17 @@ class Settings(OrderedMultiInfo['Setting', int]):
 
     """
 
-    def __getitem__(self, key: 'Setting') -> 'int':  # type: ignore[override]
-        if key in self:
-            return self.getlist(key)[-1]
-        return super().__getitem__(key)  # pylint: disable=no-value-for-parameter
-
     def items(self, multi: 'bool' = False) -> 'Iterator[tuple[Setting, int]]':  # type: ignore[override]
         if multi:
             yield from super().items(multi=True)  # pylint: disable=no-value-for-parameter
             return
         for key, _ in super().items():  # pylint: disable=no-value-for-parameter
             yield key, self[key]
+
+    def __getitem__(self, key: 'Setting') -> 'int':  # type: ignore[override]
+        if key in self:
+            return self.getlist(key)[-1]
+        return super().__getitem__(key)  # pylint: disable=no-value-for-parameter
 
 
 @info_final

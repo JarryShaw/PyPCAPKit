@@ -70,8 +70,7 @@ class IPv6(Protocol):
         #: Extension header chain, in wire order, as pairs of the parser
         #: class and its info. The per-header keys hold the same infos, but in
         #: the order of the keys of this :class:`~pcapkit.corekit.infoclass.Info`,
-        #: which differs on PyPy, so the chain is rebuilt from this alone; the
-        #: parser class keeps the IPv6_Ext a header fell back to
+        #: which differs on PyPy, so the chain is rebuilt from this alone
         #: (:issue:`1473`, :issue:`2003`).
         __exthdr__: 'tuple[tuple[Type[ProtocolBase], Data], ...]'
 

@@ -110,15 +110,21 @@ else:
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
     from pcapkit.vendor.http import *
+    from pcapkit.vendor.icmp import *
+    from pcapkit.vendor.icmpv6 import *
+    from pcapkit.vendor.igmp import *
     from pcapkit.vendor.ipv4 import *
     from pcapkit.vendor.ipv6 import *
     from pcapkit.vendor.ipx import *
     from pcapkit.vendor.l2tp import *
+    from pcapkit.vendor.linux import *
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
     from pcapkit.vendor.sctp import *
+    from pcapkit.vendor.sslv2 import *
     from pcapkit.vendor.tcp import *
+    from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
 
 # Crawlers only. This list is also the default target list of
@@ -142,6 +148,13 @@ __all__ = [
     'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_StatusCode',
+    # ICMP
+    'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
+    # ICMPv6
+    'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
+    'ICMPv6_ParameterProblemCode',
+    # IGMP
+    'IGMP_Type', 'IGMP_RecordType',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
@@ -153,6 +166,8 @@ __all__ = [
     'IPX_Packet', 'IPX_Socket',
     # L2TP
     'L2TP_Type',
+    # Linux
+    'Linux_ARPHRD',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
@@ -175,8 +190,12 @@ __all__ = [
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
     'SCTP_PayloadProtocolIdentifier',
+    # SSLv2
+    'SSLv2_HandshakeType', 'SSLv2_Version',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

@@ -47,7 +47,6 @@ class IPv6_Ext(Protocol):
     length: 'int'
     #: Header-specific content after the two fixed octets, as consumed.
     data: 'bytes'
-    #: Original parsing error, if this instance was reached as a
-    #: :func:`~pcapkit.corekit.decorators.beholder` fallback rather than by
-    #: direct dispatch.
+    #: Parsing error a caller passed to
+    #: :meth:`read <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read>`, if any.
     error: 'Optional[Exception]'

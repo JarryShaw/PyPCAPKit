@@ -60,12 +60,16 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.ICMP`
+         - :class:`pcapkit.protocols.internet.icmpv4.ICMPv4`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.TCP`
          - :class:`pcapkit.protocols.transport.tcp.TCP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.UDP`
          - :class:`pcapkit.protocols.transport.udp.UDP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_ICMP`
+         - :class:`pcapkit.protocols.internet.icmpv6.ICMPv6`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Route`
          - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`
@@ -74,6 +78,11 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.internet.esp.ESP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`
          - :class:`pcapkit.protocols.internet.ah.AH`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IGMP`
+         - :class:`pcapkit.protocols.internet.igmp.IGMP`, which dispatches to
+           :class:`pcapkit.protocols.internet.igmpv1.IGMP`,
+           :class:`pcapkit.protocols.internet.igmpv2.IGMP` or
+           :class:`pcapkit.protocols.internet.igmpv3.IGMP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
          - :class:`pcapkit.protocols.misc.raw.Raw`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`
@@ -114,13 +123,16 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         {
             Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
             Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4',       'IPv4'),
+            Enum_TransType.ICMP:            ModuleDescriptor('pcapkit.protocols.internet.icmpv4',     'ICMPv4'),
             Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp',       'TCP'),
             Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp',       'UDP'),
             Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6',       'IPv6'),
+            Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6',     'ICMPv6'),
             Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
             Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
             Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp',        'ESP'),
             Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah',         'AH'),
+            Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp',       'IGMP'),
             Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw',            'Raw'),
             Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
             Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx',        'IPX'),
@@ -416,7 +428,11 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
 
+        from pcapkit.protocols.internet.igmp import IGMP as IGMPBase  # isort: skip # pylint: disable=import-outside-toplevel
+
         protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
+        if protocol is IGMPBase:
+            protocol = IGMPBase._dispatch(file_, length)
         if depth and issubclass(protocol, Internet):
             return protocol, {'_exthdr_depth': depth}
         return protocol, {}

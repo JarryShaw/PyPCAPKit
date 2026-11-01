@@ -20,6 +20,9 @@ from pcapkit.const.esp import *
 from pcapkit.const.ftp import *
 from pcapkit.const.hip import *
 from pcapkit.const.http import *
+from pcapkit.const.icmp import *
+from pcapkit.const.icmpv6 import *
+from pcapkit.const.igmp import *
 from pcapkit.const.ipv4 import *
 from pcapkit.const.ipv6 import *
 from pcapkit.const.ipx import *
@@ -28,7 +31,9 @@ from pcapkit.const.mh import *
 from pcapkit.const.ngap import *
 from pcapkit.const.ospf import *
 from pcapkit.const.sctp import *
+from pcapkit.const.sslv2 import *
 from pcapkit.const.tcp import *
+from pcapkit.const.tls import *
 from pcapkit.const.vlan import *
 
 __all__ = [
@@ -47,6 +52,13 @@ __all__ = [
     'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_Status',
+    # ICMP
+    'ICMP_Type', 'ICMP_DestinationUnreachableCode', 'ICMP_TimeExceededCode', 'ICMP_ParameterProblemCode',
+    # ICMPv6
+    'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
+    'ICMPv6_ParameterProblemCode',
+    # IGMP
+    'IGMP_Type', 'IGMP_RecordType',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
@@ -79,8 +91,12 @@ __all__ = [
     'OSPF_Authentication', 'OSPF_Packet',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
+    # SSLv2
+    'SSLv2_HandshakeType', 'SSLv2_Version',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS/DTLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG
