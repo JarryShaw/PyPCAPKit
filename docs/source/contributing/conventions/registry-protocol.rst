@@ -37,7 +37,7 @@ may *grow*:
 =================================================== ==============================================================
 :class:`~pcapkit.corekit.enum.EnumLookup`           ``get``, ``get_all``, ``_validate_value``
 :class:`~pcapkit.corekit.enum.EnumRegistry`         ``register``, ``register_alias``, ``register_aliases``,
-                                                    ``_extend``, ``_unregistered_member``
+                                                    ``_extend``, ``_unregistered_member``, ``_make_reducible``
 =================================================== ==============================================================
 
 The owner ruled on :issue:`877` that a registry may subclass a bare base enum out of
@@ -79,8 +79,14 @@ generated registries spell by hand in ``_missing_``:
 writes at the top of ``_missing_``, with the same message. That is the ``FLAG`` of most
 crawlers, but a bespoke template's own range where its ``_missing_`` checks something
 else: ``0``-``999`` for :class:`~pcapkit.const.http.status_code.StatusCode` and
-:class:`~pcapkit.const.ftp.return_code.ReturnCode`, and :class:`str` for the
-string-valued registries.
+:class:`~pcapkit.const.ftp.return_code.ReturnCode`, and :class:`str` for
+:class:`~pcapkit.const.ftp.command.Command`,
+:class:`~pcapkit.const.ftp.command.FEATCode` and
+:class:`~pcapkit.const.http.method.Method`.
+:class:`~pcapkit.const.pcapng.option_type.OptionType` and
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` are :class:`str`-valued too, but their
+``_missing_`` checks an :class:`int` range, so their overrides check ``0``-``0xFFFF``
+and ``0``-``65535``.
 :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` and
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` have no ``_missing_`` to
 copy from, because their constructor refuses every value no member carries, so the
@@ -183,7 +189,8 @@ installed, the interpreter's own unless an earlier loud error installed
 
 * **The name miss** is raised with ``quiet=True``. It is in-library control flow at
   several call sites, and at :meth:`Method.get <pcapkit.const.http.method.Method.get>` it
-  is part of a *successful* call -- that override catches it in order to mint.
+  is part of a *successful* call -- that override catches it and returns an unregistered
+  member, which mints nothing (:ref:`mint-criterion`).
 * **The value miss** is quiet with or without a usable ``default``. The owner ruled
   for that on :issue:`1845`, on the ground that ``get`` is mostly called from
   protocol parsing, where a value that does not resolve is input for the caller to
@@ -211,7 +218,10 @@ overrides outright. They are collected here because each was reached by the same
 argument: the base's contract is house-wide, so an override that diverges from it is
 a defect rather than a local judgement about its own callers. The first item below is
 not a ruling but a language constraint, recorded with them because the rulings
-all presuppose it.
+all presuppose it. The ruled exceptions,
+:meth:`Command.get <pcapkit.const.ftp.command.Command.get>` and
+:meth:`Method.get <pcapkit.const.http.method.Method.get>`, are listed under the folding
+rule in the next section.
 
 **An override that delegates is a** ``@classmethod``, and this one is forced by
 Python rather than decided. Zero-argument :class:`super` binds the enclosing
@@ -335,7 +345,9 @@ case-insensitivity applies only to the selected registries where it makes logica
 -- :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` being one -- or where the
 RFC documentation itself recognises the values as case-insensitive, FTP and HTTP commands
 being the candidates the owner named. Only FTP survived the audit below:
-:rfc:`9110#section-9.1` makes the HTTP method token case-sensitive outright.
+:rfc:`9110#section-9.1` makes the HTTP method token case-sensitive outright, so
+:meth:`Method.get <pcapkit.const.http.method.Method.get>` does not fold. Its constructor
+does, by the ruling below.
 
 So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
 default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
@@ -345,6 +357,43 @@ to make a lookup work -- which is what keeps
 :class:`~pcapkit.const.hip.parameter.Parameter`'s ``R1_Counter = 128`` and
 ``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
 resolvable.
+
+**A fold can rest on a ruling rather than an RFC.**
+:class:`~pcapkit.const.http.method.Method`'s ``_missing_`` upper-cases the token and
+matches it against member names, then values, so ``Method('get')`` is
+:attr:`Method.GET <pcapkit.const.http.method.Method.GET>` -- while ``Method.get('get')``
+is not (:issue:`896`) -- and ``Method('baseline_control')`` is ``BASELINE_CONTROL`` by
+name, as is ``Method('baseline-control')`` by the value match the fix for :issue:`2284`
+added. The owner kept this fold on :issue:`2552`: HTTP methods are case-insensitive here,
+and member names follow Python's naming conventions, so the token's dash is an underscore
+in the name. That departs from :rfc:`9110#section-9.1` on purpose, so the ruling is the
+citation.
+
+**Some crawlers re-case the names they generate**, each an exception recorded with its
+basis:
+
+* The :class:`~pcapkit.const.reg.apptype.apptype.AppType` crawler lower-cases the
+  service name, so IANA's ``CAIlic`` (port 216) is the
+  :class:`~pcapkit.const.reg.apptype.tcp.TCP` member ``cailic``, valued
+  ``'cailic [216 - tcp]'``. :rfc:`6335#section-5.1` ignores case when comparing service
+  names, so the lower-cased name denotes the same service; the owner kept the
+  lower-casing rather than rename those members (:issue:`2551`).
+* :class:`~pcapkit.const.tls.content_type.ContentType` lower-cases IANA's ``ACK`` (26) to
+  ``ack``, the spelling :rfc:`9147#section-4.1` uses for that content type
+  (:issue:`2565`).
+* :class:`~pcapkit.const.tls.handshake_type.HandshakeType`'s crawler lower-cases each
+  cell the same way, which changes only IANA's single-row ``Unassigned`` entries, to
+  ``unassigned_7`` and ``unassigned_255``; the ranges ``_missing_`` names keep
+  ``Unassigned`` (:issue:`2582`).
+* :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`,
+  :class:`~pcapkit.const.ipv4.tos_thr.ToSThroughput`,
+  :class:`~pcapkit.const.ipv4.tos_rel.ToSReliability` and
+  :class:`~pcapkit.const.ipv6.seed_id.SeedID` upper-case their labels: ``Normal`` is
+  ``NORMAL``, ``IPv6 Source Address`` is ``IPV6_SOURCE_ADDRESS``. Each label is typed into
+  its crawler's own ``DATA`` rather than read from a registrar's CSV, so the casing
+  changed is the project's own (:issue:`2565`).
+  :class:`~pcapkit.const.ipv4.tos_pre.ToSPrecedence` keeps its ``DATA`` casing
+  (``Network_Control``).
 
 And a folding override carries **only** the fold.
 :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>` is
@@ -359,6 +408,28 @@ was nothing left for an override to hold, and the class inherits
 to add is deleted, not kept as a pass-through** -- a ``get`` that only calls
 ``super().get()`` reads as though it were doing something, and the next reader has to diff
 it against the base to find out that it is not.
+
+:meth:`Command.get <pcapkit.const.ftp.command.Command.get>` does more than fold, and
+:meth:`Method.get <pcapkit.const.http.method.Method.get>`, which does not fold, does the
+same. The owner ruled each of these an exception to this rule and to the obligations
+above, not a defect (:issue:`2553`):
+
+1. **A name miss returns an unregistered member** where the base raises
+   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`: ``Command.get('xyzzy')`` is an
+   ``XYZZY`` valued ``'xyzzy'`` that neither lookup table holds. This is :issue:`860`'s
+   no-mint design.
+2. ``default`` **is that member's value**, where the base's names a registered value to
+   fall back to: ``Method.get('ZZZ', 'GET')`` is an unregistered ``ZZZ`` valued ``'GET'``,
+   not :attr:`Method.GET <pcapkit.const.http.method.Method.GET>`. Settled on
+   :issue:`2553`, on the basis :issue:`2552` gives above.
+3. **A non-**\ :class:`str` **key goes to the base without** ``default``, so the base's
+   refusal reaches the caller whatever ``default`` is: ``Command.get(5, 'USER')`` raises
+   :exc:`~pcapkit.utilities.exceptions.EnumValueError` where the base returns
+   ``Command.USER``. ``Command.get`` delegates such a key rather than upper-casing it
+   (:issue:`1824`), and ``Method.get`` delegates every key.
+
+So on these classes ``default`` is the value an unregistered member carries on a name
+miss, and does nothing on any other path.
 
 The Lenient Criterion, in Two Limbs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -410,8 +481,9 @@ is vacuous on it rather than merely unmet.** A registry whose values are numbers
 nothing for case to apply to; the only way a string reaches
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` on one is as a member *name*, and a name
 is the Python identifier :meth:`pcapkit.vendor.default.Vendor.safe_name` derives from
-the registry's own name column -- it preserves the registrar's casing exactly, but it
-is not itself a value any specification states a comparison rule for. Measured across
+the registry's own name column -- it preserves the registrar's casing exactly, though a
+crawler may re-case the result as recorded above, and it is not itself a value any
+specification states a comparison rule for. Measured across
 every enumeration: **only** :class:`~pcapkit.const.hip.parameter.Parameter` would
 collide if names were folded, on ``R1_Counter`` against ``R1_COUNTER`` -- and
 **no** enumeration anywhere has two ``str`` *values* that
@@ -450,7 +522,8 @@ That leaves the classes with something to decide:
    * - :class:`~pcapkit.const.http.method.Method`
      - :rfc:`9110#section-9.1`
      - *"The method token is case-sensitive."* Explicitly the opposite of limb 1.
-     - **case-sensitive** -- ``get`` does not fold (:issue:`896`)
+     - **case-sensitive** -- ``get`` does not fold (:issue:`896`); the constructor folds
+       by ruling (:issue:`2552`)
    * - :class:`~pcapkit.const.pcapng.option_type.OptionType`
      - ``draft-tuexen-opsawg-pcapng``
      - Nothing states a rule; the draft never discusses option-name case.
@@ -485,10 +558,11 @@ That leaves the classes with something to decide:
        :class:`~pcapkit.const.reg.apptype.dccp.DCCP`
      - :rfc:`6335#section-5.1`
      - *"case is ignored for comparison purposes, so both "http" and "HTTP" denote
-       the same service."* Limb 1, emphatically -- and these registries **derive every
-       member name from the registry's service-name column**, in the registrar's own
-       spelling (``tcpmux``); the *value* is a composite that embeds it
-       (``'tcpmux [1 - tcp]'``), not the bare name.
+       the same service."* Limb 1, emphatically -- and these registries **derive their
+       member names from the registry's service-name column**, falling back to the
+       description where it is blank, and lower-case them as recorded above
+       (``cailic`` for IANA's ``CAIlic``, :issue:`2551`); the *value* is a composite
+       that embeds the name (``'cailic [216 - tcp]'``), not the bare name.
      - **unimplemented** -- no service-name lookup exists to fold; see below
    * - :class:`~pcapkit.const.ftp.command.CommandType`,
        :class:`~pcapkit.const.ftp.command.ConformanceRequirement`
@@ -574,14 +648,44 @@ wider than a case fix:
   own override is a design question for whoever writes the first string-keyed caller, not
   one this audit settles.
 
-One case fold also lives **outside** any ``get``, and so escapes this convention
-entirely: ``_resolve`` in :mod:`pcapkit.protocols.internet.esp` upper-cases its
-``value`` before matching it against :class:`~pcapkit.const.esp.cipher.Cipher` and
-:class:`~pcapkit.const.esp.integrity.Integrity` member names. :rfc:`7296` states no
-comparison rule for IKEv2 transform names -- checked, it does not discuss case at all
--- so that fold is a convenience with no citation behind it. It is a protocol-level
-resolver rather than a registry override, which is why the audit records it here
-rather than changing it.
+Some case folds live **outside** any registry's ``get``, and so escape this convention.
+Each is recorded here with its basis, or the lack of one:
+
+* :func:`~pcapkit.protocols.internet.esp._resolve` upper-cases its ``value`` before
+  matching it against :class:`~pcapkit.const.esp.cipher.Cipher` and
+  :class:`~pcapkit.const.esp.integrity.Integrity` member names, and
+  :meth:`IntegritySuite.get <pcapkit.protocols.internet.esp.IntegritySuite.get>`
+  upper-cases a name before handing it on. :rfc:`7296` states no comparison rule for
+  IKEv2 transform names -- checked, it does not discuss case at all -- so these are
+  conveniences with no citation behind them.
+* :func:`~pcapkit.foundation.registry.protocols.register_apptype` lower-cases a
+  :class:`str` transport before matching it against
+  :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s member names, so
+  ``'TCP'`` names ``TransportProtocol.tcp``. Its basis is that class's row above,
+  :rfc:`6335#section-8.1.1` by limb 2.
+* :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>` and
+  :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` upper-case the TCP
+  schema's flag keys, ``cwr`` to ``fin``, to look up
+  :class:`~pcapkit.const.tcp.flags.Flags` members. Both spellings are pcapkit's own and
+  the keys a fixed set, so no caller's text is folded and there is nothing to cite.
+* :meth:`TLSKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`
+  and
+  :meth:`WireGuardKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.post_process>`
+  upper-case a key log line's label before matching
+  :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` or
+  :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel`, so ``client_random`` parses
+  as ``CLIENT_RANDOM``, and
+  :func:`~pcapkit.protocols.schema.misc.pcapng._malformed_line_message` folds the same
+  way to name a malformed line's label. No comparison rule backs them:
+  :rfc:`9850#section-2` makes only the hexadecimal fields case-insensitive, and the rows
+  above find none for either label set.
+* :func:`~pcapkit.toolkit.scapy.tcp_traceflow` upper-cases a Scapy packet's name to look
+  up :class:`~pcapkit.const.reg.linktype.LinkType` by member name when the packet carries
+  no link type, so ``'Ethernet'`` resolves to ``LinkType.ETHERNET``. A Scapy layer name
+  has no registrar behind it, so there is nothing to cite.
+
+None of them is a registry override, which is why the audit records them here rather
+than changing them.
 
 .. note::
 
@@ -620,9 +724,9 @@ rather than changing it.
    regardless of case. :meth:`Method.get <pcapkit.const.http.method.Method.get>` does not
    fold case, as ruled on :issue:`896`: :rfc:`9110#section-9.1` says the HTTP method token
    is case-sensitive, so ``Method.get('get')`` does not resolve to
-   :attr:`Method.GET <pcapkit.const.http.method.Method.GET>` -- it builds its own
-   unregistered member, preserving the caller's exact casing, the same way an unrecognised
-   value always does.
+   :attr:`Method.GET <pcapkit.const.http.method.Method.GET>`. It returns an unregistered
+   ``GET`` valued ``'get'``, the name-miss exception recorded above, while
+   ``Method('get')`` resolves through the constructor's fold.
 
 What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
 value resolves through ``cls(value)`` but not through ``get(value)``, because
@@ -630,10 +734,13 @@ value resolves through ``cls(value)`` but not through ``get(value)``, because
 growing either lookup table. ``FEATCode.get('ZZ-NOT-REAL')`` raises
 :exc:`~pcapkit.utilities.exceptions.EnumKeyError` -- which *is* a :exc:`KeyError`, so
 an ``except KeyError`` around it is unaffected -- while
-``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member. Closing that gap would
-mean calling ``cls(key)`` for a ``str`` value too, which reopens the minting hazard
-above -- so the asymmetry is intended, and ``get``'s own docstring carries the full
-reasoning.
+``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member.
+:meth:`Command.get <pcapkit.const.ftp.command.Command.get>` and
+:meth:`Method.get <pcapkit.const.http.method.Method.get>` are the exceptions: by the
+name-miss exception above, ``get`` returns an unregistered member there too. Closing
+the gap elsewhere would mean calling ``cls(key)`` for a ``str`` value too, which
+reopens the minting hazard above -- so the asymmetry is intended, and ``get``'s own
+docstring carries the full reasoning.
 
 .. seealso::
 
@@ -658,14 +765,19 @@ established ones carry. A map's registration comes in two parts:
    :class:`~pcapkit.protocols.transport.tcp.TCP` and
    :class:`~pcapkit.protocols.transport.udp.UDP` keep
    :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
-   typed for the port their maps are keyed by, while
-   :class:`~pcapkit.protocols.internet.ipx.IPX` and
-   :class:`~pcapkit.protocols.link.loopback.Loopback` override their parents'
+   typed for the port their maps are keyed by. A class whose map takes other keys
+   overrides its parent's instead: :class:`~pcapkit.protocols.transport.sctp.SCTP` for
+   payload protocol identifiers rather than ports;
+   :class:`~pcapkit.protocols.internet.ipx.IPX` for IPX packet types rather than the
+   :class:`~pcapkit.const.reg.transtype.TransType`
    :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
-   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`: those are
-   typed for :class:`~pcapkit.const.reg.transtype.TransType` and
-   :class:`~pcapkit.const.reg.ethertype.EtherType`, not for the IPX packet type and
-   address family these two maps are keyed by.
+   takes; and :class:`~pcapkit.protocols.link.loopback.Loopback`,
+   :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`,
+   :class:`~pcapkit.protocols.link.frad.FRAD` and
+   :class:`~pcapkit.protocols.link.netlink.Netlink` for address families, ARPHRD types,
+   NLPIDs and ``nlmsg_type`` values rather than the
+   :class:`~pcapkit.const.reg.ethertype.EtherType`
+   :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` takes.
 2. **A** ``register_<name>`` **function** in
    :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
    line above its ``def``. It calls the classmethod and logs, and a bad argument

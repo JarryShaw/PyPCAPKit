@@ -20,9 +20,10 @@ Deriving :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from :exc:`KeyError`
 is what keeps the blast radius at nothing for the in-library sites that catch the
 base's name miss -- in :meth:`~pcapkit.const.http.method.Method.get`,
 :mod:`pcapkit.toolkit.scapy`, :mod:`pcapkit.protocols.internet.hopopt` and
-:mod:`pcapkit.protocols.internet.ipv6_opts` -- and ``Method.get`` catches it in
-order to **mint**, so for that one a name miss is part of a *successful* call.
-:class:`MethodStillMintsTests` pins that one directly.
+:mod:`pcapkit.protocols.internet.ipv6_opts` -- and ``Method.get`` catches it to
+return an unregistered member, which mints nothing, so for that one a name miss is
+part of a *successful* call. :class:`MethodUnregisteredMemberMintsNothingTests`
+pins that one directly.
 
 Call sites that would otherwise carry the shape the ruling rejects are pinned too:
 
@@ -80,7 +81,7 @@ __tier__ = 'ALL'
 
 __all__ = [
     'EnumKeyErrorClassTests', 'BaseGetProvenanceTests', 'BaseGetQuietnessTests',
-    'MethodStillMintsTests', 'TransportProtocolCaseFoldingTests',
+    'MethodUnregisteredMemberMintsNothingTests', 'TransportProtocolCaseFoldingTests',
     'CriticalityGetDeletionTests', 'MobilityHeaderNameMissTests',
     'VendorTemplateParityTests', 'TRANSPORT_GET',
 ]
@@ -284,15 +285,15 @@ class BaseGetQuietnessTests(unittest.TestCase):
                 _Closed.get('nosuch')
         self.assertFalse(hasattr(sys, 'tracebacklimit'))
 
-    def test_the_minting_override_stays_silent_end_to_end(self) -> 'None':
+    def test_the_unregistered_member_override_stays_silent_end_to_end(self) -> 'None':
         """The call this is actually for: a ``Method.get`` that misses and builds
         an unregistered member is a successful call and must emit nothing at all."""
         from pcapkit.const.http.method import Method
 
         with capture(logger) as recorder:
-            minted = Method.get('QUIET-923-PROBE')
+            member = Method.get('QUIET-923-PROBE')
         self.assertEqual(recorder.messages, [])
-        self.assertEqual(minted.value, 'QUIET-923-PROBE')
+        self.assertEqual(member.value, 'QUIET-923-PROBE')
 
     def test_the_value_miss_is_quiet_too(self) -> 'None':
         """GitHub issue #1845: the owner ruled the value miss quiet as well. It
@@ -320,25 +321,26 @@ class BaseGetQuietnessTests(unittest.TestCase):
         self.assertIn('EnumValueError', recorder.messages[0][1])
 
 
-class MethodStillMintsTests(unittest.TestCase):
+class MethodUnregisteredMemberMintsNothingTests(unittest.TestCase):
     """The sharpest call site in the blast radius.
 
     :meth:`~pcapkit.const.http.method.Method.get` relies on the base's name
     miss being a :exc:`KeyError`: it catches it *in order to* hand back an
-    unregistered member. If :exc:`~pcapkit.utilities.exceptions.EnumKeyError`
-    did not derive from :exc:`KeyError`, this would raise instead of minting.
+    unregistered member, which mints nothing. If
+    :exc:`~pcapkit.utilities.exceptions.EnumKeyError` did not derive from
+    :exc:`KeyError`, this would raise instead of returning that member.
     """
 
-    def test_an_unregistered_method_token_still_mints(self) -> 'None':
+    def test_an_unregistered_method_token_returns_a_member_that_mints_nothing(self) -> 'None':
         from pcapkit.const.http.method import Method
 
         before_names = len(Method._member_map_)
         before_values = len(Method._value2member_map_)
 
-        minted = Method.get('FROBNICATE-923')
+        member = Method.get('FROBNICATE-923')
 
-        self.assertEqual(minted.name, 'FROBNICATE-923')
-        self.assertEqual(minted.value, 'FROBNICATE-923')
+        self.assertEqual(member.name, 'FROBNICATE-923')
+        self.assertEqual(member.value, 'FROBNICATE-923')
         # ``_unregistered_member`` hands back a throwaway, so neither lookup
         # table grew -- the GitHub issue #860 contract.
         self.assertEqual(len(Method._member_map_), before_names)
