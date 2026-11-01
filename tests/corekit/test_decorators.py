@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import io
+import logging
 import sys
+import threading
 import unittest
 
 from tests._support import (bootstrap_core_modules, install_fake_payload_protocols,
                             isolate_modules)
+from tests.utilities._harness import capture
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
@@ -543,6 +546,170 @@ class DecoratorTests(unittest.TestCase):
 
         self.assertIsInstance(result, Raw)
         self.assertIsNone(result.length)
+
+    ##########################################################################
+    # beholder: a refusal it handles is quiet (#2588). Each error is built
+    # inside the decorated method, where the block declaring it is.
+    ##########################################################################
+
+    def _sentinel_hooks(self) -> 'tuple[object, object]':
+        """Install stand-ins for both exception hooks, put back after the test."""
+        saved = sys.excepthook, threading.excepthook
+
+        def restore() -> None:
+            sys.excepthook, threading.excepthook = saved
+
+        self.addCleanup(restore)
+
+        def sentinel(*args: 'object') -> None:
+            sys.__excepthook__(*args)  # type: ignore[arg-type]
+
+        def thread_sentinel(args: 'object') -> None:
+            pass
+
+        sys.excepthook, threading.excepthook = sentinel, thread_sentinel
+        return sentinel, thread_sentinel
+
+    def test_beholder_keeps_a_refusal_it_handles_quiet(self) -> None:
+        """A refusal is kept on ``error``, logs nothing at any level, and touches neither hook."""
+        exceptions = self.exceptions
+        Raw, _ = self._payload_stand_ins()
+        hooks = self._sentinel_hooks()
+
+        class DemoProtocol:
+            def _get_payload(self) -> bytes:
+                return b'refused-bytes'
+
+            @self.decorators.beholder
+            def decode(self, proto, length=None):
+                raise exceptions.ProtocolError('refused')
+
+        with capture(logging.getLogger('pcapkit')) as recorder:
+            result = DemoProtocol().decode(1, 13)
+
+        self.assertIsInstance(result, Raw)
+        self.assertEqual((result.file, result.length, result.error), (b'refused-bytes', 13, 'refused'))
+        self.assertEqual(recorder.messages, [])
+        self.assertIs(sys.excepthook, hooks[0])
+        self.assertIs(threading.excepthook, hooks[1])
+
+    def test_beholder_quiets_only_the_refusal_class(self) -> None:
+        """Another error stays loud and logged, and so does a refusal declared loud inside the block."""
+        exceptions = self.exceptions
+        Raw, _ = self._payload_stand_ins()
+        self._sentinel_hooks()
+
+        class DemoProtocol:
+            def _get_payload(self) -> bytes:
+                return b'raw-bytes'
+
+            @self.decorators.beholder
+            def decode(self, proto, length=None):
+                try:
+                    raise exceptions.ProtocolError('caught inside')
+                except exceptions.ProtocolError:
+                    pass
+                with exceptions.CaughtByCaller():
+                    exceptions.ProtocolError('declared loud')
+                raise exceptions.StructError('broken')
+
+        with capture(logging.getLogger('pcapkit')) as recorder:
+            result = DemoProtocol().decode(1, 9)
+
+        self.assertIsInstance(result, Raw)
+        self.assertEqual(result.error, 'broken')
+        self.assertEqual(recorder.messages, [('CRITICAL', 'ProtocolError: declared loud'),
+                                             ('CRITICAL', 'StructError: broken'),
+                                             ('WARNING', 'broken')])
+
+    def test_beholder_recovery_error_stays_loud_and_reaches_the_caller(self) -> None:
+        """The outermost recovery runs outside every block, so a refusal it raises is loud and propagates."""
+        exceptions = self.exceptions
+        self._payload_stand_ins()
+        self._sentinel_hooks()
+
+        class DemoProtocol:
+            def _get_payload(self) -> bytes:
+                raise exceptions.ProtocolError('no payload')
+
+            @self.decorators.beholder
+            def decode(self, proto, length=None):
+                raise exceptions.ProtocolError('refused')
+
+        with capture(logging.getLogger('pcapkit')) as recorder:
+            with self.assertRaises(exceptions.ProtocolError) as context:
+                DemoProtocol().decode(1, 3)
+
+        self.assertEqual(str(context.exception), 'no payload')
+        self.assertEqual(recorder.messages, [('CRITICAL', 'ProtocolError: no payload')])
+        self.assertEqual(exceptions._caught_here.get(), ())  # pylint: disable=protected-access
+
+    def test_beholder_inner_recovery_error_is_quiet_under_an_outer_block(self) -> None:
+        """An inner recovery runs inside the outer block, so its refusal is quiet and the outer ``error``."""
+        exceptions = self.exceptions
+        Raw, _ = self._payload_stand_ins()
+        self._sentinel_hooks()
+        beholder = self.decorators.beholder
+
+        class Inner:
+            def _get_payload(self) -> bytes:
+                raise exceptions.ProtocolError('no inner payload')
+
+            @beholder
+            def decode(self, proto, length=None):
+                raise exceptions.ProtocolError('inner refused')
+
+        class Outer:
+            def _get_payload(self) -> bytes:
+                return b'outer-bytes'
+
+            @beholder
+            def decode(self, proto, length=None):
+                return Inner().decode(2, 11)
+
+        with capture(logging.getLogger('pcapkit')) as recorder:
+            result = Outer().decode(1, 11)
+
+        self.assertIsInstance(result, Raw)
+        self.assertEqual((result.file, result.length, result.error), (b'outer-bytes', 11, 'no inner payload'))
+        self.assertEqual(recorder.messages, [])
+        self.assertEqual(exceptions._caught_here.get(), ())  # pylint: disable=protected-access
+
+    def test_beholder_nested_blocks_end_with_the_outer_call(self) -> None:
+        """An inner refusal is quiet, the outer method is back in its own block, and none outlives it."""
+        exceptions = self.exceptions
+        Raw, _ = self._payload_stand_ins()
+        self._sentinel_hooks()
+        beholder = self.decorators.beholder
+        seen = []
+
+        class Inner:
+            def _get_payload(self) -> bytes:
+                return b'inner-bytes'
+
+            @beholder
+            def decode(self, proto, length=None):
+                raise exceptions.ProtocolError('inner refused')
+
+        class Outer:
+            def _get_payload(self) -> bytes:
+                return b'outer-bytes'
+
+            @beholder
+            def decode(self, proto, length=None):
+                inner = Inner().decode(2, 11)
+                seen.append(exceptions._caught_here.get())  # pylint: disable=protected-access
+                return inner
+
+        with capture(logging.getLogger('pcapkit')) as recorder:
+            result = Outer().decode(1, 11)
+            exceptions.ProtocolError('after the outer call')
+
+        self.assertIsInstance(result, Raw)
+        self.assertEqual((result.file, result.error), (b'inner-bytes', 'inner refused'))
+        self.assertEqual(seen, [(exceptions.ProtocolError,)])
+        self.assertEqual(exceptions._caught_here.get(), ())  # pylint: disable=protected-access
+        self.assertEqual(recorder.messages, [('CRITICAL', 'ProtocolError: after the outer call')])
 
 
 if __name__ == '__main__':

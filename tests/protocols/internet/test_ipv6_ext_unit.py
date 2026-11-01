@@ -7,6 +7,7 @@ import unittest
 import warnings
 
 from tests._support import reimport_once_per_class
+from tests.utilities._harness import capture
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -245,29 +246,41 @@ class IPv6ExtUnitTests(unittest.TestCase):
                     self.assertEqual(IPv6.from_data(ipv6.info).data, raw)
                     self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
 
-    def test_failed_dedicated_parse_is_logged_once(self) -> None:
+    def test_failed_dedicated_parse_runs_once(self) -> None:
         """GitHub issue #2477: the ``Raw`` the walk ends on is the upper layer,
-        not parsed again, so its error is logged once and no
-        ``SchemaWarning`` is left from the header it replaced.
+        not parsed again, so the header's parser runs once and no
+        ``SchemaWarning`` is left from the header it replaced. The refusal is
+        handled, so it logs nothing (#2588).
         """
+        from unittest import mock
+
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
+        from pcapkit.const.ipv6.option import Option
         from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.logging import logger
 
         udp = int(TransType.UDP)
-        for form, hopopt in (('malformed', bytes([udp, 0, 0x05, 10]) + bytes(4) + _udp_bytes(b'ok')),
-                             ('truncated', bytes([udp, 0, 1]))):
+        truncated = (f'Field options has an option that runs past the end of the data: '
+                     f'{Option.PadN!r} at offset 0 of 6, with only 1 octet(s) of it present')
+        for form, hopopt, error in (
+            ('malformed', bytes([udp, 0, 0x05, 10]) + bytes(4) + _udp_bytes(b'ok'),
+             'HOPOPT: [OptNo 5] invalid format'),
+            ('truncated', bytes([udp, 0, 1]), truncated),
+        ):
             raw = _ipv6_bytes(int(EH.HOPOPT), hopopt)
             with self.subTest(form=form):
-                with warnings.catch_warnings(record=True) as caught, \
-                        self.assertLogs('pcapkit', level='WARNING') as logs:
+                with warnings.catch_warnings(record=True) as caught, capture(logger) as logs, \
+                        mock.patch.object(HOPOPT, '__post_init__', autospec=True,
+                                          side_effect=HOPOPT.__post_init__) as parses:
                     warnings.simplefilter('always')
                     ipv6 = IPv6(io.BytesIO(raw), len(raw))
                 self.assertIs(type(ipv6.payload), Raw)
-                error = ipv6.payload.info.error
-                self.assertEqual([(rec.levelname, error in rec.getMessage()) for rec in logs.records],
-                                 [('CRITICAL', True), ('WARNING', True)])
+                self.assertEqual(ipv6.payload.info.error, error)
+                self.assertEqual(parses.call_count, 1)
+                self.assertEqual(logs.messages, [])
                 self.assertEqual([w.category.__name__ for w in caught], [])
 
     def test_failed_ah_parse_is_raw_and_ends_the_walk(self) -> None:
@@ -276,13 +289,15 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.logging import logger
 
         ah = bytes([int(TransType.UDP), 0]) + bytes(6)  # Payload Len 0: a negative ICV length
         body = ah + _udp_bytes(b'ok')
         raw = _ipv6_bytes(int(EH.AH), body)
-        with self.assertLogs('pcapkit', level='WARNING'):
+        with capture(logger) as logs:
             ipv6 = IPv6(io.BytesIO(raw), len(raw))
 
+        self.assertEqual(logs.messages, [])  # a handled refusal is quiet (#2588)
         self.assertEqual(list(ipv6.extension_headers.items(multi=True)), [])
         self.assertIs(type(ipv6.payload), Raw)
         self.assertEqual(bytes(ipv6.payload), body)
