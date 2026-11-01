@@ -32,10 +32,12 @@ class SSLFamilyUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_ssl_id_names_both_concrete_protocols(self) -> None:
+    def test_ssl_id_names_the_direct_concrete_members(self) -> None:
         from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.sslv2 import SSLv2
 
-        self.assertEqual(SSL.id(), ('TLS', 'DTLS'))
+        self.assertEqual(SSL.id(), ('SSLv2', 'TLS', 'DTLS'))
+        self.assertTrue(issubclass(SSLv2, SSL))
 
     def test_tls_properties_and_make_data(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
@@ -907,10 +909,40 @@ class NonRecordPayloadTests(unittest.TestCase):
                     with self.assertRaises(ProtocolError):
                         TLS(wire, len(wire))
 
-    def test_an_sslv2_client_hello_is_raw(self) -> None:
+    def test_a_complete_sslv2_client_hello_on_443_is_sslv2(self) -> None:
         from pcapkit.protocols.transport.tcp import TCP
 
         body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain), 'TCP:SSLv2')
+
+    def test_bytes_after_an_sslv2_hello_on_443_stay_raw(self) -> None:
+        from pcapkit.protocols.transport.tcp import TCP
+
+        body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body + b'xyz'
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain), 'TCP:SSLv2:Raw')
+
+    def test_a_truncated_sslv2_hello_on_443_is_raw(self) -> None:
+        from pcapkit.protocols.transport.tcp import TCP
+
+        body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body[:-4]
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain), 'TCP:Raw')
+
+    def test_a_non_hello_sslv2_record_on_443_is_raw(self) -> None:
+        from pcapkit.protocols.transport.tcp import TCP
+
+        body = b'\x05' + bytes(8)  # MSG-SERVER-VERIFY (5), not a hello
         raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -929,6 +961,105 @@ class NonRecordPayloadTests(unittest.TestCase):
                 warnings.simplefilter('ignore')
                 proto = TCP(raw, len(raw))
             self.assertEqual(str(proto.protochain), 'TCP:Raw', raw[20:25].hex())
+
+
+def _polyglot_segment() -> bytes:
+    """A genuine TLS 1.0-legacy-version ClientHello, record length 278, with
+    ``random[0] == 0xF6``, padded to 5638 octets. Read as SSLv2 under the
+    3-octet header it is a complete CLIENT-HELLO (RECORD-LENGTH 5635)."""
+    random = b'\xf6' + bytes(31)
+    body = (b'\x03\x03' + random + b'\x00'                         # version, random, no session id
+            + b'\x00\x02\x13\x01'                                  # one cipher suite
+            + b'\x01\x00'                                          # null compression
+            + b'\x00\xe7' + b'\xff\x01' + b'\x00\xe3' + bytes(227))  # renegotiation_info
+    assert len(body) == 274
+    fragment = b'\x01' + len(body).to_bytes(3, 'big') + body        # ClientHello handshake
+    record = b'\x16\x03\x01' + len(fragment).to_bytes(2, 'big') + fragment
+    return record + bytes(5638 - len(record))
+
+
+class SSLv2On443Tests(unittest.TestCase):
+    """SSLv2 reached over TCP 443 after TLS rejects the payload: hellos of
+    either direction are accepted, a genuine TLS record is never taken as
+    SSLv2, and the SSLv2 layer reports what a direct parse would."""
+
+    #: A complete SERVER-HELLO, 2-octet header, RECORD-LENGTH 34 (hand-built,
+    #: as in ``test_sslv2_unit``).
+    SERVER_HELLO = bytes.fromhex(
+        '80220400010002000400030010aaaaaaaa010080'
+        'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    )
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def _tcp(payload: bytes):
+        from pcapkit.protocols.transport.tcp import TCP
+
+        raw = _TCP_TO_443 + payload
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return TCP(raw, len(raw))
+
+    def test_a_complete_sslv2_server_hello_on_443_is_sslv2(self) -> None:
+        from pcapkit.const.sslv2.handshake_type import HandshakeType
+
+        proto = self._tcp(self.SERVER_HELLO)
+        self.assertEqual(str(proto.protochain), 'TCP:SSLv2')
+        self.assertEqual(proto._next.info.msg_type, HandshakeType.SERVER_HELLO)
+
+    def test_a_genuine_tls_client_hello_that_is_also_sslv2_stays_tls(self) -> None:
+        from pcapkit.const.sslv2.handshake_type import HandshakeType
+        from pcapkit.protocols.application.sslv2 import SSLv2
+
+        seg = _polyglot_segment()
+        # Premise: the same octets are a complete SSLv2 CLIENT-HELLO.
+        direct = SSLv2(seg, len(seg))
+        self.assertEqual(direct.length, 3)
+        self.assertEqual(direct.info.record_length, 5635)
+        self.assertEqual(direct.info.msg_type, HandshakeType.CLIENT_HELLO)
+
+        # TLS is tried first, so the record is TLS; trailing padding stays raw.
+        proto = self._tcp(seg)
+        self.assertEqual(str(proto.protochain), 'TCP:TLS 1.0:Raw')
+
+    def test_sslv2_on_443_reports_the_direct_parse_length_packet_and_name(self) -> None:
+        from pcapkit.protocols.application.sslv2 import SSLv2
+
+        client_hello = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        # A 3-octet header: indicator 0x00 (not escape), RECORD-LENGTH, padding 0.
+        three_octet = bytes([0x00, len(client_hello), 0x00]) + client_hello
+        two_octet = bytes([0x80 | len(client_hello) >> 8, len(client_hello) & 0xFF]) + client_hello
+        for name, payload in (('server-hello', self.SERVER_HELLO),
+                              ('client-hello-2', two_octet),
+                              ('client-hello-3', three_octet)):
+            with self.subTest(payload=name):
+                on_443 = self._tcp(payload)._next
+                direct = SSLv2(payload, len(payload))
+                self.assertEqual(on_443.alias, 'SSLv2')
+                self.assertEqual(on_443.name, 'Secure Sockets Layer version 2')
+                self.assertEqual(on_443.length, direct.length)
+                self.assertEqual(on_443.packet.header, direct.packet.header)
+                self.assertEqual(on_443.packet.payload, direct.packet.payload)
+
+    def test_sslv2_hellos_on_443_rebuild_byte_exact(self) -> None:
+        from pcapkit.protocols.transport.tcp import TCP
+
+        client_hello = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
+        three_octet = bytes([0x00, len(client_hello), 0x00]) + client_hello
+        two_octet = bytes([0x80 | len(client_hello) >> 8, len(client_hello) & 0xFF]) + client_hello
+        for name, payload in (('server-hello', self.SERVER_HELLO),
+                              ('client-hello-2', two_octet),
+                              ('client-hello-3', three_octet)):
+            with self.subTest(payload=name):
+                raw = _TCP_TO_443 + payload
+                proto = self._tcp(payload)
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    rebuilt = TCP.from_data(proto.info)
+                self.assertEqual(bytes(rebuilt), raw)
+                self.assertEqual(str(rebuilt.protochain), 'TCP:SSLv2')
 
 
 class ExportTests(unittest.TestCase):

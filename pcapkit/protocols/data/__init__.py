@@ -281,6 +281,9 @@ __all__ = [
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
 
+    # Secure Sockets Layer version 2
+    'SSLv2', 'SSLv2_ClientHello', 'SSLv2_ServerHello',
+
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',
     'HTTPv1_Header',

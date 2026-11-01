@@ -73,7 +73,7 @@ __all__ = [
     'NGAP',
     'OSPF',
     'RARP', 'DRARP',
-    'SSL', 'SSLv3', 'TLS', 'DTLS',
+    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 ]
 
 #: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.

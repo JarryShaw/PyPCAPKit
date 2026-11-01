@@ -31,6 +31,7 @@ from pcapkit.const.mh import *
 from pcapkit.const.ngap import *
 from pcapkit.const.ospf import *
 from pcapkit.const.sctp import *
+from pcapkit.const.sslv2 import *
 from pcapkit.const.tcp import *
 from pcapkit.const.tls import *
 from pcapkit.const.vlan import *
@@ -90,6 +91,8 @@ __all__ = [
     'OSPF_Authentication', 'OSPF_Packet',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
+    # SSLv2
+    'SSLv2_HandshakeType', 'SSLv2_Version',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS/DTLS

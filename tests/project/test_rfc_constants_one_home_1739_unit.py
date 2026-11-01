@@ -366,6 +366,10 @@ NOT_A_COPY = {
         'the last code point of the Basic Multilingual Plane, not an IP length',
     ('pcapkit/dumpkit/common.py', 'codepoint > 65535'):
         'above the Basic Multilingual Plane, needs a UTF-16 surrogate pair, not an IP length',
+    ('pcapkit/protocols/application/sslv2.py', "b'\\x00' * 16"):
+        "the default length of an SSLv2 CLIENT-HELLO challenge or SERVER-HELLO "
+        "connection ID (the draft's own 16-32 octet minimum), not the PCAP classic "
+        'record header length',
     ('pcapkit/protocols/link/gre.py', 'return 16'):
         "GRE's own longest possible header -- the 4-octet base plus all three optional "
         'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
