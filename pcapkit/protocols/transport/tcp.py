@@ -135,6 +135,7 @@ from pcapkit.protocols.schema.transport.tcp import UnassignedOption as Schema_Un
 from pcapkit.protocols.schema.transport.tcp import UserTimeout as Schema_UserTimeout
 from pcapkit.protocols.schema.transport.tcp import WindowScale as Schema_WindowScale
 from pcapkit.protocols.transport.transport import Transport
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -152,6 +153,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
+    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags
@@ -328,6 +330,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          present (:issue:`1215`, :issue:`1216`), and ADD_ADDR parses the
          :rfc:`8684` layout (:issue:`1217`).
 
+    .. versionchanged:: 1.6.0
+
+       The checksum is computed when :meth:`make` is given none, over the
+       ``pseudo`` it is given or by the enclosing IP layer, and verified by that
+       layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+       (:issue:`2473`).
+
     """
 
     ##########################################################################
@@ -436,6 +445,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Enum_MPTCPOption.MP_FASTCLOSE: 'fastclose',
         },
     )  # type: DefaultDict[int, str | tuple[MPOptionParser, MPOptionConstructor]]
+
+    #: Whether :meth:`make` left the checksum for the enclosing IP layer to
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    _checksum_pending = False
 
     ##########################################################################
     # Properties.
@@ -590,12 +603,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
              syn: 'bool' = False,
              fin: 'bool' = False,
              window: 'int' = 65535,  # reasonable default value
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              urgent: 'int' = 0,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              padding: 'bytes' = b'',
              reserved: 'int' = 0,
+             pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_TCP':
         """Make (construct) packet data.
 
@@ -614,13 +628,18 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             syn: Synchronize sequence numbers.
             fin: Last packet from sender.
             window: Window size.
-            checksum: Checksum.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on,
+                computed over ``pseudo`` (:rfc:`793#section-3.1`), or left to
+                an IP layer this segment is the payload of; zero otherwise.
             urgent: Urgent pointer.
             options: TCP options.
             payload: Payload of the packet.
             padding: Octets after the End of Option List option; dropped
                 unless ``options`` end with one.
             reserved: Reserved bits 4-6 of octet 12.
+            pseudo: Pseudo-header of the enclosing IP layer; its length is
+                replaced by this segment's own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -683,7 +702,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         offset = math.ceil((TCP_MIN_HEADER_LEN + total_length) / 4)
 
-        return Schema_TCP(
+        schema = Schema_TCP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.tcp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.tcp),
             seq=seq_no,
@@ -695,11 +714,21 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             },
             flags=flags,
             window=window,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             urgent=urgent,
             options=options_value,
             payload=payload,
         )
+
+        self._checksum_pending = False
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            if pseudo is None:
+                self._checksum_pending = True
+            else:
+                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                octets = schema.pack()
+                schema.checksum = compute_checksum(octets, prefix=pseudo_header(pseudo, len(octets)))
+        return schema
 
     @classmethod
     def register_option(cls, code: 'Enum_Option', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
@@ -808,6 +837,29 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'reserved': data.flags.reserved,
             'payload': cls._make_payload(data),
         }
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`. A zero
+        checksum, or the pseudo-header's sum alone, is what checksum offload
+        leaves on the sending host, and is
+        :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`.
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.protocols.misc.checksum.checksum import (  # isort: skip # pylint: disable=import-outside-toplevel
+            ChecksumStatus, partial_checksum, verify_checksum)
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.checksum, length=pseudo.info.len,
+                                     prefix=pseudo.data, offload=(b'\x00\x00', partial_checksum(pseudo.data)))
+        self._info.__update__(checksum_status=status)
 
     def _read_tcp_options(self, size: 'int') -> 'Option':
         """Read TCP option list.

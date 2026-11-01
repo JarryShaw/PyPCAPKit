@@ -355,7 +355,9 @@ class IPv4UnitTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            udp = UDP(srcport=1234, dstport=53, payload=b'\xbb' * 8)
+            # NOTE: Explicit checksums, which the IP layer writes as given rather
+            # than computing them over its pseudo-header (#2473, #2474).
+            udp = UDP(srcport=1234, dstport=53, payload=b'\xbb' * 8, checksum=b'\x00\x00')
             udp_octets = bytes(udp)
 
         # 8 octets of UDP header and the 8 the caller gave it
@@ -393,7 +395,7 @@ class IPv4UnitTests(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             others = [
-                TCP(srcport=1234, dstport=80, payload=b'\xcc' * 8),
+                TCP(srcport=1234, dstport=80, payload=b'\xcc' * 8, checksum=b'\x00\x00'),
                 IPv4(protocol=6, src='192.0.2.1', dst='198.51.100.1',
                      payload=b'\xcc' * 8),
             ]
