@@ -68,23 +68,26 @@ class UDPChecksumTests(unittest.TestCase):
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
         from pcapkit.protocols.transport.udp import UDP
         from pcapkit.utilities import config
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.IPv4, self.IPv6, self.UDP, self.IP_Pseudo = IPv4, IPv6, UDP, IP_Pseudo
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
 
-    def parse(self, octets: bytes, cls: 'type | None' = None, *, verify: bool = True) -> 'tuple[object, list[str]]':
-        """``octets`` parsed as ``cls``, IPv4 by default, and the ProtocolWarnings given."""
+    def parse(self, octets: bytes, cls: 'type | None' = None, *,
+              verify: bool = True) -> 'tuple[object, list[tuple[type, str]]]':
+        """``octets`` parsed as ``cls``, IPv4 by default, and its ProtocolWarnings as ``(category, message)``."""
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             layer = (cls or self.IPv4)(octets)
-        return layer, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return layer, [(item.category, str(item.message))
+                       for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
-    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The UDP checksum status of ``octets``, and the ProtocolWarnings given."""
+    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The UDP checksum status of ``octets``, and its ProtocolWarnings as ``(category, message)``."""
         layer, messages = self.parse(octets, **kwargs)
         return layer['UDP'].info.get('checksum_status'), messages
 
@@ -100,13 +103,13 @@ class UDPChecksumTests(unittest.TestCase):
     def test_a_corrupted_checksum_warns(self) -> None:
         status, messages = self.status(with_checksum(CAPTURED, b'\x63\xb2', 26))
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, ['UDP: checksum 0x63b2 is wrong; 0x63b1 expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'UDP: checksum 0x63b2 is wrong; 0x63b1 expected')])
 
     def test_zero_is_none_over_ipv4_only(self) -> None:
         self.assertEqual(self.status(with_checksum(CAPTURED, b'\x00\x00', 26)), (self.Status.NOT_COMPUTED, []))
         status, messages = self.status(with_checksum(self.make6(), b'\x00\x00', 46), cls=self.IPv6)
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(len(messages), 1)
+        self.assertEqual([category for category, _ in messages], [self.ChecksumWarning])
 
     def test_offload_is_not_computed(self) -> None:
         prefix4 = pseudo4(CAPTURED[12:16], CAPTURED[16:20], 125)

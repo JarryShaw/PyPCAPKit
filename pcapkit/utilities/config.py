@@ -395,7 +395,7 @@ ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
 #: capture (:issue:`2471`). When on, each records a
 #: :class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus` as
 #: ``checksum_status`` in its info, and a wrong checksum warns with a
-#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning` rather than raising.
+#: :exc:`~pcapkit.utilities.warnings.ChecksumWarning` rather than raising.
 #:
 #: .. versionadded:: 1.6.0
 CHECKSUM_VERIFY = read_flag('CHECKSUM_VERIFY', False)

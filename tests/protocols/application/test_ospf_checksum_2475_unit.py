@@ -57,23 +57,25 @@ class OSPFChecksumTests(unittest.TestCase):
         from pcapkit.protocols.application.ospf import OSPF
         from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
         from pcapkit.utilities import config
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.OSPF = OSPF
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
 
-    def parse(self, octets: bytes, *, verify: bool = True) -> 'tuple[object, list[str]]':
-        """The OSPF packet parsed from ``octets``, and the ProtocolWarnings it gave."""
+    def parse(self, octets: bytes, *, verify: bool = True) -> 'tuple[object, list[tuple[type, str]]]':
+        """The OSPF packet parsed from ``octets``, and its ProtocolWarnings as ``(category, message)``."""
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             ospf = self.OSPF(octets)
-        return ospf, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return ospf, [(item.category, str(item.message))
+                      for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
-    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The checksum status of ``octets``, and the ProtocolWarnings given."""
+    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The checksum status of ``octets``, and its ProtocolWarnings as ``(category, message)``."""
         ospf, messages = self.parse(octets, **kwargs)
         return ospf.info.get('checksum_status'), messages
 
@@ -86,7 +88,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_a_corrupted_checksum_warns(self) -> None:
         status, messages = self.status(with_checksum(BUILT[0], b'\xb6\x95'))
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, ['OSPFv2: checksum 0xb695 is wrong; 0xb694 expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'OSPFv2: checksum 0xb695 is wrong; 0xb694 expected')])
 
     def test_cryptographic_authentication_leaves_it_unused(self) -> None:
         packet = BUILT[0][:14] + b'\x00\x02' + bytes([0, 0, 1, 16]) + bytes(4) + HELLO

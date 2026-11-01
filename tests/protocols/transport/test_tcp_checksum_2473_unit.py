@@ -66,23 +66,26 @@ class TCPChecksumTests(unittest.TestCase):
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.utilities import config
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.IPv4, self.IPv6, self.TCP, self.IP_Pseudo = IPv4, IPv6, TCP, IP_Pseudo
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
 
-    def parse(self, octets: bytes, cls: 'type | None' = None, *, verify: bool = True) -> 'tuple[object, list[str]]':
-        """``octets`` parsed as ``cls``, IPv4 by default, and the ProtocolWarnings given."""
+    def parse(self, octets: bytes, cls: 'type | None' = None, *,
+              verify: bool = True) -> 'tuple[object, list[tuple[type, str]]]':
+        """``octets`` parsed as ``cls``, IPv4 by default, and its ProtocolWarnings as ``(category, message)``."""
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             layer = (cls or self.IPv4)(octets)
-        return layer, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return layer, [(item.category, str(item.message))
+                       for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
-    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The TCP checksum status of ``octets``, and the ProtocolWarnings given."""
+    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The TCP checksum status of ``octets``, and its ProtocolWarnings as ``(category, message)``."""
         layer, messages = self.parse(octets, **kwargs)
         return layer['TCP'].info.get('checksum_status'), messages
 
@@ -95,7 +98,7 @@ class TCPChecksumTests(unittest.TestCase):
     def test_a_corrupted_checksum_warns(self) -> None:
         status, messages = self.status(with_checksum(CAPTURED[0], b'\x7c\x8f'))
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, ['TCP: checksum 0x7c8f is wrong; 0x7c8e expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'TCP: checksum 0x7c8f is wrong; 0x7c8e expected')])
 
     def test_offload_is_not_computed(self) -> None:
         # Linux offload leaves the pseudo-header's sum alone, uncomplemented.
@@ -190,9 +193,11 @@ class TCPChecksumTests(unittest.TestCase):
             warnings.simplefilter('always')
             ipv4 = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='TCP', checksum=b'\xbe\xef',
                              payload=self.TCP(srcport=40000, dstport=80))
-        messages = [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        messages = [(item.category, str(item.message))
+                    for item in caught if issubclass(item.category, self.ProtocolWarning)]
         self.assertEqual(len(messages), 1, messages)
-        self.assertTrue(messages[0].startswith('IPv4: checksum 0xbeef is wrong'), messages)
+        self.assertIs(messages[0][0], self.ChecksumWarning, messages)
+        self.assertTrue(messages[0][1].startswith('IPv4: checksum 0xbeef is wrong'), messages)
         self.assertIs(ipv4['TCP'].info.checksum_status, self.Status.VALID)
 
     def test_make_takes_the_pseudo_header(self) -> None:

@@ -89,7 +89,7 @@ __all__ = [
     # ImportWarning
     'FormatWarning', 'EngineWarning', 'InvalidVendorWarning',
     # RuntimeWarning
-    'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
+    'FileWarning', 'LayerWarning', 'ProtocolWarning', 'ChecksumWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
     'SeekWarning', 'ExtractionWarning', 'ConfigWarning',
@@ -378,6 +378,17 @@ class LayerWarning(BaseWarning, RuntimeWarning):
 
 class ProtocolWarning(BaseWarning, RuntimeWarning):
     """Unrecognised protocol."""
+
+
+class ChecksumWarning(ProtocolWarning):
+    """Checksum mismatch.
+
+    Reported when parsing verifies a checksum and finds it wrong, so that a
+    filter can silence it without silencing other protocol warnings.
+
+    .. versionadded:: 1.6.0
+
+    """
 
 
 class AttributeWarning(BaseWarning, RuntimeWarning):

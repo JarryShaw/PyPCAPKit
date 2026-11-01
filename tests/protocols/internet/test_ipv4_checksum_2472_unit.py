@@ -45,20 +45,22 @@ class IPv4ChecksumTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
         from pcapkit.utilities import config
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.IPv4 = IPv4
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
 
-    def parse(self, octets: bytes, *, verify: bool = True) -> 'tuple[object, list[str]]':
-        """The IPv4 layer parsed from ``octets``, and the ProtocolWarnings it gave."""
+    def parse(self, octets: bytes, *, verify: bool = True) -> 'tuple[object, list[tuple[type, str]]]':
+        """The IPv4 layer parsed from ``octets``, and its ProtocolWarnings as ``(category, message)``."""
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             ipv4 = self.IPv4(octets)
-        return ipv4, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return ipv4, [(item.category, str(item.message))
+                      for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
     def test_captured_checksums_verify(self) -> None:
         for header in CAPTURED:
@@ -71,7 +73,7 @@ class IPv4ChecksumTests(unittest.TestCase):
         header = with_checksum(CAPTURED[0], b'\x7a\x87')
         ipv4, messages = self.parse(header)
         self.assertIs(ipv4.info.checksum_status, self.Status.INVALID)
-        self.assertEqual(messages, ['IPv4: checksum 0x7a87 is wrong; 0x7a86 expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'IPv4: checksum 0x7a87 is wrong; 0x7a86 expected')])
 
     def test_a_zero_checksum_is_offload(self) -> None:
         ipv4, messages = self.parse(with_checksum(CAPTURED[0], b'\x00\x00'))
@@ -92,8 +94,9 @@ class IPv4ChecksumTests(unittest.TestCase):
             warnings.simplefilter('always')
             rebuilt = Ethernet.from_data(Ethernet(frame).info)
         self.assertEqual(rebuilt.data, frame)
-        self.assertEqual([str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)],
-                         ['IPv4: checksum 0x7a87 is wrong; 0x7a86 expected'] * 2)
+        self.assertEqual([(item.category, str(item.message))
+                          for item in caught if issubclass(item.category, self.ProtocolWarning)],
+                         [(self.ChecksumWarning, 'IPv4: checksum 0x7a87 is wrong; 0x7a86 expected')] * 2)
 
     def test_parse_rebuild_is_exact(self) -> None:
         for header in (*CAPTURED, with_checksum(CAPTURED[0], b'\x7a\x87'), with_checksum(CAPTURED[0], b'\x00\x00')):

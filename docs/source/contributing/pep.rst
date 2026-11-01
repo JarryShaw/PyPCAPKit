@@ -863,8 +863,10 @@ owner, and each lands on a precedent the library already has:
   large capture, and `Maybe Even Faster?`_ above is a standing concern, so it is
   a flag rather than unconditional behaviour.
 * **A wrong checksum is a warning, not a hard failure, and the outcome is
-  recorded on the protocol class.** The warning belongs in
-  :class:`~pcapkit.utilities.warnings.ProtocolWarning`, and the recording has an
+  recorded on the protocol class.** The warning is a
+  :class:`~pcapkit.utilities.warnings.ChecksumWarning`, a
+  :class:`~pcapkit.utilities.warnings.ProtocolWarning` of its own so a filter can
+  silence it alone (:issue:`2470`), and the recording has an
   exact precedent in :class:`~pcapkit.protocols.internet.esp.ESPStatus`: an
   enumeration of outcomes carried on the parsed result, so a caller can ask
   after the fact rather than having to have been capturing warnings at the

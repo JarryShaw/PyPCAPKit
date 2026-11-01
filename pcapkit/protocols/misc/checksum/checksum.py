@@ -11,7 +11,9 @@ records, and the functions that compute and verify the checksum.
 
 Verification is opt-in and computation opt-out, by
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` and
-:data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` (:issue:`2471`).
+:data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` (:issue:`2471`). A
+mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
+which a filter can silence alone (:issue:`2470`).
 
 A checksum over the IP pseudo-header is left to the enclosing IP layer, which
 alone knows the pseudo-header, and builds it as an
@@ -43,7 +45,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.protocols.protocol import _rebuilding
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ChecksumWarning, warn
 
 if TYPE_CHECKING:
     from typing import Collection, Iterator, Optional
@@ -75,7 +77,7 @@ class ChecksumStatus(EnumLookup, enum.IntEnum):
     #: The checksum matches.
     VALID = 0
     #: The checksum does not match, which warns with a
-    #: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
+    #: :exc:`~pcapkit.utilities.warnings.ChecksumWarning`.
     INVALID = 1
     #: The field holds no checksum: one the protocol lets the sender leave
     #: out, as UDP over IPv4 does with zero (:rfc:`768`), or what checksum
@@ -177,7 +179,7 @@ def verify_checksum(alias: 'str', data: 'bytes', field: 'bytes', *, length: 'Opt
         all ones (:rfc:`1071`), or the reason it is not.
 
     Warns:
-        ProtocolWarning: If the checksum is :attr:`~ChecksumStatus.INVALID`,
+        ChecksumWarning: If the checksum is :attr:`~ChecksumStatus.INVALID`,
             unless a payload is being rebuilt: the layer it is rebuilt for
             parses the same octets again, so a rebuilt frame warns once.
 
@@ -202,7 +204,7 @@ def verify_checksum(alias: 'str', data: 'bytes', field: 'bytes', *, length: 'Opt
     expected = ~((rest & 0xFFFF) + (rest >> 16)) & 0xFFFF
     if not _rebuilding.get():
         warn(f'{alias}: checksum {value:#06x} is wrong; {expected:#06x} expected',
-             ProtocolWarning, stacklevel=stacklevel())
+             ChecksumWarning, stacklevel=stacklevel())
     return ChecksumStatus.INVALID
 
 

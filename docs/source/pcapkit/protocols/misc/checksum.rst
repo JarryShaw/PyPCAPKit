@@ -95,6 +95,8 @@ ICMP, ICMPv6 and OSPF shares. Parsing verifies a checksum only if
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on, and records the
 outcome as ``checksum_status``; construction computes one left out unless
 :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is off (:issue:`2471`).
+A mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
+which a filter can silence alone (:issue:`2470`).
 
 A checksum over the IP pseudo-header is verified and computed by the enclosing
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` or

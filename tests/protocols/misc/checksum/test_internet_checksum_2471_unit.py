@@ -64,21 +64,23 @@ class VerifyChecksumTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.protocols.misc.checksum import checksum
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.checksum = checksum
         self.Status = checksum.ChecksumStatus
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
         body = b'\x45\x00\x00\x1c\x12\x34\x00\x00\x40\x11\x00\x00\xc0\x00\x02\x01\xc6\x33\x64\x02'
         self.field = wire.checksum(body).to_bytes(2, 'big')
         self.data = body[:10] + self.field + body[12:]
 
-    def verify(self, data: bytes, field: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The status of ``data``, and the ProtocolWarnings it gave."""
+    def verify(self, data: bytes, field: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The status of ``data``, and its ProtocolWarnings as ``(category, message)``."""
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             status = self.checksum.verify_checksum('TEST', data, field, **kwargs)
-        return status, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return status, [(item.category, str(item.message))
+                        for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
     def corrupt(self, field: bytes) -> bytes:
         """``self.data`` with ``field`` in place of its checksum."""
@@ -90,7 +92,8 @@ class VerifyChecksumTests(unittest.TestCase):
     def test_invalid_warns_with_the_expected_value(self) -> None:
         status, messages = self.verify(self.corrupt(b'\xbe\xef'), b'\xbe\xef')
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, [f'TEST: checksum 0xbeef is wrong; 0x{self.field.hex()} expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning,
+                                     f'TEST: checksum 0xbeef is wrong; 0x{self.field.hex()} expected')])
 
     def test_both_zeros_verify(self) -> None:
         # RFC 1071: a receiver sums the field in, so 0x0000 and 0xffff are both zero.

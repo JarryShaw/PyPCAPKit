@@ -66,27 +66,29 @@ class ChecksumTestCase(unittest.TestCase):
         from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
         from pcapkit.utilities import config
-        from pcapkit.utilities.warnings import ProtocolWarning
+        from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.ICMPv4, self.ICMPv6, self.IPv4, self.IPv6, self.IP_Pseudo = ICMPv4, ICMPv6, IPv4, IPv6, IP_Pseudo
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
+        self.ChecksumWarning = ChecksumWarning
 
-    def parse(self, octets: bytes, cls: type, *, verify: bool = True) -> 'tuple[object, list[str]]':
-        """``octets`` parsed as ``cls``, and the ProtocolWarnings given."""
+    def parse(self, octets: bytes, cls: type, *, verify: bool = True) -> 'tuple[object, list[tuple[type, str]]]':
+        """``octets`` parsed as ``cls``, and its ProtocolWarnings as ``(category, message)``."""
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', verify), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             layer = cls(octets)
-        return layer, [str(item.message) for item in caught if issubclass(item.category, self.ProtocolWarning)]
+        return layer, [(item.category, str(item.message))
+                       for item in caught if issubclass(item.category, self.ProtocolWarning)]
 
 
 class ICMPv4ChecksumTests(ChecksumTestCase):
     """Reading and making the ICMP checksum."""
 
-    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The ICMP checksum status of the IPv4 packet ``octets``, and the ProtocolWarnings given."""
+    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The ICMP checksum status of the IPv4 packet ``octets``, and its ProtocolWarnings."""
         layer, messages = self.parse(octets, self.IPv4, **kwargs)
         return layer['ICMP'].info.get('checksum_status'), messages
 
@@ -99,7 +101,7 @@ class ICMPv4ChecksumTests(ChecksumTestCase):
     def test_a_corrupted_checksum_warns(self) -> None:
         status, messages = self.status(with_checksum(ECHO, b'\x08\x3b', 22))
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, ['ICMP: checksum 0x083b is wrong; 0x083a expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'ICMP: checksum 0x083b is wrong; 0x083a expected')])
 
     def test_truncated_and_off(self) -> None:
         self.assertEqual(self.status(ECHO[:-1]), (self.Status.TRUNCATED, []))
@@ -155,8 +157,8 @@ class ICMPv4ChecksumTests(ChecksumTestCase):
 class ICMPv6ChecksumTests(ChecksumTestCase):
     """Verifying and computing the ICMPv6 checksum."""
 
-    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[str]]':
-        """The ICMPv6 checksum status of the IPv6 packet ``octets``, and the ProtocolWarnings given."""
+    def status(self, octets: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+        """The ICMPv6 checksum status of the IPv6 packet ``octets``, and its ProtocolWarnings."""
         layer, messages = self.parse(octets, self.IPv6, **kwargs)
         return layer['ICMPv6'].info.get('checksum_status'), messages
 
@@ -169,7 +171,7 @@ class ICMPv6ChecksumTests(ChecksumTestCase):
     def test_a_corrupted_checksum_warns(self) -> None:
         status, messages = self.status(with_checksum(CAPTURED[0], b'\x0e\xab', 42))
         self.assertIs(status, self.Status.INVALID)
-        self.assertEqual(messages, ['ICMPv6: checksum 0x0eab is wrong; 0x0eaa expected'])
+        self.assertEqual(messages, [(self.ChecksumWarning, 'ICMPv6: checksum 0x0eab is wrong; 0x0eaa expected')])
 
     def test_off_or_alone_verifies_nothing(self) -> None:
         self.assertEqual(self.status(with_checksum(CAPTURED[0], b'\x0e\xab', 42), verify=False), (None, []))
