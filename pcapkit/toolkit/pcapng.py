@@ -21,16 +21,17 @@ from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
-from pcapkit.toolkit.pcap import _fragment, tcp_segment
+from pcapkit.toolkit.pcap import _dtls_fragments, _fragment, tcp_segment
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
+    from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcapng import PCAPNG, Packet
 
-__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly',
+__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
            'tcp_traceflow', 'block2frame']
 
 
@@ -188,6 +189,32 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
         )
         return data
     return None
+
+
+def dtls_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[DTLS_Packet, ...]]':
+    """Make data for DTLS handshake-message reassembly.
+
+    A frame can be reassembled if UDP carries a DTLS layer
+    (:class:`~pcapkit.protocols.application.dtls.DTLS`) whose cleartext
+    ``handshake`` record holds a fragmented message
+    (:attr:`DTLSHandshake.is_fragmented
+    <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`,
+    :rfc:`6347#section-4.2.3`). Only the frame's first record is read (see
+    :func:`pcapkit.toolkit.pcap._dtls_fragments`).
+
+    Args:
+        frame: PCAP-NG frame.
+
+    Returns:
+        Data for DTLS reassembly (:term:`reasm.dtls.packet`), one per fragmented
+        message, if the ``frame`` can be reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.dtls.DTLS`
+
+    """
+    frame_info = cast('Packet', frame.info)
+    return _dtls_fragments(frame, num=frame_info.number, timestamp=float(frame_info.timestamp_epoch))
 
 
 def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Packet | None':

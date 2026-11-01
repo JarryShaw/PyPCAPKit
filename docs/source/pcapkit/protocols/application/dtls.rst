@@ -49,11 +49,13 @@ the two formats are told apart by that octet alone.
 Known Limitations
 -----------------
 
-**A handshake message split across DTLS records is not reassembled**
-(:rfc:`6347#section-4.2.3`, :issue:`2440`). Such a message is flagged
+**A handshake message split across DTLS records is not decoded here**
+(:rfc:`6347#section-4.2.3`, :issue:`2440`). Each fragment is flagged
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
 and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
-kept as raw octets.
+kept as raw octets. ``Extractor(reassembly=True, dtls=True)`` reassembles the
+message, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it
+with :meth:`~pcapkit.protocols.application.dtls.DTLS.read_handshake`.
 
 **A unified-header record with a connection ID is not decoded**
 (:rfc:`9147#section-4.1`, :issue:`2467`). Its length is negotiated, not carried
@@ -83,6 +85,7 @@ ones on the wire.
    .. automethod:: read
    .. automethod:: make
    .. automethod:: unpack
+   .. automethod:: read_handshake
 
    .. automethod:: __length_hint__
 

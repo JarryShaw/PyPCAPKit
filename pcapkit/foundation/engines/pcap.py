@@ -147,7 +147,7 @@ class PCAP(EngineBase[Frame]):
         - extract frames and each layer of packets;
         - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;
         - write to output file with corresponding dumper;
-        - reassemble IP and/or TCP datagram;
+        - reassemble IP and/or TCP datagram, and/or DTLS handshake message;
         - trace TCP flows if any;
         - record frame :class:`~pcapkit.corekit.infoclass.Info` object to frame storage.
 
@@ -155,8 +155,8 @@ class PCAP(EngineBase[Frame]):
             Parsed frame instance.
 
         """
-        from pcapkit.toolkit.pcap import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                          tcp_traceflow)
+        from pcapkit.toolkit.pcap import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly,
+                                          tcp_reassembly, tcp_traceflow)
         ext = self._extractor
 
         # read frame header
@@ -197,6 +197,11 @@ class PCAP(EngineBase[Frame]):
                 data_tcp = tcp_reassembly(frame)
                 if data_tcp is not None:
                     ext._reasm.tcp(data_tcp)
+            if ext._dtls:
+                data_dtls = dtls_reassembly(frame)
+                if data_dtls is not None:
+                    for packet_dtls in data_dtls:
+                        ext._reasm.dtls(packet_dtls)
 
         # trace flows
         if ext._flag_t:

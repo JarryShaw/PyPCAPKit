@@ -242,12 +242,13 @@ class PyShark(EngineBase['PySharkPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp):
+        if ext._flag_r and (ext._ipv4 or ext._ipv6 or ext._tcp or ext._dtls):
             ext._flag_r = False
             logger.debug('pyshark: reassembly unsupported, disabling it')
-            ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None)
+            ext._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None, dtls=None)
             warn("'Extractor(engine=pyshark)' object does not support reassembly; "
-                 f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}' and 'tcp={ext._tcp}' will be ignored",
+                 f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}', 'tcp={ext._tcp}' and "
+                 f"'dtls={ext._dtls}' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler, unless the caller gave one of their own

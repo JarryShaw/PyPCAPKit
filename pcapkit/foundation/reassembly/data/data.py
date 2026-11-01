@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase
@@ -360,6 +361,8 @@ class ReassemblyData(Info):
     ipv6: 'tuple[IP_Datagram, ...]'
     #: TCP reassembled data.
     tcp: 'tuple[TCP_Datagram, ...]'
+    #: DTLS reassembled handshake messages.
+    dtls: 'tuple[DTLS_Datagram, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]', dtls: 'Optional[tuple[DTLS_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
