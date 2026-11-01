@@ -182,14 +182,16 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv3"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["IGMPv3"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
+        :rfc:`3376` names the protocol ``IGMPv3``, carrying its own version.
+
         Returns:
-            Index ID of the protocol, the family name and the version.
+            Index ID of the protocol.
 
         """
-        return ('IGMP', 'IGMPv3')
+        return ('IGMPv3',)
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IGMP':
         """Read Internet Group Management Protocol version 3.
