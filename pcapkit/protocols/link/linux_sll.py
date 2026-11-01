@@ -161,9 +161,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             :class:`~pcapkit.protocols.link.radiotap.Radiotap` when ``arphrd_type``
             is :attr:`ARPHRD.IEEE80211_RADIOTAP
             <pcapkit.const.linux.arphrd.ARPHRD.IEEE80211_RADIOTAP>`;
-            otherwise :class:`~pcapkit.protocols.misc.raw.Raw`, recording
-            ``proto``, for every other ``arphrd_type`` in
-            :data:`_ARPHRD_NOT_ETHERTYPE`.
+            otherwise the dissector :attr:`Link.__proto__
+            <pcapkit.protocols.link.link.Link.__proto__>` holds for ``proto``,
+            an EtherType.
 
         """
         file_ = self._get_payload()
@@ -199,10 +199,4 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                                           layer=self._exlayer, protocol=self._exproto,
                                           __context__=self._exctx)
 
-        if arphrd_type not in _ARPHRD_NOT_ETHERTYPE:
-            return super()._import_next_layer(proto, length, packet=packet)  # type: ignore[misc,call-arg]
-
-        from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel # isort: skip
-        return self._parse_next_layer(Raw, file_, length, alias=proto, packet=packet,
-                                      layer=self._exlayer, protocol=self._exproto,
-                                      __context__=self._exctx)
+        return super()._import_next_layer(proto, length, packet=packet)  # type: ignore[misc,call-arg]
