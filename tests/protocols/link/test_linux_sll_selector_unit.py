@@ -21,16 +21,20 @@ IPV4 = (bytes.fromhex('4500001c00010000401100000a0000010a000002')
         + bytes.fromhex('3039003500080000'))
 
 
-def _header_v1(protocol_type: int = 0x0800) -> bytes:
+#: A FRAD frame, Q.922 address and UI control, carrying :data:`IPV4` by NLPID ``0xCC``.
+FRAD = bytes.fromhex('0c2103cc') + IPV4
+
+
+def _header_v1(protocol_type: int = 0x0800, arphrd_type: int = 1) -> bytes:
     """Pack a minimal ``LINUX_SLL`` (v1) header."""
     link_addr = bytes.fromhex('001122334455').ljust(8, b'\x00')
-    return struct.pack('>HHH', 0, 1, 6) + link_addr + struct.pack('>H', protocol_type)
+    return struct.pack('>HHH', 0, arphrd_type, 6) + link_addr + struct.pack('>H', protocol_type)
 
 
-def _header_v2(protocol_type: int = 0x0800) -> bytes:
+def _header_v2(protocol_type: int = 0x0800, arphrd_type: int = 1) -> bytes:
     """Pack a minimal ``LINUX_SLL2`` header."""
     link_addr = bytes.fromhex('001122334455').ljust(8, b'\x00')
-    return struct.pack('>HHIHBB', protocol_type, 0, 1, 1, 0, 6) + link_addr
+    return struct.pack('>HHIHBB', protocol_type, 0, 1, arphrd_type, 0, 6) + link_addr
 
 
 def _pcap(records: 'list[bytes]', linktype: int) -> bytes:
@@ -155,6 +159,20 @@ class TestLinuxSLLSelector(unittest.TestCase):
                          'LINUX_SLL2:Internet_Protocol_version_4')
         self.assertEqual(_extract(_header_v1() + IPV4, LinkType.LINUX_SLL, 'LinuxSLL2'),
                          'LINUX_SLL1:IPv4:UDP')
+
+    def test_extract_stops_a_registered_arphrd_type_alike(self) -> None:
+        """A FRAD frame stops where an EtherType one does (#2532)."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.reg.linktype import LinkType
+
+        for linktype, header, alias, own, other in (
+                (LinkType.LINUX_SLL, _header_v1, 'LINUX_SLL1', 'LinuxSLL1', 'LinuxSLL2'),
+                (LinkType.LINUX_SLL2, _header_v2, 'LINUX_SLL2', 'LinuxSLL2', 'LinuxSLL1')):
+            record = header(arphrd_type=ARPHRD.FRAD) + FRAD
+            for protocol in ('LinuxSLL', own):
+                with self.subTest(alias=alias, protocol=protocol):
+                    self.assertEqual(_extract(record, linktype, protocol), f'{alias}:Raw')
+            self.assertEqual(_extract(record, linktype, other), f'{alias}:FRAD:IPv4:UDP')
 
 
 if __name__ == '__main__':
