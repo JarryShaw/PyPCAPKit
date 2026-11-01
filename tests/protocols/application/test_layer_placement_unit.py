@@ -4,7 +4,7 @@
 Settled on GitHub issue #719: layer is decided by what a protocol is *for*, not by
 what encapsulates it, with the IETF as the single source of truth.
 :rfc:`1812#section-7` is titled "APPLICATION LAYER - ROUTING PROTOCOLS" with OSPF at
-§7.2.2 and confines the internet layer to IP, ICMP and IGMP at §4.1;
+§7.2.2, while the Internet Layer protocols §4.1 names are IP, ICMP and IGMP;
 :rfc:`1122#section-1.1.3` lists RARP in the application layer while ARP sits in the
 Link Layer chapter at §2.3.2. The rule and its citations are written down at
 :doc:`/contributing/conventions/protocol-layer-placement`. ``FTP_DATA`` follows the

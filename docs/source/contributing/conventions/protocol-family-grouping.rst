@@ -119,8 +119,12 @@ A parsed RARP takes ``DRARP`` as its alias for operation 5, and
 A family-inclusive member is selected by any sibling's registry key (a key of
 ``pcapkit.protocols.__proto__``), because each expands to the shared family name
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name
-and by the key of each family whose ``id()`` lists it: ``AH`` and ``ESP`` by ``IPsec``
-and by ``IPv6_Ext``, ``HTTPv1`` and ``HTTPv2`` by ``HTTP``.
+and by the key of each family whose ``id()`` lists it: ``HTTPv1`` and ``HTTPv2`` by
+``HTTP``, and ``AH`` and ``ESP`` by ``IPsec`` and by ``IPv6_Ext`` where IPv4 carries
+them. Under IPv6 they are no layer of their own but entries of
+:attr:`IPv6.extension_headers <pcapkit.protocols.internet.ipv6.IPv6.extension_headers>`,
+so on an ``Ethernet:IPv6:AH`` frame ``'AH' in``, ``'IPsec' in`` and ``'IPv6_Ext' in``
+are all ``False``; only ``frame.protochain`` matches them.
 
 Chained Records
 ~~~~~~~~~~~~~~~
