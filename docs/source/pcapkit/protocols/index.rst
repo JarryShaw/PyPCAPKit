@@ -106,7 +106,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
            end
 
            subgraph igmp [IGMP Family]
-               IGMP --> IGMPv1 & IGMPv2
+               IGMP --> IGMPv1 & IGMPv2 & IGMPv3
            end
        end
 
@@ -150,6 +150,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click IGMP "internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP"
        click IGMPv1 "internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP"
        click IGMPv2 "internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP"
+       click IGMPv3 "internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMP"
        click HOPOPT "internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
        click ICMP "internet/icmp.html#pcapkit.protocols.internet.icmp.ICMP"
        click ICMPv4 "internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.ICMPv4"

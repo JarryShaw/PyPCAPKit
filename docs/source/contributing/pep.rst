@@ -1150,9 +1150,9 @@ is wanted instead of
 sequenced *after* wave 2 rather than by preference: the multicast options embed
 :rfc:`9777` MLD (which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which
 rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
-IGMPv1/v2 are both wave 2 deliverables, now done; MLD itself remains a
-follow-up to ICMPv6 (see `More Protocols, More!!!`_ above), and IGMPv3 is
-:issue:`2448`. Landing the registry first would give a dispatch table with
+IGMP, IGMPv3 included (:issue:`2448`), are both wave 2 deliverables, now done;
+MLD itself remains a follow-up to ICMPv6 (see `More Protocols, More!!!`_
+above). Landing the registry first would give a dispatch table with
 :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the
