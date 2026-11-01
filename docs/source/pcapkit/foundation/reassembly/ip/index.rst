@@ -106,6 +106,11 @@ Departures from the procedure above:
 * An IPv6 atomic fragment, one with fragment offset zero and **M** clear,
   flushes nothing: it is reassembled in isolation and the fragments buffered
   under its ``BUFID`` are kept, per :rfc:`6946#section-4` (:issue:`2270`).
+* An IPv6 fragment that overlaps another, other than an exact duplicate,
+  abandons its datagram rather than overwriting the octets it overlaps, per
+  :rfc:`8200#section-4.5`; the datagram is reported as
+  :attr:`~pcapkit.foundation.reassembly.data.data.Completion.OVERLAP`
+  (:issue:`2547`).
 * ``TDL`` starts at ``-1`` rather than ``0``, so that a datagram carrying no
   data can complete (:issue:`1359`).
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final

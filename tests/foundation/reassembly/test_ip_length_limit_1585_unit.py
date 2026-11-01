@@ -12,7 +12,8 @@ that outgrows the bound with its header grows the buffer past it instead.
 
 The same issue documents, rather than changes, that the octets of a cut
 non-final fragment's partial block, which is not marked received (#1567), are
-not checked for conflicts; the last test pins that.
+not checked for conflicts; the last two tests pin that, the second for IPv6,
+which abandons the datagram on the overlap instead (#2547).
 
 Every case builds its fragments in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -141,20 +142,40 @@ class TestIPReassemblyLengthLimit(unittest.TestCase):
         # RFC 791 has them do.
         from pcapkit.foundation.reassembly.data.data import Completion
         from pcapkit.foundation.reassembly.ipv4 import IPv4
+
+        other = bytes(b ^ 0xFF for b in DATA[56:64])
+        for strict in (True, False):
+            with self.subTest(strict=strict):
+                reasm = IPv4(strict=strict)
+                reasm(self._packet(num=1, fo=0, mf=True, payload=DATA[:60], ihl=40))
+                reasm(self._packet(num=2, fo=56, mf=True, payload=other, ihl=40))
+                reasm(self._packet(num=3, fo=64, mf=False, payload=DATA[64:72], ihl=40))
+                datagram, = reasm.datagram
+                self.assertIs(datagram.completed, Completion.COMPLETE)
+                self.assertEqual(datagram.payload, DATA[:56] + other + DATA[64:72])
+                self.assertEqual(datagram.conflict, ())
+
+    def test_ipv6_abandons_a_datagram_overlapping_a_cut_fragment(self) -> None:
+        # The same fragments on IPv6: the cut one's 60 octets reach into the
+        # next one's, so RFC 8200 section 4.5 abandons the datagram (#2547).
+        # The overlapped octets sit in a hole, so no conflict is recorded.
+        from pcapkit.foundation.reassembly.data.data import Completion
         from pcapkit.foundation.reassembly.ipv6 import IPv6
 
         other = bytes(b ^ 0xFF for b in DATA[56:64])
-        for cls in (IPv4, IPv6):
-            for strict in (True, False):
-                with self.subTest(cls=cls.__name__, strict=strict):
-                    reasm = cls(strict=strict)
-                    reasm(self._packet(num=1, fo=0, mf=True, payload=DATA[:60], ihl=40))
-                    reasm(self._packet(num=2, fo=56, mf=True, payload=other, ihl=40))
-                    reasm(self._packet(num=3, fo=64, mf=False, payload=DATA[64:72], ihl=40))
-                    datagram, = reasm.datagram
-                    self.assertIs(datagram.completed, Completion.COMPLETE)
-                    self.assertEqual(datagram.payload, DATA[:56] + other + DATA[64:72])
-                    self.assertEqual(datagram.conflict, ())
+        for strict in (True, False):
+            with self.subTest(strict=strict):
+                reasm = IPv6(strict=strict)
+                reasm(self._packet(num=1, fo=0, mf=True, payload=DATA[:60], ihl=40))
+                reasm(self._packet(num=2, fo=56, mf=True, payload=other, ihl=40))
+                reasm(self._packet(num=3, fo=64, mf=False, payload=DATA[64:72], ihl=40))
+                late, abandoned = reasm.datagram
+                self.assertIs(abandoned.completed, Completion.OVERLAP)
+                self.assertEqual(abandoned.index, (1, 2))
+                self.assertEqual(abandoned.payload, (DATA[:56],) if strict else DATA[:56])
+                self.assertEqual(abandoned.conflict, ())
+                self.assertIs(late.completed, Completion.PARTIAL)
+                self.assertEqual(late.index, (3,))
 
 
 if __name__ == '__main__':

@@ -40,11 +40,13 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(datagram.to_dict()['payload'], (b'payload',))
         self.assertEqual(datagram.conflict, ())
 
-        buffer = Buffer(-1, bytearray(b'\x01'), [7], b'ip-header', bytearray(b'payload'), 1000.0, [])
+        buffer = Buffer(-1, bytearray(b'\x01'), [7], b'ip-header', bytearray(b'payload'), 1000.0, [],
+                        [(8, 15, True)])
         self.assertIsInstance(buffer, IP_Buffer)
         self.assertEqual(buffer.index, [7])
         self.assertEqual(buffer.timestamp, 1000.0)
         self.assertEqual(buffer.conflict, [])
+        self.assertEqual(buffer.extent, [(8, 15, True)])
 
         storage = ReassemblyData((datagram,), (), (), ())
         self.assertEqual(storage.ipv4, (datagram,))
@@ -71,6 +73,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertTrue(Completion.COMPLETE)
         self.assertFalse(Completion.PARTIAL)
         self.assertFalse(Completion.TIMEOUT)
+        self.assertFalse(Completion.OVERLAP)
 
         # ... while equality against a bool stays broken, as documented
         self.assertNotEqual(Completion.COMPLETE, True)
@@ -99,11 +102,12 @@ class ReassemblyDataModelTests(unittest.TestCase):
         from pcapkit.foundation.reassembly.data.data import Completion
 
         self.assertEqual([member.name for member in Completion],
-                        ['COMPLETE', 'PARTIAL', 'TIMEOUT'])
+                        ['COMPLETE', 'PARTIAL', 'TIMEOUT', 'OVERLAP'])
 
         self.assertEqual(Completion.COMPLETE, 'complete')
         self.assertEqual(Completion.PARTIAL, 'partial')
         self.assertEqual(Completion.TIMEOUT, 'timeout')
+        self.assertEqual(Completion.OVERLAP, 'overlap')
 
     def test_tcp_data_models_and_package_aliases(self) -> None:
         from pcapkit.foundation.reassembly.data import (Completion, TCP_Buffer, TCP_Datagram,

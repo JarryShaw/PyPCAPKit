@@ -21,6 +21,11 @@ copy opens a new buffer and surfaces as a second, ``PARTIAL`` datagram, as RFC
 791, Linux, FreeBSD, Suricata, Zeek and Wireshark all do, so those cases expect
 both datagrams.
 
+RFC 8200 section 4.5 abandons an IPv6 datagram on any overlap but an exact
+duplicate (#2547), so an IPv6 overlap case whose extra piece is not one expects
+the abandoned datagram, ``OVERLAP``, and a ``PARTIAL`` one from the later
+fragments.
+
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
@@ -160,11 +165,23 @@ def _ip_cases() -> 'list[Case]':
             # one extra piece straddling a boundary, with the same octets
             frames = [_ip_frame(kind, IP_PAYLOAD, *piece, 0x1234) for piece in pieces]
             end = next(offset + size for offset, size in pieces if offset + size >= 24) - 8
-            frames.insert(1, _ip_frame(kind, IP_PAYLOAD, 8, (end - 8) - (end - 8) % 8, 0x1234))
-            stream = Stream(IP_PAYLOAD, tuple(range(1, len(frames) + 1)), header)
+            extra = (8, (end - 8) - (end - 8) % 8)
+            frames.insert(1, _ip_frame(kind, IP_PAYLOAD, *extra, 0x1234))
             for strict in (True, False):
+                if kind == 'ipv6' and extra not in pieces:
+                    # RFC 8200 section 4.5 abandons the datagram on the extra
+                    # piece, and the rest open a new buffer (#2547)
+                    first = IP_PAYLOAD[:pieces[0][1]]
+                    rest = IP_PAYLOAD[pieces[0][1]:]
+                    streams = (
+                        Stream((first,) if strict else first, (1, 2), None, 'OVERLAP'),
+                        Stream((rest,) if strict else bytes(len(first)) + rest,
+                               tuple(range(3, len(frames) + 1)), None, 'PARTIAL'),
+                    )
+                else:
+                    streams = (Stream(IP_PAYLOAD, tuple(range(1, len(frames) + 1)), header),)
                 cases.append(Case(f'{kind}/{cut}/overlap/{"strict" if strict else "loose"}',
-                                  kind, tuple(frames), (stream,), strict))
+                                  kind, tuple(frames), streams, strict))
 
         # unfragmented: one packet, offset 0 and MF clear
         if kind == 'ipv4':

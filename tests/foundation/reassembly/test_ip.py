@@ -114,7 +114,7 @@ class IPReassemblyTests(unittest.TestCase):
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
         datagram, = empty.submit(
-            Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0, []),
+            Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0, [], []),
             bufid=(src, dst, 42, TransType.UDP),
         )
         self.assertFalse(datagram.completed)
