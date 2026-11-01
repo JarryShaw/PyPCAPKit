@@ -5,8 +5,9 @@
 .. module:: pcapkit.utilities.config
 
 :mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
-(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
-once, when this module is imported, and validated there:
+(:issue:`1726`), and its checksum flags (:issue:`2471`). Each is read from a
+``PCAPKIT_*`` environment variable once, when this module is imported, and
+validated there; a flag as :func:`read_flag` describes, and a limit as follows:
 
 * A value that is not an integer, or is below the variable's minimum, is
   reported with a :exc:`~pcapkit.utilities.warnings.ConfigWarning`, and the
@@ -53,6 +54,8 @@ __all__ = [
     'FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT', 'IPV6_TCP_WARNED_LIMIT',
     'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
     'MAX_ZERO_PAD_LENGTH', 'MAX_ZERO_PAD_SHORTFALL', 'ZERO_PAD_BUDGET_RATIO',
+    # flags
+    'CHECKSUM_VERIFY', 'CHECKSUM_COMPUTE',
     # readers
     'read_limit', 'read_flag',
 ]
@@ -380,3 +383,29 @@ MAX_ZERO_PAD_SHORTFALL = read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
 ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
     'a capture whose blocks all lie about their lengths can amplify each octet read '
     'into that many zero octets in memory'))
+
+###############################################################################
+# Flags
+###############################################################################
+
+#: bool: Whether parsing verifies the one's-complement checksums, of the IPv4
+#: header, TCP, UDP, ICMP, ICMPv6 and OSPF, :envvar:`PCAPKIT_CHECKSUM_VERIFY`.
+#:
+#: Off by default, since checksumming every packet costs time on a large
+#: capture (:issue:`2471`). When on, each records a
+#: :class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus` as
+#: ``checksum_status`` in its info, and a wrong checksum warns with a
+#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning` rather than raising.
+#:
+#: .. versionadded:: 1.6.0
+CHECKSUM_VERIFY = read_flag('CHECKSUM_VERIFY', False)
+
+#: bool: Whether construction computes a checksum the caller leaves out, for
+#: the protocols :data:`CHECKSUM_VERIFY` names, :envvar:`PCAPKIT_CHECKSUM_COMPUTE`.
+#:
+#: On by default (:issue:`2471`). A checksum given explicitly, as
+#: :meth:`~pcapkit.protocols.protocol.Protocol.from_data` gives the parsed one,
+#: is written as given either way. Off, a checksum left out is zero.
+#:
+#: .. versionadded:: 1.6.0
+CHECKSUM_COMPUTE = read_flag('CHECKSUM_COMPUTE', True)

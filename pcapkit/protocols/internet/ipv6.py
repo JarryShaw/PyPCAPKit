@@ -27,7 +27,7 @@ Octets      Bits        Name                    Description
 
 """
 import ipaddress
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
@@ -46,7 +46,7 @@ from pcapkit.utilities.exceptions import ProtocolError
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import Any, Mapping, Optional, Type
+    from typing import IO, Any, Mapping, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -311,7 +311,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             if payload_length > IP_MAX_LENGTH or jumbo_payload_length(next_val, bytes(payload)) is not None:
                 payload_length = 0
 
-        return Schema_IPv6(
+        schema = Schema_IPv6(
             hextet={
                 'version': 6,
                 'class': traffic_class,
@@ -325,6 +325,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             payload=payload,
             trailer=trailer,
         )
+
+        # NOTE: A payload that left its checksum out gets it over this header's
+        # pseudo-header; see pcapkit.protocols.misc.checksum.checksum (#2471).
+        if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
+                and cast('ProtocolBase', payload).__index__() == next_val):
+            from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
+
+            # NOTE: The payload follows this header directly, so no extension
+            # header moves an address; it puts its own length in the pseudo-header.
+            pseudo = IP_Pseudo(src=src, dst=dst, protocol=next_val, upper_length=0)
+            upper = cast('ProtocolBase', payload)
+            schema.payload = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
+        return schema
 
     @classmethod
     def id(cls) -> 'tuple[Literal["IPv6"]]':  # type: ignore[override]
@@ -355,6 +368,28 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         """
         return Enum_TransType.IPv6  # type: ignore[return-value]
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Once parsed, the checksum of the upper layer is verified over this
+        layer's pseudo-header if :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+        is on, see :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        See Also:
+            For construction arguments, please refer to :meth:`make`.
+
+        """
+        super().__post_init__(file, length, **kwargs)
+        if config.CHECKSUM_VERIFY:
+            from pcapkit.protocols.misc.checksum.checksum import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
+            verify_upper(self)
 
     ##########################################################################
     # Utilities.

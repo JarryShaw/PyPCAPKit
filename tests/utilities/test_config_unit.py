@@ -80,6 +80,13 @@ DECLARED = (
     ('ZERO_PAD_BUDGET_RATIO', 16, 0, 'amplify each octet read'),
 )
 
+#: Every flag :mod:`pcapkit.utilities.config` declares, as ``(name, default)``
+#: (#2471: verification off by default, computation on).
+FLAGS = (
+    ('CHECKSUM_VERIFY', False),
+    ('CHECKSUM_COMPUTE', True),
+)
+
 
 def options(nxt: int) -> bytes:
     """An 8-octet Destination Options header: Hdr Ext Len 0 and one PadN."""
@@ -235,8 +242,18 @@ class DeclarationTests(unittest.TestCase):
                 importlib.reload(self.config)
 
     def test_the_table_names_every_variable(self) -> None:
-        names = {row[0] for row in DECLARED}
+        names = {row[0] for row in DECLARED} | {row[0] for row in FLAGS}
         self.assertEqual(names, set(self.config.__all__) - READERS)
+
+    def test_each_flag_default_and_both_values(self) -> None:
+        for name, default in FLAGS:
+            with self.subTest(name=name):
+                self.assertEqual(self.load(name, None), (default, []))
+                self.assertEqual(self.load(name, 'on'), (True, []))
+                self.assertEqual(self.load(name, 'off'), (False, []))
+                value, messages = self.load(name, 'maybe')
+                self.assertEqual((value, len(messages)), (default, 1), messages)
+                self.assertIn(f"PCAPKIT_{name}='maybe' is not one of", messages[0])
 
     def test_each_variable_is_read_by_its_own_name(self) -> None:
         for name, default, _, _ in DECLARED:
@@ -305,7 +322,7 @@ class LayoutTests(unittest.TestCase):
         from pcapkit.utilities import config
 
         docs = (PACKAGE.parent / 'docs' / 'source' / 'pcapkit' / 'utilities' / 'config.rst').read_text('utf-8')
-        # A limit is named after its variable.
+        # A limit or a flag is named after its variable.
         for name in set(config.__all__) - READERS:
             with self.subTest(name=name):
                 self.assertIn(f'.. envvar:: PCAPKIT_{name}\n', docs)

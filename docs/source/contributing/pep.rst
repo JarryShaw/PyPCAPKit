@@ -56,8 +56,7 @@ with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
 record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
 :class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
 below. Neighbor Discovery (:rfc:`4861`, the ``NDP`` above) and Multicast
-Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented,
-nor is ICMP/ICMPv6 checksum computation or verification (:issue:`2470`).
+Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
 whose *layout* is identical -- it holds the whole of the tag, and
 :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
@@ -819,11 +818,13 @@ These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.application.ospf.OSPF`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
-:class:`~pcapkit.protocols.transport.udp.UDP` — and of them only SCTP checks
-whether the value is *right*, through
+:class:`~pcapkit.protocols.transport.udp.UDP` — and SCTP was the first to
+check whether the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
-For the others the field is recorded and never questioned, so a corrupted
-capture parses as cleanly as an intact one.
+IPv4, OSPF, TCP and UDP check it too, as do ICMP and ICMPv6, as the
+one's-complement half below describes. For HIP, HOPOPT, IPv6-Opts, IPX and MH the
+field is recorded and never questioned, so a corrupted capture parses as cleanly
+as an intact one.
 
 **These are different problems and they want separating**, because only one
 of them is cryptographic and the distinction decides what is actually hard.
@@ -879,8 +880,8 @@ owner, and each lands on a precedent the library already has:
   what the construction side needs in order to *emit* a correct checksum, and
   the two paths then share one definition instead of agreeing by coincidence.
 
-One case still wants a decision at implementation time, since it is about
-wording rather than design: **checksum offload**. A capture taken on the sending
+One case was left to implementation time, since it is about wording rather
+than design: **checksum offload**. A capture taken on the sending
 host routinely contains checksums the NIC had not computed yet, so the field is
 zero or garbage on the wire and "invalid" is the wrong word for it. Whatever
 status enumeration this grows should be able to say *not computed* distinctly
@@ -888,10 +889,32 @@ from *wrong*, or it will cry wolf on the commonest capture there is —
 :class:`~pcapkit.protocols.internet.esp.ESPStatus`'s ``NO_SA`` member is the
 model for how to spell "expected, not an error".
 
-Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
-ESP has already laid the groundwork. The checksum half builds on the IP
-pseudo-header class, :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
-(:issue:`2471`).
+**The one's-complement half is done** (:issue:`2470`, :issue:`2472` to
+:issue:`2475`), on :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
+(:issue:`2471`) and :mod:`pcapkit.protocols.misc.checksum.checksum`, settled as
+below: the first two by the owner on :issue:`2471`, the others at implementation,
+as the offload question above asked.
+
+* **Every checksum path is togglable, and the two paths default apart.** Parsing
+  verifies only under :envvar:`PCAPKIT_CHECKSUM_VERIFY`, off by default;
+  construction computes a checksum the caller leaves out unless
+  :envvar:`PCAPKIT_CHECKSUM_COMPUTE` turns it off.
+* **The toggle is an environment variable**, with a per-call override only where
+  a caller needs one. A checksum given to ``make()`` is written as given, which is
+  what keeps a rebuild byte for byte; there is no
+  :class:`~pcapkit.foundation.extraction.Extractor` or per-instance parameter.
+* **The IP layer owns the pseudo-header.** :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+  and :class:`~pcapkit.protocols.internet.ipv6.IPv6` verify their upper layer's
+  checksum once parsed, and compute it for an upper layer constructed as their
+  payload; ``make()`` of TCP, UDP and ICMPv6 also takes the ``pseudo`` itself.
+* **Offload is** :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`,
+  modelled on ``NO_SA``: a zero IPv4 or TCP checksum, or a TCP or UDP one holding
+  the pseudo-header's sum alone, as Linux offload leaves it, never warns. So does
+  a zero UDP checksum over IPv4 (:rfc:`768`), but not over IPv6, where it is
+  mandatory (:rfc:`8200#section-8.1`).
+
+The cryptographic half is sequenced for **wave 2 or 3**, and could be done sooner
+since ESP has already laid the groundwork.
 
 Deterministic Construction Arguments
 ------------------------------------
@@ -1097,8 +1120,7 @@ is the abstract base :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` and
 :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` share for selector composition
 (:issue:`2436`); each implements its own message-type parsing independently rather than
 through a shared method body. The two are distinguished by whether they carry pseudo-header
-checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation or verification
-(:issue:`2470`).
+checksums (ICMPv6 does; ICMPv4 does not), both verified and computed (:issue:`2470`).
 
 **IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
 The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`,
@@ -1271,14 +1293,13 @@ files what it merely suspects transfers the work rather than doing it, and this
 project has already had to correct a finding whose count and whose diagnosis were
 both wrong when re-derived.
 
-**Queued for wave 2 or 3 — checksum and integrity verification.** See `Checksum
-and Integrity Verification`_ above. It splits in two, and the halves are not
-equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
-``RELAY_HMAC`` and its signature parameters) could start whenever, since
+**Queued for wave 2 or 3 — cryptographic integrity verification.** See `Checksum
+and Integrity Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC``
+and its signature parameters could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
-one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is :issue:`2470` and
-:issue:`2472` to :issue:`2475`.
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is **done**
+(:issue:`2470`, :issue:`2472` to :issue:`2475`).
 
 **IP pseudo-header — done** (:issue:`2471`).
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is the

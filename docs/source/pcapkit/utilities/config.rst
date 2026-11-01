@@ -4,8 +4,8 @@ Configuration
 .. module:: pcapkit.utilities.config
 
 :mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
-(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
-once, when the module is imported:
+(:issue:`1726`), and the checksum `flags`_. Each is read from a ``PCAPKIT_*``
+environment variable once, when the module is imported. For a limit:
 
 * A value that is not an integer, or is below the variable's minimum, warns with
   a :exc:`~pcapkit.utilities.warnings.ConfigWarning` and falls back to the
@@ -134,13 +134,43 @@ Limits
 .. autodata:: pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL
 .. autodata:: pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO
 
+Flags
+-----
+
+The checksum flags (:issue:`2471`) take the values :func:`read_flag` accepts,
+and a bad value warns and falls back to the default.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Variable
+     - Default
+     - Effect
+   * - :envvar:`PCAPKIT_CHECKSUM_VERIFY`
+     - off
+     - parsing verifies each checksum and records the outcome
+   * - :envvar:`PCAPKIT_CHECKSUM_COMPUTE`
+     - on
+     - construction computes a checksum the caller leaves out
+
+.. envvar:: PCAPKIT_CHECKSUM_VERIFY
+
+   Sets :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`.
+
+.. envvar:: PCAPKIT_CHECKSUM_COMPUTE
+
+   Sets :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`.
+
+.. autodata:: pcapkit.utilities.config.CHECKSUM_VERIFY
+.. autodata:: pcapkit.utilities.config.CHECKSUM_COMPUTE
+
 .. _config-readers:
 
 Readers
 -------
 
-The limits above are read with these, and a module that keeps a variable of its
-own reads it with them too, so that a bad value is reported the same way.
+The variables above are read with these, and a module that keeps a variable of
+its own reads it with them too, so that a bad value is reported the same way.
 
 .. autofunction:: pcapkit.utilities.config.read_limit
 .. autofunction:: pcapkit.utilities.config.read_flag
