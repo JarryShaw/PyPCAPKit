@@ -9,6 +9,9 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
+# Frame Relay Access Device
+from pcapkit.protocols.data.link.frad import FRAD
+
 # Layer Two Tunnelling Protocol
 from pcapkit.protocols.data.link.l2tp import L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as L2TP_Flags
@@ -33,6 +36,9 @@ __all__ = [
 
     # Ethernet Protocol
     'Ethernet',
+
+    # Frame Relay Access Device
+    'FRAD',
 
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',

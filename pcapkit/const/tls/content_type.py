@@ -6,17 +6,7 @@
 .. module:: pcapkit.const.tls.content_type
 
 This module contains the constant enumeration for **TLS/DTLS Content Types**,
-as assigned by IANA in the ``TLS ContentType`` registry [*]_. The record-layer
-header -- :rfc:`9846#section-5.1` for TLS, :rfc:`9147#section-4`'s
-``DTLSPlaintext`` for DTLS -- opens with this type in both.
-
-Every value IANA assigns is named below. Everything else in the 0-255 range it
-lists as Unassigned (0-19 and 28-31, plus 64-255, which :rfc:`9443` reserves
-for multiplexing with other protocols on the same port) or as Reserved (32-63,
-:rfc:`9147`), and :meth:`ContentType._missing_` resolves those to an
-``Unassigned`` member without growing the registry.
-
-.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
+which is automatically generated from :class:`pcapkit.vendor.tls.content_type.ContentType`.
 
 """
 
@@ -36,45 +26,47 @@ __all__ = ['ContentType']
 class ContentType(EnumRegistry, IntEnum):
     """[ContentType] TLS/DTLS Content Types"""
 
-    #: Invalid -- a sentinel :rfc:`9846#section-5.1` names so that a record
-    #: carrying it can be rejected, never a value sent on the wire; IANA keeps
-    #: 0 inside its Unassigned 0-19 band rather than assigning it [:rfc:`9846`]
-    invalid = 0
-
-    #: ChangeCipherSpec [:rfc:`9846`]
+    #: change_cipher_spec [:rfc:`9846`]
     change_cipher_spec = 20
 
-    #: Alert [:rfc:`9846`]
+    #: alert [:rfc:`9846`]
     alert = 21
 
-    #: Handshake [:rfc:`9846`]
+    #: handshake [:rfc:`9846`]
     handshake = 22
 
-    #: Application Data [:rfc:`9846`]
+    #: application_data [:rfc:`9846`]
     application_data = 23
 
-    #: Heartbeat [:rfc:`6520`]
+    #: heartbeat [:rfc:`6520`]
     heartbeat = 24
 
-    #: ``tls12_cid`` [:rfc:`9146`]
+    #: tls12_cid [:rfc:`9146`]
     tls12_cid = 25
 
-    #: ACK -- DTLS 1.3 only [:rfc:`9147`]
+    #: ACK [:rfc:`9147`]
     ack = 26
 
-    #: ``return_routability_check`` -- DTLS connection-ID path validation
-    #: [:rfc:`9853`]
+    #: return_routability_check [:rfc:`9853`]
     return_routability_check = 27
 
     @classmethod
     def _validate_value(cls, value: 'Any') -> 'None':
         """Reject ``value`` unless it passes the range check :meth:`_missing_` makes.
 
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with that check and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
         Args:
             value: Value about to be looked up or minted.
 
         Raises:
-            EnumValueError: If ``value`` fails that check.
+            EnumValueError: If ``value`` fails that check. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
 
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
@@ -90,5 +82,18 @@ class ContentType(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return cls._unregistered_member(value, 'Unassigned')
+        if 0 <= value <= 19:
+            #: Unassigned (Requires coordination; see [RFC 9443])
+    #: [:rfc:`5764`][:rfc:`9443`]
+            return cls._unregistered_member(value, 'Unassigned')
+        if 28 <= value <= 31:
+            #: Unassigned
+            return cls._unregistered_member(value, 'Unassigned')
+        if 32 <= value <= 63:
+            #: Reserved [:rfc:`9147`]
+            return cls._unregistered_member(value, 'Reserved')
+        if 64 <= value <= 255:
+            #: Unassigned (Requires coordination; see [RFC 9443])
+    #: [:rfc:`5764`][:rfc:`9443`]
+            return cls._unregistered_member(value, 'Unassigned')
+        return super()._missing_(value)

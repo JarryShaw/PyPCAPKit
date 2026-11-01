@@ -116,6 +116,24 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 
+    def test_frad_arphrd_dispatches_to_frad(self) -> None:
+        """GitHub issue #2460: ``ARPHRD_FRAD`` dispatches to
+        :class:`~pcapkit.protocols.link.frad.FRAD` rather than falling back to
+        :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        frad = bytes.fromhex('0c21') + b'\x03\xcc' + IPV4
+        raw = _header(0x0800, 0, 0, ARPHRD.FRAD, 2, b'', 0) + frad
+        parsed = LinuxSLL2(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.FRAD)
+        self.assertEqual(type(parsed.payload).__name__, 'FRAD')
+        self.assertEqual(parsed.payload.info.dlci, 50)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:FRAD:IPv4:UDP')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
+
     def test_non_ethernet_non_excluded_arphrds_still_dispatch_by_ethertype(self) -> None:
         """Loopback, PPP and SLIP/CSLIP are not among the exceptions, so
         ``protocol_type`` is still an EtherType for them.

@@ -54,6 +54,11 @@ CASES = (
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
     ('radiotap', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
      + bytes.fromhex('aabbccddeeff')),
+    ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
+        '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
+    ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(
+        '0c21' '0300' '80' '000000' '0806'
+        '00010800060400010011223344550a0000010000000000000a000002')),
     ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
     ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
     ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),

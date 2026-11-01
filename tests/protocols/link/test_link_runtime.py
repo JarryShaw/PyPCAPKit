@@ -58,15 +58,18 @@ class LinkProtocolRuntimeTests(unittest.TestCase):
         extractor = self._extract('in.pcap')
         ethernet = extractor.frame[0].payload
         ipv6 = ethernet.payload
-        raw = ipv6.payload
+        icmpv6 = ipv6.payload
 
         self.assertEqual(ethernet.name, 'Ethernet Protocol')
         self.assertEqual(ipv6.name, 'Internet Protocol version 6')
         self.assertEqual(str(ipv6.src), 'fe80::a6:87f9:2793:16ee')
         self.assertEqual(str(ipv6.dst), 'fe80::1ccd:7c77:bac7:46b7')
         self.assertEqual(ipv6.info.limit, 255)
-        self.assertEqual(type(raw).__name__, 'Raw')
-        self.assertEqual(raw.info.protocol.name, 'IPv6_ICMP')
+        # Neighbor Solicitation (type 135) is Neighbor Discovery (RFC 4861),
+        # which is unimplemented, so it decodes as Unknown.
+        self.assertEqual(type(icmpv6).__name__, 'ICMPv6')
+        self.assertEqual(icmpv6.info.type, 135)
+        self.assertEqual(type(icmpv6.info).__name__, 'Unknown')
         self.assertIn('IPv6', str(ipv6.protochain))
         self.assertEqual(ipv6.protochain.aliases[0], 'IPv6')
 

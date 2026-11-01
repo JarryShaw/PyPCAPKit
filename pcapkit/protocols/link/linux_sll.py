@@ -150,7 +150,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                 <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
-            Instance of next layer: :class:`~pcapkit.protocols.link.radiotap.Radiotap`
+            Instance of next layer: :class:`~pcapkit.protocols.link.frad.FRAD`
+            when ``arphrd_type`` is :attr:`ARPHRD.FRAD
+            <pcapkit.const.linux.arphrd.ARPHRD.FRAD>`; :class:`~pcapkit.protocols.link.radiotap.Radiotap`
             when ``arphrd_type`` is :attr:`ARPHRD.IEEE80211_RADIOTAP
             <pcapkit.const.linux.arphrd.ARPHRD.IEEE80211_RADIOTAP>`; otherwise
             :class:`~pcapkit.protocols.misc.raw.Raw`, recording ``proto``, for
@@ -163,6 +165,12 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         arphrd_type = int(self.__header__.arphrd_type)  # type: ignore[attr-defined]
         if not min(length, len(file_)):
             return super()._import_next_layer(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+
+        if arphrd_type == ARPHRD.FRAD:
+            from pcapkit.protocols.link.frad import FRAD  # pylint: disable=import-outside-toplevel
+            return self._parse_next_layer(FRAD, file_, length, alias=proto, packet=packet,
+                                          layer=self._exlayer, protocol=self._exproto,
+                                          __context__=self._exctx)
 
         if arphrd_type == ARPHRD.IEEE80211_RADIOTAP:
             from pcapkit.protocols.link.radiotap import \

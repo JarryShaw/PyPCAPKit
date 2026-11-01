@@ -62,6 +62,9 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Frame Relay Access Device
+    'FRAD',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
@@ -115,6 +118,16 @@ __all__ = [
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
+    # Internet Control Message Protocol
+    'ICMPv4',
+    'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',
+    'ICMPv4_ParameterProblem',
+
+    # Internet Control Message Protocol for IPv6
+    'ICMPv6',
+    'ICMPv6_Unknown', 'ICMPv6_DestinationUnreachable', 'ICMPv6_PacketTooBig', 'ICMPv6_TimeExceeded',
+    'ICMPv6_ParameterProblem', 'ICMPv6_Echo',
+
     # Internet Protocol version 4
     'IPv4',
     'IPv4_ToSField', 'IPv4_Flags',
@@ -148,7 +161,7 @@ __all__ = [
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Internet Group Management Protocol
-    'IGMP',
+    'IGMP', 'IGMPv3', 'IGMPv3_Query', 'IGMPv3_Report', 'IGMPv3_GroupRecord',
 
     # Internet Protocol version 6
     'IPv6',

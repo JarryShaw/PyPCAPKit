@@ -5,10 +5,14 @@ IGMP - Internet Group Management Protocol
 
 :mod:`pcapkit.protocols.internet.igmp` contains
 :class:`~pcapkit.protocols.internet.igmp.IGMP`, the abstract base of the
-Internet Group Management Protocol (IGMP) [*]_ versions 1 and 2. Both share
-the 8-octet structure below. :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`
-and :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` set :attr:`version`,
-and :attr:`alias` names the version of each message.
+Internet Group Management Protocol (IGMP) [*]_ versions 1, 2 and 3. IGMPv1
+and IGMPv2 share the 8-octet structure below.
+:class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` and
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` set :attr:`version`
+and reuse this schema and data model as-is; IGMPv3's wire format differs
+materially by message, so :class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>`
+carries its own instead -- see :doc:`igmpv3`. :attr:`alias` names the version
+of each message read.
 
 ======= ========= ========================= ===================================
 Octets      Bits        Name                    Description
