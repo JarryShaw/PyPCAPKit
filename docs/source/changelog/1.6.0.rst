@@ -5,8 +5,9 @@ Wave 2 of the roadmap, per the contributing docs' enhancement-proposal page: the
 protocol pairs that wanted a shared abstract base, and the two that simply had
 no dissector at all. Alongside it come the Linux cooked-capture headers and a
 dissector for each ``arphrd_type`` they do not read as an EtherType, the IP
-pseudo-header, verified and computed one's-complement checksums, and stricter
-handling of a malformed IPv6 extension header.
+pseudo-header, verified and computed one's-complement checksums, stricter
+handling of a malformed IPv6 extension header, and HTTP dispatched to its
+HTTP/1 and HTTP/2 classes under the RFC names.
 
 * **Added** -- :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
   :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`, dissectors for the
@@ -230,6 +231,34 @@ handling of a malformed IPv6 extension header.
   ``pcapkit.DRARP``, ``pcapkit.protocols.DRARP`` and a parsed RARP's
   ``DRARP`` alias are unchanged.
 
+* **Changed** -- **a breaking change to** HTTP: parsing octets through
+  :class:`~pcapkit.protocols.application.http.HTTP`, building it from fields
+  and its ``from_data`` give the
+  :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+  :class:`~pcapkit.protocols.application.httpv2.HTTPv2` member, never an
+  instance of the base, and so does a TCP or UDP payload on an HTTP port, whose
+  data sits under ``httpv1`` or ``httpv2`` where it sat under ``http``
+  (:issue:`2524`, :pr:`2544`). The members are renamed after their modules,
+  ``httpv1.HTTP`` and ``httpv2.HTTP`` becoming ``HTTPv1`` and ``HTTPv2`` along
+  with their schema and data classes, with no re-export at the old paths
+  (:issue:`2529`); ``pcapkit.HTTPv1``, ``pcapkit.HTTPv2`` and the package
+  exports of those names are unchanged. ``id()`` takes the RFC names,
+  ``('HTTP/1',)`` and ``('HTTP/2',)``, and the base's lists both, where they
+  were ``('HTTP', 'HTTPv1')``, ``('HTTP', 'HTTPv2')`` and
+  ``('HTTP', 'HTTPv1', 'HTTPv2')``. So a layer no longer compares equal to
+  ``'HTTP'``, ``'HTTPv1'`` or ``'HTTPv2'``; ``'HTTP'`` still selects either
+  version, and each version's own name, ``'HTTP/1'`` or ``'HTTPv1'`` say,
+  selects it alone, where any HTTP layer matched ``'HTTPv1'`` and ``'HTTPv2'``
+  both. On the transport path a payload neither version recognises, a bare
+  connection preface included, is :class:`~pcapkit.protocols.misc.raw.Raw`
+  with no ``error``, where it carried ``'HTTP: unknown version'`` or
+  ``'HTTP/2: connection preface with no frame'``; a direct ``HTTP(...)`` on it
+  still raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`. One that
+  passes for an HTTP/2 frame header but ``HTTPv2`` refuses carries that
+  parser's own error on either path, where it was ``'HTTP: unknown version'``.
+  ``HTTPv2`` itself now parses a payload opening with the connection preface,
+  kept as ``preface``, and its ``make()`` takes ``preface``.
+
 * **Changed** -- **a breaking change to** IPv6 reassembly: a fragment
   overlapping another of its datagram, other than an exact duplicate, abandons
   the datagram, reported as
@@ -262,14 +291,29 @@ handling of a malformed IPv6 extension header.
 
 * **Changed** -- the house conventions record that a protocol class takes its
   module's name, one to a module (:issue:`2529`, :pr:`2542`); that a
-  docstring or prose block carries one ``versionadded`` per version, without
-  a body that only names the thing added (:issue:`2530`, :pr:`2542`); and that
-  each class-level registry map has a wrapper in
+  versioned family's base dispatches on every path, so parsing, building and
+  ``from_data`` give a member rather than the base (:issue:`2524`,
+  :pr:`2544`); that a docstring or prose block carries one ``versionadded``
+  per version, without a body that only names the thing added (:issue:`2530`,
+  :pr:`2542`); and that each class-level registry map has a wrapper in
   :mod:`pcapkit.foundation.registry` (:issue:`2511`, :pr:`2521`). ``const`` is
   a label added alongside a commit type rather than a type, in the pull
   request template and ``CONTRIBUTING.md`` too, and a span the transport
   registries assign to a service keeps its bare name, the mint criterion's
-  exception to code-suffixing (:issue:`2549`, :issue:`2550`, :pr:`2570`).
+  exception to code-suffixing (:issue:`2549`, :issue:`2550`, :pr:`2570`). The
+  registry conventions record the exceptions to their case-folding rules --
+  the crawlers that re-case the names they generate, the ``Method``
+  constructor's fold, and ``Command.get`` and ``Method.get`` answering a name
+  miss with an unregistered member -- and the folds that live outside any
+  registry (:issue:`2551`, :issue:`2552`, :issue:`2553`, :issue:`2556`,
+  :issue:`2565`, :issue:`2582`, :pr:`2583`).
+
+* **Changed** -- a project test fails on a shipped module with no
+  documentation entry, the placeholder sources under ``NotImplemented/``
+  excepted, and the modules this release adds that had none --
+  :mod:`pcapkit.const.linux`, the :mod:`pcapkit.vendor.tls` and
+  :mod:`pcapkit.vendor.sslv2` crawlers and the checksum packages -- now have
+  one (:issue:`2559`, :pr:`2584`).
 
 * **Changed** -- the CPython unit-test legs run ``pytest -n logical``, a worker
   per logical CPU, where ``-n auto`` counted physical cores and ran 2 workers
