@@ -399,12 +399,12 @@ def _internet_payload(code: 'int') -> 'bytes':
                         payload=_tcp(9999)))
     if code == TransType.IGMP:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv2 import IGMP
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2
 
         # A General Query: an IGMPv1/v2 message is the 8-octet header and
         # nothing else, so there is no further payload to wrap. A nonzero
         # max_resp_time makes it IGMPv2, the class IGMP dispatches it to.
-        return bytes(IGMP(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
+        return bytes(IGMPv2(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
     if code == TransType.IPv6_NoNxt:
         # The registered target for this code *is* Raw -- there is no
         # dissector to hand it, "no next header" is the whole point -- so any

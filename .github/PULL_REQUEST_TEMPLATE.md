@@ -22,7 +22,8 @@ Tick the [commit type](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBU
 - [ ] `ci` — workflows or build tooling
 - [ ] `release` — bumps the version or rolls up a distribution
 - [ ] `chore` — anything else
-- [ ] `const` — regenerates constant or registry tables, members keeping their numeric values
+
+- [ ] Also tick if it regenerates constant or registry tables, members keeping their numeric values (the `const` label)
 
 ---
 

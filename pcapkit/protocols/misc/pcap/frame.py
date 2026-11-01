@@ -521,36 +521,6 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         """Return an estimated length for the object."""
         return RECORD_HEADER_LEN  # type: ignore[return-value]
 
-    def _check_record_floor(self, length: 'Optional[int]') -> 'None':
-        """Refuse a tail too short to hold a record header.
-
-        Args:
-            length: Length of packet data, as the caller declared it, or
-                :obj:`None` to measure what is left in
-                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
-
-        Raises:
-            StreamEOFError: If fewer than sixteen octets are left to read.
-
-        A PCAP record header is sixteen octets, which is what
-        :meth:`__length_hint__` reports. A shorter tail is not a record, so
-        parsing one would only invent fields from zero padding. Reporting the
-        end of the stream instead lets :meth:`Extractor.record_frames
-        <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
-        frames read so far, as the PCAP-NG reader does for a truncated block
-        (:issue:`678`). See :issue:`1265`.
-
-        """
-        if length is None:
-            current = self._file.tell()
-            length = self._file.seek(0, io.SEEK_END) - current
-            self._file.seek(current, io.SEEK_SET)
-
-        if length < RECORD_HEADER_LEN:
-            raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
-                                 f'fewer than the {RECORD_HEADER_LEN} a record header needs',
-                                 quiet=True)
-
     # NOTE: This is a hack to make the ``__index__`` method work both as a
     # class method and an instance method.
     def __index__(self: 'Optional[Frame]' = None) -> 'int':  # type: ignore[override]
@@ -601,38 +571,35 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             'packet': cls._make_payload(data),
         }
 
-    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, ts_sec: 'Optional[int]' = None,
-                        ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
-        """Make timestamp.
+    def _check_record_floor(self, length: 'Optional[int]') -> 'None':
+        """Refuse a tail too short to hold a record header.
 
         Args:
-            timestamp: UNIX-Epoch timestamp
-            ts_sec: timestamp seconds
-            ts_usec: timestamp microseconds
-            nanosecond: nanosecond-resolution file flag
+            length: Length of packet data, as the caller declared it, or
+                :obj:`None` to measure what is left in
+                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
 
-        Returns:
-            Second and microsecond/nanosecond value of timestamp.
+        Raises:
+            StreamEOFError: If fewer than sixteen octets are left to read.
+
+        A PCAP record header is sixteen octets, which is what
+        :meth:`__length_hint__` reports. A shorter tail is not a record, so
+        parsing one would only invent fields from zero padding. Reporting the
+        end of the stream instead lets :meth:`Extractor.record_frames
+        <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
+        frames read so far, as the PCAP-NG reader does for a truncated block
+        (:issue:`678`). See :issue:`1265`.
 
         """
-        with localcontext(prec=64):
-            if timestamp is None:
-                if nanosecond:
-                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
-                else:
-                    timestamp = decimal.Decimal(time.time())
-            else:
-                if isinstance(timestamp, datetime.datetime):
-                    timestamp = totimestamp(timestamp)
-                timestamp = decimal.Decimal(timestamp)
+        if length is None:
+            current = self._file.tell()
+            length = self._file.seek(0, io.SEEK_END) - current
+            self._file.seek(current, io.SEEK_SET)
 
-        if ts_sec is None:
-            ts_sec = int(timestamp)
-
-        if ts_usec is None:
-            ts_usec = int((timestamp - ts_sec) * RESOLUTION[bool(nanosecond)])
-
-        return ts_sec, ts_usec
+        if length < RECORD_HEADER_LEN:
+            raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
+                                 f'fewer than the {RECORD_HEADER_LEN} a record header needs',
+                                 quiet=True)
 
     def _decode_next_layer(self, dict_: 'Data_Frame', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
@@ -679,6 +646,39 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
         return dict_
+
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, ts_sec: 'Optional[int]' = None,
+                        ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
+        """Make timestamp.
+
+        Args:
+            timestamp: UNIX-Epoch timestamp
+            ts_sec: timestamp seconds
+            ts_usec: timestamp microseconds
+            nanosecond: nanosecond-resolution file flag
+
+        Returns:
+            Second and microsecond/nanosecond value of timestamp.
+
+        """
+        with localcontext(prec=64):
+            if timestamp is None:
+                if nanosecond:
+                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+                else:
+                    timestamp = decimal.Decimal(time.time())
+            else:
+                if isinstance(timestamp, datetime.datetime):
+                    timestamp = totimestamp(timestamp)
+                timestamp = decimal.Decimal(timestamp)
+
+        if ts_sec is None:
+            ts_sec = int(timestamp)
+
+        if ts_usec is None:
+            ts_usec = int((timestamp - ts_sec) * RESOLUTION[bool(nanosecond)])
+
+        return ts_sec, ts_usec
 
     def _dispatch_linktype(self, proto: 'Optional[int]', length: 'Optional[int]' = None) -> 'Optional[int]':
         """Link type a frame's data is dispatched under.

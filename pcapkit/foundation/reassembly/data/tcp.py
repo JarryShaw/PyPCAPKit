@@ -236,9 +236,8 @@ class Fragment(Info):
     #: merge only ever shrinks or removes one, filling it from the arriving
     #: segment. The one exception lies wholly *outside* :attr:`raw`: when a
     #: stream whose SYN was captured is split rather than padded across a gap
-    #: wider than :attr:`TCP.__window__
-    #: <pcapkit.foundation.reassembly.tcp.TCP.__window__>`, both halves record
-    #: the range left between them. Any entry at all makes the fragment
+    #: wider than :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`, both halves
+    #: record the range left between them. Any entry at all makes the fragment
     #: incomplete.
     #:
     #: This is deliberately **not** derived from

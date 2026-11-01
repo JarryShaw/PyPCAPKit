@@ -5,8 +5,9 @@
 .. module:: pcapkit.utilities.config
 
 :mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
-(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
-once, when this module is imported, and validated there:
+(:issue:`1726`), and its checksum flags (:issue:`2471`). Each is read from a
+``PCAPKIT_*`` environment variable once, when this module is imported, and
+validated there; a flag as :func:`read_flag` describes, and a limit as follows:
 
 * A value that is not an integer, or is below the variable's minimum, is
   reported with a :exc:`~pcapkit.utilities.warnings.ConfigWarning`, and the
@@ -51,8 +52,10 @@ if TYPE_CHECKING:
 __all__ = [
     # limits
     'FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT', 'IPV6_TCP_WARNED_LIMIT',
-    'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
+    'TCP_GAP_LIMIT', 'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
     'MAX_ZERO_PAD_LENGTH', 'MAX_ZERO_PAD_SHORTFALL', 'ZERO_PAD_BUDGET_RATIO',
+    # flags
+    'CHECKSUM_VERIFY', 'CHECKSUM_COMPUTE',
     # readers
     'read_limit', 'read_flag',
 ]
@@ -214,6 +217,31 @@ EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSIO
 #: .. versionadded:: 1.5.0
 IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
+
+#: int: Widest gap, in octets, that
+#: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+#: zero-fills to merge a segment into the payload buffer it is read against,
+#: :envvar:`PCAPKIT_TCP_GAP_LIMIT`; ``-1`` always merges.
+#:
+#: This is a safety limit, not a reassembly rule: no RFC calls for one
+#: (:issue:`2546`). A segment can only legitimately open a gap as wide as the
+#: data in flight, which the receive window bounds. :rfc:`7323` allows windows
+#: up to ``2 ** 30``, but zero-filling a gap that wide costs 1 GiB, and real
+#: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling is
+#: 6 MiB -- so the default of 16 MiB clears them with room to spare. Past it,
+#: the stream is split rather than padded, as :meth:`TCP.reassembly
+#: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` describes.
+#:
+#: At ``-1`` only the sequence space bounds the gap: a sequence number is read
+#: within ``2 ** 31`` of the data buffered (:rfc:`9293#section-3.4`), so one
+#: segment can have up to 2 GiB zero-filled.
+#:
+#: .. versionadded:: 1.6.0
+#:
+#:    Moved from ``pcapkit.foundation.reassembly.tcp.TCP.__window__`` (:issue:`2546`).
+TCP_GAP_LIMIT = read_limit('TCP_GAP_LIMIT', 1 << 24, risk=(
+    'merging a segment that far from the data buffered zero-fills the gap in memory, '
+    'up to 2 GiB per segment at -1'))
 
 #: int: Most objects the ``_append_fallback`` method of a dumper
 #: :func:`~pcapkit.dumpkit.common.make_dumper` builds
@@ -380,3 +408,29 @@ MAX_ZERO_PAD_SHORTFALL = read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
 ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
     'a capture whose blocks all lie about their lengths can amplify each octet read '
     'into that many zero octets in memory'))
+
+###############################################################################
+# Flags
+###############################################################################
+
+#: bool: Whether parsing verifies the one's-complement checksums, of the IPv4
+#: header, TCP, UDP, ICMP, ICMPv6 and OSPF, :envvar:`PCAPKIT_CHECKSUM_VERIFY`.
+#:
+#: Off by default, since checksumming every packet costs time on a large
+#: capture (:issue:`2471`). When on, each records a
+#: :class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus` as
+#: ``checksum_status`` in its info, and a wrong checksum warns with a
+#: :exc:`~pcapkit.utilities.warnings.ChecksumWarning` rather than raising.
+#:
+#: .. versionadded:: 1.6.0
+CHECKSUM_VERIFY = read_flag('CHECKSUM_VERIFY', False)
+
+#: bool: Whether construction computes a checksum the caller leaves out, for
+#: the protocols :data:`CHECKSUM_VERIFY` names, :envvar:`PCAPKIT_CHECKSUM_COMPUTE`.
+#:
+#: On by default (:issue:`2471`). A checksum given explicitly, as
+#: :meth:`~pcapkit.protocols.protocol.Protocol.from_data` gives the parsed one,
+#: is written as given either way. Off, a checksum left out is zero.
+#:
+#: .. versionadded:: 1.6.0
+CHECKSUM_COMPUTE = read_flag('CHECKSUM_COMPUTE', True)

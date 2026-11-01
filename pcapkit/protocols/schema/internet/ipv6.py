@@ -88,13 +88,6 @@ class IPv6(Schema):
     #: padding, see :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
 
-    if TYPE_CHECKING:
-        def __init__(self, hextet: 'IPv6Hextet', length: 'int', next: 'Enum_TransType',
-                     limit: 'int', src: 'IPv6Address | bytes | str | int',
-                     dst: 'IPv6Address | bytes | str | int',
-                     payload: 'bytes | ProtocolBase | Schema',
-                     trailer: 'bytes' = b'') -> None: ...
-
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
@@ -124,6 +117,13 @@ class IPv6(Schema):
         self.payload = self.__buffer__['payload'] = rest[:jumbo]
         self.trailer = self.__buffer__['trailer'] = rest[jumbo:]
         return self
+
+    if TYPE_CHECKING:
+        def __init__(self, hextet: 'IPv6Hextet', length: 'int', next: 'Enum_TransType',
+                     limit: 'int', src: 'IPv6Address | bytes | str | int',
+                     dst: 'IPv6Address | bytes | str | int',
+                     payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> None: ...
 
 
 def jumbo_payload_length(next: 'int', data: 'bytes') -> 'Optional[int]':  # pylint: disable=redefined-builtin

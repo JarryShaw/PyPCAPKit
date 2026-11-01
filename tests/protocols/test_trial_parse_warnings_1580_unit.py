@@ -16,9 +16,10 @@ A next layer captured shorter than its length hint is parsed under
 with the layer. A layer that is kept reports them from the caller's line when its
 trial ends, inside the same guard -- so under an ``error`` filter every chain is
 the one parsed holding nothing -- and a cut header that stays in the chain still
-warns (#1470). Any other layer is parsed holding nothing. Holding leaves the
-warnings filters and every ``__warningregistry__`` alone, lets a
-:exc:`BaseException` through untouched, and survives a block left out of order.
+warns (#1470). Under ``beholder`` every layer is held (#2516); any other layer is
+parsed holding nothing. Holding leaves the warnings filters and every
+``__warningregistry__`` alone, lets a :exc:`BaseException` through untouched, and
+survives a block left out of order.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -254,14 +255,17 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual({item.filename for item in caught}, {__file__})
 
     def test_layer_that_cannot_be_replaced_holds_nothing(self) -> None:
-        """TCP of 24 octets is past its hint, so even a discarding block cannot drop its warnings.
+        """TCP of 24 octets, past its hint and outside ``beholder``, holds nothing.
 
-        It holds nothing, so they are reported as they are raised, and stay
-        reported when the parse then raises and is kept as ``Raw`` (#2308).
+        Nothing replaces it when it raises, so even a discarding block cannot
+        drop its warnings: they are reported as they are raised. Under
+        ``beholder`` the same cut is held and dropped with the layer (#2516).
         """
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.protocol import ProtocolBase, _short_of_hint
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import hold_warnings
 
         class NeedsAnInstance:
@@ -275,14 +279,21 @@ class TestTrialParseWarnings(unittest.TestCase):
                          [True, False, False, True])
 
         frame = FRAMES[0][:62]  # TCP cut to 24 octets, past its hint, raises
+        segment = frame[38:]
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings() as outer:
-                parsed = ProtocolBase._parse_next_layer(Ethernet, frame, len(frame))  # pylint: disable=protected-access
-                outer.discard = True
+            with self.assertRaises(ProtocolError):
+                with hold_warnings() as outer:
+                    outer.discard = True
+                    ProtocolBase._parse_next_layer(TCP, segment, len(segment))  # pylint: disable=protected-access
+        self.assertEqual(self._schema(caught), ['packet length < 0: -95'])
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            parsed = ProtocolBase._parse_next_layer(Ethernet, frame, len(frame))  # pylint: disable=protected-access
         self.assertEqual(str(parsed.protochain), 'Ethernet:IPv4:TCP')
         self.assertIsInstance(parsed.payload.payload, Raw)
-        self.assertEqual(self._schema(caught), ['packet length < 0: -95'])
+        self.assertEqual(self._schema(caught), [])
 
     def test_error_filter_chains_match_holding_nothing(self) -> None:
         """Under ``error``, every cut of :data:`FRAMES` parses to the chain it has holding nothing.

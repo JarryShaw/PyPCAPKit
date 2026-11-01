@@ -30,6 +30,7 @@ Octets      Bits        Name                    Description
    .. automethod:: make
 
    .. automethod:: _make_data
+   .. automethod:: _verify_pseudo_checksum
 
    .. autoattribute:: __proto__
       :no-value:

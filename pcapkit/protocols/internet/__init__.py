@@ -19,9 +19,9 @@ from pcapkit.protocols.internet.ah import AH
 from pcapkit.protocols.internet.esp import ESP
 from pcapkit.protocols.internet.icmpv4 import ICMPv4
 from pcapkit.protocols.internet.icmpv6 import ICMPv6
-from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1
-from pcapkit.protocols.internet.igmpv2 import IGMP as IGMPv2
-from pcapkit.protocols.internet.igmpv3 import IGMP as IGMPv3
+from pcapkit.protocols.internet.igmpv1 import IGMPv1
+from pcapkit.protocols.internet.igmpv2 import IGMPv2
+from pcapkit.protocols.internet.igmpv3 import IGMPv3
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
 from pcapkit.protocols.internet.ipx import IPX

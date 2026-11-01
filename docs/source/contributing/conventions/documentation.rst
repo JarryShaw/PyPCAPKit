@@ -303,6 +303,16 @@ deprecation note where a user could have depended on the thing, and deleted outr
 where it never shipped. The ``rarp`` entry above needed no note for that second reason.
 Asked and ruled on :issue:`719`.
 
+Version Directives
+~~~~~~~~~~~~~~~~~~
+
+**One** ``versionadded`` **per version in a docstring or prose block.** Directives of
+the same version there merge into one. **A body that only names the thing added and
+cites its issue or pull request is dropped**, leaving the bare tag: the summary above
+already names the thing, so the body adds nothing. A body with content of its own
+stays, such as a move (*Moved here from* ...), a rename or a takeover. Ruled on
+:issue:`2530`.
+
 Format and Mechanics
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -1062,6 +1062,95 @@ class SSLv2On443Tests(unittest.TestCase):
                 self.assertEqual(str(rebuilt.protochain), 'TCP:SSLv2')
 
 
+class SegmentRecordTests(unittest.TestCase):
+    """A whole record after the first in a TCP segment is a further TLS layer
+    (#2517); see ``test_tls_dtls_roundtrip_unit`` for the round trips."""
+
+    CCS = b'\x14\x03\x03\x00\x01\x01'
+    APPLICATION_DATA = b'\x17\x03\x03\x00\x05hello'
+    #: A whole handshake record whose ClientHello is too short for its fixed fields.
+    MALFORMED_HELLO = b'\x16\x03\x03\x00\x10\x01\x00\x00\x0c\x03\x03' + bytes(10)
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_frame_layer_limit_bounds_the_records(self) -> None:
+        """Each record is a layer, so the limit stops the walk with one warning."""
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities import config
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        raw = _TCP_TO_443 + self.CCS * (config.FRAME_LAYER_LIMIT + 6)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain),
+                         ':'.join(['TCP'] + ['TLS 1.2'] * config.FRAME_LAYER_LIMIT + ['Raw']))
+        self.assertEqual([item.category for item in caught], [ProtocolWarning])
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertEqual(bytes(TCP.from_data(proto.info)), raw)
+
+    def test_a_parse_stopping_at_tls_keeps_the_rest_raw(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+
+        wire = self.CCS + self.APPLICATION_DATA
+        self.assertEqual(str(TLS(wire, len(wire)).protochain), 'TLS 1.2:TLS 1.2')
+        self.assertEqual(str(TLS(wire, len(wire), protocol='TLS').protochain), 'TLS 1.2:Raw')
+
+    def test_octets_opening_no_record_stay_raw_without_an_error(self) -> None:
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, tail in (('content type 0', b'\x00\x03\x03\x00\x01\x01'),
+                           ('an SSLv2 record version', b'\x14\x00\x02\x00\x01\x01'),
+                           ('a header cut short', self.CCS[:4])):
+            with self.subTest(tail=name):
+                raw = _TCP_TO_443 + self.CCS + tail
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    proto = TCP(raw, len(raw))
+                self.assertEqual(str(proto.protochain), 'TCP:TLS 1.2:Raw')
+                self.assertIs(type(proto.payload.payload), Raw)
+                self.assertIsNone(proto.payload.payload.info.error)
+                self.assertEqual(caught, [])
+
+    def test_a_whole_record_that_fails_to_decode_is_raw(self) -> None:
+        """A ClientHello too short for its fixed fields: ``beholder`` keeps it as ``Raw``."""
+        from pcapkit.protocols.transport.tcp import TCP
+
+        raw = _TCP_TO_443 + self.CCS + self.MALFORMED_HELLO
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            proto = TCP(raw, len(raw))
+            rebuilt = bytes(TCP.from_data(proto.info))
+        self.assertEqual(str(proto.protochain), 'TCP:TLS 1.2:Raw')
+        self.assertRegex(proto.payload.payload.info.error, r'^TLS 1\.2: invalid format: client_hello')
+        self.assertEqual(caught, [])
+        self.assertEqual(rebuilt, raw)
+
+    def test_only_the_first_record_gets_the_sslv2_trial(self) -> None:
+        """A later record that fails to decode is ``Raw`` with no SSLv2 trial;
+        the first keeps its trial (#2517)."""
+        from unittest import mock
+
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, segment, chain, calls in (
+                ('after a record', self.CCS + self.MALFORMED_HELLO, 'TCP:TLS 1.2:Raw', 0),
+                ('first in the segment', self.MALFORMED_HELLO, 'TCP:Raw', 1)):
+            with self.subTest(record=name):
+                raw = _TCP_TO_443 + segment
+                with mock.patch.object(TLS, '_read_sslv2_fallback', autospec=True,
+                                       side_effect=TLS._read_sslv2_fallback) as trial:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore')
+                        proto = TCP(raw, len(raw))
+                self.assertEqual(str(proto.protochain), chain)
+                self.assertEqual(trial.call_count, calls)
+
+
 class ExportTests(unittest.TestCase):
     """The family is exported, and registered, the way every sibling
     application protocol is -- :class:`~pcapkit.protocols.application.ngap.NGAP`

@@ -72,12 +72,20 @@ DECLARED = (
     ('FRAME_LAYER_LIMIT', 64, 0, 'RecursionError (#1610)'),
     ('EXTENSION_HEADER_LIMIT', 32, 0, 'RecursionError (#1610)'),
     ('IPV6_TCP_WARNED_LIMIT', 32, 0, 'pins one of its packets in memory'),
+    ('TCP_GAP_LIMIT', 16_777_216, 0, 'zero-fills the gap in memory'),
     ('FALLBACK_LIMIT', 10_000, 0, 'a large or endless object graph'),
     ('DETECT_CACHE_SIZE', 1024, 0, 'never-repeating text'),
     ('READ_CHUNK', 1_048_576, 1, 'a bogus record length allocates'),
     ('MAX_ZERO_PAD_LENGTH', 262_144, 0, 'declare a field that long'),
     ('MAX_ZERO_PAD_SHORTFALL', 65_536, 0, 'without being charged to the running budget'),
     ('ZERO_PAD_BUDGET_RATIO', 16, 0, 'amplify each octet read'),
+)
+
+#: Every flag :mod:`pcapkit.utilities.config` declares, as ``(name, default)``
+#: (#2471: verification off by default, computation on).
+FLAGS = (
+    ('CHECKSUM_VERIFY', False),
+    ('CHECKSUM_COMPUTE', True),
 )
 
 
@@ -235,8 +243,18 @@ class DeclarationTests(unittest.TestCase):
                 importlib.reload(self.config)
 
     def test_the_table_names_every_variable(self) -> None:
-        names = {row[0] for row in DECLARED}
+        names = {row[0] for row in DECLARED} | {row[0] for row in FLAGS}
         self.assertEqual(names, set(self.config.__all__) - READERS)
+
+    def test_each_flag_default_and_both_values(self) -> None:
+        for name, default in FLAGS:
+            with self.subTest(name=name):
+                self.assertEqual(self.load(name, None), (default, []))
+                self.assertEqual(self.load(name, 'on'), (True, []))
+                self.assertEqual(self.load(name, 'off'), (False, []))
+                value, messages = self.load(name, 'maybe')
+                self.assertEqual((value, len(messages)), (default, 1), messages)
+                self.assertIn(f"PCAPKIT_{name}='maybe' is not one of", messages[0])
 
     def test_each_variable_is_read_by_its_own_name(self) -> None:
         for name, default, _, _ in DECLARED:
@@ -301,11 +319,17 @@ class LayoutTests(unittest.TestCase):
                 with self.subTest(module=module, name=name):
                     self.assertFalse(hasattr(loaded, name))
 
+    def test_the_tcp_gap_limit_left_no_class_attribute(self) -> None:
+        # #2546: TCP.__window__ moved here as TCP_GAP_LIMIT.
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        self.assertFalse(hasattr(TCP, '__window__'))
+
     def test_every_variable_is_documented(self) -> None:
         from pcapkit.utilities import config
 
         docs = (PACKAGE.parent / 'docs' / 'source' / 'pcapkit' / 'utilities' / 'config.rst').read_text('utf-8')
-        # A limit is named after its variable.
+        # A limit or a flag is named after its variable.
         for name in set(config.__all__) - READERS:
             with self.subTest(name=name):
                 self.assertIn(f'.. envvar:: PCAPKIT_{name}\n', docs)

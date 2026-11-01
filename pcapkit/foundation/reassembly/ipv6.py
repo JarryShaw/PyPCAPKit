@@ -96,6 +96,15 @@ class IPv6(IP):
        isolation, without flushing a buffer that shares its BUFID
        (:issue:`2270`).
 
+    .. versionchanged:: 1.6.0
+
+       A fragment overlapping another of its datagram, other than an exact
+       duplicate, abandons that datagram, which is reported as
+       :attr:`Completion.OVERLAP
+       <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`, per
+       :rfc:`8200#section-4.5`; 1.5.x overwrote the octets it overlapped, as
+       :rfc:`791` has IPv4 do (:issue:`2547`).
+
     """
 
     ##########################################################################
@@ -132,6 +141,18 @@ class IPv6(IP):
     #: isolation and that the fragments queued under that BUFID "MUST NOT" be
     #: discarded (:issue:`2270`).
     __isolate_atomic__ = True
+
+    #: bool: A fragment that overlaps another of its datagram abandons that
+    #: datagram: :rfc:`8200#section-4.5` says "reassembly of that packet must be
+    #: abandoned and all the fragments that have been received for that packet
+    #: must be discarded". It also lets an implementation "drop exact duplicate
+    #: fragments while keeping the other fragments belonging to the same
+    #: packet", which this one does: a fragment with the same offset, length,
+    #: **M** flag and data as one already merged changes nothing but
+    #: :attr:`Datagram.index <pcapkit.foundation.reassembly.data.ip.Datagram.index>`.
+    #: A later fragment of an abandoned datagram opens a new buffer, as one
+    #: does after a datagram completes (:issue:`2547`).
+    __discard_overlap__ = True
 
     ##########################################################################
     # Methods.

@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.internet.igmpv2
 
 :mod:`pcapkit.protocols.internet.igmpv2` contains
-:class:`~pcapkit.protocols.internet.igmpv2.IGMP`, which implements an
+:class:`~pcapkit.protocols.internet.igmpv2.IGMPv2`, which implements an
 extractor for Internet Group Management Protocol version 2
 (IGMPv2) [:rfc:`2236`]. It refuses a message of any other version; a
 Membership Query with a zero ``max_resp_time`` is IGMPv1, not IGMPv2.
@@ -22,11 +22,11 @@ from pcapkit.protocols.schema.internet.igmp import IGMP as Schema_IGMP
 if TYPE_CHECKING:
     from typing import Literal
 
-__all__ = ['IGMP']
+__all__ = ['IGMPv2']
 
 
-class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
-           schema=Schema_IGMP, data=Data_IGMP):
+class IGMPv2(IGMPBase[Data_IGMP, Schema_IGMP],
+             schema=Schema_IGMP, data=Data_IGMP):
     """This class implements Internet Group Management Protocol version 2."""
 
     ##########################################################################

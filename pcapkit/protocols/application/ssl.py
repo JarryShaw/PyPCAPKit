@@ -424,12 +424,10 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 ``fragment``.
 
         Notes:
-            Only a whole ``ClientHello``/``ServerHello`` body is decoded: an
-            unfragmented one, or a fragmented DTLS message completed by a
-            :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine passed as
-            :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>`'s
-            ``reassembly`` (:issue:`2440`). Other bodies stay undecoded
-            (:issue:`2437`).
+            Only an unfragmented ``ClientHello``/``ServerHello`` body is
+            decoded; other bodies stay undecoded (:issue:`2437`). A fragmented
+            DTLS message is decoded once reassembled, by
+            :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` (:issue:`2440`).
 
         """
         from pcapkit.protocols.data.application.dtls import \
@@ -487,12 +485,19 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         Args:
             messages: Handshake messages, as returned by
                 :meth:`_read_tls_handshake_messages`, or already-encoded
-                :obj:`bytes` per message.
+                :obj:`bytes` per message. A fragmented DTLS message's body is
+                its fragment's octets, or the whole message, of which only the
+                fragment's range is written.
             dtls: Whether to write DTLS's fragment header after each
                 message's ``msg_type``/``length`` header.
 
         Returns:
             Encoded record fragment.
+
+        Raises:
+            ProtocolError: If a fragmented DTLS message's body does not yield
+                exactly ``fragment_length`` octets, which a fragment carries
+                (:rfc:`6347#section-4.2.3`).
 
         """
         out = bytearray()
@@ -516,13 +521,15 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
             if is_fragmented:
                 fragment_length = message.fragment_length
-                # ``body_bytes`` is this fragment's own octets, unless decoding the
-                # completing fragment replaced it with the full reassembled message
-                # (see :meth:`DTLS._reassemble_dtls_handshake`). Slice back to this
-                # record's own byte range so parse-then-rebuild stays byte-exact.
-                if len(body_bytes) != fragment_length:
+                # NOTE: a fragment's body is exactly ``fragment_length`` octets (RFC 6347,
+                # section 4.2.3); a whole-message body is cut down to this fragment's range.
+                if len(body_bytes) != fragment_length and len(body_bytes) == length:
                     start = message.fragment_offset
                     body_bytes = body_bytes[start:start + fragment_length]
+                if len(body_bytes) != fragment_length:
+                    raise ProtocolError(f'{self.alias}: invalid format: handshake fragment body '
+                                        f'of {len(body_bytes)} octets, fragment_length '
+                                        f'{fragment_length}')
             else:
                 fragment_length = len(body_bytes)
 

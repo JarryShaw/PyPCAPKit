@@ -230,6 +230,22 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
                                      reversed=network_reversed, pack=False),
         )
 
+    @classmethod
+    def from_data(cls, data: 'Data_Header | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1470`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -280,22 +296,6 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
     def __length_hint__(self) -> 'Literal[24]':
         """Return an estimated length for the object."""
         return GLOBAL_HEADER_LEN  # type: ignore[return-value]
-
-    @classmethod
-    def from_data(cls, data: 'Data_Header | dict[str, Any]', **kwargs: 'Any') -> 'Self':
-        """Create protocol instance from data.
-
-        Args:
-            data: Protocol data.
-            **kwargs: Construction keywords, as for :meth:`Protocol.from_data
-                <pcapkit.protocols.protocol.Protocol.from_data>`.
-
-        Returns:
-            Protocol instance, cut back to what was captured when the header
-            it was parsed from was cut short (:issue:`1470`).
-
-        """
-        return replay_short_read(super().from_data(data, **kwargs), data)
 
     @classmethod
     def __index__(cls) -> 'NoReturn':

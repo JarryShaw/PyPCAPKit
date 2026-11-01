@@ -2,7 +2,7 @@
 """GitHub issue #2438: the Linux "cooked" capture encapsulation v2 (``LINUX_SLL2``).
 
 Covers the 20-octet header, the same ``arphrd_type``-gated next-layer rule as
-v1 (see :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`),
+v1 (see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`),
 link-address validation, and byte-exact round trips.
 
 Each test imports :mod:`pcapkit` itself, after
@@ -74,34 +74,11 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 
-    def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """The generic ``arphrd_type``s that never have ``protocol_type`` looked
-        up as an EtherType are kept raw. ``NETLINK``, ``FRAD`` and
-        ``IPGRE``/``IP6GRE`` are the exceptional dispatch cases, covered by
-        their dedicated tests.
-        """
-        from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
-
-        for arphrd in (ARPHRD.IEEE80211_RADIOTAP,):
-            with self.subTest(arphrd=arphrd):
-                raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
-                parsed = LinuxSLL2(raw, len(raw))
-                self.assertEqual(parsed.info.arphrd_type, arphrd)
-                self.assertEqual(parsed.info.protocol_type, 0x0800)
-                self.assertIsInstance(parsed.payload, Raw)
-                self.assertIs(type(parsed.payload.info.protocol), int)
-                self.assertEqual(parsed.payload.info.protocol, 0x0800)
-                self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Raw')
-                self.assertEqual(parsed.data, raw)
-                self._assert_rebuilds(parsed)
-
     def test_netlink_arphrd_dispatches_to_netlink(self) -> None:
         """``ARPHRD_NETLINK`` dispatches to
         :class:`~pcapkit.protocols.link.netlink.Netlink`, not
-        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), even though
-        it too is in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`.
+        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), through
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
         """
         import struct
 
@@ -116,6 +93,24 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertIsInstance(parsed.payload, Netlink)
         self.assertEqual(parsed.payload.info.nlmsg_type, 3)
         self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Netlink:Raw')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
+
+    def test_radiotap_arphrd_dispatches_to_radiotap(self) -> None:
+        """GitHub issue #2502: ``ARPHRD_IEEE80211_RADIOTAP`` dispatches to
+        :class:`~pcapkit.protocols.link.radiotap.Radiotap` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        radiotap = bytes.fromhex('00' '00' '0800' '00000000') + b'\xaa' * 10
+        raw = _header(0x0800, 0, 0, ARPHRD.IEEE80211_RADIOTAP, 2, b'', 0) + radiotap
+        parsed = LinuxSLL2(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.IEEE80211_RADIOTAP)
+        self.assertEqual(type(parsed.payload).__name__, 'Radiotap')
+        self.assertEqual(parsed.payload.info.it_len, 8)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Radiotap:Raw')
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 
@@ -136,6 +131,41 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:FRAD:IPv4:UDP')
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
+
+    def test_frad_protocol_type_is_not_an_ethertype(self) -> None:
+        """``ARPHRD_FRAD`` is a key of
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`,
+        so its ``protocol_type`` is never looked up as an EtherType, per
+        tcpdump.org's LINUX_SLL2 page (:issue:`2460`).
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import LinuxSLL, _resolve_next_layer_proto
+
+        self.assertIn(ARPHRD.FRAD, LinuxSLL.__proto__)
+        proto = _resolve_next_layer_proto(LinuxSLL.__proto__, ARPHRD.FRAD, 0x0800)
+        self.assertIs(type(proto), int)
+        self.assertEqual(proto, 0x0800)
+
+    def test_truncated_frad_is_kept_raw_with_an_int_protocol(self) -> None:
+        """A FRAD payload too short for its header is kept as
+        :class:`~pcapkit.protocols.misc.raw.Raw`, which records
+        ``protocol_type`` as a plain :class:`int`, not an EtherType member
+        (:issue:`2460`).
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.misc.raw import Raw
+
+        for size in (1, 2, 3):
+            with self.subTest(size=size):
+                raw = _header(0x0800, 0, 0, ARPHRD.FRAD, 2, b'', 0) + bytes.fromhex('0c2103')[:size]
+                parsed = LinuxSLL2(raw, len(raw))
+                self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Raw')
+                self.assertIsInstance(parsed.payload, Raw)
+                self.assertIs(type(parsed.payload.info.protocol), int)
+                self.assertEqual(parsed.payload.info.protocol, 0x0800)
+                self.assertEqual(parsed.data, raw)
+                self._assert_rebuilds(parsed)
 
     def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
         """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both

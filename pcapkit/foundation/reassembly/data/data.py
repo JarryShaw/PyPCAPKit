@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.protocols.protocol import ProtocolBase
@@ -63,7 +64,7 @@ class Completion(EnumLookup, StrEnum):
     where that name is the stdlib ``enum.StrEnum``.
 
     Warning:
-        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
+        Being a :class:`str` whose members other than :attr:`COMPLETE` are
         **falsy** makes this a non-empty string that tests false, so ``bool(x)``
         and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above
         is what lets ``if datagram.completed:`` read as a boolean test -- but code
@@ -91,11 +92,20 @@ class Completion(EnumLookup, StrEnum):
     #: discarded, so no further fragment will ever be added to this datagram.
     TIMEOUT = auto()
 
+    #: Reassembly was **abandoned** because a fragment overlapped another of the
+    #: same datagram without being an exact duplicate of it, which
+    #: :rfc:`8200#section-4.5` discards an IPv6 datagram for. The overlapping
+    #: fragment's octets are not in the payload; ``conflict`` still lists where
+    #: they disagreed with the octets kept.
+    #:
+    #: .. versionadded:: 1.6.0
+    OVERLAP = auto()
+
     def __bool__(self) -> 'bool':
         """Whether the datagram was reassembled in whole.
 
-        Only :attr:`COMPLETE` is truthy; both :attr:`PARTIAL` and
-        :attr:`TIMEOUT` describe an incomplete datagram.
+        Only :attr:`COMPLETE` is truthy; every other member describes an
+        incomplete datagram.
 
         Note:
             This override is what a :class:`str` base does *not* give -- every
@@ -360,6 +370,8 @@ class ReassemblyData(Info):
     ipv6: 'tuple[IP_Datagram, ...]'
     #: TCP reassembled data.
     tcp: 'tuple[TCP_Datagram, ...]'
+    #: DTLS reassembled handshake messages.
+    dtls: 'tuple[DTLS_Datagram, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]', dtls: 'Optional[tuple[DTLS_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

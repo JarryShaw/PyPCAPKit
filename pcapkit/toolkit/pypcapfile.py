@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.decorators import _beholding
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
@@ -61,7 +62,7 @@ from pcapkit.protocols.schema.transport import tcp as Schema_TCP_Module
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, hold_warnings, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
@@ -477,10 +478,21 @@ def _default_accepts(name: 'str', header: 'bytes') -> 'bool':
         dissected. The answer depends on the octets alone, so the most recent
         answers are remembered, as many as the cache's ``maxsize``.
 
+        A header the parser rejects is dropped with its warnings, as a replaced
+        next layer is, and one it accepts reports them from the caller's line
+        (:issue:`2308`, :issue:`2526`).
+
     """
     protocol = Protocol_IPv4 if name == 'IPv4' else Protocol_TCP
     try:
-        protocol(header, len(header), protocol=name)
+        # NOTE: The parser reads its own header, outside ``_parse_next_layer``,
+        # so ``_beholding`` would hold nothing here (#2526).
+        with hold_warnings() as held:
+            try:
+                protocol(header, len(header), protocol=name)
+            except Exception:
+                held.discard = True
+                raise
     except Exception:  # as beholder does
         return False
     return True
@@ -500,14 +512,23 @@ def _default_extension_header(protocol: 'int', data: 'bytes') -> 'Optional[tuple
         parser raises anything at all, or fewer octets were captured than the
         header needs.
 
+    Note:
+        The header is parsed on trial as under
+        :func:`~pcapkit.corekit.decorators.beholder`: one that raises is dropped
+        with its warnings, as a replaced next layer is (:issue:`2308`,
+        :issue:`2526`).
+
     """
     # pylint: disable-next=protected-access
     klass = Protocol_IPv4._lookup_next_layer(Protocol_IPv4.__proto__, protocol)
+    token = _beholding.set(True)
     try:
         header = Protocol_IPv4._parse_next_layer(  # pylint: disable=protected-access
             klass, data, len(data), version=4, extension=False, alias=protocol, protocol=klass)
     except Exception:  # as beholder does
         return None
+    finally:
+        _beholding.reset(token)
     nxt = getattr(header.info, 'next', None)  # none on a header cut short, read as raw octets
     if nxt is None:
         return None

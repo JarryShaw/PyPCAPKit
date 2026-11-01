@@ -61,8 +61,8 @@ OSI says the same by construction. ITU-T X.200 §9.2.4.4 has a protocol declare 
 layer in terms of *"functions which pertain to a particular layer"*, and clause 7
 defines every layer by its purpose rather than by what encapsulates it.
 
-IANA Assignments Carry No Layer Claim
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+IANA Assignments: Encapsulation, Not Layer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every registry this package dispatches on -- *Protocol Numbers*, *Ether Types*,
 and *Service Name and Transport Protocol Port Number* -- has **no layer field**.
@@ -102,8 +102,8 @@ The distinction that dissolves the apparent conflict: computing a forwarding tab
 the **control plane** and makes the protocol a user of the stack; forwarding packets is
 the **data plane** and is internet-layer. OSPF does the former.
 
-Tunnelling Protocols Follow Their Payload
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tunnelling Protocols: Payload, Not Carrier
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A tunnelling protocol is placed by what it carries, not by what carries it. So
 :class:`~pcapkit.protocols.link.l2tp.L2TP` and

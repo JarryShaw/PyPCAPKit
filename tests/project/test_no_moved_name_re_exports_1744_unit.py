@@ -21,9 +21,10 @@ These checks pin that:
 * :class:`TestNoReExportProse` -- no docstring under :mod:`pcapkit` and no page
   under ``docs/`` says a removed name is importable, re-exported or available
   at its old path;
-* :class:`TestVersionRemoved` -- the paths that shipped in 1.4.x carry
-  ``versionremoved:: 1.5.0`` in the module docstring and on the docs page, per
-  #1103; the beta-only ones are deleted with no directive.
+* :class:`TestVersionRemoved` -- the paths that shipped in a release carry
+  ``versionremoved`` for the version that removed them, in the module docstring
+  and on the docs page, per #1103; the beta-only ones are deleted with no
+  directive.
 
 This module is unit-tier and reads no capture.
 
@@ -55,6 +56,7 @@ PURE = (
     ('pcapkit.foundation.reassembly.data.data', 'DeferredPacket'),
     ('pcapkit.foundation.traceflow.data.data', 'DeferredPacket'),
     ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
+    ('pcapkit.protocols.application.rarp', 'DRARP'),
     ('pcapkit.protocols.application.ngap', 'ProcedureCode'),
     ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
@@ -73,17 +75,22 @@ USED = (
 #: Every removed ``(old module, name)`` pair.
 REMOVED = PURE + tuple((module, name) for module, name, _ in USED)
 
-#: The paths that shipped in 1.4.x, as ``(old module, name, source file, docs page)``.
+#: The paths that shipped in a release, as ``(old module, name, source file, docs page,
+#: the version that removed it)``.
 SHIPPED = (
     ('pcapkit.protocols.misc.pcapng', 'TLSKeyLabel',
-     'pcapkit/protocols/misc/pcapng.py', 'pcapkit/protocols/misc/pcapng.rst'),
+     'pcapkit/protocols/misc/pcapng.py', 'pcapkit/protocols/misc/pcapng.rst', '1.5.0'),
     ('pcapkit.corekit.fields.field', 'NoValueType',
-     'pcapkit/corekit/fields/field.py', 'pcapkit/corekit/fields/field.rst'),
+     'pcapkit/corekit/fields/field.py', 'pcapkit/corekit/fields/field.rst', '1.5.0'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp',
-     'pcapkit/protocols/internet/mh.py', 'pcapkit/protocols/internet/mh.rst'),
+     'pcapkit/protocols/internet/mh.py', 'pcapkit/protocols/internet/mh.rst', '1.5.0'),
     ('pcapkit.protocols.application.ftp', 'FTP_DATA',
      'pcapkit/protocols/application/ftp.py',
-     'pcapkit/protocols/application/ftp.rst'),
+     'pcapkit/protocols/application/ftp.rst', '1.5.0'),
+    # #2529: shipped in 1.5.x, moved to its own module.
+    ('pcapkit.protocols.application.rarp', 'DRARP',
+     'pcapkit/protocols/application/rarp.py',
+     'pcapkit/protocols/application/rarp.rst', '1.6.0'),
 )
 
 
@@ -270,18 +277,19 @@ class TestNoReExportProse(unittest.TestCase):
 
 
 class TestVersionRemoved(unittest.TestCase):
-    """A path that shipped in 1.4.x is recorded as removed in 1.5.0, twice."""
+    """A path that shipped in a release is recorded as removed, twice."""
 
     def test_docstring_and_docs_page_carry_the_directive(self) -> 'None':
-        for module_name, name, source, page in SHIPPED:
+        for module_name, name, source, page, version in SHIPPED:
             old_path = f'``{module_name}.{name}``'
             module = importlib.import_module(module_name)
             for label, text in (('docstring', module.__doc__ or ''),
                                 ('docs page', (_docs_dir() / page).read_text(encoding='utf-8'))):
                 with self.subTest(path=f'{module_name}.{name}', where=label):
-                    blocks = re.findall(r'(?ms)^\.\. versionremoved:: 1\.5\.0\n\n(.*?)(?=^\S|\Z)', text)
+                    blocks = re.findall(rf'(?ms)^\.\. versionremoved:: {re.escape(version)}\n\n(.*?)(?=^\S|\Z)',
+                                        text)
                     self.assertTrue(any(old_path in block for block in blocks),
-                                    f'no versionremoved:: 1.5.0 block names {old_path} in {label}')
+                                    f'no versionremoved:: {version} block names {old_path} in {label}')
             self.assertTrue((ROOT / source).is_file())
 
 

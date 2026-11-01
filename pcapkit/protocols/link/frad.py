@@ -11,7 +11,7 @@ extractor for Frame Relay's multiprotocol encapsulation [*]_, as seen on a
 is ``ARPHRD_FRAD`` -- :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`
 dispatches here instead of falling back to
 :class:`~pcapkit.protocols.misc.raw.Raw` for that one case; see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`. Its
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`. Its
 structure is the Q.922 LAPF address onward, with no trailing FCS: a 2-octet
 ``frad.addr``, a 1-octet ``frad.control`` (``0x03``, UI, for ordinary data
 traffic), then a 1-octet ``frad.nlpid`` -- or, when SNAP-encapsulated, the
@@ -29,15 +29,17 @@ schema.
 import collections
 from typing import TYPE_CHECKING
 
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.frad import FRAD as Data_FRAD
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.frad import FRAD as Schema_FRAD
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, NoReturn, Optional, Type
+    from typing import Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
 
@@ -286,6 +288,46 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             payload=payload,
         )
 
+    @classmethod
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        r"""Register a new protocol class for an NLPID.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Link.register
+            <pcapkit.protocols.link.link.Link.register>` because
+            :attr:`self.__proto__ <FRAD.__proto__>` is keyed by NLPID rather
+            than by EtherType.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this NLPID is already
+                registered and the incumbent differs from the replacement; see
+                :meth:`Protocol.register <pcapkit.protocols.protocol.Protocol.register>`
+                for the guard, and for the shipped descriptor a restore puts
+                back (:issue:`1504`).
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'NLPID {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -303,17 +345,17 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         return 10
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol is reached only through
-                :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`'s
-                ``arphrd_type`` dispatch, not through a link-layer header
-                type of its own.
+        Returns:
+            Numeral registry index of the protocol in Linux ARP hardware
+            types, the ``arphrd_type`` that
+            :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+            dispatches here.
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_ARPHRD.FRAD  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

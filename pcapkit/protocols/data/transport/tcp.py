@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber
     from pcapkit.corekit.infoclass import OrderedMultiInfo
+    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
     IPAddress = Union[IPv4Address, IPv6Address]
 
@@ -104,6 +105,10 @@ class TCP(Protocol):
         padding: 'bytes'
         #: Connection control flags.
         connection: 'TCP_Flags'
+        #: Outcome of verifying :attr:`checksum`, present only when the
+        #: enclosing IP layer verified it under
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`.
+        checksum_status: 'ChecksumStatus'
 
         def __init__(self, srcport: 'AppType', dstport: 'AppType', seq: 'int', ack: 'int', hdr_len: 'int',
                      flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

@@ -98,7 +98,7 @@ class TestRawItemRejectedByRead(unittest.TestCase):
         # the wider ``try`` leaves a raw item that does parse alone
         ipv4 = _attr('pcapkit.protocols.internet.ipv4.IPv4')
         proto = ipv4(options=[b'\x94\x04\x00\x00'], protocol=253)
-        self.assertEqual(proto.data.hex(), '460000180000000000fd00007f0000010000000094040000')
+        self.assertEqual(proto.data.hex(), '460000180000000000fda5e47f0000010000000094040000')
 
 
 if __name__ == '__main__':

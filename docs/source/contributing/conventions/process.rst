@@ -224,9 +224,13 @@ commit, so the label and the message agree by construction:
      - tooling and repository hygiene, with no library behaviour change
    * - ``release``
      - version bumps and distribution rollups
-   * - ``const``
-     - regenerated IANA or vendor constant tables, members keeping their numeric
-       values
+
+.. note::
+
+   ``const`` is not a type: no commit subject takes a ``const:`` prefix. It marks
+   regenerated IANA or vendor constant tables, members keeping their numeric values,
+   and like ``breaking`` below it is **additive**, going on alongside the type label
+   rather than instead of it.
 
 **Issue kind**, for issues rather than pull requests: ``design`` marks a pattern being
 decided rather than a defect or a request, and a majority of the rulings on these pages
@@ -428,8 +432,8 @@ thresholds are on :doc:`../workflows`.
    job's shape or selection -- a leg added, split or moved -- dispatch the workflow, so
    the next week compares like with like.
 *  **Monthly, refresh the measured figures** quoted in :file:`unit-tests.yml`'s
-   comments that the report shows to be stale -- the coverage leg's headroom, the
-   ordering cells' timings and their step cap's rationale.
+   comments that the report shows to be stale -- the ordering cells' timings and
+   their step cap's rationale.
 
 
 The PEP Discussion, Kept Current

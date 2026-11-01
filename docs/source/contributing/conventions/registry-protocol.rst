@@ -642,3 +642,84 @@ reasoning.
    :mod:`pcapkit.vendor.default`'s template, never in the generated file alone --
    the next regeneration would discard it.
 
+Registration Wrappers
+~~~~~~~~~~~~~~~~~~~~~
+
+The owner ruled on :issue:`2511` that every class-level registry map a protocol
+dispatches through -- ``__proto__``, ``__option__``, ``__chunk__`` and the like -- has a
+public wrapper in :mod:`pcapkit.foundation.registry`, carrying the validation the
+established ones carry. A map's registration comes in two parts:
+
+1. **A** ``register`` **or** ``register_<kind>`` **classmethod** on the class owning
+   the map -- ``register`` for ``__proto__``, ``register_<kind>`` for ``__<kind>__``
+   -- which writes it and warns when it displaces an entry. An inherited one counts
+   only when it is typed and validated for exactly that map's keys, which the owner
+   chose over an override on every class (:issue:`2511`). So
+   :class:`~pcapkit.protocols.transport.tcp.TCP` and
+   :class:`~pcapkit.protocols.transport.udp.UDP` keep
+   :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
+   typed for the port their maps are keyed by, while
+   :class:`~pcapkit.protocols.internet.ipx.IPX` and
+   :class:`~pcapkit.protocols.link.loopback.Loopback` override their parents'
+   :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
+   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`: those are
+   typed for :class:`~pcapkit.const.reg.transtype.TransType` and
+   :class:`~pcapkit.const.reg.ethertype.EtherType`, not for the IPX packet type and
+   address family these two maps are keyed by.
+2. **A** ``register_<name>`` **function** in
+   :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
+   line above its ``def``. It calls the classmethod and logs, and a bad argument
+   writes nothing: ``_check_code`` checks the code against the map's enum, or, with
+   ``kind=None``, as a bare :class:`int` where no enum keys the map; a parser named
+   by string has to exist as a ``_read_*`` method; and a ``__proto__`` entry has to
+   be a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass or a descriptor
+   naming one. A wrapper writing a ``__proto__`` map also records the class's name
+   with ``_register_name``, and one whose entries have a schema registry takes a
+   keyword-only ``schema``.
+
+**A** ``__proto__`` **wrapper is named after its keys.** One taking only an enum's
+members takes the enum's name, as
+:func:`~pcapkit.foundation.registry.protocols.register_ethertype` does; one taking
+bare :class:`int` keys, with or without an enum beside them, takes the owning
+protocol's name, as :func:`~pcapkit.foundation.registry.protocols.register_tcp` and
+:func:`~pcapkit.foundation.registry.protocols.register_loopback` do. These depart
+from it:
+
+* :func:`~pcapkit.foundation.registry.protocols.register_pcap` and
+  :func:`~pcapkit.foundation.registry.protocols.register_pcapng` take only
+  :class:`~pcapkit.const.reg.linktype.LinkType` members, but
+  :func:`~pcapkit.foundation.registry.protocols.register_linktype` holds that name
+  for writing both their maps at once, so each takes its capture format's name.
+* :func:`~pcapkit.foundation.registry.protocols.register_apptype` takes bare
+  :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s map,
+  :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no one
+  owner's name fits and it takes
+  :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s.
+
+:func:`~pcapkit.foundation.registry.protocols.register_protocol` and
+:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` are outside the
+rule: the first writes :data:`pcapkit.protocols.__proto__`, keyed by class name, and
+the second whichever maps its ``code`` names.
+
+:func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk` is the shape for a
+parser map:
+
+.. code-block:: python
+
+   # NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__
+   def register_sctp_chunk(code, meth, *, schema=None):
+       _check_code(code, SCTP_Chunk, SCTP)
+       if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
+           raise RegistryError('method must be a valid SCTP chunk parser function')
+
+       SCTP.register_chunk(code, meth)
+       if schema is not None:
+           Schema_SCTP_Chunk.register(code, schema)
+       logger.debug('registered SCTP chunk parser: %s', code.name)
+
+:file:`tests/foundation/registry/test_registry_wrapper_coverage_2511_unit.py` walks
+every protocol class for such a map, and fails on one that no wrapper's tag names
+unless its ``EXCUSED`` table gives the reason. It fails as well on a map whose owner
+defines no ``register*`` classmethod of its own, unless its ``INHERITED`` table names
+the one typed for that map's keys.
+

@@ -350,8 +350,6 @@ NOT_A_COPY = {
         'an if_tsoffset option: 4 octets of header and 8 of value',
     ('pcapkit/foundation/engines/scapy.py', 'options[4:12]'):
         'the 8-octet value of an if_tsoffset option',
-    ('pcapkit/foundation/reassembly/tcp.py', '1 << 24'):
-        'a bit width, not a PCAP global header',
     ('pcapkit/toolkit/dpkt.py', '_fragment(6)'):
         'the IP version number',
     ('pcapkit/toolkit/dpkt.py', 'version == 6'):
@@ -397,7 +395,11 @@ UNRELATED = {
     'pcapkit/protocols/schema/internet/ipv6_option.py': ((16,), 'an MPL Seed-ID of 16 octets'),
     'pcapkit/protocols/schema/application/httpv2.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
-    'pcapkit/protocols/application/ospf.py': ((24, 65535), 'OSPF header length and field bounds'),
+    'pcapkit/protocols/application/ospf.py': ((16, 24, 65535),
+                                              'OSPF header length and field bounds; 16 is the '
+                                              'offset of the Authentication field the checksum '
+                                              'leaves out (RFC 2328 appendix A.3.1), not a PCAP '
+                                              'record header'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
     'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
@@ -452,10 +454,16 @@ UNRELATED = {
                                           'octets, not a PCAP record header) and the max value '
                                           "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
                                           'an IPv4 total length)'),
+    'pcapkit/protocols/link/radiotap.py': ((65535,), "the max value of radiotap's own "
+                                           '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
     'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),
+    'pcapkit/protocols/misc/checksum/checksum.py': ((16, 65535),
+                                                    "the one's-complement sum's 16-bit word mask "
+                                                    'and carry shift (RFC 1071), not an IP total '
+                                                    'length or a PCAP record header'),
     'pcapkit/protocols/misc/pcapng.py': ((65535,), 'a 16-bit mask'),
     'pcapkit/protocols/schema/misc/pcapng.py': ((9, 65535), 'an epb_flags bit offset, and a '
                                                '16-bit field default'),

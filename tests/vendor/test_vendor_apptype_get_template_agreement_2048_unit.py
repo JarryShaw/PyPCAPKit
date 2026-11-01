@@ -31,7 +31,7 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 #: Where ``get`` starts and where the method after it starts, in both texts.
-GET_START = "    @classmethod\n    def get(cls, key: 'int', *,"
+GET_START = "    @classmethod\n    def get(cls, key: 'int', default: 'Any' = NO_DEFAULT, *,"
 GET_END = '    @classmethod\n    def get_all('
 
 

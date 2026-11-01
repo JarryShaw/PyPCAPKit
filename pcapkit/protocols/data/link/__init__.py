@@ -29,6 +29,9 @@ from pcapkit.protocols.data.link.loopback import Loopback
 # Netlink Socket Framing
 from pcapkit.protocols.data.link.netlink import Netlink
 
+# IEEE 802.11 Radiotap Header
+from pcapkit.protocols.data.link.radiotap import Radiotap
+
 # 802.1Q/802.1ad VLAN Tag Types
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
 from pcapkit.protocols.data.link.vlan import VLAN
@@ -57,6 +60,9 @@ __all__ = [
 
     # Netlink Socket Framing
     'Netlink',
+
+    # IEEE 802.11 Radiotap Header
+    'Radiotap',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',

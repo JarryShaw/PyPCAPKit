@@ -38,6 +38,7 @@ for SNAP), a 3-octet OUI and a 2-octet PID follow, kept as ``frad.ext_nlpid``,
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register
 
    .. automethod:: __length_hint__
    .. automethod:: __index__

@@ -1323,9 +1323,12 @@ class ProcessConventionTests(unittest.TestCase):
         The check runs one way, template to page, by design: it would not catch a page
         label gaining no tickbox, only a tickbox naming no label.
 
+        A label that goes on alongside the type, such as ``const``, has an *Also tick
+        if* box outside the type list, so the page has to say it is not a type.
+
         """
-        types = re.findall(r'^- \[ \] `([a-z]+)` ', self.TEMPLATE.read_text(encoding='utf-8'),
-                           re.MULTILINE)
+        text = self.TEMPLATE.read_text(encoding='utf-8')
+        types = re.findall(r'^- \[ \] `([a-z]+)` ', text, re.MULTILINE)
         self.assertGreaterEqual(len(types), 8,
                                 f'only {types!r} parsed out of the pull request '
                                 'template; the check below would pass vacuously')
@@ -1335,6 +1338,19 @@ class ProcessConventionTests(unittest.TestCase):
                               f'process.rst does not name the {commit_type} type '
                               'label, which the pull request template asks every '
                               'contributor to tick')
+
+        additive = re.findall(r'^- \[ \] Also tick if [^`\n]*`([a-z]+)`', text, re.MULTILINE)
+        self.assertTrue(additive,
+                        'no "Also tick if" box parsed out of the pull request '
+                        'template; the check below would pass vacuously')
+        for label in additive:
+            with self.subTest(additive=label):
+                self.assertNotIn(label, types,
+                                 f'the pull request template ticks {label} both as a '
+                                 'commit type and as a label alongside one')
+                self.assertIn(f'``{label}`` is not a type', self.flat,
+                              f'process.rst does not say {label} is not a type, though '
+                              'the pull request template ticks it outside the type list')
 
     def test_the_page_names_what_the_tree_has(self) -> 'None':
         """Every claim the page makes that has local ground truth.

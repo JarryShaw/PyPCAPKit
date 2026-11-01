@@ -18,6 +18,7 @@ from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, Buf
                                                     DatagramID, Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+from pcapkit.utilities import config
 
 if TYPE_CHECKING:
     from typing import Type
@@ -99,6 +100,11 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
        <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>`; 1.4.x
        kept the later octets without a record (:issue:`443`).
 
+    .. versionremoved:: 1.6.0
+
+       ``__window__``, now :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`
+       (:issue:`2546`).
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[TCP_Protocol]'
@@ -129,40 +135,32 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     #: ask for one, e.g. ``2 * 120`` for 2·MSL if that is the policy wanted.
     __timeout__ = math.inf
 
-    #: int: Widest gap, in octets, that merging a segment into the payload
-    #: buffer it is read against may zero-fill: 16 MiB. The gap is measured on
-    #: whichever side the segment lands, from the buffer's end to the
-    #: segment's start, or from the segment's end to the buffer's start.
-    #:
-    #: A segment can only legitimately open a gap as wide as the data in flight,
-    #: which the receive window bounds. :rfc:`7323` allows windows up to
-    #: ``2 ** 30``, but zero-filling a gap that wide costs 1 GiB, and real
-    #: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling
-    #: is 6 MiB -- so 16 MiB clears them with room to spare. A segment that
-    #: would open a wider gap is not padded to; the buffer held so far is
-    #: submitted and a fresh one opened for the segment instead. What that
-    #: means depends on whether the buffer's SYN was captured:
-    #:
-    #: * **No SYN** -- the segment is taken to start a new stream on a reused
-    #:   4-tuple, and the two buffers are reported independently.
-    #: * **SYN captured** -- the SYN proves both are the same stream with the
-    #:   range in between lost, so that range is recorded in the
-    #:   :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` of the
-    #:   payload buffer the segment was read against and of the new one, and
-    #:   both are reported
-    #:   :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`
-    #:   (in strict mode, as a single run each). The new buffer keeps the
-    #:   SYN's header and counts as having seen it.
-    #:
-    #: Override in a subclass to change the bound.
-    __window__ = 1 << 24
-
     ##########################################################################
     # Methods.
     ##########################################################################
 
     def reassembly(self, info: 'Packet') -> 'None':
         """Reassembly procedure.
+
+        A segment is merged into the payload buffer it is read against by
+        zero-filling the gap between them, measured on whichever side the
+        segment lands: from the buffer's end to the segment's start, or from
+        the segment's end to the buffer's start. A gap wider than
+        :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT` is not padded to; the
+        buffer held so far is submitted and a fresh one opened for the segment
+        instead. What that means depends on whether the buffer's SYN was
+        captured:
+
+        * **No SYN** -- the segment is taken to start a new stream on a reused
+          4-tuple, and the two buffers are reported independently.
+        * **SYN captured** -- the SYN proves both are the same stream with the
+          range in between lost, so that range is recorded in the
+          :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap` of the
+          payload buffer the segment was read against and of the new one, and
+          both are reported
+          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`
+          (in strict mode, as a single run each). The new buffer keeps the
+          SYN's header and counts as having seen it.
 
         Arguments:
             info: :term:`info <reasm.tcp.packet>` dict of packets to be reassembled
@@ -203,8 +201,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         # it most plausibly continues -- this ACK's own payload buffer, or else
         # the most recently opened one -- per :rfc:`9293#section-3.4`. Plain
         # integer comparison reads a stream crossing 2**32 as a gap of about
-        # 4 GiB. A segment landing farther than ``__window__`` outside that
-        # buffer starts a new stream instead -- see ``__window__``.
+        # 4 GiB. A segment landing farther than ``config.TCP_GAP_LIMIT``
+        # outside that buffer splits the stream instead -- see the docstring.
         SHIFT = 0
         HDR = info.header if SYN else b''  # header of the buffer opened below, if any
         ANCHORED = SYN                     # whether that buffer's stream start is known
@@ -217,7 +215,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             END = fragment.isn + fragment.len
             UNWRAPPED = self._unwrap(PSN, END)
             # the zero-filled gap merging this segment would open, either side
-            if max(UNWRAPPED - END, fragment.isn - (UNWRAPPED + info.len)) > self.__window__:
+            limit = config.TCP_GAP_LIMIT
+            if limit != -1 and max(UNWRAPPED - END, fragment.isn - (UNWRAPPED + info.len)) > limit:
                 old = self._buffer.pop(BUFID)
                 if self._anchored(old):
                     # The SYN proves this is still the same stream, with the
@@ -552,7 +551,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         """Remove a received range from a fragment's gap list, in place.
 
         Only an entry lying outside :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`
-        -- the range a split stream left out, see :attr:`TCP.__window__` -- can
+        -- the range a split stream left out, see :meth:`TCP.reassembly` -- can
         still overlap a segment once it is merged; :meth:`_merge_overlap` has
         already closed every entry inside ``raw`` that the segment covers.
 
@@ -806,7 +805,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # How completely this buffer came out, and why it stopped. Derived
             # once per buffer, so the two branches cannot disagree about it.
             # Any gap entry counts, including one lying wholly outside ``raw``:
-            # that is the range a split stream left out (see ``__window__``).
+            # that is the range a split stream left out (see ``reassembly``).
             completion = Completion.COMPLETE if not buffer.gap else (
                 Completion.TIMEOUT if timeout else Completion.PARTIAL
             )

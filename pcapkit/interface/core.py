@@ -82,6 +82,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
             trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
             trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
             ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
+            dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
             buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
             no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
             context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'Extractor':  # context settings # pylint: disable=line-too-long
@@ -113,7 +114,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         reasm_store: if store reassembled datagrams
         reasm_timeout: reassembly timeout in seconds, on the capture's own
             clock; :data:`None` selects each protocol's default (60 seconds for
-            IPv4 and IPv6, disabled for TCP)
+            IPv4 and IPv6, disabled for TCP); DTLS reassembly takes none
 
         trace: if trace TCP traffic flows
         trace_fout: path name for flow tracer if necessary
@@ -130,6 +131,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
         tcp: if perform TCP reassembly and/or flow tracing
             (must be used with ``reassembly=True`` or ``trace=True``)
+        dtls: if perform DTLS handshake-message reassembly (must be used with
+            ``reassembly=True``); the default engine alone supports it
 
         buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
         buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
@@ -172,6 +175,11 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
        keyword. Flows are traced bidirectionally by default, and IPv4 and IPv6
        reassembly buffers expire after 60 seconds of capture time.
 
+    .. versionchanged:: 1.6.0
+
+       ``dtls`` is inserted after ``tcp``, so a positional argument from
+       ``buffer_size`` onwards moves one place along.
+
     """
     if isinstance(layer, type) and issubclass(layer, ProtocolBase):
         layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
@@ -180,7 +188,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      store=store, files=files, nofile=nofile,
                      auto=auto, verbose=verbose, extension=extension,
                      engine=engine, layer=layer, protocol=protocol,  # type: ignore[arg-type]
-                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp,
+                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, dtls=dtls,
                      reassembly=reassembly, reasm_store=reasm_store, reasm_strict=reasm_strict,
                      reasm_timeout=reasm_timeout,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,

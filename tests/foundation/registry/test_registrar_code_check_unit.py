@@ -12,11 +12,11 @@ Every case snapshots each registry the registrars here write -- the dispatch and
 method tables, the schema tables, :data:`pcapkit.protocols.__proto__` and the
 name leases -- calls the registrar with an otherwise valid argument list, and
 compares every registry with the snapshot. The registrars that take a plain
-``int`` port or PPID (``register_tcp``, ``register_udp``, ``register_sctp`` and
-``register_apptype``) are out of scope for those codes: an ``int`` is a valid
-code there.
+``int`` (``NUMBER_REGISTRARS``) accept the ``int``, but still reject
+:obj:`None` and a :class:`str`. Those keyed by no enum at all
+(``INT_ONLY_REGISTRARS``) take nothing but an ``int`` (#2510, #2511).
 
-Every registrar, those four included, also rejects a member of an enum other
+Every registrar, those included, also rejects a member of an enum other
 than the one it is typed on (#2224). The registry enums compare equal to their
 values, so such a member keys the entry of the registrar's own member of that
 value: without the check, ``register_linktype(TransType.ICMP, ...)`` replaces
@@ -64,6 +64,12 @@ METHOD_REGISTRARS = (
      'pcapkit.protocols.schema.transport.tcp:Option'),
     ('register_tcp_mp_option', 'pcapkit.protocols.transport.tcp:TCP',
      'pcapkit.protocols.schema.transport.tcp:MPTCP'),
+    ('register_sctp_chunk', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:Chunk'),
+    ('register_sctp_parameter', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:Parameter'),
+    ('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:ErrorCause'),
     ('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTP',
      'pcapkit.protocols.schema.application.httpv2:FrameType'),
     ('register_pcapng_block', 'pcapkit.protocols.misc.pcapng:PCAPNG',
@@ -84,6 +90,7 @@ MODULE_REGISTRARS = (
     ('register_pcap', ('pcapkit.protocols.misc.pcap.frame:Frame',)),
     ('register_pcapng', ('pcapkit.protocols.misc.pcapng:PCAPNG',)),
     ('register_ethertype', ('pcapkit.protocols.link.link:Link',)),
+    ('register_arphrd', ('pcapkit.protocols.link.linux_sll:LinuxSLL',)),
     ('register_transtype', ('pcapkit.protocols.internet.internet:Internet',)),
 )
 
@@ -103,6 +110,9 @@ REGISTRAR_ENUMS = {
     'register_mh_extension': 'pcapkit.const.mh.cga_extension:CGAExtension',
     'register_tcp_option': 'pcapkit.const.tcp.option:Option',
     'register_tcp_mp_option': 'pcapkit.const.tcp.mp_tcp_option:MPTCPOption',
+    'register_sctp_chunk': 'pcapkit.const.sctp.chunk:Chunk',
+    'register_sctp_parameter': 'pcapkit.const.sctp.parameter:Parameter',
+    'register_sctp_cause': 'pcapkit.const.sctp.cause_code:CauseCode',
     'register_http_frame': 'pcapkit.const.http.frame:Frame',
     'register_pcapng_block': 'pcapkit.const.pcapng.block_type:BlockType',
     'register_pcapng_option': 'pcapkit.const.pcapng.option_type:OptionType',
@@ -112,18 +122,28 @@ REGISTRAR_ENUMS = {
     'register_pcap': 'pcapkit.const.reg.linktype:LinkType',
     'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',
     'register_ethertype': 'pcapkit.const.reg.ethertype:EtherType',
+    'register_arphrd': 'pcapkit.const.linux.arphrd:ARPHRD',
     'register_transtype': 'pcapkit.const.reg.transtype:TransType',
 }
 
-#: Registrars that also take a plain ``int``: the port or PPID used, the classes
-#: whose ``__proto__`` they write, and any trailing arguments.
+#: Registrars that also take a plain ``int``: the port, PPID, packet type,
+#: address family, NLPID or message type used, the classes whose
+#: ``__proto__`` they write, and any trailing arguments.
 NUMBER_REGISTRARS = (
+    ('register_loopback', 2, ('pcapkit.protocols.link.loopback:Loopback',), ()),
+    ('register_ipx', 17, ('pcapkit.protocols.internet.ipx:IPX',), ()),
     ('register_tcp', 80, ('pcapkit.protocols.transport.tcp:TCP',), ()),
     ('register_udp', 53, ('pcapkit.protocols.transport.udp:UDP',), ()),
     ('register_sctp', 60, ('pcapkit.protocols.transport.sctp:SCTP',), ()),
     ('register_apptype', 80, ('pcapkit.protocols.transport.tcp:TCP',
                               'pcapkit.protocols.transport.udp:UDP'), ('tcp',)),
+    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad:FRAD',), ()),
+    ('register_netlink', 16, ('pcapkit.protocols.link.netlink:Netlink',), ()),
 )
+
+#: The registrars above whose registry no enum keys, so a plain ``int`` is the
+#: only code they take (#2510, #2511).
+INT_ONLY_REGISTRARS = ('register_loopback', 'register_frad', 'register_netlink')
 
 
 def resolve(path: 'str') -> 'type':
@@ -220,6 +240,14 @@ class RegistrarCodeCheckTests(unittest.TestCase):
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw,
                                             codes=(self._wrong_code(name),))
 
+    def test_number_registrars_reject_none_and_a_str(self) -> None:
+        """Accepting an ``int`` lets in neither :obj:`None` nor its digits as a :class:`str` (#2511)."""
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, number, targets, extra in NUMBER_REGISTRARS:
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                                            codes=(None, str(number)))
+
     def test_number_registrars_reject_a_member_of_another_enum(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.misc.raw import Raw
@@ -244,6 +272,37 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                                             codes=(True, False))
         with self.assertRaisesRegex(RegistryError, r'^TCP: code must be an int or a member of AppType, not True$'):
             registrars._check_code(True, registrars.Enum_AppType, TCP, number=True)
+
+    def test_int_only_registrars_reject_anything_but_an_int(self) -> None:
+        """No enum keys Loopback's, FRAD's or Netlink's registry, so only a plain
+        ``int`` is a code (#2510, #2511).
+
+        ``_check_code`` with ``kind=None`` is the check, so its message keeps the
+        shape the enum-typed ones have.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import RegistryError
+
+        for name, _, targets, extra in NUMBER_REGISTRARS:
+            if name in INT_ONLY_REGISTRARS:
+                self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                                                codes=(None, '2', 2.0, TransType.IPv4, ARPHRD.FRAD))
+        for code, message in ((None, 'None'), (True, 'True'),
+                              (TransType.IPv4, 'a member of TransType: ')):
+            with self.subTest(code=code):
+                with self.assertRaisesRegex(RegistryError, rf'^Loopback: code must be an int, not {message}'):
+                    registrars._check_code(code, None, Loopback)
+        registrars._check_code(2, None, Loopback)
+        with self.assertRaisesRegex(RegistryError, r'^FRAD: code must be an int, not None$'):
+            registrars._check_code(None, None, FRAD)
+        with self.assertRaisesRegex(RegistryError,
+                                    r'^FRAD: code must be an int, not a member of ARPHRD: '):
+            registrars._check_code(ARPHRD.FRAD, None, FRAD)
 
     def test_every_rejection_names_the_destination_registry(self) -> None:
         """The message says *whose* registry rejected the key (#2268).
@@ -271,7 +330,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         for name, targets in MODULE_REGISTRARS:
             cases.append((name, resolve(targets[0]).__name__, self._wrong_code(name), (Raw,), {}))
         for name, number, targets, extra in NUMBER_REGISTRARS:
-            # these four take a plain int, so only a member of another enum is wrong
+            # these take a plain int, so only a member of another enum is wrong
             cases.append((name, resolve(targets[0]).__name__, LinkType(number),
                           (Raw, *extra), {}))
 

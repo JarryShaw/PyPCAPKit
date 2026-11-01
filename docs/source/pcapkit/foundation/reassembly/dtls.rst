@@ -54,8 +54,9 @@ Terminology
        is :class:`~pcapkit.foundation.reassembly.data.dtls.Packet` -- one
        fragment's own ``bufid``, ``message_seq``, ``fragment_offset``,
        ``fragment_length`` and raw ``payload``, built by
-       :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>` from
-       a single :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`.
+       :func:`pcapkit.toolkit.pcap.dtls_reassembly` or
+       :func:`pcapkit.toolkit.pcapng.dtls_reassembly` from a single
+       :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`.
 
    reasm.dtls.datagram
        Data structure for **reassembled DTLS handshake message** (element of
@@ -64,7 +65,8 @@ Terminology
        ``completed``, the original packet identifier, the packet numbers
        that built it, and ``body``, the reassembled payload (a contiguous
        :obj:`bytes`, or -- under ``strict=True`` and an incomplete message --
-       a :obj:`tuple` of the octet runs actually received).
+       a :obj:`tuple` of the octet runs actually received), which
+       :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes.
 
    reasm.dtls.buffer
        Data structure for internal buffering

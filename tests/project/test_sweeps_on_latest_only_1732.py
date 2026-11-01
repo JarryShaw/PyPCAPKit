@@ -293,6 +293,19 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 self.assertEqual(argv[:2], ['-m', 'pytest'])
                 self.assertEqual(pytest_args(argv), want)
 
+    def test_every_test_leg_runs_a_worker_per_logical_cpu(self) -> None:
+        """#2571: ``-n logical``, as ``auto`` counts physical cores wherever psutil is installed.
+
+        PyPy's legs share the flag, and with no psutil there resolve it as ``auto`` would.
+
+        """
+        for version, (leg, argv) in self.runs.items():
+            if is_experimental(leg):
+                continue
+            with self.subTest(python=version):
+                args = pytest_args(argv)
+                self.assertEqual(args[args.index('-n') + 1], 'logical')
+
     def test_a_step_that_ignores_the_pins_alone_off_latest_is_caught(self) -> None:
         """The check above fails when a leg off ``latest`` leaves out the pins rather than the tier."""
         script = step(JOB)['run']

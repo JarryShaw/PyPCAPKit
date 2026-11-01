@@ -33,6 +33,9 @@ SCHEMA_REGISTRARS = (
     'register_pcapng_option',
     'register_pcapng_record',
     'register_pcapng_secrets',
+    'register_sctp_cause',
+    'register_sctp_chunk',
+    'register_sctp_parameter',
     'register_tcp_mp_option',
     'register_tcp_option',
 )
@@ -452,6 +455,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         # names TCP alone (#806), which the notes below rely on.
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.apptype import UDP as AppType_UDP
+        from pcapkit.const.ipx.packet import Packet as IPXPacket
+        from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
@@ -470,7 +475,12 @@ class ProtocolRegistryTests(unittest.TestCase):
             (registry.register_pcapng, LinkType.ETHERNET, [(registry.PCAPNG, 'register')]),
             (registry.register_ethertype, EtherType.Internet_Protocol_version_4,
              [(registry.Link, 'register')]),
+            (registry.register_loopback, 2, [(registry.Loopback, 'register')]),
+            (registry.register_arphrd, ARPHRD.FRAD, [(registry.LinuxSLL, 'register')]),
+            (registry.register_frad, 0xCC, [(registry.FRAD, 'register')]),
+            (registry.register_netlink, 16, [(registry.Netlink, 'register')]),
             (registry.register_transtype, TransType.TCP, [(registry.Internet, 'register')]),
+            (registry.register_ipx, IPXPacket.NCP, [(registry.IPX, 'register')]),
         ]
         for func, code, targets in class_routes:
             with self.subTest(func=f'{func.__name__}-class'):
@@ -882,6 +892,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.sctp.cause_code import CauseCode
+        from pcapkit.const.sctp.chunk import Chunk
+        from pcapkit.const.sctp.parameter import Parameter as SCTPParameter
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option as TCPOption
         from pcapkit.foundation.registry import protocols as registry
@@ -908,6 +921,12 @@ class ProtocolRegistryTests(unittest.TestCase):
              registry.Schema_TCP_Option, 'register_option', TCPOption.No_Operation),
             (registry.register_tcp_mp_option, registry.TCP, '_read_mptcp_unit',
              registry.Schema_TCP_MPTCP, 'register_mp_option', MPTCPOption.MP_CAPABLE),
+            (registry.register_sctp_chunk, registry.SCTP, '_read_chunk_unit',
+             registry.Schema_SCTP_Chunk, 'register_chunk', Chunk.Payload_Data),
+            (registry.register_sctp_parameter, registry.SCTP, '_read_param_unit',
+             registry.Schema_SCTP_Parameter, 'register_parameter', SCTPParameter.Heartbeat_Info),
+            (registry.register_sctp_cause, registry.SCTP, '_read_cause_unit',
+             registry.Schema_SCTP_ErrorCause, 'register_cause', CauseCode.Stale_Cookie),
             (registry.register_http_frame, registry.HTTPv2, '_read_http_unit',
              registry.Schema_HTTP_FrameType, 'register_frame', HTTPFrame.DATA),
             (registry.register_pcapng_block, registry.PCAPNG, '_read_block_unit',

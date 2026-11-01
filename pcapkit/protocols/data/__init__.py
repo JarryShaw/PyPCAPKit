@@ -80,6 +80,9 @@ __all__ = [
     # Netlink Socket Framing
     'Netlink',
 
+    # IEEE 802.11 Radiotap Header
+    'Radiotap',
+
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 

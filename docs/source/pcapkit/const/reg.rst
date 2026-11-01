@@ -105,6 +105,13 @@ registry is one enumeration per transport protocol sharing a memberless base.
    :class:`int` to its port number, and compares, orders and hashes as that
    port.
 
+.. versionchanged:: 1.6.0
+
+   :meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>` takes
+   the ``default`` of :meth:`~pcapkit.corekit.enum.EnumLookup.get`, and a miss
+   raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`, still a
+   :exc:`ValueError`, rather than a builtin one (:issue:`2545`).
+
 .. autoclass:: pcapkit.const.reg.apptype.apptype.AppType
    :members:
    :undoc-members:

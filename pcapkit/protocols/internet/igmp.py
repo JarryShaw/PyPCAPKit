@@ -8,21 +8,15 @@
 :class:`~pcapkit.protocols.internet.igmp.IGMP`, the abstract base of
 IGMPv1 (:rfc:`1112`), IGMPv2 (:rfc:`2236`) and IGMPv3 (:rfc:`3376`) messages.
 IGMPv1 and IGMPv2 share one 8-octet layout, so the base holds that shared
-schema, data model and read path. :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,
-:class:`~pcapkit.protocols.internet.igmpv2.IGMP` and
-:class:`~pcapkit.protocols.internet.igmpv3.IGMP` set :attr:`version`; IGMPv3's
+schema, data model and read path. :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1`,
+:class:`~pcapkit.protocols.internet.igmpv2.IGMPv2` and
+:class:`~pcapkit.protocols.internet.igmpv3.IGMPv3` set :attr:`version`; IGMPv3's
 wire format differs materially (a Query's source-list extension, a Report's
 group-record list), so it carries its own schema and data model instead. The
 registry entry for IP protocol 2 is this base, and :meth:`IGMP._dispatch
 <pcapkit.protocols.internet.igmp.IGMP._dispatch>` picks the version class.
 
 .. versionadded:: 1.6.0
-
-   IGMPv1 (:rfc:`1112`) and IGMPv2 (:rfc:`2236`) (:issue:`2439`).
-
-.. versionadded:: 1.6.0
-
-   IGMPv3 (:rfc:`3376`) (:issue:`2448`).
 
 """
 
@@ -286,16 +280,16 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             length: The IGMP message's length, in octets.
 
         Returns:
-            :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,
-            :class:`~pcapkit.protocols.internet.igmpv2.IGMP` or
-            :class:`~pcapkit.protocols.internet.igmpv3.IGMP` for the version
+            :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1`,
+            :class:`~pcapkit.protocols.internet.igmpv2.IGMPv2` or
+            :class:`~pcapkit.protocols.internet.igmpv3.IGMPv3` for the version
             the message classifies as; :class:`~pcapkit.protocols.misc.raw.Raw`
             for any other message, which then keeps its octets undissected.
 
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMP as IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv2 import IGMP as IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv3 import IGMP as IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv1 import IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
         if len(data) < 2:

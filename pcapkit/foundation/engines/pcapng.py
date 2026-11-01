@@ -202,7 +202,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         - if not, save the block into the internal context storage and repeat;
         - if yes, save the related information into the internal context storage;
         - write the parsed block into output file;
-        - reassemble IP and/or TCP fragments;
+        - reassemble IP and/or TCP fragments, and/or DTLS handshake messages;
         - trace TCP flows if any;
         - record frame information if any.
 
@@ -210,8 +210,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             Parsed PCAP-NG block.
 
         """
-        from pcapkit.toolkit.pcapng import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                            tcp_traceflow)
+        from pcapkit.toolkit.pcapng import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly,
+                                            tcp_reassembly, tcp_traceflow)
         ext = self._extractor
 
         while True:
@@ -317,6 +317,11 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 data_tcp = tcp_reassembly(block)
                 if data_tcp is not None:
                     ext._reasm.tcp(data_tcp)
+            if ext._dtls:
+                data_dtls = dtls_reassembly(block)
+                if data_dtls is not None:
+                    for packet_dtls in data_dtls:
+                        ext._reasm.dtls(packet_dtls)
 
         # trace flows
         if ext._flag_t:

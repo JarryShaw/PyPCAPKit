@@ -13,10 +13,12 @@ House Conventions
    * :ref:`mint-criterion` -- :mod:`pcapkit.const`, which is where the settled
      questions have mostly arisen;
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
-   * :ref:`registry-protocol` -- :mod:`pcapkit.const` again;
+   * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, and the registration
+     wrappers of :mod:`pcapkit.foundation.registry`;
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members
-     spell :meth:`~pcapkit.protocols.protocol.Protocol.id`;
+     spell :meth:`~pcapkit.protocols.protocol.Protocol.id`, and how a protocol class
+     is named after its module;
    * :ref:`protocol-member-order` -- the order of members in a protocol class body;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;

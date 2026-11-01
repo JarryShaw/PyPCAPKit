@@ -36,14 +36,16 @@ from pcapkit.protocols.data.internet.ipx import IPX as Data_IPX
 from pcapkit.protocols.data.internet.ipx import Address as Data_Address
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, DefaultDict, Optional, Type
+    from typing import Any, ClassVar, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
+    from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -83,10 +85,19 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     #: instead of sharing :attr:`Internet.__proto__
     #: <pcapkit.protocols.internet.internet.Internet.__proto__>` (:issue:`2169`).
     #: No IPX-native protocol is shipped, so the payload is
-    #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered.
+    #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered with
+    #: :func:`~pcapkit.foundation.registry.protocols.register_ipx`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by, declared as
+    #: :attr:`Internet.__proto_key__ <pcapkit.protocols.internet.internet.Internet.__proto_key__>`
+    #: is, so a ``code=`` key is checked as
+    #: :func:`~pcapkit.foundation.registry.protocols.register_ipx` checks its own.
+    #: A bare :class:`int` is a valid key too, because the IPX Packet Type is a
+    #: number in its own right (:issue:`2268`, :issue:`2511`).
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_Packet, True)
 
     ##########################################################################
     # Properties.
@@ -211,6 +222,46 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             payload=payload,
             trailer=trailer,
         )
+
+    @classmethod
+    def register(cls, code: 'Enum_Packet | int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # pylint: disable=line-too-long
+        r"""Register a new protocol class for an IPX Packet Type.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: IPX Packet Type, as in :class:`~pcapkit.const.ipx.packet.Packet`
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Internet.register
+            <pcapkit.protocols.internet.internet.Internet.register>` because
+            :attr:`self.__proto__ <IPX.__proto__>` is keyed by IPX Packet Type
+            rather than by IP protocol number (:issue:`2511`).
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this packet type is
+                already registered and the incumbent differs from the
+                replacement; the message names both. See :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard,
+                and for the shipped descriptor a restore puts back (:issue:`1504`).
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'packet type {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     ##########################################################################
     # Data models.

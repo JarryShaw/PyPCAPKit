@@ -26,8 +26,14 @@ validation. It has no registry index, so its ``__index__`` raises.
    :show-inheritance:
 
    .. automethod:: id
+   .. automethod:: register
    .. automethod:: __index__
    .. automethod:: _import_next_layer
+
+   .. autoattribute:: __proto__
+      :no-value:
+   .. autoattribute:: __proto_key__
+      :no-value:
 
 Auxiliary Functions
 -------------------
@@ -38,14 +44,13 @@ Auxiliary Functions
 Auxiliary Constants
 -------------------
 
-.. autodata:: pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE
 .. autodata:: pcapkit.protocols.link.linux_sll._ETHERTYPE_FIELD
    :no-value:
 
 Hardware Types
 --------------
 
-The ``arphrd_type`` values in ``_ARPHRD_NOT_ETHERTYPE`` are named by the enumeration below.
+The ``arphrd_type`` keys of ``LinuxSLL.__proto__`` are named by the enumeration below.
 
 .. autoclass:: pcapkit.const.linux.arphrd.ARPHRD
    :members:

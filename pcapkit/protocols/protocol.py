@@ -840,31 +840,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         packet = kwargs.get('__packet__', {})  # packet data
         return header.pack(packet)
 
-    def _packing_target(self) -> 'Self':
-        """Return the instance that :meth:`pack` makes its header on.
-
-        Returns:
-            The instance itself while it is being constructed, i.e. before
-            :meth:`__post_init__` has set its :attr:`info`, since its
-            :meth:`unpack` reads the made header back; a shallow copy of it
-            otherwise, so that neither that header nor an attribute that
-            :meth:`make` sets is left on the instance (:issue:`1769`).
-
-        Note:
-            A :meth:`pack` override that does not call this one has to build
-            on this target too, as :meth:`Frame.pack
-            <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and
-            :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` do.
-            The copy is shallow, so a :meth:`make` that mutates a container
-            in place still reaches the instance's.
-
-        """
-        # NOTE: ``_info`` is the last thing ``__post_init__`` sets, from
-        # ``unpack``; until then the instance holds no packet to keep.
-        if '_info' not in vars(self):
-            return self
-        return copy.copy(self)
-
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
 
@@ -1087,60 +1062,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {entry!r}', RegistryWarning)
         cls.__proto__[code] = entry
-
-    @classmethod
-    def _next_layer_entry(cls, code: 'Any', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'
-                          ) -> 'Optional[ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]':
-        """Work out what a next-layer ``register`` stores under ``code``.
-
-        :meth:`register` and the :class:`~pcapkit.protocols.link.link.Link`,
-        :class:`~pcapkit.protocols.internet.internet.Internet`,
-        :class:`~pcapkit.protocols.transport.transport.Transport`,
-        :class:`~pcapkit.protocols.transport.sctp.SCTP`,
-        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` overrides share this;
-        each still warns and stores for itself.
-
-        Arguments:
-            code: registry key
-            protocol: module descriptor or a :class:`ProtocolBase` subclass
-
-        Returns:
-            :obj:`None` if ``protocol`` is the entry stored under ``code``
-            already -- the same object, or a descriptor equal to a stored one
-            (:issue:`1364`). Otherwise the entry to store: if ``protocol`` is a
-            descriptor equal to the one ``code`` shipped with, per
-            :attr:`_shipped_proto`, the shipped object itself, unresolved;
-            else ``protocol`` resolved to its class.
-
-        Raises:
-            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`ProtocolBase` subclass.
-
-        Note:
-            The shipped descriptor is matched before it is resolved, so an
-            override undone by handing back the shipped entry leaves the
-            registry as it shipped: the entry is still a descriptor, nothing is
-            imported, and the class is looked up when a frame dispatches to it
-            (:issue:`1504`).
-
-        """
-        incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
-            return None
-        shipped = cls._shipped_proto.get(code)
-        if (isinstance(protocol, ModuleDescriptor) and isinstance(shipped, ModuleDescriptor)
-                and protocol == shipped):
-            return shipped
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        return protocol
 
     @classmethod
     def from_schema(cls, schema: '_ST | dict[str, Any]') -> 'Self':
@@ -1735,6 +1656,94 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     # Utilities.
     ##########################################################################
 
+    @classmethod
+    def _make_data(cls, data: 'Data') -> 'dict[str, Any]':
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return data.to_dict()
+
+    def _packing_target(self) -> 'Self':
+        """Return the instance that :meth:`pack` makes its header on.
+
+        Returns:
+            The instance itself while it is being constructed, i.e. before
+            :meth:`__post_init__` has set its :attr:`info`, since its
+            :meth:`unpack` reads the made header back; a shallow copy of it
+            otherwise, so that neither that header nor an attribute that
+            :meth:`make` sets is left on the instance (:issue:`1769`).
+
+        Note:
+            A :meth:`pack` override that does not call this one has to build
+            on this target too, as :meth:`Frame.pack
+            <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and
+            :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` do.
+            The copy is shallow, so a :meth:`make` that mutates a container
+            in place still reaches the instance's.
+
+        """
+        # NOTE: ``_info`` is the last thing ``__post_init__`` sets, from
+        # ``unpack``; until then the instance holds no packet to keep.
+        if '_info' not in vars(self):
+            return self
+        return copy.copy(self)
+
+    @classmethod
+    def _next_layer_entry(cls, code: 'Any', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'
+                          ) -> 'Optional[ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]':
+        """Work out what a next-layer ``register`` stores under ``code``.
+
+        :meth:`register` and every override of it, such as
+        :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`,
+        share this; each still warns and stores for itself.
+
+        Arguments:
+            code: registry key
+            protocol: module descriptor or a :class:`ProtocolBase` subclass
+
+        Returns:
+            :obj:`None` if ``protocol`` is the entry stored under ``code``
+            already -- the same object, or a descriptor equal to a stored one
+            (:issue:`1364`). Otherwise the entry to store: if ``protocol`` is a
+            descriptor equal to the one ``code`` shipped with, per
+            :attr:`_shipped_proto`, the shipped object itself, unresolved;
+            else ``protocol`` resolved to its class.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`ProtocolBase` subclass.
+
+        Note:
+            The shipped descriptor is matched before it is resolved, so an
+            override undone by handing back the shipped entry leaves the
+            registry as it shipped: the entry is still a descriptor, nothing is
+            imported, and the class is looked up when a frame dispatches to it
+            (:issue:`1504`).
+
+        """
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and (incumbent is protocol or (
+                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
+                and incumbent == protocol)):
+            return None
+        shipped = cls._shipped_proto.get(code)
+        if (isinstance(protocol, ModuleDescriptor) and isinstance(shipped, ModuleDescriptor)
+                and protocol == shipped):
+            return shipped
+        if isinstance(protocol, ModuleDescriptor):
+            protocol = protocol.klass
+        if not isinstance(protocol, type):
+            raise RegistryError(f'protocol must be a class, not {protocol!r}')
+        if not issubclass(protocol, ProtocolBase):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
+        return protocol
+
     def _get_context(self, cls: 'Optional[Type[_CTX]]' = None) -> 'Optional[_CTX]':
         """Get the caller supplied context for this protocol, if any.
 
@@ -2164,19 +2173,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return next(iter(found.values()))
 
     @classmethod
-    def _make_data(cls, data: 'Data') -> 'dict[str, Any]':
-        """Create key-value pairs from ``data`` for protocol construction.
-
-        Args:
-            data: protocol data
-
-        Returns:
-            Key-value pairs for protocol construction.
-
-        """
-        return data.to_dict()
-
-    @classmethod
     def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
@@ -2422,12 +2418,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             parse ends when it is kept, still inside the guard that catches them
             under an ``error`` filter. A layer kept with its header cut short
             still warns. The held warnings of a parse that raises are dropped
-            too when :func:`~pcapkit.corekit.decorators.beholder` replaces the
-            layer, as it does around :meth:`_import_next_layer`, since the
+            too when :func:`~pcapkit.corekit.decorators.beholder`, which wraps
+            :meth:`_import_next_layer`, replaces the layer, since the
             replacement's ``error`` reports the failure (:issue:`2308`); outside
-            it, they are reported as the error leaves. A layer captured at least
-            as long as its hint cannot be replaced, and is parsed holding
-            nothing, even inside one that holds.
+            ``beholder``, they are reported as the error leaves. Under
+            ``beholder``, a layer is held however much was captured, since one
+            that raises is replaced at any length (:issue:`2516`), so a kept
+            layer's warnings follow those of the layers it carries. Outside
+            ``beholder``, a layer captured at least as long as its hint cannot
+            be replaced, and is parsed holding nothing, even inside one that
+            holds.
 
             A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
             it and the rest of the frame are kept as
@@ -2460,7 +2460,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         captured = min(length, len(file_))
         token = _frame_depth.set(depth)
         try:
-            with hold_warnings(_short_of_hint(klass, captured)) as held:
+            # NOTE: Under ``beholder`` a layer that raises is replaced at any length,
+            # so its warnings are held however much was captured (#2516).
+            with hold_warnings(_beholding.get() or _short_of_hint(klass, captured)) as held:
                 try:
                     next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
                 except Exception:

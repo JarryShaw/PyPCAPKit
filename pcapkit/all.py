@@ -84,13 +84,19 @@ __all__ = [
     'TCP_Reassembly',                                       # TCP Reassembly
     'DTLS_Reassembly',                                      # DTLS Reassembly
 
+    # pcapkit.foundation.analysis
+    'dtls_handshake',                                       # DTLS Analysis
+
     # pcapkit.foundation.registry
     'register_protocol',
     'register_protocol_code',
     'register_linktype',
     'register_pcap', 'register_pcapng',
     'register_ethertype',
+    'register_loopback',
+    'register_arphrd', 'register_frad', 'register_netlink',
     'register_transtype',
+    'register_ipx',
     'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
@@ -98,6 +104,7 @@ __all__ = [
     'register_apptype',
     'register_tcp', 'register_udp', 'register_sctp',
     'register_tcp_option', 'register_tcp_mp_option',
+    'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
     'register_http_frame',
     'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
     'register_pcapng_record',
@@ -122,10 +129,9 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'Netlink', 'S_Tag', 'VLAN',    # Link Layer
+    'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',  # Link Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',                   # Internet Layer
-
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'IP_Pseudo',                                            # IP Pseudo-Header
@@ -137,8 +143,9 @@ __all__ = [
     'Data', 'data',                                         # Protocol Data
 
     # pcapkit.toolkit
-    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
-    'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_tcp_traceflow',
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly', 'tcp_traceflow',
+    'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_dtls_reassembly',
+    'pcapng_tcp_traceflow',
     'pcapng_block2frame',                                   # default engine
     'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
     'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',

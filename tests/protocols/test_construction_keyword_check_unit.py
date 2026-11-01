@@ -348,6 +348,27 @@ class ForwardedKeywordTests(unittest.TestCase):
         self.assertNotIn('extension', keywords(HIP.make))
         self.assertIn('extension', _declared_keywords(HIP))
 
+    def test_tls_declares_chained_on_unpack_and_not_on_make(self) -> None:
+        """The same asymmetry on ``unpack``: :meth:`TLS.unpack
+        <pcapkit.protocols.application.tls.TLS.unpack>` declares ``chained``,
+        which a further record in the segment is parsed with (#2517), and
+        :meth:`TLS.make <pcapkit.protocols.application.tls.TLS.make>` does not.
+
+        """
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.protocol import _declared_keywords
+
+        def keywords(method: 'Any') -> 'set[str]':
+            return {
+                name for name, parameter in inspect.signature(method).parameters.items()
+                if parameter.kind in (parameter.POSITIONAL_OR_KEYWORD,
+                                      parameter.KEYWORD_ONLY)
+            }
+
+        self.assertIn('chained', keywords(TLS.unpack))
+        self.assertNotIn('chained', keywords(TLS.make))
+        self.assertIn('chained', _declared_keywords(TLS))
+
     def test_a_keyword_only_read_declares_is_accepted_end_to_end(self) -> None:
         """The same shape, constructed rather than inspected.
 

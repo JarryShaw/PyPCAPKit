@@ -34,12 +34,13 @@ The counts are the same in development mode as outside it:
 there are. Constructing a warning class is not an act of reporting one -- it
 emits nothing and has no side effects.
 
-A next layer captured shorter than its length hint is parsed on trial, and
-replaced with :class:`~pcapkit.protocols.misc.raw.Raw` when its header was not
-captured. The trial's warnings are held back by
+A next layer is parsed on trial, and replaced with
+:class:`~pcapkit.protocols.misc.raw.Raw` when its header was not captured or its
+parse raises. The trial's warnings are held back by
 :class:`~pcapkit.utilities.warnings.hold_warnings`: a replaced layer's are dropped
 on each channel, since they describe a layer the result does not have, and a kept
-layer's are reported as above when the trial ends (:issue:`1580`).
+layer's are reported as above when the trial ends (:issue:`1580`, :issue:`2308`,
+:issue:`2516`).
 
 .. autofunction:: pcapkit.utilities.warnings.warn
 
@@ -129,6 +130,10 @@ configured separately, through the :mod:`logging` module::
    :show-inheritance:
 
 .. autoexception:: pcapkit.utilities.warnings.ProtocolWarning
+   :no-members:
+   :show-inheritance:
+
+.. autoexception:: pcapkit.utilities.warnings.ChecksumWarning
    :no-members:
    :show-inheritance:
 

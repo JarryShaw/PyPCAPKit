@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.ospf.authentication import Authentication
     from pcapkit.const.ospf.packet import Packet
+    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
 __all__ = ['OSPF', 'CryptographicAuthentication']
 
@@ -71,6 +72,9 @@ class OSPF(Protocol):
         #: Octets captured past the Packet Length, present only when there are
         #: any.
         trailer: 'bytes'
+        #: Outcome of verifying :attr:`chksum`, present only for OSPFv2 when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
+        checksum_status: 'ChecksumStatus'
 
         def __init__(self, version: 'int', type: 'Packet', len: 'int', router_id: 'IPv4Address',
                      area_id: 'IPv4Address', chksum: 'bytes', autype: 'Authentication') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin

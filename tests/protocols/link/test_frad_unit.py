@@ -5,7 +5,7 @@
 ``ARPHRD_FRAD`` payload that
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
 :class:`~pcapkit.protocols.misc.raw.Raw` (see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`). Covers the
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
 Q.922 address field, the direct-NLPID and SNAP-encapsulated forms per
 :rfc:`2427`, and byte-exact round trips. The FRAD-dispatch side of
 ``LinuxSLL1``/``LinuxSLL2`` is covered in their own test modules.
@@ -229,12 +229,16 @@ class TestFRAD(unittest.TestCase):
             FRAD(nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x1_0000)  # out of range
 
     def test_id_and_index(self) -> None:
+        """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertEqual(FRAD.id(), ('FRAD',))
-        with self.assertRaises(UnsupportedCall):
-            FRAD.__index__()
+        self.assertIs(FRAD.__index__(), ARPHRD.FRAD)
+        self.assertEqual(FRAD.__index__(), 770)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, FRAD.__index__()),
+                      FRAD)
 
     def test_truncated_header_rebuilds_as_captured(self) -> None:
         """A capture ending inside the header must not blow up the parse, and

@@ -115,6 +115,11 @@ their row says otherwise:
 |                                                                 | Scapy binds it to on the host it runs on, and no TCP or       |
 |                                                                 | Fragment header behind an AH, Mobility, HIP or Shim6 header   |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no DTLS reassembly, since                                     |
+| :class:`~pcapkit.foundation.engines.scapy.Scapy` and            | :func:`~pcapkit.toolkit.pcap.dtls_reassembly` reads           |
+| :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | :mod:`pcapkit`'s own DTLS layer -- disabled with an           |
+|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
++-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | plain :obj:`dict` -- ``json`` is written instead, with a      |
 | :class:`~pcapkit.foundation.engines.pyshark.PyShark`,           | :class:`~pcapkit.utilities.warnings.FormatWarning`            |

@@ -584,6 +584,104 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             raise ProtocolError('IPv6-Opts: invalid format')
         return options
 
+    def _make_ipv6_opts(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for IPv6-Opts.
+
+        Args:
+            options: IPv6-Opts options
+
+        Returns:
+            Tuple of options and total length of options.
+
+        Note:
+            Options given as a :obj:`list` are fresh input: padding options in
+            it are dropped, and padding is inserted after each option to align
+            the header. Options given as a mapping, such as the
+            :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` of parsed
+            data, are emitted in order with their own padding options kept, and
+            padding is added only at the end if the header is not aligned.
+
+            The returned length is that of the options area alone, the value
+            :meth:`make` derives the ``Hdr Ext Len`` field from. Since the two
+            octets of the fixed header precede it, an options area is well
+            formed only when it is 2 octets short of a multiple of 8 --
+            including when it holds no real options at all, in which case it is
+            6 octets of pure padding rather than empty.
+
+        """
+        total_length = 0
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    code = Enum_Option.get(schema[0])
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
+
+                    opt = schema  # type: bytes | Schema_Option
+                    opt_len = len(schema)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
+
+                    opt = schema
+                    opt_len = len(schema.pack())
+                else:
+                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
+
+                    name = self._lookup_registry(self.__option__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_opt_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_opt_none))
+                    else:
+                        meth = name[1]
+
+                    opt = meth(code, **args)
+                    opt_len = len(opt.pack())
+
+                options_list.append(opt)
+                total_length += opt_len
+
+                # force alignment of the header (fixed part included) to 8 octets
+                pad_opts, pad_len = self._make_pad_options(total_length + 2)
+                options_list.extend(pad_opts)
+                total_length += pad_len
+
+            # an options area holding nothing at all is still 6 octets long
+            pad_opts, pad_len = self._make_pad_options(total_length + 2)
+            options_list.extend(pad_opts)
+            total_length += pad_len
+            return options_list, total_length
+
+        # NOTE: Options given as parsed data are emitted as they are, padding
+        # included and in place, so that a parsed header rebuilds byte for
+        # byte; only a header left short of alignment gets trailing padding.
+        options_list = []
+        for code, option in options.items(multi=True):
+            name = self._lookup_registry(self.__option__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_opt_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_opt_none))
+            else:
+                meth = name[1]
+
+            opt = meth(code, option)
+            opt_len = len(opt.pack())
+
+            options_list.append(opt)
+            total_length += opt_len
+
+        # an options area holding nothing at all is still 6 octets long
+        pad_opts, pad_len = self._make_pad_options(total_length + 2)
+        options_list.extend(pad_opts)
+        total_length += pad_len
+        return options_list, total_length
+
     def _read_opt_none(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts unassigned options.
 
@@ -1376,104 +1474,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         if pad_len == 1:
             return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
         return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
-
-    def _make_ipv6_opts(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
-        """Make options for IPv6-Opts.
-
-        Args:
-            options: IPv6-Opts options
-
-        Returns:
-            Tuple of options and total length of options.
-
-        Note:
-            Options given as a :obj:`list` are fresh input: padding options in
-            it are dropped, and padding is inserted after each option to align
-            the header. Options given as a mapping, such as the
-            :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` of parsed
-            data, are emitted in order with their own padding options kept, and
-            padding is added only at the end if the header is not aligned.
-
-            The returned length is that of the options area alone, the value
-            :meth:`make` derives the ``Hdr Ext Len`` field from. Since the two
-            octets of the fixed header precede it, an options area is well
-            formed only when it is 2 octets short of a multiple of 8 --
-            including when it holds no real options at all, in which case it is
-            6 octets of pure padding rather than empty.
-
-        """
-        total_length = 0
-        if isinstance(options, list):
-            options_list = []  # type: list[Schema_Option | bytes]
-            for schema in options:
-                if isinstance(schema, bytes):
-                    code = Enum_Option.get(schema[0])
-                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
-                        continue
-
-                    opt = schema  # type: bytes | Schema_Option
-                    opt_len = len(schema)
-                elif isinstance(schema, Schema):
-                    code = schema.type
-                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
-                        continue
-
-                    opt = schema
-                    opt_len = len(schema.pack())
-                else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
-                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
-                        continue
-
-                    name = self._lookup_registry(self.__option__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_opt_{name}'
-                        meth = cast('OptionConstructor',
-                                    getattr(self, meth_name, self._make_opt_none))
-                    else:
-                        meth = name[1]
-
-                    opt = meth(code, **args)
-                    opt_len = len(opt.pack())
-
-                options_list.append(opt)
-                total_length += opt_len
-
-                # force alignment of the header (fixed part included) to 8 octets
-                pad_opts, pad_len = self._make_pad_options(total_length + 2)
-                options_list.extend(pad_opts)
-                total_length += pad_len
-
-            # an options area holding nothing at all is still 6 octets long
-            pad_opts, pad_len = self._make_pad_options(total_length + 2)
-            options_list.extend(pad_opts)
-            total_length += pad_len
-            return options_list, total_length
-
-        # NOTE: Options given as parsed data are emitted as they are, padding
-        # included and in place, so that a parsed header rebuilds byte for
-        # byte; only a header left short of alignment gets trailing padding.
-        options_list = []
-        for code, option in options.items(multi=True):
-            name = self._lookup_registry(self.__option__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_opt_{name}'
-                meth = cast('OptionConstructor',
-                            getattr(self, meth_name, self._make_opt_none))
-            else:
-                meth = name[1]
-
-            opt = meth(code, option)
-            opt_len = len(opt.pack())
-
-            options_list.append(opt)
-            total_length += opt_len
-
-        # an options area holding nothing at all is still 6 octets long
-        pad_opts, pad_len = self._make_pad_options(total_length + 2)
-        options_list.extend(pad_opts)
-        total_length += pad_len
-        return options_list, total_length
 
     def _make_opt_none(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
                        data: 'bytes' = b'',

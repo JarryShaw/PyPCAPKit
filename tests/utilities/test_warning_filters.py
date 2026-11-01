@@ -37,7 +37,7 @@ __tier__ = 'ALL'
 CATEGORY_NAMES = [
     'BaseWarning',
     'FormatWarning', 'EngineWarning', 'InvalidVendorWarning',
-    'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
+    'FileWarning', 'LayerWarning', 'ProtocolWarning', 'ChecksumWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
     'SeekWarning', 'ExtractionWarning', 'ConfigWarning',

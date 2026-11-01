@@ -35,10 +35,9 @@ only append, and offer nothing to undo an append with, so they have no case
 here; nor does ``register_protocol_code``, which funnels into the same
 :meth:`ProtocolBase.register
 <pcapkit.protocols.protocol.ProtocolBase.register>` the ``register_tcp`` cases
-reach. Class-level registrars with no foundation wrapper are out of scope:
-``SCTP.register_chunk``, ``register_parameter`` and ``register_cause`` (covered
-by :file:`tests/protocols/transport/test_sctp_unit.py`), ``Schema.register``,
-the PCAP-NG ``Option.register`` and ``ESP.register``.
+reach; nor does ``register_ipx``, whose registry ships no entry to restore.
+Class-level registrars with no foundation wrapper are out of scope:
+``Schema.register``, the PCAP-NG ``Option.register`` and ``ESP.register``.
 
 Every case restores the registries it touched, whatever its outcome. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -77,6 +76,9 @@ DISPATCH = {
     'Frame': 'pcapkit.protocols.misc.pcap.frame:Frame',
     'PCAPNG': 'pcapkit.protocols.misc.pcapng:PCAPNG',
     'Link': 'pcapkit.protocols.link.link:Link',
+    'Loopback': 'pcapkit.protocols.link.loopback:Loopback',
+    'LinuxSLL': 'pcapkit.protocols.link.linux_sll:LinuxSLL',
+    'FRAD': 'pcapkit.protocols.link.frad:FRAD',
     'Internet': 'pcapkit.protocols.internet.internet:Internet',
     'TCP': 'pcapkit.protocols.transport.tcp:TCP',
     'UDP': 'pcapkit.protocols.transport.udp:UDP',
@@ -128,6 +130,15 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_tcp_mp_option', 'pcapkit.protocols.transport.tcp:TCP', '__mp_option__',
                     'pcapkit.protocols.schema.transport.tcp:MPTCP',
                     ('pcapkit.const.tcp.mp_tcp_option:MPTCPOption.MP_JOIN',)),
+    MethodRegistrar('register_sctp_chunk', 'pcapkit.protocols.transport.sctp:SCTP', '__chunk__',
+                    'pcapkit.protocols.schema.transport.sctp:Chunk',
+                    ('pcapkit.const.sctp.chunk:Chunk.Cookie_Acknowledgement',)),
+    MethodRegistrar('register_sctp_parameter', 'pcapkit.protocols.transport.sctp:SCTP', '__parameter__',
+                    'pcapkit.protocols.schema.transport.sctp:Parameter',
+                    ('pcapkit.const.sctp.parameter:Parameter.Heartbeat_Info',)),
+    MethodRegistrar('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP', '__cause__',
+                    'pcapkit.protocols.schema.transport.sctp:ErrorCause',
+                    ('pcapkit.const.sctp.cause_code:CauseCode.Stale_Cookie',)),
     MethodRegistrar('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTP', '__frame__',
                     'pcapkit.protocols.schema.application.httpv2:FrameType',
                     ('pcapkit.const.http.frame:Frame.HEADERS',)),
@@ -173,6 +184,10 @@ MODULE_REGISTRARS = (
     ModuleRegistrar('register_ethertype',
                     'pcapkit.const.reg.ethertype:EtherType.Address_Resolution_Protocol', 'Link',
                     'pcapkit.protocols.link.link:Link'),
+    ModuleRegistrar('register_loopback', 2, 'Loopback', 'pcapkit.protocols.internet.internet:Internet'),
+    ModuleRegistrar('register_arphrd', 'pcapkit.const.linux.arphrd:ARPHRD.FRAD', 'LinuxSLL',
+                    'pcapkit.protocols.link.link:Link'),
+    ModuleRegistrar('register_frad', 0xCC, 'FRAD', 'pcapkit.protocols.internet.internet:Internet'),
     ModuleRegistrar('register_transtype', 'pcapkit.const.reg.transtype:TransType.TCP', 'Internet',
                     'pcapkit.protocols.transport.transport:Transport'),
     ModuleRegistrar('register_tcp', 80, 'TCP', 'pcapkit.protocols.application.application:Application'),
@@ -433,6 +448,8 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_reassembly_tcp_callback': 'append-only, nothing to undo with',
             'register_traceflow_tcp_callback': 'append-only, nothing to undo with',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
+            'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',
+            'register_netlink': 'Netlink.__proto__ ships no entry, so there is none to restore',
         }
         self.assertEqual(sorted(set(registry.__all__) - covered - set(excused)), [])
         self.assertEqual(sorted((covered | set(excused)) - set(registry.__all__)), [])

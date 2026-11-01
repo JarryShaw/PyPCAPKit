@@ -9,16 +9,22 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it. The TCP adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`.
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, and the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap._dtls_fragments`.
 
 """
 from typing import TYPE_CHECKING, NamedTuple, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
+from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.application.dtls import DTLS
+from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
+from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.internet.ip import IP as Protocol_IP
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
@@ -27,6 +33,7 @@ from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.udp import UDP
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -38,8 +45,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
 
-__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
-           'tcp_segment', 'TCPSegment']
+__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
+           'tcp_traceflow', 'tcp_segment', 'TCPSegment']
 
 
 class TCPSegment(NamedTuple):
@@ -380,6 +387,92 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         )
         return data
     return None
+
+
+def _dtls_fragments(frame: 'ProtocolBase', *, num: 'int',
+                    timestamp: 'float') -> 'Optional[tuple[DTLS_Packet, ...]]':
+    """Make data for DTLS handshake-message reassembly from a frame's DTLS record.
+
+    The DTLS adapters of this module and of :mod:`pcapkit.toolkit.pcapng` read
+    the record with this.
+
+    Args:
+        frame: PCAP frame or PCAP-NG block.
+        num: Original packet range number.
+        timestamp: Capture timestamp, in seconds since the Unix epoch.
+
+    Returns:
+        One record per fragmented handshake message in the frame's first
+        :class:`~pcapkit.protocols.application.dtls.DTLS` layer, if UDP carries
+        it and it is a cleartext ``handshake`` record holding one; otherwise
+        :data:`None`. The buffer ID is the IP and UDP endpoints nearest above
+        the record, with its epoch (:rfc:`6347#section-4.1`).
+
+    """
+    ip = prev = None  # type: Optional[ProtocolBase]
+    layer = frame  # type: ProtocolBase
+    while isinstance(layer, ProtocolBase) and not isinstance(layer, (NoPayload, DTLS)):
+        if isinstance(layer, Protocol_IP):
+            ip = layer
+        prev, layer = layer, layer.payload
+    if not isinstance(layer, DTLS) or not isinstance(prev, UDP) or ip is None:
+        return None
+
+    dtls_info = layer.info
+    # NOTE: a record past epoch 0 is ciphertext, so its content is bytes, not messages.
+    if (not isinstance(dtls_info, Data_DTLS) or dtls_info.content_type != Enum_ContentType.handshake
+            or not isinstance(dtls_info.content, tuple)):
+        return None
+
+    ip_info = cast('Data_IPv4 | Data_IPv6', ip.info)
+    udp_info = prev.info
+    bufid = (
+        ip_info.src,                # source IP address
+        udp_info.srcport.port,      # source port
+        ip_info.dst,                # destination IP address
+        udp_info.dstport.port,      # destination port
+        dtls_info.epoch,            # DTLS epoch
+    )
+    packets = tuple(
+        DTLS_Packet(  # type: ignore[type-var]
+            bufid=bufid,                                # buffer identifier
+            num=num,                                    # original packet range number
+            msg_type=message.msg_type,                  # handshake message type
+            length=message.length,                      # total message length
+            message_seq=message.message_seq,            # message sequence number
+            fragment_offset=message.fragment_offset,    # fragment offset
+            fragment_length=message.fragment_length,    # fragment length
+            payload=cast('bytes', message.body),        # raw bytes type fragment body
+            timestamp=timestamp,                        # capture timestamp
+        )
+        for message in dtls_info.content
+        if isinstance(message, Data_DTLSHandshake) and message.is_fragmented
+    )
+    return packets or None
+
+
+def dtls_reassembly(frame: 'Frame') -> 'Optional[tuple[DTLS_Packet, ...]]':
+    """Make data for DTLS handshake-message reassembly.
+
+    A frame can be reassembled if UDP carries a DTLS layer
+    (:class:`~pcapkit.protocols.application.dtls.DTLS`) whose cleartext
+    ``handshake`` record holds a fragmented message
+    (:attr:`DTLSHandshake.is_fragmented
+    <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`,
+    :rfc:`6347#section-4.2.3`). Only the frame's first record is read.
+
+    Args:
+        frame: PCAP frame.
+
+    Returns:
+        Data for DTLS reassembly (:term:`reasm.dtls.packet`), one per fragmented
+        message, if the ``frame`` can be reassembled; otherwise :data:`None`.
+
+    See Also:
+        :class:`pcapkit.foundation.reassembly.dtls.DTLS`
+
+    """
+    return _dtls_fragments(frame, num=frame.info.number, timestamp=float(frame.info.time_epoch))
 
 
 def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | None':

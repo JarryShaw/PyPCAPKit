@@ -123,15 +123,19 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: fragment overlapped octets already buffered but did not repeat them.
     #: Empty when the datagram never saw a contested octet.
     #:
-    #: :rfc:`791` resolves the disagreement itself: "In the case that two or
-    #: more fragments contain the same data either identically or through a
-    #: partial overlap, this procedure will use the more recently arrived copy
-    #: in the data buffer and datagram delivered." So :attr:`payload` always
-    #: holds whichever fragment arrived *last* over a contested range -- the
-    #: opposite resolution from TCP's first-write-wins
+    #: For IPv4, :rfc:`791` resolves the disagreement itself: "In the case that
+    #: two or more fragments contain the same data either identically or
+    #: through a partial overlap, this procedure will use the more recently
+    #: arrived copy in the data buffer and datagram delivered." So
+    #: :attr:`payload` always holds whichever fragment arrived *last* over a
+    #: contested range -- the opposite resolution from TCP's first-write-wins
     #: (:rfc:`9293#section-3.10`) -- and this field is what lets a caller tell
     #: a clean datagram from a contested one, since a resolved conflict does
-    #: not, on its own, leave a hole for ``completed`` to report.
+    #: not, on its own, leave a hole for ``completed`` to report. IPv6 instead
+    #: abandons the datagram on the overlapping fragment, without writing it
+    #: (:rfc:`8200#section-4.5`), so there a conflict comes only with
+    #: :attr:`Completion.OVERLAP
+    #: <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`.
     #:
     #: :attr:`Buffer.RCVBT <pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT>`
     #: only records receipt in 8-octet blocks, coarser than the octet
@@ -190,6 +194,15 @@ class Buffer(Info, Generic[_AT]):
     #: :attr:`Datagram.conflict <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
     #: verbatim when the buffer is submitted.
     conflict: 'list[tuple[int, int]]'
+    #: Extent of each fragment merged into this buffer, as ``(start, stop,
+    #: mf)``: its first octet, one past its last, and its **MF** (**M**) flag,
+    #: sorted by ``start``. Kept only where an overlapping fragment abandons
+    #: the datagram, i.e. for IPv6, whose merged fragments therefore never
+    #: overlap; empty for IPv4. See
+    #: :attr:`IP.__discard_overlap__ <pcapkit.foundation.reassembly.ip.IP.__discard_overlap__>`.
+    #:
+    #: .. versionadded:: 1.6.0
+    extent: 'list[tuple[int, int, bool]]'
 
     if TYPE_CHECKING:
-        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray', timestamp: 'float', conflict: 'list[tuple[int, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray', timestamp: 'float', conflict: 'list[tuple[int, int]]', extent: 'list[tuple[int, int, bool]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
