@@ -895,7 +895,8 @@ model for how to spell "expected, not an error".
 :issue:`2475`), on :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
 (:issue:`2471`) and :mod:`pcapkit.protocols.misc.checksum.checksum`, settled as
 below: the toggles by the owner on :issue:`2471`, the rest at implementation,
-as the offload question above asked.
+as the offload question above asked; the owner accepted the toggles and the
+offload heuristic on :issue:`2470`.
 
 * **Every checksum path is togglable, and verifying and computing default apart.** Parsing
   verifies only under :envvar:`PCAPKIT_CHECKSUM_VERIFY`, off by default;
