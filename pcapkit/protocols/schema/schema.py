@@ -416,6 +416,470 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
     #: List of names to be excluded from :obj:`dict` conversion.
     __excluded__: 'list[str]' = []
 
+    @classmethod
+    def from_dict(cls, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
+                  **kwargs: '_VT') -> 'Self':
+        r"""Create a new instance.
+
+        * If ``dict_`` is a mapping, then does:
+          ``for k in dict_: self[k] = dict_[k]``.
+        * If ``dict_`` is present and not a mapping, then does:
+          ``for k, v in dict_: self[k] = v``.
+        * In either case, and if ``dict_`` is not present, this is followed
+          by: ``for k, v in kwargs.items(): self[k] = v``.
+
+        Args:
+            dict\_: Source data.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        self = cls.__new__(cls)
+        self.__update__(dict_, **kwargs)
+        self.__post_init__()
+        return self
+
+    def to_dict(self) -> 'dict[str, _VT]':
+        """Convert :class:`Schema` into :obj:`dict`.
+
+        Important:
+            We only convert nested :class:`Schema` objects into :obj:`dict` if
+            they are the direct value of the :class:`Schema` object's attribute.
+            Should such :class:`Schema` objects be nested within other data
+            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
+            leave them intact rather than converting them into :obj:`dict`.
+
+        Note:
+            A schema unpacked as the value of a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` that left part of
+            the field's span unread carries those octets under a
+            ``__remainder__`` key, and the number of octets it did read under
+            ``__remainder_offset__``. :meth:`from_dict` accepts both back, so
+            that the rebuilt field still packs them (:issue:`1380`). The keys
+            are absent otherwise.
+
+            A schema whose data ended inside one of its fields carries the
+            ``__short_read__`` that :meth:`unpack` recorded, and
+            :meth:`from_dict` accepts it back, likewise.
+
+        """
+        dict_ = {}  # type: dict[str, Any]
+        for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
+            out_key = self.__map_reverse__.get(key, key)
+            if isinstance(value, Schema):
+                dict_[out_key] = value.to_dict()
+            else:
+                dict_[out_key] = value
+
+        for key in ('__remainder__', '__remainder_offset__', '__short_read__'):
+            if key in self.__dict__:
+                dict_[key] = self.__dict__[key]
+        return dict_
+
+    def to_bytes(self) -> 'bytes':
+        """Convert :class:`Schema` into :obj:`bytes`."""
+        return self.__bytes__()
+
+    def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':
+        """Get payload of :class:`Schema`.
+
+        Args:
+            name: Name of the payload field.
+
+        Returns:
+            Payload of :class:`Schema` as :obj:`bytes`.
+
+        """
+        if name is None:
+            name = self.__payload__
+
+        field = self.__fields__.get(name)
+        if field is None:
+            raise ProtocolUnbound(f'unknown field: {name!r}')
+        if not isinstance(field, PayloadField):
+            raise ProtocolUnbound(f'not a payload field: {name!r}')
+        return self.__buffer__[name]
+
+    def pack(self, packet: 'Optional[dict[str, Any]]' = None) -> 'bytes':
+        """Pack :class:`Schema` into :obj:`bytes`.
+
+        Args:
+            packet: Packet data.
+
+        Returns:
+            Packed :class:`Schema` as :obj:`bytes`.
+
+        Notes:
+            Since we do not know the length of the packet, we use a
+            reasonable default value ``-1`` for the ``__length__``
+            field, as the :class:`~pcapkit.corekit.fields.field.Field`
+            class will consider negative value as a placeholder.
+
+            If you want to pack the packet with the correct length,
+            please provide the ``__length__`` value before packing.
+
+        """
+        if packet is None:
+            packet = {}
+
+        packet.update(self.__dict__)
+        # NOTE: ``pre_unpack`` is called here as well as from the unpacking path
+        # since a schema may seed ``packet`` keys that both paths need, as
+        # ``pcapkit.protocols.schema.internet.hip.EncryptedParameter`` does.
+        # ``pre_pack`` is what carries the packing-only preparation, such as the
+        # PCAP-NG section header block's byte order magic, which no field of the
+        # schema holds and which therefore cannot be recovered from
+        # ``self.__dict__`` above.
+        self.pre_unpack(packet)
+        self.pre_pack(packet)
+
+        if '__length__' not in packet:
+            packet['__length__'] = -1  # reasonable default value
+
+        for field in self.__fields__.values():
+            field = field(packet)
+
+            # NOTE: Read from the instance rather than with :func:`getattr`, which
+            # finds the *class* attribute when the instance has none -- and a
+            # schema's class attribute for a field is the
+            # :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A
+            # field the caller never set would arrive below as the field rather
+            # than as a value: ``getattr(self, name, None)`` could not return its
+            # ``None``, so the absent-value branches would not fire, and packing
+            # would fail from inside a field object -- naming a field *class*, and
+            # so saying nothing about which field had been left out.
+            data = self.__dict__.get(self.__map__.get(field.name, field.name))
+
+            if isinstance(field, PayloadField):
+                # NOTE: ``ProtocolBase``, not ``Protocol``: ``Protocol`` is a thin
+                # subclass that only adds auto-registration for externally defined
+                # protocols, and no protocol in the library subclasses it. Testing
+                # against it would send any protocol instance -- which is exactly
+                # what :meth:`ProtocolBase._make_payload
+                # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns,
+                # and what ``make``'s own ``bytes | Protocol | Schema`` signature
+                # advertises -- to the ``ProtocolUnbound`` below instead of packing
+                # it, and ``from_data`` could not reconstruct a parsed packet. An
+                # external ``Protocol`` subclass is still a ``ProtocolBase``. The
+                # import is inside the method rather than at module level.
+                from pcapkit.protocols.protocol import \
+                    ProtocolBase  # pylint: disable=import-outside-toplevel
+
+                if data is None:
+                    self.__buffer__[field.name] = b''
+                elif isinstance(data, ProtocolBase):
+                    self.__buffer__[field.name] = bytes(data)
+                elif isinstance(data, bytes):
+                    self.__buffer__[field.name] = data
+                elif isinstance(data, Schema):
+                    self.__buffer__[field.name] = data.pack(packet)
+                else:
+                    raise ProtocolUnbound(f'unsupported type {type(data)}')
+                continue
+
+            if isinstance(field, ListField):
+                if data is None:
+                    self.__buffer__[field.name] = b''
+                elif isinstance(data, bytes):
+                    self.__buffer__[field.name] = data
+                elif isinstance(data, (list, tuple)):
+                    # NOTE: a data model may declare a field ``tuple[...]``
+                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
+                    # 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/
+                    # hip.py -- and ``_read_*`` then hands one straight back
+                    # here on reconstruction. ``ListField.pack`` only ever
+                    # iterates its argument, so it accepts either, and
+                    # rejecting the tuple would break parse-then-reconstruct for
+                    # such a field. ``list(data)`` is a no-op for an actual list
+                    # and keeps ``ListField.pack``'s own ``Optional[list[_TL]]``
+                    # signature honest rather than widening it too.
+                    self.__buffer__[field.name] = field.pack(list(data), packet)
+                else:
+                    raise ProtocolUnbound(f'unsupported type {type(data)}')
+
+                if isinstance(field, OptionField):
+                    # NOTE: The packing mirror of the ``__option_padding__`` that
+                    # :meth:`unpack` records: whatever of the declared option area
+                    # the packed options do not fill. Without it every padding
+                    # field sized from that key packs nothing, and the header
+                    # comes out shorter than its own length field says
+                    # (#1289). An undeclared area (a negative length)
+                    # leaves no remainder.
+                    packet['__option_padding__'] = max(field.length - len(self.__buffer__[field.name]), 0)
+                continue
+
+            if isinstance(field, PaddingField):
+                # NOTE: the octets as captured, or zeros when there are none
+                # (#1223) -- see :meth:`PaddingField.pack
+                # <pcapkit.corekit.fields.strings.PaddingField.pack>`.
+                self.__buffer__[field.name] = field.pack(data, packet)
+                continue
+
+            if isinstance(field, ConditionalField):
+                if not field.test(packet):
+                    self.__buffer__[field.name] = b''
+                    continue
+                field = field.field(packet)
+
+            if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match consumes nothing, so it contributes no
+                # octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`
+                # mirrors this for the same reason -- see the ``ForwardMatchField``
+                # branch there.
+                self.__buffer__[field.name] = b''
+                continue
+
+            try:
+                temp = field.pack(data, packet)
+            except NoDefaultValue:
+                temp = bytes(field.length)
+
+            if isinstance(field, SchemaField) and len(temp) < field.length:
+                # NOTE: :meth:`unpack` hands a nested schema its whole declared
+                # span, and the schema may read less of it than that. The octets
+                # it left unread travel with the nested value as its
+                # ``__remainder__`` -- on the schema itself, or as a key of the
+                # mapping :meth:`to_dict` made of it -- so they are re-emitted
+                # from there, as long as the nested schema still packs to the
+                # ``__remainder_offset__`` octets it was parsed at. Re-emitting
+                # them after a nested schema that has shrunk or grown would put
+                # stale octets at a shifted offset, so then, or for a schema that
+                # never had any, the rest of the span is zero-filled.
+                # Either way the field keeps the width its length field declares
+                # (#1292), and a schema rebuilt through :meth:`from_dict`
+                # packs what the parsed one did (#1380).
+                #
+                # A field reached through a
+                # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
+                # here: the PCAP-NG block selector declares the rest of the
+                # *stream* as its span, which is no part of the field.
+                if isinstance(data, Schema):
+                    record = data.__dict__  # type: Mapping[str, Any]
+                elif isinstance(data, collections.abc.Mapping):
+                    record = data
+                else:
+                    record = {}
+                tail = record.get('__remainder__', b'')
+                if record.get('__remainder_offset__') != len(temp) or len(temp) + len(tail) > field.length:
+                    tail = b''
+                temp += tail + bytes(field.length - len(temp) - len(tail))
+            self.__buffer__[field.name] = temp
+
+        self.post_process(packet)
+        self._cut_short_read()
+        self.__updated__ = False
+        return self.__bytes__()
+
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process.
+
+        Args:
+            packet: packet data
+
+        Note:
+            This method is expected to directly modify any data stored
+            in the ``packet`` and thus no return is required.
+
+        """
+
+    @classmethod
+    @prepare
+    def unpack(cls, data: 'bytes | IO[bytes]',
+               length: 'Optional[int]' = None,
+               packet: 'Optional[dict[str, Any]]' = None) -> 'Self':
+        """Unpack :obj:`bytes` into :class:`Schema`.
+
+        Args:
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Unpacked data as :class:`Schema`.
+
+        Notes:
+            A ``__length__`` key in ``packet`` records the length of the
+            remaining data, which is used to determine the length of the
+            payload field.
+
+            When this schema is nested -- unpacked through a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
+            directly -- ``packet`` is not the enclosing schema's own data, but
+            a context built by
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name
+            this schema does not itself
+            declare falls through to the enclosing schema, and the enclosing
+            schema is also reachable unconditionally under a ``__packet__``
+            key. See that function for the exact lookup, write and iteration
+            semantics.
+
+            We also use an ``__option_padding__`` key in ``packet`` to record how
+            much of an
+            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
+            area it did not consume. What follows that area decides what the
+            remainder means: usually padding, to be skipped, but a schema may
+            equally read it as further options, as the PCAP-NG name resolution
+            block does with its records and options.
+
+            An :class:`~pcapkit.corekit.fields.collections.OptionField`
+            declares the size of the whole area it may read, but stops at the
+            end-of-option-list marker and reports the unconsumed remainder
+            through ``__option_padding__``. Since that remainder has not been
+            parsed, we rewind ``data`` by it, so that the fields which size
+            themselves from ``__option_padding__`` read the remainder itself
+            rather than the same number of octets from beyond it.
+
+        """
+        # force cast arg type since decorator changed their signatures
+        if TYPE_CHECKING:
+            data = cast('IO[bytes]', data)
+            length = cast('int', length)
+            packet = cast('dict[str, Any]', packet)
+
+        self = cls.__new__(cls)
+        for field in self.__fields__.values():
+            field = field(packet)
+
+            # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
+            # so it is read once per field here rather than at each use.
+            if isinstance(field, PayloadField):
+                # NOTE: A negative length is the unset default and takes what
+                # the declared length leaves, never less than nothing; a
+                # computed zero is an empty payload, not an unset one, or it
+                # would swallow the fields after it (#1275).
+                length = field.length
+                if length < 0:
+                    length = max(cast('int', packet['__length__']), 0)
+
+                # NOTE: A declared length is asked for no further than one read
+                # can go, :data:`sys.maxsize`; past it the read raises
+                # :exc:`OverflowError` rather than coming back short, which is
+                # how every other overrun is reported. No stream holds more than
+                # that, so the bounded read is the same short read (#1975).
+                payload = data.read(min(length, sys.maxsize))
+                self.__buffer__[field.name] = payload
+
+                packet['__length__'] -= length
+                packet[field.name] = payload
+
+                setattr(self, field.name, payload)
+                continue
+
+            if isinstance(field, PaddingField):
+                length = field.length
+
+                byte = data.read(length)
+                self.__buffer__[field.name] = byte
+                self._note_short_read(field.name, length, byte)
+
+                packet[field.name] = byte
+                packet['__length__'] -= length
+
+                setattr(self, field.name, byte)
+                continue
+
+            if isinstance(field, ConditionalField):
+                if not field.test(packet):
+                    self.__buffer__[field.name] = b''
+                    setattr(self, field.name, None)
+                    packet[field.name] = NO_VALUE
+                    continue
+                field = field.field(packet)
+
+            length = field.length
+
+            # NOTE: bounded as the payload read above is (#1975).
+            byte = data.read(min(length, sys.maxsize))
+            self.__buffer__[field.name] = byte
+            if not isinstance(field, ForwardMatchField):
+                self._note_short_read(field.name, length, byte)
+
+            value = field.unpack(byte, packet.copy())
+            if isinstance(field, SchemaField) and isinstance(value, Schema):
+                # NOTE: Kept on the nested schema rather than only in
+                # ``__buffer__``, so that the octets it left unread go wherever
+                # the value goes, :meth:`to_dict` included; see :meth:`pack`.
+                # The width read is summed from the nested buffers rather than
+                # taken with :func:`len`, which may pack the schema again.
+                consumed = sum(map(len, value.__buffer__.values()))
+                if len(byte) > consumed:
+                    value.__dict__['__remainder__'] = byte[consumed:]
+                    value.__dict__['__remainder_offset__'] = consumed
+            setattr(self, field.name, value)
+
+            packet[field.name] = value
+
+            if isinstance(field, OptionField):
+                packet['__option_padding__'] = field.option_padding
+
+            if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match reads ``length`` octets so a later field
+                # can size itself from them, but consumes neither the stream
+                # (the rewind below) nor ``__length__`` (no decrement in this
+                # branch). ``self.__buffer__[field.name]`` above still holds the
+                # octets just read, so it is zeroed here, as :meth:`pack` does for
+                # the same field type: ``__bytes__``/``__len__`` concatenate every
+                # slot in ``__buffer__``, and the octets are read again, for real,
+                # by whichever field actually needs them, so keeping them would
+                # over-report the schema's length by the forward match's width.
+                # Zeroing is also what lets a declared area checked against
+                # ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
+                # and :class:`~pcapkit.corekit.fields.collections.ListField` both
+                # do this -- see the octets actually consumed.
+                #
+                # The rewind is by the octets actually read, not by ``length``:
+                # near the end of the stream the read comes back short, and
+                # rewinding the full width would move the stream *before* the
+                # forward match, so the fields after it would re-read the
+                # preceding octet as their first.
+                data.seek(-len(byte), io.SEEK_CUR)
+                self.__buffer__[field.name] = b''
+            elif isinstance(field, OptionField) and field.option_padding > 0:
+                # the option list ended before the declared field length was
+                # exhausted; give the unconsumed remainder back to ``data``
+                # so that the following fields can read it
+                data.seek(-field.option_padding, io.SEEK_CUR)
+                consumed = length - field.option_padding
+
+                self.__buffer__[field.name] = byte[:consumed]
+                packet['__length__'] -= consumed
+            else:
+                packet['__length__'] -= length
+
+            if packet['__length__'] < 0:
+                warn(f'packet length < 0: {packet["__length__"]}',
+                     SchemaWarning, stacklevel=stacklevel())
+
+        self.__updated__ = False
+        return self
+
+    @classmethod
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for unpacking process.
+
+        Args:
+            packet: packet data
+
+        Note:
+            This method is expected to directly modify any data stored
+            in the ``packet`` and thus no return is required.
+
+        """
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after packing and/or unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        return self
+
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Refuse to derive from a finalised schema.
 
@@ -709,262 +1173,6 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             return
         return super().__delattr__(name)
 
-    @classmethod
-    def from_dict(cls, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
-                  **kwargs: '_VT') -> 'Self':
-        r"""Create a new instance.
-
-        * If ``dict_`` is a mapping, then does:
-          ``for k in dict_: self[k] = dict_[k]``.
-        * If ``dict_`` is present and not a mapping, then does:
-          ``for k, v in dict_: self[k] = v``.
-        * In either case, and if ``dict_`` is not present, this is followed
-          by: ``for k, v in kwargs.items(): self[k] = v``.
-
-        Args:
-            dict\_: Source data.
-            **kwargs: Arbitrary keyword arguments.
-
-        """
-        self = cls.__new__(cls)
-        self.__update__(dict_, **kwargs)
-        self.__post_init__()
-        return self
-
-    def to_dict(self) -> 'dict[str, _VT]':
-        """Convert :class:`Schema` into :obj:`dict`.
-
-        Important:
-            We only convert nested :class:`Schema` objects into :obj:`dict` if
-            they are the direct value of the :class:`Schema` object's attribute.
-            Should such :class:`Schema` objects be nested within other data
-            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
-            leave them intact rather than converting them into :obj:`dict`.
-
-        Note:
-            A schema unpacked as the value of a
-            :class:`~pcapkit.corekit.fields.misc.SchemaField` that left part of
-            the field's span unread carries those octets under a
-            ``__remainder__`` key, and the number of octets it did read under
-            ``__remainder_offset__``. :meth:`from_dict` accepts both back, so
-            that the rebuilt field still packs them (:issue:`1380`). The keys
-            are absent otherwise.
-
-            A schema whose data ended inside one of its fields carries the
-            ``__short_read__`` that :meth:`unpack` recorded, and
-            :meth:`from_dict` accepts it back, likewise.
-
-        """
-        dict_ = {}  # type: dict[str, Any]
-        for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
-                continue
-
-            out_key = self.__map_reverse__.get(key, key)
-            if isinstance(value, Schema):
-                dict_[out_key] = value.to_dict()
-            else:
-                dict_[out_key] = value
-
-        for key in ('__remainder__', '__remainder_offset__', '__short_read__'):
-            if key in self.__dict__:
-                dict_[key] = self.__dict__[key]
-        return dict_
-
-    def to_bytes(self) -> 'bytes':
-        """Convert :class:`Schema` into :obj:`bytes`."""
-        return self.__bytes__()
-
-    def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':
-        """Get payload of :class:`Schema`.
-
-        Args:
-            name: Name of the payload field.
-
-        Returns:
-            Payload of :class:`Schema` as :obj:`bytes`.
-
-        """
-        if name is None:
-            name = self.__payload__
-
-        field = self.__fields__.get(name)
-        if field is None:
-            raise ProtocolUnbound(f'unknown field: {name!r}')
-        if not isinstance(field, PayloadField):
-            raise ProtocolUnbound(f'not a payload field: {name!r}')
-        return self.__buffer__[name]
-
-    def pack(self, packet: 'Optional[dict[str, Any]]' = None) -> 'bytes':
-        """Pack :class:`Schema` into :obj:`bytes`.
-
-        Args:
-            packet: Packet data.
-
-        Returns:
-            Packed :class:`Schema` as :obj:`bytes`.
-
-        Notes:
-            Since we do not know the length of the packet, we use a
-            reasonable default value ``-1`` for the ``__length__``
-            field, as the :class:`~pcapkit.corekit.fields.field.Field`
-            class will consider negative value as a placeholder.
-
-            If you want to pack the packet with the correct length,
-            please provide the ``__length__`` value before packing.
-
-        """
-        if packet is None:
-            packet = {}
-
-        packet.update(self.__dict__)
-        # NOTE: ``pre_unpack`` is called here as well as from the unpacking path
-        # since a schema may seed ``packet`` keys that both paths need, as
-        # ``pcapkit.protocols.schema.internet.hip.EncryptedParameter`` does.
-        # ``pre_pack`` is what carries the packing-only preparation, such as the
-        # PCAP-NG section header block's byte order magic, which no field of the
-        # schema holds and which therefore cannot be recovered from
-        # ``self.__dict__`` above.
-        self.pre_unpack(packet)
-        self.pre_pack(packet)
-
-        if '__length__' not in packet:
-            packet['__length__'] = -1  # reasonable default value
-
-        for field in self.__fields__.values():
-            field = field(packet)
-
-            # NOTE: Read from the instance rather than with :func:`getattr`, which
-            # finds the *class* attribute when the instance has none -- and a
-            # schema's class attribute for a field is the
-            # :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A
-            # field the caller never set would arrive below as the field rather
-            # than as a value: ``getattr(self, name, None)`` could not return its
-            # ``None``, so the absent-value branches would not fire, and packing
-            # would fail from inside a field object -- naming a field *class*, and
-            # so saying nothing about which field had been left out.
-            data = self.__dict__.get(self.__map__.get(field.name, field.name))
-
-            if isinstance(field, PayloadField):
-                # NOTE: ``ProtocolBase``, not ``Protocol``: ``Protocol`` is a thin
-                # subclass that only adds auto-registration for externally defined
-                # protocols, and no protocol in the library subclasses it. Testing
-                # against it would send any protocol instance -- which is exactly
-                # what :meth:`ProtocolBase._make_payload
-                # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns,
-                # and what ``make``'s own ``bytes | Protocol | Schema`` signature
-                # advertises -- to the ``ProtocolUnbound`` below instead of packing
-                # it, and ``from_data`` could not reconstruct a parsed packet. An
-                # external ``Protocol`` subclass is still a ``ProtocolBase``. The
-                # import is inside the method rather than at module level.
-                from pcapkit.protocols.protocol import \
-                    ProtocolBase  # pylint: disable=import-outside-toplevel
-
-                if data is None:
-                    self.__buffer__[field.name] = b''
-                elif isinstance(data, ProtocolBase):
-                    self.__buffer__[field.name] = bytes(data)
-                elif isinstance(data, bytes):
-                    self.__buffer__[field.name] = data
-                elif isinstance(data, Schema):
-                    self.__buffer__[field.name] = data.pack(packet)
-                else:
-                    raise ProtocolUnbound(f'unsupported type {type(data)}')
-                continue
-
-            if isinstance(field, ListField):
-                if data is None:
-                    self.__buffer__[field.name] = b''
-                elif isinstance(data, bytes):
-                    self.__buffer__[field.name] = data
-                elif isinstance(data, (list, tuple)):
-                    # NOTE: a data model may declare a field ``tuple[...]``
-                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
-                    # 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/
-                    # hip.py -- and ``_read_*`` then hands one straight back
-                    # here on reconstruction. ``ListField.pack`` only ever
-                    # iterates its argument, so it accepts either, and
-                    # rejecting the tuple would break parse-then-reconstruct for
-                    # such a field. ``list(data)`` is a no-op for an actual list
-                    # and keeps ``ListField.pack``'s own ``Optional[list[_TL]]``
-                    # signature honest rather than widening it too.
-                    self.__buffer__[field.name] = field.pack(list(data), packet)
-                else:
-                    raise ProtocolUnbound(f'unsupported type {type(data)}')
-
-                if isinstance(field, OptionField):
-                    # NOTE: The packing mirror of the ``__option_padding__`` that
-                    # :meth:`unpack` records: whatever of the declared option area
-                    # the packed options do not fill. Without it every padding
-                    # field sized from that key packs nothing, and the header
-                    # comes out shorter than its own length field says
-                    # (#1289). An undeclared area (a negative length)
-                    # leaves no remainder.
-                    packet['__option_padding__'] = max(field.length - len(self.__buffer__[field.name]), 0)
-                continue
-
-            if isinstance(field, PaddingField):
-                # NOTE: the octets as captured, or zeros when there are none
-                # (#1223) -- see :meth:`PaddingField.pack
-                # <pcapkit.corekit.fields.strings.PaddingField.pack>`.
-                self.__buffer__[field.name] = field.pack(data, packet)
-                continue
-
-            if isinstance(field, ConditionalField):
-                if not field.test(packet):
-                    self.__buffer__[field.name] = b''
-                    continue
-                field = field.field(packet)
-
-            if isinstance(field, ForwardMatchField):
-                # NOTE: a forward match consumes nothing, so it contributes no
-                # octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`
-                # mirrors this for the same reason -- see the ``ForwardMatchField``
-                # branch there.
-                self.__buffer__[field.name] = b''
-                continue
-
-            try:
-                temp = field.pack(data, packet)
-            except NoDefaultValue:
-                temp = bytes(field.length)
-
-            if isinstance(field, SchemaField) and len(temp) < field.length:
-                # NOTE: :meth:`unpack` hands a nested schema its whole declared
-                # span, and the schema may read less of it than that. The octets
-                # it left unread travel with the nested value as its
-                # ``__remainder__`` -- on the schema itself, or as a key of the
-                # mapping :meth:`to_dict` made of it -- so they are re-emitted
-                # from there, as long as the nested schema still packs to the
-                # ``__remainder_offset__`` octets it was parsed at. Re-emitting
-                # them after a nested schema that has shrunk or grown would put
-                # stale octets at a shifted offset, so then, or for a schema that
-                # never had any, the rest of the span is zero-filled.
-                # Either way the field keeps the width its length field declares
-                # (#1292), and a schema rebuilt through :meth:`from_dict`
-                # packs what the parsed one did (#1380).
-                #
-                # A field reached through a
-                # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
-                # here: the PCAP-NG block selector declares the rest of the
-                # *stream* as its span, which is no part of the field.
-                if isinstance(data, Schema):
-                    record = data.__dict__  # type: Mapping[str, Any]
-                elif isinstance(data, collections.abc.Mapping):
-                    record = data
-                else:
-                    record = {}
-                tail = record.get('__remainder__', b'')
-                if record.get('__remainder_offset__') != len(temp) or len(temp) + len(tail) > field.length:
-                    tail = b''
-                temp += tail + bytes(field.length - len(temp) - len(tail))
-            self.__buffer__[field.name] = temp
-
-        self.post_process(packet)
-        self._cut_short_read()
-        self.__updated__ = False
-        return self.__bytes__()
-
     def _note_short_read(self, name: 'str', length: 'int', byte: 'bytes') -> 'None':
         """Record the first field the data ends inside, for :meth:`_cut_short_read`.
 
@@ -1001,214 +1209,6 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             elif key == name:
                 self.__buffer__[key] = self.__buffer__[key][:count]
                 cut = True
-
-    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
-        """Prepare ``packet`` data for packing process.
-
-        Args:
-            packet: packet data
-
-        Note:
-            This method is expected to directly modify any data stored
-            in the ``packet`` and thus no return is required.
-
-        """
-
-    @classmethod
-    @prepare
-    def unpack(cls, data: 'bytes | IO[bytes]',
-               length: 'Optional[int]' = None,
-               packet: 'Optional[dict[str, Any]]' = None) -> 'Self':
-        """Unpack :obj:`bytes` into :class:`Schema`.
-
-        Args:
-            data: Packed data.
-            length: Length of data.
-            packet: Unpacked data.
-
-        Returns:
-            Unpacked data as :class:`Schema`.
-
-        Notes:
-            A ``__length__`` key in ``packet`` records the length of the
-            remaining data, which is used to determine the length of the
-            payload field.
-
-            When this schema is nested -- unpacked through a
-            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
-            directly -- ``packet`` is not the enclosing schema's own data, but
-            a context built by
-            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name
-            this schema does not itself
-            declare falls through to the enclosing schema, and the enclosing
-            schema is also reachable unconditionally under a ``__packet__``
-            key. See that function for the exact lookup, write and iteration
-            semantics.
-
-            We also use an ``__option_padding__`` key in ``packet`` to record how
-            much of an
-            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
-            area it did not consume. What follows that area decides what the
-            remainder means: usually padding, to be skipped, but a schema may
-            equally read it as further options, as the PCAP-NG name resolution
-            block does with its records and options.
-
-            An :class:`~pcapkit.corekit.fields.collections.OptionField`
-            declares the size of the whole area it may read, but stops at the
-            end-of-option-list marker and reports the unconsumed remainder
-            through ``__option_padding__``. Since that remainder has not been
-            parsed, we rewind ``data`` by it, so that the fields which size
-            themselves from ``__option_padding__`` read the remainder itself
-            rather than the same number of octets from beyond it.
-
-        """
-        # force cast arg type since decorator changed their signatures
-        if TYPE_CHECKING:
-            data = cast('IO[bytes]', data)
-            length = cast('int', length)
-            packet = cast('dict[str, Any]', packet)
-
-        self = cls.__new__(cls)
-        for field in self.__fields__.values():
-            field = field(packet)
-
-            # NOTE: ``Field.length`` recomputes struct.calcsize() on every read,
-            # so it is read once per field here rather than at each use.
-            if isinstance(field, PayloadField):
-                # NOTE: A negative length is the unset default and takes what
-                # the declared length leaves, never less than nothing; a
-                # computed zero is an empty payload, not an unset one, or it
-                # would swallow the fields after it (#1275).
-                length = field.length
-                if length < 0:
-                    length = max(cast('int', packet['__length__']), 0)
-
-                # NOTE: A declared length is asked for no further than one read
-                # can go, :data:`sys.maxsize`; past it the read raises
-                # :exc:`OverflowError` rather than coming back short, which is
-                # how every other overrun is reported. No stream holds more than
-                # that, so the bounded read is the same short read (#1975).
-                payload = data.read(min(length, sys.maxsize))
-                self.__buffer__[field.name] = payload
-
-                packet['__length__'] -= length
-                packet[field.name] = payload
-
-                setattr(self, field.name, payload)
-                continue
-
-            if isinstance(field, PaddingField):
-                length = field.length
-
-                byte = data.read(length)
-                self.__buffer__[field.name] = byte
-                self._note_short_read(field.name, length, byte)
-
-                packet[field.name] = byte
-                packet['__length__'] -= length
-
-                setattr(self, field.name, byte)
-                continue
-
-            if isinstance(field, ConditionalField):
-                if not field.test(packet):
-                    self.__buffer__[field.name] = b''
-                    setattr(self, field.name, None)
-                    packet[field.name] = NO_VALUE
-                    continue
-                field = field.field(packet)
-
-            length = field.length
-
-            # NOTE: bounded as the payload read above is (#1975).
-            byte = data.read(min(length, sys.maxsize))
-            self.__buffer__[field.name] = byte
-            if not isinstance(field, ForwardMatchField):
-                self._note_short_read(field.name, length, byte)
-
-            value = field.unpack(byte, packet.copy())
-            if isinstance(field, SchemaField) and isinstance(value, Schema):
-                # NOTE: Kept on the nested schema rather than only in
-                # ``__buffer__``, so that the octets it left unread go wherever
-                # the value goes, :meth:`to_dict` included; see :meth:`pack`.
-                # The width read is summed from the nested buffers rather than
-                # taken with :func:`len`, which may pack the schema again.
-                consumed = sum(map(len, value.__buffer__.values()))
-                if len(byte) > consumed:
-                    value.__dict__['__remainder__'] = byte[consumed:]
-                    value.__dict__['__remainder_offset__'] = consumed
-            setattr(self, field.name, value)
-
-            packet[field.name] = value
-
-            if isinstance(field, OptionField):
-                packet['__option_padding__'] = field.option_padding
-
-            if isinstance(field, ForwardMatchField):
-                # NOTE: a forward match reads ``length`` octets so a later field
-                # can size itself from them, but consumes neither the stream
-                # (the rewind below) nor ``__length__`` (no decrement in this
-                # branch). ``self.__buffer__[field.name]`` above still holds the
-                # octets just read, so it is zeroed here, as :meth:`pack` does for
-                # the same field type: ``__bytes__``/``__len__`` concatenate every
-                # slot in ``__buffer__``, and the octets are read again, for real,
-                # by whichever field actually needs them, so keeping them would
-                # over-report the schema's length by the forward match's width.
-                # Zeroing is also what lets a declared area checked against
-                # ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
-                # and :class:`~pcapkit.corekit.fields.collections.ListField` both
-                # do this -- see the octets actually consumed.
-                #
-                # The rewind is by the octets actually read, not by ``length``:
-                # near the end of the stream the read comes back short, and
-                # rewinding the full width would move the stream *before* the
-                # forward match, so the fields after it would re-read the
-                # preceding octet as their first.
-                data.seek(-len(byte), io.SEEK_CUR)
-                self.__buffer__[field.name] = b''
-            elif isinstance(field, OptionField) and field.option_padding > 0:
-                # the option list ended before the declared field length was
-                # exhausted; give the unconsumed remainder back to ``data``
-                # so that the following fields can read it
-                data.seek(-field.option_padding, io.SEEK_CUR)
-                consumed = length - field.option_padding
-
-                self.__buffer__[field.name] = byte[:consumed]
-                packet['__length__'] -= consumed
-            else:
-                packet['__length__'] -= length
-
-            if packet['__length__'] < 0:
-                warn(f'packet length < 0: {packet["__length__"]}',
-                     SchemaWarning, stacklevel=stacklevel())
-
-        self.__updated__ = False
-        return self
-
-    @classmethod
-    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
-        """Prepare ``packet`` data for unpacking process.
-
-        Args:
-            packet: packet data
-
-        Note:
-            This method is expected to directly modify any data stored
-            in the ``packet`` and thus no return is required.
-
-        """
-
-    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
-        """Revise ``schema`` data after packing and/or unpacking process.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        return self
 
 
 class _EnumRegistry(collections.defaultdict):
@@ -1361,6 +1361,53 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
         """
         return self.__enum__
 
+    @classmethod
+    def register(cls, code: '_ET', schema: 'Type[Self]') -> 'None':
+        """Register enumeration to :attr:`__enum__` mapping.
+
+        Args:
+            code: Enumeration code.
+            schema: Enumeration schema.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already
+                registered, naming the displaced schema and its replacement.
+
+        Note:
+            Every public registrar in
+            :mod:`pcapkit.foundation.registry.protocols` that accepts a
+            ``schema`` registers two halves of one binding -- a parser class
+            through e.g. :meth:`IPv4.register_option
+            <pcapkit.protocols.internet.ipv4.IPv4.register_option>`, and a
+            schema class through this method. Both warn on an overwrite, so one
+            ``register_ipv4_option`` call replacing a built-in reports the
+            schema it displaced as well as the parser.
+
+            The warning fires only when the incumbent differs from the
+            replacement: a repeat call that names the exact same schema object
+            is a caller replaying a registration, not a mistake, so it is a
+            silent no-op.
+
+            Presence is a faithful "was this really registered" test only because
+            :class:`_EnumRegistry` returns a miss without recording it. A plain
+            :class:`collections.defaultdict` would insert :attr:`__default__` the
+            first time any unregistered ``code`` was looked up, so parsing a
+            single packet carrying an unknown code would make the next legitimate
+            registration for that code warn about an entry no caller ever asked
+            for.
+
+            :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this
+            method with a namespaced registry of its own and does not delegate
+            here, so it is guarded separately.
+
+        """
+        incumbent = cls.__enum__.get(code)  # type: ignore[arg-type]
+        if incumbent is not None and incumbent is not schema:
+            warn(f'schema {code} already registered, overwriting '
+                 f'{incumbent!r} with {schema!r}', RegistryWarning)
+
+        cls.__enum__[code] = schema  # type: ignore[index]
+
     def __init_subclass__(cls, /, code: 'Optional[_ET | Iterable[_ET]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Register enumeration to :attr:`registry` mapping.
 
@@ -1440,53 +1487,6 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                     warn(f'schema {_code} already registered, overwriting '
                          f'{incumbent!r} with {cls!r}', RegistryWarning)
                 cls.__enum__[_code] = (cls)  # type: ignore[index]
-
-    @classmethod
-    def register(cls, code: '_ET', schema: 'Type[Self]') -> 'None':
-        """Register enumeration to :attr:`__enum__` mapping.
-
-        Args:
-            code: Enumeration code.
-            schema: Enumeration schema.
-
-        Warns:
-            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already
-                registered, naming the displaced schema and its replacement.
-
-        Note:
-            Every public registrar in
-            :mod:`pcapkit.foundation.registry.protocols` that accepts a
-            ``schema`` registers two halves of one binding -- a parser class
-            through e.g. :meth:`IPv4.register_option
-            <pcapkit.protocols.internet.ipv4.IPv4.register_option>`, and a
-            schema class through this method. Both warn on an overwrite, so one
-            ``register_ipv4_option`` call replacing a built-in reports the
-            schema it displaced as well as the parser.
-
-            The warning fires only when the incumbent differs from the
-            replacement: a repeat call that names the exact same schema object
-            is a caller replaying a registration, not a mistake, so it is a
-            silent no-op.
-
-            Presence is a faithful "was this really registered" test only because
-            :class:`_EnumRegistry` returns a miss without recording it. A plain
-            :class:`collections.defaultdict` would insert :attr:`__default__` the
-            first time any unregistered ``code`` was looked up, so parsing a
-            single packet carrying an unknown code would make the next legitimate
-            registration for that code warn about an entry no caller ever asked
-            for.
-
-            :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this
-            method with a namespaced registry of its own and does not delegate
-            here, so it is guarded separately.
-
-        """
-        incumbent = cls.__enum__.get(code)  # type: ignore[arg-type]
-        if incumbent is not None and incumbent is not schema:
-            warn(f'schema {code} already registered, overwriting '
-                 f'{incumbent!r} with {schema!r}', RegistryWarning)
-
-        cls.__enum__[code] = schema  # type: ignore[index]
 
 
 def keep_short_read(protocol: 'ProtocolBase') -> 'None':
