@@ -158,7 +158,7 @@ class TestOverrides(_KeepsState):
         self.assertEqual(interface.block, BlockType.Interface_Description_Block)
 
     def test_httpv2(self) -> 'None':
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         kwargs = {'type': 0x00, 'sid': 1, 'frame': {'data': b'abc'}}
         frame = HTTPv2(**kwargs)

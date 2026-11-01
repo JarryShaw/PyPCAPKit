@@ -98,9 +98,9 @@ The protocol classes :mod:`pcapkit` ships:
 + Application Layer                                                +----------------+-----------------------+-------------------------------------------------------------+
 | (:class:`~pcapkit.protocols.application.application.Application` |                | :class:`pcapkit.protocols.application.http.HTTP`                                    |
 + subclasses)                                                      +                +-----------------------+-------------------------------------------------------------+
-|                                                                  | HTTP Family    | :class:`pcapkit.protocols.application.httpv1.HTTP`                                  |
+|                                                                  | HTTP Family    | :class:`pcapkit.protocols.application.httpv1.HTTPv1`                                |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.application.httpv2.HTTP`                                  |
+|                                                                  |                | :class:`pcapkit.protocols.application.httpv2.HTTPv2`                                |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.application.ngap.NGAP`                                                     |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
@@ -406,7 +406,7 @@ writes them:
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_cause`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTP`        | :attr:`HTTP.__frame__ <pcapkit.protocols.application.httpv2.HTTP.__frame__>`                  | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
+| Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTPv2`      | :attr:`HTTPv2.__frame__ <pcapkit.protocols.application.httpv2.HTTPv2.__frame__>`              | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`PCAPNG.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_pcapng_block`       |
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+

@@ -52,6 +52,20 @@ def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes
     )
 
 
+def base_read(raw: bytes) -> object:
+    """Parse ``raw`` with the base's own ``read``, on a bare instance.
+
+    ``HTTP(...)`` gives the member and never runs the base's ``read`` (#2544), so
+    ``_guess_version`` is reached this way.
+    """
+    from pcapkit.protocols.application.http import HTTP
+
+    http = object.__new__(HTTP)
+    http._data = raw
+    http.__cached__ = {}
+    return http.read(len(raw))
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPUnitTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -89,7 +103,7 @@ class HTTPUnitTests(unittest.TestCase):
         http._version = '1.1'
         http._length = 42
 
-        self.assertEqual(HTTP.id(), ('HTTP', 'HTTPv1', 'HTTPv2'))
+        self.assertEqual(HTTP.id(), ('HTTP/1', 'HTTP/2'))
         self.assertEqual(http.name, 'Hypertext Transfer Protocol')
         self.assertEqual(http.alias, 'HTTP/1.1')
         self.assertEqual(http.version, '1.1')
@@ -132,12 +146,12 @@ class HTTPUnitTests(unittest.TestCase):
         http._file = object()
         http.__cached__ = {}
 
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', FakeHTTPv1):
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1', FakeHTTPv1):
             self.assertEqual(http.read(version=1, marker=True), 'v1-info')
         self.assertEqual(http.version, '1.1')
         self.assertEqual(http.length, 11)
 
-        with mock.patch('pcapkit.protocols.application.httpv2.HTTP', FakeHTTPv2):
+        with mock.patch('pcapkit.protocols.application.httpv2.HTTPv2', FakeHTTPv2):
             self.assertEqual(http.read(length=9, version=2), 'v2-info')
         self.assertEqual(http.version, '2')
         self.assertEqual(http.length, 22)
@@ -147,9 +161,9 @@ class HTTPUnitTests(unittest.TestCase):
             self.assertEqual(http.read(), 'v1-info')
         guess.assert_called_once_with(len(http._data))
 
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', FakeHTTPv1):
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1', FakeHTTPv1):
             self.assertEqual(http.make(version=1, path='/'), ('v1-made', {'path': '/'}))
-        with mock.patch('pcapkit.protocols.application.httpv2.HTTP', FakeHTTPv2):
+        with mock.patch('pcapkit.protocols.application.httpv2.HTTPv2', FakeHTTPv2):
             self.assertEqual(http.make(version=2, sid=1), ('v2-made', {'sid': 1}))
 
         # The HTTP/2 arm runs only on a frame header a sender could write
@@ -160,15 +174,15 @@ class HTTPUnitTests(unittest.TestCase):
         frame._file = object()
         frame.__cached__ = {}
 
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1',
                         mock.Mock(side_effect=ProtocolError('bad v1'))), \
-                mock.patch('pcapkit.protocols.application.httpv2.HTTP', FakeHTTPv2):
+                mock.patch('pcapkit.protocols.application.httpv2.HTTPv2', FakeHTTPv2):
             self.assertIsInstance(HTTP._guess_version(frame, 9), FakeHTTPv2)
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', FakeHTTPv1):
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1', FakeHTTPv1):
             self.assertIsInstance(HTTP._guess_version(http, 9), FakeHTTPv1)
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1',
                         mock.Mock(side_effect=ProtocolError('bad v1'))), \
-                mock.patch('pcapkit.protocols.application.httpv2.HTTP',
+                mock.patch('pcapkit.protocols.application.httpv2.HTTPv2',
                            mock.Mock(side_effect=ProtocolError('bad v2'))):
             with self.assertRaises(ProtocolError):
                 HTTP._guess_version(frame, 9)
@@ -193,8 +207,8 @@ class HTTPUnitTests(unittest.TestCase):
         threaded through.
         """
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTPv1
-        from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTPv2
+        from pcapkit.protocols.schema.application.httpv1 import HTTPv1 as Schema_HTTPv1
+        from pcapkit.protocols.schema.application.httpv2 import HTTPv2 as Schema_HTTPv2
 
         http = object.__new__(HTTP)
 
@@ -269,11 +283,11 @@ class HTTPUnitTests(unittest.TestCase):
         http._file = object()
         http.__cached__ = {}
 
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', RecordingHTTP):
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1', RecordingHTTP):
             http.read(version=1)
         self.assertIs(http._http.received, http._data)
 
-        with mock.patch('pcapkit.protocols.application.httpv2.HTTP', RecordingHTTP):
+        with mock.patch('pcapkit.protocols.application.httpv2.HTTPv2', RecordingHTTP):
             http.read(version=2)
         self.assertIs(http._http.received, http._data)
 
@@ -312,9 +326,9 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_read_explicit_version_still_wraps_a_bare_value_error(self) -> None:
         """``HTTP.read``'s ``except ValueError`` net is kept, and is pinned here.
 
-        ``httpv1.HTTP`` does not raise a bare :class:`ValueError` (#787), so no
+        ``httpv1.HTTPv1`` does not raise a bare :class:`ValueError` (#787), so no
         real payload reaches that net, and ``..._wraps_malformed_payload`` above
-        gets its chained ``__cause__`` from ``httpv1.HTTP``. The net is kept
+        gets its chained ``__cause__`` from ``httpv1.HTTPv1``. The net is kept
         because the guarantee is the explicit path's and not one delegate's: a
         :class:`ValueError` out of *either* versioned class must reach the
         caller as a :class:`~pcapkit.utilities.exceptions.ProtocolError`. Pinned
@@ -332,7 +346,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         for version, module in ((1, 'httpv1'), (2, 'httpv2')):
             with self.subTest(version=version):
-                with mock.patch(f'pcapkit.protocols.application.{module}.HTTP',
+                with mock.patch(f'pcapkit.protocols.application.{module}.HTTPv{version}',
                                 mock.Mock(side_effect=ValueError('boom'))):
                     with self.assertRaises(ProtocolError) as ctx:
                         http.read(version=version)
@@ -342,7 +356,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         # A ``ProtocolError`` from the delegate is re-raised as it is, not
         # re-labelled with the version it was dispatched on.
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1',
                         mock.Mock(side_effect=ProtocolError('HTTP: invalid format'))):
             with self.assertRaises(ProtocolError) as ctx:
                 http.read(version=1)
@@ -360,7 +374,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.http.method import Method
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         wire = b'GET /index.html HTTP/1.1\r\nHost: example.test\r\n\r\nbody'
         data = HTTPv1(wire, len(wire)).info
@@ -377,7 +391,7 @@ class HTTPUnitTests(unittest.TestCase):
         """As for HTTP/1.*, from parsed data, and with no ``length`` (#1154)."""
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         wire = bytes.fromhex('00000400010000000162796520')
         data = HTTPv2(wire, len(wire)).info
@@ -393,7 +407,7 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_guess_version_falls_through_to_the_http2_arm(self) -> None:
         """``_guess_version`` must reach its second arm (#787).
 
-        Guards against ``httpv1.HTTP`` failing with a bare :class:`ValueError`,
+        Guards against ``httpv1.HTTPv1`` failing with a bare :class:`ValueError`,
         which ``contextlib.suppress(ProtocolError)`` does not catch: the
         exception would leave ``_guess_version`` from the *first* arm, and the
         HTTP/2 arm below it would be dead code. ``assertRaises(ValueError)``
@@ -421,8 +435,8 @@ class HTTPUnitTests(unittest.TestCase):
         http._data = bytes.fromhex('0000ff000000000001') + b'x' * 6
 
         entered = []  # type: list[str]
-        real_v1 = importlib.import_module('pcapkit.protocols.application.httpv1').HTTP
-        real_v2 = importlib.import_module('pcapkit.protocols.application.httpv2').HTTP
+        real_v1 = importlib.import_module('pcapkit.protocols.application.httpv1').HTTPv1
+        real_v2 = importlib.import_module('pcapkit.protocols.application.httpv2').HTTPv2
 
         def record(name: str, real: object) -> object:
             def spy(*args: object, **kwargs: object) -> object:
@@ -430,9 +444,9 @@ class HTTPUnitTests(unittest.TestCase):
                 return real(*args, **kwargs)  # type: ignore[operator]
             return spy
 
-        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1',
                         record('httpv1', real_v1)), \
-             mock.patch('pcapkit.protocols.application.httpv2.HTTP',
+             mock.patch('pcapkit.protocols.application.httpv2.HTTPv2',
                         record('httpv2', real_v2)):
             with self.assertRaises(ProtocolError):
                 HTTP._guess_version(http, len(http._data))
@@ -446,10 +460,10 @@ class HTTPUnitTests(unittest.TestCase):
         """The literal #787 reproduction: the HTTP/2 connection preface.
 
         ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` plus a SETTINGS frame is
-        what an HTTP/2 connection opens with, and ``httpv2.HTTP`` parses the
+        what an HTTP/2 connection opens with, and ``httpv2.HTTPv2`` parses the
         *frame* (on its own) and reports ``version='2'``. Guards against the
         guess raising ``ValueError: not enough values to unpack (expected 2, got
-        1)`` from ``httpv1.HTTP`` instead, which keeps it from the answer its own
+        1)`` from ``httpv1.HTTPv1`` instead, which keeps it from the answer its own
         second arm has.
 
         Asserted against the explicit ``version=2`` path rather than on its own,
@@ -706,7 +720,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
 
     def test_start_line_predicate_agrees_with_the_httpv1_parser(self) -> None:
-        """``test_start_line`` must accept exactly what ``httpv1.HTTP`` accepts.
+        """``test_start_line`` must accept exactly what ``httpv1.HTTPv1`` accepts.
 
         The predicate classifies and the parser parses, and they are two
         statements of the same rule -- which is why the two share one copy of
@@ -717,14 +731,14 @@ class HTTPUnitTests(unittest.TestCase):
         and #800 are both about.
 
         Pinned by construction rather than by inspection -- each payload is run
-        through ``httpv1.HTTP`` as well as through the predicate, so the two
+        through ``httpv1.HTTPv1`` as well as through the predicate, so the two
         cannot be edited apart without this failing.
 
         """
         import io
 
         from pcapkit.protocols.application.http import test_start_line
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         accepted = (
@@ -875,7 +889,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         ``_guess_version``'s closing ``raise`` is only reachable when *both*
         arms fail with :class:`~pcapkit.utilities.exceptions.ProtocolError`, so
-        it needs a payload that ``httpv2.HTTP`` rejects too -- a frame whose
+        it needs a payload that ``httpv2.HTTPv2`` rejects too -- a frame whose
         declared length contradicts its type. A PING frame carries eight octets
         of opaque data and so must declare 8 [:rfc:`9113#section-6.7`]; 0 is
         refused by ``_read_http_ping``.
@@ -898,14 +912,14 @@ class HTTPUnitTests(unittest.TestCase):
         raw = http2_frame_bytes(0x06, 0x00, 0, b'')  # PING, declared length 0
 
         with self.assertRaises(ProtocolError) as ctx:
-            HTTP(io.BytesIO(raw), len(raw))
+            base_read(raw)
         self.assertEqual(str(ctx.exception), 'HTTP: unknown version')
 
     def test_guess_version_reports_unknown_version_for_a_short_payload(self) -> None:
         """A payload too short for an HTTP/2 frame header must not leak :exc:`struct.error`.
 
         With the HTTP/2 arm reachable (#787), a payload the HTTP/1 arm declines
-        goes on into ``httpv2.HTTP``. Guards against a payload under nine octets
+        goes on into ``httpv2.HTTPv2``. Guards against a payload under nine octets
         failing *inside* the schema machinery rather than in ``read``:
         :func:`struct.calcsize` handed a template built from a negative length
         raises :exc:`struct.error`, which derives straight from
@@ -920,10 +934,10 @@ class HTTPUnitTests(unittest.TestCase):
         the property at stake; "a caller who catches protocol errors catches
         this" is.
 
-        ``httpv2.HTTP.unpack`` refuses a buffer under nine octets with
+        ``httpv2.HTTPv2.unpack`` refuses a buffer under nine octets with
         ``ProtocolError`` before the schema layer runs (#799), so that
         :exc:`struct.error` is what the guard prevents rather than what such a
-        payload meets. Both routes into ``httpv2.HTTP`` -- the guess and
+        payload meets. Both routes into ``httpv2.HTTPv2`` -- the guess and
         ``HTTP(..., version=2)`` -- reach the same short-buffer path, so both are
         pinned here.
 
@@ -957,15 +971,15 @@ class HTTPUnitTests(unittest.TestCase):
                     HTTP(io.BytesIO(short), len(short))
 
     def test_httpv1_read_raises_protocol_error_for_a_malformed_message(self) -> None:
-        """The chosen #787 fix, at its source: ``httpv1.HTTP`` raises ``ProtocolError``.
+        """The chosen #787 fix, at its source: ``httpv1.HTTPv1`` raises ``ProtocolError``.
 
         Both of the unpackings that a non-HTTP/1 payload lands short on are
         covered -- the header/body separator in ``read``, and the start line in
         ``_read_http_header`` -- since either alone leaves the other leaking a
         bare :class:`ValueError`, and the reproduction only reaches the second.
 
-        Asserted on ``httpv1.HTTP`` directly rather than through the proxy
-        because the contract holds for every caller of ``httpv1.HTTP``, not only
+        Asserted on ``httpv1.HTTPv1`` directly rather than through the proxy
+        because the contract holds for every caller of ``httpv1.HTTPv1``, not only
         for ``_guess_version``'s first arm.
 
         ``__cause__`` is asserted because the chain is what keeps the underlying
@@ -976,7 +990,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -1011,7 +1025,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.protocols.application.http import HTTP, test_start_line
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.protocols.application.httpv1 import Type
 
         raw = b'GET / HTTP/1.0\r\n\r\n'
@@ -1033,7 +1047,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.protocols.application.http import HTTP, test_start_line
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.protocols.application.httpv1 import Type
 
         raw = b'HTTP/1.0 200 OK\r\n\r\nbody'
@@ -1063,7 +1077,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         request = HTTPv1(method='GET', uri='/', http_version='1.1')
         self.assertEqual(request.data, b'GET / HTTP/1.1\r\n\r\n')
@@ -1093,7 +1107,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         cases = {
             'request with headers': (b'GET / HTTP/1.1\r\nHost: a\r\n\r\n', True),
@@ -1124,7 +1138,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.protocols.application.http import HTTP, test_start_line
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -1163,7 +1177,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -1206,7 +1220,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         cases = (
             ('space continuation', b'GET / HTTP/1.1\r\nX-Long: a\r\n   b\r\nHost: e\r\n\r\n'),
@@ -1250,7 +1264,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         def fields(raw: bytes) -> object:
             return list(HTTPv1(io.BytesIO(raw), len(raw)).info.header.items())
@@ -1296,7 +1310,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual([v for v in values if '\t' in v], [])
 
     def test_httpv1_never_lets_a_bare_exception_escape(self) -> None:
-        """The invariant behind #787: ``httpv1.HTTP`` fails only as ``ProtocolError``.
+        """The invariant behind #787: ``httpv1.HTTPv1`` fails only as ``ProtocolError``.
 
         A bare exception out of ``httpv1`` escapes ``_guess_version``'s
         suppression, so every site that raises one adds a class of payload the
@@ -1315,7 +1329,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         payloads = (
@@ -1354,7 +1368,7 @@ class HTTPUnitTests(unittest.TestCase):
                     pass  # the only permitted failure
                 except BaseException as exc:  # noqa: B036 # pragma: no cover
                     self.fail(f'{label}: bare {type(exc).__module__}.'
-                              f'{type(exc).__qualname__} escaped httpv1.HTTP: {exc}')
+                              f'{type(exc).__qualname__} escaped httpv1.HTTPv1: {exc}')
 
     def test_httpv1_passes_maxsplit_to_re_split_by_keyword(self) -> None:
         """``re.split``'s ``maxsplit`` must be a keyword, or #787 recurs verbatim.
@@ -1374,7 +1388,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
         import warnings
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         raw = b'GET /index.html HTTP/1.1\r\nHost: example.com\r\nX-A: b\r\n\r\nbody'
 
@@ -1402,7 +1416,7 @@ class HTTPUnitTests(unittest.TestCase):
         best case, needing arm 2 to decline as well.
 
         The *outer*-header slice of the class this suppression exists for is
-        refused by ``httpv2.HTTP.unpack``, which rejects a buffer under nine
+        refused by ``httpv2.HTTPv2.unpack``, which rejects a buffer under nine
         octets before the schema layer runs (#799), and the *inner* slice by
         ``FieldBase.length``, where a resolved field length going negative
         raises ``ProtocolError`` rather than a bare :exc:`struct.error` (#805).
@@ -1415,7 +1429,7 @@ class HTTPUnitTests(unittest.TestCase):
         below for the inner one.
 
         It is also unnecessary: nothing reaches a :exc:`struct.error` through
-        ``httpv1.HTTP``. Nine byte patterns over lengths 0-24, on both the direct
+        ``httpv1.HTTPv1``. Nine byte patterns over lengths 0-24, on both the direct
         route and ``read(version=1)``, answered ``ProtocolError`` 450 times out of
         450.
 
@@ -1446,22 +1460,22 @@ class HTTPUnitTests(unittest.TestCase):
 
         for label, error in faults:
             with self.subTest(fault=label):
-                with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+                with mock.patch('pcapkit.protocols.application.httpv1.HTTPv1',
                                 mock.Mock(side_effect=error)):
                     # It must propagate, not be swallowed into an HTTP/2 answer.
                     with self.assertRaises(struct.error):
-                        HTTP(io.BytesIO(raw), len(raw))
+                        base_read(raw)
 
     def test_guess_version_does_not_leak_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
         """A buffer that clears nine octets must not crash one field further in.
 
-        #799's ``httpv2.HTTP.unpack`` guard only protects the fixed nine-octet
+        #799's ``httpv2.HTTPv2.unpack`` guard only protects the fixed nine-octet
         *outer* header. A ``GOAWAY`` frame's own fixed ``stream`` (4 octets) and
         ``error`` (4 octets) fields consume eight more octets before ``debug``
         is even reached, so a sixteen-octet buffer -- nine for the header, seven
         for the rest -- drives ``pkt['__length__']`` to ``-1`` at ``debug``.
         Guards against that raising a bare :exc:`struct.error` straight through
-        ``httpv2.HTTP``. The root is generic ``FieldBase.length``
+        ``httpv2.HTTPv2``. The root is generic ``FieldBase.length``
         (``struct.calcsize`` on a negative-count template), shared by many
         schema modules, not something httpv2-specific, and it is handled there
         (#805) -- so direct construction raises :exc:`ProtocolError` too.
@@ -1478,7 +1492,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         # GOAWAY (type 0x07), sid 0, declared length 0x15 (21 octets of
@@ -1531,8 +1545,8 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv1_id_make_data_and_request_construction(self) -> None:
         from pcapkit.const.http.method import Method
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.schema.application.httpv1 import HTTPv1 as Schema_HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv1)
@@ -1549,7 +1563,7 @@ class HTTPUnitTests(unittest.TestCase):
             raw_header=(),
         )
 
-        self.assertEqual(HTTPv1.id(), ('HTTP', 'HTTPv1'))
+        self.assertEqual(HTTPv1.id(), ('HTTP/1',))
         self.assertEqual(proto.version, '1.0')
         self.assertEqual(proto.alias, 'HTTP/1.0')
         self.assertIn(b'GET /index.html HTTP/1.1\r\n', schema.data)
@@ -1674,7 +1688,7 @@ class HTTPUnitTests(unittest.TestCase):
         would parse it as a method named ``G``.
         """
         from pcapkit.const.http.method import Method
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv1)
@@ -1721,7 +1735,7 @@ class HTTPUnitTests(unittest.TestCase):
         base 10: b'200x'``, and ``b'HTTP/1.1 2000 OK'`` -> ``ValueError: 2000 is
         not a valid StatusCode``.
         """
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv1)
@@ -1740,7 +1754,7 @@ class HTTPUnitTests(unittest.TestCase):
 
     def test_httpv1_response_construction_and_missing_request_uri_error(self) -> None:
         from pcapkit.const.http.status_code import StatusCode
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv1)
@@ -1758,7 +1772,7 @@ class HTTPUnitTests(unittest.TestCase):
 
     def test_httpv2_id_length_make_bytes_and_register_frame_warning(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         proto = object.__new__(HTTPv2)
         original = HTTPv2.__dict__['__frame__'][Frame.DATA]
@@ -1767,7 +1781,7 @@ class HTTPUnitTests(unittest.TestCase):
             with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
                 HTTPv2.register_frame(Frame.DATA, 'headers')
 
-            self.assertEqual(HTTPv2.id(), ('HTTP', 'HTTPv2'))
+            self.assertEqual(HTTPv2.id(), ('HTTP/2',))
             self.assertEqual(proto.alias, 'HTTP/2')
             self.assertEqual(proto.version, '2')
             self.assertEqual(proto.length, 9)
@@ -1786,7 +1800,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         #425's defect on HTTP/2 frame dispatch. ``__frame__`` is a
         :class:`collections.defaultdict` on a class attribute shared by every
-        :class:`~pcapkit.protocols.application.httpv2.HTTP` instance in the
+        :class:`~pcapkit.protocols.application.httpv2.HTTPv2` instance in the
         process, so ``__frame__[type]`` inserted every frame type it missed --
         and the value it inserted was ``'none'``, which the default factory
         returns anyway.
@@ -1799,7 +1813,7 @@ class HTTPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         # Length 4, type 0xF0, no flags, stream 1, then four octets of payload.
         # The length counts the payload only [:rfc:`9113#section-4.1`].
@@ -1828,7 +1842,7 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.const.http.error_code import ErrorCode
         from pcapkit.const.http.frame import Frame
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         proto = object.__new__(HTTPv2)
 
@@ -1943,7 +1957,7 @@ class HTTPUnitTests(unittest.TestCase):
 
     def test_httpv2_frame_readers_reject_malformed_lengths(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv2)
@@ -1972,7 +1986,7 @@ class HTTPUnitTests(unittest.TestCase):
 
     def test_httpv2_read_validates_common_frame_header_rules(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HTTPv2)
@@ -2097,7 +2111,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         def frame(declared: int, buflen: int, type_: int = 0x00) -> bytes:
@@ -2134,7 +2148,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         exactly_nine = http2_frame_bytes(0x00, 0x00, 1, b'')
@@ -2157,7 +2171,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         payload = b'{"ok":true}\n'
         raw = http2_frame_bytes(0x00, 0x00, 1, payload)
@@ -2182,7 +2196,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for size in range(0, 9):
@@ -2207,7 +2221,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError, StreamEOFError
 
         for size in range(1, 9):
@@ -2224,7 +2238,7 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
         from pcapkit.const.http.setting import Setting
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.data.application.httpv2 import PingFrame, PingFrameFlags
         from pcapkit.protocols.schema.application import httpv2 as schema_httpv2
         from pcapkit.protocols.schema.application.httpv2 import DataFrame, SettingPair
@@ -2486,7 +2500,7 @@ class HTTPUnitTests(unittest.TestCase):
 
     def test_httpv2_callable_frame_registry_paths(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.schema.application import httpv2 as schema_httpv2
 
         custom = Frame.get(250)
@@ -2575,7 +2589,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.schema.application.httpv2 import DataFrame
 
         for end_stream, flags_octet in ((False, 0x00), (True, 0x01)):
@@ -2611,7 +2625,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.schema.application.httpv2 import (DataFrame, FrameType,
                                                                  UnassignedFrame)
 

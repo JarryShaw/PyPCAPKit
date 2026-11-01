@@ -89,7 +89,7 @@ CASES = (
     ('sctp', 'transport.sctp:SCTP', {}, bytes.fromhex(
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
     ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),
-    ('http1', 'application.httpv1:HTTP', {}, b'GET / HTTP/1.1\r\n\r\n'),
+    ('http1', 'application.httpv1:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
 )
 
 

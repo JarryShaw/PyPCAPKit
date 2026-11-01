@@ -297,6 +297,9 @@ worth stating because the opposite is easy to assume -- measured on ``1.5.0b8``,
 is in the source distribution *and* in the wheel, and each imports as a
 namespace-package submodule. What they are not is a *package*: none of those
 directories carries an :file:`__init__.py`, so ``find_packages`` omits all of them.
+:file:`tests/project/test_docs_module_pages_2559_unit.py` fails on a module with no
+``module``, ``currentmodule`` or ``automodule`` directive, and on a placeholder that
+gains one.
 
 When something is removed, its documentation entry goes with it -- carrying a
 deprecation note where a user could have depended on the thing, and deleted outright

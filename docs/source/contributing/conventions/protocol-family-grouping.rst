@@ -21,12 +21,12 @@ The member list takes either of these forms:
   :class:`~pcapkit.protocols.internet.esp.ESP` are not in it, since they belong to
   the separate abstract :class:`~pcapkit.protocols.internet.ipsec.IPsec`, whose
   :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id` is ``('AH', 'ESP')``.
+  :meth:`HTTP.id() <pcapkit.protocols.application.http.HTTP.id>` is
+  ``('HTTP/1', 'HTTP/2')``.
 * **The base's own name, then the members.**
   :meth:`VLAN.id() <pcapkit.protocols.link.vlan.VLAN.id>` is
-  ``('VLAN', 'C_Tag', 'S_Tag')``,
-  :meth:`L2TP.id() <pcapkit.protocols.link.l2tp.L2TP.id>` is ``('L2TP', 'L2TPv2')``
-  and :meth:`HTTP.id() <pcapkit.protocols.application.http.HTTP.id>` is
-  ``('HTTP', 'HTTPv1', 'HTTPv2')``.
+  ``('VLAN', 'C_Tag', 'S_Tag')`` and
+  :meth:`L2TP.id() <pcapkit.protocols.link.l2tp.L2TP.id>` is ``('L2TP', 'L2TPv2')``.
 
 :meth:`ARP.id() <pcapkit.protocols.link.arp.ARP.id>` is ``('ARP',)`` alone; see
 :ref:`protocol-family-shapes`.
@@ -48,7 +48,29 @@ HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 sh
 
 :class:`~pcapkit.protocols.internet.ip.IP` and
 :class:`~pcapkit.protocols.internet.ipsec.IPsec` define no ``read()``. The HTTP class
-does, and a parsed HTTP/1.1 or HTTP/2 layer is the HTTP class itself.
+does, but yields no instance of itself (:ref:`below <protocol-family-dispatch>`).
+
+.. _protocol-family-dispatch:
+
+Dispatching Bases
+~~~~~~~~~~~~~~~~~
+
+**A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
+octets through it, constructing it from fields and its ``from_data`` give the member
+the octets, fields or data model describe, never an instance of the base. In
+:class:`~pcapkit.protocols.application.http.HTTP`,
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks the member
+from the octets, for a payload a transport port binds to HTTP as well, and
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields` from the fields.
+The other versioned families are tracked on :issue:`2574`.
+
+**Octets neither version takes**, a frameless HTTP/2 connection preface among them,
+are :class:`~pcapkit.protocols.misc.raw.Raw` with no ``error`` on the transport path,
+and a direct ``HTTP(...)`` on them raises
+:exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2524`). Octets the
+dispatcher gives :class:`~pcapkit.protocols.application.httpv2.HTTPv2` that its parser
+then refuses, such as a preface and three octets, are
+:class:`~pcapkit.protocols.misc.raw.Raw` with the parser's ``error``.
 
 .. _protocol-family-shapes:
 
@@ -70,15 +92,14 @@ Member Shapes
        :class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMPv3>` ``('IGMPv3',)`` --
        :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>` narrows the same way,
        but to the RFC canonical name rather than a versioned one
-       (:ref:`protocol-family-canonical-names`)
+       (:ref:`protocol-family-canonical-names`);
+       :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` ``('HTTP/1',)``
+       and :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>`
+       ``('HTTP/2',)``
    * - Family-inclusive
      - the member's label plus the family name
      - :class:`~pcapkit.protocols.link.c_tag.C_Tag` ``('C_Tag', 'VLAN')``,
        :class:`~pcapkit.protocols.link.s_tag.S_Tag` ``('S_Tag', 'VLAN')``;
-       :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>`
-       ``('HTTP', 'HTTPv1')`` and
-       :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>`
-       ``('HTTP', 'HTTPv2')``;
        :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` ``('L2TP', 'L2TPv2')``
    * - One parser, dynamic alias
      - fixed, whichever protocol was read
@@ -99,7 +120,7 @@ A family-inclusive member is selected by any sibling's registry key (a key of
 ``pcapkit.protocols.__proto__``), because each expands to the shared family name
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name
 and by the key of each family whose ``id()`` lists it: ``AH`` and ``ESP`` by ``IPsec``
-and by ``IPv6_Ext``.
+and by ``IPv6_Ext``, ``HTTPv1`` and ``HTTPv2`` by ``HTTP``.
 
 Chained Records
 ~~~~~~~~~~~~~~~
@@ -142,6 +163,16 @@ them with one. The family base's ``id()`` follows:
 canonical name and the family's own name are the same string -- the same shape
 :meth:`ICMP.id() <pcapkit.protocols.internet.icmp.ICMP.id>` takes, ``('ICMP', 'ICMPv6')``.
 
+**HTTP takes the RFC names as well** (:issue:`2524`). :rfc:`9113` names its protocol
+``HTTP/2``, so :meth:`HTTPv2.id() <pcapkit.protocols.application.httpv2.HTTPv2.id>` is
+``('HTTP/2',)``. :rfc:`9112` names ``HTTP/1.1``, but the HTTP/1 class also reads
+messages declaring 1.0 or 0.9, so
+:meth:`HTTPv1.id() <pcapkit.protocols.application.httpv1.HTTPv1.id>` is the major
+version, ``('HTTP/1',)``, and ``alias`` carries the exact one. No member's name
+is the family's, so :meth:`HTTP.id() <pcapkit.protocols.application.http.HTTP.id>`
+lists the members alone, ``('HTTP/1', 'HTTP/2')``, the shape of
+:meth:`IP.id() <pcapkit.protocols.internet.ip.IP.id>`.
+
 .. _protocol-family-selectors:
 
 Selector Matching
@@ -150,6 +181,10 @@ Selector Matching
 **A family name selects every version, and each version name selects its own.**
 :pr:`2443`. On an IPv4 frame, ``'IP' in`` is ``True`` and ``'IPv6' in`` is ``False``.
 On an IPv6 frame, ``'IP' in`` is ``True`` and ``'IPv4' in`` is ``False``.
+
+HTTP follows it too (:issue:`2524`). On an HTTP/1.1 frame, ``'HTTP' in`` and
+``'HTTP/1' in`` are ``True`` and ``'HTTP/2' in`` is ``False``, since the layer is
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1`; an HTTP/2 frame is the reverse.
 
 What a selector on a frame or a layer reaches is defined by
 :meth:`~pcapkit.protocols.protocol.Protocol.expand_comp`,
@@ -161,7 +196,9 @@ Selectors are case-insensitive: ``'ipv4' in`` an IPv4 frame is ``True``.
   is not expanded. On a parsed IPv4 layer, ``ipv4 == 'IPv4'`` is ``True`` and
   ``ipv4 == 'IP'`` is ``False``. On a parsed C-Tag layer, ``== 'VLAN'`` is ``True``,
   since ``VLAN`` is in its ``id()``, and ``== 'S_Tag'`` is ``False``, though
-  ``'S_Tag' in`` the layer is ``True``.
+  ``'S_Tag' in`` the layer is ``True``. On a parsed HTTP/1.1 layer, ``== 'HTTP/1'`` is
+  ``True`` and ``== 'HTTP'`` is ``False``, since no member's ``id()`` carries
+  ``HTTP``, though ``'HTTP' in`` the layer is ``True``.
 * ``in`` **and** ``[]`` expand the selector first. A registry key becomes its class
   plus that class's ``id()``, as does a class object, and a layer matches when any of
   those appears among its own class and ``id()``. So ``'S_Tag' in`` a C-Tag frame is
@@ -204,8 +241,6 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
 :issue:`2529`, where the classes that do not match yet are pending:
-:class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>`,
-:class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`,
 :class:`arp.InARP <pcapkit.protocols.link.arp.InARP>`,
 :class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
 :class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

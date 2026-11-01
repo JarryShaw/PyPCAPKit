@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.application.httpv2
 
 :mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTP`
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
 only, which implements an extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -34,6 +34,12 @@ Octets      Bits        Name                    Description
    are kept (:issue:`652`, :issue:`668`, :issue:`1244`, :issue:`1245`,
    :issue:`1246`, :issue:`1247`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
 """
 import collections
 from typing import TYPE_CHECKING, cast
@@ -42,8 +48,8 @@ from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
 from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.protocols.application.http import _HTTP2_PREFACE
 from pcapkit.protocols.application.http import HTTP as HTTPBase
-from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as Data_ContinuationFrameFlags
@@ -53,6 +59,7 @@ from pcapkit.protocols.data.application.httpv2 import Flags as Data_Flags
 from pcapkit.protocols.data.application.httpv2 import GoawayFrame as Data_GoawayFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrame as Data_HeadersFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as Data_HeadersFrameFlags
+from pcapkit.protocols.data.application.httpv2 import HTTPv2 as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import PingFrame as Data_PingFrame
 from pcapkit.protocols.data.application.httpv2 import PingFrameFlags as Data_PingFrameFlags
 from pcapkit.protocols.data.application.httpv2 import PriorityFrame as Data_PriorityFrame
@@ -65,13 +72,13 @@ from pcapkit.protocols.data.application.httpv2 import SettingsFrame as Data_Sett
 from pcapkit.protocols.data.application.httpv2 import SettingsFrameFlags as Data_SettingsFrameFlags
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as Data_UnassignedFrame
 from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as Data_WindowUpdateFrame
-from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import \
     ContinuationFrame as Schema_ContinuationFrame
 from pcapkit.protocols.schema.application.httpv2 import DataFrame as Schema_DataFrame
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_FrameType
 from pcapkit.protocols.schema.application.httpv2 import GoawayFrame as Schema_GoawayFrame
 from pcapkit.protocols.schema.application.httpv2 import HeadersFrame as Schema_HeadersFrame
+from pcapkit.protocols.schema.application.httpv2 import HTTPv2 as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import PingFrame as Schema_PingFrame
 from pcapkit.protocols.schema.application.httpv2 import PriorityFrame as Schema_PriorityFrame
 from pcapkit.protocols.schema.application.httpv2 import PushPromiseFrame as Schema_PushPromiseFrame
@@ -105,10 +112,10 @@ if TYPE_CHECKING:
     FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], Tuple[Schema_FrameType, Flags]]
 
-__all__ = ['HTTP']
+__all__ = ['HTTPv2']
 
 
-class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
+class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
            schema=Schema_HTTP, data=Data_HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
@@ -123,35 +130,42 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
          - Frame Parser
          - Frame Constructor
        * - :attr:`~pcapkit.const.http.frame.Frame.DATA`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_data`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_data`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_data`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_data`
        * - :attr:`~pcapkit.const.http.frame.Frame.HEADERS`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_headers`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_headers`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_headers`
        * - :attr:`~pcapkit.const.http.frame.Frame.PRIORITY`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_priority`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_priority`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_priority`
        * - :attr:`~pcapkit.const.http.frame.Frame.RST_STREAM`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_rst_stream`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_rst_stream`
        * - :attr:`~pcapkit.const.http.frame.Frame.SETTINGS`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_settings`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_settings`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_settings`
        * - :attr:`~pcapkit.const.http.frame.Frame.PUSH_PROMISE`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_push_promise`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_push_promise`
        * - :attr:`~pcapkit.const.http.frame.Frame.PING`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_ping`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_ping`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_ping`
        * - :attr:`~pcapkit.const.http.frame.Frame.GOAWAY`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_goaway`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_goaway`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_goaway`
        * - :attr:`~pcapkit.const.http.frame.Frame.WINDOW_UPDATE`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_window_update`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_window_update`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_window_update`
        * - :attr:`~pcapkit.const.http.frame.Frame.CONTINUATION`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_continuation`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_continuation`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_continuation`
+
+    .. versionchanged:: 1.6.0
+
+       A payload opening with the connection preface parses, with the preface
+       kept as ``preface`` and counted in :attr:`length`, and :meth:`make` takes
+       ``preface``, since a dispatched HTTP/2 payload reaches this class rather
+       than :class:`~pcapkit.protocols.application.http.HTTP` (:issue:`2524`).
 
     """
 
@@ -190,9 +204,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         return 'HTTP/2'
 
     @property
-    def length(self) -> 'Literal[9]':
-        """Header length of current protocol."""
-        return 9
+    def length(self) -> 'int':
+        """Header length of current protocol: the 9-octet frame header, after the
+        24-octet connection preface when one opens the payload."""
+        return 9 + self._preface_length
 
     @property
     def version(self) -> 'Literal["2"]':
@@ -247,7 +262,26 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             *non-zero* short buffer is malformed either way, so it is rejected
             here whether or not ``length`` was given.
 
+            A payload opening with the HTTP/2 connection preface
+            (:rfc:`9113#section-3.4`) has the frame parsed from the octets after
+            it, as :meth:`HTTP._guess_version
+            <pcapkit.protocols.application.http.HTTP._guess_version>` parses it,
+            since a dispatched payload reaches this class rather than that one
+            (:issue:`2524`); the preface counts towards :attr:`length`. A
+            preface with no frame after it is refused, since the data model
+            holds one frame per packet and has no form for a frameless segment.
+
         """
+        preface_len = len(_HTTP2_PREFACE)
+        if self.__header__ is None and self._data[:preface_len] == _HTTP2_PREFACE \
+                and (length is None or length >= preface_len):
+            remaining = (len(self) if length is None else length) - preface_len
+            if remaining == 0:
+                raise ProtocolError('HTTP/2: connection preface with no frame')
+            self._preface_length = preface_len
+            self._file.seek(preface_len)
+            length = remaining
+
         if length is None:
             # ``0 < ... < 9`` rather than ``... < 9``: an exhausted stream
             # (``len(self) == 0``) is left alone, so ``length`` reaches
@@ -296,7 +330,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if length is None:
-            length = len(self)
+            length = len(self) - self._preface_length
         schema = self.__header__
 
         # NOTE: ``schema.length`` is the *declared* length off the wire -- the
@@ -322,6 +356,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         else:
             meth = name[0]
         http = meth(schema.frame, header=schema)
+        if self._preface_length:
+            http.__update__({
+                'preface': _HTTP2_PREFACE,
+            })
 
         # The frame ends at its declared Length; whatever follows it in the
         # buffer (e.g. the next frame) is the undissected remainder.
@@ -337,6 +375,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
              sid: 'int' = 0,
              frame: 'Optional[bytes | Data_HTTP | Schema_FrameType | dict[str, Any]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             preface: 'bool' = False,  # pylint: disable=unused-argument
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
 
@@ -354,6 +393,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 does. An explicit :obj:`bytes` value, ``b''`` included, is
                 packed as raw octets instead.
             payload: Octets after the frame, e.g. the next frame.
+            preface: Whether the HTTP/2 connection preface goes ahead of the
+                frame; :meth:`pack` writes it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -362,7 +403,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Raises:
             ProtocolError: If ``frame`` is none of the forms this maker reads --
                 raw :obj:`bytes`, a :obj:`dict` of frame arguments, an
-                :class:`~pcapkit.protocols.data.application.httpv2.HTTP` data
+                :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2` data
                 model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
         .. versionchanged:: 1.5.0
@@ -453,14 +494,21 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         return data
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv2"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP/2"]]':  # type: ignore[override]
         """Index ID of the protocol.
+
+        :rfc:`9113` names the protocol ``HTTP/2``.
 
         Returns:
             Index ID of the protocol.
 
+        .. versionchanged:: 1.6.0
+
+           ``('HTTP/2',)``, narrowed to this class, where it was
+           ``('HTTP', 'HTTPv2')`` (:issue:`2524`).
+
         """
-        return (cls.__name__, 'HTTPv2')  # type: ignore[return-value]
+        return ('HTTP/2',)
 
     @classmethod
     def register_frame(cls, code: 'Enum_Frame', meth: 'str | tuple[FrameParser, FrameConstructor]') -> 'None':
@@ -521,6 +569,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             'sid': data.sid,
             'frame': data,
             'payload': cls._make_payload(data),
+            'preface': bool(data.get('preface')),
         }
 
     @staticmethod

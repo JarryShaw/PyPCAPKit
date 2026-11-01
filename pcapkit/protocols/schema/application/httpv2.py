@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for HTTP/2 protocol"""
+"""header schema for HTTP/2 protocol
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.schema.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
+"""
 
 import collections
 import enum
@@ -18,7 +26,7 @@ from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
-    'HTTP',
+    'HTTPv2',
 
     'FrameType',
     'UnassignedFrame', 'DataFrame', 'HeadersFrame', 'PriorityFrame',
@@ -73,7 +81,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
 
 def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
-    """Selector function for :attr:`HTTP.frame` field.
+    """Selector function for :attr:`HTTPv2.frame` field.
 
     Args:
         pkt: Packet data.
@@ -87,15 +95,15 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
     type = cast('Enum_Frame', pkt['type'])
     schema = FrameType.registry[type]
     # The frame payload is bounded by the declared Length, so anything after
-    # it -- typically the next frame -- is left for :attr:`HTTP.payload`. It is
+    # it -- typically the next frame -- is left for :attr:`HTTPv2.payload`. It is
     # bounded by the buffer as well, so that a Length the buffer cannot back
-    # reaches :meth:`HTTP.read <pcapkit.protocols.application.httpv2.HTTP.read>`,
+    # reaches :meth:`HTTPv2.read <pcapkit.protocols.application.httpv2.HTTPv2.read>`,
     # which rejects it with :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
     return SchemaField(length=min(pkt['length'], pkt['__length__']), schema=schema)
 
 
 @schema_final
-class HTTP(Schema):
+class HTTPv2(Schema):
     """Header schema for HTTP/2 packet."""
 
     #: Length of the frame payload, the 9-octet header excluded.

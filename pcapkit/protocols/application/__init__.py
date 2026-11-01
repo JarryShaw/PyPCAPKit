@@ -23,8 +23,8 @@ from pcapkit.protocols.application.application import Application
 # Utility Classes for Protocols
 from pcapkit.protocols.application.ftp import FTP
 from pcapkit.protocols.application.ftp_data import FTP_DATA
-from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.application.httpv1 import HTTPv1
+from pcapkit.protocols.application.httpv2 import HTTPv2
 from pcapkit.protocols.application.ngap import NGAP
 from pcapkit.protocols.application.ospf import OSPF
 from pcapkit.protocols.application.rarp import RARP

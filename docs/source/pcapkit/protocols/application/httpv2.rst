@@ -4,7 +4,7 @@ HTTP/2 - Hypertext Transfer Protocol
 .. module:: pcapkit.protocols.application.httpv2
 
 :mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTP`
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
 only, which implements an extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -31,11 +31,17 @@ Octets      Bits        Name                    Description
    are kept (:issue:`652`, :issue:`668`, :issue:`1244`, :issue:`1245`,
    :issue:`1246`, :issue:`1247`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
 .. raw:: html
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.httpv2.HTTP
+.. autoclass:: pcapkit.protocols.application.httpv2.HTTPv2
    :no-members:
    :show-inheritance:
 
@@ -85,7 +91,13 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.application.httpv2
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.HTTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.schema.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.HTTPv2
    :members:
    :show-inheritance:
 
@@ -170,7 +182,13 @@ Data Models
 
 .. module:: pcapkit.protocols.data.application.httpv2
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTPv2
    :members:
    :show-inheritance:
 

@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for HTTP/1.* protocol"""
+"""header schema for HTTP/1.* protocol
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.schema.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
+"""
 
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
-__all__ = ['HTTP']
+__all__ = ['HTTPv1']
 
 
 @schema_final
-class HTTP(Schema):
+class HTTPv1(Schema):
     r"""Header schema for HTTP/1.\* packet."""
 
     #: Packet data.

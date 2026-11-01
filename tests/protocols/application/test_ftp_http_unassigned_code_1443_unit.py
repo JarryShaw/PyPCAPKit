@@ -88,14 +88,14 @@ class TestHTTPStatusCodeEveryValue(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_three_digit_status_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         for code in range(1000):
             raw = b'HTTP/1.1 %03d X\r\n\r\n' % code
             with self.subTest(code=code):
-                parsed = HTTP(raw, len(raw))
+                parsed = HTTPv1(raw, len(raw))
                 self.assertEqual(int(parsed.info.receipt.status), code)
-                self.assertEqual(HTTP.from_data(parsed.info).data, raw)
+                self.assertEqual(HTTPv1.from_data(parsed.info).data, raw)
 
     def test_unassigned_and_unknown_pseudo_members(self) -> None:
         from pcapkit.const.http.status_code import StatusCode
@@ -118,11 +118,11 @@ class TestHTTPStatusCodeEveryValue(unittest.TestCase):
                     StatusCode.get(value)
 
     def test_make_keeps_the_leading_zero(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
-        proto = HTTP(status=99, message='X', http_version='1.1')
+        proto = HTTPv1(status=99, message='X', http_version='1.1')
         self.assertEqual(proto.data, b'HTTP/1.1 099 X\r\n\r\n')
-        reparsed = HTTP(proto.data, len(proto.data))
+        reparsed = HTTPv1(proto.data, len(proto.data))
         self.assertEqual(int(reparsed.info.receipt.status), 99)
 
 

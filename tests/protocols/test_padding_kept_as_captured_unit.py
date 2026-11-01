@@ -39,9 +39,9 @@ FRAMES = {
     # CmprI 15, CmprE 15, Pad 7: one 1-octet address then 7 pad octets
     'IPv6-Route RPL padding': ('internet.ipv6_route', 'IPv6_Route', True,
                                '3b010301ff700000' '01eeeeeeeeeeeeee'),
-    'HTTP/2 DATA padding': ('application.httpv2', 'HTTP', False, '00000600080000000102616263eeff'),
-    'HTTP/2 HEADERS padding': ('application.httpv2', 'HTTP', False, '0000040108000000010282eeff'),
-    'HTTP/2 PUSH_PROMISE padding': ('application.httpv2', 'HTTP', False,
+    'HTTP/2 DATA padding': ('application.httpv2', 'HTTPv2', False, '00000600080000000102616263eeff'),
+    'HTTP/2 HEADERS padding': ('application.httpv2', 'HTTPv2', False, '0000040108000000010282eeff'),
+    'HTTP/2 PUSH_PROMISE padding': ('application.httpv2', 'HTTPv2', False,
                                     '000008050800000001020000000282eeff'),
     'OSPF cryptographic authentication reserved': (
         'application.ospf', 'OSPF', False,
@@ -112,7 +112,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
     def test_wrong_width_padding_is_zero_filled_or_truncated(self) -> None:
         """A ``ConditionalField``-wrapped padding zero-fills or truncates as ``struct`` does."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.link.l2tpv2 import L2TPv2
 
         # the L2TPv2 ``padding`` contract: zero-filled or truncated to ``offset``
@@ -128,7 +128,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
                               (b'', '0000050008000000010378000000')):
             with self.subTest(http2=padding):
                 frame = {'pad_len': 3, 'data': b'x', 'padding': padding}
-                self.assertEqual(HTTP(type=Frame.DATA, sid=1, frame=frame).data.hex(), wire)
+                self.assertEqual(HTTPv2(type=Frame.DATA, sid=1, frame=frame).data.hex(), wire)
 
     def test_makers_tolerate_a_data_model_without_the_new_fields(self) -> None:
         """A stand-in lacking the padding attributes rebuilds with zero padding."""

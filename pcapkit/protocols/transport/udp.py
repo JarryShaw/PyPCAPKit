@@ -69,8 +69,10 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
     Note:
         The HTTP ports resolve to
-        :class:`pcapkit.protocols.application.http.HTTP`, which identifies the
-        version from the payload and delegates.
+        :class:`pcapkit.protocols.application.http.HTTP`, whose
+        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks
+        :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
+        :class:`~pcapkit.protocols.application.httpv2.HTTPv2` from the payload.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
         binds the same class for its HTTP ports.
 

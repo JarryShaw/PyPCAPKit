@@ -361,7 +361,7 @@ Follow-ups to the bindings above:
   <pcapkit.protocols.transport.tcp.TCP.__proto__>` and :attr:`UDP.__proto__
   <pcapkit.protocols.transport.udp.UDP.__proto__>` both point their HTTP ports at
   the version-identifying proxy :class:`pcapkit.protocols.application.http.HTTP`
-  rather than at :class:`pcapkit.protocols.application.httpv1.HTTP`, so a
+  rather than at :class:`pcapkit.protocols.application.httpv1.HTTPv1`, so a
   segment's HTTP version is decided by its payload rather than asserted by its
   port number. That depends on the proxy identifying the version positively
   instead of guessing, since a guess path is wrong on non-HTTP input.

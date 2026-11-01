@@ -499,7 +499,8 @@ class EnumRegistry(EnumLookup):
     :meth:`~EnumLookup.get_all` and :meth:`~EnumLookup._validate_value`, all
     inherited here unchanged. What this tier adds is the half that makes a
     registry *open*: :meth:`register`, :meth:`register_alias`,
-    :meth:`register_aliases`, :meth:`_extend` and :meth:`_unregistered_member`.
+    :meth:`register_aliases`, :meth:`_extend`, :meth:`_unregistered_member` and
+    :meth:`_make_reducible`.
 
     An enumeration inherits from *here* when it may grow at runtime, and from
     :class:`EnumLookup` directly when it may not. The owner's ruling on GitHub

@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""data model for HTTP/2 protocol"""
+"""data model for HTTP/2 protocol
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -16,7 +24,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.application.httpv2 import FrameType
 
 __all__ = [
-    'HTTP',
+    'HTTPv2',
 
     'Flags', 'Settings',
     'DataFrameFlags', 'HeadersFrameFlags', 'SettingsFrameFlags',
@@ -41,7 +49,7 @@ class Flags(Data):
         __value__: 'FrameType.Flags'
 
 
-class HTTP(Protocol):
+class HTTPv2(Protocol):
     """Data model for HTTP/2 protocol."""
 
     #: Length of the frame payload, the 9-octet header excluded.
@@ -57,7 +65,7 @@ class HTTP(Protocol):
 
 
 @info_final
-class UnassignedFrame(HTTP):
+class UnassignedFrame(HTTPv2):
     """Data model for HTTP/2 unassigned frame."""
 
     #: Flags.
@@ -83,7 +91,7 @@ class DataFrameFlags(Flags):
 
 
 @info_final
-class DataFrame(HTTP):
+class DataFrame(HTTPv2):
     """Data model for HTTP/2 ``DATA`` frame."""
 
     #: Flags.
@@ -117,7 +125,7 @@ class HeadersFrameFlags(Flags):
 
 
 @info_final
-class HeadersFrame(HTTP):
+class HeadersFrame(HTTPv2):
     """Data model for HTTP/2 ``HEADERS`` frame."""
 
     #: Flags.
@@ -140,7 +148,7 @@ class HeadersFrame(HTTP):
 
 
 @info_final
-class PriorityFrame(HTTP):
+class PriorityFrame(HTTPv2):
     """Data model for HTTP/2 ``PRIORITY`` frame."""
 
     #: Flags.
@@ -157,7 +165,7 @@ class PriorityFrame(HTTP):
 
 
 @info_final
-class RSTStreamFrame(HTTP):
+class RSTStreamFrame(HTTPv2):
     """Data model for HTTP/2 ``RST_STREAM`` frame."""
 
     #: Flags.
@@ -212,7 +220,7 @@ class SettingsFrameFlags(Flags):
 
 
 @info_final
-class SettingsFrame(HTTP):
+class SettingsFrame(HTTPv2):
     """Data model for HTTP/2 ``SETTINGS`` frame."""
 
     #: Flags.
@@ -238,7 +246,7 @@ class PushPromiseFrameFlags(Flags):
 
 
 @info_final
-class PushPromiseFrame(HTTP):
+class PushPromiseFrame(HTTPv2):
     """Data model for HTTP/2 ``PUSH_PROMISE`` frame."""
 
     #: Flags.
@@ -270,7 +278,7 @@ class PingFrameFlags(Flags):
 
 
 @info_final
-class PingFrame(HTTP):
+class PingFrame(HTTPv2):
     """Data model for HTTP/2 ``PING`` frame."""
 
     #: Flags.
@@ -283,7 +291,7 @@ class PingFrame(HTTP):
 
 
 @info_final
-class GoawayFrame(HTTP):
+class GoawayFrame(HTTPv2):
     """Data model for HTTP/2 ``GOAWAY`` frame."""
 
     #: Flags.
@@ -302,7 +310,7 @@ class GoawayFrame(HTTP):
 
 
 @info_final
-class WindowUpdateFrame(HTTP):
+class WindowUpdateFrame(HTTPv2):
     """Data model for HTTP/2 ``WINDOW_UPDATE`` frame."""
 
     #: Flags.
@@ -328,7 +336,7 @@ class ContinuationFrameFlags(Flags):
 
 
 @info_final
-class ContinuationFrame(HTTP):
+class ContinuationFrame(HTTPv2):
     """Data model for HTTP/2 ``CONTINUATION`` frame."""
 
     #: Flags.

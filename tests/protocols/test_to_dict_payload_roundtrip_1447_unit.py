@@ -76,9 +76,10 @@ FRAMES = {
 #: Little-endian global header: v2.4, Ethernet.
 GLOBAL = bytes.fromhex('d4c3b2a1' '0200' '0400' '00000000' '00000000' 'ffff0000' '01000000')
 
-#: Every layer type #1447 names, each of which these frames must exercise, and
-#: L2TPv2, whose ``info_name`` is not its lowercased class name.
-LAYERS = {'Frame', 'Ethernet', 'ARP', 'IPv4', 'IPv6', 'TCP', 'UDP', 'HTTP', 'L2TPv2'}
+#: Every layer type #1447 names, each of which these frames must exercise -- HTTP
+#: as the version classes it dispatches to (#2524) -- and L2TPv2, whose
+#: ``info_name`` is not its lowercased class name.
+LAYERS = {'Frame', 'Ethernet', 'ARP', 'IPv4', 'IPv6', 'TCP', 'UDP', 'HTTPv1', 'HTTPv2', 'L2TPv2'}
 
 
 class TestToDictPayloadRoundTrip(unittest.TestCase):

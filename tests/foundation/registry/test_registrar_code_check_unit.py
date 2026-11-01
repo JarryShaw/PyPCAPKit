@@ -70,7 +70,7 @@ METHOD_REGISTRARS = (
      'pcapkit.protocols.schema.transport.sctp:Parameter'),
     ('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP',
      'pcapkit.protocols.schema.transport.sctp:ErrorCause'),
-    ('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTP',
+    ('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTPv2',
      'pcapkit.protocols.schema.application.httpv2:FrameType'),
     ('register_pcapng_block', 'pcapkit.protocols.misc.pcapng:PCAPNG',
      'pcapkit.protocols.schema.misc.pcapng:BlockType'),

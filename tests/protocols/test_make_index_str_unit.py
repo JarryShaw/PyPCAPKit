@@ -151,7 +151,7 @@ class TestMakeIndexStr(unittest.TestCase):
         member's integer, and a start line built from the integer carries no
         reason phrase; only the member itself brings one along.
         """
-        http = _attr('pcapkit.protocols.application.httpv1.HTTP')
+        http = _attr('pcapkit.protocols.application.httpv1.HTTPv1')
         status_code = _attr('pcapkit.const.http.status_code.StatusCode')
 
         self.assertEqual(http(status='CODE_404').data, http(status=404).data)
@@ -166,7 +166,7 @@ class TestMakeIndexStr(unittest.TestCase):
 
         # a named namespace resolves a member name, not an arbitrary string: an
         # HTTP status code member is spelled ``CODE_404``, so ``'OK'`` is none
-        http = _attr('pcapkit.protocols.application.httpv1.HTTP')
+        http = _attr('pcapkit.protocols.application.httpv1.HTTPv1')
         with self.assertRaises(exc):
             http(status='OK')
 
