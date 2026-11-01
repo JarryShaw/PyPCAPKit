@@ -162,10 +162,11 @@ class DispatchReachabilityTests(unittest.TestCase):
                                                f'{gap.found!r}' for gap in gaps))
 
         # A walk that found nothing to check would also report no gaps, so pin
-        # a floor of 23 claims (measured: the 21 distinct classes plus ``InARP``
-        # and ``DRARP`` reaching their family bases' entries, and ``Ethernet``
-        # counted once for ``Frame`` and once for ``PCAPNG``).
-        self.assertGreaterEqual(checked, 23)
+        # the measured claim count as a floor: each indexed class once per
+        # destination its code's ``__proto_dest__`` names -- ``Frame`` and
+        # ``PCAPNG`` for a ``LinkType`` code, ``LinuxSLL`` for an ``ARPHRD`` one
+        # -- with ``InARP`` and ``DRARP`` reaching their family bases' entries.
+        self.assertGreaterEqual(checked, 39)
 
     def test_the_audit_detects_a_code_that_nothing_dispatches(self) -> None:
         """The guard has teeth: inject a gap and confirm the audit reports it.

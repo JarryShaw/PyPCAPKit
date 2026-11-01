@@ -25,6 +25,7 @@ which is automatically generated from :class:`pcapkit.vendor.linux.arphrd.ARPHRD
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __proto_dest__
 
 .. rubric:: Footnotes
 

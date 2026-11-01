@@ -23,12 +23,13 @@ template side:
   touched the other generated modules would rewrite most of :mod:`pcapkit.const`
   on the next crawl.
 * :class:`CrawlerProtoDestTests` -- the declaring crawlers name exactly the
-  destinations the registries need, and no other crawler declares one.
+  destinations the registries need, no other crawler declares one, and the
+  committed ``ARPHRD`` module is its crawler's rendering.
 
-Nothing here crawls: :meth:`Vendor.__init__` fetches from IANA and writes the
-constant file as a side effect of construction, so the one instance built below
-uses ``cls.__new__(cls)``, the same bypass
-:file:`tests/vendor/test_vendor_dest_path_unit.py` uses for the same reason.
+Nothing here crawls: :meth:`Vendor.__init__` fetches its registry and writes the
+constant file as a side effect of construction, so the one crawler constructed
+below is ``ARPHRD``, whose registry is a ``DATA`` literal, writing to a
+temporary file.
 
 """
 from __future__ import annotations
@@ -53,8 +54,8 @@ VENDOR_DEPS = ('requests', 'bs4')
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 #: ``crawler module -> ((module, class), ...)``, the destinations the declaring
-#: crawlers name (#2392), with ``LinkType`` naming two: a link-layer header
-#: type keys the next-layer registry of both capture file formats.
+#: crawlers name (#2392, #2533), with ``LinkType`` naming two: a link-layer
+#: header type keys the next-layer registry of both capture file formats.
 EXPECTED = {
     'pcapkit.vendor.reg.ethertype': (('pcapkit.protocols.link.link', 'Link'),),
     'pcapkit.vendor.reg.transtype': (('pcapkit.protocols.internet.internet', 'Internet'),),
@@ -62,6 +63,7 @@ EXPECTED = {
                                     ('pcapkit.protocols.misc.pcapng', 'PCAPNG')),
     'pcapkit.vendor.sctp.payload_protocol_identifier': (('pcapkit.protocols.transport.sctp',
                                                          'SCTP'),),
+    'pcapkit.vendor.linux.arphrd': (('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),),
 }
 
 
@@ -252,6 +254,34 @@ class CrawlerProtoDestTests(unittest.TestCase):
             for descriptor in klass.PROTO_DEST:
                 with self.subTest(crawler=name, destination=descriptor.name):
                     self.assertTrue(issubclass(descriptor.klass, ProtocolBase))
+
+    def test_the_committed_arphrd_module_is_the_crawlers_rendering(self) -> None:
+        """Regenerating ``ARPHRD`` reproduces the committed module, declaration included (#2533).
+
+        A regeneration pin, not the change's fail-before proof: it holds whenever
+        crawler and committed module agree, so it passes without the declaration
+        too. ``EXPECTED`` and the inference tests in
+        :file:`tests/protocols/test_protocol_code_registration_unit.py` are what
+        fail without it.
+
+        Its crawler reads a ``DATA`` literal rather than fetching, so the whole
+        render runs offline; it writes to a temporary file here, not to
+        :file:`pcapkit/const/`.
+        """
+        import pathlib
+        import tempfile
+        from unittest import mock
+
+        import pcapkit.const.linux.arphrd as committed
+        from pcapkit.vendor.linux.arphrd import ARPHRD
+
+        with tempfile.TemporaryDirectory(prefix='pcapkit-vendor-arphrd-') as tmp:
+            dest = pathlib.Path(tmp, 'arphrd.py')
+            with mock.patch.object(ARPHRD, '_dest_path', return_value=str(dest)):
+                ARPHRD()
+            rendered = dest.read_text(encoding='utf-8')
+
+        self.assertEqual(rendered, pathlib.Path(committed.__file__).read_text(encoding='utf-8'))
 
 
 if __name__ == '__main__':
