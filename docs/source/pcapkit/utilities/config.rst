@@ -61,6 +61,11 @@ Limits
      - ``32``
      - ``>= 0``, or ``-1``
      - each capture remembered pins one packet in memory
+   * - :envvar:`PCAPKIT_TCP_GAP_LIMIT`
+     - ``16777216``
+     - ``>= 0``, or ``-1``
+     - a TCP gap that wide is zero-filled in memory, up to 2 GiB at ``-1``
+       (:issue:`2546`)
    * - :envvar:`PCAPKIT_FALLBACK_LIMIT`
      - ``10000``
      - ``>= 0``, or ``-1``
@@ -99,6 +104,10 @@ Limits
 
    Sets :data:`~pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`.
 
+.. envvar:: PCAPKIT_TCP_GAP_LIMIT
+
+   Sets :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`.
+
 .. envvar:: PCAPKIT_FALLBACK_LIMIT
 
    Sets :data:`~pcapkit.utilities.config.FALLBACK_LIMIT`.
@@ -127,6 +136,7 @@ Limits
 .. autodata:: pcapkit.utilities.config.FRAME_LAYER_LIMIT
 .. autodata:: pcapkit.utilities.config.EXTENSION_HEADER_LIMIT
 .. autodata:: pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT
+.. autodata:: pcapkit.utilities.config.TCP_GAP_LIMIT
 .. autodata:: pcapkit.utilities.config.FALLBACK_LIMIT
 .. autodata:: pcapkit.utilities.config.DETECT_CACHE_SIZE
 .. autodata:: pcapkit.utilities.config.READ_CHUNK

@@ -350,8 +350,6 @@ NOT_A_COPY = {
         'an if_tsoffset option: 4 octets of header and 8 of value',
     ('pcapkit/foundation/engines/scapy.py', 'options[4:12]'):
         'the 8-octet value of an if_tsoffset option',
-    ('pcapkit/foundation/reassembly/tcp.py', '1 << 24'):
-        'a bit width, not a PCAP global header',
     ('pcapkit/toolkit/dpkt.py', '_fragment(6)'):
         'the IP version number',
     ('pcapkit/toolkit/dpkt.py', 'version == 6'):

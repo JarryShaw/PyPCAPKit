@@ -13,6 +13,9 @@ GitHub issues #1354, #1355 and #1356, from the foundation round-trip audit
 * #1356 -- a FIN that submits the buffer at once splits data reordered behind
   it off into a buffer of its own.
 
+The widest gap a segment is padded across is ``config.TCP_GAP_LIMIT``, a safety
+limit that ``-1`` lifts (#2546).
+
 Every case feeds hand-built segments and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
@@ -174,13 +177,61 @@ class TestTCPReassemblyRoundTrip(unittest.TestCase):
         reasm = self._run(self._seg(0x30000000, b'A' * 5), self._seg(0x10000000, b'B' * 5))
         self.assertEqual(sorted(p for (_, _, _, p) in self._summary(reasm)), [b'A' * 5, b'B' * 5])
 
-    def test_a_gap_within_the_window_is_still_padded(self) -> None:
-        from pcapkit.foundation.reassembly.tcp import TCP
+    def test_a_gap_at_the_default_limit_is_still_padded(self) -> None:
+        from pcapkit.utilities import config
 
-        far = TCP.__window__
+        far = config.TCP_GAP_LIMIT
         reasm = self._run(self._seg(0, b'A' * 5), self._seg(5 + far, b'B' * 5), strict=False)
         (completed, _, index, payload), = self._summary(reasm)
         self.assertEqual((completed, index, len(payload)), ('PARTIAL', (1, 2), 10 + far))
+
+    # #2546 ------------------------------------------------------------------
+
+    def _gap_limit(self, limit):
+        """Patch ``config.TCP_GAP_LIMIT`` to ``limit`` for the rest of the test."""
+        from unittest import mock
+
+        from pcapkit.utilities import config
+
+        patcher = mock.patch.object(config, 'TCP_GAP_LIMIT', limit)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_a_gap_up_to_the_limit_is_padded(self) -> None:
+        self._gap_limit(100)
+        # the gap is measured on either side of the buffer
+        for side, segs, runs in (('after', (self._seg(0, b'A' * 5), self._seg(105, b'B' * 5)),
+                                  (b'A' * 5, b'B' * 5)),
+                                 ('before', (self._seg(200, b'A' * 5), self._seg(95, b'B' * 5)),
+                                  (b'B' * 5, b'A' * 5))):
+            with self.subTest(side=side):
+                self.assertEqual(self._summary(self._run(*segs)), [('PARTIAL', 500, (1, 2), runs)])
+
+    def test_a_gap_past_the_limit_splits_the_stream(self) -> None:
+        self._gap_limit(100)
+        for side, seq in (('after', 106), ('before', 94)):
+            with self.subTest(side=side, syn=False):
+                reasm = self._run(self._seg(200 if side == 'before' else 0, b'A' * 5),
+                                  self._seg(seq, b'B' * 5))
+                self.assertEqual(sorted((c, p) for (c, _, _, p) in self._summary(reasm)),
+                                 [('COMPLETE', b'A' * 5), ('COMPLETE', b'B' * 5)])
+        # a captured SYN keeps both halves one stream, each missing the gap
+        reasm = self._run(self._seg(0, syn=True), self._seg(1, b'A' * 5), self._seg(107, b'B' * 5))
+        self.assertEqual(self._summary(reasm), [('PARTIAL', 500, (3,), (b'B' * 5,)),
+                                                ('PARTIAL', 500, (1, 2), (b'A' * 5,))])
+        self.assertEqual(reasm._buffer[BUFID].ack[500].gap, [(6, 106)])
+
+    def test_minus_one_pads_a_gap_past_the_default(self) -> None:
+        self._gap_limit(-1)
+        far = (1 << 24) + 1
+        start = far + 10
+        for side, segs, runs in (('after', (self._seg(0, b'A' * 5), self._seg(5 + far, b'B' * 5)),
+                                  (b'A' * 5, b'B' * 5)),
+                                 ('before', (self._seg(start, b'A' * 5),
+                                             self._seg(start - far - 5, b'B' * 5)),
+                                  (b'B' * 5, b'A' * 5))):
+            with self.subTest(side=side):
+                self.assertEqual(self._summary(self._run(*segs)), [('PARTIAL', 500, (1, 2), runs)])
 
     def test_data_reordered_behind_the_fin_joins_the_stream(self) -> None:
         reasm = self._run(self._seg(100, syn=True, ack=0), self._seg(101, b'AAAAA'),

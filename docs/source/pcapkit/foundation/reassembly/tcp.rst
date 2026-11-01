@@ -21,7 +21,6 @@ which reconstructs fragmented TCP packets back to origin.
    .. autoattribute:: __callback_fn__
       :no-value:
    .. autoattribute:: __timeout__
-   .. autoattribute:: __window__
 
 Algorithm
 =========

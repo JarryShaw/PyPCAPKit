@@ -72,6 +72,7 @@ DECLARED = (
     ('FRAME_LAYER_LIMIT', 64, 0, 'RecursionError (#1610)'),
     ('EXTENSION_HEADER_LIMIT', 32, 0, 'RecursionError (#1610)'),
     ('IPV6_TCP_WARNED_LIMIT', 32, 0, 'pins one of its packets in memory'),
+    ('TCP_GAP_LIMIT', 16_777_216, 0, 'zero-fills the gap in memory'),
     ('FALLBACK_LIMIT', 10_000, 0, 'a large or endless object graph'),
     ('DETECT_CACHE_SIZE', 1024, 0, 'never-repeating text'),
     ('READ_CHUNK', 1_048_576, 1, 'a bogus record length allocates'),
@@ -317,6 +318,12 @@ class LayoutTests(unittest.TestCase):
             for name in names:
                 with self.subTest(module=module, name=name):
                     self.assertFalse(hasattr(loaded, name))
+
+    def test_the_tcp_gap_limit_left_no_class_attribute(self) -> None:
+        # #2546: TCP.__window__ moved here as TCP_GAP_LIMIT.
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        self.assertFalse(hasattr(TCP, '__window__'))
 
     def test_every_variable_is_documented(self) -> None:
         from pcapkit.utilities import config
