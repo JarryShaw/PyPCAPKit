@@ -75,17 +75,17 @@ class TestLinuxSLL2(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE`` and ``FRAD``, per tcpdump.org's
-        LINUX_SLL2 page, are kept raw. ``IEEE80211_RADIOTAP`` is also in
-        :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE` but
-        dispatches to :class:`~pcapkit.protocols.link.radiotap.Radiotap`
-        instead; see :meth:`test_radiotap_arphrd_dispatches_to_radiotap`.
+        """``NETLINK``, ``IPGRE`` and ``IP6GRE``, per tcpdump.org's
+        LINUX_SLL2 page, are kept raw. ``FRAD`` and
+        ``IEEE80211_RADIOTAP`` are special-cased elsewhere: the former
+        dispatches to :class:`~pcapkit.protocols.link.frad.FRAD`, and the
+        latter to :class:`~pcapkit.protocols.link.radiotap.Radiotap`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE):
             with self.subTest(arphrd=arphrd):
                 raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
                 parsed = LinuxSLL2(raw, len(raw))

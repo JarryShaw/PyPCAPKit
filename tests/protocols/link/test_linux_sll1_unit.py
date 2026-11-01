@@ -73,18 +73,18 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE`` and ``FRAD``, per tcpdump.org's
+        """``NETLINK``, ``IPGRE`` and ``IP6GRE``, per tcpdump.org's
         LINUX_SLL page, never have ``protocol_type`` looked up as an
-        EtherType, even though 0x0800 is IPv4's. ``IEEE80211_RADIOTAP`` is
-        also in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`
-        but dispatches to :class:`~pcapkit.protocols.link.radiotap.Radiotap`
-        instead; see :meth:`test_radiotap_arphrd_dispatches_to_radiotap`.
+        EtherType, even though 0x0800 is IPv4's. ``FRAD`` and
+        ``IEEE80211_RADIOTAP`` are special-cased elsewhere: the former
+        dispatches to :class:`~pcapkit.protocols.link.frad.FRAD`, and the
+        latter to :class:`~pcapkit.protocols.link.radiotap.Radiotap`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.FRAD):
+        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE):
             with self.subTest(arphrd=arphrd):
                 # protocol_type 0x0800 is IPv4's EtherType, but these
                 # hardware types never carry an EtherType in protocol_type.
