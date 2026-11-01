@@ -4,6 +4,8 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.corekit.packet import DeferredPacket
+from pcapkit.foundation.reassembly.data.data import Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
     from pcapkit.foundation.reassembly.data.data import Completion
+    from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
@@ -81,17 +84,16 @@ class DatagramID(Info, Generic[_AT]):
 
 
 @info_final
-class Datagram(Info, Generic[_AT]):
+class Datagram(DeferredPacket, Info, Generic[_AT]):
     """Data model for :term:`DTLS <reasm.dtls.datagram>` reassembled
-    handshake message.
+    handshake message."""
 
-    :attr:`body` is reported eagerly, not through a
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`: a message only
-    reaches :meth:`DTLS.submit <pcapkit.foundation.reassembly.dtls.DTLS.submit>`
-    because it was fragmented, so there is no common unfragmented case to
-    keep cheap.
-
-    """
+    #: Listing ``packet`` here is what makes :attr:`packet` lazy -- see
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket`.
+    __additional__ = ['packet']
+    #: Placeholder class :attr:`packet` may hold, for
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    __deferred__ = Deferred
 
     #: How completely the message was reassembled, and why reassembly
     #: stopped; see :class:`~pcapkit.foundation.reassembly.data.data.Completion`.
@@ -106,12 +108,17 @@ class Datagram(Info, Generic[_AT]):
     msg_type: 'Enum_HandshakeType'
     #: Total message length, as declared by its fragments.
     length: 'int'
-    #: Reassembled message body, undecoded;
-    #: :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it.
+    #: Reassembled message body, undecoded.
     body: 'bytes | tuple[bytes, ...]'
+    #: Decoded message, as :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
+    #: returns it: decoded on first read, not at construction time, and
+    #: :data:`None` for an incomplete message. A
+    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in
+    #: its place, and reading this attribute then runs it and keeps the result.
+    packet: 'Optional[Data_DTLSHandshake]'
 
     if TYPE_CHECKING:
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', message_seq: 'int', msg_type: 'Enum_HandshakeType', length: 'int', body: 'bytes | tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', message_seq: 'int', msg_type: 'Enum_HandshakeType', length: 'int', body: 'bytes | tuple[bytes, ...]', packet: 'Optional[Data_DTLSHandshake | Deferred[tuple[Enum_HandshakeType, int, int]]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

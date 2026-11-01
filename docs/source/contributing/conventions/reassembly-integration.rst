@@ -62,10 +62,12 @@ the default engine and is disabled at the engine level on every other.
 handshake message (:issue:`2496`). IP and TCP have no such method: what parses their
 outcome is the general-purpose
 :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` dispatcher,
-reused via :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, not a method
-written for reassembly specifically.
+not a method written for reassembly specifically.
 
-DTLS differs from the IP/TCP shape where the rule is silent: its reassembled body is
-reported eagerly, with no deferred ``packet``, and
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` sets no ``__protocol_type__``
-(:issue:`2531`).
+**Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`). IPv4, IPv6,
+TCP and DTLS reassembly each set ``__protocol_type__``, and each reports its parsed
+outcome as a datagram's ``packet``, deferred to first read by
+:class:`~pcapkit.foundation.reassembly.data.data.Deferred`. IP and TCP run
+``__protocol_type__``'s ``analyze``. DTLS runs the decoder behind ``dtls_handshake``
+instead, where point 3 places it, so its ``packet`` is what ``dtls_handshake`` returns:
+:data:`None` for an incomplete message.

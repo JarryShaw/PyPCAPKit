@@ -61,7 +61,8 @@ class DeferredPacket:
 
     It is shared by
     :class:`pcapkit.foundation.reassembly.data.ip.Datagram`,
-    :class:`pcapkit.foundation.reassembly.data.tcp.Datagram` and
+    :class:`pcapkit.foundation.reassembly.data.tcp.Datagram`,
+    :class:`pcapkit.foundation.reassembly.data.dtls.Datagram` and
     :class:`pcapkit.foundation.traceflow.data.tcp.Index`, which differ only in
     the placeholder class each names in :attr:`__deferred__`
     (:issue:`1516`).
