@@ -285,10 +285,11 @@ class TestTheTestsAreContained(unittest.TestCase):
             graalpy = version.startswith('graalpy')
             with self.subTest(version=version):
                 self.assertEqual(by_impl(env['GRAAL_PYTHON_VM_ARGS'], version), HEAP if graalpy else '')
-                self.assertEqual(by_impl(env['WORKERS'], version), GRAAL_WORKERS if graalpy else 'auto')
+                # #2571: 3.14t installs psutil, under which `auto` counts physical cores.
+                self.assertEqual(by_impl(env['WORKERS'], version), GRAAL_WORKERS if graalpy else 'logical')
         script = step(TESTS)['run']
         self.assertIn('set -- -q -n "$WORKERS" --dist load', script)
-        self.assertNotIn('-n auto', script)
+        self.assertEqual(re.findall(r'-q -n (\S+)', script), ['"$WORKERS"'])
 
     def test_the_timeout_ends_the_tests_before_the_step_cap(self) -> None:
         script = step(TESTS)['run']

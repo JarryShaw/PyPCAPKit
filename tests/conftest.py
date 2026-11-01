@@ -600,7 +600,7 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     :class:`~tests.test_tier_guard_xdist.XdistSubprocessTests` deliberately
     writes a real violation to disk, under :data:`~tests._tiers.PROBE_MODULE_NAME`, to
     reproduce the tier guard's own collection-time diagnostic end to end.
-    Serially the two never overlap; under the ``-n auto --dist load`` this
+    Serially the two never overlap; under the ``--dist load`` this
     suite's CI jobs use, pytest-xdist may hand the two tests to different
     worker processes at the same moment, and the scan can then observe the
     probe mid-life and report a violation nobody committed -- a real defect in
@@ -619,7 +619,7 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
 
     A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, such
     as the Windows leg of :file:`.github/workflows/experimental.yml`, which runs
-    ``-n auto`` too. Nothing that has to stay correct there relies on the lock
+    ``--dist load`` too. Nothing that has to stay correct there relies on the lock
     (#2114): :func:`tests._tiers.suite_modules` never lists the probe, and
     :class:`~tests.test_tier_guard.SuiteIsCleanTests` skips it where this is a
     no-op. :func:`msvcrt.locking` is no substitute, since it has no shared mode.

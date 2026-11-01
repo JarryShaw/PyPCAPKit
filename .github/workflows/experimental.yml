@@ -388,7 +388,8 @@ jobs:
         timeout-minutes: 120
         env:
           GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
-          WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
+          # #2571: 3.14t, which installs psutil, takes `logical` as unit-tests.yml `test` does.
+          WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'logical' }}
           # #1963: folded, so each line break reads as the space between two shards.
           SHARDS: >-
             ${{ startsWith(matrix.python-version, 'graalpy') && 'tests/const
@@ -680,7 +681,8 @@ jobs:
         run: python -c "import os; print('cpu_count', os.cpu_count())"
 
       # `experimental`'s selection, the `ALL` tier (#1958), asked of
-      # tests/_tiers.py on the leg's own CPython, as `test` asks it.
+      # tests/_tiers.py on the leg's own CPython, as `test` asks it; the flags
+      # are `test`'s.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -692,7 +694,7 @@ jobs:
             echo "::${ANNOTATION_LEVEL} title=Could not compute the LATEST tier::tests._tiers.latest_tier_paths() failed -- see the traceback above."
             exit 1
           fi
-          set -- -q -n auto --dist load \
+          set -- -q -n logical --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \

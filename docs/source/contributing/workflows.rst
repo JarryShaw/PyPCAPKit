@@ -1189,7 +1189,7 @@ warnings:
 
 * GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError``,
   a 2 GiB heap for every GraalPy process, xdist workers included, and ``-n 3``, a CPU
-  of the runner's 4 left to the JIT and the runner; 3.14t keeps ``-n auto``. A
+  of the runner's 4 left to the JIT and the runner; 3.14t runs ``-n logical``. A
   worker's live heap grows with the tests it runs (`#1753
   <https://github.com/JarryShaw/PyPCAPKit/issues/1753>`__): in job 116172356218 all
   three reached 2.2-2.6 GB RSS in 16 minutes, and a ``MemoryError`` in pytest's own
