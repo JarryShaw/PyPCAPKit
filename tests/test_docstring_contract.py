@@ -619,7 +619,7 @@ class DocstringRaisesTests(unittest.TestCase):
         """A commented-out ``raise`` never keeps its ``Raises:`` clause.
 
         :meth:`HTTP._read_http_none
-        <pcapkit.protocols.application.httpv2.HTTP._read_http_none>` is where
+        <pcapkit.protocols.application.httpv2.HTTPv2._read_http_none>` is where
         this went wrong: the ``raise ProtocolError(...)`` was commented out and
         replaced by a :class:`~pcapkit.utilities.warnings.ProtocolWarning`,
         and the ``Raises:`` clause stayed. Downgrading a raise to a warning is

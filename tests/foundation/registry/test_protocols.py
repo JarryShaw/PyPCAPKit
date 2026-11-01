@@ -89,35 +89,39 @@ class ProtocolRegistryTests(unittest.TestCase):
                 if issubclass(item.category, category)]
 
     def test_register_protocol_warns_when_a_colliding_name_overwrites(self) -> None:
-        """Three dispatchable classes are all named ``HTTP``, so they share a key.
+        """Two dispatchable classes named ``HTTP`` share a key.
 
         The registry is keyed on ``protocol.__name__.upper()``, so
-        :class:`pcapkit.protocols.application.http.HTTP`,
-        :class:`pcapkit.protocols.application.httpv1.HTTP` and
-        :class:`pcapkit.protocols.application.httpv2.HTTP` all land on ``'HTTP'``
-        and registering one replaces whichever was there. Guards against the
-        replacement being silent (#675) -- no exception, no warning -- so that a
-        later bare-name lookup simply returns a different class than it did
-        before, with nothing connecting the symptom to the registration that
-        caused it.
+        :class:`pcapkit.protocols.application.http.HTTP` and a user class of the
+        same name both land on ``'HTTP'``, and registering one replaces whichever
+        was there. Guards against the replacement being silent (#675) -- no
+        exception, no warning -- so that a later bare-name lookup simply returns a
+        different class than it did before, with nothing connecting the symptom
+        to the registration that caused it. No two shipped HTTP classes share a
+        name since #2529, so the second class is built here.
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols.application import http, httpv1, httpv2
+        from pcapkit.protocols.application import http
+        from pcapkit.protocols.application.application import Application
         from pcapkit.utilities.warnings import RegistryWarning
 
         self._guard_registry(registry.protocol_registry, 'HTTP')
 
-        # The premise the defect rests on: three *different* classes, one key.
-        colliding = (http.HTTP, httpv1.HTTP, httpv2.HTTP)
-        self.assertEqual(len(set(colliding)), 3)
+        # Defining a Protocol subclass registers it, so this displaces the base.
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            custom = type('HTTP', (Application,), {'__module__': __name__})
+
+        # The premise the defect rests on: two *different* classes, one key.
+        colliding = (http.HTTP, custom)
+        self.assertEqual(len(set(colliding)), 2)
         self.assertEqual({cls.__name__.upper() for cls in colliding}, {'HTTP'})
 
         registry.protocol_registry['HTTP'] = http.HTTP
 
         # Both directions, so the test is not pinned to one registration order.
-        for incumbent, replacement in ((http.HTTP, httpv2.HTTP),
-                                       (httpv2.HTTP, httpv1.HTTP)):
+        for incumbent, replacement in ((http.HTTP, custom), (custom, http.HTTP)):
             with self.subTest(replacing=incumbent.__module__):
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
@@ -133,11 +137,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
                 # Naming both classes is the point of the message: 'HTTP already
                 # registered' on its own does not say *which* HTTP was lost, and
-                # the module is the only thing that distinguishes these three.
-                # ``repr`` rather than ``__module__`` because
-                # 'pcapkit.protocols.application.http' is a prefix of
-                # '...application.httpv1', so a substring test on the module name
-                # alone would pass on the wrong class.
+                # the module is the only thing that distinguishes the two.
                 self.assertIn(repr(incumbent), messages[0])
                 self.assertIn(repr(replacement), messages[0])
                 self.assertLess(messages[0].index(repr(incumbent)),

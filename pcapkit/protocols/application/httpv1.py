@@ -5,7 +5,7 @@ r"""HTTP/1.* - Hypertext Transfer Protocol
 .. module:: pcapkit.protocols.application.httpv1
 
 :mod:`pcapkit.protocols.application.httpv1` contains
-:class:`~pcapkit.protocols.application.httpv1.HTTP`,
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
 which implements an extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, and its
 :class:`~pcapkit.protocols.application.httpv1.Type` enumeration. The
@@ -34,6 +34,12 @@ structure of an HTTP/1.* message is described as below:
    rather than normalised or re-encoded (:issue:`1241`, :issue:`1302`,
    :issue:`1333`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
 """
 import re
 from typing import TYPE_CHECKING
@@ -45,10 +51,10 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import (_HTTP2_PREFACE_HEADER, _RE_METHOD, _RE_STATUS,
                                                 _RE_VERSION)
 from pcapkit.protocols.application.http import HTTP as HTTPBase
-from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
+from pcapkit.protocols.data.application.httpv1 import HTTPv1 as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
-from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
+from pcapkit.protocols.schema.application.httpv1 import HTTPv1 as Schema_HTTP
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError
@@ -63,7 +69,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.data.application.httpv1 import Header as Data_Header
 
-__all__ = ['HTTP']
+__all__ = ['HTTPv1']
 
 # NOTE: The start-line patterns ``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS``,
 # and ``_HTTP2_PREFACE_HEADER``, are imported from ``http.py``, where
@@ -86,9 +92,15 @@ class Type(EnumLookup, StrEnum):
     RESPONSE = auto()
 
 
-class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
+class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
            data=Data_HTTP, schema=Schema_HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
+    """This class implements Hypertext Transfer Protocol (HTTP/1.*).
+
+    .. versionchanged:: 1.6.0
+
+       Renamed from ``HTTP``, after its module (:issue:`2529`).
+
+    """
 
     ##########################################################################
     # Defaults.

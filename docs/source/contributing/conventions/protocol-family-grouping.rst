@@ -71,8 +71,8 @@ Member Shapes
        :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>` narrows the same way,
        but to the RFC canonical name rather than a versioned one
        (:ref:`protocol-family-canonical-names`);
-       :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` ``('HTTP/1',)``
-       and :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>`
+       :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` ``('HTTP/1',)``
+       and :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>`
        ``('HTTP/2',)``
    * - Family-inclusive
      - the member's label plus the family name
@@ -142,10 +142,10 @@ canonical name and the family's own name are the same string -- the same shape
 :meth:`ICMP.id() <pcapkit.protocols.internet.icmp.ICMP.id>` takes, ``('ICMP', 'ICMPv6')``.
 
 **HTTP takes the RFC names as well** (:issue:`2524`). :rfc:`9113` names its protocol
-``HTTP/2``, so :meth:`HTTPv2.id() <pcapkit.protocols.application.httpv2.HTTP.id>` is
+``HTTP/2``, so :meth:`HTTPv2.id() <pcapkit.protocols.application.httpv2.HTTPv2.id>` is
 ``('HTTP/2',)``. :rfc:`9112` names ``HTTP/1.1``, but the HTTP/1 class also reads
 messages declaring 1.0 or 0.9, so
-:meth:`HTTPv1.id() <pcapkit.protocols.application.httpv1.HTTP.id>` is the major
+:meth:`HTTPv1.id() <pcapkit.protocols.application.httpv1.HTTPv1.id>` is the major
 version, ``('HTTP/1',)``, and ``alias`` carries the exact one. No member's name
 is the family's, so :meth:`HTTP.id() <pcapkit.protocols.application.http.HTTP.id>`
 lists the members alone, ``('HTTP/1', 'HTTP/2')``, the shape of

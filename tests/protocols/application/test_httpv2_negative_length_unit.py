@@ -75,7 +75,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
         drives ``debug``'s ``length=lambda pkt: pkt['__length__']`` to -1.
         Unguarded: ``struct.error: bad char in struct format``.
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         data = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
@@ -92,7 +92,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
         need eight payload octets, so every one of these drives ``debug``
         negative.
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for buflen in range(9, 17):
@@ -109,7 +109,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
         The promised stream identifier alone is four octets, so buffers 9
         through 12 leave ``fragment`` negative.
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for buflen in range(9, 13):
@@ -122,7 +122,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
 
     def test_an_over_padded_data_frame_raises_protocolerror(self) -> None:
         """``pad_len`` exceeding the payload area, for a ``DATA`` frame."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         payload = bytes([20])  # PADDED, pad_len=20, no data and no padding octets follow
@@ -140,7 +140,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
         negative must parse as it would unguarded -- no exception, no
         warning.
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         debug = b'ok'
         payload = (5).to_bytes(4, 'big') + (0).to_bytes(4, 'big') + debug

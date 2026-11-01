@@ -54,8 +54,8 @@ class HTTPIdTests(unittest.TestCase):
     @staticmethod
     def classes() -> 'tuple[Any, Any, Any]':
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         return HTTP, HTTPv1, HTTPv2
 

@@ -12,7 +12,7 @@ parsed. Each sits on the maker side, outside #2296's checklist:
   :meth:`IPv6_Opts._make_opt_pad
   <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pad>`, the twins of
   the ``Pad1`` length warning on :class:`~pcapkit.protocols.internet.mh.MH` (#2296);
-* :meth:`HTTP.make <pcapkit.protocols.application.httpv2.HTTP.make>` and
+* :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>` and
   :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>`, the
   dispatchers whose unsupported-``frame``/``block`` guard is the same shape as
   ``MH.make``'s.
@@ -134,10 +134,10 @@ class HTTPFrameMessage(MakerMessageTestCase):
 
     def test_unreadable_frame_names_the_argument(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        http = self.protocol(HTTP)
+        http = self.protocol(HTTPv2)
         code = Frame.DATA
         for frame in (5, 1.5, 'frame', []):
             with self.subTest(frame=frame):
@@ -150,20 +150,20 @@ class HTTPFrameMessage(MakerMessageTestCase):
 
     def test_raw_frame_still_builds(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        http = self.protocol(HTTP)
+        http = self.protocol(HTTPv2)
         schema = http.make(type=Frame.DATA, frame=b'\x01\x02')
         self.assertEqual(schema.frame, b'\x01\x02')
         self.assertEqual(schema.length, 2)
 
     def test_an_omitted_frame_is_not_rejected(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         # ``frame=None`` dispatches to the frame type's own constructor (#2274)
         # rather than reaching the guard, so the guard does not cover it.
-        http = self.protocol(HTTP)
+        http = self.protocol(HTTPv2)
         self.assertEqual(http.make(type=Frame.DATA, frame=None).type, Frame.DATA)
 
 

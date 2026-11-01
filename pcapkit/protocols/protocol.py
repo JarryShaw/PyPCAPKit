@@ -310,8 +310,8 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             # declares it dispatches, not a property its subclasses share:
             # :class:`~pcapkit.protocols.application.http.HTTP` cannot enumerate
             # its keywords because it forwards them to whichever of
-            # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` and
-            # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>` the
+            # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` and
+            # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>` the
             # ``version`` names, but each of those declares its own in full, and
             # inheriting the opt-out would exempt the very classes that can be
             # checked. A subclass that dispatches in turn says so itself.
@@ -564,8 +564,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: belongs to a class chosen at call time:
     #: :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` declares
     #: only ``version`` and forwards everything else to
-    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTP.make>` or
-    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
+    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTPv1.make>` or
+    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>`
     #: depending on that value, so no set of names is right for it. Use it only
     #: for that shape, since a protocol that skips the check silently discards an
     #: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a

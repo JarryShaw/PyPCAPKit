@@ -37,9 +37,9 @@ class TestHTTPv2ErrorCodeDefault(unittest.TestCase):
     def build(self, name: 'str', sid: 'int', frame: 'dict[str, object]') -> 'Any':
         """Build the HTTP/2 frame ``name`` from the ``frame`` mapping."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        return HTTP(type=Frame[name], sid=sid, frame=frame)
+        return HTTPv2(type=Frame[name], sid=sid, frame=frame)
 
     def test_rst_stream_defaults_to_no_error(self) -> None:
         from pcapkit.const.http.error_code import ErrorCode

@@ -229,7 +229,7 @@ class TestRegistryNameRestore(unittest.TestCase):
         shipped = {('tcp', code): TCP.__proto__[code] for code in (21, 80, 8080)}
         shipped.update({('udp', code): UDP.__proto__[code] for code in (80, 1701, 8080)})
         targets = sorted(shipped)
-        builtins = [IPv4, http.HTTP, httpv1.HTTP, httpv2.HTTP]
+        builtins = [IPv4, http.HTTP, httpv1.HTTPv1, httpv2.HTTPv2]
 
         def expected(held: 'dict[Any, tuple[int, Any]]', name: 'str') -> 'Any':
             latest = max((entry for entry in held.values() if entry[1].__name__.upper() == name),

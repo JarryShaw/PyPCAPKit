@@ -56,9 +56,9 @@ class TestHTTPv2DefaultFrame(unittest.TestCase):
 
     def build(self, type: 'Any', sid: 'int', **kwargs: 'Any') -> 'Any':
         """Build the HTTP/2 frame of ``type`` on stream ``sid``."""
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        return HTTP(type=type, sid=sid, **kwargs)
+        return HTTPv2(type=type, sid=sid, **kwargs)
 
     def test_default_builds_every_frame_type(self) -> None:
         from pcapkit.const.http.frame import Frame
@@ -77,15 +77,15 @@ class TestHTTPv2DefaultFrame(unittest.TestCase):
 
     def test_default_frames_round_trip(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (sid, wire) in DEFAULT_FRAMES.items():
             with self.subTest(frame=name):
                 made = bytes(self.build(Frame[name], sid))
-                parsed = HTTP(made, len(made))
+                parsed = HTTPv2(made, len(made))
                 self.assertEqual(parsed.info.type, Frame[name])
                 self.assertEqual(parsed.info.sid, sid)
-                self.assertEqual(bytes(HTTP.from_data(parsed.info)).hex(), wire.hex())
+                self.assertEqual(bytes(HTTPv2.from_data(parsed.info)).hex(), wire.hex())
 
     def test_an_unassigned_type_is_unchanged(self) -> None:
         wire = bytes.fromhex('000000fa0000000001')
@@ -115,14 +115,14 @@ class TestHTTPv2DefaultFrame(unittest.TestCase):
 
     def test_explicit_empty_bytes_stay_raw_on_a_fixed_size_type(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         # An explicit ``b''`` is still packed raw, even on a frame type whose
         # default (``None``) dispatches to a constructor with a non-empty
         # payload -- it must not be swept into that dispatch. Built via
         # ``make`` directly, bypassing the round-trip parse that a length-0
         # PING would legitimately fail (PING's payload is a fixed 8 octets).
-        schema = HTTP.__new__(HTTP).make(type=Frame.PING, frame=b'')
+        schema = HTTPv2.__new__(HTTPv2).make(type=Frame.PING, frame=b'')
         self.assertEqual(int(schema.length), 0)
         self.assertEqual(schema.frame, b'')
 
@@ -135,37 +135,37 @@ class TestHTTPv2EmptySettings(unittest.TestCase):
 
     def test_none_builds_a_parameterless_settings_frame(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for label, frame in (('default', {}), ('explicit', {'settings': None})):
             with self.subTest(settings=label):
-                made = bytes(HTTP(type=Frame.SETTINGS, sid=0, frame=frame))
+                made = bytes(HTTPv2(type=Frame.SETTINGS, sid=0, frame=frame))
                 self.assertEqual(made.hex(), DEFAULT_FRAMES['SETTINGS'][1].hex())
-                self.assertEqual(HTTP(made, len(made)).info.length, 0)
+                self.assertEqual(HTTPv2(made, len(made)).info.length, 0)
 
     def test_the_schema_carries_no_entries(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        schema, flags = HTTP.__new__(HTTP)._make_http_settings()
+        schema, flags = HTTPv2.__new__(HTTPv2)._make_http_settings()
         self.assertEqual(list(schema.settings), [])
         self.assertEqual(int(flags), 0)
 
     def test_an_empty_settings_frame_still_takes_the_ack_flag(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        made = bytes(HTTP(type=Frame.SETTINGS, sid=0, frame={'ack': True}))
+        made = bytes(HTTPv2(type=Frame.SETTINGS, sid=0, frame={'ack': True}))
         self.assertEqual(made.hex(), '000000040100000000')
 
     def test_other_settings_types_are_still_rejected(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
             with self.subTest(settings=settings):
                 with self.assertRaises(ProtocolError) as ctx:
-                    bytes(HTTP(type=Frame.SETTINGS, frame={'settings': settings}))
+                    bytes(HTTPv2(type=Frame.SETTINGS, frame={'settings': settings}))
                 self.assertEqual(str(ctx.exception),
                                  f'HTTP/2: [Type 4] invalid settings: {tail}')
 

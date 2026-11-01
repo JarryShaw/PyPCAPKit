@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""data model for HTTP/1.* protocol"""
+"""data model for HTTP/1.* protocol
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.data.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -17,7 +25,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.application.httpv1 import Type as HTTP_Type
 
 __all__ = [
-    'HTTP',
+    'HTTPv1',
 
     'Header',
     'RequestHeader', 'ResponseHeader',
@@ -25,8 +33,14 @@ __all__ = [
 
 
 @info_final
-class HTTP(Protocol):
-    """Data model for HTTP/1.* protocol."""
+class HTTPv1(Protocol):
+    """Data model for HTTP/1.* protocol.
+
+    .. versionchanged:: 1.6.0
+
+       Renamed from ``HTTP``, after its module (:issue:`2529`).
+
+    """
 
     #: HTTP receipt.
     receipt: 'Header'

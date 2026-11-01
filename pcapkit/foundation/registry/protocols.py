@@ -50,7 +50,7 @@ from pcapkit.const.tcp.option import Option as TCP_Option
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.protocols import __proto__ as protocol_registry
-from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.application.httpv2 import HTTPv2
 from pcapkit.protocols.internet.hip import HIP
 from pcapkit.protocols.internet.hopopt import HOPOPT
 from pcapkit.protocols.internet.icmpv4 import ICMPv4
@@ -181,15 +181,11 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`~pcapkit.protocols.protocol.ProtocolBase`, and will be registered to
     the :data:`pcapkit.protocols.__proto__` registry.
 
-    The registry is keyed on ``protocol.__name__.upper()``, which is **not**
-    unique across this package: several dispatchable protocol classes are
-    named ``HTTP`` -- the generic base
-    :class:`pcapkit.protocols.application.http.HTTP` and the version
-    implementations :class:`pcapkit.protocols.application.httpv1.HTTP` and
-    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so they all compete
-    for the single key ``'HTTP'``. Registering one of them replaces whichever
-    was there, and the replacement is observable through every reader of the
-    registry, e.g. :meth:`Protocol.expand_comp
+    The registry is keyed on ``protocol.__name__.upper()``, which nothing makes
+    unique: two protocol classes of the same name, such as a user's class
+    named after a shipped one, compete for one key. Registering one of them
+    replaces whichever was there, and the replacement is observable through
+    every reader of the registry, e.g. :meth:`Protocol.expand_comp
     <pcapkit.protocols.protocol.Protocol.expand_comp>`, which resolves a
     bare protocol name through it. Per :issue:`675` the overwrite is reported,
     matching :meth:`Protocol.register
@@ -208,7 +204,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     overwrite that overwrote nothing. Warning on the harmless case is not free:
     it teaches a caller to filter
     :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that
-    filter would then hide the ``HTTP`` collision this warning exists to
+    filter would then hide the name collision this warning exists to
     surface. The sibling ``register`` methods across the package, each keyed on a
     caller-supplied ``code``, apply the same identity criterion (:issue:`718`).
 
@@ -239,6 +235,15 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
             holds a *different* class under this protocol's name, i.e. the
             registration displaced another protocol class. Re-registering the
             same class under the same name is silent.
+
+    .. versionchanged:: 1.6.0
+
+       The HTTP member classes are named
+       :class:`~pcapkit.protocols.application.httpv1.HTTPv1` and
+       :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, so registering
+       one keeps its own key and no longer displaces
+       :class:`~pcapkit.protocols.application.http.HTTP` under ``'HTTP'``
+       (:issue:`2529`).
 
     """
     if not isinstance(protocol, type):
@@ -1833,16 +1838,16 @@ def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CausePar
 ###############################################################################
 
 
-# NOTE: pcapkit.protocols.application.httpv2.HTTP.__frame__
+# NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__
 def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]', *,
                         schema: 'Optional[Type[Schema_HTTP_FrameType]]' = None) -> 'None':
     """Register a frame parser.
 
     The function will register the given frame parser to the
-    :data:`pcapkit.protocols.application.httpv2.HTTP.__frame__` registry.
+    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.
 
     Args:
-        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>` frame type
+        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>` frame type
             code as in :class:`~pcapkit.const.http.frame.Frame`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the frame. A name names the

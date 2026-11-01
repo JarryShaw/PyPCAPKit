@@ -610,8 +610,8 @@ class ScopeTests(unittest.TestCase):
 
         :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` declares
         only ``version`` and forwards every other keyword to
-        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` or
-        :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>` according to
+        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` or
+        :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>` according to
         that value, so no fixed set of names is correct for it. Measured without
         the opt-out::
 
@@ -620,7 +620,7 @@ class ScopeTests(unittest.TestCase):
         Asserted through the real class rather than a dummy, because the point is
         that this one protocol declines and the rest do not. The construction
         succeeds, and the packet it builds -- ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
-        which only :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>`'s
+        which only :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>`'s
         ``make`` produces from these keywords -- is the proof that they reached
         the delegate rather than being refused on the way.
 
@@ -631,8 +631,8 @@ class ScopeTests(unittest.TestCase):
 
         """
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.protocols.protocol import _declared_keywords
         from pcapkit.protocols.transport.tcp import TCP
 

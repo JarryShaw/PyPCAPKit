@@ -32,9 +32,9 @@ class TestHTTPv2SettingsPlainDict(unittest.TestCase):
     def build(self, settings: 'object') -> 'bytes':
         """Build a ``SETTINGS`` frame from ``settings``."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        return bytes(HTTP(type=Frame.SETTINGS, frame={'settings': settings}))
+        return bytes(HTTPv2(type=Frame.SETTINGS, frame={'settings': settings}))
 
     def test_plain_dict_builds_the_list_octets(self) -> None:
         from pcapkit.const.http.setting import Setting
@@ -52,10 +52,10 @@ class TestHTTPv2SettingsPlainDict(unittest.TestCase):
     def test_plain_dict_frame_parses_back(self) -> None:
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         raw = self.build({1: 4096, 3: 100})
-        info = HTTP(io.BytesIO(raw), len(raw)).info
+        info = HTTPv2(io.BytesIO(raw), len(raw)).info
         self.assertEqual([(int(k), v) for k, v in info.settings.items(multi=True)],
                          [(1, 4096), (3, 100)])
 

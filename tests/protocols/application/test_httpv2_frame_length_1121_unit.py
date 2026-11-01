@@ -69,7 +69,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
     def test_rfc_frames_parse_and_report_the_payload_length(self) -> None:
         """Each RFC frame parses, and ``info.length`` is its payload length."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (raw, _) in RFC_FRAMES.items():
             with self.subTest(frame=name):
@@ -78,7 +78,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
     def test_make_writes_the_rfc_octets(self) -> None:
         """``make`` packs exactly the RFC octets, Length included."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (raw, kwargs) in RFC_FRAMES.items():
             with self.subTest(frame=name):
@@ -86,7 +86,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
     def test_parsed_frames_rebuild_to_the_same_octets(self) -> None:
         """parse -> ``make`` reproduces the wire octets."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (raw, _) in RFC_FRAMES.items():
             with self.subTest(frame=name):
@@ -95,7 +95,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
     def test_a_header_inclusive_length_is_rejected(self) -> None:
         """A fixed-size frame declaring payload + 9 is a size error."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name in ('PRIORITY', 'RST_STREAM', 'PING', 'WINDOW_UPDATE'):
@@ -108,7 +108,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
 
     def test_declared_payload_must_fit_after_the_header(self) -> None:
         """The buffer has to back the 9-octet header plus the declared payload."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw, _ = RFC_FRAMES['DATA']

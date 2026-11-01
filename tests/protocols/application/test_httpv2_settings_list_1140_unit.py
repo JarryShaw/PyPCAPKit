@@ -45,7 +45,7 @@ class HTTPv2SettingsListUnitTests(unittest.TestCase):
 
     def test_settings_parse_without_warnings(self) -> None:
         """No warning of any kind is emitted, and every pair is read."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (pairs, ack) in CASES.items():
             raw = scapy_frame(pairs, ack)
@@ -59,7 +59,7 @@ class HTTPv2SettingsListUnitTests(unittest.TestCase):
 
     def test_settings_round_trip_to_the_scapy_octets(self) -> None:
         """parse -> ``make`` reproduces scapy's octets exactly."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, (pairs, ack) in CASES.items():
             raw = scapy_frame(pairs, ack)

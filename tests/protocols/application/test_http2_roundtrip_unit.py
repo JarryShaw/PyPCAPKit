@@ -58,12 +58,12 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, wire in FRAMES.items():
             with self.subTest(frame=name):
-                parsed = HTTP(wire, len(wire))
-                self.assertEqual(bytes(HTTP.from_data(parsed.info)).hex(), wire.hex())
+                parsed = HTTPv2(wire, len(wire))
+                self.assertEqual(bytes(HTTPv2.from_data(parsed.info)).hex(), wire.hex())
 
     def test_preface_is_parsed_and_rebuilt(self) -> None:
         from pcapkit.protocols.application.http import HTTP
@@ -78,20 +78,20 @@ class TestHTTP2RoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(HTTP.from_data(parsed.info)).hex(), wire.hex())
 
     def test_payload_is_bounded_by_the_declared_length(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         wire = FRAMES['1243 DATA then SETTINGS ACK']
-        parsed = HTTP(wire, len(wire))
+        parsed = HTTPv2(wire, len(wire))
         self.assertEqual(parsed.info.length, 3)
         self.assertEqual(parsed.info.data, b'abc')
         self.assertEqual(bytes(parsed.payload), SETTINGS_ACK)
 
     def test_reserved_and_undefined_bits_are_parsed(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         def parse(name: str) -> 'object':
             wire = FRAMES[name]
-            return HTTP(wire, len(wire)).info
+            return HTTPv2(wire, len(wire)).info
 
         self.assertEqual(parse('1246 header R bit').reserved, 1)
         self.assertEqual(parse('1246 PUSH_PROMISE R bit').promised_reserved, 1)
@@ -102,10 +102,10 @@ class TestHTTP2RoundTrip(unittest.TestCase):
 
     def test_repeated_settings_keep_their_order(self) -> None:
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         wire = FRAMES['1247 SETTINGS A, B, A']
-        settings = HTTP(wire, len(wire)).info.settings
+        settings = HTTPv2(wire, len(wire)).info.settings
         self.assertEqual(list(settings.items(multi=True)), [
             (Setting.HEADER_TABLE_SIZE, 1),
             (Setting.ENABLE_PUSH, 0),
@@ -115,10 +115,10 @@ class TestHTTP2RoundTrip(unittest.TestCase):
     def test_repeated_settings_index_to_the_last_value(self) -> None:
         """The last value of a repeated identifier wins (RFC 9113 section 6.5)."""
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         wire = FRAMES['1247 SETTINGS A, B, A']
-        info = HTTP(wire, len(wire)).info
+        info = HTTPv2(wire, len(wire)).info
         settings = info.settings
         self.assertEqual(settings[Setting.HEADER_TABLE_SIZE], 3)
         self.assertEqual(settings.get(Setting.HEADER_TABLE_SIZE), 3)
@@ -127,18 +127,18 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         # The Info export keeps every entry, in wire order (#1484).
         self.assertEqual(list(settings.to_dict().items(multi=True)), list(settings.items(multi=True)))
         self.assertEqual(settings.getlist(Setting.HEADER_TABLE_SIZE), [1, 3])
-        self.assertEqual(bytes(HTTP.from_data(info)).hex(), wire.hex())
+        self.assertEqual(bytes(HTTPv2.from_data(info)).hex(), wire.hex())
 
     def test_make_padded_with_zero_pad_length(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        made = HTTP(type=Frame.DATA, sid=1, frame={'padded': True, 'data': b'abc'})
+        made = HTTPv2(type=Frame.DATA, sid=1, frame={'padded': True, 'data': b'abc'})
         self.assertEqual(bytes(made), FRAMES['1244 DATA PADDED, Pad Length 0'])
 
     def test_make_accepts_frame_bytes(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for frame_type, sid, payload in (
             (Frame.DATA, 1, b'abc'),
@@ -154,29 +154,29 @@ class TestHTTP2RoundTrip(unittest.TestCase):
             (Frame(0xfa), 1, b'abc'),
         ):
             with self.subTest(type=frame_type):
-                made = HTTP(type=frame_type, sid=sid, frame=payload)
+                made = HTTPv2(type=frame_type, sid=sid, frame=payload)
                 wire = len(payload).to_bytes(3, 'big') + bytes([int(frame_type), 0]) + sid.to_bytes(4, 'big') + payload
                 self.assertEqual(bytes(made), wire)
                 self.assertEqual(made.info.type, frame_type)
 
     def test_make_frame_bytes_wrong_for_the_type_raise_protocol_error(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
-            HTTP(type=Frame.PRIORITY, sid=1, frame=b'abc')
+            HTTPv2(type=Frame.PRIORITY, sid=1, frame=b'abc')
 
     def test_make_ping_rejects_wrong_width_opaque_data(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for data in (b'abc', b'0123456789'):
             with self.subTest(data=data):
                 with self.assertRaises(ProtocolError):
-                    HTTP(type=Frame.PING, sid=0, frame={'opaque_data': data})
-        self.assertEqual(bytes(HTTP(type=Frame.PING, sid=0, frame={'opaque_data': b'01234567'}))[9:],
+                    HTTPv2(type=Frame.PING, sid=0, frame={'opaque_data': data})
+        self.assertEqual(bytes(HTTPv2(type=Frame.PING, sid=0, frame={'opaque_data': b'01234567'}))[9:],
                          b'01234567')
 
 

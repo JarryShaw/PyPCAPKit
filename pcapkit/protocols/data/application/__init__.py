@@ -12,13 +12,13 @@ from pcapkit.protocols.data.application.ftp import Request as FTP_Request
 from pcapkit.protocols.data.application.ftp import Response as FTP_Response
 
 # Hypertext Transfer Protocol (HTTP/1.*)
-from pcapkit.protocols.data.application.httpv1 import HTTP as HTTPv1
+from pcapkit.protocols.data.application.httpv1 import HTTPv1
 from pcapkit.protocols.data.application.httpv1 import Header as HTTPv1_Header
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as HTTPv1_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as HTTPv1_ResponseHeader
 
 # Hypertext Transfer Protocol (HTTP/2)
-from pcapkit.protocols.data.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.data.application.httpv2 import HTTPv2
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as HTTPv2_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as HTTPv2_ContinuationFrameFlags

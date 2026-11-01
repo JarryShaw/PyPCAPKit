@@ -7,8 +7,8 @@ HTTP - Hypertext Transfer Protocol
 :class:`~pcapkit.protocols.application.http.HTTP`,
 which is a base class for Hypertext Transfer
 Protocol (HTTP) [*]_ family, e.g.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
-and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`,
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTPv1>`
+and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>`,
 and :func:`~pcapkit.protocols.application.http.test_start_line`,
 which tells whether a payload opens with an HTTP/1.* start line.
 

@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.application.httpv2
 
 :mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTP`
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
 only, which implements an extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -34,6 +34,12 @@ Octets      Bits        Name                    Description
    are kept (:issue:`652`, :issue:`668`, :issue:`1244`, :issue:`1245`,
    :issue:`1246`, :issue:`1247`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.httpv2.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.HTTPv2`,
+   after its module (:issue:`2529`).
+
 """
 import collections
 from typing import TYPE_CHECKING, cast
@@ -43,7 +49,6 @@ from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
-from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as Data_ContinuationFrameFlags
@@ -53,6 +58,7 @@ from pcapkit.protocols.data.application.httpv2 import Flags as Data_Flags
 from pcapkit.protocols.data.application.httpv2 import GoawayFrame as Data_GoawayFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrame as Data_HeadersFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as Data_HeadersFrameFlags
+from pcapkit.protocols.data.application.httpv2 import HTTPv2 as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import PingFrame as Data_PingFrame
 from pcapkit.protocols.data.application.httpv2 import PingFrameFlags as Data_PingFrameFlags
 from pcapkit.protocols.data.application.httpv2 import PriorityFrame as Data_PriorityFrame
@@ -65,13 +71,13 @@ from pcapkit.protocols.data.application.httpv2 import SettingsFrame as Data_Sett
 from pcapkit.protocols.data.application.httpv2 import SettingsFrameFlags as Data_SettingsFrameFlags
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as Data_UnassignedFrame
 from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as Data_WindowUpdateFrame
-from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import \
     ContinuationFrame as Schema_ContinuationFrame
 from pcapkit.protocols.schema.application.httpv2 import DataFrame as Schema_DataFrame
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_FrameType
 from pcapkit.protocols.schema.application.httpv2 import GoawayFrame as Schema_GoawayFrame
 from pcapkit.protocols.schema.application.httpv2 import HeadersFrame as Schema_HeadersFrame
+from pcapkit.protocols.schema.application.httpv2 import HTTPv2 as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import PingFrame as Schema_PingFrame
 from pcapkit.protocols.schema.application.httpv2 import PriorityFrame as Schema_PriorityFrame
 from pcapkit.protocols.schema.application.httpv2 import PushPromiseFrame as Schema_PushPromiseFrame
@@ -105,10 +111,10 @@ if TYPE_CHECKING:
     FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], Tuple[Schema_FrameType, Flags]]
 
-__all__ = ['HTTP']
+__all__ = ['HTTPv2']
 
 
-class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
+class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
            schema=Schema_HTTP, data=Data_HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
@@ -123,35 +129,39 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
          - Frame Parser
          - Frame Constructor
        * - :attr:`~pcapkit.const.http.frame.Frame.DATA`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_data`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_data`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_data`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_data`
        * - :attr:`~pcapkit.const.http.frame.Frame.HEADERS`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_headers`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_headers`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_headers`
        * - :attr:`~pcapkit.const.http.frame.Frame.PRIORITY`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_priority`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_priority`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_priority`
        * - :attr:`~pcapkit.const.http.frame.Frame.RST_STREAM`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_rst_stream`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_rst_stream`
        * - :attr:`~pcapkit.const.http.frame.Frame.SETTINGS`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_settings`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_settings`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_settings`
        * - :attr:`~pcapkit.const.http.frame.Frame.PUSH_PROMISE`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_push_promise`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_push_promise`
        * - :attr:`~pcapkit.const.http.frame.Frame.PING`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_ping`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_ping`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_ping`
        * - :attr:`~pcapkit.const.http.frame.Frame.GOAWAY`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_goaway`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_goaway`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_goaway`
        * - :attr:`~pcapkit.const.http.frame.Frame.WINDOW_UPDATE`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_window_update`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_window_update`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_window_update`
        * - :attr:`~pcapkit.const.http.frame.Frame.CONTINUATION`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_continuation`
-         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._make_http_continuation`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._make_http_continuation`
+
+    .. versionchanged:: 1.6.0
+
+       Renamed from ``HTTP``, after its module (:issue:`2529`).
 
     """
 
@@ -362,7 +372,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Raises:
             ProtocolError: If ``frame`` is none of the forms this maker reads --
                 raw :obj:`bytes`, a :obj:`dict` of frame arguments, an
-                :class:`~pcapkit.protocols.data.application.httpv2.HTTP` data
+                :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2` data
                 model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
         .. versionchanged:: 1.5.0

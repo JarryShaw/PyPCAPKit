@@ -8,8 +8,8 @@
 :class:`~pcapkit.protocols.application.http.HTTP`,
 which is a base class for Hypertext Transfer
 Protocol (HTTP) [*]_ family, e.g.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
-and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`,
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTPv1>`
+and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>`,
 and :func:`~pcapkit.protocols.application.http.test_start_line`,
 which tells whether a payload opens with an HTTP/1.* start line.
 
@@ -69,7 +69,7 @@ def _test_http2_frame(data: 'bytes') -> 'bool':
     """Test whether ``data`` opens with a frame header a conforming sender could write.
 
     This is a plausibility test for :meth:`HTTP._guess_version`'s fall-through
-    only. :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>` itself parses every frame
+    only. :class:`httpv2.HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>` itself parses every frame
     :rfc:`9113` lets a receiver accept, which includes frames this test turns down.
 
     Args:
@@ -115,7 +115,7 @@ _RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\Z")  # RFC 9110, section 16.
 _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 # Regular expression to match HTTP status code. Anchored for the same reason as
 # ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and
-# ``httpv1.HTTP`` takes the value from ``int(para2)`` on the raw token, so an
+# ``httpv1.HTTPv1`` takes the value from ``int(para2)`` on the raw token, so an
 # unanchored prefix match would let ``200x`` and ``2000`` past the guard and then
 # out of ``int()`` as a bare ``ValueError`` -- where ``_read_http_header``
 # documents ``ProtocolError``.
@@ -125,10 +125,10 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 # the syntax.
 _RE_STATUS = re.compile(rb'\d{3}\Z')
 
-# The HTTP/2 connection preface's header block, as ``httpv1.HTTP.read`` splits it
+# The HTTP/2 connection preface's header block, as ``httpv1.HTTPv1.read`` splits it
 # off at the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field
 # lines, so the patterns above accept it; it is refused by name in
-# ``httpv1.HTTP._read_http_header`` and :func:`test_start_line` so that the
+# ``httpv1.HTTPv1._read_http_header`` and :func:`test_start_line` so that the
 # preface never parses as HTTP/1.
 _HTTP2_PREFACE_HEADER = _HTTP2_PREFACE.split(b'\r\n\r\n', maxsplit=1)[0]
 
@@ -152,7 +152,7 @@ def test_start_line(data: 'bytes') -> 'bool':
     Note:
         The acceptance rule is deliberately the *same* one
         :meth:`HTTP._read_http_header
-        <pcapkit.protocols.application.httpv1.HTTP._read_http_header>` applies
+        <pcapkit.protocols.application.httpv1.HTTPv1._read_http_header>` applies
         -- ``_RE_METHOD`` with ``_RE_VERSION`` for a request, ``_RE_VERSION``
         with ``_RE_STATUS`` for a response -- which is why those patterns
         are defined beside this predicate and
@@ -170,7 +170,7 @@ def test_start_line(data: 'bytes') -> 'bool':
         HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that
         tested only the first line would answer :data:`True` for it. Split at the
         header/body separator first, as :meth:`HTTP.read
-        <pcapkit.protocols.application.httpv1.HTTP.read>` does, and the preface's
+        <pcapkit.protocols.application.httpv1.HTTPv1.read>` does, and the preface's
         header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which
         the parser refuses by name and so does this. Any *other* header with no
         CRLF in it is a start line with zero field lines, which
@@ -224,8 +224,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: This class is a version dispatcher rather than a protocol with a header of
     #: its own, so its construction keywords cannot be enumerated: :meth:`make`
     #: declares only ``version`` and forwards everything else to
-    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTP.make>` or
-    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
+    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTPv1.make>` or
+    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>`
     #: according to that value, so the correct set of names depends on an
     #: argument. :obj:`None` therefore opts out of the construction keyword check
     #: that :meth:`Protocol.__init__
@@ -313,9 +313,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             http = self._guess_version(length, **kwargs)
         else:
             if version == 1:
-                from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+                from pcapkit.protocols.application.httpv1 import HTTPv1 as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             elif version == 2:
-                from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+                from pcapkit.protocols.application.httpv2 import HTTPv2 as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             else:
                 raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
@@ -373,9 +373,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             raise ProtocolError(f'HTTP/{version}: connection preface is HTTP/2 only')
 
         if version == 1:
-            from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+            from pcapkit.protocols.application.httpv1 import HTTPv1 as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+            from pcapkit.protocols.application.httpv2 import HTTPv2 as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
             raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
@@ -430,8 +430,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             Protocol instance.
 
         """
-        from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv1 import HTTPv1 as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv2 import HTTPv2 as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
         if not isinstance(data, Data) and not issubclass(cls.__data__, (Data_HTTPv1, Data_HTTPv2)):
             if 'receipt' in data:
@@ -459,10 +459,10 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # HTTP/1.*'s lives in ``receipt`` as the start line's string, and HTTP/2
         # has none -- so the version is the class of ``data`` that :meth:`read`
         # returned from the versioned parser.
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv1 import HTTPv1 as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv2 import HTTPv2 as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
         if isinstance(data, Data_HTTPv1):
             return {'version': 1, **HTTPv1._make_data(data)}
@@ -551,11 +551,11 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # preface must not be claimed out of octets outside this payload.
         preface_len = len(_HTTP2_PREFACE)
         if self._test_preface(length):
-            from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+            from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
             # The preface is not a frame -- the frames begin after it
             # (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately
-            # following), so it is skipped rather than fed to ``httpv2.HTTP``,
+            # following), so it is skipped rather than fed to ``httpv2.HTTPv2``,
             # which would misread it as framing.
             if length == preface_len:
                 # A preface with nothing after it *is* HTTP/2, but this library's
@@ -588,10 +588,10 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             self._preface_length = preface_len
             return http
 
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
         # NOTE: The second identification: an HTTP/1 ``request-line`` or
-        # ``status-line``, tested with the very patterns ``httpv1.HTTP`` parses
+        # ``status-line``, tested with the very patterns ``httpv1.HTTPv1`` parses
         # with (``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS`` above, all
         # anchored, which ``httpv1.py`` imports from this module), so the
         # predicate and the parser cannot disagree about what HTTP/1 looks like.
@@ -621,7 +621,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # too short for HTTP/2's nine-octet frame header, or whose frame-specific
         # fields exceed what the buffer holds, must not escape as a stdlib
         # exception that no caller of this method can catch. Such payloads raise
-        # ``ProtocolError`` at the source -- ``httpv2.HTTP.unpack`` rejects a
+        # ``ProtocolError`` at the source -- ``httpv2.HTTPv2.unpack`` rejects a
         # buffer under nine octets, and :attr:`FieldBase.length
         # <pcapkit.corekit.fields.field.FieldBase.length>` re-raises a
         # negative-length template as
@@ -629,7 +629,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # suppression only guards whatever path is not known to do likewise.
         #
         # Suppressing it on the *first* arm is wrong: nine byte patterns over
-        # lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTP``, so
+        # lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTPv1``, so
         # it buys nothing, and
         # :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*
         # :exc:`struct.error`, so suppressing it on a non-final arm swallows
@@ -654,7 +654,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         if not _test_http2_frame(self._data[:length]):
             raise ProtocolError('HTTP: unknown version')
 
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError, struct.error):
             return HTTPv2(self._data, length, **kwargs)
 
