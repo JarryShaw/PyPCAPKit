@@ -108,6 +108,7 @@ against a typical 1460-octet MSS, so this is routine.
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: unpack
 
    .. automethod:: __length_hint__
 
