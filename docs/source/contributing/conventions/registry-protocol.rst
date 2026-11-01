@@ -660,10 +660,12 @@ established ones carry. A map's registration comes in two parts:
    :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
    typed for the port their maps are keyed by, while
    :class:`~pcapkit.protocols.internet.ipx.IPX` and
-   :class:`~pcapkit.protocols.link.loopback.Loopback` override
+   :class:`~pcapkit.protocols.link.loopback.Loopback` override their parents'
    :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
-   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`, typed for
-   TransType and EtherType.
+   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`: those are
+   typed for :class:`~pcapkit.const.reg.transtype.TransType` and
+   :class:`~pcapkit.const.reg.ethertype.EtherType`, not for the IPX packet type and
+   address family these two maps are keyed by.
 2. **A** ``register_<name>`` **function** in
    :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
    line above its ``def``. It calls the classmethod and logs, and a bad argument
@@ -680,11 +682,24 @@ members takes the enum's name, as
 :func:`~pcapkit.foundation.registry.protocols.register_ethertype` does; one taking
 bare :class:`int` keys, with or without an enum beside them, takes the owning
 protocol's name, as :func:`~pcapkit.foundation.registry.protocols.register_tcp` and
-:func:`~pcapkit.foundation.registry.protocols.register_loopback` do.
-:func:`~pcapkit.foundation.registry.protocols.register_pcap` and
-:func:`~pcapkit.foundation.registry.protocols.register_pcapng`, which split
-:func:`~pcapkit.foundation.registry.protocols.register_linktype` by capture format,
-take their format's name.
+:func:`~pcapkit.foundation.registry.protocols.register_loopback` do. These depart
+from it:
+
+* :func:`~pcapkit.foundation.registry.protocols.register_pcap` and
+  :func:`~pcapkit.foundation.registry.protocols.register_pcapng` take only
+  :class:`~pcapkit.const.reg.linktype.LinkType` members, but
+  :func:`~pcapkit.foundation.registry.protocols.register_linktype` holds that name
+  for writing both their maps at once, so each takes its capture format's name.
+* :func:`~pcapkit.foundation.registry.protocols.register_apptype` takes bare
+  :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s map,
+  :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no one
+  owner's name fits and it takes
+  :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s.
+
+:func:`~pcapkit.foundation.registry.protocols.register_protocol` and
+:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` are outside the
+rule: the first writes :data:`pcapkit.protocols.__proto__`, keyed by class name, and
+the second whichever maps its ``code`` names.
 
 :func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk` is the shape for a
 parser map:

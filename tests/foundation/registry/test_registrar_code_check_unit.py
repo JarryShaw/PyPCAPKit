@@ -12,9 +12,9 @@ Every case snapshots each registry the registrars here write -- the dispatch and
 method tables, the schema tables, :data:`pcapkit.protocols.__proto__` and the
 name leases -- calls the registrar with an otherwise valid argument list, and
 compares every registry with the snapshot. The registrars that take a plain
-``int`` (``NUMBER_REGISTRARS``) are out of scope for those codes: an ``int`` is
-a valid code there. Those keyed by no enum at all (``INT_ONLY_REGISTRARS``)
-take nothing else (#2511).
+``int`` (``NUMBER_REGISTRARS``) accept the ``int``, but still reject
+:obj:`None` and a :class:`str`. Those keyed by no enum at all
+(``INT_ONLY_REGISTRARS``) take nothing but an ``int`` (#2511).
 
 Every registrar, those included, also rejects a member of an enum other
 than the one it is typed on (#2224). The registry enums compare equal to their
@@ -235,6 +235,14 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         for name, targets in MODULE_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw,
                                             codes=(self._wrong_code(name),))
+
+    def test_number_registrars_reject_none_and_a_str(self) -> None:
+        """Accepting an ``int`` lets in neither :obj:`None` nor its digits as a :class:`str` (#2511)."""
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, number, targets, extra in NUMBER_REGISTRARS:
+            self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
+                                            codes=(None, str(number)))
 
     def test_number_registrars_reject_a_member_of_another_enum(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

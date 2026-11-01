@@ -95,8 +95,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     #: :attr:`Internet.__proto_key__ <pcapkit.protocols.internet.internet.Internet.__proto_key__>`
     #: is, so a ``code=`` key is checked as
     #: :func:`~pcapkit.foundation.registry.protocols.register_ipx` checks its own.
-    #: A bare :class:`int` stays a valid key, as it was while this registry
-    #: declared no pairing (:issue:`2268`, :issue:`2511`).
+    #: A bare :class:`int` is a valid key too, because the IPX Packet Type is a
+    #: number in its own right (:issue:`2268`, :issue:`2511`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_Packet, True)
 
     ##########################################################################
