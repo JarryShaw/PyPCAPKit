@@ -374,26 +374,6 @@ class ARP(Link[Data_ARP, Schema_ARP],
             _addr = addr.hex()
         return _addr
 
-    def _read_proto_resolve(self, addr: 'bytes', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
-        """Resolve protocol address according to protocol.
-
-        Arguments:
-            addr: Protocol address.
-            ptype: Protocol type.
-
-        Returns:
-            Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is
-            4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)
-            and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the
-            address as a hex :class:`str`.
-
-        """
-        if ptype == Enum_EtherType.Internet_Protocol_version_4 and len(addr) == 4:  # IPv4
-            return ipaddress.IPv4Address(addr)
-        if ptype == Enum_EtherType.Internet_Protocol_version_6 and len(addr) == 16:  # IPv6
-            return ipaddress.IPv6Address(addr)
-        return addr.hex()
-
     def _make_addr_resolve(self, addr: 'str | bytes | bytearray', htype: 'int') -> 'bytes':
         """Resolve hardware address according to protocol.
 
@@ -440,6 +420,26 @@ class ARP(Link[Data_ARP, Schema_ARP],
                 raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: '
                                     f'{addr!r}') from None
         return bytes(addr)
+
+    def _read_proto_resolve(self, addr: 'bytes', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
+        """Resolve protocol address according to protocol.
+
+        Arguments:
+            addr: Protocol address.
+            ptype: Protocol type.
+
+        Returns:
+            Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is
+            4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)
+            and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the
+            address as a hex :class:`str`.
+
+        """
+        if ptype == Enum_EtherType.Internet_Protocol_version_4 and len(addr) == 4:  # IPv4
+            return ipaddress.IPv4Address(addr)
+        if ptype == Enum_EtherType.Internet_Protocol_version_6 and len(addr) == 16:  # IPv6
+            return ipaddress.IPv6Address(addr)
+        return addr.hex()
 
     def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int',
                             plen: 'Optional[int]' = None) -> 'bytes':
