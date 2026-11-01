@@ -76,7 +76,11 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
     @property
     def alias(self) -> 'str':
-        """Acronym of corresponding protocol, ``'IGMPv1'``, ``'IGMPv2'`` or ``'IGMPv3'``."""
+        """Acronym of corresponding protocol, ``'IGMP'``, ``'IGMPv2'`` or ``'IGMPv3'``.
+
+        IGMPv1 reports ``'IGMP'``, the name :rfc:`1112` gives it.
+
+        """
         return f'IGMPv{self.version}'
 
     @property
