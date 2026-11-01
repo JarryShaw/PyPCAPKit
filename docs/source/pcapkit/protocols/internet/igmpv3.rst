@@ -49,6 +49,7 @@ Octets      Bits        Name                               Description
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: length
 

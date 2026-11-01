@@ -429,6 +429,19 @@ class IGMPVersionedClassTests(unittest.TestCase):
         self.assertEqual(object.__new__(IGMPv2).version, 2)
         self.assertEqual(object.__new__(IGMPv3).version, 3)
 
+    def test_name_carries_the_version_its_rfc_names(self) -> None:
+        """:rfc:`2236` and :rfc:`3376` name IGMPv2 and IGMPv3 with their versions,
+        so their ``name`` carries it; :rfc:`1112` names IGMPv1 without one (#2558)."""
+        expected = {
+            'IGMPv1': 'Internet Group Management Protocol',
+            'IGMPv2': 'Internet Group Management Protocol version 2',
+            'IGMPv3': 'Internet Group Management Protocol version 3',
+        }
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            with self.subTest(packet=name):
+                parsed = igmp_class(version)(io.BytesIO(packet), len(packet))
+                self.assertEqual(parsed.name, expected[version])
+
     def test_base_id_covers_all_three_versions(self) -> None:
         """The base lists each version's canonical name, and only those: IGMPv1's
         is the family name itself, so no ``id()`` carries ``'IGMPv1'``."""
@@ -630,7 +643,7 @@ class IGMPUnitTests(unittest.TestCase):
         self.assertEqual(IGMP.__index__(), TransType.IGMP)
         self.assertEqual(proto.__length_hint__(), 8)
         self.assertEqual(proto.length, 8)
-        self.assertEqual(proto.name, 'Internet Group Management Protocol')
+        self.assertEqual(proto.name, 'Internet Group Management Protocol version 2')
         self.assertEqual(proto.alias, 'IGMPv2')
 
     def test_igmpv3_length_varies_with_the_message(self) -> None:

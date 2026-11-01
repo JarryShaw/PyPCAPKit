@@ -159,6 +159,11 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
     ##########################################################################
 
     @property
+    def name(self) -> 'Literal["Internet Group Management Protocol version 3"]':  # type: ignore[override]
+        """Name of corresponding protocol."""
+        return 'Internet Group Management Protocol version 3'
+
+    @property
     def version(self) -> 'Literal[3]':
         """IGMP version this class reads: ``3``."""
         return 3

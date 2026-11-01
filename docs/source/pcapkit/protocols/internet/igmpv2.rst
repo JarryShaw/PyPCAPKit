@@ -14,6 +14,7 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: alias
 
