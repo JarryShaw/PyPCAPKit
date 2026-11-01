@@ -31,7 +31,7 @@ class EngineRuntimeTests(unittest.TestCase):
 
         self.assertEqual(extractor.length, 6)
         self.assertEqual(type(extractor.frame[0]).__name__, 'Frame')
-        self.assertEqual(str(extractor.frame[0].protochain), 'Ethernet:IPv6:IPv6_ICMP')
+        self.assertEqual(str(extractor.frame[0].protochain), 'Ethernet:IPv6:ICMPv6')
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
     def test_dpkt_engine_returns_dpkt_packets_and_toolkit_chain(self) -> None:
@@ -53,7 +53,7 @@ class EngineRuntimeTests(unittest.TestCase):
         # undissected, as ``Raw``. ``Ether`` is what the capture actually holds: frame 1 of
         # in.pcap is an Ethernet frame carrying an ICMPv6 neighbour solicitation over
         # IPv6, which is exactly what the two tests above independently report for the
-        # same frame -- 'Ethernet:IPv6:IPv6_ICMP' from the default engine and
+        # same frame -- 'Ethernet:IPv6:ICMPv6' from the default engine and
         # 'Ethernet:IP6:ICMP6' from DPKT. The three chains are three libraries'
         # spellings of one frame, so scapy agreeing here is parity, not a new claim.
         from pcapkit.interface import extract

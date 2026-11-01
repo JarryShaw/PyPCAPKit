@@ -23,7 +23,7 @@ class IGMP(Protocol):
     v2's, with ``max_resp_time`` reserved at zero and fewer :attr:`type`
     values defined (:issue:`2439`). IGMPv3 (:rfc:`3376`) adds a
     group-record-list body of a materially different shape and is out of
-    scope here.
+    scope here -- see :mod:`pcapkit.protocols.data.internet.igmpv3`.
 
     """
 

@@ -85,7 +85,11 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: or under a different variable name entirely is skipped by construction too,
 #: same as one built by ``.append()``. Those are covered behaviourally, not
 #: statically, by :file:`tests/const/test_const_enum_lookup.py`.
-EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 38
+#: The ICMP, ICMPv6 and IGMP ``type`` crawlers seed ``miss`` with an empty
+#: list or build their bodies dynamically, so they do not all count here. The
+#: constant-body crawlers still present in the merged tree are the updated count
+#: that the static sweep pins.
+EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 45
 
 
 def _constant_miss_lines() -> 'dict[str, list[str]]':

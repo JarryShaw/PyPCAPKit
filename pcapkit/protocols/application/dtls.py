@@ -35,12 +35,6 @@ ones on the wire.
 
 .. versionadded:: 1.6.0
 
-.. versionchanged:: 1.6.0
-
-   :meth:`read` reassembles a fragmented handshake message and decodes it,
-   given a :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine via its
-   new ``reassembly`` argument (:issue:`2440`).
-
 """
 from typing import TYPE_CHECKING, cast
 
