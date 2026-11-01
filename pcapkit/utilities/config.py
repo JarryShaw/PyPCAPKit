@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 __all__ = [
     # limits
     'FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT', 'IPV6_TCP_WARNED_LIMIT',
-    'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
+    'TCP_GAP_LIMIT', 'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
     'MAX_ZERO_PAD_LENGTH', 'MAX_ZERO_PAD_SHORTFALL', 'ZERO_PAD_BUDGET_RATIO',
     # readers
     'read_limit', 'read_flag',
@@ -214,6 +214,31 @@ EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSIO
 #: .. versionadded:: 1.5.0
 IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
+
+#: int: Widest gap, in octets, that
+#: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+#: zero-fills to merge a segment into the payload buffer it is read against,
+#: :envvar:`PCAPKIT_TCP_GAP_LIMIT`; ``-1`` always merges.
+#:
+#: This is a safety limit, not a reassembly rule: no RFC calls for one
+#: (:issue:`2546`). A segment can only legitimately open a gap as wide as the
+#: data in flight, which the receive window bounds. :rfc:`7323` allows windows
+#: up to ``2 ** 30``, but zero-filling a gap that wide costs 1 GiB, and real
+#: windows are far smaller -- Linux's default ``net.ipv4.tcp_rmem`` ceiling is
+#: 6 MiB -- so the default of 16 MiB clears them with room to spare. Past it,
+#: the stream is split rather than padded, as :meth:`TCP.reassembly
+#: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` describes.
+#:
+#: At ``-1`` only the sequence space bounds the gap: a sequence number is read
+#: within ``2 ** 31`` of the data buffered (:rfc:`9293#section-3.4`), so one
+#: segment can have up to 2 GiB zero-filled.
+#:
+#: .. versionadded:: 1.6.0
+#:
+#:    Moved from ``pcapkit.foundation.reassembly.tcp.TCP.__window__`` (:issue:`2546`).
+TCP_GAP_LIMIT = read_limit('TCP_GAP_LIMIT', 1 << 24, risk=(
+    'merging a segment that far from the data buffered zero-fills the gap in memory, '
+    'up to 2 GiB per segment at -1'))
 
 #: int: Most objects the ``_append_fallback`` method of a dumper
 #: :func:`~pcapkit.dumpkit.common.make_dumper` builds

@@ -47,8 +47,9 @@ look like for a datagram to come out of it at all:
    each direction is a buffer of its own.
    :meth:`~pcapkit.foundation.reassembly.tcp.TCP.submit` runs on that
    direction's RST; once its FIN has been seen and every octet below the FIN
-   has arrived; when a SYN, or a segment farther than ``__window__`` from the
-   buffer, opens a new one on the same four-tuple; on a timeout, if one is
+   has arrived; when a SYN, or a segment farther than
+   :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT` from the buffer, opens a
+   new one on the same four-tuple; on a timeout, if one is
    set; and, for whatever is still buffered, when the datagrams are read --
    ``extraction.reassembly`` flushes every open buffer through
    :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.fetch`. So a

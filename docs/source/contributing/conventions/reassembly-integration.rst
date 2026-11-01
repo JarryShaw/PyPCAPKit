@@ -22,6 +22,12 @@ The Rule
    message, accept overlaps -- the engine does the same and adds no timeout, cap or
    ordering rule the RFC does not call for.
 
+**TCP's gap cap is a safety limit, not a reassembly rule.** No RFC calls for
+:data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`, the widest gap TCP reassembly
+zero-fills to merge a segment. It bounds the memory a capture can have zero-filled, as
+:data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` does for a field, and ``-1``
+lifts it to give the uncapped reassembly point 4 asks for. Ruled on :issue:`2546`.
+
 Compliance, Measured
 ~~~~~~~~~~~~~~~~~~~~~
 
