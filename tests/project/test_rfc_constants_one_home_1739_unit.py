@@ -366,6 +366,19 @@ NOT_A_COPY = {
         'the last code point of the Basic Multilingual Plane, not an IP length',
     ('pcapkit/dumpkit/common.py', 'codepoint > 65535'):
         'above the Basic Multilingual Plane, needs a UTF-16 surrogate pair, not an IP length',
+    ('pcapkit/protocols/link/gre.py', 'return 16'):
+        "GRE's own longest possible header -- the 4-octet base plus all three optional "
+        'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
+    ('pcapkit/protocols/link/gre.py', '0 <= checksum <= 65535'):
+        "the max value of GRE's own 2-octet Checksum field (:rfc:`2784#section-2.5`), "
+        'not an IP total length',
+    ('pcapkit/protocols/link/gre.py', '0 <= reserved1 <= 65535'):
+        "the max value of GRE's own 2-octet Reserved1 field (:rfc:`2784#section-2.6`), "
+        'not an IP total length',
+    ('pcapkit/protocols/schema/link/gre.py', "{'reserved_2': (4, 9)}"):
+        "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
+        'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
+        'table',
 }
 
 #: Sweep hits of a homed value in a module whose own protocol owns no constant

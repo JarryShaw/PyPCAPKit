@@ -76,14 +76,15 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
         """The generic ``arphrd_type``s that never have ``protocol_type`` looked
-        up as an EtherType are kept raw; ``NETLINK`` and ``FRAD`` are the
-        exceptional dispatch cases, covered by their dedicated tests.
+        up as an EtherType are kept raw. ``NETLINK``, ``FRAD`` and
+        ``IPGRE``/``IP6GRE`` are the exceptional dispatch cases, covered by
+        their dedicated tests.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.IEEE80211_RADIOTAP):
+        for arphrd in (ARPHRD.IEEE80211_RADIOTAP,):
             with self.subTest(arphrd=arphrd):
                 raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
                 parsed = LinuxSLL2(raw, len(raw))
@@ -135,6 +136,26 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:FRAD:IPv4:UDP')
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
+
+    def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
+        """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both
+        dispatch to :class:`~pcapkit.protocols.link.gre.GRE` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+            with self.subTest(arphrd=arphrd):
+                gre = bytes.fromhex('00000800') + IPV4
+                raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + gre
+                parsed = LinuxSLL2(raw, len(raw))
+                self.assertEqual(parsed.info.arphrd_type, arphrd)
+                self.assertEqual(type(parsed.payload).__name__, 'GRE')
+                self.assertEqual(parsed.payload.info.protocol_type, 0x0800)
+                self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:GRE:IPv4:UDP')
+                self.assertEqual(parsed.data, raw)
+                self._assert_rebuilds(parsed)
 
     def test_non_ethernet_non_excluded_arphrds_still_dispatch_by_ethertype(self) -> None:
         """Loopback, PPP and SLIP/CSLIP are not among the exceptions, so

@@ -150,11 +150,14 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                 <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
-            Instance of next layer: :class:`~pcapkit.protocols.link.netlink.Netlink`
-            when ``arphrd_type`` is :attr:`ARPHRD.NETLINK
-            <pcapkit.const.linux.arphrd.ARPHRD.NETLINK>`; or
+            Instance of next layer:
+            :class:`~pcapkit.protocols.link.netlink.Netlink` when ``arphrd_type``
+            is :attr:`ARPHRD.NETLINK <pcapkit.const.linux.arphrd.ARPHRD.NETLINK>`;
             :class:`~pcapkit.protocols.link.frad.FRAD` when ``arphrd_type`` is
             :attr:`ARPHRD.FRAD <pcapkit.const.linux.arphrd.ARPHRD.FRAD>`;
+            :class:`~pcapkit.protocols.link.gre.GRE` when ``arphrd_type`` is
+            :attr:`ARPHRD.IPGRE <pcapkit.const.linux.arphrd.ARPHRD.IPGRE>` or
+            :attr:`ARPHRD.IP6GRE <pcapkit.const.linux.arphrd.ARPHRD.IP6GRE>`;
             otherwise :class:`~pcapkit.protocols.misc.raw.Raw`, recording
             ``proto``, for every other ``arphrd_type`` in
             :data:`_ARPHRD_NOT_ETHERTYPE`.
@@ -163,19 +166,26 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         file_ = self._get_payload()
         if length is None:
             length = len(file_)
-        arphrd_type = int(self.__header__.arphrd_type)  # type: ignore[attr-defined]
+
         if not min(length, len(file_)):
             return super()._import_next_layer(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+
+        arphrd_type = int(self.__header__.arphrd_type)  # type: ignore[attr-defined]
 
         if arphrd_type == ARPHRD.NETLINK:
             from pcapkit.protocols.link.netlink import Netlink  # pylint: disable=import-outside-toplevel # isort: skip
             return self._parse_next_layer(Netlink, file_, length, alias=proto, packet=packet,
                                           layer=self._exlayer, protocol=self._exproto,
                                           __context__=self._exctx)
-
         if arphrd_type == ARPHRD.FRAD:
             from pcapkit.protocols.link.frad import FRAD  # pylint: disable=import-outside-toplevel
             return self._parse_next_layer(FRAD, file_, length, alias=proto, packet=packet,
+                                          layer=self._exlayer, protocol=self._exproto,
+                                          __context__=self._exctx)
+
+        if arphrd_type in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+            from pcapkit.protocols.link.gre import GRE  # pylint: disable=import-outside-toplevel
+            return self._parse_next_layer(GRE, file_, length, alias=proto, packet=packet,
                                           layer=self._exlayer, protocol=self._exproto,
                                           __context__=self._exctx)
 

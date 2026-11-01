@@ -50,6 +50,9 @@ CASES = (
     ('arp', 'link.arp:ARP', {}, bytes.fromhex('000186dd06100001') + bytes(range(44))),
     ('rarp', 'application.rarp:RARP', {}, bytes.fromhex('0001080006040003') + bytes(range(20))),
     ('l2tpv2', 'link.l2tpv2:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
+    ('gre', 'link.gre:GRE', {}, struct.pack('>HH', 0xB000, 0x0800) + struct.pack('>HH', 0, 0)
+     + struct.pack('>I', 0x11223344) + struct.pack('>I', 99)
+     + bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
     ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
     ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),

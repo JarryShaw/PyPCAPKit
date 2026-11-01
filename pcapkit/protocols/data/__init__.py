@@ -65,6 +65,9 @@ __all__ = [
     # Frame Relay Access Device
     'FRAD',
 
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
