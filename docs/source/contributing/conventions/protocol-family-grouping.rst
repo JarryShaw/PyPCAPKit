@@ -51,7 +51,8 @@ HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 sh
 does, for a caller that builds it directly, but a dispatched payload is parsed by its
 version's class: as the :class:`~pcapkit.protocols.internet.igmp.IGMP` base picks
 the member for an IGMP message,
-:meth:`HTTP._dispatch <pcapkit.protocols.application.http.HTTP._dispatch>` picks
+:meth:`HTTP._dispatch_version
+<pcapkit.protocols.application.http.HTTP._dispatch_version>` picks
 :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
 :class:`~pcapkit.protocols.application.httpv2.HTTPv2` for the payload a transport
 port binds to HTTP (:issue:`2524`).

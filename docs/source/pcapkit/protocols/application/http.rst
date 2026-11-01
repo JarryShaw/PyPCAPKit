@@ -18,9 +18,9 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.http.HTTP` is parsed by
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, which
-   :meth:`~pcapkit.protocols.application.http.HTTP._dispatch` picks, rather than by
-   this class, so its data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`).
+   :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks,
+   rather than by this class, so its data sits under ``httpv1`` or ``httpv2``
+   rather than ``http`` (:issue:`2524`).
 
 .. autoclass:: pcapkit.protocols.application.http.HTTP
    :no-members:
@@ -39,7 +39,7 @@ which tells whether a payload opens with an HTTP/1.* start line.
    .. automethod:: _make_data
 
    .. automethod:: _guess_version
-   .. automethod:: _dispatch
+   .. automethod:: _dispatch_version
 
    .. autoattribute:: _preface_length
 

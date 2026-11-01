@@ -2,7 +2,7 @@
 """A dispatched HTTP payload is parsed by its version's class. C.f. #2524.
 
 The HTTP ports bind the family base
-:class:`~pcapkit.protocols.application.http.HTTP`, and ``HTTP._dispatch`` picks
+:class:`~pcapkit.protocols.application.http.HTTP`, and ``HTTP._dispatch_version`` picks
 ``HTTPv1`` or ``HTTPv2`` from the payload, as ``IGMP._dispatch`` picks an IGMP
 message's class. So a segment's HTTP layer is never the base: its data sits under
 ``httpv1`` or ``httpv2``, a payload neither version identifies is kept as
@@ -57,7 +57,7 @@ UNIDENTIFIED = {
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPDispatchTests(unittest.TestCase):
-    """``HTTP._dispatch``, the transport layers' use of it, and the round trips."""
+    """``HTTP._dispatch_version``, the transport layers' use of it, the round trips."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -93,13 +93,15 @@ class HTTPDispatchTests(unittest.TestCase):
 
         for label, (payload, class_name) in PAYLOADS.items():
             with self.subTest(payload=label):
-                self.assertIs(HTTP._dispatch(payload, len(payload)), self.member(class_name))
+                self.assertIs(HTTP._dispatch_version(payload, len(payload)),
+                              self.member(class_name))
         for label, payload in UNIDENTIFIED.items():
             with self.subTest(payload=label):
-                self.assertIs(HTTP._dispatch(payload, len(payload)), Raw)
+                self.assertIs(HTTP._dispatch_version(payload, len(payload)), Raw)
         with self.subTest(payload='bounded by length'):
             request = PAYLOADS['request'][0]
-            self.assertIs(HTTP._dispatch(request + b'\x00' * 9, len(request)), self.member('HTTPv1'))
+            self.assertIs(HTTP._dispatch_version(request + b'\x00' * 9, len(request)),
+                          self.member('HTTPv1'))
 
     def test_tcp_and_udp_parse_with_the_member_under_its_key(self) -> None:
         for transport in (self.tcp, self.udp):

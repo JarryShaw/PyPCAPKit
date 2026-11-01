@@ -9,7 +9,7 @@ reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those 
 wire -- :rfc:`9113#section-3` gives HTTP/2 the ``http`` scheme and HTTP/1.1's
 default port numbers -- so the
 port cannot decide the version and the payload has to, which is what
-:class:`pcapkit.protocols.application.http.HTTP` does: its ``_dispatch`` picks
+:class:`pcapkit.protocols.application.http.HTTP` does: its ``_dispatch_version`` picks
 ``HTTPv1`` or ``HTTPv2``, and the layer is that class (#2524).
 
 Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
@@ -93,8 +93,8 @@ class TCPHTTPDispatchTests(unittest.TestCase):
         them and :func:`~pcapkit.corekit.decorators.beholder` turns the refusal
         into ``Raw``. The HTTP/1.1 half guards the HTTP/1.1 frames in the
         fixture corpus, which these ports route through
-        :meth:`HTTP._dispatch
-        <pcapkit.protocols.application.http.HTTP._dispatch>`: they have to
+        :meth:`HTTP._dispatch_version
+        <pcapkit.protocols.application.http.HTTP._dispatch_version>`: they have to
         come back HTTP/1.1, each as its own version's class, and both halves are
         asserted here so neither can be satisfied at the other's expense.
 

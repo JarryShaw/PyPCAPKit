@@ -21,9 +21,9 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.http.HTTP` is parsed by
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, which
-   :meth:`~pcapkit.protocols.application.http.HTTP._dispatch` picks, rather than by
-   this class, so its data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`).
+   :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks,
+   rather than by this class, so its data sits under ``httpv1`` or ``httpv2``
+   rather than ``http`` (:issue:`2524`).
 
 """
 import contextlib
@@ -483,7 +483,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                             f'not {type(data).__name__}')
 
     @classmethod
-    def _dispatch(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase]':
+    def _dispatch_version(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase]':
         """Pick the class that parses the HTTP message at the start of ``data``.
 
         The payload is identified before any class is built, as
@@ -494,6 +494,13 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         is :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
         :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, never this base
         (:issue:`2524`).
+
+        It is the counterpart of :meth:`IGMP._dispatch
+        <pcapkit.protocols.internet.igmp.IGMP._dispatch>`, named apart from it
+        because, in the transport layer, ``_dispatch`` already names
+        :meth:`AppType._dispatch
+        <pcapkit.const.reg.apptype.apptype.AppType._dispatch>`, the port
+        registries' lookup hook.
 
         Args:
             data: Payload of the transport layer, starting at the HTTP message.

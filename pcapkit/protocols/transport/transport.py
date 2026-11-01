@@ -268,7 +268,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
 
         The HTTP ports bind the family base
         :class:`~pcapkit.protocols.application.http.HTTP`, whose
-        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch` picks
+        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks
         :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
         :class:`~pcapkit.protocols.application.httpv2.HTTPv2` from the payload,
         as :meth:`Internet._import_next_layer
@@ -287,7 +287,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         from pcapkit.protocols.application.http import HTTP as HTTPBase  # isort: skip # pylint: disable=import-outside-toplevel
 
         if klass is HTTPBase:
-            return HTTPBase._dispatch(file_, length)
+            return HTTPBase._dispatch_version(file_, length)
         return klass
 
     @staticmethod
