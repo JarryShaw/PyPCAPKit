@@ -542,78 +542,6 @@ class SecurityAssociation:
 
     """
 
-    def __init__(self, spi: 'Optional[int]' = None, *,
-                 encryption: 'Cipher | str | int' = Cipher.ENCR_NULL,
-                 encryption_key: 'bytes' = b'',
-                 salt: 'Optional[bytes]' = None,
-                 integrity: 'Integrity | str | int' = Integrity.NONE,
-                 integrity_key: 'bytes' = b'',
-                 icv_length: 'Optional[int]' = None,
-                 destination: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
-                 strict: 'bool' = True) -> 'None':
-        if spi is not None and not 0 <= spi <= 0xFFFFFFFF:
-            raise ProtocolError(f'ESP: invalid SPI: {spi!r}')
-
-        if isinstance(destination, bool):
-            # NOTE: checked before the ``ipaddress.ip_address`` call below, for
-            # the same reason as ``_reject_bool`` in
-            # ``pcapkit.corekit.fields.ipaddress`` (this module calls
-            # ``ipaddress.ip_address`` directly rather than through a Field, so
-            # it needs its own copy of the guard): ``bool`` is an ``int``
-            # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
-            # ``2**32`` as IPv4 -- so without this check, ``destination=True``
-            # would silently become ``IPv4Address('0.0.0.1')``, with no
-            # exception and no warning.
-            raise ProtocolError(
-                f'ESP: invalid destination: must not be a bool, not {destination!r} -- '
-                f'pass int({destination!r}) if the numeric value is what is wanted')
-
-        #: Optional[int]: Security Parameters Index, or :data:`None` for any.
-        self.spi = spi
-        #: CipherSuite: How to apply the encryption algorithm.
-        self.cipher_suite = CipherSuite.get(encryption)
-        #: IntegritySuite: How to apply the integrity algorithm.
-        self.integrity_suite = IntegritySuite.get(integrity)
-        #: Cipher: Encryption algorithm, i.e. its IKEv2 transform.
-        self.encryption = self.cipher_suite.cipher
-        #: Integrity: Integrity algorithm, i.e. its IKEv2 transform.
-        self.integrity = self.integrity_suite.integrity
-        #: bool: Whether to enforce the :rfc:`4303` §2.4 padding pattern.
-        self.strict = strict
-        #: Optional[IPv4Address | IPv6Address]: Outer destination address.
-        self.destination = ipaddress.ip_address(destination) if destination is not None else None
-
-        if self.cipher_suite.is_aead and self.integrity is not Integrity.NONE:
-            raise ProtocolError(
-                f'ESP: invalid integrity algorithm: {self.encryption.name} is a combined mode '
-                f'algorithm and provides its own integrity, so {self.integrity.name!r} must '
-                f'not be configured alongside it'
-            )
-
-        key, self.__salt__ = self._split_key(self.cipher_suite, encryption_key, salt)
-        self.__key__ = key
-        self.__integrity_key__ = bytes(integrity_key)
-
-        if self.integrity is not Integrity.NONE:
-            expected = self.integrity_suite.key_size
-            if len(self.__integrity_key__) != expected:
-                # NOTE: #2411 -- the ``ESP:`` prefix matters more here than on
-                # the exceptions above: ``warn`` reports the caller's frame, so
-                # the message text is the only thing that names the protocol.
-                warn(f'ESP: invalid integrity key: {self.integrity.name} expects a '
-                     f'{expected}-octet key, got {len(self.__integrity_key__)} octets; '
-                     f'the ICV will very likely fail to verify', ProtocolWarning)
-
-        if icv_length is not None and icv_length < 0:
-            raise ProtocolError(f'ESP: invalid ICV length: {icv_length!r}')
-        self.__icv_length__ = icv_length
-
-        unavailable = self.unavailable()
-        if unavailable is not None:
-            warn(f'{unavailable}; ESP payloads for SPI '
-                 f'{"any" if self.spi is None else f"{self.spi:#010x}"} will be reported as '
-                 f'opaque ciphertext', ProtocolWarning)
-
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -845,6 +773,89 @@ class SecurityAssociation:
         return iv + ciphertext, encryptor.tag[:self.icv_length]
 
     ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, spi: 'Optional[int]' = None, *,
+                 encryption: 'Cipher | str | int' = Cipher.ENCR_NULL,
+                 encryption_key: 'bytes' = b'',
+                 salt: 'Optional[bytes]' = None,
+                 integrity: 'Integrity | str | int' = Integrity.NONE,
+                 integrity_key: 'bytes' = b'',
+                 icv_length: 'Optional[int]' = None,
+                 destination: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
+                 strict: 'bool' = True) -> 'None':
+        if spi is not None and not 0 <= spi <= 0xFFFFFFFF:
+            raise ProtocolError(f'ESP: invalid SPI: {spi!r}')
+
+        if isinstance(destination, bool):
+            # NOTE: checked before the ``ipaddress.ip_address`` call below, for
+            # the same reason as ``_reject_bool`` in
+            # ``pcapkit.corekit.fields.ipaddress`` (this module calls
+            # ``ipaddress.ip_address`` directly rather than through a Field, so
+            # it needs its own copy of the guard): ``bool`` is an ``int``
+            # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
+            # ``2**32`` as IPv4 -- so without this check, ``destination=True``
+            # would silently become ``IPv4Address('0.0.0.1')``, with no
+            # exception and no warning.
+            raise ProtocolError(
+                f'ESP: invalid destination: must not be a bool, not {destination!r} -- '
+                f'pass int({destination!r}) if the numeric value is what is wanted')
+
+        #: Optional[int]: Security Parameters Index, or :data:`None` for any.
+        self.spi = spi
+        #: CipherSuite: How to apply the encryption algorithm.
+        self.cipher_suite = CipherSuite.get(encryption)
+        #: IntegritySuite: How to apply the integrity algorithm.
+        self.integrity_suite = IntegritySuite.get(integrity)
+        #: Cipher: Encryption algorithm, i.e. its IKEv2 transform.
+        self.encryption = self.cipher_suite.cipher
+        #: Integrity: Integrity algorithm, i.e. its IKEv2 transform.
+        self.integrity = self.integrity_suite.integrity
+        #: bool: Whether to enforce the :rfc:`4303` §2.4 padding pattern.
+        self.strict = strict
+        #: Optional[IPv4Address | IPv6Address]: Outer destination address.
+        self.destination = ipaddress.ip_address(destination) if destination is not None else None
+
+        if self.cipher_suite.is_aead and self.integrity is not Integrity.NONE:
+            raise ProtocolError(
+                f'ESP: invalid integrity algorithm: {self.encryption.name} is a combined mode '
+                f'algorithm and provides its own integrity, so {self.integrity.name!r} must '
+                f'not be configured alongside it'
+            )
+
+        key, self.__salt__ = self._split_key(self.cipher_suite, encryption_key, salt)
+        self.__key__ = key
+        self.__integrity_key__ = bytes(integrity_key)
+
+        if self.integrity is not Integrity.NONE:
+            expected = self.integrity_suite.key_size
+            if len(self.__integrity_key__) != expected:
+                # NOTE: #2411 -- the ``ESP:`` prefix matters more here than on
+                # the exceptions above: ``warn`` reports the caller's frame, so
+                # the message text is the only thing that names the protocol.
+                warn(f'ESP: invalid integrity key: {self.integrity.name} expects a '
+                     f'{expected}-octet key, got {len(self.__integrity_key__)} octets; '
+                     f'the ICV will very likely fail to verify', ProtocolWarning)
+
+        if icv_length is not None and icv_length < 0:
+            raise ProtocolError(f'ESP: invalid ICV length: {icv_length!r}')
+        self.__icv_length__ = icv_length
+
+        unavailable = self.unavailable()
+        if unavailable is not None:
+            warn(f'{unavailable}; ESP payloads for SPI '
+                 f'{"any" if self.spi is None else f"{self.spi:#010x}"} will be reported as '
+                 f'opaque ciphertext', ProtocolWarning)
+
+    def __repr__(self) -> 'str':
+        """Representation of the SA, free of any key material."""
+        spi = 'any' if self.spi is None else f'{self.spi:#010x}'
+        dst = '' if self.destination is None else f' dst={self.destination!s}'
+        return (f'<SecurityAssociation spi={spi} encryption={self.encryption.name} '
+                f'integrity={self.integrity.name} icv={self.icv_length}{dst}>')
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
@@ -887,17 +898,6 @@ class SecurityAssociation:
                                 f'got {len(material)!r}')
         return material, salt
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __repr__(self) -> 'str':
-        """Representation of the SA, free of any key material."""
-        spi = 'any' if self.spi is None else f'{self.spi:#010x}'
-        dst = '' if self.destination is None else f' dst={self.destination!s}'
-        return (f'<SecurityAssociation spi={spi} encryption={self.encryption.name} '
-                f'integrity={self.integrity.name} icv={self.icv_length}{dst}>')
-
 
 class ESPContext(ProtocolContext):
     """Caller supplied Security Association context for :class:`ESP`.
@@ -907,11 +907,6 @@ class ESPContext(ProtocolContext):
             parser, in order of preference for otherwise equal matches.
 
     """
-
-    def __init__(self, *associations: 'SecurityAssociation') -> 'None':
-        self.__associations__ = []  # type: list[SecurityAssociation]
-        for association in associations:
-            self.register(association)
 
     ##########################################################################
     # Properties.
@@ -969,6 +964,11 @@ class ESPContext(ProtocolContext):
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __init__(self, *associations: 'SecurityAssociation') -> 'None':
+        self.__associations__ = []  # type: list[SecurityAssociation]
+        for association in associations:
+            self.register(association)
 
     def __repr__(self) -> 'str':
         """Representation of the context, free of any key material."""
@@ -1393,74 +1393,6 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             'payload': data.payload_data + data.icv,
         }
 
-    @staticmethod
-    def _payload_bytes(payload: 'bytes | ProtocolBase | Schema') -> 'bytes':
-        """Render ``payload`` as :obj:`bytes`.
-
-        Args:
-            payload: Payload as supplied to :meth:`make`.
-
-        Returns:
-            Packed payload.
-
-        Raises:
-            ProtocolUnbound: If ``payload`` is of an unsupported type. This
-                mirrors :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`,
-                which rejects the same set.
-
-        """
-        from pcapkit.protocols.protocol import \
-            ProtocolBase  # pylint: disable=import-outside-toplevel
-
-        if isinstance(payload, bytes):
-            return payload
-        if isinstance(payload, Schema):
-            return payload.pack()
-        if isinstance(payload, ProtocolBase):
-            return bytes(payload)
-        raise ProtocolUnbound(f'unsupported type {type(payload)}')
-
-    @staticmethod
-    def _read_trailer(plaintext: 'bytes', association: 'SecurityAssociation',
-                      spi: 'int') -> 'tuple[bytes, bytes, int, int] | str':
-        """Split the ESP trailer off the decrypted plaintext.
-
-        Args:
-            plaintext: Decrypted payload data, i.e. the inner payload
-                followed by the ESP trailer.
-            association: Security Association the packet was decrypted with.
-            spi: Security Parameters Index, for the diagnostic message.
-
-        Returns:
-            A 4-tuple of the inner payload, the padding, the pad length and
-            the next header, or a :obj:`str` explaining why the trailer is
-            not self consistent.
-
-        """
-        if len(plaintext) < 2:
-            return (f'ESP: decrypted payload too short: SPI {spi:#010x} decrypts to '
-                    f'{len(plaintext)} octets, too short to hold a pad length and next header')
-
-        pad_len, next_ = plaintext[-2], plaintext[-1]
-        if pad_len + 2 > len(plaintext):
-            return (f'ESP: invalid pad length: the decrypted payload for SPI {spi:#010x} '
-                    f'declares {pad_len} octets of padding but holds only '
-                    f'{len(plaintext) - 2}; the encryption key is most likely wrong')
-
-        padding = plaintext[len(plaintext) - 2 - pad_len:len(plaintext) - 2]
-        inner = plaintext[:len(plaintext) - 2 - pad_len]
-
-        if padding != bytes(range(1, pad_len + 1)):
-            message = (f'ESP: invalid padding: the decrypted payload for SPI {spi:#010x} does '
-                       f'not follow the monotonically increasing sequence of RFC 4303 s2.4')
-            if association.strict and not association.authenticated:
-                # Nothing authenticated this packet, so the padding pattern
-                # is the only wrong-key signal available.
-                return f'{message}; the encryption key is most likely wrong'
-            warn(message, ProtocolWarning)
-
-        return inner, padding, pad_len, next_
-
     def _make_opaque(self, spi: 'int', seq: 'int', total: 'int', payload_data: 'bytes',
                      status: 'ESPStatus', error: 'str', *, icv: 'bytes' = b'',
                      version: 'Literal[4, 6]' = 4,
@@ -1510,3 +1442,71 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         return self._decode_next_layer(esp, None, len(payload_data) + len(icv),
                                        packet=packet or None, version=version,
                                        payload=payload_data + icv)
+
+    @staticmethod
+    def _read_trailer(plaintext: 'bytes', association: 'SecurityAssociation',
+                      spi: 'int') -> 'tuple[bytes, bytes, int, int] | str':
+        """Split the ESP trailer off the decrypted plaintext.
+
+        Args:
+            plaintext: Decrypted payload data, i.e. the inner payload
+                followed by the ESP trailer.
+            association: Security Association the packet was decrypted with.
+            spi: Security Parameters Index, for the diagnostic message.
+
+        Returns:
+            A 4-tuple of the inner payload, the padding, the pad length and
+            the next header, or a :obj:`str` explaining why the trailer is
+            not self consistent.
+
+        """
+        if len(plaintext) < 2:
+            return (f'ESP: decrypted payload too short: SPI {spi:#010x} decrypts to '
+                    f'{len(plaintext)} octets, too short to hold a pad length and next header')
+
+        pad_len, next_ = plaintext[-2], plaintext[-1]
+        if pad_len + 2 > len(plaintext):
+            return (f'ESP: invalid pad length: the decrypted payload for SPI {spi:#010x} '
+                    f'declares {pad_len} octets of padding but holds only '
+                    f'{len(plaintext) - 2}; the encryption key is most likely wrong')
+
+        padding = plaintext[len(plaintext) - 2 - pad_len:len(plaintext) - 2]
+        inner = plaintext[:len(plaintext) - 2 - pad_len]
+
+        if padding != bytes(range(1, pad_len + 1)):
+            message = (f'ESP: invalid padding: the decrypted payload for SPI {spi:#010x} does '
+                       f'not follow the monotonically increasing sequence of RFC 4303 s2.4')
+            if association.strict and not association.authenticated:
+                # Nothing authenticated this packet, so the padding pattern
+                # is the only wrong-key signal available.
+                return f'{message}; the encryption key is most likely wrong'
+            warn(message, ProtocolWarning)
+
+        return inner, padding, pad_len, next_
+
+    @staticmethod
+    def _payload_bytes(payload: 'bytes | ProtocolBase | Schema') -> 'bytes':
+        """Render ``payload`` as :obj:`bytes`.
+
+        Args:
+            payload: Payload as supplied to :meth:`make`.
+
+        Returns:
+            Packed payload.
+
+        Raises:
+            ProtocolUnbound: If ``payload`` is of an unsupported type. This
+                mirrors :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`,
+                which rejects the same set.
+
+        """
+        from pcapkit.protocols.protocol import \
+            ProtocolBase  # pylint: disable=import-outside-toplevel
+
+        if isinstance(payload, bytes):
+            return payload
+        if isinstance(payload, Schema):
+            return payload.pack()
+        if isinstance(payload, ProtocolBase):
+            return bytes(payload)
+        raise ProtocolUnbound(f'unsupported type {type(payload)}')
