@@ -38,6 +38,10 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
                PCAPNG
            end
 
+           subgraph checksum [Checksum Pseudo-Headers]
+               IP_Pseudo
+           end
+
            Raw & NoPayload
        end
 
@@ -57,7 +61,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
            end
 
            subgraph ssl [SSL Family]
-               SSL --> TLS & DTLS
+               SSL --> TLS & DTLS & SSLv2
                TLS --> SSLv3
            end
        end
@@ -102,7 +106,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
            end
 
            subgraph igmp [IGMP Family]
-               IGMP --> IGMPv1 & IGMPv2
+               IGMP --> IGMPv1 & IGMPv2 & IGMPv3
            end
        end
 
@@ -112,7 +116,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
        B --> Link & Internet & Transport & Application
 
-       B --> Header & Frame & PCAPNG & Raw & NoPayload
+       B --> Header & Frame & PCAPNG & Raw & NoPayload & IP_Pseudo
        Raw --> FTP_DATA
        ARP --> RARP
        IPv6_Ext --> AH & ESP
@@ -146,6 +150,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click IGMP "internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP"
        click IGMPv1 "internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP"
        click IGMPv2 "internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP"
+       click IGMPv3 "internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMP"
        click HOPOPT "internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
        click ICMP "internet/icmp.html#pcapkit.protocols.internet.icmp.ICMP"
        click ICMPv4 "internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.ICMPv4"
@@ -158,6 +163,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click IPv6-Frag "internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
        click IPv6-Opts "internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
        click IPv6-Route "internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
+       click IP_Pseudo "misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo"
        click IPX "internet/ipx.html#pcapkit.protocols.internet.ipx.IPX"
        click MH "internet/mh.html#pcapkit.protocols.internet.mh.MH"
 
@@ -177,6 +183,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click RARP "application/rarp.html#pcapkit.protocols.application.rarp.RARP"
        click DRARP "application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.SSL"
+       click SSLv2 "application/sslv2.html#pcapkit.protocols.application.sslv2.SSLv2"
        click TLS "application/tls.html#pcapkit.protocols.application.tls.TLS"
        click SSLv3 "application/tls.html#pcapkit.protocols.application.tls.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"

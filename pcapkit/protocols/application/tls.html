@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.application.tls contains TLS and SSLv3, which implement an extractor for the TLS/SSLv3+ record-layer family* – SSLv3 ( RFC 6101), TLS 1.0 ( RFC 2246), TLS 1.1 ( RFC 4346), TLS 1.2..." />
 <meta name="description" content="pcapkit.protocols.application.tls contains TLS and SSLv3, which implement an extractor for the TLS/SSLv3+ record-layer family* – SSLv3 ( RFC 6101), TLS 1.0 ( RFC 2246), TLS 1.1 ( RFC 4346), TLS 1.2..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="DTLS - Datagram Transport Layer Security" href="dtls.html"><link rel="prev" title="SSL - Secure Sockets Layer" href="ssl.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="DTLS - Datagram Transport Layer Security" href="dtls.html"><link rel="prev" title="SSLv2 - Secure Sockets Layer version 2" href="sslv2.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>TLS/SSL - Transport Layer Security - PyPCAPKit</title>
@@ -249,12 +249,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/frad.html">FRAD - Frame Relay Access Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/gre.html">GRE - Generic Routing Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -304,6 +306,7 @@
 <li class="toctree-l4"><a class="reference internal" href="ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
@@ -313,6 +316,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/checksum.html">IP Pseudo-Header</a></li>
 </ul>
 </li>
 </ul>
@@ -381,6 +385,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -657,10 +662,11 @@ at port 443, the <code class="docutils literal notranslate"><span class="pre">ht
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.tls.TLS.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.tls.TLS.length" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.tls.TLS.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of current protocol – the fixed record header,
 <a class="reference internal" href="#pcapkit.protocols.data.application.tls.TLS.length" title="pcapkit.protocols.data.application.tls.TLS.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>’s fragment
-excluded.</p>
+excluded; or, once <a class="reference internal" href="#pcapkit.protocols.application.tls.TLS.read" title="pcapkit.protocols.application.tls.TLS.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> has adopted an SSLv2 record, that
+record’s own 2- or 3-octet header.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -682,7 +688,11 @@ identifies, so a lookup by ID matches every record; inspect
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.tls.TLS.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/tls.html#TLS.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.tls.TLS.read" title="Link to this definition">¶</a></dt>
-<dd><p>Read Transport Layer Security (TLS).</p>
+<dd><p>Read Transport Layer Security (TLS), or the SSLv2 record port 443 may carry.</p>
+<p>TLS is tried first. Only when <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_record()</span></code> rejects the
+record is the payload offered to
+<a class="reference internal" href="sslv2.html#pcapkit.protocols.application.sslv2.SSLv2" title="pcapkit.protocols.application.sslv2.SSLv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code></a>, whose own header
+checks are strict, so a genuine TLS record is never taken as SSLv2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -691,14 +701,14 @@ identifies, so a lookup by ID matches every record; inspect
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.application.tls.TLS" title="pcapkit.protocols.data.application.tls.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the record cannot be a genuine TLS/SSLv3+
-    record – see <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_record()</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the payload is neither a TLS record (see
+    <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_record()</span></code>) nor an SSLv2 record.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -903,14 +913,14 @@ same as every other content type.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="ssl.html">
+          <a class="prev-page" href="sslv2.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">SSL - Secure Sockets Layer</div>
+                <div class="title">SSLv2 - Secure Sockets Layer version 2</div>
                 
               </div>
             </a>

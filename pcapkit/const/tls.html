@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="This module contains the constant enumerations shared by the record-layer implementations under the SSL umbrella – TLS(SSLv3 through TLS 1.3) and DTLS. Available enumerations include:,, TLS_Content..." />
 <meta name="description" content="This module contains the constant enumerations shared by the record-layer implementations under the SSL umbrella – TLS(SSLv3 through TLS 1.3) and DTLS. Available enumerations include:,, TLS_Content..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PCAPNG Constant Enumerations" href="pcapng.html"><link rel="prev" title="OSPF Constant Enumerations" href="ospf.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PCAPNG Constant Enumerations" href="pcapng.html"><link rel="prev" title="SSLv2 Constant Enumerations" href="sslv2.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>SSL Constant Enumerations - PyPCAPKit</title>
@@ -249,12 +249,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -304,6 +306,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
@@ -313,6 +316,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/checksum.html">IP Pseudo-Header</a></li>
 </ul>
 </li>
 </ul>
@@ -381,6 +385,7 @@
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -887,14 +892,14 @@ same words (<a class="extlink-issue reference external" href="https://github.com
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="ospf.html">
+          <a class="prev-page" href="sslv2.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</div>
+                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</div>
                 
               </div>
             </a>

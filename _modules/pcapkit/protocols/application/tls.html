@@ -242,12 +242,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -297,6 +299,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
@@ -306,6 +309,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/checksum.html">IP Pseudo-Header</a></li>
 </ul>
 </li>
 </ul>
@@ -374,6 +378,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
@@ -559,8 +564,13 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.content_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContentType</span> <span class="k">as</span> <span class="n">Enum_ContentType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span><span class="p">,</span> <span class="n">TLS13_VERSION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.sslv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSLv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.sslv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientHello</span> <span class="k">as</span> <span class="n">SSLv2_ClientHello</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.sslv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServerHello</span> <span class="k">as</span> <span class="n">SSLv2_ServerHello</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.sslv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSLv2</span> <span class="k">as</span> <span class="n">SSLv2_Data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.tls</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLS</span> <span class="k">as</span> <span class="n">Data_TLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.tls</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLS</span> <span class="k">as</span> <span class="n">Schema_TLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -617,6 +627,9 @@
     <span class="c1">#: Tier :meth:`read` identified, e.g. ``'TLS 1.2'``; ``'TLS'`` until then.</span>
     <span class="n">_alias</span> <span class="o">=</span> <span class="s1">'TLS'</span>  <span class="c1"># type: Literal["TLS", "SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2", "TLS 1.3"]</span>
 
+    <span class="c1">#: Header length of the SSLv2 record :meth:`read` adopted; ``None`` for TLS's own.</span>
+    <span class="n">_adopted_length</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
@@ -632,12 +645,15 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alias</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[5]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Header length of current protocol -- the fixed record header,</span>
 <span class="sd">        :attr:`~pcapkit.protocols.data.application.tls.TLS.length`'s fragment</span>
-<span class="sd">        excluded.</span>
+<span class="sd">        excluded; or, once :meth:`read` has adopted an SSLv2 record, that</span>
+<span class="sd">        record's own 2- or 3-octet header.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adopted_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adopted_length</span>
         <span class="k">return</span> <span class="mi">5</span>
 
     <span class="c1">##########################################################################</span>
@@ -661,8 +677,13 @@
 
 <div class="viewcode-block" id="TLS.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.TLS.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_TLS'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read Transport Layer Security (TLS).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read Transport Layer Security (TLS), or the SSLv2 record port 443 may carry.</span>
+
+<span class="sd">        TLS is tried first. Only when :meth:`_read_tls_record` rejects the</span>
+<span class="sd">        record is the payload offered to</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.sslv2.SSLv2`, whose own header</span>
+<span class="sd">        checks are strict, so a genuine TLS record is never taken as SSLv2.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -672,11 +693,19 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the record cannot be a genuine TLS/SSLv3+</span>
-<span class="sd">                record -- see :meth:`_read_tls_record`.</span>
+<span class="sd">            ProtocolError: If the payload is neither a TLS record (see</span>
+<span class="sd">                :meth:`_read_tls_record`) nor an SSLv2 record.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tls_record</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tls_record</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+            <span class="n">parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_sslv2_fallback</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">return</span> <span class="n">parsed</span></div>
 
 
 <div class="viewcode-block" id="TLS.make">
@@ -731,6 +760,28 @@
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
+
+<span class="sd">        An SSLv2 record that :meth:`read` adopted from port 443 is rebuilt as</span>
+<span class="sd">        the SSLv2 record it was parsed from, since TLS's record layout cannot</span>
+<span class="sd">        carry its 2- or 3-octet header.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Protocol data.</span>
+<span class="sd">            **kwargs: As :meth:`Protocol.from_data</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Protocol instance: an :class:`~pcapkit.protocols.application.sslv2.SSLv2`</span>
+<span class="sd">            for an SSLv2 record, otherwise a TLS instance.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">SSLv2_Data</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">SSLv2</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -828,7 +879,51 @@
         <span class="p">)</span>
 
         <span class="n">remaining</span> <span class="o">=</span> <span class="n">available</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tls</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tls</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_sslv2_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse the payload as SSLv2 once TLS has rejected it.</span>
+
+<span class="sd">        Only a complete CLIENT-HELLO or SERVER-HELLO is accepted: the whole</span>
+<span class="sd">        record must sit in this segment, and its body must pass the hello</span>
+<span class="sd">        length probe. Anything else stays :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The SSLv2 data model, adopted as this dispatcher's own, or</span>
+<span class="sd">            :data:`None` if the payload is not a complete SSLv2 hello.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">SSLv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">info</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">header_len</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">record_length</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="p">(</span><span class="n">SSLv2_ClientHello</span><span class="p">,</span> <span class="n">SSLv2_ServerHello</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adopt_dispatched</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adopt_dispatched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Adopt the SSLv2 parse, including its 2- or 3-octet header length.</span>
+
+<span class="sd">        :attr:`length` and :attr:`packet` must describe the header the record</span>
+<span class="sd">        really has, as a direct SSLv2 parse does.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj: The SSLv2 instance, already parsed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``obj``'s parsed data model, as :meth:`SSL._adopt_dispatched` returns it.</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adopted_length</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_adopt_dispatched</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
 
 
 
