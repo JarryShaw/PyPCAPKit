@@ -124,26 +124,27 @@ REQUIRED_JOB = 'Required checks passed'
 TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.github', 'python-versions.toml')
 
 
-def _coverage_legs() -> 'tuple[str, tuple[str, ...]]':
-    """The ``latest`` leg's job name, and the other supported legs', from :data:`TIERS`."""
+def _coverage_legs() -> 'tuple[str, str, tuple[str, ...]]':
+    """``latest``, its leg's job name, and the other supported legs', from :data:`TIERS`."""
     with open(TIERS, 'rb') as file:
         data = tomllib.load(file)
     paired = tuple(f'Python {version}' for version, entry in data['versions']['cpython'].items()
                    if entry['tier'] == 'supported' and version != data['latest'])
-    return f"Python {data['latest']}", paired
+    return data['latest'], f"Python {data['latest']}", paired
 
 
-#: The leg running under coverage, ``latest``, and the legs its tests step is paired
-#: against: the rest of the supported tier (#1633), not the KTLO legs, which are
-#: named ``Python 3.x (KTLO)`` and may stop early without failing.
-COVERAGE_JOB, PAIRED_JOBS = _coverage_legs()
+#: ``latest``, the job of its leg, which runs under coverage, and the legs that job's
+#: tests step is paired against: the rest of the supported tier (#1633), not the KTLO
+#: legs, which are named ``Python 3.x (KTLO)`` and may stop early without failing.
+LATEST_VERSION, COVERAGE_JOB, PAIRED_JOBS = _coverage_legs()
 TESTS_STEP = 'Run unit tests'
 #: The leg ms/test is measured on: a supported version not under coverage, kept on
 #: 3.13 -- the newest such leg when W4's baseline was measured -- so that W4 compares
 #: one interpreter with itself week over week.
 MS_PER_TEST_LEG = '3.13'
-#: The JUnit artifacts read, by leg, and from how many push runs.
-JUNIT_LEGS = ('3.13', '3.14')
+#: The JUnit artifacts read, by leg, and from how many push runs. ``latest``'s holds
+#: the ``LATEST`` tier, which no other leg runs (#2571).
+JUNIT_LEGS = tuple(dict.fromkeys(('3.13', '3.14', LATEST_VERSION)))
 JUNIT_ARTIFACT = 'junit-unit-{leg}'
 JUNIT_RUNS = 5
 

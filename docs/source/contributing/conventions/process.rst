@@ -428,8 +428,8 @@ thresholds are on :doc:`../workflows`.
    job's shape or selection -- a leg added, split or moved -- dispatch the workflow, so
    the next week compares like with like.
 *  **Monthly, refresh the measured figures** quoted in :file:`unit-tests.yml`'s
-   comments that the report shows to be stale -- the coverage leg's headroom, the
-   ordering cells' timings and their step cap's rationale.
+   comments that the report shows to be stale -- the ordering cells' timings and
+   their step cap's rationale.
 
 
 The PEP Discussion, Kept Current
