@@ -372,7 +372,8 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             if any, the source address otherwise.
 
         Raises:
-            ProtocolError: If a Destination Options header is not parsed.
+            ProtocolError: If a Destination Options header is not parsed,
+                however deep in the chain.
 
         """
         src = ip.info.src
@@ -386,17 +387,38 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                 if option is not None:
                     src = option.address
 
-            # If a malformed Destination Options header stopped the walk, it becomes the upper layer as Raw (#2480).
-            # Only raise an error if the Destination Options header is the next protocol but not in extension_headers.
-            if (ip.info.next == Enum_ExtensionHeader.IPv6_Opts and
-                not ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Opts) and
-                hasattr(ip, 'payload') and ip.payload is not None):
-                from pcapkit.protocols.misc.raw import Raw
-                if type(ip.payload) is Raw:
-                    raise ProtocolError(f'{self.alias}: Destination Options of {ip.alias} not '
-                                        'parsed; give src')
-
+            # NOTE: A header the walk stopped on, at any depth, is unparsed too, as
+            # a malformed one is (#2480), and may hold a Home Address option.
+            if self._walk(ip)[0] == Enum_ExtensionHeader.IPv6_Opts:
+                raise ProtocolError(f'{self.alias}: Destination Options of {ip.alias} not '
+                                    'parsed; give src')
         return src
+
+    @staticmethod
+    def _walk(ip: 'IPv6') -> 'tuple[Enum_TransType, int]':
+        """Walk the extension headers of an IPv6 layer up to its upper layer.
+
+        A Mobility Header or HIP (:rfc:`6275#section-6.1.1`, :rfc:`7401#section-5.1.1`)
+        is the upper layer itself, and an Encapsulating Security Payload
+        (:rfc:`4303`) ends the walk, its upper layer being encrypted.
+
+        Args:
+            ip: IPv6 layer.
+
+        Returns:
+            The code the walk stopped on, and the octets of the headers ahead of
+            it. The code is an extension header's if ``ip`` did not parse that
+            header: a malformed one (:issue:`2480`), one past the header limit,
+            or one not captured.
+
+        """
+        code, before = ip.info.next, 0
+        for _, header in ip.extension_headers.items(multi=True):
+            if code in _TERMINAL_HEADERS or code == Enum_TransType.ESP:
+                break
+            before += header.length
+            code = header.info.next
+        return code, before
 
     def _destination(self, ip: 'IPv4 | IPv6') -> 'IPv4Address | IPv6Address':
         """Read the pseudo-header destination address from an IP layer.
@@ -444,14 +466,10 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                                     f'{route.type} not parsed; give dst')
             dst = final
 
-        # If a malformed Routing header stopped the walk, it becomes the upper layer as Raw (#2480).
-        # Only raise an error if the Routing header is the next protocol but not in extension_headers.
-        if (ip.info.next == Enum_ExtensionHeader.IPv6_Route and
-            not ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Route) and
-            hasattr(ip, 'payload') and ip.payload is not None):
-            from pcapkit.protocols.misc.raw import Raw
-            if type(ip.payload) is Raw:
-                raise ProtocolError(f'{self.alias}: Routing header of {ip.alias} not parsed; give dst')
+        # NOTE: A header the walk stopped on, at any depth, is unparsed too, as
+        # a malformed one is (#2480), and may have segments left.
+        if self._walk(ip)[0] == Enum_ExtensionHeader.IPv6_Route:
+            raise ProtocolError(f'{self.alias}: Routing header of {ip.alias} not parsed; give dst')
         return dst
 
     def _upper_protocol(self, ip: 'IPv4 | IPv6') -> 'Enum_TransType':
@@ -507,42 +525,11 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             # NOTE: The upper layer of an ESP (RFC 4303) is encrypted, so it is never walked.
             unparsed = code in (Enum_TransType.AH, Enum_TransType.ESP)
         else:
-            code, before = ip.info.next, 0
-            for _, header in ip.extension_headers.items(multi=True):
-                # NOTE: An ESP header is never walked, its upper layer being encrypted (RFC 4303).
-                if code in _TERMINAL_HEADERS or code == Enum_TransType.ESP:
-                    break
-                before += header.length
-                code = header.info.next
+            code, before = self._walk(ip)
             unparsed = code not in _TERMINAL_HEADERS and self._is_extension_header(code)
 
-            # If a malformed extension header stopped the walk, it becomes the upper layer as Raw (#2480).
-            # Provide a more specific error message identifying which extension header failed.
-            if unparsed:
-                from pcapkit.protocols.misc.raw import Raw
-
-                # Check if the upper layer is Raw, indicating an unparsed extension header.
-                # Only raise a specific error if this extension header is NOT in the parsed headers.
-                if hasattr(ip, 'payload') and type(ip.payload) is Raw:
-                    # Try to identify which extension header failed. ``ProtocolError``
-                    # subclasses ``ValueError``, so only the enum lookup itself -- not
-                    # the raises below -- may sit inside this ``except ValueError``.
-                    try:
-                        ext_header = Enum_ExtensionHeader(code)  # type: 'Optional[Enum_ExtensionHeader]'
-                    except ValueError:
-                        ext_header = None
-                    if ext_header is not None:
-                        # Check if this header type was successfully parsed by looking in extension_headers
-                        ext_list = ip.extension_headers.getlist(ext_header)
-                        # If the header is not in the parsed list, it failed to parse
-                        if not ext_list:
-                            if ext_header == Enum_ExtensionHeader.IPv6_Opts:
-                                raise ProtocolError(f'{self.alias}: Destination Options of {ip.alias} not '
-                                                    'parsed; give src')
-                            elif ext_header == Enum_ExtensionHeader.IPv6_Route:
-                                raise ProtocolError(f'{self.alias}: Routing header of {ip.alias} not parsed; give dst')
-                    # Fall through to generic error message if not a recognized case
-
+        # NOTE: What is missing is the protocol and the length, even where an
+        # unparsed header also hides an address (#2513).
         if code is None or unparsed:
             raise ProtocolError(f'{self.alias}: upper layer of {ip.alias} not parsed; '
                                 'give protocol and upper_length')
