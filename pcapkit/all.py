@@ -128,6 +128,7 @@ __all__ = [
 
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
+    'IP_Pseudo',                                            # IP Pseudo-Header
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
     'FTP', 'FTP_DATA',                                      # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'RARP', 'DRARP',

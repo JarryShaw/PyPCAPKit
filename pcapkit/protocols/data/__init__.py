@@ -118,6 +118,9 @@ __all__ = [
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
+    # IP Pseudo-Header
+    'IP_Pseudo',
+
     # Internet Control Message Protocol
     'ICMPv4',
     'ICMPv4_Unknown', 'ICMPv4_Echo', 'ICMPv4_DestinationUnreachable', 'ICMPv4_TimeExceeded',
