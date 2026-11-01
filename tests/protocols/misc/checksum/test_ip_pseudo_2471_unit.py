@@ -3,7 +3,9 @@
 
 GitHub issue #2471: :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is
 built from a parsed IPv4 or IPv6 layer, or from explicit values, and packs to
-the :rfc:`793#section-3.1` or :rfc:`8200#section-8.1` layout.
+the :rfc:`793#section-3.1` or :rfc:`8200#section-8.1` layout;
+:func:`~pcapkit.protocols.misc.checksum.ip_pseudo.pseudo_header` gives it the
+upper layer's own length.
 
 The captured cases come from the tracked :file:`examples/captures/in.pcap` and
 :file:`examples/captures/dhcp.pcapng`. Each expected pseudo-header is sliced
@@ -699,6 +701,29 @@ class IPPseudoWalkTests(unittest.TestCase):
         second = bytes([58, 0]) + bytes(6)
         ip = self.ipv6(60, first + second + self.ICMPV6)
         self.assertEqual(IP_Pseudo(ip=ip).data[32:], bytes.fromhex('00000008' '000000' '3a'))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PseudoHeaderTests(unittest.TestCase):
+    """:func:`pseudo_header` gives the upper layer's own length."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo, pseudo_header
+
+        self.pseudo_header = pseudo_header
+        self.IP_Pseudo = IP_Pseudo
+
+    def test_the_length_is_replaced(self) -> None:
+        for src, dst, offset, width in (('192.0.2.1', '198.51.100.2', 10, 2),
+                                        ('2001:db8::1', '2001:db8::2', 32, 4)):
+            pseudo = self.IP_Pseudo(src=src, dst=dst, protocol=6, upper_length=0)
+            with self.subTest(src=src):
+                self.assertIs(self.pseudo_header(pseudo, 0), pseudo.data)
+                octets = self.pseudo_header(pseudo, 0x1234)
+                self.assertEqual(octets[offset:offset + width], (0x1234).to_bytes(width, 'big'))
+                self.assertEqual(octets[:offset] + octets[offset + width:],
+                                 pseudo.data[:offset] + pseudo.data[offset + width:])
 
 
 if __name__ == '__main__':

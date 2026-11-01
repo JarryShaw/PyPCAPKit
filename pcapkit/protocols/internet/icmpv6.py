@@ -134,7 +134,7 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
     )  # type: DefaultDict[Enum_Type | int, str | tuple[TypeParser, TypeConstructor]]
 
     #: Whether :meth:`make` left the checksum for the enclosing IP layer to
-    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo`.
     _checksum_pending = False
 
     ##########################################################################
@@ -299,7 +299,8 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             if pseudo is None:
                 self._checksum_pending = True
             else:
-                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.checksum.ip_pseudo import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
                 octets = schema.pack()
                 schema.checksum = compute_checksum(octets, prefix=pseudo_header(pseudo, len(octets)))
         return schema
@@ -372,13 +373,13 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
         """Verify the checksum over the pseudo-header of the enclosing IP layer.
 
         That layer calls this once parsed, see
-        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`.
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper`.
 
         Args:
             pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
 
         """
-        from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
 
         if pseudo is None:
             status = ChecksumStatus.NO_PSEUDO_HEADER

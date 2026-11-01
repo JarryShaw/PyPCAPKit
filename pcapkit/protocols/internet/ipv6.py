@@ -328,7 +328,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         )
 
         # NOTE: A payload that left its checksum out gets it over this header's
-        # pseudo-header; see pcapkit.protocols.misc.checksum.checksum (#2471).
+        # pseudo-header; see pcapkit.protocols.misc.checksum.ip_pseudo (#2471).
         if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
                 and cast('ProtocolBase', payload).__index__() == next_val):
             from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
@@ -376,7 +376,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Once parsed, the checksum of the upper layer is verified over this
         layer's pseudo-header if :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-        is on, see :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`.
+        is on, see :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper`.
 
         Args:
             file: Source packet stream.
@@ -389,7 +389,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         """
         super().__post_init__(file, length, **kwargs)
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.checksum import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.checksum.ip_pseudo import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
             verify_upper(self)
 
     ##########################################################################
@@ -653,7 +653,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         if config.CHECKSUM_VERIFY:
             # NOTE: As in IPv4.read; an atomic fragment, offset zero and no more
             # to come, is a whole packet (#2470).
-            from pcapkit.protocols.misc.checksum.checksum import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
             frags = self._exthdr.getlist(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[arg-type]
             scope = fragment_payload(any(frag.info.get('offset') or frag.info.get('mf') for frag in frags))
         token = _frame_depth.set(depth + len(_protos))

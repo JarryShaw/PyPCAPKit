@@ -460,10 +460,6 @@ UNRELATED = {
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
     'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),
-    'pcapkit/protocols/misc/checksum/checksum.py': ((16, 65535),
-                                                    "the one's-complement sum's 16-bit word mask "
-                                                    'and carry shift (RFC 1071), not an IP total '
-                                                    'length or a PCAP record header'),
     'pcapkit/protocols/misc/pcapng.py': ((65535,), 'a 16-bit mask'),
     'pcapkit/protocols/schema/misc/pcapng.py': ((9, 65535), 'an epb_flags bit offset, and a '
                                                '16-bit field default'),

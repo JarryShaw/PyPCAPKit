@@ -8,7 +8,7 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.apptype import AppType
-    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = ['UDP']
 

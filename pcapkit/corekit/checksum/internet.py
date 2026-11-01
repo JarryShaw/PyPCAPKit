@@ -2,12 +2,13 @@
 """Internet Checksum
 =====================
 
-.. module:: pcapkit.protocols.misc.checksum.checksum
+.. module:: pcapkit.corekit.checksum.internet
 
-:mod:`pcapkit.protocols.misc.checksum.checksum` contains what the
-one's-complement Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP,
-ICMP, ICMPv6 and OSPF shares: :class:`ChecksumStatus`, the outcome a parse
-records, and the functions that compute and verify the checksum.
+:mod:`pcapkit.corekit.checksum.internet` contains the one's-complement
+Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, ICMP, ICMPv6
+and OSPF: :class:`ChecksumStatus`, the outcome a parse records, and the
+functions that compute and verify the checksum. It imports nothing from
+:mod:`pcapkit.protocols`, which builds on it (:issue:`2580`).
 
 Verification is opt-in and computation opt-out, by
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` and
@@ -15,23 +16,10 @@ Verification is opt-in and computation opt-out, by
 mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
 which a filter can silence alone (:issue:`2470`).
 
-A checksum over the IP pseudo-header is left to the enclosing IP layer, which
-alone knows the pseudo-header, and builds it as an
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, rather than the
-upper layer reaching back to its parent. The upper layer takes part through
-these members:
-
-* ``_verify_pseudo_checksum(pseudo)`` verifies the checksum against
-  ``pseudo``, or records :attr:`ChecksumStatus.NO_PSEUDO_HEADER` for
-  :data:`None`; the IP layer calls it once parsed, see :func:`verify_upper`;
-* ``make()`` takes the ``pseudo`` it computes the checksum over, and replaces
-  the length it carries with the upper layer's own;
-* ``_checksum_pending`` is :data:`True` once ``make()`` left out a checksum it
-  had no ``pseudo`` for. An IP layer constructed with that upper layer as its
-  payload then rebuilds it with its own pseudo-header.
-
-A checksum over the upper layer alone, as ICMP's, is verified as it is parsed,
-unless the IP layer it is parsed from is a fragment, see :func:`fragment_payload`.
+A checksum over the IP pseudo-header is left to the enclosing IP layer, see
+:mod:`pcapkit.protocols.misc.checksum.ip_pseudo`. A checksum over the upper
+layer alone, as ICMP's, is verified as it is parsed, unless the IP layer it is
+parsed from is a fragment, see :func:`fragment_payload`.
 
 .. versionadded:: 1.6.0
 
@@ -43,22 +31,25 @@ import struct
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.protocols.protocol import _rebuilding
-from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
+from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ChecksumWarning, warn
 
 if TYPE_CHECKING:
     from typing import Collection, Iterator, Optional
 
-    from pcapkit.protocols.internet.ipv4 import IPv4
-    from pcapkit.protocols.internet.ipv6 import IPv6
-    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-
 __all__ = [
     'ChecksumStatus',
     'internet_checksum', 'compute_checksum', 'partial_checksum', 'verify_checksum',
-    'pseudo_header', 'verify_upper', 'fragment_payload',
+    'fragment_payload',
 ]
+
+#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
+#: :meth:`Protocol._make_payload
+#: <pcapkit.protocols.protocol.Protocol._make_payload>`, so that the layer
+#: it is rebuilt for parses the same octets again; see
+#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`. It lives here so that
+#: :func:`verify_checksum` reads it without importing :mod:`pcapkit.protocols`.
+_rebuilding = contextvars.ContextVar('_rebuilding', default=False)
 
 #: contextvars.ContextVar[bool]: Whether the layer being parsed is the payload
 #: of an IP fragment, see :func:`fragment_payload`.
@@ -206,59 +197,6 @@ def verify_checksum(alias: 'str', data: 'bytes', field: 'bytes', *, length: 'Opt
         warn(f'{alias}: checksum {value:#06x} is wrong; {expected:#06x} expected',
              ChecksumWarning, stacklevel=stacklevel())
     return ChecksumStatus.INVALID
-
-
-def pseudo_header(pseudo: 'IP_Pseudo', length: 'int') -> 'bytes':
-    """Octets of ``pseudo`` with ``length`` as its upper-layer length.
-
-    Args:
-        pseudo: Pseudo-header of the enclosing IP layer.
-        length: Upper-layer length the checksum is computed for.
-
-    Returns:
-        :attr:`pseudo.data <pcapkit.protocols.protocol.Protocol.data>`, made
-        anew if it carries another length.
-
-    Raises:
-        FieldValueError: If ``length`` does not fit the length field.
-
-    """
-    if pseudo.info.len == length:
-        return pseudo.data
-    return type(pseudo)(src=pseudo.src, dst=pseudo.dst, protocol=pseudo.protocol,
-                        upper_length=length, zero=pseudo.info.zero).data
-
-
-def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
-    """Verify the checksum of the upper layer ``ip`` carries over its pseudo-header.
-
-    The upper layer is the payload of ``ip``, past any Authentication Header
-    of IPv4. It is verified if it defines ``_verify_pseudo_checksum``, against
-    the :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` of ``ip``,
-    or against :data:`None` if that cannot be derived or names another protocol.
-
-    Args:
-        ip: Parsed IPv4 or IPv6 layer.
-
-    """
-    from pcapkit.protocols.internet.ah import AH  # isort: skip # pylint: disable=import-outside-toplevel
-    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
-
-    upper = ip.payload
-    # NOTE: IPv6 walks an AH as an extension header; IPv4 carries it as its payload.
-    while isinstance(upper, AH):
-        upper = upper.payload
-    verify = getattr(upper, '_verify_pseudo_checksum', None)
-    if verify is None:
-        return
-
-    try:
-        pseudo = IP_Pseudo(ip=ip)  # type: Optional[IP_Pseudo]
-    except (ProtocolError, FieldValueError):
-        pseudo = None
-    if pseudo is not None and pseudo.protocol != upper.__index__():
-        pseudo = None
-    verify(pseudo)
 
 
 @contextlib.contextmanager

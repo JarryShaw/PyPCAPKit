@@ -43,6 +43,7 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 
 import aenum
 
+from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.decorators import _beholding, beholder, seekset
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
@@ -430,13 +431,6 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 #: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` parses; see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _frame_depth = contextvars.ContextVar('_frame_depth', default=0)
-
-#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
-#: :meth:`Protocol._make_payload
-#: <pcapkit.protocols.protocol.Protocol._make_payload>`, so that the layer
-#: it is rebuilt for parses the same octets again; see
-#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
-_rebuilding = contextvars.ContextVar('_rebuilding', default=False)
 
 
 def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
