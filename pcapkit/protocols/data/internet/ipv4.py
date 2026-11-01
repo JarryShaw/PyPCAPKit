@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
 __all__ = [
     'IPv4',
@@ -142,6 +143,9 @@ class IPv4(Protocol):
         padding: 'bytes'
         #: Octets captured past the Total Length, present only when there are any.
         trailer: 'bytes'
+        #: Outcome of verifying :attr:`checksum`, present only when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
+        checksum_status: 'ChecksumStatus'
 
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 

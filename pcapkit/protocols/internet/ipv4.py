@@ -210,6 +210,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
        * The TS option's maker takes an address as a string as well
          (:issue:`1402`).
 
+    .. versionchanged:: 1.6.0
+
+       The header checksum is computed when :meth:`make` is given none, and
+       verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+       (:issue:`2472`).
+
     """
 
     ##########################################################################
@@ -362,6 +368,15 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 ('padding', self._data[IPV4_HEADER_LEN + _used:ipv4.hdr_len]),
             ])
 
+        # NOTE: The checksum covers the header alone (RFC 791 section 3.1); a zero
+        # one is what header checksum offload leaves on the sending host.
+        if config.CHECKSUM_VERIFY:
+            from pcapkit.protocols.misc.checksum.checksum import verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            ipv4.__update__([
+                ('checksum_status', verify_checksum(self.alias, self._data[:ipv4.hdr_len], schema.chksum,
+                                                    offload=(b'\x00\x00',))),
+            ])
+
         # NOTE: Octets captured past the Total Length belong to this layer,
         # since its own length field is what leaves them out of the payload: an
         # Ethernet carrier hands the whole rest of its frame here, padding
@@ -443,7 +458,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              protocol_default: 'Optional[int]' = None,
              protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              protocol_reversed: 'bool' = False,
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              src: 'IPv4Address | str | int | bytes' = '127.0.0.1',
              dst: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
              options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
@@ -486,7 +501,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             protocol_default: Default value of ``protocol``.
             protocol_namespace: Namespace of ``protocol``.
             protocol_reversed: If the namespace of ``protocol`` is reversed.
-            checksum: Checksum of the packet.
+            checksum: Header checksum; computed over the header (:rfc:`791`)
+                if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, zero
+                if it is off.
             src: Source address of the packet.
             dst: Destination address of the packet.
             options: Options of the packet.
@@ -562,13 +580,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             },
             ttl=ttl_val,
             proto=proto,  # type: ignore[arg-type]
-            chksum=checksum,
+            chksum=b'\x00\x00' if checksum is None else checksum,
             src=src,
             dst=dst,
             options=options_value,
             payload=payload,
             trailer=trailer,
         )
+
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            from pcapkit.protocols.misc.checksum.checksum import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            schema.chksum = compute_checksum(schema.pack()[:ihl * 4])
 
         # NOTE: A payload that left its checksum out gets it over this header's
         # pseudo-header, unless a fragment, whose checksum covers the datagram (#2471).
