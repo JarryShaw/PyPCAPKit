@@ -32,6 +32,7 @@ from pcapkit.protocols.data.link.loopback import Loopback as Data_Loopback
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.loopback import Loopback as Schema_Loopback
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
@@ -124,7 +125,8 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
     #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`. Keyed by
     #: address family rather than by EtherType, so this class keeps a registry
     #: of its own instead of sharing :attr:`Link.__proto__
-    #: <pcapkit.protocols.link.link.Link.__proto__>`.
+    #: <pcapkit.protocols.link.link.Link.__proto__>`; an entry is registered with
+    #: :func:`~pcapkit.foundation.registry.protocols.register_loopback`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -249,6 +251,46 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
             family=family.to_bytes(4, byteorder),
             payload=payload,
         )
+
+    @classmethod
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        r"""Register a new protocol class for an address family.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: BSD address family
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Link.register
+            <pcapkit.protocols.link.link.Link.register>` because
+            :attr:`self.__proto__ <Loopback.__proto__>` is keyed by address
+            family rather than by EtherType (:issue:`2511`).
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this address family is
+                already registered and the incumbent differs from the
+                replacement; the message names both. See :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard,
+                and for the shipped descriptor a restore puts back (:issue:`1504`).
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'address family {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     ##########################################################################
     # Data models.

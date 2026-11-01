@@ -32,6 +32,7 @@ is kept as ``loopback.byteorder``.
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register
 
    .. automethod:: _make_data
 

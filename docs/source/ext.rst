@@ -196,6 +196,12 @@ The registry function per protocol type:
 |                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_sctp`   |                    |
 +-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
 
+A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
+number, so it registers through
+:func:`~pcapkit.foundation.registry.protocols.register_ipx`; one carried over BSD
+loopback is keyed by address family rather than by EtherType, and registers through
+:func:`~pcapkit.foundation.registry.protocols.register_loopback`.
+
 Samples
 ~~~~~~~
 
@@ -386,19 +392,19 @@ writes them:
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`MH.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_mh_extension`       |
 +                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4`         | :attr:`ICMPv4.__type__ <pcapkit.protocols.internet.icmpv4.ICMPv4.__type__>`                   | :meth:`~pcapkit.protocols.internet.icmpv4.ICMPv4.register_type`            |
+|                   | :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4`         | :attr:`ICMPv4.__type__ <pcapkit.protocols.internet.icmpv4.ICMPv4.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_icmp_type`          |
 +                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6`         | :attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.ICMPv6.__type__>`                   | :meth:`~pcapkit.protocols.internet.icmpv6.ICMPv6.register_type`            |
+|                   | :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6`         | :attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.ICMPv6.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_icmp_type`          |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`TCP.__option__ <pcapkit.protocols.transport.tcp.TCP.__option__>`                       | :func:`~pcapkit.foundation.registry.protocols.register_tcp_option`         |
 + Transport Layer   + :class:`~pcapkit.protocols.transport.tcp.TCP`              +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`TCP.__mp_option__ <pcapkit.protocols.transport.tcp.TCP.__mp_option__>`                 | :func:`~pcapkit.foundation.registry.protocols.register_tcp_mp_option`      |
 +                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`SCTP.__chunk__ <pcapkit.protocols.transport.sctp.SCTP.__chunk__>`                      | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_chunk`              |
+|                   |                                                            | :attr:`SCTP.__chunk__ <pcapkit.protocols.transport.sctp.SCTP.__chunk__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk`         |
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_parameter`          |
+|                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :func:`~pcapkit.foundation.registry.protocols.register_sctp_parameter`     |
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_cause`              |
+|                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_cause`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 | Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTP`        | :attr:`HTTP.__frame__ <pcapkit.protocols.application.httpv2.HTTP.__frame__>`                  | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+

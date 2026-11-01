@@ -1093,13 +1093,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                           ) -> 'Optional[ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]':
         """Work out what a next-layer ``register`` stores under ``code``.
 
-        :meth:`register` and the :class:`~pcapkit.protocols.link.link.Link`,
-        :class:`~pcapkit.protocols.internet.internet.Internet`,
-        :class:`~pcapkit.protocols.transport.transport.Transport`,
-        :class:`~pcapkit.protocols.transport.sctp.SCTP`,
-        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` overrides share this;
-        each still warns and stores for itself.
+        :meth:`register` and every override of it, such as
+        :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`,
+        share this; each still warns and stores for itself.
 
         Arguments:
             code: registry key
