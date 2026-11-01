@@ -8,6 +8,7 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.icmp.type import Type as Enum_Type
+    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
 __all__ = [
     'ICMPv4',
@@ -32,7 +33,7 @@ class ICMPv4(Protocol):
     #: is entirely :attr:`type`-dependent; each subclass below documents
     #: which registry (if any) its own ``code`` values are drawn from.
     code: 'int'
-    #: Checksum, kept as on the wire; it is neither verified nor computed.
+    #: Checksum.
     checksum: 'bytes'
     #: Message length, in octets, header included. ICMP messages carry no
     #: length field of their own -- this is simply how many octets
@@ -40,6 +41,11 @@ class ICMPv4(Protocol):
     #: handed, kept here so the whole message can be told apart from a
     #: truncated capture.
     length: 'int'
+
+    if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`checksum`, present only when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
+        checksum_status: 'ChecksumStatus'
 
 
 @info_final

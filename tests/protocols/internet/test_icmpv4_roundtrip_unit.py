@@ -124,10 +124,9 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         from pcapkit.protocols.internet.icmpv4 import ICMPv4
 
         proto = ICMPv4()
-        # Type 8 (Echo), code 0, an uncomputed (zero) RFC 792 checksum over
-        # an all-zero 4-octet id/seq body, then that same body: this class
-        # does not compute or verify the checksum (#2470).
-        self.assertEqual(bytes(proto), bytes.fromhex('0800000000000000'))
+        # Type 8 (Echo), code 0, the RFC 792 checksum computed over an all-zero
+        # 4-octet id/seq body, then that same body (#2470).
+        self.assertEqual(bytes(proto), bytes.fromhex('0800f7ff00000000'))
 
     def test_dispatches_from_ipv4(self) -> None:
         """IPv4's protocol-number dispatch reaches :class:`ICMPv4`."""

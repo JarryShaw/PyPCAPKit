@@ -47,6 +47,7 @@ from pcapkit.protocols.schema.internet.icmpv6 import PacketTooBig as Schema_Pack
 from pcapkit.protocols.schema.internet.icmpv6 import ParameterProblem as Schema_ParameterProblem
 from pcapkit.protocols.schema.internet.icmpv6 import TimeExceeded as Schema_TimeExceeded
 from pcapkit.protocols.schema.internet.icmpv6 import Unknown as Schema_Unknown
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -57,6 +58,8 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
+
+    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
 
     TypeParser = Callable[[Schema_ICMPv6Type, NamedArg(Schema_ICMPv6, 'header'), NamedArg(int, 'length')],
                           Data_ICMPv6]
@@ -100,6 +103,13 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
     Listener Discovery (:rfc:`9777`), is kept as its raw message body, see
     :meth:`_read_data_type_none` and :meth:`_make_data_type_none`.
 
+    .. versionchanged:: 1.6.0
+
+       The checksum is computed when :meth:`make` is given none, over the
+       ``pseudo`` it is given or by the enclosing IPv6 layer, and verified by
+       that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+       (:issue:`2470`).
+
     """
 
     ##########################################################################
@@ -122,6 +132,10 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             Enum_Type.Echo_Reply:              'echo',
         },
     )  # type: DefaultDict[Enum_Type | int, str | tuple[TypeParser, TypeConstructor]]
+
+    #: Whether :meth:`make` left the checksum for the enclosing IP layer to
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    _checksum_pending = False
 
     ##########################################################################
     # Properties.
@@ -210,6 +224,7 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
              checksum: 'Optional[bytes]' = None,
              # Echo identifier and sequence number, the shortest body.
              body: 'bytes | Data_ICMPv6 | Schema_ICMPv6Type | dict[str, Any]' = b'\x00\x00\x00\x00',
+             pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_ICMPv6':
         """Make (construct) packet data.
 
@@ -219,8 +234,10 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             type_namespace: Namespace of ICMPv6 type.
             type_reversed: If the namespace of ICMPv6 type is reversed.
             code: ICMPv6 code; meaning is entirely ``type``-dependent.
-            checksum: Checksum, stored as given; :data:`None` leaves it
-                ``b'\\x00\\x00'``, uncomputed.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on,
+                computed over ``pseudo`` (:rfc:`4443#section-2.3`), or left to
+                an IPv6 layer this message is the payload of; zero otherwise.
             body: Message body. :obj:`bytes` is parsed against ``type``'s own
                 schema; a :obj:`dict` or a
                 :class:`~pcapkit.protocols.data.internet.icmpv6.ICMPv6` data
@@ -228,6 +245,8 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
                 :attr:`__type__`); any other
                 :class:`~pcapkit.protocols.schema.internet.icmpv6.ICMPv6Type`
                 is used as is.
+            pseudo: Pseudo-header of the enclosing IPv6 layer; its length is
+                replaced by this message's own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -268,15 +287,22 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
         else:
             raise ProtocolError(f'{self.alias}: invalid message body type: {body.__class__}')
 
-        if checksum is None:
-            checksum = b'\x00\x00'
-
-        return Schema_ICMPv6(
+        schema = Schema_ICMPv6(
             type=type_val,
             code=code,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             data=data_val,
         )
+
+        self._checksum_pending = False
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            if pseudo is None:
+                self._checksum_pending = True
+            else:
+                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                octets = schema.pack()
+                schema.checksum = compute_checksum(octets, prefix=pseudo_header(pseudo, len(octets)))
+        return schema
 
     @classmethod
     def register_type(cls, code: 'Enum_Type', meth: 'str | tuple[TypeParser, TypeConstructor]') -> 'None':
@@ -341,6 +367,25 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             'checksum': data.checksum,
             'body': data,
         }
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`.
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.checksum,
+                                     length=pseudo.info.len, prefix=pseudo.data)
+        self._info.__update__(checksum_status=status)
 
     def _read_data_type_none(self, schema: 'Schema_Unknown', *, header: 'Schema_ICMPv6',
                              length: 'int') -> 'Data_Unknown':

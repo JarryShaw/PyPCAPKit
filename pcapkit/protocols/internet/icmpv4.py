@@ -45,6 +45,7 @@ from pcapkit.protocols.schema.internet.icmpv4 import ICMPv4Type as Schema_ICMPv4
 from pcapkit.protocols.schema.internet.icmpv4 import ParameterProblem as Schema_ParameterProblem
 from pcapkit.protocols.schema.internet.icmpv4 import TimeExceeded as Schema_TimeExceeded
 from pcapkit.protocols.schema.internet.icmpv4 import Unknown as Schema_Unknown
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -93,6 +94,12 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
     Any other type is kept as its raw message body, see
     :meth:`_read_data_type_none` and :meth:`_make_data_type_none`.
+
+    .. versionchanged:: 1.6.0
+
+       The checksum is computed when :meth:`make` is given none, and verified
+       on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+       (:issue:`2470`).
 
     """
 
@@ -194,6 +201,13 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
             meth = name[0]
         icmp = meth(schema.data, header=schema, length=length)
 
+        # NOTE: The checksum covers the message alone, with no pseudo-header (RFC 792).
+        if config.CHECKSUM_VERIFY:
+            from pcapkit.protocols.misc.checksum.checksum import verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            icmp.__update__([
+                ('checksum_status', verify_checksum(self.alias, self._data, schema.checksum, length=length)),
+            ])
+
         # NOTE: The quoted original datagram stays raw in the message body,
         # so there is no next layer; the schema has no ``payload`` field.
         self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
@@ -218,8 +232,9 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
             type_namespace: Namespace of ICMP type.
             type_reversed: If the namespace of ICMP type is reversed.
             code: ICMP code; meaning is entirely ``type``-dependent.
-            checksum: Checksum, stored as given; :data:`None` leaves it
-                ``b'\\x00\\x00'``, uncomputed.
+            checksum: Checksum; if :data:`None`, computed over the message
+                (:rfc:`792`) when :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`
+                is on, zero when it is off.
             body: Message body. :obj:`bytes` is parsed against ``type``'s own
                 schema; a :obj:`dict` or a :class:`~pcapkit.protocols.data.internet.icmpv4.ICMPv4`
                 data model is handed to that type's own constructor method
@@ -266,15 +281,17 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         else:
             raise ProtocolError(f'{self.alias}: invalid message body type: {body.__class__}')
 
-        if checksum is None:
-            checksum = b'\x00\x00'
-
-        return Schema_ICMPv4(
+        schema = Schema_ICMPv4(
             type=type_val,
             code=code,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             data=data_val,
         )
+
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            from pcapkit.protocols.misc.checksum.checksum import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            schema.checksum = compute_checksum(schema.pack())
+        return schema
 
     @classmethod
     def register_type(cls, code: 'Enum_Type', meth: 'str | tuple[TypeParser, TypeConstructor]') -> 'None':
