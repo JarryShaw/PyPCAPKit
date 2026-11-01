@@ -802,6 +802,10 @@ from it:
   :class:`~pcapkit.const.reg.linktype.LinkType` members, but
   :func:`~pcapkit.foundation.registry.protocols.register_linktype` holds that name
   for writing both their maps at once, so each takes its capture format's name.
+* :func:`~pcapkit.foundation.registry.protocols.register_radiotap` takes only
+  :class:`~pcapkit.const.reg.linktype.LinkType` members too, keyed by the link type
+  of the frame behind a radiotap header, and takes its owning protocol's name for the
+  same reason.
 * :func:`~pcapkit.foundation.registry.protocols.register_apptype` takes bare
   :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s map,
   :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no one

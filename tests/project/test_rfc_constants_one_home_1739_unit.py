@@ -449,6 +449,9 @@ UNRELATED = {
                                       'and the 28-octet IPv4 ARP length'),
     'pcapkit/protocols/link/loopback.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
+    'pcapkit/protocols/link/ieee802_11.py': ((6, 9, 12, 16, 32), 'a 6-octet MAC address, '
+                                             'Frame Control bit offsets, and the 12-, 16- and '
+                                             '32-bit widths of 802.11 header fields'),
     'pcapkit/protocols/link/l2tpv2.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
     'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
@@ -460,6 +463,8 @@ UNRELATED = {
     'pcapkit/protocols/link/radiotap.py': ((65535,), "the max value of radiotap's own "
                                            '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
+    'pcapkit/protocols/schema/link/ieee802_11.py': ((6, 9), 'a MAC address is 6 octets, and '
+                                                    'the From DS bit offset of Frame Control'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
     'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),

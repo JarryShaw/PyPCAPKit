@@ -23,6 +23,7 @@ from pcapkit.const.hip import *
 from pcapkit.const.http import *
 from pcapkit.const.icmp import *
 from pcapkit.const.icmpv6 import *
+from pcapkit.const.ieee802_11 import *
 from pcapkit.const.igmp import *
 from pcapkit.const.ipv4 import *
 from pcapkit.const.ipv6 import *
@@ -61,6 +62,9 @@ __all__ = [
     # ICMPv6
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
     'ICMPv6_ParameterProblemCode',
+    # IEEE 802.11
+    'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
+    'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',
     # IGMP
     'IGMP_Type', 'IGMP_RecordType',
     # IPv4

@@ -15,6 +15,13 @@ from pcapkit.protocols.data.link.frad import FRAD
 # Generic Routing Encapsulation
 from pcapkit.protocols.data.link.gre import GRE
 
+# IEEE 802.11 MAC Header
+from pcapkit.protocols.data.link.ieee802_11 import IEEE802_11
+from pcapkit.protocols.data.link.ieee802_11 import FrameControl as IEEE802_11_FrameControl
+from pcapkit.protocols.data.link.ieee802_11 import HTControl as IEEE802_11_HTControl
+from pcapkit.protocols.data.link.ieee802_11 import QoSControl as IEEE802_11_QoSControl
+from pcapkit.protocols.data.link.ieee802_11 import SequenceControl as IEEE802_11_SequenceControl
+
 # Layer Two Tunnelling Protocol
 from pcapkit.protocols.data.link.l2tp import L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as L2TP_Flags
@@ -48,6 +55,10 @@ __all__ = [
 
     # Generic Routing Encapsulation
     'GRE',
+
+    # IEEE 802.11 MAC Header
+    'IEEE802_11', 'IEEE802_11_FrameControl', 'IEEE802_11_SequenceControl',
+    'IEEE802_11_QoSControl', 'IEEE802_11_HTControl',
 
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',

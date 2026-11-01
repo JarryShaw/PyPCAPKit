@@ -32,11 +32,8 @@ bounds the whole of it; the 802.11 MAC frame starts at that offset.
 Scope
 -----
 
-Decoding every optional field radiotap.org defines, and the 802.11 MAC
-frame behind them, is future work tracked on :issue:`2460` and
-:issue:`2502` -- this is already the widest of that issue's five
-follow-ups, and the 802.11 MAC frame is a protocol family of its own. This
-first cut instead:
+Decoding every optional field radiotap.org defines is tracked on
+:issue:`2576`. This class:
 
 * **Decodes** the fixed 8-octet start -- ``it_version``, ``it_pad``,
   ``it_len`` -- and walks the present-flags chain far enough to know how
@@ -47,11 +44,15 @@ first cut instead:
   select -- the octets between the present-flags chain and ``it_len`` are
   kept whole and undissected, as
   :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.fields`.
-* **Leaves opaque** everything from ``it_len`` on: the 802.11 MAC frame
-  itself, which has no dissector anywhere in this package yet. It is kept
-  as :class:`~pcapkit.protocols.misc.raw.Raw` (or
-  :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing follows),
-  unconditionally.
+* **Hands** everything from ``it_len`` on, the 802.11 MAC frame, to
+  :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`
+  (:class:`~pcapkit.protocols.misc.null.NoPayload` when nothing follows).
+  The header names no next protocol, since an 802.11 frame always follows it,
+  so the frame is looked up in
+  :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
+  under :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`;
+  :func:`~pcapkit.foundation.registry.protocols.register_radiotap` replaces
+  the entry.
 
 .. autoclass:: pcapkit.protocols.link.radiotap.Radiotap
    :no-members:
@@ -65,14 +66,17 @@ first cut instead:
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register
 
    .. automethod:: __length_hint__
    .. automethod:: __index__
 
    .. automethod:: _make_data
-   .. automethod:: _import_next_layer
+   .. automethod:: _get_payload
 
    .. autoattribute:: __proto__
+      :no-value:
+   .. autoattribute:: __proto_key__
       :no-value:
 
 Header Schemas

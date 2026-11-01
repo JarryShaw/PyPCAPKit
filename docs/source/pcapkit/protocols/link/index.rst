@@ -27,6 +27,7 @@ link layer, with detailed implementation and methods.
    inarp
    frad
    gre
+   ieee802_11
    l2tp
    l2tpv2
    linux_sll

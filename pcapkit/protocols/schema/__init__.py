@@ -29,6 +29,7 @@ __all__ = [
     'Ethernet',
     'FRAD',
     'GRE',
+    'IEEE802_11',
     'L2TP',
     'LinuxSLL1', 'LinuxSLL2',
     'Loopback',

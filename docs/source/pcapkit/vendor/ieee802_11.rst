@@ -1,0 +1,96 @@
+==========================================================================
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` Vendor Crawlers
+==========================================================================
+
+.. module:: pcapkit.vendor.ieee802_11
+
+This module contains all vendor crawlers of
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` implementations.
+Available vendor crawlers include:
+
+.. list-table::
+
+   * - :class:`IEEE802_11_Type <pcapkit.vendor.ieee802_11.type.Type>`
+     - Frame Types
+   * - :class:`IEEE802_11_ManagementSubtype <pcapkit.vendor.ieee802_11.management_subtype.ManagementSubtype>`
+     - Management Frame Subtypes
+   * - :class:`IEEE802_11_ControlSubtype <pcapkit.vendor.ieee802_11.control_subtype.ControlSubtype>`
+     - Control Frame Subtypes
+   * - :class:`IEEE802_11_DataSubtype <pcapkit.vendor.ieee802_11.data_subtype.DataSubtype>`
+     - Data Frame Subtypes
+   * - :class:`IEEE802_11_ExtensionSubtype <pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype>`
+     - Extension Frame Subtypes
+
+.. note::
+
+   These crawlers do not crawl. IEEE Std 802.11-2020 assigns the frame type
+   and subtype values in Table 9-1 of the standard's text, and neither IEEE
+   nor IANA publishes them as a machine-readable registry, so each crawler
+   reads a ``DATA`` literal and defines no ``LINK``
+   (:ref:`const-vendor-pairing`). Each ``DATA`` is transcribed from the table
+   on Wikipedia's *802.11 frame types* page [*]_, which reproduces Table 9-1
+   with the Trigger frame of IEEE Std 802.11ax-2021.
+
+Frame Types
+===========
+
+.. module:: pcapkit.vendor.ieee802_11.type
+
+This module contains the vendor crawler for **IEEE 802.11 Frame Types**,
+which is automatically generating :class:`pcapkit.const.ieee802_11.type.Type`.
+
+.. autoclass:: pcapkit.vendor.ieee802_11.type.Type
+   :members: FLAG
+   :show-inheritance:
+
+Management Frame Subtypes
+=========================
+
+.. module:: pcapkit.vendor.ieee802_11.management_subtype
+
+This module contains the vendor crawler for **IEEE 802.11 Management Frame Subtypes**,
+which is automatically generating :class:`pcapkit.const.ieee802_11.management_subtype.ManagementSubtype`.
+
+.. autoclass:: pcapkit.vendor.ieee802_11.management_subtype.ManagementSubtype
+   :members: FLAG
+   :show-inheritance:
+
+Control Frame Subtypes
+======================
+
+.. module:: pcapkit.vendor.ieee802_11.control_subtype
+
+This module contains the vendor crawler for **IEEE 802.11 Control Frame Subtypes**,
+which is automatically generating :class:`pcapkit.const.ieee802_11.control_subtype.ControlSubtype`.
+
+.. autoclass:: pcapkit.vendor.ieee802_11.control_subtype.ControlSubtype
+   :members: FLAG
+   :show-inheritance:
+
+Data Frame Subtypes
+===================
+
+.. module:: pcapkit.vendor.ieee802_11.data_subtype
+
+This module contains the vendor crawler for **IEEE 802.11 Data Frame Subtypes**,
+which is automatically generating :class:`pcapkit.const.ieee802_11.data_subtype.DataSubtype`.
+
+.. autoclass:: pcapkit.vendor.ieee802_11.data_subtype.DataSubtype
+   :members: FLAG
+   :show-inheritance:
+
+Extension Frame Subtypes
+========================
+
+.. module:: pcapkit.vendor.ieee802_11.extension_subtype
+
+This module contains the vendor crawler for **IEEE 802.11 Extension Frame Subtypes**,
+which is automatically generating :class:`pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype`.
+
+.. autoclass:: pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype
+   :members: FLAG
+   :show-inheritance:
+
+.. rubric:: Footnotes
+
+.. [*] https://en.wikipedia.org/w/index.php?title=802.11_frame_types&oldid=1369762968

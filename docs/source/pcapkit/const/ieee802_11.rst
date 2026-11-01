@@ -1,0 +1,88 @@
+==============================================================================
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` Constant Enumerations
+==============================================================================
+
+.. module:: pcapkit.const.ieee802_11
+
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` implementations, each
+from IEEE Std 802.11-2020, Table 9-1, *Valid type and subtype combinations*.
+Available enumerations include:
+
+.. list-table::
+
+   * - :class:`IEEE802_11_Type <pcapkit.const.ieee802_11.type.Type>`
+     - Frame Types
+   * - :class:`IEEE802_11_ManagementSubtype <pcapkit.const.ieee802_11.management_subtype.ManagementSubtype>`
+     - Management Frame Subtypes
+   * - :class:`IEEE802_11_ControlSubtype <pcapkit.const.ieee802_11.control_subtype.ControlSubtype>`
+     - Control Frame Subtypes
+   * - :class:`IEEE802_11_DataSubtype <pcapkit.const.ieee802_11.data_subtype.DataSubtype>`
+     - Data Frame Subtypes
+   * - :class:`IEEE802_11_ExtensionSubtype <pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype>`
+     - Extension Frame Subtypes
+
+Frame Types
+===========
+
+.. module:: pcapkit.const.ieee802_11.type
+
+This module contains the constant enumeration for **IEEE 802.11 Frame Types**,
+which is automatically generated from :class:`pcapkit.vendor.ieee802_11.type.Type`.
+
+.. autoclass:: pcapkit.const.ieee802_11.type.Type
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Management Frame Subtypes
+=========================
+
+.. module:: pcapkit.const.ieee802_11.management_subtype
+
+This module contains the constant enumeration for **IEEE 802.11 Management Frame Subtypes**,
+which is automatically generated from :class:`pcapkit.vendor.ieee802_11.management_subtype.ManagementSubtype`.
+
+.. autoclass:: pcapkit.const.ieee802_11.management_subtype.ManagementSubtype
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Control Frame Subtypes
+======================
+
+.. module:: pcapkit.const.ieee802_11.control_subtype
+
+This module contains the constant enumeration for **IEEE 802.11 Control Frame Subtypes**,
+which is automatically generated from :class:`pcapkit.vendor.ieee802_11.control_subtype.ControlSubtype`.
+
+.. autoclass:: pcapkit.const.ieee802_11.control_subtype.ControlSubtype
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Data Frame Subtypes
+===================
+
+.. module:: pcapkit.const.ieee802_11.data_subtype
+
+This module contains the constant enumeration for **IEEE 802.11 Data Frame Subtypes**,
+which is automatically generated from :class:`pcapkit.vendor.ieee802_11.data_subtype.DataSubtype`.
+
+.. autoclass:: pcapkit.const.ieee802_11.data_subtype.DataSubtype
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Extension Frame Subtypes
+========================
+
+.. module:: pcapkit.const.ieee802_11.extension_subtype
+
+This module contains the constant enumeration for **IEEE 802.11 Extension Frame Subtypes**,
+which is automatically generated from :class:`pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype`.
+
+.. autoclass:: pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype
+   :members:
+   :undoc-members:
+   :show-inheritance:
