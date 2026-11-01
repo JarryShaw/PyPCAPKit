@@ -33,6 +33,7 @@ __all__ = [
     'register_ethertype',
 
     'register_transtype',
+    'register_ipx',
     'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
@@ -41,6 +42,7 @@ __all__ = [
     'register_apptype',
     'register_tcp', 'register_udp', 'register_sctp',
     'register_tcp_option', 'register_tcp_mp_option',
+    'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
 
     'register_http_frame',
 

@@ -27,6 +27,7 @@ from pcapkit.const.icmpv6.type import Type as ICMPv6_Type
 from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
 from pcapkit.const.ipv6.option import Option as IPv6_Option
 from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
+from pcapkit.const.ipx.packet import Packet as IPX_Packet
 from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
 from pcapkit.const.mh.option import Option as MH_Option
 from pcapkit.const.mh.packet import Packet as MH_Packet
@@ -39,6 +40,9 @@ from pcapkit.const.reg.apptype import TransportProtocol
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.const.sctp.cause_code import CauseCode as SCTP_CauseCode
+from pcapkit.const.sctp.chunk import Chunk as SCTP_Chunk
+from pcapkit.const.sctp.parameter import Parameter as SCTP_Parameter
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
@@ -55,6 +59,7 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+from pcapkit.protocols.internet.ipx import IPX
 from pcapkit.protocols.internet.mh import MH
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
@@ -75,6 +80,9 @@ from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSB
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
+from pcapkit.protocols.schema.transport.sctp import Chunk as Schema_SCTP_Chunk
+from pcapkit.protocols.schema.transport.sctp import ErrorCause as Schema_SCTP_ErrorCause
+from pcapkit.protocols.schema.transport.sctp import Parameter as Schema_SCTP_Parameter
 from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
 from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
 from pcapkit.protocols.transport.sctp import SCTP
@@ -120,6 +128,12 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
+    from pcapkit.protocols.transport.sctp import CauseConstructor as SCTP_CauseConstructor
+    from pcapkit.protocols.transport.sctp import CauseParser as SCTP_CauseParser
+    from pcapkit.protocols.transport.sctp import ChunkConstructor as SCTP_ChunkConstructor
+    from pcapkit.protocols.transport.sctp import ChunkParser as SCTP_ChunkParser
+    from pcapkit.protocols.transport.sctp import ParameterConstructor as SCTP_ParameterConstructor
+    from pcapkit.protocols.transport.sctp import ParameterParser as SCTP_ParameterParser
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
     from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
@@ -135,6 +149,7 @@ __all__ = [
     'register_ethertype',
 
     'register_transtype',
+    'register_ipx',
     'register_icmp_type',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
@@ -143,6 +158,7 @@ __all__ = [
     'register_apptype',
     'register_tcp', 'register_udp', 'register_sctp',
     'register_tcp_option', 'register_tcp_mp_option',
+    'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
 
     'register_http_frame',
 
@@ -857,6 +873,57 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (Internet, code))
+
+
+@overload
+def register_ipx(code: 'IPX_Packet', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_ipx(code: 'IPX_Packet', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.internet.ipx.IPX.__proto__
+def register_ipx(code: 'IPX_Packet', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                 class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.internet.ipx.IPX.__proto__` registry.
+
+    Arguments:
+        code: IPX Packet Type as in :class:`~pcapkit.const.ipx.packet.Packet`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Important:
+        Unlike :func:`register_transtype`, ``code`` is an IPX Packet Type, **not**
+        an IP protocol number: :class:`~pcapkit.protocols.internet.ipx.IPX`
+        keeps a registry of its own (:issue:`2169`).
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.ipx.packet.Packet`
+            member, e.g. a :class:`~pcapkit.const.reg.transtype.TransType`
+            member, or ``module`` is not a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, IPX_Packet, IPX)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    IPX.register(code, module)
+    logger.debug('registered IPX packet type protocol: %s', code.name)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (IPX, code))
 
 
 # NOTE: pcapkit.protocols.internet.ipv4.IPv4.__option__
@@ -1587,6 +1654,115 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (SCTP, code))
+
+
+# NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__
+def register_sctp_chunk(code: 'SCTP_Chunk', meth: 'str | tuple[SCTP_ChunkParser, SCTP_ChunkConstructor]', *,
+                        schema: 'Optional[Type[Schema_SCTP_Chunk]]' = None) -> 'None':
+    """Register a chunk parser.
+
+    The function will register the given chunk parser to the
+    :data:`pcapkit.protocols.transport.sctp.SCTP.__chunk__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk type as in
+            :class:`~pcapkit.const.sctp.chunk.Chunk`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the chunk. A name names the
+            ``_read_chunk_*`` and ``_make_chunk_*`` methods, and has to name
+            an existing ``_read_chunk_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the chunk.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Chunk`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.chunk.Chunk`
+            member, e.g. a member of another enum, or ``meth``
+            is a name with no matching ``_read_chunk_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, SCTP_Chunk, SCTP)
+    if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
+        raise RegistryError('method must be a valid SCTP chunk parser function')
+
+    SCTP.register_chunk(code, meth)
+    if schema is not None:
+        Schema_SCTP_Chunk.register(code, schema)
+    logger.debug('registered SCTP chunk parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.transport.sctp.SCTP.__parameter__
+def register_sctp_parameter(code: 'SCTP_Parameter',
+                            meth: 'str | tuple[SCTP_ParameterParser, SCTP_ParameterConstructor]', *,
+                            schema: 'Optional[Type[Schema_SCTP_Parameter]]' = None) -> 'None':
+    """Register a chunk parameter parser.
+
+    The function will register the given chunk parameter parser to the
+    :data:`pcapkit.protocols.transport.sctp.SCTP.__parameter__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk parameter type
+            as in :class:`~pcapkit.const.sctp.parameter.Parameter`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the parameter. A name names the
+            ``_read_param_*`` and ``_make_param_*`` methods, and has to name
+            an existing ``_read_param_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Parameter`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.parameter.Parameter`
+            member, e.g. a member of another enum, or ``meth``
+            is a name with no matching ``_read_param_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, SCTP_Parameter, SCTP)
+    if isinstance(meth, str) and not hasattr(SCTP, f'_read_param_{meth}'):
+        raise RegistryError('method must be a valid SCTP chunk parameter parser function')
+
+    SCTP.register_parameter(code, meth)
+    if schema is not None:
+        Schema_SCTP_Parameter.register(code, schema)
+    logger.debug('registered SCTP chunk parameter parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.transport.sctp.SCTP.__cause__
+def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CauseParser, SCTP_CauseConstructor]', *,
+                        schema: 'Optional[Type[Schema_SCTP_ErrorCause]]' = None) -> 'None':
+    """Register an error cause parser.
+
+    The function will register the given error cause parser to the
+    :data:`pcapkit.protocols.transport.sctp.SCTP.__cause__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` error cause code as
+            in :class:`~pcapkit.const.sctp.cause_code.CauseCode`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the cause. A name names the
+            ``_read_cause_*`` and ``_make_cause_*`` methods, and has to name
+            an existing ``_read_cause_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the cause.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.ErrorCause`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.cause_code.CauseCode`
+            member, e.g. a member of another enum, or ``meth``
+            is a name with no matching ``_read_cause_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, SCTP_CauseCode, SCTP)
+    if isinstance(meth, str) and not hasattr(SCTP, f'_read_cause_{meth}'):
+        raise RegistryError('method must be a valid SCTP error cause parser function')
+
+    SCTP.register_cause(code, meth)
+    if schema is not None:
+        Schema_SCTP_ErrorCause.register(code, schema)
+    logger.debug('registered SCTP error cause parser: %s', code.name)
 
 
 ###############################################################################

@@ -88,6 +88,8 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_transtype
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_ipx
+
 .. autofunction:: pcapkit.foundation.registry.protocols.register_ipv4_option
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_icmp_type
@@ -120,6 +122,12 @@ Transport Layer Registries
 .. autofunction:: pcapkit.foundation.registry.protocols.register_udp
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_sctp
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_chunk
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_parameter
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_cause
 
 Application Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

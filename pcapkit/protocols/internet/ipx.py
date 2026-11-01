@@ -83,7 +83,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     #: instead of sharing :attr:`Internet.__proto__
     #: <pcapkit.protocols.internet.internet.Internet.__proto__>` (:issue:`2169`).
     #: No IPX-native protocol is shipped, so the payload is
-    #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered.
+    #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered with
+    #: :func:`~pcapkit.foundation.registry.protocols.register_ipx`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]

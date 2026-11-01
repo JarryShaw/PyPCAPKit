@@ -642,3 +642,43 @@ reasoning.
    :mod:`pcapkit.vendor.default`'s template, never in the generated file alone --
    the next regeneration would discard it.
 
+Registration Wrappers
+~~~~~~~~~~~~~~~~~~~~~
+
+The owner ruled on :issue:`2511` that every class-level registry map a protocol
+dispatches through -- ``__proto__``, ``__option__``, ``__chunk__`` and the like -- has a
+public wrapper in :mod:`pcapkit.foundation.registry`, carrying the validation the
+established ones carry. A map's registration comes in two parts:
+
+1. **A** ``register`` **or** ``register_<kind>`` **classmethod** on the class owning
+   the map, which writes it and warns when it displaces an entry.
+2. **A** ``register_<name>`` **function** in
+   :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
+   line above its ``def``. It calls the classmethod and logs, and a bad argument
+   writes nothing: the code is checked against the map's enum with ``_check_code``,
+   a parser named by string has to exist as a ``_read_*`` method, and a
+   ``__proto__`` entry has to be a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+   subclass or a descriptor naming one. A wrapper writing a ``__proto__`` map also
+   records the class's name with ``_register_name``, and one whose entries have a
+   schema registry takes a keyword-only ``schema``.
+
+:func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk` is the shape for a
+parser map:
+
+.. code-block:: python
+
+   # NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__
+   def register_sctp_chunk(code, meth, *, schema=None):
+       _check_code(code, SCTP_Chunk, SCTP)
+       if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
+           raise RegistryError('method must be a valid SCTP chunk parser function')
+
+       SCTP.register_chunk(code, meth)
+       if schema is not None:
+           Schema_SCTP_Chunk.register(code, schema)
+       logger.debug('registered SCTP chunk parser: %s', code.name)
+
+:file:`tests/foundation/registry/test_registry_wrapper_coverage_2511_unit.py` walks
+every protocol class for such a map, and fails on one that no wrapper's tag names
+unless its ``EXCUSED`` table gives the reason.
+

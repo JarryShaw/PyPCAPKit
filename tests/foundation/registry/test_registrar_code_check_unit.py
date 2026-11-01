@@ -64,6 +64,12 @@ METHOD_REGISTRARS = (
      'pcapkit.protocols.schema.transport.tcp:Option'),
     ('register_tcp_mp_option', 'pcapkit.protocols.transport.tcp:TCP',
      'pcapkit.protocols.schema.transport.tcp:MPTCP'),
+    ('register_sctp_chunk', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:Chunk'),
+    ('register_sctp_parameter', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:Parameter'),
+    ('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP',
+     'pcapkit.protocols.schema.transport.sctp:ErrorCause'),
     ('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTP',
      'pcapkit.protocols.schema.application.httpv2:FrameType'),
     ('register_pcapng_block', 'pcapkit.protocols.misc.pcapng:PCAPNG',
@@ -85,6 +91,7 @@ MODULE_REGISTRARS = (
     ('register_pcapng', ('pcapkit.protocols.misc.pcapng:PCAPNG',)),
     ('register_ethertype', ('pcapkit.protocols.link.link:Link',)),
     ('register_transtype', ('pcapkit.protocols.internet.internet:Internet',)),
+    ('register_ipx', ('pcapkit.protocols.internet.ipx:IPX',)),
 )
 
 #: Codes that are not enum members: the issue's ``int``, :obj:`None`, and a
@@ -103,6 +110,9 @@ REGISTRAR_ENUMS = {
     'register_mh_extension': 'pcapkit.const.mh.cga_extension:CGAExtension',
     'register_tcp_option': 'pcapkit.const.tcp.option:Option',
     'register_tcp_mp_option': 'pcapkit.const.tcp.mp_tcp_option:MPTCPOption',
+    'register_sctp_chunk': 'pcapkit.const.sctp.chunk:Chunk',
+    'register_sctp_parameter': 'pcapkit.const.sctp.parameter:Parameter',
+    'register_sctp_cause': 'pcapkit.const.sctp.cause_code:CauseCode',
     'register_http_frame': 'pcapkit.const.http.frame:Frame',
     'register_pcapng_block': 'pcapkit.const.pcapng.block_type:BlockType',
     'register_pcapng_option': 'pcapkit.const.pcapng.option_type:OptionType',
@@ -113,6 +123,7 @@ REGISTRAR_ENUMS = {
     'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',
     'register_ethertype': 'pcapkit.const.reg.ethertype:EtherType',
     'register_transtype': 'pcapkit.const.reg.transtype:TransType',
+    'register_ipx': 'pcapkit.const.ipx.packet:Packet',
 }
 
 #: Registrars that also take a plain ``int``: the port or PPID used, the classes
