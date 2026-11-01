@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/config.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726). Each limit is read from a PCAPKIT_* environment variable once, when the module is imported: A value that is not an integer, or ..." />
-<meta name="description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726). Each limit is read from a PCAPKIT_* environment variable once, when the module is imported: A value that is not an integer, or ..." />
+<meta property="og:description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726), and the checksum flags. Each is read from a PCAPKIT_* environment variable once, when the module is imported. For a limit: A va..." />
+<meta name="description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726), and the checksum flags. Each is read from a PCAPKIT_* environment variable once, when the module is imported. For a limit: A va..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Character Set Detection" href="chardet.html"><link rel="prev" title="Logging System" href="logging.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -234,7 +234,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/dtls.html">DTLS Handshake-Message Reassembly</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
@@ -242,9 +246,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../foundation/registry.html">Registry Management</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
@@ -257,12 +261,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/netlink.html">Netlink - Linux Netlink Socket Framing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/radiotap.html">Radiotap - IEEE 802.11 Radiotap Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
@@ -288,14 +293,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Application Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
@@ -304,24 +309,25 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp_data.html">FTP_DATA - FTP Data Channel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/checksum.html">IP Pseudo-Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
@@ -330,8 +336,8 @@
 <li class="toctree-l3"><a class="reference internal" href="datetime.html">Timestamp Conversion</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/strings.html">Text Fields</a></li>
@@ -354,21 +360,22 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/linux.html">Linux-Specific Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -390,7 +397,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -412,6 +419,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/sslv2.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/tls.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
@@ -424,7 +433,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -470,7 +479,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
@@ -534,8 +543,8 @@
           <section id="module-pcapkit.utilities.config">
 <span id="configuration"></span><h1>Configuration<a class="headerlink" href="#module-pcapkit.utilities.config" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> holds every tunable limit of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). Each limit is read from a <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> environment variable
-once, when the module is imported:</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>), and the checksum <a class="reference internal" href="#flags">flags</a>. Each is read from a <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code>
+environment variable once, when the module is imported. For a limit:</p>
 <ul class="simple">
 <li><p>A value that is not an integer, or is below the variable’s minimum, warns with
 a <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a> and falls back to the
@@ -593,33 +602,39 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>each capture remembered pins one packet in memory</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_TCP_GAP_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16777216</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
+<td><p>a TCP gap that wide is zero-filled in memory, up to 2 GiB at <code class="docutils literal notranslate"><span class="pre">-1</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10000</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a large or endless object graph is dumped without bound</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-15"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1024</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>the cache retains every bytestring it was asked about</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-15"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1048576</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">1</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a bogus record length allocates that much in one read</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">262144</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the ceiling and the running budget</p></td>
 <td><p>a hostile capture’s declared length is zero-filled in memory
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/554">#554</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">65536</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to disable the running budget</p></td>
 <td><p>lying lengths amplify into memory without being charged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-19"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the running budget</p></td>
 <td><p>as above, per octet actually read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
@@ -643,6 +658,12 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <dt class="sig sig-object std" id="envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT">
 <span class="sig-name descname"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></span><a class="headerlink" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT" title="pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
+</dd></dl>
+
+<dl class="std envvar">
+<dt class="sig sig-object std" id="envvar-PCAPKIT_TCP_GAP_LIMIT">
+<span class="sig-name descname"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></span><a class="headerlink" href="#envvar-PCAPKIT_TCP_GAP_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.TCP_GAP_LIMIT" title="pcapkit.utilities.config.TCP_GAP_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_GAP_LIMIT</span></code></a>.</p>
 </dd></dl>
 
 <dl class="std envvar">
@@ -686,7 +707,7 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <dt class="sig sig-object py" id="pcapkit.utilities.config.FRAME_LAYER_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">FRAME_LAYER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most layers dissected in one frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>),
-<span class="target" id="index-19"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-20"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
 <p>A layer is one entry of the frame’s protocol chain, counted from the first
 layer the frame record carries, usually its link layer; a protocol
 constructed from its own octets is not counted itself, so the count starts at
@@ -717,7 +738,7 @@ does the end of a chain of extension headers, which
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_HEADER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most IPv6 extension headers dissected in one chain, i.e. one after
 another with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>),
-<span class="target" id="index-20"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-21"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
 <p>The walk stops there, and what follows the last of them is kept as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
@@ -727,7 +748,7 @@ layer such as IPv4, where each header dissects the next one itself
 (<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>). Behind
 IPv4, the <code class="docutils literal notranslate"><span class="pre">scapy</span></code> toolkit steps over at most this many in the octets to find
 TCP; the third-party engines are otherwise best effort here (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>).</p>
-<p><span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
+<p><span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
 Destination Options header at most twice, so no compliant chain gets close.
 Without the bound, a chain dissected header by header stops wherever
 Python’s recursion limit falls, which depends on the interpreter. Each
@@ -749,7 +770,7 @@ stops where parsing it did, and warns once too (<a class="extlink-issue referenc
 <dt class="sig sig-object py" id="pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">IPV6_TCP_WARNED_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>How many captures the <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engine remembers having warned
-about for TCP over IPv6, <span class="target" id="index-22"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
+about for TCP over IPv6, <span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
 <p>Each one pins a packet of its own in memory, so the memory is bounded and the
 oldest is forgotten first. Up to this many captures read at the same time
 warn exactly once each.</p>
@@ -764,12 +785,39 @@ warn exactly once each.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.config.TCP_GAP_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">TCP_GAP_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777216</span></span><a class="headerlink" href="#pcapkit.utilities.config.TCP_GAP_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Widest gap, in octets, that
+<a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a>
+zero-fills to merge a segment into the payload buffer it is read against,
+<span class="target" id="index-24"></span><a class="reference internal" href="#envvar-PCAPKIT_TCP_GAP_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_TCP_GAP_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> always merges.</p>
+<p>This is a safety limit, not a reassembly rule: no RFC calls for one
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>). A segment can only legitimately open a gap as wide as the
+data in flight, which the receive window bounds. <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a> allows windows
+up to <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">30</span></code>, but zero-filling a gap that wide costs 1 GiB, and real
+windows are far smaller – Linux’s default <code class="docutils literal notranslate"><span class="pre">net.ipv4.tcp_rmem</span></code> ceiling is
+6 MiB – so the default of 16 MiB clears them with room to spare. Past it,
+the stream is split rather than padded, as <a class="reference internal" href="../foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> describes.</p>
+<p>At <code class="docutils literal notranslate"><span class="pre">-1</span></code> only the sequence space bounds the gap: a sequence number is read
+within <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span></code> of the data buffered (<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.4"><strong>RFC 9293 Section 3.4</strong></a>), so one
+segment can have up to 2 GiB zero-filled.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.tcp.TCP.__window__</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.config.FALLBACK_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">FALLBACK_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10000</span></span><a class="headerlink" href="#pcapkit.utilities.config.FALLBACK_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most objects the <code class="docutils literal notranslate"><span class="pre">_append_fallback</span></code> method of a dumper
 <a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_dumper()</span></code></a> builds
 expands for one top-level object, counting an object once per time it is met,
-<span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
+<span class="target" id="index-27"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
 <p>Measured over the <code class="docutils literal notranslate"><span class="pre">foundation</span></code>, <code class="docutils literal notranslate"><span class="pre">dumpkit</span></code> and <code class="docutils literal notranslate"><span class="pre">interface</span></code> test legs, no
 fallback object expands into more than 7, so the default leaves three orders
 of magnitude of room.</p>
@@ -787,7 +835,7 @@ of magnitude of room.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.DETECT_CACHE_SIZE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">DETECT_CACHE_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></span><a class="headerlink" href="#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="Link to this definition">¶</a></dt>
 <dd><p>How many distinct bytestrings <a class="reference internal" href="chardet.html#pcapkit.utilities.chardet.detect" title="pcapkit.utilities.chardet.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a>
-remembers, <span class="target" id="index-24"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
+remembers, <span class="target" id="index-28"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
 unbounded.</p>
 <p>Unlike the other limits, this one is read once, when
 <a class="reference internal" href="chardet.html#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.chardet</span></code></a> is imported, as the size of its
@@ -806,7 +854,7 @@ unbounded.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.READ_CHUNK">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">READ_CHUNK</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1048576</span></span><a class="headerlink" href="#pcapkit.utilities.config.READ_CHUNK" title="Link to this definition">¶</a></dt>
 <dd><p>Most octets <a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> asks of its
-stream in one read, <span class="target" id="index-25"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
+stream in one read, <span class="target" id="index-29"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
 read at once.</p>
 <p>A read allocates what it asks for up front, so a record’s bogus length is read
 in pieces.</p>
@@ -849,7 +897,7 @@ no fixed-width field ever legitimately is – gets refused.</p>
 <p>A ceiling on one field says nothing about how many fields a parse may pad,
 which is what <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_SHORTFALL</span></code></a> and
 <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> below are for. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>.</p>
-<p>Set with <span class="target" id="index-26"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
+<p>Set with <span class="target" id="index-30"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
 lifts the running budget of <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> with it, since the
 ceiling is the one-off term of that budget’s allowance.</p>
 <div class="versionadded">
@@ -901,7 +949,7 @@ amplification lives – and legitimately that is a once-per-file event, since
 only the last block of a truncated capture is cut short. So the band gets the
 running budget below, whose one-off term already covers any single such event
 outright.</p>
-<p>Set with <span class="target" id="index-27"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
+<p>Set with <span class="target" id="index-31"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
 budget: every shortfall within <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> is then padded
 without being charged to it.</p>
 <div class="versionadded">
@@ -934,7 +982,7 @@ hundred; <a class="extlink-issue reference external" href="https://github.com/Ja
 rather than cut. 16 octets of further allowance per octet genuinely read
 leaves any real file an allowance orders of magnitude past the one event it
 can want, while bounding the sum for a file whose blocks all lie.</p>
-<p>Set with <span class="target" id="index-28"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
+<p>Set with <span class="target" id="index-32"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
 budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> still bounds each field.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
@@ -947,10 +995,85 @@ budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_P
 </dd></dl>
 
 </section>
+<section id="flags">
+<h2>Flags<a class="headerlink" href="#flags" title="Link to this heading">¶</a></h2>
+<p>The checksum flags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>) take the values <a class="reference internal" href="#pcapkit.utilities.config.read_flag" title="pcapkit.utilities.config.read_flag"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_flag()</span></code></a> accepts,
+and a bad value warns and falls back to the default.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="target" id="index-33"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a></p></td>
+<td><p>off</p></td>
+<td><p>parsing verifies each checksum and records the outcome</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="index-34"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a></p></td>
+<td><p>on</p></td>
+<td><p>construction computes a checksum the caller leaves out</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="std envvar">
+<dt class="sig sig-object std" id="envvar-PCAPKIT_CHECKSUM_VERIFY">
+<span class="sig-name descname"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></span><a class="headerlink" href="#envvar-PCAPKIT_CHECKSUM_VERIFY" title="Link to this definition">¶</a></dt>
+<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>.</p>
+</dd></dl>
+
+<dl class="std envvar">
+<dt class="sig sig-object std" id="envvar-PCAPKIT_CHECKSUM_COMPUTE">
+<span class="sig-name descname"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></span><a class="headerlink" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE" title="Link to this definition">¶</a></dt>
+<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="pcapkit.utilities.config.CHECKSUM_COMPUTE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_COMPUTE</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.config.CHECKSUM_VERIFY">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">CHECKSUM_VERIFY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="Link to this definition">¶</a></dt>
+<dd><p>Whether parsing verifies the one’s-complement checksums, of the IPv4
+header, TCP, UDP, ICMP, ICMPv6 and OSPF, <span class="target" id="index-35"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>.</p>
+<p>Off by default, since checksumming every packet costs time on a large
+capture (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>). When on, each records a
+<a class="reference internal" href="../protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.checksum.ChecksumStatus" title="pcapkit.protocols.misc.checksum.checksum.ChecksumStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChecksumStatus</span></code></a> as
+<code class="docutils literal notranslate"><span class="pre">checksum_status</span></code> in its info, and a wrong checksum warns with a
+<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ChecksumWarning" title="pcapkit.utilities.warnings.ChecksumWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ChecksumWarning</span></code></a> rather than raising.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.config.CHECKSUM_COMPUTE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">CHECKSUM_COMPUTE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="Link to this definition">¶</a></dt>
+<dd><p>Whether construction computes a checksum the caller leaves out, for
+the protocols <a class="reference internal" href="#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a> names, <span class="target" id="index-36"></span><a class="reference internal" href="#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a>.</p>
+<p>On by default (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>). A checksum given explicitly, as
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> gives the parsed one,
+is written as given either way. Off, a checksum left out is zero.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="readers">
 <span id="config-readers"></span><h2>Readers<a class="headerlink" href="#readers" title="Link to this heading">¶</a></h2>
-<p>The limits above are read with these, and a module that keeps a variable of its
-own reads it with them too, so that a bad value is reported the same way.</p>
+<p>The variables above are read with these, and a module that keeps a variable of
+its own reads it with them too, so that a bad value is reported the same way.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.config.read_limit">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">read_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">risk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/config.html#read_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.config.read_limit" title="Link to this definition">¶</a></dt>
@@ -1069,6 +1192,7 @@ value, and <code class="docutils literal notranslate"><span class="pre">default<
             <ul>
 <li><a class="reference internal" href="#">Configuration</a><ul>
 <li><a class="reference internal" href="#limits">Limits</a></li>
+<li><a class="reference internal" href="#flags">Flags</a></li>
 <li><a class="reference internal" href="#readers">Readers</a></li>
 </ul>
 </li>

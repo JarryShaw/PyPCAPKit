@@ -12,9 +12,11 @@ origin, using the :rfc:`791` procedure described in :doc:`index`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __discard_overlap__
    .. automethod:: reassembly
    .. automethod:: submit
    .. automethod:: _detect_conflicts
+   .. automethod:: _find_overlap
 
 Data Models
 -----------

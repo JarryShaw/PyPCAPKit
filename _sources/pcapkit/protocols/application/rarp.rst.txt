@@ -1,14 +1,13 @@
-RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol
-==========================================================
+RARP - Reverse Address Resolution Protocol
+==========================================
 
 .. module:: pcapkit.protocols.application.rarp
 
 :mod:`pcapkit.protocols.application.rarp` contains
-:class:`~pcapkit.protocols.application.rarp.RARP` and
-:class:`~pcapkit.protocols.application.rarp.DRARP`,
-which implement extractors for (Dynamic) Reverse
-Address Resolution Protocol (RARP/DRARP) [*]_,
-whose structure is described as below:
+:class:`~pcapkit.protocols.application.rarp.RARP` only,
+which implements an extractor for Reverse Address
+Resolution Protocol (RARP) [*]_, whose structure is
+described as below:
 
 ====== ========= ========================= =========================
 Octets      Bits        Name                    Description
@@ -28,7 +27,7 @@ Octets      Bits        Name                    Description
 
    Moved here from ``pcapkit.protocols.link.rarp``.
    :class:`~pcapkit.protocols.application.rarp.RARP` and
-   :class:`~pcapkit.protocols.application.rarp.DRARP` derive from
+   :class:`~pcapkit.protocols.application.drarp.DRARP` derive from
    :class:`~pcapkit.protocols.application.application.Application` as well as
    :class:`~pcapkit.protocols.link.arp.ARP`, so their layer is
    ``'Application'`` (:issue:`719`).
@@ -38,6 +37,12 @@ Octets      Bits        Name                    Description
    ``pcapkit.protocols.link.rarp``, and the ``RARP`` and ``DRARP`` names
    that :mod:`pcapkit.protocols.link` exported, with no alias (:issue:`719`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.rarp.DRARP``, with no alias. The class
+   moved to :mod:`pcapkit.protocols.application.drarp`, since a module holds
+   one protocol class, named after it (:issue:`2529`).
+
 .. autoclass:: pcapkit.protocols.application.rarp.RARP
    :no-members:
    :show-inheritance:
@@ -45,12 +50,6 @@ Octets      Bits        Name                    Description
    .. automethod:: id
 
    .. automethod:: __index__
-
-.. autoclass:: pcapkit.protocols.application.rarp.DRARP
-   :no-members:
-   :show-inheritance:
-
-   .. automethod:: id
 
 .. rubric:: Footnotes
 

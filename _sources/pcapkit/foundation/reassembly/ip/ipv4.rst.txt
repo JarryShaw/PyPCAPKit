@@ -146,6 +146,7 @@ Terminology
            |                         |                  |--> (tuple) (first, last), absolute and
            |                         |                               inclusive
            |                         |                  |--> ...
+           |                         |--> 'extent' : (list) always empty: IPv4 keeps no extents
            |--> (tuple) BUFID ...
 
        .. note::

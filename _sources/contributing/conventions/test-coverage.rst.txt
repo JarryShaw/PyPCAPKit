@@ -123,10 +123,11 @@ Running the Tests
 
 *  **One module per process, never the whole suite.** Check a change by running the
    modules it touches, each as its own ``python -m pytest <module> -q``, and leave the
-   whole tier to CI, which spreads it over workers with ``-n auto --dist load``. Every
-   purge-then-import leaves the previous generation of :mod:`pcapkit` behind as
-   garbage, and the whole suite in one plain-unittest process runs out of memory --
-   :file:`util/run_unittest_leg.py` records the measurement.
+   whole tier to CI, whose ``test`` job spreads the unit tier over workers with
+   ``-n logical --dist load``. Every purge-then-import leaves the previous generation
+   of :mod:`pcapkit` behind as garbage, and the whole suite in one plain-unittest
+   process runs out of memory -- :file:`util/run_unittest_leg.py` records the
+   measurement.
 *  **Read the summary line, not the exit code.** pytest's last line
    (``N passed, M failed``) and unittest's ``OK`` or ``FAILED (...)`` are the result;
    an exit code read through a pipe or a wrapper is the pipe's or the wrapper's.

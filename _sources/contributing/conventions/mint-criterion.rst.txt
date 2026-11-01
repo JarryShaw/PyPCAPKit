@@ -47,7 +47,7 @@ Measured against the tree, by class:
   **Some of the rest can never reach the call either**, because every range they declare is
   already covered by their own members -- :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`
   declares ``0..1`` and has members ``[0, 1]``, so its ``_unregistered_member`` call is
-  dead code. Those found are :mod:`ipv4.option_class <pcapkit.const.ipv4.option_class>`,
+  dead code. They are :mod:`ipv4.option_class <pcapkit.const.ipv4.option_class>`,
   :mod:`ipv4.tos_del <pcapkit.const.ipv4.tos_del>`,
   :mod:`ipv4.tos_ecn <pcapkit.const.ipv4.tos_ecn>`,
   :mod:`ipv4.tos_pre <pcapkit.const.ipv4.tos_pre>`,
@@ -58,11 +58,7 @@ Measured against the tree, by class:
   :mod:`ipv6.smf_dpd_mode <pcapkit.const.ipv6.smf_dpd_mode>`,
   :mod:`l2tp.type <pcapkit.const.l2tp.type>`,
   :mod:`mh.dhcp_support_mode <pcapkit.const.mh.dhcp_support_mode>` and
-  :mod:`vlan.priority_level <pcapkit.const.vlan.priority_level>`. The ``str``-valued
-  :class:`ftp.command.Command <pcapkit.const.ftp.command.Command>`,
-  :class:`ftp.command.FEATCode <pcapkit.const.ftp.command.FEATCode>` and
-  :class:`http.method.Method <pcapkit.const.http.method.Method>` were not probed, so that
-  list is a floor.
+  :mod:`vlan.priority_level <pcapkit.const.vlan.priority_level>`.
 * **Cache in the value table only**: :class:`~pcapkit.const.tcp.flags.Flags` and the
   Mobility Header flag registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`. They range-check and hand
@@ -128,6 +124,15 @@ what the generated code happens to look like:
    and ``Statically Assigned``. These are written for a human reading the table, so the
    bare label stands: suffixing one with a code would **manufacture a name nobody
    assigned**, and the value will get its real name if and when something assigns it.
+
+.. note::
+
+   In the transport registries -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+   :class:`~pcapkit.const.reg.apptype.udp.UDP` and the rest -- the spans IANA assigns
+   to a service are an exception to the first case: ``x11``, ``ircu``, ``swx`` and the
+   others resolve with the bare service name, so ``TCP(6001).name`` is ``'x11'``, not
+   ``'x11_6001'``. Suffixing them would change ``.name``, which a caller can observe.
+   Recorded on :issue:`2550`.
 
 Worked Examples
 ~~~~~~~~~~~~~~~

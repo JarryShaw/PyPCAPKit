@@ -43,6 +43,7 @@ format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register
 
    .. automethod:: __length_hint__
    .. automethod:: __index__

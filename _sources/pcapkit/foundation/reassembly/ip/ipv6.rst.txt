@@ -17,6 +17,7 @@ origin. Please refer to :doc:`ip` for more information.
    .. autoattribute:: __callback_fn__
       :no-value:
    .. autoattribute:: __timeout__
+   .. autoattribute:: __discard_overlap__
 
 Terminology
 -----------
@@ -108,7 +109,7 @@ Terminology
            |     |                  |--> (tuple) (first, last), absolute and inclusive
            |     |                  |--> ...
            |--> (Info) data
-           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
+           |     |--> 'completed' : (Completion) PARTIAL, TIMEOUT or OVERLAP --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
@@ -148,17 +149,19 @@ Terminology
 
        .. note::
 
-          ``completed`` and ``conflict`` are independent signals: a datagram
-          can be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
-          and still carry a non-empty ``conflict``. IPv6 reassembly shares
-          IPv4's resolution of an overlapping fragment's disagreement, the one
-          :rfc:`791` gives -- "this procedure will use the more recently
-          arrived copy in the data buffer" -- the opposite resolution from
-          TCP's first-write-wins (:rfc:`9293#section-3.10`), rather than
-          abandoning the datagram as :rfc:`8200#section-4.5` has a receiving
-          node do. So a contested range never leaves a hole on its own, and
-          ``conflict`` is what lets a caller tell a clean datagram from a
-          contested one.
+          A fragment that overlaps another, other than an exact duplicate,
+          abandons its datagram, as :rfc:`8200#section-4.5` has a receiving
+          node do, rather than overwriting the octets it overlaps as IPv4's
+          :rfc:`791` procedure does. The datagram is reported as
+          :attr:`Completion.OVERLAP <pcapkit.foundation.reassembly.data.data.Completion.OVERLAP>`,
+          its ``payload`` the fragments merged before the overlapping one, and
+          ``conflict`` where that fragment disagreed with them -- empty if it
+          repeated their octets. So a
+          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+          IPv6 datagram never carries a conflict. An exact duplicate, with the
+          same offset, length, **M** flag and data, is dropped as the RFC
+          permits, its frame number kept in ``index``. A later fragment of an
+          abandoned datagram opens a new buffer (:issue:`2547`).
 
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms
@@ -190,6 +193,9 @@ Terminology
            |                         |                  |--> (tuple) (first, last), absolute and
            |                         |                               inclusive
            |                         |                  |--> ...
+           |                         |--> 'extent' : (list) merged fragments, sorted and disjoint
+           |                         |                |--> (tuple) (start, stop, mf), stop exclusive
+           |                         |                |--> ...
            |--> (tuple) BUFID ...
 
        .. note::

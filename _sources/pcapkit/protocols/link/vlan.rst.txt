@@ -56,13 +56,11 @@ next-EtherType is ``0x8100``, which selects a customer tag in turn:
 would nest a ``c_tag`` inside a ``c_tag``, leaving nothing to say which was the
 service tag.
 
-Two EtherTypes also mean two :meth:`~pcapkit.protocols.protocol.Protocol.__index__`
-values, which is the project's rule for separate modules: siblings that *share* an
-index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
-:mod:`~pcapkit.protocols.link.arp` and
-:class:`~pcapkit.protocols.application.rarp.DRARP` shares
-:mod:`~pcapkit.protocols.application.rarp`. This base is abstract, nothing
-dispatches to it, and it declares no index, so its ``__index__`` raises.
+Each tag has a module of its own because a module holds one protocol class,
+named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`
+exempt (:issue:`2529`). This base is abstract, nothing dispatches to it, and it
+declares no :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, so its
+``__index__`` raises.
 
 .. autoclass:: pcapkit.protocols.link.vlan.VLAN
    :no-members:

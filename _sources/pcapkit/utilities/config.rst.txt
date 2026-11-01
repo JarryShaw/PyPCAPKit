@@ -4,8 +4,8 @@ Configuration
 .. module:: pcapkit.utilities.config
 
 :mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
-(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
-once, when the module is imported:
+(:issue:`1726`), and the checksum `flags`_. Each is read from a ``PCAPKIT_*``
+environment variable once, when the module is imported. For a limit:
 
 * A value that is not an integer, or is below the variable's minimum, warns with
   a :exc:`~pcapkit.utilities.warnings.ConfigWarning` and falls back to the
@@ -61,6 +61,11 @@ Limits
      - ``32``
      - ``>= 0``, or ``-1``
      - each capture remembered pins one packet in memory
+   * - :envvar:`PCAPKIT_TCP_GAP_LIMIT`
+     - ``16777216``
+     - ``>= 0``, or ``-1``
+     - a TCP gap that wide is zero-filled in memory, up to 2 GiB at ``-1``
+       (:issue:`2546`)
    * - :envvar:`PCAPKIT_FALLBACK_LIMIT`
      - ``10000``
      - ``>= 0``, or ``-1``
@@ -99,6 +104,10 @@ Limits
 
    Sets :data:`~pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`.
 
+.. envvar:: PCAPKIT_TCP_GAP_LIMIT
+
+   Sets :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`.
+
 .. envvar:: PCAPKIT_FALLBACK_LIMIT
 
    Sets :data:`~pcapkit.utilities.config.FALLBACK_LIMIT`.
@@ -127,6 +136,7 @@ Limits
 .. autodata:: pcapkit.utilities.config.FRAME_LAYER_LIMIT
 .. autodata:: pcapkit.utilities.config.EXTENSION_HEADER_LIMIT
 .. autodata:: pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT
+.. autodata:: pcapkit.utilities.config.TCP_GAP_LIMIT
 .. autodata:: pcapkit.utilities.config.FALLBACK_LIMIT
 .. autodata:: pcapkit.utilities.config.DETECT_CACHE_SIZE
 .. autodata:: pcapkit.utilities.config.READ_CHUNK
@@ -134,13 +144,43 @@ Limits
 .. autodata:: pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL
 .. autodata:: pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO
 
+Flags
+-----
+
+The checksum flags (:issue:`2471`) take the values :func:`read_flag` accepts,
+and a bad value warns and falls back to the default.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Variable
+     - Default
+     - Effect
+   * - :envvar:`PCAPKIT_CHECKSUM_VERIFY`
+     - off
+     - parsing verifies each checksum and records the outcome
+   * - :envvar:`PCAPKIT_CHECKSUM_COMPUTE`
+     - on
+     - construction computes a checksum the caller leaves out
+
+.. envvar:: PCAPKIT_CHECKSUM_VERIFY
+
+   Sets :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`.
+
+.. envvar:: PCAPKIT_CHECKSUM_COMPUTE
+
+   Sets :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`.
+
+.. autodata:: pcapkit.utilities.config.CHECKSUM_VERIFY
+.. autodata:: pcapkit.utilities.config.CHECKSUM_COMPUTE
+
 .. _config-readers:
 
 Readers
 -------
 
-The limits above are read with these, and a module that keeps a variable of its
-own reads it with them too, so that a bad value is reported the same way.
+The variables above are read with these, and a module that keeps a variable of
+its own reads it with them too, so that a bad value is reported the same way.
 
 .. autofunction:: pcapkit.utilities.config.read_limit
 .. autofunction:: pcapkit.utilities.config.read_flag

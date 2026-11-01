@@ -44,6 +44,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _import_next_layer
 
    .. automethod:: __index__
+   .. automethod:: __post_init__
 
    .. automethod:: _read_ip_hextet
 

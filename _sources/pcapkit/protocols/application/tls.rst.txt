@@ -83,12 +83,31 @@ Decoded Fields
 * Everything else -- the same types once encrypted, ``application_data``
   and every other content type -- as opaque :obj:`bytes`.
 
+Records in One Segment
+----------------------
+
+A whole record after the first in a TCP segment is dissected as a further
+:class:`~pcapkit.protocols.application.tls.TLS` layer, the previous record's
+payload (:issue:`2517`): a ``ServerHello`` followed by a ``ChangeCipherSpec``
+reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
+
+* A whole record that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  with no SSLv2 trial.
+* Octets that open no record -- an unsupported content type, a legacy
+  version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
+* A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
+  keeps the rest of the segment raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 Known Limitation
 ----------------
 
 **A record split across two TCP segments is not reassembled**, and decodes as
-:class:`~pcapkit.protocols.misc.raw.Raw`. A record may be up to 16 KiB
-against a typical 1460-octet MSS, so this is routine.
+:class:`~pcapkit.protocols.misc.raw.Raw`, as does the partial record a segment
+ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
+this is routine.
 
 .. versionadded:: 1.6.0
 
@@ -108,6 +127,7 @@ against a typical 1460-octet MSS, so this is routine.
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: unpack
 
    .. automethod:: __length_hint__
 
