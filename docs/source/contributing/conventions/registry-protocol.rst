@@ -761,14 +761,19 @@ established ones carry. A map's registration comes in two parts:
    :class:`~pcapkit.protocols.transport.tcp.TCP` and
    :class:`~pcapkit.protocols.transport.udp.UDP` keep
    :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
-   typed for the port their maps are keyed by, while
-   :class:`~pcapkit.protocols.internet.ipx.IPX` and
-   :class:`~pcapkit.protocols.link.loopback.Loopback` override their parents'
+   typed for the port their maps are keyed by. A class whose map takes other keys
+   overrides its parent's instead: :class:`~pcapkit.protocols.transport.sctp.SCTP` for
+   payload protocol identifiers rather than ports;
+   :class:`~pcapkit.protocols.internet.ipx.IPX` for IPX packet types rather than the
+   :class:`~pcapkit.const.reg.transtype.TransType`
    :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
-   and :meth:`Link.register <pcapkit.protocols.link.link.Link.register>`: those are
-   typed for :class:`~pcapkit.const.reg.transtype.TransType` and
-   :class:`~pcapkit.const.reg.ethertype.EtherType`, not for the IPX packet type and
-   address family these two maps are keyed by.
+   takes; and :class:`~pcapkit.protocols.link.loopback.Loopback`,
+   :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`,
+   :class:`~pcapkit.protocols.link.frad.FRAD` and
+   :class:`~pcapkit.protocols.link.netlink.Netlink` for address families, ARPHRD types,
+   NLPIDs and ``nlmsg_type`` values rather than the
+   :class:`~pcapkit.const.reg.ethertype.EtherType`
+   :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` takes.
 2. **A** ``register_<name>`` **function** in
    :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
    line above its ``def``. It calls the classmethod and logs, and a bad argument
