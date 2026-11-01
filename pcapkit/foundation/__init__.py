@@ -9,7 +9,8 @@
 :mod:`pcapkit`, including PCAP file extraction tool
 :class:`~pcapkit.foundation.extraction.Extractor`, flow tracing
 :mod:`~pcapkit.foundation.traceflow`, registry management
-APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
+APIs for :mod:`pcapkit`, TCP/IP and DTLS reassembly implementations, and
+the :mod:`~pcapkit.foundation.analysis` of what they reassemble.
 
 """
 from pcapkit.foundation.extraction import Extractor

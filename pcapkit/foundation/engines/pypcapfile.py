@@ -226,6 +226,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   own protocol implementations.
                 * if IPv6 reassembly is enabled, as |pcapfile|_ has no IPv6
                   decoder.
+                * if DTLS reassembly is enabled, as it reads :mod:`pcapkit`'s own
+                  DTLS layer.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.
 
@@ -256,9 +258,18 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         if ext._flag_r and ext._ipv6:
             ext._ipv6 = False
-            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=None, tcp=ext._reasm.tcp)
+            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=None, tcp=ext._reasm.tcp,
+                                           dtls=ext._reasm.dtls)
             warn("'Extractor(engine=pypcapfile)' object does not support IPv6 reassembly; "
                  "so 'ipv6=True' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        if ext._flag_r and ext._dtls:
+            ext._dtls = False
+            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
+                                           tcp=ext._reasm.tcp, dtls=None)
+            warn("'Extractor(engine=pypcapfile)' object does not support DTLS reassembly, "
+                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
+                 AttributeWarning, stacklevel=stacklevel())
 
         stream = NamedStream(ext._ifile, ext._ifnm)
         sfile = pcapfile.savefile.load_savefile(stream, layers=0, lazy=True)

@@ -46,10 +46,11 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(buffer.timestamp, 1000.0)
         self.assertEqual(buffer.conflict, [])
 
-        storage = ReassemblyData((datagram,), (), ())
+        storage = ReassemblyData((datagram,), (), (), ())
         self.assertEqual(storage.ipv4, (datagram,))
         self.assertEqual(storage.ipv6, ())
         self.assertEqual(storage.tcp, ())
+        self.assertEqual(storage.dtls, ())
 
     def test_completion_is_a_string_that_reads_as_a_bool(self) -> None:
         """The contract ``Datagram.completed`` has to keep as a StrEnum.

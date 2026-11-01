@@ -171,7 +171,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
     def make_extractor(self, **overrides):
         sink = OutputSink()
-        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock())
+        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
+                                  dtls=mock.Mock())
         trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
@@ -190,6 +191,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             '_ipv4': False,
             '_ipv6': False,
             '_tcp': False,
+            '_dtls': False,
             '_reasm': reasm,
             '_trace': trace,
             '_frame': [],
@@ -304,6 +306,25 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         self.assertIs(extractor._reasm.ipv4, ipv4)
         self.assertIs(extractor._reasm.tcp, tcp)
         self.assertIsNone(extractor._reasm.ipv6)
+
+    def test_run_disables_dtls_reassembly_but_keeps_the_rest(self) -> None:
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        extractor, _ = self.make_extractor(_flag_r=True, _ipv4=True, _tcp=True, _dtls=True)
+        ipv4, tcp = extractor._reasm.ipv4, extractor._reasm.tcp
+        engine = self.engine(extractor)
+        with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+            engine.run()
+
+        messages = [call.args[0] for call in warn.call_args_list
+                    if call.args[1] is AttributeWarning]
+        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
+                        messages)
+        self.assertTrue(extractor._flag_r)
+        self.assertFalse(extractor._dtls)
+        self.assertIsNone(extractor._reasm.dtls)
+        self.assertIs(extractor._reasm.ipv4, ipv4)
+        self.assertIs(extractor._reasm.tcp, tcp)
 
     def test_run_leaves_reassembly_alone_when_ipv6_was_not_requested(self) -> None:
         extractor, _ = self.make_extractor(_flag_r=True, _ipv4=True, _tcp=True)

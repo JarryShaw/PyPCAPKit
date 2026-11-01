@@ -247,11 +247,13 @@ without keys.
 
 **Done: reassembling a handshake message DTLS has fragmented across several
 records** (:rfc:`6347#section-4.2.3`, :issue:`2440`), via
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS`, keyed on the UDP 4-tuple.
-Pass ``reassembly=`` and ``flow=`` to
-:class:`~pcapkit.protocols.application.dtls.DTLS` to opt in; the completing
-fragment's body decodes to the full reassembled message, while every other
-fragment's body stays that one fragment's raw octets -- see
+:class:`~pcapkit.foundation.reassembly.dtls.DTLS`, keyed on the UDP 4-tuple
+and the epoch. ``Extractor(reassembly=True, dtls=True)`` opts in on the
+default engine, which feeds it through
+:func:`pcapkit.toolkit.pcap.dtls_reassembly`, and
+:func:`~pcapkit.foundation.analysis.dtls_handshake` decodes each reassembled
+message (:issue:`2496`). In the frame itself every fragment's body stays that
+one fragment's raw octets -- see
 :attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`.
 An unfragmented message is unaffected either way.
 

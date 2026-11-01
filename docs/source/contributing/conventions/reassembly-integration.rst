@@ -25,33 +25,33 @@ The Rule
 Compliance, Measured
 ~~~~~~~~~~~~~~~~~~~~~
 
-**Point 1 is an existing, enforced precedent.** Neither
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` nor
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` nor
-:class:`~pcapkit.protocols.transport.tcp.TCP` imports or calls into
+**Point 1 holds for every engine.** None of
+:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.IPv6`,
+:class:`~pcapkit.protocols.transport.tcp.TCP` and
+:class:`~pcapkit.protocols.application.dtls.DTLS` imports or calls into
 :mod:`pcapkit.foundation.reassembly` at all. The real path is
 :mod:`pcapkit.foundation.engines` calling a ``pcapkit.toolkit.<engine>`` extraction
 function on an already-parsed frame, feeding the result to the reassembly instance the
-:class:`~pcapkit.foundation.extraction.Extractor` holds.
+:class:`~pcapkit.foundation.extraction.Extractor` holds; for DTLS that function is
+:func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`).
 
-**Points 2 and 3 describe infrastructure that does not exist yet, for any engine.**
-No single :mod:`pcapkit.toolkit` helper enumerates which output engines support a given
+**Point 2 describes infrastructure that does not exist yet, for any engine.** No
+single :mod:`pcapkit.toolkit` helper enumerates which output engines support a given
 reassembly engine -- support is established ad hoc, per engine backend, in three
 different shapes (define the extraction functions; define them raising
 :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`; or disable reassembly at the
-engine level, as :mod:`pcapkit.foundation.engines.pyshark` does). No
-:mod:`pcapkit.foundation.analysis` module exists; what parses a reassembled outcome
-today is the pre-existing, general-purpose
+engine level, as :mod:`pcapkit.foundation.engines.pyshark` does). DTLS takes the
+first shape on the default engine and the third on every other.
+
+**Point 3 holds for DTLS alone.**
+:func:`~pcapkit.foundation.analysis.dtls_handshake` parses a reassembled DTLS
+handshake message (:issue:`2496`). IP and TCP have no such method: what parses their
+outcome is the general-purpose
 :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` dispatcher,
 reused via :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, not a method
-written for reassembly specifically. So points 2 and 3 are a forward-looking ask, not
-yet a pattern any engine follows.
+written for reassembly specifically.
 
-**The DTLS reassembly work on** :pr:`2451` **violates point 1.**
-:class:`~pcapkit.protocols.application.dtls.DTLS` imports
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` directly and calls it from
-:meth:`DTLS.read`, which no other protocol class does. Its own module docstring notes
-the further divergence from the IP/TCP shape: it is "not toolkit-fed", reports its
-reassembled body eagerly instead of through a :class:`Deferred
-<pcapkit.foundation.reassembly.data.data.Deferred>`, and sets no
-``__protocol_type__``.
+DTLS still differs from the IP/TCP shape in two ways, neither covered by the rule:
+its reassembled body is reported eagerly, with no deferred ``packet``, and
+:class:`~pcapkit.foundation.reassembly.dtls.DTLS` sets no ``__protocol_type__``.

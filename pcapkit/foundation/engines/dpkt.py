@@ -16,6 +16,7 @@ from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase
+from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.protocols.schema.misc.pcapng import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
                                                   GENERIC_BLOCK_MINIMUM)
@@ -480,7 +481,8 @@ class DPKT(EngineBase['DPKTPacket']):
                 is provided as the DPKT engine does not support such operations;
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the DPKT engine does not parse with :mod:`pcapkit`'s own
-                protocol implementations.
+                protocol implementations; or if DTLS reassembly is enabled, for the
+                same reason.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -501,6 +503,14 @@ class DPKT(EngineBase['DPKTPacket']):
             warn("'Extractor(engine=dpkt)' does not parse with pcapkit's own protocol "
                  "implementations, so the parsing context supplied through "
                  "'context=' is ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._flag_r and ext._dtls:
+            ext._dtls = False
+            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
+                                           tcp=ext._reasm.tcp, dtls=None)
+            warn("'Extractor(engine=dpkt)' object does not support DTLS reassembly, "
+                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler, unless the caller gave one of their own (#1874)

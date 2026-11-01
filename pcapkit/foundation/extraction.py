@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.context import ProtocolContext
+    from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
     from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
     from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
@@ -165,6 +166,11 @@ class Extractor(Generic[_P]):
        ``verbose`` is called on every engine, where the third-party engines
        replaced it with their own printer (:issue:`1874`).
 
+    .. versionchanged:: 1.6.0
+
+       ``dtls`` is inserted after ``tcp``, so a positional argument from
+       ``buffer_size`` onwards moves one place along.
+
     """
     if TYPE_CHECKING:
         #: Input file name.
@@ -247,6 +253,9 @@ class Extractor(Generic[_P]):
         #: TCP flag. It indicates if the TCP reassembly and/or flow tracing
         #: is enabled.
         _tcp: 'bool'
+        #: DTLS flag. It indicates if the DTLS handshake-message reassembly is
+        #: enabled.
+        _dtls: 'bool'
 
         #: Extract til protocol.
         _exptl: 'Protocols'
@@ -339,6 +348,7 @@ class Extractor(Generic[_P]):
         'ipv4': ModuleDescriptor('pcapkit.foundation.reassembly.ipv4', 'IPv4'),
         'ipv6': ModuleDescriptor('pcapkit.foundation.reassembly.ipv6', 'IPv6'),
         'tcp': ModuleDescriptor('pcapkit.foundation.reassembly.tcp', 'TCP'),
+        'dtls': ModuleDescriptor('pcapkit.foundation.reassembly.dtls', 'DTLS'),
     }  # type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
 
     #: Flow tracing support mapping for extracting frames. The values should be a module
@@ -423,6 +433,7 @@ class Extractor(Generic[_P]):
         * ``ipv4`` -- tuple of IPv4 payload fragment (:term:`reasm.ipv4.datagram`)
         * ``ipv6`` -- tuple of IPv6 payload fragment (:term:`reasm.ipv6.datagram`)
         * ``tcp`` -- tuple of TCP payload fragment (:term:`reasm.tcp.datagram`)
+        * ``dtls`` -- tuple of DTLS handshake message (:term:`reasm.dtls.datagram`)
 
         Raises:
             UnsupportedCall: If :attr:`self._flag_r <pcapkit.foundation.extraction.Extractor._flag_r>`
@@ -439,6 +450,7 @@ class Extractor(Generic[_P]):
                 ipv4=tuple(self._reasm.ipv4.datagram) if self._ipv4 else None,
                 ipv6=tuple(self._reasm.ipv6.datagram) if self._ipv6 else None,
                 tcp=tuple(self._reasm.tcp.datagram) if self._tcp else None,
+                dtls=tuple(self._reasm.dtls.datagram) if self._dtls else None,
             )
             return data
         raise UnsupportedCall("'Extractor(reassembly=False)' object has no attribute 'reassembly'")
@@ -1187,6 +1199,7 @@ class Extractor(Generic[_P]):
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
                  trace_bidirectional: 'bool' = True, trace_analyse: 'bool' = False,                                            # trace settings # pylint: disable=line-too-long
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False,                           # reassembly/trace settings # pylint: disable=line-too-long
+                 dtls: 'bool' = False,                                                                                          # reassembly settings # pylint: disable=line-too-long
                  buffer_size: 'int' = io.DEFAULT_BUFFER_SIZE, buffer_save: 'bool' = False, buffer_path: 'Optional[str]' = None, # buffer settings # pylint: disable=line-too-long
                  no_eof: 'bool' = False,                                                                                      # EOF settings # pylint: disable=line-too-long
                  context: 'Optional[ContextRegistry | ProtocolContext | Mapping[str, ProtocolContext] | Iterable[ProtocolContext]]' = None) -> 'None':  # context settings # pylint: disable=line-too-long
@@ -1221,7 +1234,8 @@ class Extractor(Generic[_P]):
                 each protocol's own default -- 60 seconds for IPv4
                 (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),
                 disabled for TCP, which no specification gives a deadline. Pass
-                :data:`math.inf` to disable it everywhere
+                :data:`math.inf` to disable it everywhere; DTLS reassembly takes
+                none (:rfc:`6347#section-4.2.3`)
 
             trace: if trace TCP traffic flows
             trace_fout: path name for flow tracer if necessary
@@ -1242,6 +1256,8 @@ class Extractor(Generic[_P]):
             ipv6: if perform IPv6 reassembly (must be used with ``reassembly=True``)
             tcp: if perform TCP reassembly and/or flow tracing
                 (must be used with ``reassembly=True`` or ``trace=True``)
+            dtls: if perform DTLS handshake-message reassembly (must be used
+                with ``reassembly=True``); the default engine alone supports it
 
             buffer_size: buffer size for reading input file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
             buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
@@ -1375,13 +1391,14 @@ class Extractor(Generic[_P]):
         self._ipv4 = ipv4 or ip  # IPv4 Reassembly
         self._ipv6 = ipv6 or ip  # IPv6 Reassembly
         self._tcp = tcp          # TCP Reassembly
+        self._dtls = dtls        # DTLS Reassembly
 
         self._exptl = protocol or 'null'                              # extract til protocol
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
         self._exctx = ContextRegistry.make(context)                   # caller supplied context
 
         if reassembly:
-            reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = None
+            reasm_obj_ipv4 = reasm_obj_ipv6 = reasm_obj_tcp = reasm_obj_dtls = None
 
             if self._ipv4:
                 logger.debug('IPv4 reassembly enabled')
@@ -1410,11 +1427,21 @@ class Extractor(Generic[_P]):
                     self.__reassembly__['tcp'] = reasm_cls_tcp  # update mapping upon import
                 reasm_obj_tcp = cast('TCP_Reassembly', reasm_cls_tcp(strict=reasm_strict, store=reasm_store,
                                                                     timeout=reasm_timeout))
+            if self._dtls:
+                logger.debug('DTLS reassembly enabled')
+
+                reasm_cls_dtls = self.__reassembly__['dtls']
+                if isinstance(reasm_cls_dtls, ModuleDescriptor):
+                    reasm_cls_dtls = reasm_cls_dtls.klass
+                    self.__reassembly__['dtls'] = reasm_cls_dtls  # update mapping upon import
+                # NOTE: no ``timeout``: the RFC gives DTLS handshake reassembly none.
+                reasm_obj_dtls = cast('DTLS_Reassembly', reasm_cls_dtls(strict=reasm_strict, store=reasm_store))
 
             self._reasm = ReassemblyManager(
                 ipv4=reasm_obj_ipv4,
                 ipv6=reasm_obj_ipv6,
                 tcp=reasm_obj_tcp,
+                dtls=reasm_obj_dtls,
             )
 
         if trace:

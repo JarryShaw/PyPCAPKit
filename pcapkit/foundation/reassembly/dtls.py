@@ -43,10 +43,11 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         sequence number resets on each cipher-state change
         (:rfc:`6347#section-4.1`), so a new epoch opens a fresh buffer.
         Overlapping fragments are accepted
-        (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). Not toolkit-fed:
-        a protocol instance never sees the addresses, so a caller supplies the
-        4-tuple as ``flow`` to :meth:`DTLS.read
-        <pcapkit.protocols.application.dtls.DTLS.read>`.
+        (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). The
+        :class:`~pcapkit.foundation.extraction.Extractor` feeds it through
+        :func:`pcapkit.toolkit.pcap.dtls_reassembly`, which reads the 4-tuple
+        off the frame, and :func:`~pcapkit.foundation.analysis.dtls_handshake`
+        decodes what it reassembles.
 
     Example:
         >>> from pcapkit.foundation.reassembly.dtls import DTLS
@@ -106,12 +107,11 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         one.
 
         This is a synchronous alternative to :attr:`datagram`/:meth:`fetch`
-        for a caller -- :meth:`DTLS.read
-        <pcapkit.protocols.application.dtls.DTLS.read>` is the one that
-        exists -- that wants to know, immediately after feeding one fragment,
-        whether *that* fragment was the one that completed its message,
-        rather than waiting for the buffer (which may hold several other
-        messages still in flight under the same buffer ID) to be flushed.
+        for a caller that wants to know, immediately after feeding one
+        fragment, whether *that* fragment was the one that completed its
+        message, rather than waiting for the buffer (which may hold several
+        other messages still in flight under the same buffer ID) to be
+        flushed.
 
         """
         return self._last

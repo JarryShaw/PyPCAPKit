@@ -117,11 +117,13 @@ class ExtractorTests(unittest.TestCase):
         extractor._ipv4 = True
         extractor._ipv6 = True
         extractor._tcp = True
+        extractor._dtls = True
         extractor._frame = ['frame']
         extractor._reasm = types.SimpleNamespace(
             ipv4=types.SimpleNamespace(datagram=('ipv4',)),
             ipv6=types.SimpleNamespace(datagram=('ipv6',)),
             tcp=types.SimpleNamespace(datagram=('tcp',)),
+            dtls=types.SimpleNamespace(datagram=('dtls',)),
         )
         # ``finish`` as well as ``index``: _cleanup tells the tracer the capture
         # has ended, which is where a flow nothing superseded is finalised, so a
@@ -154,12 +156,14 @@ class ExtractorTests(unittest.TestCase):
         self.assertEqual(extractor.reassembly.ipv4, ('ipv4',))
         self.assertEqual(extractor.reassembly.ipv6, ('ipv6',))
         self.assertEqual(extractor.reassembly.tcp, ('tcp',))
+        self.assertEqual(extractor.reassembly.dtls, ('dtls',))
         self.assertEqual(extractor.trace.tcp, ('trace',))
         self.assertIs(extractor.engine, extractor._exeng)
         self.assertEqual(extractor.magic_number, b'fake')
 
-        extractor._ipv4 = extractor._ipv6 = extractor._tcp = False
+        extractor._ipv4 = extractor._ipv6 = extractor._tcp = extractor._dtls = False
         self.assertIsNone(extractor.reassembly.ipv4)
+        self.assertIsNone(extractor.reassembly.dtls)
         self.assertIsNone(extractor.trace.tcp)
 
         unsupported = object.__new__(Extractor)

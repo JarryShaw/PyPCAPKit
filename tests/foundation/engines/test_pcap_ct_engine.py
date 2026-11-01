@@ -144,7 +144,8 @@ class PCAP_CTEngineTests(unittest.TestCase):
 
     def make_extractor(self, **overrides):
         sink = OutputSink()
-        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock())
+        reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
+                                  dtls=mock.Mock())
         trace = types.SimpleNamespace(tcp=mock.Mock())
         values = {
             '_ifile': io.BytesIO(b'capture'),
@@ -163,6 +164,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
             '_ipv4': False,
             '_ipv6': False,
             '_tcp': False,
+            '_dtls': False,
             '_reasm': reasm,
             '_trace': trace,
             '_frame': [],
@@ -452,7 +454,24 @@ class PCAP_CTEngineTests(unittest.TestCase):
         self.assertIsNone(extractor._reasm.ipv4)
         self.assertIsNone(extractor._reasm.ipv6)
         self.assertIsNone(extractor._reasm.tcp)
+        self.assertIsNone(extractor._reasm.dtls)
         self.assertIsNone(extractor._trace.tcp)
+
+    def test_run_disables_reassembly_requested_for_dtls_alone(self) -> None:
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        extractor, _ = self.make_extractor(_flag_r=True, _dtls=True)
+        engine = self.engine(extractor)
+        with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
+            with mock.patch('pcapkit.foundation.engines.pcap_ct.warn') as warn:
+                engine.run()
+
+        messages = [call.args[0] for call in warn.call_args_list
+                    if call.args[1] is AttributeWarning]
+        self.assertTrue(any("'dtls=True' will be ignored" in message for message in messages),
+                        messages)
+        self.assertFalse(extractor._flag_r)
+        self.assertIsNone(extractor._reasm.dtls)
 
     def test_run_leaves_disabled_reassembly_and_tracing_untouched(self) -> None:
         extractor, _ = self.make_extractor(_flag_r=True, _flag_t=True)

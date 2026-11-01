@@ -12,13 +12,16 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it. The TCP adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
-:func:`~pcapkit.toolkit.pcap.tcp_segment`.
+:func:`~pcapkit.toolkit.pcap.tcp_segment`, and the DTLS ones the record with
+:func:`~pcapkit.toolkit.pcap._dtls_fragments`.
 
 .. autofunction:: pcapkit.toolkit.pcap.ipv4_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.ipv6_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcap.dtls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcap.tcp_traceflow
 
@@ -28,6 +31,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.pcap.tcp_segment
 
 .. autofunction:: pcapkit.toolkit.pcap._fragment
+
+.. autofunction:: pcapkit.toolkit.pcap._dtls_fragments
 
 .. autoclass:: pcapkit.toolkit.pcap.TCPSegment
    :members:
@@ -48,6 +53,8 @@ cannot be used for it.
 .. autofunction:: pcapkit.toolkit.pcapng.ipv6_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_reassembly
+
+.. autofunction:: pcapkit.toolkit.pcapng.dtls_reassembly
 
 .. autofunction:: pcapkit.toolkit.pcapng.tcp_traceflow
 

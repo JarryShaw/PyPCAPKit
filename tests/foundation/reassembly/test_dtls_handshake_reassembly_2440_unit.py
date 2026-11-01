@@ -1,22 +1,31 @@
 # -*- coding: utf-8 -*-
-"""DTLS handshake-message reassembly (GitHub issue #2440).
+"""DTLS handshake-message reassembly (GitHub issues #2440 and #2496).
 
-Covers the new :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine in
-isolation, fed fragments directly, and the wiring into
-:meth:`~pcapkit.protocols.application.dtls.DTLS.read`, which decodes a
-fragmented ``ClientHello``/``ServerHello`` once its reassembly engine reports
-the message complete.
+Covers the :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine in
+isolation, fed fragments directly, and the extraction path: the default engine
+feeds it through :func:`pcapkit.toolkit.pcap.dtls_reassembly`, and
+:func:`pcapkit.foundation.analysis.dtls_handshake` decodes a fragmented
+``ClientHello``/``ServerHello`` once the engine reports the message complete.
 
-Every case builds its fragments in memory and reads no capture. Classes are
-imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
+Every case builds its fragments and captures in memory and reads no sample
+capture. Classes are imported inside each test, after
+:func:`~tests._support.reimport_once_per_class`.
 
 """
 
 from __future__ import annotations
 
+import io
+import ipaddress
+import struct
 import unittest
+import warnings
+from typing import TYPE_CHECKING
 
-from tests._support import reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class
+
+if TYPE_CHECKING:
+    from typing import Any
 
 #: Test tier (#1958): hand-picked round-trip cases, not a sweep.
 __tier__ = 'ALL'
@@ -69,6 +78,55 @@ def _split(body: bytes, bounds: 'tuple[int, ...]') -> 'list[tuple[int, int]]':
     length)`` pairs covering the whole of ``body``."""
     edges = (0, *bounds, len(body))
     return [(edges[i], edges[i + 1] - edges[i]) for i in range(len(edges) - 1)]
+
+
+#: ``(src, sport, dst, dport)`` of the UDP association the captures below carry.
+FLOW = (ipaddress.ip_address('192.0.2.1'), 1234, ipaddress.ip_address('198.51.100.1'), 5684)
+
+
+def _frame(record: bytes, flow: 'tuple[Any, int, Any, int]' = FLOW) -> bytes:
+    """An Ethernet frame of IPv4 and UDP carrying the DTLS ``record`` along ``flow``."""
+    src, sport, dst, dport = flow
+    segment = struct.pack('!HHHH', sport, dport, 8 + len(record), 0) + record
+    return (b'\xbb' * 6 + b'\xaa' * 6 + b'\x08\x00'
+            + struct.pack('!BBHHHBBH4s4s', 0x45, 0, 20 + len(segment), 1, 0x4000, 64, 17, 0,
+                          src.packed, dst.packed)
+            + segment)
+
+
+def _pcap(frames: 'list[bytes]') -> bytes:
+    """A little-endian microsecond Ethernet PCAP holding ``frames``, one second apart."""
+    out = struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 0xFFFF, 1)
+    for num, octets in enumerate(frames):
+        out += struct.pack('<IIII', 1500000000 + num, 0, len(octets), len(octets)) + octets
+    return out
+
+
+def _block(block_type: int, body: bytes) -> bytes:
+    body += b'\x00' * (-len(body) % 4)
+    return struct.pack('<II', block_type, len(body) + 12) + body + struct.pack('<I', len(body) + 12)
+
+
+def _pcapng(frames: 'list[bytes]') -> bytes:
+    """A little-endian PCAP-NG holding ``frames`` on an Ethernet interface, one second apart."""
+    out = (_block(0x0A0D0D0A, struct.pack('<IHHq', 0x1A2B3C4D, 1, 0, -1))
+           + _block(1, struct.pack('<HHI', 1, 0, 0xFFFF)))
+    for num, octets in enumerate(frames):
+        ticks = (1500000000 + num) * 10 ** 6
+        out += _block(6, struct.pack('<IIIII', 0, ticks >> 32, ticks & 0xFFFFFFFF,
+                                     len(octets), len(octets)) + octets)
+    return out
+
+
+def _extract(test: 'unittest.TestCase', capture: bytes, **kwargs: 'Any') -> 'Any':
+    """Run the default engine over ``capture``, every frame stored."""
+    from pcapkit import extract
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        extractor = extract(fin=io.BytesIO(capture), nofile=True, store=True, **kwargs)
+    test.addCleanup(close_extractor, extractor)
+    return extractor
 
 
 class TestDTLSHandshakeReassembly(unittest.TestCase):
@@ -407,262 +465,196 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
         self.assertEqual(engine.last.body, body)
 
 
-class TestDTLSReadReassemblyWiring(unittest.TestCase):
-    """:meth:`DTLS.read`'s ``reassembly``/``flow`` arguments, exercised
-    through the real protocol class rather than the engine alone."""
+class TestDTLSExtractorReassembly(unittest.TestCase):
+    """``Extractor(reassembly=True, dtls=True)`` over real frames, and
+    :func:`~pcapkit.foundation.analysis.dtls_handshake` over what it reassembles."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
+    @staticmethod
+    def _records(msg_type: int, body: bytes, frags: 'list[tuple[int, int]]', *,
+                 message_seq: int = 5) -> 'list[bytes]':
+        """One DTLS record per ``(offset, length)`` fragment of ``body``."""
+        return [_dtls_record(22, _dtls_handshake(msg_type, body[fo:fo + length],
+                                                 message_seq=message_seq, fragment_offset=fo,
+                                                 fragment_length=length, total_length=len(body)),
+                             seq=num)
+                for num, (fo, length) in enumerate(frags, 1)]
+
     def test_fragmented_client_hello_decodes_once_reassembled(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.foundation.analysis import dtls_handshake
 
         body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
-        half = len(body) // 2
-        wire1 = _dtls_record(22, _dtls_handshake(1, body[:half], message_seq=5, fragment_offset=0,
-                            fragment_length=half, total_length=len(body)), seq=2)
-        wire2 = _dtls_record(22, _dtls_handshake(1, body[half:], message_seq=5, fragment_offset=half,
-                            fragment_length=len(body) - half, total_length=len(body)), seq=3)
+        records = self._records(1, body, _split(body, (len(body) // 2,)))
+        for container, write in (('pcap', _pcap), ('pcapng', _pcapng)):
+            with self.subTest(container=container):
+                extractor = _extract(self, write([_frame(r) for r in records]),
+                                     reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        flow = ('10.0.0.1', 1234, '10.0.0.2', 5684)
+                # the frames themselves keep each fragment's raw octets
+                for frame in extractor.frame:
+                    message = frame['DTLS'].info.content[0]
+                    self.assertTrue(message.is_fragmented)
+                    self.assertIsInstance(message.body, bytes)
 
-        parsed1 = DTLS(wire1, len(wire1), reassembly=engine, flow=flow, frame_num=1, frame_timestamp=0.0)
-        msg1 = parsed1.info.content[0]
-        self.assertTrue(msg1.is_fragmented)
-        self.assertIsInstance(msg1.body, bytes)
-
-        parsed2 = DTLS(wire2, len(wire2), reassembly=engine, flow=flow, frame_num=2, frame_timestamp=0.1)
-        msg2 = parsed2.info.content[0]
-        self.assertTrue(msg2.is_fragmented)
-        self.assertNotIsInstance(msg2.body, bytes)
-        self.assertEqual(msg2.body.cookie, b'\xab\xcd\xef\x01')
+                datagram, = extractor.reassembly.dtls
+                self.assertTrue(datagram.completed)
+                self.assertEqual(datagram.index, (1, 2))
+                self.assertEqual((datagram.id.src, datagram.id.sport, datagram.id.dst,
+                                  datagram.id.dport, datagram.id.epoch), (*FLOW, 0))
+                decoded = dtls_handshake(datagram)
+                self.assertFalse(decoded.is_fragmented)
+                self.assertEqual((decoded.fragment_offset, decoded.fragment_length),
+                                 (0, len(body)))
+                self.assertEqual(decoded.body.cookie, b'\xab\xcd\xef\x01')
 
     def test_fragmented_server_hello_decodes_once_reassembled(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.foundation.analysis import dtls_handshake
 
         body = _server_hello_body(extensions=b'\x00\x0d\x00\x02\xab\xcd')
         third = len(body) // 3
         frags = _split(body, (third, 2 * third))
-        bufid_flow = ('1.1.1.1', 100, '2.2.2.2', 5684)
+        # delivered out of order: [2, 0, 1]
+        records = self._records(2, body, [frags[2], frags[0], frags[1]], message_seq=9)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        decoded = None
-        # deliver out of order: [2, 0, 1]
-        for num, idx in enumerate((2, 0, 1), 1):
-            fo, length = frags[idx]
-            wire = _dtls_record(22, _dtls_handshake(2, body[fo:fo + length], message_seq=9,
-                               fragment_offset=fo, fragment_length=length, total_length=len(body)),
-                               seq=10 + num)
-            parsed = DTLS(wire, len(wire), reassembly=engine, flow=bufid_flow,
-                          frame_num=num, frame_timestamp=float(num))
-            msg = parsed.info.content[0]
-            if not isinstance(msg.body, bytes):
-                decoded = msg.body
-        self.assertIsNotNone(decoded)
-        self.assertEqual(decoded.random, bytes(range(32, 64)))
+        datagram, = extractor.reassembly.dtls
+        self.assertEqual(datagram.body, body)
+        self.assertEqual(dtls_handshake(datagram).body.random, bytes(range(32, 64)))
 
-    def test_reassembly_without_flow_raises_rather_than_corrupting(self) -> None:
-        """Omitting ``flow`` while passing ``reassembly`` must not silently
-        default onto a shared buffer key -- two interleaved associations
-        would otherwise corrupt each other's reassembly."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.utilities.exceptions import ProtocolError
+    def test_interleaved_associations_do_not_share_a_buffer(self) -> None:
+        """Two associations sending the same ``message_seq`` interleaved each
+        reassemble their own message: the buffer ID is read off each frame's
+        own IP and UDP layers."""
+        from pcapkit.foundation.analysis import dtls_handshake
 
-        body = _client_hello_body()
-        half = len(body) // 2
-        wire = _dtls_record(22, _dtls_handshake(1, body[:half], message_seq=5, fragment_offset=0,
-                           fragment_length=half, total_length=len(body)), seq=2)
+        other = (FLOW[0], 4321, FLOW[2], FLOW[3])
+        body_a = _client_hello_body(cookie=b'\x0a' * 4)
+        body_b = _client_hello_body(cookie=b'\x0b' * 4)
+        half = len(body_a) // 2
+        rec_a = self._records(1, body_a, _split(body_a, (half,)))
+        rec_b = self._records(1, body_b, _split(body_b, (half,)))
+        frames = [_frame(rec_a[0]), _frame(rec_b[0], other), _frame(rec_a[1]), _frame(rec_b[1], other)]
+        extractor = _extract(self, _pcap(frames), reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        with self.assertRaises(ProtocolError):
-            DTLS(wire, len(wire), reassembly=engine, frame_num=1, frame_timestamp=0.0)
+        cookies = {d.id.sport: dtls_handshake(d).body.cookie for d in extractor.reassembly.dtls}
+        self.assertEqual(cookies, {1234: b'\x0a' * 4, 4321: b'\x0b' * 4})
 
     def test_encrypted_handshake_record_skips_reassembly_unharmed(self) -> None:
-        """A ``handshake``-typed record at epoch >= 1 is ciphertext --
-        :meth:`SSL._read_tls_content <pcapkit.protocols.application.ssl.SSL._read_tls_content>`
-        returns it as raw :obj:`bytes` rather than parsed messages. Every
-        real DTLS handshake ends with exactly such a record (the encrypted
-        ``Finished``), so a ``reassembly`` engine must not choke on it."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
-
+        """A ``handshake``-typed record at epoch >= 1 is ciphertext -- every
+        real DTLS handshake ends with one, the encrypted ``Finished`` -- so it
+        stays raw bytes and feeds nothing."""
         ciphertext = b'\xa3\x5d\x12\xee' * 12
-        wire = _dtls_record(22, ciphertext, epoch=1, seq=7)
+        extractor = _extract(self, _pcap([_frame(_dtls_record(22, ciphertext, epoch=1, seq=7))]),
+                             reassembly=True, dtls=True)
+        self.assertEqual(extractor.frame[0]['DTLS'].info.content, ciphertext)
+        self.assertEqual(extractor.reassembly.dtls, ())
 
-        engine = DTLSReassembly()
-        flow = ('10.0.0.1', 1234, '10.0.0.2', 5684)
-
-        parsed = DTLS(wire, len(wire), reassembly=engine, flow=flow,
-                     frame_num=1, frame_timestamp=0.0)
-        self.assertEqual(parsed.info.content, ciphertext)
-
-    def test_completing_record_rebuilds_byte_exact(self) -> None:
-        """The record that completes a reassembled message must still
-        round-trip exactly through ``from_data``/``make``:
-        the fragment header has to keep describing *this* record's own byte
-        range even though ``body`` holds the full decoded message, or
-        re-encoding it drifts out of sync with the bytes written after it."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
+    def test_every_fragment_record_rebuilds_byte_exact(self) -> None:
+        """Reassembly leaves the frames alone, so every fragment's record --
+        the one completing its message included -- round-trips exactly
+        through ``from_data``."""
         from pcapkit.protocols.application.dtls import DTLS
 
         body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
-        half = len(body) // 2
-        wire1 = _dtls_record(22, _dtls_handshake(1, body[:half], message_seq=5, fragment_offset=0,
-                            fragment_length=half, total_length=len(body)), seq=2)
-        wire2 = _dtls_record(22, _dtls_handshake(1, body[half:], message_seq=5, fragment_offset=half,
-                            fragment_length=len(body) - half, total_length=len(body)), seq=3)
+        records = self._records(1, body, _split(body, (len(body) // 2,)))
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        flow = ('10.0.0.1', 1234, '10.0.0.2', 5684)
-
-        DTLS(wire1, len(wire1), reassembly=engine, flow=flow, frame_num=1, frame_timestamp=0.0)
-        parsed2 = DTLS(wire2, len(wire2), reassembly=engine, flow=flow, frame_num=2, frame_timestamp=0.1)
-
-        msg2 = parsed2.info.content[0]
-        # the completing fragment: decoded in place, not raw bytes.
-        self.assertNotIsInstance(msg2.body, bytes)
-
-        rebuilt = bytes(DTLS.from_data(parsed2.info))
-        self.assertEqual(rebuilt, wire2)
+        self.assertTrue(extractor.reassembly.dtls[0].completed)
+        for frame, record in zip(extractor.frame, records):
+            self.assertEqual(bytes(DTLS.from_data(frame['DTLS'].info)), record)
 
     def test_overrunning_completing_fragment_keeps_raw_bytes_and_round_trips(self) -> None:
         """A fragment whose ``fragment_offset + fragment_length`` overruns the
-        declared ``length`` (5 + 10 > 10) completes its message, but its record
-        must stay as it arrived. Replacing its body with the clipped message
-        corrupts the round trip, and
-        :meth:`SSL._make_tls_handshake_messages
-        <pcapkit.protocols.application.ssl.SSL._make_tls_handshake_messages>`'s
-        exactness check cannot be relied on to catch it."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
+        declared ``length`` (5 + 10 > 10) completes its message, clipped, but
+        its record stays exactly as it arrived."""
         from pcapkit.protocols.application.dtls import DTLS
 
         length = 10
-        first = b'A' * 5
         second = b'B' * 10  # this record's own 10 octets, but offset 5 + 10 > length 10
-        wire1 = _dtls_handshake(11, first, message_seq=3, fragment_offset=0,
-                                fragment_length=5, total_length=length)
-        wire2 = _dtls_handshake(11, second, message_seq=3, fragment_offset=5,
-                                fragment_length=10, total_length=length)
-        record1 = _dtls_record(22, wire1, seq=2)
-        record2 = _dtls_record(22, wire2, seq=3)
+        record1 = _dtls_record(22, _dtls_handshake(11, b'A' * 5, message_seq=3, fragment_offset=0,
+                                                   fragment_length=5, total_length=length), seq=2)
+        record2 = _dtls_record(22, _dtls_handshake(11, second, message_seq=3, fragment_offset=5,
+                                                   fragment_length=10, total_length=length), seq=3)
+        extractor = _extract(self, _pcap([_frame(record1), _frame(record2)]),
+                             reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        flow = ('19.0.0.1', 1, '19.0.0.2', 5684)
+        datagram, = extractor.reassembly.dtls
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.body, b'A' * 5 + b'B' * 5)
 
-        DTLS(record1, len(record1), reassembly=engine, flow=flow, frame_num=1, frame_timestamp=0.0)
-        parsed2 = DTLS(record2, len(record2), reassembly=engine, flow=flow, frame_num=2,
-                      frame_timestamp=0.1)
-
-        # the engine itself did complete the message (clipping the overrun)
-        # but this record is left exactly as it arrived.
-        self.assertIsNotNone(engine.last)
-        self.assertTrue(engine.last.completed)
-
-        msg2 = parsed2.info.content[0]
-        self.assertIsInstance(msg2.body, bytes)
-        self.assertEqual(msg2.body, second)
-        self.assertEqual(msg2.fragment_offset, 5)
-        self.assertEqual(msg2.fragment_length, 10)
-
-        rebuilt = bytes(DTLS.from_data(parsed2.info))
-        self.assertEqual(rebuilt, record2)
+        message = extractor.frame[1]['DTLS'].info.content[0]
+        self.assertEqual((message.body, message.fragment_offset, message.fragment_length),
+                         (second, 5, 10))
+        self.assertEqual(bytes(DTLS.from_data(extractor.frame[1]['DTLS'].info)), record2)
 
     def test_undecodable_reassembled_body_falls_back_to_raw_bytes(self) -> None:
-        """A completed message whose reassembled bytes do not decode as a
-        valid message of its ``msg_type`` keeps those raw bytes instead of
-        raising (dtls.py's ``except ProtocolError`` fallback)."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
+        """A completed message whose reassembled bytes do not decode as its
+        ``msg_type`` keeps them raw instead of raising."""
+        from pcapkit.foundation.analysis import dtls_handshake
 
-        # far too short to be a genuine ClientHello (needs >= 34 octets
-        # before even the session_id length is reached), but a perfectly
-        # in-bounds pair of fragments for the reassembler itself.
+        # far too short to be a genuine ClientHello, but in bounds for the reassembler
         body = b'\x01\x02\x03\x04\x05'
-        wire1 = _dtls_record(22, _dtls_handshake(1, body[:3], message_seq=1, fragment_offset=0,
-                            fragment_length=3, total_length=len(body)), seq=2)
-        wire2 = _dtls_record(22, _dtls_handshake(1, body[3:], message_seq=1, fragment_offset=3,
-                            fragment_length=len(body) - 3, total_length=len(body)), seq=3)
+        records = self._records(1, body, _split(body, (3,)), message_seq=1)
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        flow = ('20.0.0.1', 1, '20.0.0.2', 5684)
+        datagram, = extractor.reassembly.dtls
+        self.assertTrue(datagram.completed)
+        decoded = dtls_handshake(datagram)
+        self.assertEqual(decoded.body, body)
+        self.assertFalse(decoded.is_fragmented)
 
-        DTLS(wire1, len(wire1), reassembly=engine, flow=flow, frame_num=1, frame_timestamp=0.0)
-        parsed2 = DTLS(wire2, len(wire2), reassembly=engine, flow=flow, frame_num=2, frame_timestamp=0.1)
+    def test_records_without_fragmented_messages_feed_nothing(self) -> None:
+        """An alert, application data, and a handshake record whose message
+        arrives whole reach no reassembly buffer."""
+        whole = _client_hello_body()
+        records = [
+            _dtls_record(21, bytes([1, 0]), seq=2),
+            _dtls_record(23, b'\x17' * 16, seq=3),
+            _dtls_record(22, _dtls_handshake(1, whole, message_seq=0, fragment_offset=0,
+                                             fragment_length=len(whole)), seq=4),
+        ]
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
+        self.assertEqual(extractor.reassembly.dtls, ())
 
-        self.assertIsNotNone(engine.last)
-        self.assertTrue(engine.last.completed)
+    def test_frames_are_the_same_with_and_without_reassembly(self) -> None:
+        """What the extractor yields per frame does not depend on DTLS reassembly."""
+        body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
+        capture = _pcap([_frame(r) for r in self._records(1, body, _split(body, (len(body) // 2,)))])
+        plain = _extract(self, capture)
+        reassembled = _extract(self, capture, reassembly=True, dtls=True)
+        self.assertEqual([f['DTLS'].info for f in plain.frame],
+                         [f['DTLS'].info for f in reassembled.frame])
 
-        msg2 = parsed2.info.content[0]
-        # decode was attempted (the fragment is complete and in-bounds) and
-        # failed -- raw reassembled bytes kept, not raised.
-        self.assertIsInstance(msg2.body, bytes)
-        self.assertEqual(msg2.body, body)
-
-    def test_flow_required_check_fires_for_non_handshake_records_too(self) -> None:
-        """``flow`` is required the moment ``reassembly`` is given,
-        regardless of this record's content type, not only for a
-        cleartext ``handshake`` record."""
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        engine = DTLSReassembly()
-
-        # an ``alert`` record -- never reaches ``_reassemble_dtls_handshake``
-        # at all, so a handshake-only check would never see it.
-        alert_wire = _dtls_record(21, bytes([1, 0]), seq=2)
-        with self.assertRaises(ProtocolError):
-            DTLS(alert_wire, len(alert_wire), reassembly=engine, frame_num=1, frame_timestamp=0.0)
-
-        # an encrypted (epoch >= 1) ``handshake`` record -- ``content`` is
-        # raw ciphertext :obj:`bytes` here, not a :obj:`tuple`, so a check
-        # keyed on the tuple would skip it too.
-        encrypted_wire = _dtls_record(22, b'\xaa' * 16, epoch=1, seq=3)
-        with self.assertRaises(ProtocolError):
-            DTLS(encrypted_wire, len(encrypted_wire), reassembly=engine, frame_num=2,
-                frame_timestamp=0.0)
-
-    def test_without_reassembly_argument_body_stays_raw(self) -> None:
-        """With no engine, the body stays raw whatever the fragment."""
+    def test_without_reassembly_body_stays_raw(self) -> None:
+        """Parsed alone, a fragment's body stays raw whatever the fragment."""
         from pcapkit.protocols.application.dtls import DTLS
 
         body = _client_hello_body()
         half = len(body) // 2
         wire = _dtls_record(22, _dtls_handshake(1, body[half:], message_seq=5, fragment_offset=half,
-                           fragment_length=len(body) - half, total_length=len(body)), seq=2)
+                                                fragment_length=len(body) - half,
+                                                total_length=len(body)), seq=2)
 
-        parsed = DTLS(wire, len(wire))
-        msg = parsed.info.content[0]
+        msg = DTLS(wire, len(wire)).info.content[0]
         self.assertTrue(msg.is_fragmented)
         self.assertIsInstance(msg.body, bytes)
 
-    def test_incomplete_reassembly_through_read_stays_raw_and_does_not_crash(self) -> None:
-        from pcapkit.foundation.reassembly.dtls import DTLS as DTLSReassembly
-        from pcapkit.protocols.application.dtls import DTLS
+    def test_incomplete_reassembly_stays_raw_and_does_not_crash(self) -> None:
+        from pcapkit.foundation.analysis import dtls_handshake
 
         body = _server_hello_body()
         third = len(body) // 3
         frags = _split(body, (third, 2 * third))
-        flow = ('3.3.3.3', 200, '4.4.4.4', 5684)
+        records = self._records(2, body, [frags[0], frags[2]], message_seq=1)  # fragment 1 lost
+        extractor = _extract(self, _pcap([_frame(r) for r in records]), reassembly=True, dtls=True)
 
-        engine = DTLSReassembly()
-        for num, idx in enumerate((0, 2), 1):  # fragment 1 of 3 never arrives
-            fo, length = frags[idx]
-            wire = _dtls_record(22, _dtls_handshake(2, body[fo:fo + length], message_seq=1,
-                               fragment_offset=fo, fragment_length=length, total_length=len(body)),
-                               seq=20 + num)
-            parsed = DTLS(wire, len(wire), reassembly=engine, flow=flow,
-                         frame_num=num, frame_timestamp=float(num))
-            msg = parsed.info.content[0]
-            self.assertTrue(msg.is_fragmented)
-            self.assertIsInstance(msg.body, bytes)
-
-        datagram, = engine.fetch()
+        for frame in extractor.frame:
+            self.assertIsInstance(frame['DTLS'].info.content[0].body, bytes)
+        datagram, = extractor.reassembly.dtls
         self.assertEqual(datagram.completed.name, 'PARTIAL')
+        self.assertIsNone(dtls_handshake(datagram))
 
 
 if __name__ == '__main__':

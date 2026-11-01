@@ -46,6 +46,8 @@ class ReassemblyManager(Info):
     ipv6: 'IPv6_Reassembly'
     #: TCP reassembly.
     tcp: 'TCP_Reassembly'
+    #: DTLS handshake-message reassembly.
+    dtls: 'DTLS_Reassembly'
 
     if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[IPv4_Reassembly]', ipv6: 'Optional[IPv6_Reassembly]', tcp: 'Optional[TCP_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, ipv4: 'Optional[IPv4_Reassembly]', ipv6: 'Optional[IPv6_Reassembly]', tcp: 'Optional[TCP_Reassembly]', dtls: 'Optional[DTLS_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

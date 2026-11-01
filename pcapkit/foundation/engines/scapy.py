@@ -39,6 +39,7 @@ import struct
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase
+from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.protocols.schema.misc.pcapng import DEFAULT_RESOLUTION
@@ -369,7 +370,8 @@ class Scapy(EngineBase['ScapyPacket']):
                 is provided as the Scapy engine does not support such operations;
                 or if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
                 is provided, as the Scapy engine does not parse with :mod:`pcapkit`'s own
-                protocol implementations.
+                protocol implementations; or if DTLS reassembly is enabled, for the
+                same reason.
 
         """
         ext = self._extractor
@@ -383,6 +385,14 @@ class Scapy(EngineBase['ScapyPacket']):
             warn("'Extractor(engine=scapy)' does not parse with pcapkit's own protocol "
                  "implementations, so the parsing context supplied through "
                  "'context=' is ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._flag_r and ext._dtls:
+            ext._dtls = False
+            ext._reasm = ReassemblyManager(ipv4=ext._reasm.ipv4, ipv6=ext._reasm.ipv6,
+                                           tcp=ext._reasm.tcp, dtls=None)
+            warn("'Extractor(engine=scapy)' object does not support DTLS reassembly, "
+                 "which reads pcapkit's own DTLS layer; so 'dtls=True' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler, unless the caller gave one of their own (#1874)

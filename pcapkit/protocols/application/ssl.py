@@ -424,12 +424,10 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 ``fragment``.
 
         Notes:
-            Only a whole ``ClientHello``/``ServerHello`` body is decoded: an
-            unfragmented one, or a fragmented DTLS message completed by a
-            :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine passed as
-            :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>`'s
-            ``reassembly`` (:issue:`2440`). Other bodies stay undecoded
-            (:issue:`2437`).
+            Only an unfragmented ``ClientHello``/``ServerHello`` body is
+            decoded; other bodies stay undecoded (:issue:`2437`). A fragmented
+            DTLS message is decoded once reassembled, by
+            :func:`~pcapkit.foundation.analysis.dtls_handshake` (:issue:`2440`).
 
         """
         from pcapkit.protocols.data.application.dtls import \
@@ -514,20 +512,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             is_fragmented = dtls and message.is_fragmented
             length = message.length if is_fragmented else len(body_bytes)
 
-            if is_fragmented:
-                fragment_length = message.fragment_length
-                # ``body_bytes`` is this fragment's own octets, unless decoding the
-                # completing fragment replaced it with the full reassembled message
-                # (see :meth:`DTLS._reassemble_dtls_handshake`). Slice back to this
-                # record's own byte range so parse-then-rebuild stays byte-exact.
-                if len(body_bytes) != fragment_length:
-                    start = message.fragment_offset
-                    body_bytes = body_bytes[start:start + fragment_length]
-            else:
-                fragment_length = len(body_bytes)
-
             out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
             if dtls:
+                fragment_length = message.fragment_length if is_fragmented else len(body_bytes)
                 out += (message.message_seq.to_bytes(2, 'big')
                        + message.fragment_offset.to_bytes(3, 'big')
                        + fragment_length.to_bytes(3, 'big'))

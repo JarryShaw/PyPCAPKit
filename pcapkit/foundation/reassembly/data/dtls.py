@@ -106,13 +106,8 @@ class Datagram(Info, Generic[_AT]):
     msg_type: 'Enum_HandshakeType'
     #: Total message length, as declared by its fragments.
     length: 'int'
-    #: Reassembled message body, undecoded -- decoding a ``ClientHello``/
-    #: ``ServerHello`` once reassembled is
-    #: :meth:`DTLS.read <pcapkit.protocols.application.dtls.DTLS.read>`'s job,
-    #: which alone holds the bound instance :meth:`SSL._read_tls_client_hello
-    #: <pcapkit.protocols.application.ssl.SSL._read_tls_client_hello>` and
-    #: :meth:`SSL._read_tls_server_hello
-    #: <pcapkit.protocols.application.ssl.SSL._read_tls_server_hello>` need.
+    #: Reassembled message body, undecoded;
+    #: :func:`~pcapkit.foundation.analysis.dtls_handshake` decodes it.
     body: 'bytes | tuple[bytes, ...]'
 
     if TYPE_CHECKING:

@@ -35,7 +35,8 @@ def make_extractor(**overrides):
     from pcapkit.corekit.context import ContextRegistry
 
     sink = OutputSink()
-    reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock())
+    reasm = types.SimpleNamespace(ipv4=mock.Mock(), ipv6=mock.Mock(), tcp=mock.Mock(),
+                                  dtls=mock.Mock())
     trace = types.SimpleNamespace(tcp=mock.Mock())
     values = {
         # ``Extractor`` always hands the engines a buffered (peekable) reader,
@@ -56,6 +57,7 @@ def make_extractor(**overrides):
         '_ipv4': True,
         '_ipv6': True,
         '_tcp': True,
+        '_dtls': False,
         '_reasm': reasm,
         '_trace': trace,
         '_frame': [],
