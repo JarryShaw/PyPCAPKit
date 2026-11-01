@@ -318,10 +318,11 @@ class Method(EnumRegistry, StrEnum):
             value: Value to get enum item. Matched case-insensitively against
                 the canonical upper-case member names, then against member
                 values, so ``'baseline-control'`` resolves to
-                ``BASELINE_CONTROL`` (:issue:`2284`) -- deliberately unlike
-                :meth:`get`, which checks names and values too
-                (GitHub issue :issue:`908`) but case-**sensitively**, per
-                :rfc:`9110#section-9.1` (:issue:`896`). The owner kept this
+                ``BASELINE_CONTROL`` by the value match the fix for
+                :issue:`2284` added -- deliberately unlike :meth:`get`, which
+                checks names and values too (GitHub issue :issue:`908`) but
+                case-**sensitively**, per :rfc:`9110#section-9.1`
+                (:issue:`896`). The owner kept this
                 fold on GitHub issue :issue:`2552`, departing from that RFC on
                 purpose: HTTP methods are case-insensitive here, and member
                 names follow Python's naming conventions.

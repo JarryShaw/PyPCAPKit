@@ -358,15 +358,16 @@ to make a lookup work -- which is what keeps
 ``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
 resolvable.
 
-**One fold rests on a ruling rather than an RFC.**
+**A fold can rest on a ruling rather than an RFC.**
 :class:`~pcapkit.const.http.method.Method`'s ``_missing_`` upper-cases the token and
 matches it against member names, then values, so ``Method('get')`` is
 :attr:`Method.GET <pcapkit.const.http.method.Method.GET>` -- while ``Method.get('get')``
-is not (:issue:`896`) -- and both ``Method('baseline-control')`` and
-``Method('baseline_control')`` are ``BASELINE_CONTROL`` (:issue:`2284`). The owner kept
-this fold on :issue:`2552`: HTTP methods are case-insensitive here, and member names
-follow Python's naming conventions, so the token's dash is an underscore in the name.
-That departs from :rfc:`9110#section-9.1` on purpose, so the ruling is the citation.
+is not (:issue:`896`) -- and ``Method('baseline_control')`` is ``BASELINE_CONTROL`` by
+name, as is ``Method('baseline-control')`` by the value match the fix for :issue:`2284`
+added. The owner kept this fold on :issue:`2552`: HTTP methods are case-insensitive here,
+and member names follow Python's naming conventions, so the token's dash is an underscore
+in the name. That departs from :rfc:`9110#section-9.1` on purpose, so the ruling is the
+citation.
 
 **Some crawlers re-case the names they generate**, each an exception recorded with its
 basis:
@@ -424,8 +425,8 @@ above, not a defect (:issue:`2553`):
 3. **A non-**\ :class:`str` **key goes to the base without** ``default``, so the base's
    refusal reaches the caller whatever ``default`` is: ``Command.get(5, 'USER')`` raises
    :exc:`~pcapkit.utilities.exceptions.EnumValueError` where the base returns
-   ``Command.USER``. :issue:`1824` set this when it made ``Command.get`` delegate such a
-   key, matching ``Method.get``, which sends every key to the base without ``default``.
+   ``Command.USER``. ``Command.get`` delegates such a key rather than upper-casing it
+   (:issue:`1824`), and ``Method.get`` delegates every key.
 
 So on these classes ``default`` is the value an unregistered member carries on a name
 miss, and does nothing on any other path.
@@ -733,10 +734,13 @@ value resolves through ``cls(value)`` but not through ``get(value)``, because
 growing either lookup table. ``FEATCode.get('ZZ-NOT-REAL')`` raises
 :exc:`~pcapkit.utilities.exceptions.EnumKeyError` -- which *is* a :exc:`KeyError`, so
 an ``except KeyError`` around it is unaffected -- while
-``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member. Closing that gap would
-mean calling ``cls(key)`` for a ``str`` value too, which reopens the minting hazard
-above -- so the asymmetry is intended, and ``get``'s own docstring carries the full
-reasoning.
+``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member.
+:meth:`Command.get <pcapkit.const.ftp.command.Command.get>` and
+:meth:`Method.get <pcapkit.const.http.method.Method.get>` are the exceptions: by the
+name-miss exception above, ``get`` returns an unregistered member there too. Closing
+the gap elsewhere would mean calling ``cls(key)`` for a ``str`` value too, which
+reopens the minting hazard above -- so the asymmetry is intended, and ``get``'s own
+docstring carries the full reasoning.
 
 .. seealso::
 
