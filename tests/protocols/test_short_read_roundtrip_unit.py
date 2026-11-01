@@ -86,6 +86,8 @@ CASES = (
     ('esp', 'internet.esp:ESP', {}, bytes.fromhex('0000000100000002') + b'\x77' * 16),
     ('tcp', 'transport.tcp:TCP', {}, bytes.fromhex('9c409c41000000010000000060020000ffff0000020405b4')),
     ('udp', 'transport.udp:UDP', {}, bytes.fromhex('9c409c41000c000061626364')),
+    ('dccp', 'transport.dccp:DCCP', {}, bytes.fromhex(
+        '9c40138906008f3a0100000000000001123456782004010268656c6c6f')),
     ('sctp', 'transport.sctp:SCTP', {}, bytes.fromhex(
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
     ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),

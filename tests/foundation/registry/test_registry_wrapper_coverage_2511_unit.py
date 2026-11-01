@@ -52,6 +52,8 @@ EXCUSED = {
 
 #: ``map path -> (the classmethod its owner inherits, why it fits the map's keys)``.
 INHERITED = {
+    'pcapkit.protocols.transport.dccp.DCCP.__proto__':
+        ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
     'pcapkit.protocols.transport.tcp.TCP.__proto__':
         ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
     'pcapkit.protocols.transport.udp.UDP.__proto__':

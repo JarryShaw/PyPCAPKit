@@ -42,7 +42,7 @@ the ones outstanding are,
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
 * Internet Layer: ECN, Shim6
-* Transport Layer: DCCP, RSVP
+* Transport Layer: RSVP
 * Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP,
   NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
   XMPP
@@ -818,12 +818,13 @@ These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.internet.ipx.IPX`,
 :class:`~pcapkit.protocols.internet.mh.MH`,
 :class:`~pcapkit.protocols.application.ospf.OSPF`,
+:class:`~pcapkit.protocols.transport.dccp.DCCP`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
 :class:`~pcapkit.protocols.transport.udp.UDP` — and SCTP was the first to
 check whether the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
-IPv4, OSPF, TCP and UDP check it too, as do ICMP and ICMPv6, as the
+IPv4, OSPF, TCP, UDP and DCCP check it too, as do ICMP and ICMPv6, as the
 one's-complement half below describes. For HIP, HOPOPT, IPv6-Opts, IPX and MH the
 field is recorded and never questioned, so a corrupted capture parses as cleanly
 as an intact one.
@@ -832,9 +833,9 @@ as an intact one.
 of them is cryptographic and the distinction decides what is actually hard.
 
 **The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
-ICMP/ICMPv6 and OSPF, needs no cryptography at all — it is sixteen-bit addition
+DCCP, ICMP/ICMPv6 and OSPF, needs no cryptography at all — it is sixteen-bit addition
 with end-around carry, and implementing it is an afternoon. What blocks it is the
-**IP pseudo-header**: the TCP, UDP and ICMPv6 checksums are computed over source
+**IP pseudo-header**: the TCP, UDP, DCCP and ICMPv6 checksums are computed over source
 and destination addresses, the protocol number and the payload length, all of
 which live in the *enclosing* layer. So verification needs a parsed protocol to
 reach back to its parent, which is a structural question about
@@ -924,6 +925,20 @@ offload heuristic on :issue:`2470`.
   checksum covers, so it is verified when the fragment holds that much, and
   :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
   otherwise.
+* **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
+  a pseudo-header that carries the whole packet's length, as TCP's does, so a
+  fragment is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER`
+  too. A coverage running past the packet, which the RFC forbids and has the
+  receiver ignore, is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID` and
+  warns. Linux, until it dropped DCCP in 6.16, never sent one: its
+  ``dccp_csum_outgoing`` wrote a CsCov of 0 wherever the coverage reached the
+  end of the packet, and ``make()`` does the same when it computes the
+  checksum. No value is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`:
+  DCCP has no checksum to leave out, and Linux computed it in software rather
+  than offloading it. Settled at implementation (:issue:`2489`).
 
 The cryptographic half is sequenced for **wave 2 or 3**, and could be done sooner
 since ESP has already laid the groundwork.
@@ -1123,9 +1138,15 @@ Steps`_ above.
 **Wave 2 — the protocol pairs that want a shared abstract base**, per `More
 Protocols, More!!!`_ above: **TLS/SSL with DTLS** and **IGMP** and **DCCP** on
 their own. These are grouped because the shared-base question is the design work
-and doing either half of a pair alone would answer it twice. **DCCP** is the
-transport-layer implementation, tracked by :issue:`2489`, and blocked on
-:issue:`2479` for its pseudo-header checksum.
+and doing either half of a pair alone would answer it twice.
+
+**DCCP — done within wave 2** (:issue:`2489`).
+:class:`~pcapkit.protocols.transport.dccp.DCCP` dissects every :rfc:`4340` packet
+type and DCCP-Listen (:rfc:`5596`), with short and long sequence numbers, and the
+options :rfc:`4340` defines; its checksum is verified and computed over
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, as `Checksum and
+Integrity Verification`_ above describes. The Data Checksum option's CRC-32c is
+recorded and not checked.
 
 **Done within wave 2 — ICMP/ICMPv6 shared base.** :class:`~pcapkit.protocols.internet.icmp.ICMP`
 is the abstract base :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` and
@@ -1311,7 +1332,7 @@ and its signature parameters could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
 one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is **done**
-(:issue:`2470`, :issue:`2472` to :issue:`2475`).
+(:issue:`2470`, :issue:`2472` to :issue:`2475`), and DCCP's with it (:issue:`2489`).
 
 **IP pseudo-header — done** (:issue:`2471`).
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is the

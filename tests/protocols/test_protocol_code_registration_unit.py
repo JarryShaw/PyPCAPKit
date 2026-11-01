@@ -569,6 +569,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.dccp import DCCP
         from pcapkit.protocols.transport.sctp import SCTP
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.protocols.transport.udp import UDP
@@ -591,6 +592,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
             PCAPNG: (LinkType, False, TransType.ICMP, 1),
             TCP: (AppType, True, LinkType(53), 54324),
             UDP: (AppType, True, LinkType(53), 54324),
+            DCCP: (AppType, True, LinkType(53), 54324),
             SCTP: (PayloadProtocolIdentifier, True, TransType.ICMP, 54324),
         }
 

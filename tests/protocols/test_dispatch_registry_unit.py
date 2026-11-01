@@ -228,10 +228,11 @@ class DispatchRegistryTests(unittest.TestCase):
         # LinkType.NULL and LinkType.LOOP in both link-type tables, the four
         # address families of Loopback.__proto__, #2438's
         # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
-        # pcap and pcapng frame tables, #2439's IGMP, and #2436's
-        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP].
-        self.assertEqual(len(cases), 56,
-                         'expected exactly 56 entries across the seven __proto__ '
+        # pcap and pcapng frame tables, #2439's IGMP, #2436's
+        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], and
+        # #2489's Internet.__proto__[TransType.DCCP].
+        self.assertEqual(len(cases), 57,
+                         'expected exactly 57 entries across the seven __proto__ '
                          'tables named in GitHub issue #496 and the loopback table '
                          'of #1574; a different count means a registry changed '
                          'shape and this module was not updated to match')
@@ -240,7 +241,7 @@ class DispatchRegistryTests(unittest.TestCase):
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
-            'link': 7, 'internet': 20, 'tcp': 5, 'udp': 4, 'sctp': 2,
+            'link': 7, 'internet': 21, 'tcp': 5, 'udp': 4, 'sctp': 2,
             'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4,
         })
 
