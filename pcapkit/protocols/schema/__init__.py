@@ -33,6 +33,7 @@ __all__ = [
     'LinuxSLL1', 'LinuxSLL2',
     'Loopback',
     'Netlink',
+    'Radiotap',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols

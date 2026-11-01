@@ -56,6 +56,8 @@ CASES = (
     ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
     ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
+    ('radiotap', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
+     + bytes.fromhex('aabbccddeeff')),
     ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
         '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
     ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(

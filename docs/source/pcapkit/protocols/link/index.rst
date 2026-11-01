@@ -33,6 +33,7 @@ link layer, with detailed implementation and methods.
    linux_sll2
    loopback
    netlink
+   radiotap
    vlan
    c_tag
    s_tag

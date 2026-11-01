@@ -452,6 +452,8 @@ UNRELATED = {
                                           'octets, not a PCAP record header) and the max value '
                                           "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
                                           'an IPv4 total length)'),
+    'pcapkit/protocols/link/radiotap.py': ((65535,), "the max value of radiotap's own "
+                                           '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
