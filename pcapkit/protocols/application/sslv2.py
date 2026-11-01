@@ -37,6 +37,26 @@ none of the draft's own constraints on it, or on e.g. ``session_id`` being
 
 .. [*] https://datatracker.ietf.org/doc/html/draft-hickman-netscape-ssl-00
 
+Records in One Segment
+----------------------
+
+A whole record after the first in a TCP segment is dissected as a further
+:class:`SSLv2` layer, the previous record's payload, whatever its message type
+(:issue:`2567`): a ``CLIENT-HELLO`` followed by a ``CLIENT-MASTER-KEY`` reads
+``SSLv2:SSLv2``. The exceptions:
+
+* A whole record that fails to decode -- a ``RECORD-LENGTH`` of ``0``, which
+  leaves no ``MSG-TYPE`` -- becomes :class:`~pcapkit.protocols.misc.raw.Raw`
+  together with everything after it.
+* Octets that open no record -- a header cut short, or a record the segment
+  ends inside -- stay raw, with no error.
+* A parse told to stop at SSLv2 (``protocol='SSLv2'`` or ``layer='Application'``)
+  keeps the rest of the segment raw, except behind the SSLv2 fallback of
+  :class:`~pcapkit.protocols.application.tls.TLS` on port 443, which is not
+  handed the stop.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 .. versionadded:: 1.6.0
 
 """
@@ -44,6 +64,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.sslv2.handshake_type import HandshakeType as Enum_HandshakeType
 from pcapkit.const.sslv2.version import Version as Enum_Version
+from pcapkit.corekit.decorators import beholder
 from pcapkit.protocols.application.ssl import SSL
 from pcapkit.protocols.data.application.sslv2 import ClientHello as Data_ClientHello
 from pcapkit.protocols.data.application.sslv2 import ServerHello as Data_ServerHello
@@ -53,6 +74,7 @@ from pcapkit.protocols.schema.application.sslv2 import ServerHello as Schema_Ser
 from pcapkit.protocols.schema.application.sslv2 import SSLv2 as Schema_SSLv2
 from pcapkit.protocols.schema.application.sslv2 import \
     UnknownHandshakeBody as Schema_UnknownHandshakeBody
+from pcapkit.protocols.schema.application.sslv2 import sslv2_record_length
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -66,6 +88,28 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['SSLv2']
+
+
+def _opens_whole_record(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with a whole SSLv2 record.
+
+    Only the record header is read: it must be whole, and the record its
+    ``RECORD-LENGTH`` declares must end inside ``data``. A ``RECORD-LENGTH`` of
+    ``0`` passes, so that :meth:`SSLv2.read` refuses the record rather than it
+    staying raw unreported.
+
+    Args:
+        data: Octets after a record.
+
+    Returns:
+        Whether a further record opens ``data`` and ends inside it.
+
+    """
+    if len(data) < 2:
+        return False
+    header_len = 2 if data[0] & 0x80 else 3
+    record_length = sslv2_record_length({'indicator': data[0], 'length_low': data[1]})
+    return header_len + record_length <= len(data)
 
 
 class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
@@ -475,3 +519,54 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
             cipher_specs=cipher_specs,
             connection_id=connection_id,
         )
+
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import next layer extractor: a further whole record, or the rest undissected.
+
+        A TCP segment may carry several records (:issue:`2567`). So the ``-1``
+        remainder is dissected as this class when :func:`_opens_whole_record`
+        finds a whole record opening it, and is otherwise kept as
+        :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :meth:`Application._import_next_layer
+        <pcapkit.protocols.application.application.Application._import_next_layer>`
+        keeps it. A partial record, which the segment ends inside, is the
+        reassembly limit, and stays raw.
+
+        Arguments:
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest of the segment) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class for a further record, or as
+            :meth:`Application._import_next_layer
+            <pcapkit.protocols.application.application.Application._import_next_layer>`
+            returns otherwise.
+
+        """
+        if proto == -1 and not self._sigterm and _opens_whole_record(self._get_payload()[:length]):
+            return self._import_next_record(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+        return super()._import_next_layer(proto, length, packet=packet)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_record(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
+                            packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import the further record :meth:`_import_next_layer` found.
+
+        Arguments:
+            proto: next layer protocol index, the ``-1`` sentinel
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            when :func:`~pcapkit.corekit.decorators.beholder` replaces a record
+            that fails to parse.
+
+        """
+        file_ = self._get_payload()
+        return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx)
