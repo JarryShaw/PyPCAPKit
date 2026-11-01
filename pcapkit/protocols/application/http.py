@@ -513,9 +513,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             for one it does not, which then keeps its octets undissected.
 
         Note:
-            A connection preface with no frame after it is HTTP/2, and is real
-            traffic, since a client may send the preface and its ``SETTINGS``
-            frame in separate segments. It is still
+            A connection preface with no frame after it is HTTP/2, and can be
+            real traffic, since a client may send the preface and its
+            ``SETTINGS`` frame in separate segments. It is
             :class:`~pcapkit.protocols.misc.raw.Raw` here, because the HTTP/2
             data model holds one frame per packet: the frame header's Length,
             Type, Flags and Stream Identifier are required fields of

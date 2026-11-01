@@ -47,6 +47,18 @@ PAYLOADS = {
     'preface': (_PREFACE + _SETTINGS, 'HTTPv2'),
 }
 
+#: Payloads the dispatcher gives to ``HTTPv2`` and ``HTTPv2`` refuses, with the
+#: fragment of the refusal: a preface followed by fewer octets than a frame
+#: header, and a plausible frame header whose frame does not parse.
+REFUSED = {
+    **{f'preface and {count} octet(s)':
+       (_PREFACE + b'\x00' * count, 'shorter than the 9-octet frame header')
+       for count in range(1, 9)},
+    'preface and an empty PRIORITY frame': (_PREFACE + bytes.fromhex('000000020000000001'),
+                                            r'\[Type 2\] invalid format'),
+    'empty PRIORITY frame': (bytes.fromhex('000000020000000001'), r'\[Type 2\] invalid format'),
+}
+
 #: Payloads that neither version identifies.
 UNIDENTIFIED = {
     'zeros': b'\x00' * 9,
@@ -157,10 +169,19 @@ class HTTPDispatchTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             self.assertEqual(TCP.from_data(tcp.info).data, tcp.data)
 
-    def test_the_dispatcher_picks_only_a_class_that_parses_the_payload(self) -> None:
-        """Whatever member the dispatcher picks parses the payload it picked it for."""
+    def test_a_picked_member_parses_these_payloads_or_refuses_those(self) -> None:
+        """The member the dispatcher picks parses each payload this module lists
+        as HTTP, or refuses each it lists as refused.
+
+        The dispatcher identifies without parsing, so it can pick ``HTTPv2`` for a
+        payload ``HTTPv2`` then refuses: a preface followed by fewer octets than a
+        frame header, or a plausible frame header whose frame does not parse. That
+        segment is kept as ``Raw`` with the parser's own error. A preface alone is
+        the one such payload it keeps ``Raw`` itself.
+        """
         from pcapkit.protocols.application.http import HTTP
         from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import ProtocolError
 
         payloads = {**{label: payload for label, (payload, _) in PAYLOADS.items()},
                     **UNIDENTIFIED, 'preface alone': _PREFACE}
@@ -172,6 +193,19 @@ class HTTPDispatchTests(unittest.TestCase):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
                     self.assertEqual(klass(io.BytesIO(payload), len(payload)).data, payload)
+
+        HTTPv2 = self.member('HTTPv2')
+        for label, (payload, fragment) in REFUSED.items():
+            with self.subTest(payload=label, refused=True):
+                self.assertIs(HTTP._dispatch_version(payload, len(payload)), HTTPv2)
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    with self.assertRaisesRegex(ProtocolError, fragment):
+                        HTTPv2(io.BytesIO(payload), len(payload))
+                tcp = self.tcp(payload)
+                self.assertIs(type(tcp.payload), Raw)
+                self.assertEqual(tcp.payload.data, payload)
+                self.assertRegex(tcp.payload.info.error, fragment)
 
     def test_a_preface_counts_as_header_and_is_kept(self) -> None:
         tcp = self.tcp(_PREFACE + _SETTINGS)
