@@ -136,7 +136,7 @@ def _coverage_legs() -> 'tuple[str, str, tuple[str, ...]]':
 #: ``latest``, the job of its leg, which runs under coverage, and the legs that job's
 #: tests step is paired against: the rest of the supported tier (#1633), not the KTLO
 #: legs, which are named ``Python 3.x (KTLO)`` and may stop early without failing.
-LATEST, COVERAGE_JOB, PAIRED_JOBS = _coverage_legs()
+LATEST_VERSION, COVERAGE_JOB, PAIRED_JOBS = _coverage_legs()
 TESTS_STEP = 'Run unit tests'
 #: The leg ms/test is measured on: a supported version not under coverage, kept on
 #: 3.13 -- the newest such leg when W4's baseline was measured -- so that W4 compares
@@ -144,7 +144,7 @@ TESTS_STEP = 'Run unit tests'
 MS_PER_TEST_LEG = '3.13'
 #: The JUnit artifacts read, by leg, and from how many push runs. ``latest``'s holds
 #: the ``LATEST`` tier, which no other leg runs (#2571).
-JUNIT_LEGS = ('3.13', '3.14', LATEST)
+JUNIT_LEGS = tuple(dict.fromkeys(('3.13', '3.14', LATEST_VERSION)))
 JUNIT_ARTIFACT = 'junit-unit-{leg}'
 JUNIT_RUNS = 5
 

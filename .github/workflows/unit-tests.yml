@@ -102,8 +102,8 @@ jobs:
       #
       # `include` marks one leg `coverage: true`, `latest` (#1661), so coverage
       # adds no leg to the queue. That leg runs slower than the rest: it runs the
-      # `LATEST` tier as well as `ALL`, under coverage. ci-timing.yml's W3 tracks
-      # the gap.
+      # `LATEST` tier as well as `ALL`, under coverage. util/ci_timing.py's W3
+      # tracks the gap.
       #
       # #2243, the owner's option B: a test-only pull request runs the
       # `latest` leg alone, the coverage leg, which runs the whole suite with
@@ -184,9 +184,8 @@ jobs:
         # cannot silently change how this suite is distributed. The durations
         # table and JUnit file are #1538's per-test timings.
         #
-        # #2571: `-n logical`, as `auto` counts physical cores, half the runner's
-        # CPUs, wherever psutil is installed: the `test` extra installs it on
-        # CPython. On PyPy, which has none, the two agree.
+        # #2571: `-n logical`, as with psutil (the `test` extra's, CPython only)
+        # `auto` counts physical cores, half the runner's CPUs; on PyPy they agree.
         #
         # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
         # module in `ALL`, a curated list each stating `__tier__ = 'ALL'` (#1963),

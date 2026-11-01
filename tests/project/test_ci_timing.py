@@ -1184,6 +1184,8 @@ class TestTimingArtifacts(unittest.TestCase):
                     if entry.get('coverage')]
         self.assertEqual(len(coverage), 1)
         self.assertIn(coverage[0], ci_timing.JUNIT_LEGS)
+        # Each leg once, or its artifact is read and counted twice.
+        self.assertEqual(len(set(ci_timing.JUNIT_LEGS)), len(ci_timing.JUNIT_LEGS))
 
     def test_the_reusable_workflow_asks_for_no_write_permission(self) -> 'None':
         """Its callers grant ``contents: read``, so a write scope would break them."""
