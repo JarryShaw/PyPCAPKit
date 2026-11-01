@@ -123,6 +123,7 @@ else:
     from pcapkit.vendor.ospf import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.tcp import *
+    from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
 
 # Crawlers only. This list is also the default target list of
@@ -190,6 +191,8 @@ __all__ = [
     'SCTP_PayloadProtocolIdentifier',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
+    # TLS
+    'TLS_ContentType', 'TLS_HandshakeType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG
