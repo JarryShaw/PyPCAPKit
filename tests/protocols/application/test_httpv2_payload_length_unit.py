@@ -218,7 +218,7 @@ class FramePayloadMixin:
             The parsed data object, i.e. ``HTTP(...).info``.
 
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -520,7 +520,7 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
         raw = http2_frame_bytes(0xF0, 0x00, 1, DATA_PAYLOAD)
 
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         registry = HTTPv2.__dict__['__frame__']
         try:
@@ -702,13 +702,13 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
         """Construct one frame through the public API and pack it.
 
         Args:
-            **kwargs: Forwarded to :class:`~pcapkit.protocols.application.httpv2.HTTP`.
+            **kwargs: Forwarded to :class:`~pcapkit.protocols.application.httpv2.HTTPv2`.
 
         Returns:
             The packed frame.
 
         """
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')

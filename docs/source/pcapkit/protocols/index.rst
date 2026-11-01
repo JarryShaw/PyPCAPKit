@@ -174,8 +174,8 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 
        click Application "application/application.html#pcapkit.protocols.application.application.Application"
        click HTTP "application/http.html#pcapkit.protocols.application.http.HTTP"
-       click h1 "application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP"
-       click h2 "application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
+       click h1 "application/httpv1.html#pcapkit.protocols.application.httpv1.HTTPv1"
+       click h2 "application/httpv2.html#pcapkit.protocols.application.httpv2.HTTPv2"
        click FTP "application/ftp.html#pcapkit.protocols.application.ftp.FTP"
        click FTP_DATA "application/ftp_data.html#pcapkit.protocols.application.ftp_data.FTP_DATA"
        click NGAP "application/ngap.html#pcapkit.protocols.application.ngap.NGAP"

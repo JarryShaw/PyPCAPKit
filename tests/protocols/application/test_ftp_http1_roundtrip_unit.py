@@ -126,22 +126,22 @@ class HTTP1RoundTripTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         for name, raw in HTTP1_MESSAGES:
             with self.subTest(name=name):
-                self.assertEqual(HTTP.from_data(HTTP(raw, len(raw)).info).data, raw)
+                self.assertEqual(HTTPv1.from_data(HTTPv1(raw, len(raw)).info).data, raw)
 
     def test_non_utf8_start_line_keeps_its_charset(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         raw = b'GET /caf\xe9 HTTP/1.1\r\n\r\n'
-        receipt = HTTP(raw, len(raw)).info.receipt
+        receipt = HTTPv1(raw, len(raw)).info.receipt
         self.assertEqual(receipt.uri, '/café')
         self.assertIsNotNone(receipt.charset)
 
         raw = b'GET /caf\xc3\xa9 HTTP/1.1\r\n\r\n'
-        self.assertIsNone(HTTP(raw, len(raw)).info.receipt.charset)
+        self.assertIsNone(HTTPv1(raw, len(raw)).info.receipt.charset)
 
 
 if __name__ == '__main__':

@@ -2,18 +2,19 @@
 """TCP's HTTP ports dispatch through the version-identifying proxy. C.f. #682.
 
 Guards against :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
-binding :class:`pcapkit.protocols.application.httpv1.HTTP` directly for ports 80
+binding :class:`pcapkit.protocols.application.httpv1.HTTPv1` directly for ports 80
 and 8080, which makes a segment on either port HTTP/1 by assertion of the port
 number: an HTTP/2 payload there would be refused by the HTTP/1 parser and
 reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those ports on the
 wire -- :rfc:`9113#section-3` gives HTTP/2 the ``http`` scheme and HTTP/1.1's
 default port numbers -- so the
 port cannot decide the version and the payload has to, which is what
-:class:`pcapkit.protocols.application.http.HTTP` does.
+:class:`pcapkit.protocols.application.http.HTTP` does: its ``_dispatch_version`` picks
+``HTTPv1`` or ``HTTPv2``, and the layer is that class (#2524).
 
 Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
 segments below are built in memory, and the HTTP/2 payload is the nine octets
-this library's own ``httpv2.HTTP`` writes for an empty ``DATA`` frame on stream
+this library's own ``httpv2.HTTPv2`` writes for an empty ``DATA`` frame on stream
 1, rather than a hand-rolled frame, so the frame is whatever the library itself
 writes and cannot fail for a reason that has nothing to do with dispatch.
 
@@ -37,7 +38,7 @@ _TCP_TO_8080 = bytes.fromhex('c3501f9000000001000000015010ffff00000000')
 
 #: A nine-octet HTTP/2 ``DATA`` frame: declared length 0 (the payload, the
 #: header excluded), type 0, no flags, stream 1, as
-#: ``httpv2.HTTP(type=Frame.DATA, sid=1, frame={'data': b''})`` writes it. A
+#: ``httpv2.HTTPv2(type=Frame.DATA, sid=1, frame={'data': b''})`` writes it. A
 #: ``DATA`` frame needs a non-zero stream (:rfc:`9113#section-6.1`), so the
 #: version guess does not take a stream-0 one for HTTP/2.
 _HTTP2_FRAME = bytes.fromhex('000000000000000001')
@@ -87,26 +88,26 @@ class TCPHTTPDispatchTests(unittest.TestCase):
     def test_http2_on_the_http_ports_decodes_as_http2_and_http1_still_as_http1(self) -> None:
         """Both versions reach their own parser from a port-80/8080 segment.
 
-        The HTTP/2 half pins the binding to the proxy: bound to ``httpv1.HTTP``,
-        these nine octets decode as ``TCP:Raw``, because ``httpv1.HTTP`` refuses
+        The HTTP/2 half pins the binding to the proxy: bound to ``httpv1.HTTPv1``,
+        these nine octets decode as ``TCP:Raw``, because ``httpv1.HTTPv1`` refuses
         them and :func:`~pcapkit.corekit.decorators.beholder` turns the refusal
         into ``Raw``. The HTTP/1.1 half guards the HTTP/1.1 frames in the
         fixture corpus, which these ports route through
-        :meth:`HTTP._guess_version
-        <pcapkit.protocols.application.http.HTTP._guess_version>`: they have to
-        come back HTTP/1.1, and both halves are asserted here so neither can be
-        satisfied at the other's expense.
+        :meth:`HTTP._dispatch_version
+        <pcapkit.protocols.application.http.HTTP._dispatch_version>`: they have to
+        come back HTTP/1.1, each as its own version's class, and both halves are
+        asserted here so neither can be satisfied at the other's expense.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
 
         cases = (
-            (_TCP_TO_80, _HTTP2_FRAME, 'TCP:HTTP/2'),
-            (_TCP_TO_8080, _HTTP2_FRAME, 'TCP:HTTP/2'),
-            (_TCP_TO_80, _HTTP1_REQUEST, 'TCP:HTTP/1.1'),
-            (_TCP_TO_8080, _HTTP1_REQUEST, 'TCP:HTTP/1.1'),
+            (_TCP_TO_80, _HTTP2_FRAME, 'TCP:HTTP/2', 'httpv2'),
+            (_TCP_TO_8080, _HTTP2_FRAME, 'TCP:HTTP/2', 'httpv2'),
+            (_TCP_TO_80, _HTTP1_REQUEST, 'TCP:HTTP/1.1', 'httpv1'),
+            (_TCP_TO_8080, _HTTP1_REQUEST, 'TCP:HTTP/1.1', 'httpv1'),
         )
-        for header, payload, expected in cases:
+        for header, payload, expected, module in cases:
             with self.subTest(port=int.from_bytes(header[2:4], 'big'), chain=expected):
                 raw = header + payload
                 with warnings.catch_warnings():
@@ -119,7 +120,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
 
                 self.assertEqual(str(proto.protochain), expected)
                 self.assertEqual(type(proto.payload).__module__,
-                                 'pcapkit.protocols.application.http')
+                                 f'pcapkit.protocols.application.{module}')
 
 
 if __name__ == '__main__':

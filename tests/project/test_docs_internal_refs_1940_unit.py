@@ -68,7 +68,7 @@ HELPERS = (
     ('pcapkit/foundation/extraction.rst', 'pcapkit.foundation.extraction.Extractor._register_internal_engine'),
     ('pcapkit/foundation/reassembly/tcp.rst', 'pcapkit.foundation.reassembly.tcp.TCP._make_ports'),
     ('pcapkit/protocols/application/http.rst', 'pcapkit.protocols.application.http.HTTP.from_data'),
-    ('pcapkit/protocols/application/httpv2.rst', 'pcapkit.protocols.application.httpv2.HTTP.unpack'),
+    ('pcapkit/protocols/application/httpv2.rst', 'pcapkit.protocols.application.httpv2.HTTPv2.unpack'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap._convert'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap._revert'),
     ('pcapkit/protocols/application/ngap.rst', 'pcapkit.protocols.application.ngap._PYCRATE'),

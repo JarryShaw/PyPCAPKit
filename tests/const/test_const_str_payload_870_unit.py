@@ -29,11 +29,11 @@ own wire string fails silently (no exception -- just an unexpected
 :data:`False`). Nothing under :mod:`pcapkit.protocols` compares a member this
 way (the one caller of
 :meth:`~pcapkit.const.http.method.Method.get`,
-:meth:`pcapkit.protocols.application.httpv1.HTTP._read_start_line`, reached
-through :meth:`~pcapkit.protocols.application.httpv1.HTTP._read_http_header`
-and :meth:`~pcapkit.protocols.application.httpv1.HTTP.make`, only builds a
+:meth:`pcapkit.protocols.application.httpv1.HTTPv1._read_start_line`, reached
+through :meth:`~pcapkit.protocols.application.httpv1.HTTPv1._read_http_header`
+and :meth:`~pcapkit.protocols.application.httpv1.HTTPv1.make`, only builds a
 member from the wire string, and
-:meth:`~pcapkit.protocols.application.httpv1.HTTP._make_start_line` reads
+:meth:`~pcapkit.protocols.application.httpv1.HTTPv1._make_start_line` reads
 ``.value``; neither calls ``str()`` or ``==`` on the member itself), so the fix is
 observable only to external callers and to this module's own dunders
 (``__repr__`` reads ``_value_`` and is unaffected).

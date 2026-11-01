@@ -9,10 +9,10 @@ from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as DTLS_Cip
 from pcapkit.protocols.schema.application.ftp import FTP
 
 # Hypertext Transfer Protocol (HTTP/1.*)
-from pcapkit.protocols.schema.application.httpv1 import HTTP as HTTPv1
+from pcapkit.protocols.schema.application.httpv1 import HTTPv1
 
 # Hypertext Transfer Protocol (HTTP/2)
-from pcapkit.protocols.schema.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.schema.application.httpv2 import HTTPv2
 from pcapkit.protocols.schema.application.httpv2 import \
     ContinuationFrame as HTTPv2_ContinuationFrame
 from pcapkit.protocols.schema.application.httpv2 import DataFrame as HTTPv2_DataFrame

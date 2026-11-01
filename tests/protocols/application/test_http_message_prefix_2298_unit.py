@@ -7,12 +7,12 @@ the fix these read ``invalid HTTP version: 3``, ``invalid HTTP data: dict`` and
 ``unknown HTTP version`` from :class:`~pcapkit.protocols.application.http.HTTP`,
 and ``HTTP request must have URI.`` and
 ``HTTP packet must be either request or response.`` from
-:meth:`httpv1.HTTP._make_start_line
-<pcapkit.protocols.application.httpv1.HTTP._make_start_line>`, capitalised, with
+:meth:`httpv1.HTTPv1._make_start_line
+<pcapkit.protocols.application.httpv1.HTTPv1._make_start_line>`, capitalised, with
 a closing full stop and without the values that were rejected. The
 ``SETTINGS`` one read ``HTTP/2 : [Type 4] invalid settings`` from
-:meth:`httpv2.HTTP._make_http_settings
-<pcapkit.protocols.application.httpv2.HTTP._make_http_settings>`, a space before
+:meth:`httpv2.HTTPv2._make_http_settings
+<pcapkit.protocols.application.httpv2.HTTPv2._make_http_settings>`, a space before
 the colon and no rejected value either.
 
 Every case builds its own octets in memory and reads no capture. Classes are
@@ -71,21 +71,21 @@ class TestHTTPDispatcherMessages(unittest.TestCase):
 
 
 class TestHTTPv1StartLineMessages(unittest.TestCase):
-    """Pin ``httpv1.HTTP._make_start_line``'s messages."""
+    """Pin ``httpv1.HTTPv1._make_start_line``'s messages."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
     def test_request_without_uri(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            HTTP(method='GET', http_version='1.1')
+            HTTPv1(method='GET', http_version='1.1')
         self.assertEqual(str(ctx.exception), 'HTTP: invalid start line: a request needs a URI')
 
     def test_neither_or_both_of_method_and_status(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -95,21 +95,21 @@ class TestHTTPv1StartLineMessages(unittest.TestCase):
         for kwargs, tail in cases:
             with self.subTest(**kwargs):
                 with self.assertRaises(ProtocolError) as ctx:
-                    HTTP.__new__(HTTP)._make_start_line(http_version='1.1', **kwargs)
+                    HTTPv1.__new__(HTTPv1)._make_start_line(http_version='1.1', **kwargs)
                 self.assertEqual(str(ctx.exception),
                                  'HTTP: invalid start line: must have either a method or a '
                                  f'status, {tail}')
 
 
 class TestHTTPv2SettingsMessage(unittest.TestCase):
-    """Pin ``httpv2.HTTP._make_http_settings``'s rejection message."""
+    """Pin ``httpv2.HTTPv2._make_http_settings``'s rejection message."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
     def test_settings_names_the_rejected_value(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         # ``None`` is no longer rejected: it builds a parameterless ``SETTINGS``
@@ -117,7 +117,7 @@ class TestHTTPv2SettingsMessage(unittest.TestCase):
         for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
             with self.subTest(settings=settings):
                 with self.assertRaises(ProtocolError) as ctx:
-                    bytes(HTTP(type=Frame.SETTINGS, frame={'settings': settings}))
+                    bytes(HTTPv2(type=Frame.SETTINGS, frame={'settings': settings}))
                 self.assertEqual(str(ctx.exception),
                                  f'HTTP/2: [Type 4] invalid settings: {tail}')
 

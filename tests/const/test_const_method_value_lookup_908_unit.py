@@ -19,7 +19,7 @@ not touch).
 ``_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\\Z")``, which
 ``httpv1.py`` imports, admits a hyphen, so a request line carrying
 ``BASELINE-CONTROL`` matches, reaches ``Enum_Method.get(...)`` in
-``httpv1.HTTP._read_start_line``, parses successfully, and is
+``httpv1.HTTPv1._read_start_line``, parses successfully, and is
 reported with the wrong ``idempotent`` -- the harder kind of defect to
 notice, since the parse itself never fails.
 :class:`HTTPv1EndToEndTests` below pins that whole path, not just the direct
@@ -192,12 +192,12 @@ class HTTPv1EndToEndTests(unittest.TestCase):
     def test_a_baseline_control_request_line_reports_the_registrys_idempotent_flag(
             self) -> None:
         """``_RE_METHOD`` admits the hyphen, so this request line reaches
-        ``Enum_Method.get(...)`` in ``httpv1.HTTP._read_start_line``, which without the
+        ``Enum_Method.get(...)`` in ``httpv1.HTTPv1._read_start_line``, which without the
         fix comes back with ``idempotent=False`` -- the wrong answer for a parse that
         otherwise succeeds silently. Pins the whole path, not only the
         direct ``Method.get`` call above."""
         from pcapkit.const.http.method import Method
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         proto = object.__new__(HTTPv1)
         header, _ = proto._read_http_header(
@@ -212,7 +212,7 @@ class HTTPv1EndToEndTests(unittest.TestCase):
             self) -> None:
         """The issue's second repro, through the same end-to-end path."""
         from pcapkit.const.http.method import Method
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         proto = object.__new__(HTTPv1)
         header, _ = proto._read_http_header(
@@ -272,7 +272,7 @@ class NonStrKeyTests(unittest.TestCase):
         ``value`` are both ``b'GET'``. ``bytes`` is the plausible mistake here, since
         ``_RE_METHOD`` (in ``pcapkit/protocols/application/http.py``) is a
         bytes pattern and ``httpv1`` is bytes throughout -- the live call in
-        ``httpv1.HTTP._read_start_line`` is safe only because it wraps the match in
+        ``httpv1.HTTPv1._read_start_line`` is safe only because it wraps the match in
         ``self.decode(...)``.
         """
         from pcapkit.const.http.method import Method

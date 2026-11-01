@@ -139,7 +139,7 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP', '__cause__',
                     'pcapkit.protocols.schema.transport.sctp:ErrorCause',
                     ('pcapkit.const.sctp.cause_code:CauseCode.Stale_Cookie',)),
-    MethodRegistrar('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTP', '__frame__',
+    MethodRegistrar('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTPv2', '__frame__',
                     'pcapkit.protocols.schema.application.httpv2:FrameType',
                     ('pcapkit.const.http.frame:Frame.HEADERS',)),
     MethodRegistrar('register_pcapng_block', 'pcapkit.protocols.misc.pcapng:PCAPNG', '__block__',
@@ -383,10 +383,13 @@ def _steps(label: 'str') -> 'list[Callable[[], None]]':
     if head == 'register_protocol':
         from pcapkit.foundation.registry import register_protocol
         from pcapkit.protocols import __proto__ as names
-        from pcapkit.protocols.application import httpv2
+        from pcapkit.protocols.application.application import Application
 
         shipped = names['HTTP']
-        return [lambda: register_protocol(httpv2.HTTP), lambda: register_protocol(shipped)]
+        # No shipped class shares HTTP's name since #2529, so a user class named
+        # like it displaces the entry; defining it registers it.
+        custom = type('HTTP', (Application,), {'__module__': __name__})
+        return [lambda: register_protocol(custom), lambda: register_protocol(shipped)]
     name, _, member = head.partition(':')
     for module in MODULE_REGISTRARS:
         if module.name == name:

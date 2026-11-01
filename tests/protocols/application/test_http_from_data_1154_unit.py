@@ -9,8 +9,8 @@ HTTP version: 0``. It dispatches on the class of the data, and passes the
 ``version`` that :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>`
 dispatches on.
 
-Behind that, :meth:`httpv2.HTTP._make_data
-<pcapkit.protocols.application.httpv2.HTTP._make_data>` must not return the
+Behind that, :meth:`httpv2.HTTPv2._make_data
+<pcapkit.protocols.application.httpv2.HTTPv2._make_data>` must not return the
 frame's ``length``, which ``ProtocolBase.__init__`` takes as the number of
 octets to parse back -- the payload alone, nine short of the frame -- so every
 HTTP/2 ``from_data`` would raise as well. ``make`` computes the Length itself,
@@ -61,7 +61,7 @@ HTTP2_FRAMES = (
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPFromDataTests(unittest.TestCase):
-    """``from_data`` on the dispatcher and on ``httpv2.HTTP`` round-trips."""
+    """``from_data`` on the dispatcher and on ``httpv2.HTTPv2`` round-trips."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -94,8 +94,8 @@ class HTTPFromDataTests(unittest.TestCase):
                 self._round_trip(HTTP, bytes.fromhex(octets))
 
     def test_httpv2_rebuilds_its_own_frames(self) -> None:
-        """``httpv2.HTTP.from_data`` parses back the whole frame, not only Length octets."""
-        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        """``httpv2.HTTPv2.from_data`` parses back the whole frame, not only Length octets."""
+        from pcapkit.protocols.application.httpv2 import HTTPv2
 
         for name, octets in HTTP2_FRAMES:
             with self.subTest(frame=name):

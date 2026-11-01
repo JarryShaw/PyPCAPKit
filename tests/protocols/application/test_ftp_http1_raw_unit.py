@@ -139,7 +139,7 @@ class HTTP1RawTests(unittest.TestCase):
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
         from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         for cls in (HTTPv1, HTTP):
             for name, raw, _, _ in HTTP1_MESSAGES:
@@ -147,11 +147,11 @@ class HTTP1RawTests(unittest.TestCase):
                     self.assertEqual(cls.from_data(cls(raw, len(raw)).info).data, raw)
 
     def test_parsed_values_stay_normalised(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         for name, raw, receipt, fields in HTTP1_MESSAGES:
             with self.subTest(name=name):
-                info = HTTP(raw, len(raw)).info
+                info = HTTPv1(raw, len(raw)).info
                 for key, value in receipt.items():
                     self.assertEqual(getattr(info.receipt, key), value)
                 self.assertEqual(list(info.header.items(multi=True)), fields)
@@ -160,28 +160,28 @@ class HTTP1RawTests(unittest.TestCase):
 
     def test_changed_values_are_written_from_the_change(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         raw = b'HTTP/1.1 200  OK\r\nA:1\r\nB:\tcaf\xe9\r\n\r\n'
-        info = HTTP(raw, len(raw)).info
-        http = object.__new__(HTTP)
+        info = HTTPv1(raw, len(raw)).info
+        http = object.__new__(HTTPv1)
 
         headers = OrderedMultiDict([('A', '2'), ('B', 'café')])
         self.assertEqual(
-            http.make(**{**HTTP._make_data(info), 'headers': headers}).data,
+            http.make(**{**HTTPv1._make_data(info), 'headers': headers}).data,
             b'HTTP/1.1 200  OK\r\nA: 2\r\nB:\tcaf\xe9\r\n\r\n',
         )
         self.assertEqual(
-            http.make(**{**HTTP._make_data(info), 'message': 'Fine'}).data,
+            http.make(**{**HTTPv1._make_data(info), 'message': 'Fine'}).data,
             b'HTTP/1.1 200 Fine\r\nA:1\r\nB:\tcaf\xe9\r\n\r\n',
         )
 
     def test_raw_lines_cannot_write_a_line_break_their_values_lack(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
-        http = object.__new__(HTTP)
+        http = object.__new__(HTTPv1)
         for raw in (b'X: a\r', b'X: a\n', b'\nX: a', b'X: a\r\n \nInjected: b'):
             with self.subTest(raw_header=raw):
                 headers = OrderedMultiDict([http._read_field_line(raw)])
@@ -193,19 +193,19 @@ class HTTP1RawTests(unittest.TestCase):
                     http.make(status=200, message='OK', raw_line=raw)
 
     def test_line_breaks_the_values_carry_still_rebuild(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         for raw in (b'GET / HTTP/1.1\r\nX: a\nb\r\n\r\n', b'GET / HTTP/1.1\r\nX: a\r\n\tb\r\n\r\n'):
             with self.subTest(raw=raw):
-                self.assertEqual(HTTP.from_data(HTTP(raw, len(raw)).info).data, raw)
+                self.assertEqual(HTTPv1.from_data(HTTPv1(raw, len(raw)).info).data, raw)
 
     def test_field_lines_are_matched_by_content(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTP
+        from pcapkit.protocols.application.httpv1 import HTTPv1
 
         raw = b'GET / HTTP/1.1\r\nA:1\r\nB:  2\r\nC:3\r\n\r\n'
-        data = HTTP._make_data(HTTP(raw, len(raw)).info)
-        http = object.__new__(HTTP)
+        data = HTTPv1._make_data(HTTPv1(raw, len(raw)).info)
+        http = object.__new__(HTTPv1)
         for headers, expected in (
             ([('B', '2'), ('C', '3')], b'B:  2\r\nC:3\r\n'),
             ([('A', '1'), ('N', 'new'), ('B', '2'), ('C', '3')], b'A:1\r\nN: new\r\nB:  2\r\nC:3\r\n'),

@@ -61,6 +61,13 @@ PURE = (
     ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
     ('pcapkit.protocols.internet.mh', 'PMIPv6Timestamp'),
+    # #2529: renamed after their modules.
+    ('pcapkit.protocols.application.httpv1', 'HTTP'),
+    ('pcapkit.protocols.application.httpv2', 'HTTP'),
+    ('pcapkit.protocols.schema.application.httpv1', 'HTTP'),
+    ('pcapkit.protocols.schema.application.httpv2', 'HTTP'),
+    ('pcapkit.protocols.data.application.httpv1', 'HTTP'),
+    ('pcapkit.protocols.data.application.httpv2', 'HTTP'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -91,6 +98,25 @@ SHIPPED = (
     ('pcapkit.protocols.application.rarp', 'DRARP',
      'pcapkit/protocols/application/rarp.py',
      'pcapkit/protocols/application/rarp.rst', '1.6.0'),
+    # #2529: shipped in 1.5.x, renamed after their modules.
+    ('pcapkit.protocols.application.httpv1', 'HTTP',
+     'pcapkit/protocols/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
+    ('pcapkit.protocols.application.httpv2', 'HTTP',
+     'pcapkit/protocols/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.application.httpv1', 'HTTP',
+     'pcapkit/protocols/schema/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.application.httpv2', 'HTTP',
+     'pcapkit/protocols/schema/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
+    ('pcapkit.protocols.data.application.httpv1', 'HTTP',
+     'pcapkit/protocols/data/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
+    ('pcapkit.protocols.data.application.httpv2', 'HTTP',
+     'pcapkit/protocols/data/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
 )
 
 

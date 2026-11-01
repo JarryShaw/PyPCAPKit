@@ -4,7 +4,7 @@ HTTP/1.* - Hypertext Transfer Protocol
 .. module:: pcapkit.protocols.application.httpv1
 
 :mod:`pcapkit.protocols.application.httpv1` contains
-:class:`~pcapkit.protocols.application.httpv1.HTTP`,
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
 which implements an extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, and its
 :class:`~pcapkit.protocols.application.httpv1.Type` enumeration. The
@@ -31,7 +31,13 @@ structure of an HTTP/1.* message is described as below:
    rather than normalised or re-encoded (:issue:`1241`, :issue:`1302`,
    :issue:`1333`).
 
-.. autoclass:: pcapkit.protocols.application.httpv1.HTTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
+.. autoclass:: pcapkit.protocols.application.httpv1.HTTPv1
    :no-members:
    :show-inheritance:
 
@@ -60,7 +66,13 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.application.httpv1
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv1.HTTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.schema.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
+.. autoclass:: pcapkit.protocols.schema.application.httpv1.HTTPv1
    :members:
    :show-inheritance:
 
@@ -69,7 +81,13 @@ Data Models
 
 .. module:: pcapkit.protocols.data.application.httpv1
 
-.. autoclass:: pcapkit.protocols.data.application.httpv1.HTTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.httpv1.HTTP``, with no alias. The
+   class is renamed :class:`~pcapkit.protocols.data.application.httpv1.HTTPv1`,
+   after its module (:issue:`2529`).
+
+.. autoclass:: pcapkit.protocols.data.application.httpv1.HTTPv1
    :members:
    :show-inheritance:
 

@@ -63,7 +63,7 @@ the value 1 "to permit detection of L2F packets should they arrive intermixed
 with L2TP packets". L2F is a separate protocol with its own header. It is
 therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``
 only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id`. See
-:meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
+:meth:`L2TPv2.id <pcapkit.protocols.link.l2tpv2.L2TPv2.id>` for how a
 version-flavoured alias is spelled: canonical name first, alias second, since
 callers take element zero as canonical.
 
@@ -156,7 +156,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
         Returns:
             Index ID of the protocol -- the family name, then every version in
-            it, as :meth:`HTTP.id <pcapkit.protocols.application.http.HTTP.id>`
+            it, as :meth:`VLAN.id <pcapkit.protocols.link.vlan.VLAN.id>`
             does for its own family. ``L2F`` and ``L2TPv3`` join this tuple when
             they are implemented.
 

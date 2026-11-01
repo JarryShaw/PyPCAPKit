@@ -41,7 +41,7 @@ The Order
       :issue:`2490`.
    d. **Other helpers.** Every helper that ``read()``, ``make()`` and the registries
       do not reach goes last, including one that only another helper calls, such as
-      ``_decode_text()`` in :class:`~pcapkit.protocols.application.httpv1.HTTP`.
+      ``_decode_text()`` in :class:`~pcapkit.protocols.application.httpv1.HTTPv1`.
       Ruled on :issue:`2490`.
 
 **Registry maps.** The registry maps themselves (``__proto__``, ``__option__``,

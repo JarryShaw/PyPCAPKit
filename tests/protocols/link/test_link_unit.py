@@ -336,8 +336,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         # its own, so this must be stated on the subclass, not inherited.
         self.assertIs(L2TPv2.__schema__, SchemaL2TP)
 
-        # Canonical family name first, then this version's label -- the shape
-        # ``httpv1.HTTP.id`` uses, so ``protocol='L2TP'`` still selects v2.
+        # Canonical family name first, then this version's label, so
+        # ``protocol='L2TP'`` still selects v2.
         self.assertEqual(L2TP.id(), ('L2TP', 'L2TPv2'))
         self.assertEqual(L2TPv2.id(), ('L2TP', 'L2TPv2'))
         self.assertEqual(L2TPv2.id()[0], 'L2TP')
