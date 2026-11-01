@@ -1063,11 +1063,13 @@ class SSLv2On443Tests(unittest.TestCase):
 
 
 class SegmentRecordTests(unittest.TestCase):
-    """Every whole record in a TCP segment is a TLS layer of its own (#2517);
-    see ``test_tls_dtls_roundtrip_unit`` for the round trips."""
+    """A whole record after the first in a TCP segment is a further TLS layer
+    (#2517); see ``test_tls_dtls_roundtrip_unit`` for the round trips."""
 
     CCS = b'\x14\x03\x03\x00\x01\x01'
     APPLICATION_DATA = b'\x17\x03\x03\x00\x05hello'
+    #: A whole handshake record whose ClientHello is too short for its fixed fields.
+    MALFORMED_HELLO = b'\x16\x03\x03\x00\x10\x01\x00\x00\x0c\x03\x03' + bytes(10)
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -1117,9 +1119,7 @@ class SegmentRecordTests(unittest.TestCase):
         """A ClientHello too short for its fixed fields: ``beholder`` keeps it as ``Raw``."""
         from pcapkit.protocols.transport.tcp import TCP
 
-        hello = b'\x01\x00\x00\x0c\x03\x03' + bytes(10)
-        bad = b'\x16\x03\x03' + len(hello).to_bytes(2, 'big') + hello
-        raw = _TCP_TO_443 + self.CCS + bad
+        raw = _TCP_TO_443 + self.CCS + self.MALFORMED_HELLO
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             proto = TCP(raw, len(raw))
@@ -1128,6 +1128,27 @@ class SegmentRecordTests(unittest.TestCase):
         self.assertRegex(proto.payload.payload.info.error, r'^TLS 1\.2: invalid format: client_hello')
         self.assertEqual(caught, [])
         self.assertEqual(rebuilt, raw)
+
+    def test_only_the_first_record_gets_the_sslv2_trial(self) -> None:
+        """A later record that fails to decode is ``Raw`` with no SSLv2 trial;
+        the first keeps its trial (#2517)."""
+        from unittest import mock
+
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, segment, chain, calls in (
+                ('after a record', self.CCS + self.MALFORMED_HELLO, 'TCP:TLS 1.2:Raw', 0),
+                ('first in the segment', self.MALFORMED_HELLO, 'TCP:Raw', 1)):
+            with self.subTest(record=name):
+                raw = _TCP_TO_443 + segment
+                with mock.patch.object(TLS, '_read_sslv2_fallback', autospec=True,
+                                       side_effect=TLS._read_sslv2_fallback) as trial:
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore')
+                        proto = TCP(raw, len(raw))
+                self.assertEqual(str(proto.protochain), chain)
+                self.assertEqual(trial.call_count, calls)
 
 
 class ExportTests(unittest.TestCase):

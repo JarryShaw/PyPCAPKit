@@ -95,6 +95,11 @@ A parsed RARP takes ``DRARP`` as its alias for operation 5, and
 :class:`~pcapkit.protocols.application.rarp.DRARP` ``('DRARP',)`` inherits the
 ``__index__`` of RARP.
 
+**Within one segment, each whole record of a record-layer protocol is its own layer**,
+chained as the previous record's payload (:issue:`2517`). So each layer's dynamic alias
+names its own record's version: under :class:`~pcapkit.protocols.application.tls.TLS`, a
+``ServerHello`` then a ``ChangeCipherSpec`` read ``TCP:TLS 1.3:TLS 1.2``.
+
 A family-inclusive member is selected by any sibling's registry key (a key of
 ``pcapkit.protocols.__proto__``), because each expands to the shared family name
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name

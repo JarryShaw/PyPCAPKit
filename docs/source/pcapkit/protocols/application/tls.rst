@@ -86,12 +86,18 @@ Decoded Fields
 Records in One Segment
 ----------------------
 
-Every whole record in a TCP segment is dissected, each as a
-:class:`~pcapkit.protocols.application.tls.TLS` layer whose payload is the next
-record (:issue:`2517`): a ``ServerHello`` followed by a ``ChangeCipherSpec``
-reads ``TCP:TLS 1.3:TLS 1.2``. Each record is a layer, so
-:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` bounds how many are
-dissected.
+A whole record after the first in a TCP segment is dissected as a further
+:class:`~pcapkit.protocols.application.tls.TLS` layer, the previous record's
+payload (:issue:`2517`): a ``ServerHello`` followed by a ``ChangeCipherSpec``
+reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
+
+* A whole record that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  with no SSLv2 trial.
+* A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
+  keeps the rest of the segment raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
 
 Known Limitation
 ----------------
