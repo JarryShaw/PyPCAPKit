@@ -20,7 +20,7 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2` rather than an instance
    of it, so the data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`, :pr:`2544`).
+   (:issue:`2524`).
 
 .. autoclass:: pcapkit.protocols.application.http.HTTP
    :no-members:

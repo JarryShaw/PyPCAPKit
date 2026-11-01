@@ -23,7 +23,7 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2` rather than an instance
    of it, so the data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`, :pr:`2544`).
+   (:issue:`2524`).
 
 """
 import contextlib
@@ -237,7 +237,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     and :meth:`from_data` give
     :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
     :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, never an instance of
-    this class (:pr:`2544`); see :meth:`__new__`.
+    this class (:issue:`2524`); see :meth:`__new__`.
 
     """
 
@@ -457,7 +457,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         Returns:
             Protocol instance; on this class, an instance of the member the data
-            model belongs to (:pr:`2544`).
+            model belongs to (:issue:`2524`).
 
         Raises:
             ProtocolError: If ``data`` is neither HTTP/1.* nor HTTP/2 data, on
@@ -825,7 +825,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         field that only :meth:`HTTPv1.make
         <pcapkit.protocols.application.httpv1.HTTPv1.make>` takes, or no field
         of either, picks :class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
-        the version :meth:`make` defaults to.
+        the version :meth:`make` defaults to. ``preface`` counts only when true,
+        as in the ``version`` check, since its default is :data:`False`.
 
         Args:
             fields: Construction keywords.
@@ -850,10 +851,13 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 raise ProtocolError(f'HTTP/{version}: connection preface is HTTP/2 only')
             return member
 
-        names = set(fields)
+        # NOTE: ``preface=False`` is the default, not a request for HTTP/2.
+        names = {name for name, value in fields.items() if name != 'preface' or value}
         own1, own2 = _make_fields(HTTPv1), _make_fields(HTTPv2)
         only1, only2 = names & (own1 - own2), names & (own2 - own1)
         if only1 and only2:
+            if only2 == {'preface'}:
+                raise ProtocolError('HTTP/1: connection preface is HTTP/2 only')
             raise ProtocolError(f'HTTP: fields of both HTTP/1 ({", ".join(sorted(only1))}) '
                                 f'and HTTP/2 ({", ".join(sorted(only2))})')
         return HTTPv2 if only2 else HTTPv1

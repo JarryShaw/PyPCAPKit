@@ -120,12 +120,43 @@ class HTTPBaseDispatchTests(unittest.TestCase):
                 self.assertEqual(layer.data, direct.data)
         self.assertTrue(HTTP(version=2, preface=True, type=Frame.SETTINGS).data.startswith(_PREFACE))
 
+    def test_a_false_preface_names_no_version(self) -> None:
+        """``preface=False`` is the default, so it names no version.
+
+        HTTP/1 fields beside it still build HTTP/1, as without it, and on its own it
+        picks HTTPv1, the version ``make`` defaults to; only a true ``preface`` means
+        HTTP/2.
+        """
+        from pcapkit.const.http.frame import Frame
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        HTTP, HTTPv1, HTTPv2 = self.classes()
+        self.assertIs(HTTP._dispatch_fields({'preface': False}), HTTPv1)
+        self.assertIs(HTTP._dispatch_fields({'preface': True}), HTTPv2)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            with_false = HTTP(method='GET', uri='/', preface=False)
+            without = HTTP(method='GET', uri='/')
+            frame = HTTP(type=Frame.DATA, sid=1, preface=False)
+        self.assertIs(type(with_false), HTTPv1)
+        self.assertEqual(with_false.data, without.data)
+        self.assertIs(type(frame), HTTPv2)
+        self.assertFalse(frame.data.startswith(_PREFACE))
+        # Alone it builds what ``HTTP()`` builds: an HTTP/1 message with no start
+        # line, which HTTPv1 refuses.
+        with self.assertRaisesRegex(ProtocolError, 'invalid start line'):
+            HTTP(preface=False)
+
     def test_fields_no_one_version_builds_raise(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError
 
         HTTP, _, _ = self.classes()
         for fields, message in (({'method': 'GET', 'sid': 1}, 'fields of both'),
                                 ({'version': 1, 'preface': True}, 'HTTP/2 only'),
+                                ({'method': 'GET', 'uri': '/', 'preface': True},
+                                 r'^HTTP/1: connection preface is HTTP/2 only$'),
+                                ({'method': 'GET', 'preface': True, 'sid': 1},
+                                 r'^HTTP: fields of both HTTP/1 \(method\) and HTTP/2 \(preface, sid\)$'),
                                 ({'version': 3}, 'invalid version')):
             with self.subTest(fields=fields):
                 with self.assertRaisesRegex(ProtocolError, message):

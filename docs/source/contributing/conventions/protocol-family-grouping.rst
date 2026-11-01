@@ -55,14 +55,22 @@ does, but yields no instance of itself (:ref:`below <protocol-family-dispatch>`)
 Dispatching Bases
 ~~~~~~~~~~~~~~~~~
 
-**A versioned family's base dispatches on both paths** (:pr:`2544`). Parsing octets
-through it, constructing it from fields and its ``from_data`` give the member the
-octets, fields or data model describe, never an instance of the base. In
+**A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
+octets through it, constructing it from fields and its ``from_data`` give the member
+the octets, fields or data model describe, never an instance of the base. In
 :class:`~pcapkit.protocols.application.http.HTTP`,
 :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks the member
-from the octets, for a payload a transport port binds to HTTP as well
-(:issue:`2524`), and :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields`
-from the fields. The other versioned families are tracked on :issue:`2574`.
+from the octets, for a payload a transport port binds to HTTP as well, and
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields` from the fields.
+The other versioned families are tracked on :issue:`2574`.
+
+**Octets neither version takes**, a frameless HTTP/2 connection preface among them,
+are :class:`~pcapkit.protocols.misc.raw.Raw` with no ``error`` on the transport path,
+and a direct ``HTTP(...)`` on them raises
+:exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2524`). Octets the
+dispatcher gives :class:`~pcapkit.protocols.application.httpv2.HTTPv2` that its parser
+then refuses, such as a preface and three octets, are
+:class:`~pcapkit.protocols.misc.raw.Raw` with the parser's ``error``.
 
 .. _protocol-family-shapes:
 

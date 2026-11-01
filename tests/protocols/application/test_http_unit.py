@@ -52,7 +52,6 @@ def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes
     )
 
 
-@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 def base_read(raw: bytes) -> object:
     """Parse ``raw`` with the base's own ``read``, on a bare instance.
 
@@ -67,6 +66,7 @@ def base_read(raw: bytes) -> object:
     return http.read(len(raw))
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
