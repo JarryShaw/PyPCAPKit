@@ -13,10 +13,10 @@ if TYPE_CHECKING:
     from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
     from pcapkit.const.igmp.type import Type as Enum_Type
 
-__all__ = ['IGMP', 'Query', 'Report', 'GroupRecord']
+__all__ = ['IGMPv3', 'Query', 'Report', 'GroupRecord']
 
 
-class IGMP(Protocol):
+class IGMPv3(Protocol):
     """Data model for Internet Group Management Protocol version 3.
 
     This is the common ancestor of the two message shapes IGMPv3 defines:
@@ -31,17 +31,17 @@ class IGMP(Protocol):
     type: 'Enum_Type'
     #: Header length, in octets. IGMP has no header field of its own that
     #: states this -- unlike :class:`~pcapkit.protocols.internet.ah.AH`, it
-    #: is computed from what :meth:`IGMP.read
-    #: <pcapkit.protocols.internet.igmpv3.IGMP.read>` actually consumed, the
+    #: is computed from what :meth:`IGMPv3.read
+    #: <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` actually consumed, the
     #: same way :attr:`~pcapkit.protocols.data.internet.esp.ESP.length` is.
     length: 'int'
 
 
 @info_final
-class Query(IGMP):
+class Query(IGMPv3):
     """Data model for an IGMPv3 Membership Query (:rfc:`3376#section-4.1`).
 
-    Reached only once :meth:`IGMP.read <pcapkit.protocols.internet.igmpv3.IGMP.read>`
+    Reached only once :meth:`IGMPv3.read <pcapkit.protocols.internet.igmpv3.IGMPv3.read>`
     has confirmed the message classifies as IGMPv3 (at least 12 octets), so
     the source-list extension fields below are always populated -- never
     :data:`None`, unlike the single-class design IGMPv1/v2 predate this one
@@ -110,7 +110,7 @@ class GroupRecord(Data):
 
 
 @info_final
-class Report(IGMP):
+class Report(IGMPv3):
     """Data model for an IGMPv3 Membership Report (:rfc:`3376#section-4.2`)."""
 
     #: Reserved octet after :attr:`type` (:rfc:`3376#section-4.2.1`), kept as

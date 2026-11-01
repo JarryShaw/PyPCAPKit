@@ -15,7 +15,7 @@ from pcapkit.corekit.fields.strings import BitField, BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import ProtocolError, StreamEOFError
 
-__all__ = ['IGMP', 'Query', 'QueryExtension', 'Report', 'GroupRecord']
+__all__ = ['IGMPv3', 'Query', 'QueryExtension', 'Report', 'GroupRecord']
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -37,22 +37,22 @@ if TYPE_CHECKING:
 
 
 def igmpv3_body_selector(pkt: 'dict[str, Any]') -> 'SchemaField':
-    """Selector function for :attr:`IGMP.body` field.
+    """Selector function for :attr:`IGMPv3.body` field.
 
     Args:
         pkt: Packet data.
 
     Returns:
         Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
-        :class:`Query` or :class:`Report` instance, chosen by :attr:`IGMP.type`.
+        :class:`Query` or :class:`Report` instance, chosen by :attr:`IGMPv3.type`.
 
     Raises:
-        ProtocolError: If :attr:`IGMP.type` is neither the Membership Query
+        ProtocolError: If :attr:`IGMPv3.type` is neither the Membership Query
             nor the IGMPv3 Membership Report. :meth:`IGMP._classify
             <pcapkit.protocols.internet.igmp.IGMP._classify>` is what keeps a
             genuine IGMPv1/v2 message (an 8-octet Query, or a Report/Leave
             type) from ever reaching this class in the first place; this is
-            only reached when :class:`~pcapkit.protocols.internet.igmpv3.IGMP`
+            only reached when :class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`
             is instantiated directly on a message of neither shape.
 
     """
@@ -107,7 +107,7 @@ class QueryExtension(Schema):
         'qrv': (5, 3),
     })
     #: Querier's Query Interval Code, as received on the wire; decoded into
-    #: seconds by :meth:`IGMP.read <pcapkit.protocols.internet.igmpv3.IGMP.read>`
+    #: seconds by :meth:`IGMPv3.read <pcapkit.protocols.internet.igmpv3.IGMPv3.read>`
     #: per :rfc:`3376#section-4.1.7`.
     qqic: 'int' = UInt8Field()
     #: Number of source addresses.
@@ -120,8 +120,8 @@ class QueryExtension(Schema):
     #: Additional data (:rfc:`3376#section-4.1.10`): octets past the source
     #: list that a received Query may carry and that must be kept (to verify
     #: the checksum) but not otherwise acted on. Empty for a
-    #: standards-conformant Query, since :meth:`IGMP.make
-    #: <pcapkit.protocols.internet.igmpv3.IGMP.make>` never writes any.
+    #: standards-conformant Query, since :meth:`IGMPv3.make
+    #: <pcapkit.protocols.internet.igmpv3.IGMPv3.make>` never writes any.
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
@@ -139,13 +139,13 @@ class Query(Schema):
     present only on a Query of 12 or more octets overall -- see
     :func:`query_extension_present`. An 8-octet Query, which this schema
     unpacks too (with :attr:`ext` :data:`None`), is not actually IGMPv3;
-    :meth:`IGMP.read <pcapkit.protocols.internet.igmpv3.IGMP.read>` is what
+    :meth:`IGMPv3.read <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` is what
     refuses it.
 
     """
 
-    #: Max response code; the raw octet :meth:`IGMP.read
-    #: <pcapkit.protocols.internet.igmpv3.IGMP.read>` decodes per
+    #: Max response code; the raw octet :meth:`IGMPv3.read
+    #: <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` decodes per
     #: :rfc:`3376#section-4.1.1`.
     max_resp_code: 'int' = UInt8Field()
     #: Checksum: the 16-bit one's complement of the one's complement sum of
@@ -289,7 +289,7 @@ class Report(Schema):
 
 
 @schema_final
-class IGMP(Schema):
+class IGMPv3(Schema):
     """Header schema for an IGMPv3 packet.
 
     :attr:`type` is common to both shapes IGMPv3 defines; everything past it
@@ -315,14 +315,14 @@ class IGMP(Schema):
         def __init__(self, type: 'Enum_Type | int', body: 'Query | Report | bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
 
     def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':  # pylint: disable=unused-argument
-        """Get payload of :class:`IGMP`.
+        """Get payload of :class:`IGMPv3`.
 
         Args:
             name: Unused; kept for signature compatibility with
                 :meth:`Schema.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`.
 
         Returns:
-            Trailing octets of :attr:`body` -- see the class :class:`Note <IGMP>`
+            Trailing octets of :attr:`body` -- see the class :class:`Note <IGMPv3>`
             above for exactly where each shape keeps them.
 
         """

@@ -80,11 +80,11 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.internet.igmp.IGMP`                                       |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv1.IGMP`                                     |
+|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv1.IGMPv1`                                   |
 +                                                                  + IGMP Family    +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv2.IGMP`                                     |
+|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv2.IGMPv2`                                   |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv3.IGMP`                                     |
+|                                                                  |                | :class:`pcapkit.protocols.internet.igmpv3.IGMPv3`                                   |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 | Transport Layer                                                  | :class:`pcapkit.protocols.transport.tcp.TCP`                                                         |
 + (:class:`~pcapkit.protocols.transport.transport.Transport`       +----------------+-----------------------+-------------------------------------------------------------+

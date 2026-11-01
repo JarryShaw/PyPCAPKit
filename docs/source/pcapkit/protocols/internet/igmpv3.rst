@@ -4,10 +4,10 @@ IGMPv3 - Internet Group Management Protocol version 3
 .. module:: pcapkit.protocols.internet.igmpv3
 
 :mod:`pcapkit.protocols.internet.igmpv3` contains
-:class:`~pcapkit.protocols.internet.igmpv3.IGMP`, which implements an
+:class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`, which implements an
 extractor for Internet Group Management Protocol version 3 (IGMPv3)
-[:rfc:`3376`]. Unlike :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`
-and :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>`, which reuse the
+[:rfc:`3376`]. Unlike :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>`
+and :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMPv2>`, which reuse the
 abstract base's own 8-octet schema and data model (see
 :mod:`~pcapkit.protocols.internet.igmp`), IGMPv3 defines two message shapes
 of its own:
@@ -43,7 +43,7 @@ Octets      Bits        Name                               Description
   8          64   ``igmp.body.records``                Group Record [1..M]
 ======= ========= ================================== ===================================
 
-.. autoclass:: pcapkit.protocols.internet.igmpv3.IGMP
+.. autoclass:: pcapkit.protocols.internet.igmpv3.IGMPv3
    :no-members:
    :show-inheritance:
 
@@ -63,7 +63,7 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.internet.igmpv3
 
-.. autoclass:: pcapkit.protocols.schema.internet.igmpv3.IGMP
+.. autoclass:: pcapkit.protocols.schema.internet.igmpv3.IGMPv3
    :members:
    :show-inheritance:
 
@@ -88,7 +88,7 @@ Data Models
 
 .. module:: pcapkit.protocols.data.internet.igmpv3
 
-.. autoclass:: pcapkit.protocols.data.internet.igmpv3.IGMP
+.. autoclass:: pcapkit.protocols.data.internet.igmpv3.IGMPv3
    :members:
    :show-inheritance:
 

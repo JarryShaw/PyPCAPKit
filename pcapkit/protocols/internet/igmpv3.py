@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.internet.igmpv3
 
 :mod:`pcapkit.protocols.internet.igmpv3` contains
-:class:`~pcapkit.protocols.internet.igmpv3.IGMP`, which implements an
+:class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`, which implements an
 extractor for Internet Group Management Protocol version 3 (IGMPv3)
 [:rfc:`3376`]. Unlike IGMPv1/v2, IGMPv3 defines two message shapes of its
 own, both handled by this one class:
@@ -47,20 +47,18 @@ and :meth:`id` are this class's own.
 
 .. versionadded:: 1.6.0
 
-   IGMPv3 (:rfc:`3376`) (:issue:`2448`).
-
 """
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
 from pcapkit.const.igmp.type import Type as Enum_Type
-from pcapkit.protocols.data.internet.igmpv3 import IGMP as Data_IGMP
 from pcapkit.protocols.data.internet.igmpv3 import GroupRecord as Data_GroupRecord
+from pcapkit.protocols.data.internet.igmpv3 import IGMPv3 as Data_IGMPv3
 from pcapkit.protocols.data.internet.igmpv3 import Query as Data_Query
 from pcapkit.protocols.data.internet.igmpv3 import Report as Data_Report
 from pcapkit.protocols.internet.igmp import IGMP as IGMPBase
-from pcapkit.protocols.schema.internet.igmpv3 import IGMP as Schema_IGMP
 from pcapkit.protocols.schema.internet.igmpv3 import GroupRecord as Schema_GroupRecord
+from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3 as Schema_IGMPv3
 from pcapkit.protocols.schema.internet.igmpv3 import Query as Schema_Query
 from pcapkit.protocols.schema.internet.igmpv3 import QueryExtension as Schema_QueryExtension
 from pcapkit.protocols.schema.internet.igmpv3 import Report as Schema_Report
@@ -77,7 +75,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['IGMP']
+__all__ = ['IGMPv3']
 
 
 def _decode_resp_code(code: 'int') -> 'int':
@@ -141,12 +139,12 @@ def _encode_resp_code(value: 'int') -> 'int':
     return 0x80 | (exp << 4) | mant
 
 
-class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
-           schema=Schema_IGMP, data=Data_IGMP):
+class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
+             schema=Schema_IGMPv3, data=Data_IGMPv3):
     """This class implements Internet Group Management Protocol version 3.
 
-    Unlike :class:`~pcapkit.protocols.internet.igmpv1.IGMP` and
-    :class:`~pcapkit.protocols.internet.igmpv2.IGMP`, which share the base's
+    Unlike :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1` and
+    :class:`~pcapkit.protocols.internet.igmpv2.IGMPv2`, which share the base's
     own 8-octet schema and data model, IGMPv3's wire format differs
     materially by message -- a Query's source-list extension, a Report's
     group-record list -- so this class carries its own (:issue:`2439`,
@@ -170,7 +168,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
         Every message starts with an 8-octet header. A Query may carry the
         source-list extension, and a Report's group-record list has no fixed
         size, so this is taken during :meth:`read` from the octets consumed
-        (see :attr:`~pcapkit.protocols.data.internet.igmpv3.IGMP.length`)
+        (see :attr:`~pcapkit.protocols.data.internet.igmpv3.IGMPv3.length`)
         rather than returned as a constant, unlike the base's own
         :attr:`~pcapkit.protocols.internet.igmp.IGMP.length`.
 
@@ -193,7 +191,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
         """
         return ('IGMPv3',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IGMP':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IGMPv3':
         """Read Internet Group Management Protocol version 3.
 
         Args:
@@ -211,7 +209,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
         """
         if length is None:
             length = len(self)
-        schema = cast('Schema_IGMP', self.__header__)
+        schema = cast('Schema_IGMPv3', self.__header__)
         body = schema.body
 
         if isinstance(body, Schema_Query):
@@ -245,7 +243,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
                 qqic=qqic,
                 qqi=qqi,
                 sources=sources,
-            )  # type: Data_IGMP
+            )  # type: Data_IGMPv3
         elif isinstance(body, Schema_Report):
             records = tuple(
                 Data_GroupRecord(
@@ -291,7 +289,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
              reserved_2: 'bytes' = b'\x00\x00',
              records: 'Optional[Iterable[dict[str, Any] | Data_GroupRecord]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
-             **kwargs: 'Any') -> 'Schema_IGMP':
+             **kwargs: 'Any') -> 'Schema_IGMPv3':
         """Make (construct) packet data.
 
         Building a Query (the default) always writes the source-list
@@ -362,7 +360,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
                 self._make_group_record(record) if not isinstance(record, dict) else
                 self._make_group_record(**record) for record in records
             ]
-            return Schema_IGMP(
+            return Schema_IGMPv3(
                 type=type_value,
                 body=Schema_Report(
                     reserved_1=reserved_1,
@@ -389,7 +387,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
             if max_resp_code is None:
                 max_resp_code = _encode_resp_code(max_resp_time)
 
-            return Schema_IGMP(
+            return Schema_IGMPv3(
                 type=type_value,
                 body=Schema_Query(
                     max_resp_code=max_resp_code,
@@ -459,7 +457,7 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
     ##########################################################################
 
     @classmethod
-    def _make_data(cls, data: 'Data_IGMP') -> 'dict[str, Any]':  # type: ignore[override]
+    def _make_data(cls, data: 'Data_IGMPv3') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
 
         Args:

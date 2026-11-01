@@ -131,7 +131,7 @@ from pcapkit.protocols.schema.internet.icmpv6 import Unknown as ICMPv6_Unknown
 # Internet Group Management Protocol
 from pcapkit.protocols.schema.internet.igmp import IGMP
 from pcapkit.protocols.schema.internet.igmpv3 import GroupRecord as IGMPv3_GroupRecord
-from pcapkit.protocols.schema.internet.igmpv3 import IGMP as IGMPv3
+from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3
 from pcapkit.protocols.schema.internet.igmpv3 import Query as IGMPv3_Query
 from pcapkit.protocols.schema.internet.igmpv3 import QueryExtension as IGMPv3_QueryExtension
 from pcapkit.protocols.schema.internet.igmpv3 import Report as IGMPv3_Report

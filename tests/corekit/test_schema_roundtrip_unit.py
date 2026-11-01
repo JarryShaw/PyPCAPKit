@@ -77,7 +77,7 @@ OVERRIDES = {
     'internet.ipv6_opts:SMFHashBasedDPDOption': {'hav': b'\x80'},
     # Type 0 is reserved, so the first member is no IGMP message at all; only
     # IGMPv3's own schema switches on it (the flat base/v1/v2 one does not).
-    'internet.igmpv3:IGMP': {'type': lambda module: module.Enum_Type.IGMP_Membership_Query},
+    'internet.igmpv3:IGMPv3': {'type': lambda module: module.Enum_Type.IGMP_Membership_Query},
 }  # type: dict[str, dict[str, Any]]
 
 #: Packet context a dispatch target needs from its enclosing layer.
