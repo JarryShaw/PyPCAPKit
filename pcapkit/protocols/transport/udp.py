@@ -32,6 +32,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
 from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
 from pcapkit.protocols.transport.transport import Transport
+from pcapkit.utilities import config
 
 if TYPE_CHECKING:
     from typing import Any, ClassVar, Optional, Type
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.enum import EnumRegistry
+    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -79,6 +81,13 @@ class UDP(Transport[Data_UDP, Schema_UDP],
        passes so that a truncated capture keeps its declared Length
        (:issue:`1155`), and ``trailer``, so that the octets past the Length
        field rebuild as captured (:issue:`1461`).
+
+    .. versionchanged:: 1.6.0
+
+       The checksum is computed when :meth:`make` is given none, over the
+       ``pseudo`` it is given or by the enclosing IP layer, and verified by that
+       layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+       (:issue:`2474`).
 
     """
 
@@ -137,6 +146,10 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     #: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
     #: member carries one (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
+
+    #: Whether :meth:`make` left the checksum for the enclosing IP layer to
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    _checksum_pending = False
 
     ##########################################################################
     # Properties.
@@ -217,22 +230,28 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     def make(self,
              srcport: 'Enum_AppType | int' = 0,
              dstport: 'Enum_AppType | int' = 0,
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              total_length: 'Optional[int]' = None,
              payload: 'bytes | Schema | ProtocolBase' = b'',
              trailer: 'bytes' = b'',
+             pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 
         Args:
             srcport: Source port.
             dstport: Destination port.
-            checksum: Checksum.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on,
+                computed over ``pseudo`` (:rfc:`768`), or left to an IP layer
+                this datagram is the payload of; zero, i.e. none, otherwise.
             total_length: Length of the datagram, header included; computed from
                 the header and the payload when omitted.
             payload: Payload data.
             trailer: Octets after the datagram, outside the Length field;
                 written as is and not counted in a computed ``total_length``.
+            pseudo: Pseudo-header of the enclosing IP layer; its length is
+                replaced by ``total_length``, as the Length field gives it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -259,14 +278,29 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         if total_length is None:
             total_length = 8 + len(payload)
 
-        return Schema_UDP(
+        schema = Schema_UDP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.udp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.udp),
             len=total_length,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             payload=payload,
             trailer=trailer,
         )
+
+        self._checksum_pending = False
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            if pseudo is None:
+                self._checksum_pending = True
+            else:
+                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+
+                # NOTE: Over the datagram the Length field gives, or all but the trailer
+                # for a jumbogram's zero one (RFC 2675); a computed zero is all ones.
+                octets = schema.pack()
+                length = total_length or len(octets) - len(trailer)
+                schema.checksum = compute_checksum(octets[:length], nonzero=True,
+                                                   prefix=pseudo_header(pseudo, length))
+        return schema
 
     ##########################################################################
     # Data models.
@@ -315,3 +349,30 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # NOTE: And the octets captured past the Length field (#1461).
             'trailer': data.get('trailer', b''),
         }
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`. A zero
+        checksum over IPv4, which means none (:rfc:`768`), and the
+        pseudo-header's sum alone, which checksum offload leaves on the sending
+        host, are
+        :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`.
+        A zero one over IPv6 is wrong, as one is mandatory there
+        (:rfc:`8200#section-8.1`).
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.protocols.misc.checksum.checksum import (  # isort: skip # pylint: disable=import-outside-toplevel
+            ChecksumStatus, partial_checksum, verify_checksum)
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.checksum, length=pseudo.info.len,
+                                     prefix=pseudo.data, absent=b'\x00\x00' if pseudo.version == 4 else None,
+                                     offload=(partial_checksum(pseudo.data),))
+        self._info.__update__(checksum_status=status)

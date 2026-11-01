@@ -133,6 +133,10 @@ configured separately, through the :mod:`logging` module::
    :no-members:
    :show-inheritance:
 
+.. autoexception:: pcapkit.utilities.warnings.ChecksumWarning
+   :no-members:
+   :show-inheritance:
+
 .. autoexception:: pcapkit.utilities.warnings.AttributeWarning
    :no-members:
    :show-inheritance:

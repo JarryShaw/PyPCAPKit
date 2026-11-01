@@ -50,7 +50,7 @@ RAW_ITEMS = {
                        '1106206100000000' + '00' * 32 + '0041000c' + '00' * 12),
     'IPv4 options': ('pcapkit.protocols.internet.ipv4.IPv4',
                      {'options': [b'\x94\x04\x00\x00'], 'protocol': 253},
-                     '460000180000000000fd00007f0000010000000094040000'),
+                     '460000180000000000fda5e47f0000010000000094040000'),
     'TCP options': ('pcapkit.protocols.transport.tcp.TCP',
                     {'options': [b'\x02\x04\x05\xb4']},
                     '0000000000000000000000006000ffff00000000020405b4'),

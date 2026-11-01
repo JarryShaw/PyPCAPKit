@@ -89,6 +89,7 @@ Octets      Bits        Name                    Description
       :no-value:
 
    .. automethod:: __index__
+   .. automethod:: __post_init__
 
 Header Schemas
 --------------

@@ -33,6 +33,7 @@ Octets      Bits        Name                    Description
    .. automethod:: make
 
    .. automethod:: _make_data
+   .. automethod:: _verify_pseudo_checksum
 
    .. automethod:: _read_data_type_none
    .. automethod:: _read_data_type_destination_unreachable

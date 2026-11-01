@@ -606,8 +606,12 @@ class IPPseudoWalkTests(unittest.TestCase):
                             for index in range(count))
 
         self.assertEqual(IP_Pseudo(ip=self.ipv6(60, chain(32) + self.UDP)).info.len, 8)
+        # It may hold a Home Address option, and it hides the upper layer (#2513).
+        ip = self.ipv6(60, chain(33) + self.UDP)
+        with self.assertRaisesRegex(ProtocolError, 'Destination Options of IPv6 not parsed; give src'):
+            IP_Pseudo(ip=ip)
         with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed'):
-            IP_Pseudo(ip=self.ipv6(60, chain(33) + self.UDP))
+            IP_Pseudo(ip=ip, src='2001:db8::1')
 
     def test_truncated_headers_are_unparsed(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
@@ -630,6 +634,41 @@ class IPPseudoWalkTests(unittest.TestCase):
         # A Type 0 Routing header with an odd Hdr Ext Len.
         with self.assertRaisesRegex(ProtocolError, 'Routing header of IPv6 not parsed; give dst'):
             IP_Pseudo(ip=self.ipv6(43, bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8)))
+
+    def test_a_malformed_header_past_the_first_is_unparsed(self) -> None:
+        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # A valid 8-octet header, then a malformed one as above: each may hold an
+        # address the pseudo-header takes, so giving the protocol and the length
+        # does not do without it (#2513).
+        opts = bytes([17, 2]) + bytes(22)
+        route = bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8)
+        cases = (
+            ('Destination Options', 'src', self.ipv6(0, bytes([60, 0]) + bytes(6) + opts, payload=16)),
+            ('Destination Options', 'src', self.ipv6(60, bytes([60, 0]) + bytes(6) + opts, payload=16)),
+            ('Routing header', 'dst', self.ipv6(0, bytes([43, 0]) + bytes(6) + route)),
+        )
+        for index, (header, value, ip) in enumerate(cases):
+            with self.subTest(index):
+                with self.assertRaisesRegex(ProtocolError, f'{header} of IPv6 not parsed; give {value}'):
+                    IP_Pseudo(ip=ip, protocol=17, upper_length=8)
+                pseudo = IP_Pseudo(ip=ip, protocol=17, upper_length=8, **{value: '2001:db8::99'})
+                self.assertEqual(getattr(pseudo, value), ipaddress.IPv6Address('2001:db8::99'))
+
+    def test_the_upper_layer_needs_its_protocol_and_length(self) -> None:
+        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        # The malformed headers above, with the address given: what the walk still
+        # cannot read is the upper layer's protocol and length (#2513).
+        opts = self.ipv6(60, bytes([17, 2]) + bytes(22), payload=8)
+        route = self.ipv6(43, bytes([17, 1, 0, 1, 0, 0, 0, 0]) + bytes(8))
+        for ip, value in ((opts, 'src'), (route, 'dst')):
+            with self.subTest(value):
+                with self.assertRaisesRegex(ProtocolError, 'upper layer of IPv6 not parsed; '
+                                                           'give protocol and upper_length'):
+                    IP_Pseudo(ip=ip, **{value: '2001:db8::99'})
 
     def test_last_fragment_needs_the_reassembled_length(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
