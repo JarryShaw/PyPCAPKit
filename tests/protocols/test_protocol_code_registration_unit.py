@@ -555,6 +555,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         reads it: an inherited one would not be its own declaration.
         """
         from pcapkit.const.ipx.packet import Packet
+        from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.apptype import AppType
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
@@ -564,6 +565,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.protocols.misc.raw import Raw
@@ -575,6 +577,9 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         expected = {
             # 0x0800 is EtherType.Internet_Protocol_version_4, where Link ships IPv4.
             Link: (EtherType, False, TransType.ICMP, 0x0800),
+            # 770 is ARPHRD.FRAD, where LinuxSLL ships FRAD; the EtherType is the
+            # key of Link's registry, which LinuxSLL's own refuses (#2510).
+            LinuxSLL: (ARPHRD, False, EtherType.Internet_Protocol_version_4, 770),
             # 6 is TransType.TCP, where Internet ships TCP.
             Internet: (TransType, False, EtherType.XEROX_NS_IDP, 6),
             # TransType.UDP is 17, Packet.NCP: IPX's registry of its own exists so

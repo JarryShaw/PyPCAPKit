@@ -77,6 +77,8 @@ DISPATCH = {
     'PCAPNG': 'pcapkit.protocols.misc.pcapng:PCAPNG',
     'Link': 'pcapkit.protocols.link.link:Link',
     'Loopback': 'pcapkit.protocols.link.loopback:Loopback',
+    'LinuxSLL': 'pcapkit.protocols.link.linux_sll:LinuxSLL',
+    'FRAD': 'pcapkit.protocols.link.frad:FRAD',
     'Internet': 'pcapkit.protocols.internet.internet:Internet',
     'TCP': 'pcapkit.protocols.transport.tcp:TCP',
     'UDP': 'pcapkit.protocols.transport.udp:UDP',
@@ -183,6 +185,9 @@ MODULE_REGISTRARS = (
                     'pcapkit.const.reg.ethertype:EtherType.Address_Resolution_Protocol', 'Link',
                     'pcapkit.protocols.link.link:Link'),
     ModuleRegistrar('register_loopback', 2, 'Loopback', 'pcapkit.protocols.internet.internet:Internet'),
+    ModuleRegistrar('register_arphrd', 'pcapkit.const.linux.arphrd:ARPHRD.FRAD', 'LinuxSLL',
+                    'pcapkit.protocols.link.link:Link'),
+    ModuleRegistrar('register_frad', 0xCC, 'FRAD', 'pcapkit.protocols.internet.internet:Internet'),
     ModuleRegistrar('register_transtype', 'pcapkit.const.reg.transtype:TransType.TCP', 'Internet',
                     'pcapkit.protocols.transport.transport:Transport'),
     ModuleRegistrar('register_tcp', 80, 'TCP', 'pcapkit.protocols.application.application:Application'),
@@ -444,6 +449,7 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_traceflow_tcp_callback': 'append-only, nothing to undo with',
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
             'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',
+            'register_netlink': 'Netlink.__proto__ ships no entry, so there is none to restore',
         }
         self.assertEqual(sorted(set(registry.__all__) - covered - set(excused)), [])
         self.assertEqual(sorted((covered | set(excused)) - set(registry.__all__)), [])

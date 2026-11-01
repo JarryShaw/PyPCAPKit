@@ -5,7 +5,7 @@
 ``ARPHRD_NETLINK`` payload that
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
 :class:`~pcapkit.protocols.misc.raw.Raw` (see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`). Covers the
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
 16-octet ``nlmsghdr`` fields, the byte-order heuristic
 :func:`~pcapkit.protocols.link.netlink.nlmsg_byteorder` resolves (see
 :rfc:`3549#section-2.3.2`), and byte-exact round trips. The NETLINK-dispatch
@@ -197,12 +197,16 @@ class TestNetlink(unittest.TestCase):
         self.assertEqual(made.info.nlmsg_len, 999)
 
     def test_id_and_index(self) -> None:
+        """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertEqual(Netlink.id(), ('Netlink',))
-        with self.assertRaises(UnsupportedCall):
-            Netlink.__index__()
+        self.assertIs(Netlink.__index__(), ARPHRD.NETLINK)
+        self.assertEqual(Netlink.__index__(), 824)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, Netlink.__index__()),
+                      Netlink)
 
     def test_truncated_header_rebuilds_as_captured(self) -> None:
         """A capture ending inside the header must not blow up the parse, and

@@ -147,7 +147,8 @@ class LinuxSLL2(LinuxSLL[Data_LinuxSLL2, Schema_LinuxSLL2],
             link_addr=schema.link_addr,
         )
 
-        _proto = _resolve_next_layer_proto(schema.arphrd_type, schema.protocol_type)
+        _proto = _resolve_next_layer_proto(self.__proto__, schema.arphrd_type,
+                                           schema.protocol_type)
         return self._decode_next_layer(linux_sll2, _proto, length - self.length)
 
     def make(self,
@@ -164,7 +165,8 @@ class LinuxSLL2(LinuxSLL[Data_LinuxSLL2, Schema_LinuxSLL2],
 
         Args:
             protocol_type: Protocol (internet layer); an EtherType unless
-                ``arphrd_type`` is in the exceptions of :class:`LinuxSLL2`.
+                ``arphrd_type`` is a key of :attr:`LinuxSLL.__proto__
+                <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
             reserved: Reserved, must be zero.
             interface_index: Index, in the capturing host's own numbering, of
                 the interface the packet was seen on.

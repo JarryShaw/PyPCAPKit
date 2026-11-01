@@ -85,6 +85,12 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_loopback
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_arphrd
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_frad
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_netlink
+
 Internet Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -28,6 +28,7 @@ from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
 from pcapkit.const.ipv6.option import Option as IPv6_Option
 from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
 from pcapkit.const.ipx.packet import Packet as IPX_Packet
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
 from pcapkit.const.mh.option import Option as MH_Option
 from pcapkit.const.mh.packet import Packet as MH_Packet
@@ -61,8 +62,11 @@ from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.internet.ipx import IPX
 from pcapkit.protocols.internet.mh import MH
+from pcapkit.protocols.link.frad import FRAD
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.link.linux_sll import LinuxSLL
 from pcapkit.protocols.link.loopback import Loopback
+from pcapkit.protocols.link.netlink import Netlink
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import ProtocolBase
@@ -149,6 +153,7 @@ __all__ = [
 
     'register_ethertype',
     'register_loopback',
+    'register_arphrd', 'register_frad', 'register_netlink',
 
     'register_transtype',
     'register_ipx',
@@ -886,6 +891,136 @@ def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase]
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (Loopback, code))
+
+
+@overload
+def register_arphrd(code: 'Enum_ARPHRD', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_arphrd(code: 'Enum_ARPHRD', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__
+def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                    class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__` registry, so
+    that a Linux "cooked" capture on that ``arphrd_type`` dispatches to it
+    instead of reading ``protocol_type`` as an EtherType.
+
+    Arguments:
+        code: ARP hardware type as in :class:`~pcapkit.const.linux.arphrd.ARPHRD`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.linux.arphrd.ARPHRD`
+            member, e.g. a member of another enum, or ``module``
+            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+            subclass.
+
+    """
+    _check_code(code, Enum_ARPHRD, LinuxSLL)  # type: ignore[type-abstract]
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    LinuxSLL.register(code, module)
+    logger.debug('registered ARPHRD protocol: %s', code.name)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (LinuxSLL, code))
+
+
+@overload
+def register_frad(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_frad(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.frad.FRAD.__proto__
+def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                  class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.frad.FRAD.__proto__` registry.
+
+    Arguments:
+        code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
+            not accepted, even though it is one), or is a member of an enum.
+
+    """
+    _check_code(code, None, FRAD)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    FRAD.register(code, module)
+    logger.debug('registered FRAD NLPID: %s', code)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (FRAD, code))
+
+
+@overload
+def register_netlink(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_netlink(code: 'int', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.netlink.Netlink.__proto__
+def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                     class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.netlink.Netlink.__proto__` registry.
+
+    Arguments:
+        code: ``nlmsg_type`` of the dissected message
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is not an :class:`int` (a :class:`bool` is
+            not accepted, even though it is one), or is a member of an enum.
+
+    """
+    _check_code(code, None, Netlink)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    Netlink.register(code, module)
+    logger.debug('registered Netlink message type: %s', code)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (Netlink, code))
 
 
 ###############################################################################

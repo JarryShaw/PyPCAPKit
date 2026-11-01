@@ -12,7 +12,7 @@ optional Key and Sequence Number extensions [:rfc:`2890`], as seen on a
 is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- both land on this one class:
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches here instead
 of falling back to :class:`~pcapkit.protocols.misc.raw.Raw` for either case;
-see :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`. The
+see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`. The
 "IP"/"IP6" distinction in the two ``arphrd_type`` names is about which IP
 version the tunnel carries on its *outer* layer -- i.e. which ``arphrd_type``
 fired -- not a different GRE header shape; the GRE framing itself is
@@ -64,15 +64,16 @@ than misreading it as RFC 2784/2890 GRE.
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.data.link.gre import GRE as Data_GRE
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.gre import GRE as Schema_GRE
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -315,17 +316,18 @@ class GRE(Link[Data_GRE, Schema_GRE],
         return 16
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol is reached only through
-                :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`'s
-                ``arphrd_type`` dispatch, not through a link-layer header
-                type of its own.
+        Returns:
+            Numeral registry index of the protocol in Linux ARP hardware
+            types: :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE`, which
+            :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+            dispatches here alongside
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`.
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_ARPHRD.IPGRE  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

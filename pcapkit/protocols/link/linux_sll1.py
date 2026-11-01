@@ -55,8 +55,9 @@ class LinuxSLL1(LinuxSLL[Data_LinuxSLL1, Schema_LinuxSLL1],
     """Linux "cooked" capture encapsulation v1 (``LINUX_SLL``).
 
     ``protocol_type`` is dispatched as an EtherType, unless ``arphrd_type`` is
-    in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`; in that
-    case, and when no dissector is registered, the payload is
+    a key of :attr:`LinuxSLL.__proto__
+    <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`, which dispatches
+    it instead; with no dissector registered either way, the payload is
     :class:`~pcapkit.protocols.misc.raw.Raw`.
 
     """
@@ -145,7 +146,8 @@ class LinuxSLL1(LinuxSLL[Data_LinuxSLL1, Schema_LinuxSLL1],
             protocol_type=schema.protocol_type,
         )
 
-        _proto = _resolve_next_layer_proto(schema.arphrd_type, schema.protocol_type)
+        _proto = _resolve_next_layer_proto(self.__proto__, schema.arphrd_type,
+                                           schema.protocol_type)
         return self._decode_next_layer(linux_sll, _proto, length - self.length)
 
     def make(self,
@@ -167,7 +169,8 @@ class LinuxSLL1(LinuxSLL[Data_LinuxSLL1, Schema_LinuxSLL1],
             link_addr_length: Length of the address actually in use, by
                 default ``len(link_addr)``; may exceed 8, up to ``0xFFFF``.
             protocol_type: Protocol (internet layer); an EtherType unless
-                ``arphrd_type`` is in the exceptions of :class:`LinuxSLL1`.
+                ``arphrd_type`` is a key of :attr:`LinuxSLL.__proto__
+                <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 

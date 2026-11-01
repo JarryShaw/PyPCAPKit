@@ -46,8 +46,6 @@ __tier__ = 'LATEST'
 EXCUSED = {
     'pcapkit.protocols.protocol.ProtocolBase.__proto__':
         'the empty default a class without a map of its own inherits; nothing dispatches by it',
-    'pcapkit.protocols.link.frad.FRAD.__proto__': 'wrapper and classmethod owned by #2510',
-    'pcapkit.protocols.link.netlink.Netlink.__proto__': 'wrapper and classmethod owned by #2510',
 }
 
 #: ``map path -> (the classmethod its owner inherits, why it fits the map's keys)``.
