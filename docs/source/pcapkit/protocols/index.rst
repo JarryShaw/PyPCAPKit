@@ -141,7 +141,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
        click ARP "link/arp.html#pcapkit.protocols.link.arp.ARP"
-       click InARP "link/arp.html#pcapkit.protocols.link.arp.InARP"
+       click InARP "link/inarp.html#pcapkit.protocols.link.inarp.InARP"
 
        click Internet "internet/internet.html#pcapkit.protocols.internet.internet.Internet"
        click AH "internet/ah.html#pcapkit.protocols.internet.ah.AH"

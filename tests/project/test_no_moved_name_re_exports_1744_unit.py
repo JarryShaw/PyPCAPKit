@@ -61,6 +61,7 @@ PURE = (
     ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
     ('pcapkit.protocols.internet.mh', 'PMIPv6Timestamp'),
+    ('pcapkit.protocols.link.arp', 'InARP'),
     # #2529: renamed after their modules.
     ('pcapkit.protocols.application.httpv1', 'HTTP'),
     ('pcapkit.protocols.application.httpv2', 'HTTP'),
@@ -94,10 +95,13 @@ SHIPPED = (
     ('pcapkit.protocols.application.ftp', 'FTP_DATA',
      'pcapkit/protocols/application/ftp.py',
      'pcapkit/protocols/application/ftp.rst', '1.5.0'),
-    # #2529: shipped in 1.5.x, moved to its own module.
+    # #2529: shipped in 1.5.x, moved to their own modules.
     ('pcapkit.protocols.application.rarp', 'DRARP',
      'pcapkit/protocols/application/rarp.py',
      'pcapkit/protocols/application/rarp.rst', '1.6.0'),
+    ('pcapkit.protocols.link.arp', 'InARP',
+     'pcapkit/protocols/link/arp.py',
+     'pcapkit/protocols/link/arp.rst', '1.6.0'),
     # #2529: shipped in 1.5.x, renamed after their modules.
     ('pcapkit.protocols.application.httpv1', 'HTTP',
      'pcapkit/protocols/application/httpv1.py',

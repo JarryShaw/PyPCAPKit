@@ -103,7 +103,8 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_arp_and_inarp_stay_on_the_link_layer(self) -> None:
         """:rfc:`1122#section-2.3.2` keeps ARP on the link layer; RARP is not."""
-        from pcapkit.protocols.link.arp import ARP, InARP
+        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.inarp import InARP
 
         self.assertEqual(ARP.__layer__, 'Link')
         self.assertEqual(InARP.__layer__, 'Link')
