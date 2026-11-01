@@ -98,8 +98,8 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
     .. versionchanged:: 1.6.0
 
        The checksum is computed when :meth:`make` is given none, and verified
-       on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-       (:issue:`2470`).
+       on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`,
+       unless the enclosing IP layer is a fragment (:issue:`2470`).
 
     """
 
@@ -201,11 +201,17 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
             meth = name[0]
         icmp = meth(schema.data, header=schema, length=length)
 
-        # NOTE: The checksum covers the message alone, with no pseudo-header (RFC 792).
+        # NOTE: The checksum covers the whole message, with no pseudo-header (RFC 792);
+        # an IP fragment carries only part of one.
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.checksum import verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.checksum.checksum import (  # isort: skip # pylint: disable=import-outside-toplevel
+                ChecksumStatus, _in_fragment, verify_checksum)
+            if _in_fragment.get():
+                status = ChecksumStatus.NO_PSEUDO_HEADER
+            else:
+                status = verify_checksum(self.alias, self._data, schema.checksum, length=length)
             icmp.__update__([
-                ('checksum_status', verify_checksum(self.alias, self._data, schema.checksum, length=length)),
+                ('checksum_status', status),
             ])
 
         # NOTE: The quoted original datagram stays raw in the message body,

@@ -17,7 +17,7 @@ A checksum over the IP pseudo-header is left to the enclosing IP layer, which
 alone knows the pseudo-header, and builds it as an
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, rather than the
 upper layer reaching back to its parent. The upper layer takes part through
-three members:
+these members:
 
 * ``_verify_pseudo_checksum(pseudo)`` verifies the checksum against
   ``pseudo``, or records :attr:`ChecksumStatus.NO_PSEUDO_HEADER` for
@@ -28,9 +28,14 @@ three members:
   had no ``pseudo`` for. An IP layer constructed with that upper layer as its
   payload then rebuilds it with its own pseudo-header.
 
+A checksum over the upper layer alone, as ICMP's, is verified as it is parsed,
+unless the IP layer it is parsed from is a fragment, see :func:`fragment_payload`.
+
 .. versionadded:: 1.6.0
 
 """
+import contextlib
+import contextvars
 import enum
 import struct
 from typing import TYPE_CHECKING
@@ -41,7 +46,7 @@ from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stackle
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Collection, Optional
+    from typing import Collection, Iterator, Optional
 
     from pcapkit.protocols.internet.ipv4 import IPv4
     from pcapkit.protocols.internet.ipv6 import IPv6
@@ -50,8 +55,12 @@ if TYPE_CHECKING:
 __all__ = [
     'ChecksumStatus',
     'internet_checksum', 'compute_checksum', 'partial_checksum', 'verify_checksum',
-    'pseudo_header', 'verify_upper',
+    'pseudo_header', 'verify_upper', 'fragment_payload',
 ]
+
+#: contextvars.ContextVar[bool]: Whether the layer being parsed is the payload
+#: of an IP fragment, see :func:`fragment_payload`.
+_in_fragment = contextvars.ContextVar('_in_fragment', default=False)
 
 
 class ChecksumStatus(EnumLookup, enum.IntEnum):
@@ -75,8 +84,9 @@ class ChecksumStatus(EnumLookup, enum.IntEnum):
     NOT_COMPUTED = 2
     #: Fewer octets were captured than the checksum covers.
     TRUNCATED = 3
-    #: The enclosing IP layer does not give the pseudo-header the checksum
-    #: covers, as for a fragment or an upper layer behind ESP.
+    #: The enclosing IP layer does not give what the checksum covers: it is
+    #: a fragment, holding only part of the datagram, or the pseudo-header
+    #: cannot be derived from it.
     NO_PSEUDO_HEADER = 4
 
 
@@ -247,3 +257,23 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
     if pseudo is not None and pseudo.protocol != upper.__index__():
         pseudo = None
     verify(pseudo)
+
+
+@contextlib.contextmanager
+def fragment_payload(fragment: 'bool') -> 'Iterator[None]':
+    """Mark the payload an IP layer parses as a fragment's, or not.
+
+    A checksum over the upper layer alone, as ICMP's (:rfc:`792`), covers all
+    of the datagram's data, which a fragment carries part of, so the upper
+    layer of one records :attr:`~ChecksumStatus.NO_PSEUDO_HEADER` rather than
+    being verified (:issue:`2470`). The nearest enclosing IP layer decides.
+
+    Args:
+        fragment: Whether the IP layer is a fragment; an atomic one is not.
+
+    """
+    token = _in_fragment.set(fragment)
+    try:
+        yield
+    finally:
+        _in_fragment.reset(token)

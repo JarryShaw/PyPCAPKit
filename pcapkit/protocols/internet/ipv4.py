@@ -424,8 +424,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # as, and ``'UDP' in frame`` does not hold of a slice of UDP payload
         # (#1553). Reassembly takes ``packet.payload``, the octets as
         # captured, which this leaves as they were.
-        return self._decode_next_layer(ipv4, None if ipv4.offset else ipv4.protocol, _plen,
-                                       packet=__packet__)
+        proto = None if ipv4.offset else ipv4.protocol
+        if config.CHECKSUM_VERIFY:
+            # NOTE: An upper layer checksummed alone, as ICMP is, is not verified
+            # in a fragment; see pcapkit.protocols.misc.checksum.checksum (#2470).
+            from pcapkit.protocols.misc.checksum.checksum import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
+            with fragment_payload(bool(ipv4.offset or ipv4.flags.mf)):
+                return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
+        return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
 
     def make(self,
              tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,

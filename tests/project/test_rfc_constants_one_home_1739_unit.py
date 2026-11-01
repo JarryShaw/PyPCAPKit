@@ -397,7 +397,11 @@ UNRELATED = {
     'pcapkit/protocols/schema/internet/ipv6_option.py': ((16,), 'an MPL Seed-ID of 16 octets'),
     'pcapkit/protocols/schema/application/httpv2.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
-    'pcapkit/protocols/application/ospf.py': ((24, 65535), 'OSPF header length and field bounds'),
+    'pcapkit/protocols/application/ospf.py': ((16, 24, 65535),
+                                              'OSPF header length and field bounds; 16 is the '
+                                              'offset of the Authentication field the checksum '
+                                              'leaves out (RFC 2328 appendix A.3.1), not a PCAP '
+                                              'record header'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
     'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
@@ -456,6 +460,10 @@ UNRELATED = {
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
     'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),
+    'pcapkit/protocols/misc/checksum/checksum.py': ((16, 65535),
+                                                    "the one's-complement sum's 16-bit word mask "
+                                                    'and carry shift (RFC 1071), not an IP total '
+                                                    'length or a PCAP record header'),
     'pcapkit/protocols/misc/pcapng.py': ((65535,), 'a 16-bit mask'),
     'pcapkit/protocols/schema/misc/pcapng.py': ((9, 65535), 'an epb_flags bit offset, and a '
                                                '16-bit field default'),

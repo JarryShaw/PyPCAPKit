@@ -103,7 +103,9 @@ A checksum over the IP pseudo-header is verified and computed by the enclosing
 the upper layer reaching back to its parent. So an upper layer constructed
 alone, or behind another header such as an IPv6 extension header or an
 Authentication Header, has its checksum computed only if given the ``pseudo``
-to compute it over, and one parsed alone records no outcome.
+to compute it over, and one parsed alone records no outcome. ICMP's checksum,
+over the message alone, is verified as it is parsed, unless the IP layer it is
+parsed from is a fragment.
 
 .. autoclass:: pcapkit.protocols.misc.checksum.checksum.ChecksumStatus
    :members:
@@ -115,3 +117,4 @@ to compute it over, and one parsed alone records no outcome.
 .. autofunction:: pcapkit.protocols.misc.checksum.checksum.verify_checksum
 .. autofunction:: pcapkit.protocols.misc.checksum.checksum.pseudo_header
 .. autofunction:: pcapkit.protocols.misc.checksum.checksum.verify_upper
+.. autofunction:: pcapkit.protocols.misc.checksum.checksum.fragment_payload

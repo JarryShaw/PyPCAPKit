@@ -26,6 +26,7 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet
 
 """
+import contextlib
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
@@ -46,7 +47,7 @@ from pcapkit.utilities.exceptions import ProtocolError
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, Mapping, Optional, Type
+    from typing import IO, Any, ContextManager, Mapping, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -648,11 +649,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # of a slice of UDP payload (#1545). Reassembly takes
         # ``fragment`` above, which this leaves as it was.
         self._exthdr_depth = len(_protos)  # the headers the upper layer follows
+        scope = contextlib.nullcontext()  # type: ContextManager[None]
+        if config.CHECKSUM_VERIFY:
+            # NOTE: As in IPv4.read; an atomic fragment, offset zero and no more
+            # to come, is a whole packet (#2470).
+            from pcapkit.protocols.misc.checksum.checksum import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
+            frags = self._exthdr.getlist(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[arg-type]
+            scope = fragment_payload(any(frag.info.get('offset') or frag.info.get('mf') for frag in frags))
         token = _frame_depth.set(depth + len(_protos))
         try:
-            return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
-                                              ipv6_exthdr=ProtoChain.from_list(_protos),  # type: ignore[arg-type]
-                                              payload=payload)
+            with scope:
+                return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
+                                                  ipv6_exthdr=ProtoChain.from_list(_protos),  # type: ignore[arg-type]
+                                                  payload=payload)
         finally:
             _frame_depth.reset(token)
 

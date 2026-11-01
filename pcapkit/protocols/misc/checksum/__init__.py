@@ -4,9 +4,9 @@
 
 .. module:: pcapkit.protocols.misc.checksum
 
-:mod:`pcapkit.protocols.misc.checksum` contains the pseudo-header protocols
-that upper-layer checksums cover, currently
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` only, and in
+:mod:`pcapkit.protocols.misc.checksum` contains the pseudo-header that
+upper-layer checksums cover,
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, and in
 :mod:`~pcapkit.protocols.misc.checksum.checksum` what the one's-complement
 checksums share, such as
 :class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus`.

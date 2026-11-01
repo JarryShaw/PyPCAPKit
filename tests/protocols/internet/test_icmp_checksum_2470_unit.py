@@ -105,6 +105,25 @@ class ICMPv4ChecksumTests(ChecksumTestCase):
         self.assertEqual(self.status(ECHO[:-1]), (self.Status.TRUNCATED, []))
         self.assertEqual(self.status(with_checksum(ECHO, b'\x08\x3b', 22), verify=False), (None, []))
 
+    def test_a_fragment_is_not_verified(self) -> None:
+        # The first 32 of the Echo's 40 octets, More Fragments set: the checksum
+        # covers all 40, so the fragment cannot be checked, as TCP's cannot.
+        message = ECHO[20:]
+        packets = {
+            'IPv4': (self.IPv4, wire.ipv4(message[:32], mf=True, proto=1)),
+            'behind AH': (self.IPv4, wire.ipv4(bytes([1, 4]) + bytes(22) + message[:32], mf=True, proto=51)),
+            'IPv6': (self.IPv6, wire.ipv6_fragment(message[:32], mf=True, nxt=1)),
+        }
+        for name, (cls, packet) in packets.items():
+            with self.subTest(name):
+                layer, messages = self.parse(packet, cls)
+                self.assertEqual((layer['ICMP'].info.checksum_status, messages),
+                                 (self.Status.NO_PSEUDO_HEADER, []))
+                self.assertEqual(cls.from_data(layer.info).data, packet)
+        # An atomic fragment is the whole datagram.
+        layer, messages = self.parse(wire.ipv6_fragment(message, nxt=1), self.IPv6)
+        self.assertEqual((layer['ICMP'].info.checksum_status, messages), (self.Status.VALID, []))
+
     def test_parse_rebuild_is_exact(self) -> None:
         for packet in (ECHO, with_checksum(ECHO, b'\x08\x3b', 22), with_checksum(ECHO, b'\x00\x00', 22)):
             for verify in (True, False):
