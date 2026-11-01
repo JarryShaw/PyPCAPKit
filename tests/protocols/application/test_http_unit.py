@@ -89,7 +89,7 @@ class HTTPUnitTests(unittest.TestCase):
         http._version = '1.1'
         http._length = 42
 
-        self.assertEqual(HTTP.id(), ('HTTP', 'HTTPv1', 'HTTPv2'))
+        self.assertEqual(HTTP.id(), ('HTTP/1', 'HTTP/2'))
         self.assertEqual(http.name, 'Hypertext Transfer Protocol')
         self.assertEqual(http.alias, 'HTTP/1.1')
         self.assertEqual(http.version, '1.1')
@@ -1549,7 +1549,7 @@ class HTTPUnitTests(unittest.TestCase):
             raw_header=(),
         )
 
-        self.assertEqual(HTTPv1.id(), ('HTTP', 'HTTPv1'))
+        self.assertEqual(HTTPv1.id(), ('HTTP/1',))
         self.assertEqual(proto.version, '1.0')
         self.assertEqual(proto.alias, 'HTTP/1.0')
         self.assertIn(b'GET /index.html HTTP/1.1\r\n', schema.data)
@@ -1767,7 +1767,7 @@ class HTTPUnitTests(unittest.TestCase):
             with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
                 HTTPv2.register_frame(Frame.DATA, 'headers')
 
-            self.assertEqual(HTTPv2.id(), ('HTTP', 'HTTPv2'))
+            self.assertEqual(HTTPv2.id(), ('HTTP/2',))
             self.assertEqual(proto.alias, 'HTTP/2')
             self.assertEqual(proto.version, '2')
             self.assertEqual(proto.length, 9)

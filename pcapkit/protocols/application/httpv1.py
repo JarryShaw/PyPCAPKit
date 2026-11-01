@@ -278,14 +278,23 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         )
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv1"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP/1"]]':  # type: ignore[override]
         """Index ID of the protocol.
+
+        :rfc:`9112` names the protocol ``HTTP/1.1``. This class also reads
+        messages declaring HTTP/1.0 or HTTP/0.9, so its name carries the major
+        version alone, and :attr:`alias` the exact one.
 
         Returns:
             Index ID of the protocol.
 
+        .. versionchanged:: 1.6.0
+
+           ``('HTTP/1',)``, narrowed to this class, where it was
+           ``('HTTP', 'HTTPv1')`` (:issue:`2524`).
+
         """
-        return (cls.__name__, 'HTTPv1')  # type: ignore[return-value]
+        return ('HTTP/1',)
 
     ##########################################################################
     # Utilities.

@@ -367,10 +367,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         Returns:
             Index ID of the protocol -- the canonical family name first, then
-            this version's own label, as
-            :meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>`
-            does. Element zero is what callers treat as canonical, so both
-            ``protocol='L2TP'`` and ``protocol='L2TPv2'`` select this class.
+            this version's own label. Element zero is what callers treat as
+            canonical, so both ``protocol='L2TP'`` and ``protocol='L2TPv2'``
+            select this class.
 
         """
         return ('L2TP', 'L2TPv2')

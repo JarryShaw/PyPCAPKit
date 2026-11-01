@@ -53,7 +53,7 @@ the value 1 "to permit detection of L2F packets should they arrive intermixed wi
 L2TP packets". L2F is a separate protocol with its own header, so it is to be
 implemented as ``L2F``, the canonical name, with ``L2TPv1`` only as an alias in its
 :meth:`~pcapkit.protocols.protocol.Protocol.id`. See
-:meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for
+:meth:`L2TPv2.id <pcapkit.protocols.link.l2tpv2.L2TPv2.id>` for
 how a version-flavoured alias is spelled: canonical name first, alias second,
 since callers take element zero as canonical.
 

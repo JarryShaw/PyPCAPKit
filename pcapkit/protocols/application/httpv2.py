@@ -453,14 +453,21 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         return data
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv2"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP/2"]]':  # type: ignore[override]
         """Index ID of the protocol.
+
+        :rfc:`9113` names the protocol ``HTTP/2``.
 
         Returns:
             Index ID of the protocol.
 
+        .. versionchanged:: 1.6.0
+
+           ``('HTTP/2',)``, narrowed to this class, where it was
+           ``('HTTP', 'HTTPv2')`` (:issue:`2524`).
+
         """
-        return (cls.__name__, 'HTTPv2')  # type: ignore[return-value]
+        return ('HTTP/2',)
 
     @classmethod
     def register_frame(cls, code: 'Enum_Frame', meth: 'str | tuple[FrameParser, FrameConstructor]') -> 'None':

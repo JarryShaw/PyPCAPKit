@@ -122,8 +122,8 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
 
         Returns:
             Index ID of the protocol -- the family name, then every tag in it, as
-            :meth:`HTTP.id <pcapkit.protocols.application.http.HTTP.id>` does for
-            its own family. Note that unlike HTTP's versions, the two tags are
+            :meth:`L2TP.id <pcapkit.protocols.link.l2tp.L2TP.id>` does for
+            its own family. Note that unlike L2TP's versions, the two tags are
             *distinct protocols* rather than flavours of one, so each is its own
             canonical name; they carry ``VLAN`` only as a secondary alias.
 

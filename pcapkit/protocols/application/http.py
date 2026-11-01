@@ -262,9 +262,28 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv1"], Literal["HTTPv2"]]':
-        """Index ID of the protocol."""
-        return ('HTTP', 'HTTPv1', 'HTTPv2')
+    def id(cls) -> 'tuple[Literal["HTTP/1"], Literal["HTTP/2"]]':
+        """Index ID of the protocol.
+
+        The family base lists its members' names alone, as
+        :meth:`IP.id() <pcapkit.protocols.internet.ip.IP.id>` does: ``HTTP/1``
+        for :rfc:`9112`'s HTTP/1.1 and the versions before it, and :rfc:`9113`'s
+        ``HTTP/2``. A parsed layer is this class, so either name selects it
+        whichever version it holds, and :attr:`alias` tells the versions apart.
+        String ``==`` compares against ``(cls, *id())``, so ``== 'HTTP'`` is
+        :data:`False`, while ``'HTTP' in`` matches by class.
+
+        Returns:
+            Index ID of the protocol; the versioned classes narrow it to their
+            own name.
+
+        .. versionchanged:: 1.6.0
+
+           ``('HTTP/1', 'HTTP/2')``, where it was ``('HTTP', 'HTTPv1', 'HTTPv2')``
+           (:issue:`2524`).
+
+        """
+        return ('HTTP/1', 'HTTP/2')
 
     def read(self, length: 'Optional[int]' = None, *,
              version: 'Optional[Literal[1, 2]]' = None,
