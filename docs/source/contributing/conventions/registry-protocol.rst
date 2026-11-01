@@ -380,6 +380,10 @@ basis:
 * :class:`~pcapkit.const.tls.content_type.ContentType` lower-cases IANA's ``ACK`` (26) to
   ``ack``, the spelling :rfc:`9147#section-4.1` uses for that content type
   (:issue:`2565`).
+* :class:`~pcapkit.const.tls.handshake_type.HandshakeType`'s crawler lower-cases each
+  cell the same way, which changes only IANA's single-row ``Unassigned`` entries, to
+  ``unassigned_7`` and ``unassigned_255``; the ranges ``_missing_`` names keep
+  ``Unassigned`` (:issue:`2582`).
 * :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`,
   :class:`~pcapkit.const.ipv4.tos_thr.ToSThroughput`,
   :class:`~pcapkit.const.ipv4.tos_rel.ToSReliability` and
