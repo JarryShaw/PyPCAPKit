@@ -52,6 +52,7 @@ CASES = (
     ('l2tpv2', 'link.l2tpv2:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
     ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
     ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
+    ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
     ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
         '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
     ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(

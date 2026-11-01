@@ -431,6 +431,10 @@ UNRELATED = {
     'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
+    'pcapkit/protocols/link/netlink.py': ((16, 65535), "the nlmsghdr fixed header length (16 "
+                                          'octets, not a PCAP record header) and the max value '
+                                          "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
+                                          'an IPv4 total length)'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),

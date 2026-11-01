@@ -19,6 +19,7 @@ from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
 from pcapkit.protocols.link.frad import FRAD
 from pcapkit.protocols.link.loopback import Loopback
+from pcapkit.protocols.link.netlink import Netlink
 
 # Linux "Cooked" Capture Encapsulation Family
 from pcapkit.protocols.link.linux_sll import LinuxSLL
@@ -43,5 +44,6 @@ __all__ = [
 
     # Link Layer Protocols
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',
+    'LinuxSLL2', 'Loopback', 'Netlink', 'S_Tag', 'VLAN',
+
 ]

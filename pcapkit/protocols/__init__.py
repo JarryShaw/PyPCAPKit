@@ -51,7 +51,8 @@ __all__ = [
 
     # Link Layer
     'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'S_Tag', 'VLAN',
+    'LinuxSLL2', 'Loopback', 'Netlink', 'S_Tag', 'VLAN',
+
 
     # Internet Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',

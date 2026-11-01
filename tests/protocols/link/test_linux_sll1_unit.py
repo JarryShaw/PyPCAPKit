@@ -73,17 +73,15 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE`` and ``IEEE80211_RADIOTAP``, per
-        tcpdump.org's LINUX_SLL page, never have ``protocol_type`` looked up as an
-        EtherType, even though 0x0800 is IPv4's. ``FRAD`` is the exception: see
-        :meth:`test_frad_arphrd_dispatches_to_frad`.
+        """The generic ``arphrd_type``s that never have ``protocol_type`` looked
+        up as an EtherType are kept raw; ``NETLINK`` and ``FRAD`` are the
+        exceptional dispatch cases, covered by their dedicated tests.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
         from pcapkit.protocols.misc.raw import Raw
 
-        for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP):
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE, ARPHRD.IEEE80211_RADIOTAP):
             with self.subTest(arphrd=arphrd):
                 # protocol_type 0x0800 is IPv4's EtherType, but these
                 # hardware types never carry an EtherType in protocol_type.
@@ -97,6 +95,28 @@ class TestLinuxSLL1(unittest.TestCase):
                 self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Raw')
                 self.assertEqual(parsed.data, raw)
                 self._assert_rebuilds(parsed)
+
+    def test_netlink_arphrd_dispatches_to_netlink(self) -> None:
+        """``ARPHRD_NETLINK`` dispatches to
+        :class:`~pcapkit.protocols.link.netlink.Netlink`, not
+        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), even though
+        it too is in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`.
+        """
+        import struct
+
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+        from pcapkit.protocols.link.netlink import Netlink
+
+        nlmsg = struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'
+        raw = _header(2, ARPHRD.NETLINK, b'', 0, 0x0800) + nlmsg
+        parsed = LinuxSLL1(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.NETLINK)
+        self.assertIsInstance(parsed.payload, Netlink)
+        self.assertEqual(parsed.payload.info.nlmsg_type, 3)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Netlink:Raw')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
 
     def test_frad_arphrd_dispatches_to_frad(self) -> None:
         """GitHub issue #2460: ``ARPHRD_FRAD`` dispatches to
@@ -221,7 +241,7 @@ class TestLinuxSLL1(unittest.TestCase):
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.netlink import Netlink
 
         registry = Link.__dict__['__proto__']
         had_original = 0x1234 in registry
@@ -238,9 +258,11 @@ class TestLinuxSLL1(unittest.TestCase):
             self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:IPv4:UDP')
             self._assert_rebuilds(parsed)
 
+            # A registered override on Link.__proto__ does not leak into
+            # NETLINK's dispatch -- it never looks EtherType up at all.
             raw = _sll(0x1234, ARPHRD.NETLINK) + IPV4
             parsed = LinuxSLL1(raw, len(raw))
-            self.assertIsInstance(parsed.payload, Raw)
+            self.assertIsInstance(parsed.payload, Netlink)
         finally:
             if had_original:
                 registry[0x1234] = original
@@ -339,7 +361,7 @@ class TestLinuxSLL1(unittest.TestCase):
         raw = (_header(0, 1, bytes.fromhex('001122334455'), 6, 0x0800) + IPV4,
                # loopback (772): not Ethernet, not one of the exceptions.
                _header(2, 772, b'', 0, 0x0800) + IPV4,
-               # NETLINK (824): one of the exceptions, stays Raw.
+               # NETLINK (824): one of the exceptions, dispatches to Netlink.
                _header(2, ARPHRD.NETLINK, b'', 0, 0x0800) + IPV4)
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, 'any.pcap')
@@ -350,7 +372,7 @@ class TestLinuxSLL1(unittest.TestCase):
                 extractor = pcapkit.extract(fin=path, nofile=True, store=True)
 
         self.assertEqual([frame.protochain.chain for frame in extractor.frame],
-                         ['LINUX_SLL1:IPv4:UDP', 'LINUX_SLL1:IPv4:UDP', 'LINUX_SLL1:Raw'])
+                         ['LINUX_SLL1:IPv4:UDP', 'LINUX_SLL1:IPv4:UDP', 'LINUX_SLL1:Netlink:Raw'])
         for frame in extractor.frame:
             self._assert_rebuilds(frame, num=frame._fnum, header=frame._ghdr)
 
