@@ -287,14 +287,15 @@ class TestTheTestsStep(unittest.TestCase):
                                 *(f'--ignore={path}' for path in latest)])
 
     def test_its_flags_are_tests(self) -> None:
-        """The flags as unit-tests.yml ``test``'s step writes them."""
-        flags = re.compile(r"set -- -q -n auto --dist load .*?--ignore-glob='\*_regression\.py'", re.S)
+        """The flags as unit-tests.yml ``test``'s step writes them, but for ``-n``, which #2571 moved there alone."""
+        flags = re.compile(r"set -- -q -n (\w+) (--dist load .*?--ignore-glob='\*_regression\.py')", re.S)
         own = flags.search(step('Run unit tests')['run'])
         tests = [entry for entry in _workflows.steps('unit-tests.yml', 'test') if entry.get('name') == 'Run unit tests']
         theirs = flags.search(tests[0]['run'])
         self.assertIsNotNone(own)
         self.assertIsNotNone(theirs)
-        self.assertEqual(own.group(0).split(), theirs.group(0).split())  # type: ignore[union-attr]
+        self.assertEqual((own.group(1), theirs.group(1)), ('auto', 'logical'))  # type: ignore[union-attr]
+        self.assertEqual(own.group(2).split(), theirs.group(2).split())  # type: ignore[union-attr]
 
     def test_a_tier_it_cannot_list_fails_the_step_with_a_warning(self) -> None:
         result, argv, _ = self.run_step(FAIL_C='1')

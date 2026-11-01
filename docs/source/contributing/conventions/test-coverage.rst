@@ -123,7 +123,7 @@ Running the Tests
 
 *  **One module per process, never the whole suite.** Check a change by running the
    modules it touches, each as its own ``python -m pytest <module> -q``, and leave the
-   whole tier to CI, which spreads it over workers with ``-n auto --dist load``. Every
+   whole tier to CI, which spreads it over workers with ``-n logical --dist load``. Every
    purge-then-import leaves the previous generation of :mod:`pcapkit` behind as
    garbage, and the whole suite in one plain-unittest process runs out of memory --
    :file:`util/run_unittest_leg.py` records the measurement.

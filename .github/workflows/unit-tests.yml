@@ -101,8 +101,9 @@ jobs:
       # legs run the same `ALL` tier as every CPython leg but `latest`.
       #
       # `include` marks one leg `coverage: true`, `latest` (#1661), so coverage
-      # adds no leg to the queue. Uncovered, 3.15's tests step took a median
-      # 8.1 minutes and coverage cost about 1.8x, which fits the job's 45.
+      # adds no leg to the queue. That leg runs slower than the rest: it runs the
+      # `LATEST` tier as well as `ALL`, under coverage. ci-timing.yml's W3 tracks
+      # the gap.
       #
       # #2243, the owner's option B: a test-only pull request runs the
       # `latest` leg alone, the coverage leg, which runs the whole suite with
@@ -166,7 +167,7 @@ jobs:
         if: ${{ matrix.coverage }}
         run: python -m pip install 'coverage>=7.10'
 
-      # Nothing else in the log says what `-n auto` resolved to on this runner.
+      # Nothing else in the log says what `-n logical` resolved to on this runner.
       - name: Report available parallelism
         id: parallelism
         if: ${{ steps.install.outcome == 'success' }}
@@ -182,6 +183,10 @@ jobs:
         # `--dist load` is pinned explicitly, so a change to xdist's default
         # cannot silently change how this suite is distributed. The durations
         # table and JUnit file are #1538's per-test timings.
+        #
+        # #2571: `-n logical`, as `auto` counts physical cores, half the runner's
+        # CPUs, wherever psutil is installed: the `test` extra installs it on
+        # CPython. On PyPy, which has none, the two agree.
         #
         # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
         # module in `ALL`, a curated list each stating `__tier__ = 'ALL'` (#1963),
@@ -215,7 +220,7 @@ jobs:
             echo "::${ANNOTATION_LEVEL} title=Could not compute the LATEST tier::tests._tiers.latest_tier_paths() failed -- see the traceback above."
             exit 1
           fi
-          set -- -q -n auto --dist load \
+          set -- -q -n logical --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \

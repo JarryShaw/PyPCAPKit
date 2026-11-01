@@ -1178,6 +1178,13 @@ class TestTimingArtifacts(unittest.TestCase):
         coverage = [entry['python-version'] for entry in found if entry.get('coverage')]
         self.assertEqual([f'Python {version}' for version in coverage], [ci_timing.COVERAGE_JOB])
 
+    def test_the_review_reads_the_coverage_legs_timings(self) -> 'None':
+        """#2571: the coverage leg, ``latest``, alone runs the ``LATEST`` tier, so its file is read too."""
+        coverage = [entry['python-version'] for entry in matrix_legs(matrix('unit-tests.yml', 'test'))
+                    if entry.get('coverage')]
+        self.assertEqual(len(coverage), 1)
+        self.assertIn(coverage[0], ci_timing.JUNIT_LEGS)
+
     def test_the_reusable_workflow_asks_for_no_write_permission(self) -> 'None':
         """Its callers grant ``contents: read``, so a write scope would break them."""
         code = '\n'.join(line.split('#', 1)[0] for line in self.text.splitlines())
