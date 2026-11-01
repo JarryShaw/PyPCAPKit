@@ -94,6 +94,8 @@ reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
 * A whole record that fails to decode becomes
   :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
   with no SSLv2 trial.
+* Octets that open no record -- an unsupported content type, a legacy
+  version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
 * A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
   keeps the rest of the segment raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
