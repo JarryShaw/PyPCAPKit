@@ -1100,11 +1100,15 @@ through a shared method body. The two are distinguished by whether they carry ps
 checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation or verification
 (:issue:`2470`).
 
-**IGMP v1/v2 — done within wave 2** (:issue:`2439`).
-The versioned classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>` and
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` share one read path on the
-abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base.
-:rfc:`3376` IGMPv3 is :issue:`2448`.
+**IGMP — done within wave 2** (:issue:`2439`, :issue:`2448`).
+The three concrete classes :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMP>`,
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMP>` and
+:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMP>` share one read path on
+the abstract :class:`~pcapkit.protocols.internet.igmp.IGMP` base, which
+:meth:`~pcapkit.protocols.internet.igmp.IGMP._classify` dispatches to the right
+one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (:rfc:`3376`) adds the
+Membership Query's source-list extension and the Membership Report's
+group-record list, each a shape of its own.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
@@ -1148,8 +1152,7 @@ sequenced *after* wave 2 rather than by preference: the multicast options embed
 rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
 IGMPv1/v2 are both wave 2 deliverables, now done; MLD itself remains a
 follow-up to ICMPv6 (see `More Protocols, More!!!`_ above), and IGMPv3 is
-:issue:`2448` -- neither is part of wave 2's own scope. Landing the
-registry first would give a dispatch table with nothing but
+:issue:`2448`. Landing the registry first would give a dispatch table with
 :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the

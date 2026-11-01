@@ -241,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -274,6 +275,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -676,8 +678,10 @@
 <span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`)</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Instance of next layer: :class:`~pcapkit.protocols.misc.raw.Raw`,</span>
-<span class="sd">            recording ``proto``, when ``arphrd_type`` is in</span>
+<span class="sd">            Instance of next layer: :class:`~pcapkit.protocols.link.frad.FRAD`</span>
+<span class="sd">            when ``arphrd_type`` is :attr:`ARPHRD.FRAD &lt;pcapkit.const.linux.arphrd.ARPHRD.FRAD&gt;`;</span>
+<span class="sd">            otherwise :class:`~pcapkit.protocols.misc.raw.Raw`, recording</span>
+<span class="sd">            ``proto``, for every other ``arphrd_type`` in</span>
 <span class="sd">            :data:`_ARPHRD_NOT_ETHERTYPE`.</span>
 
 <span class="sd">        """</span>
@@ -685,7 +689,16 @@
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
         <span class="n">arphrd_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">arphrd_type</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="ow">or</span> <span class="n">arphrd_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ARPHRD_NOT_ETHERTYPE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[misc,call-arg]</span>
+
+        <span class="k">if</span> <span class="n">arphrd_type</span> <span class="o">==</span> <span class="n">ARPHRD</span><span class="o">.</span><span class="n">FRAD</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.frad</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAD</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_next_layer</span><span class="p">(</span><span class="n">FRAD</span><span class="p">,</span> <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
+                                          <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
+                                          <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">arphrd_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ARPHRD_NOT_ETHERTYPE</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[misc,call-arg]</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>

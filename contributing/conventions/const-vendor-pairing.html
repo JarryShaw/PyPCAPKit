@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -560,17 +562,48 @@ module docstring and comments, alongside the <code class="docutils literal notra
 generated <code class="docutils literal notranslate"><span class="pre">const</span></code> module carries only the plain, templated docstring every
 other generated module does.</p>
 </section>
-<section id="known-violation">
-<h2>Known Violation<a class="headerlink" href="#known-violation" title="Link to this heading">¶</a></h2>
+<section id="link-and-scrape-pairing-tls-content-types-and-handshaketype">
+<h2><code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-Scrape Pairing: TLS Content Types and HandshakeType<a class="headerlink" href="#link-and-scrape-pairing-tls-content-types-and-handshaketype" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">HandshakeType</span></code></a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>) both cite a live
-IANA registry and claim to name every value IANA assigns, with no
-<a class="reference internal" href="../../pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawler behind either one – no <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/tls/</span></code>
-directory exists, and neither class appears in <code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.vendor.__all__</span></code>. This
-was flagged in that PR’s own review and merged anyway on the stated reasoning that the
-crawler would follow later. Tracked as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2495">#2495</a>. Unlike ARPHRD, TLS’s source
-<em>is</em> a live, web-published IANA table, so its eventual crawler takes the normal
-<code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-scrape shape, not the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> attribute.</p>
+<a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">HandshakeType</span></code></a> (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>) now have
+matching crawlers – <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.content_type</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.handshake_type</span></code>, exported as <code class="docutils literal notranslate"><span class="pre">TLS_ContentType</span></code> and
+<code class="docutils literal notranslate"><span class="pre">TLS_HandshakeType</span></code> – closing the gap <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2495">#2495</a> tracked. Both take the
+normal <code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-scrape shape against IANA’s <code class="docutils literal notranslate"><span class="pre">tls-parameters-5.csv</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tls-parameters-7.csv</span></code>, as this doc said the eventual crawler would; unlike
+ARPHRD, TLS’s source is a live, web-published table, so neither reads a
+<code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal.</p>
+<p>Running either crawler is a true no-op against the committed <code class="docutils literal notranslate"><span class="pre">const</span></code>
+modules: regenerating both reproduces the tree byte-for-byte, the same
+guarantee ARPHRD and the <code class="docutils literal notranslate"><span class="pre">sslv2</span></code> restack carry. Getting there meant
+regenerating the <code class="docutils literal notranslate"><span class="pre">const</span></code> modules committed alongside <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2441">#2441</a>, which
+predated the crawler and had drifted from it in three ways, caught in
+cross-review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2503">#2503</a>:</p>
+<ul class="simple">
+<li><p>the committed <code class="docutils literal notranslate"><span class="pre">ContentType</span></code> resolved values 32-63 to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> via a
+flat <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fallback, while IANA’s registry – and the crawler –
+call that band <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>); the committed docstring already
+said “Reserved”, the code did not. Regenerating fixes the resolved name for
+that band.</p></li>
+<li><p>the committed <code class="docutils literal notranslate"><span class="pre">ContentType</span></code> carried an <code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">=</span> <span class="pre">0</span></code> sentinel with no
+IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
+inside its 0-19 <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> band, unnamed); it is dropped, and value 0
+now resolves to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> like the rest of that band.
+<a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> never checked this member
+by name – its wire-type allowlist already excluded value 0 by construction
+– so the sentinel’s removal is behaviourally a no-op there too.</p></li>
+<li><p>the committed <code class="docutils literal notranslate"><span class="pre">HandshakeType</span></code> cited RFC 5246, 6066 and 4680 for several
+members where IANA’s registry now cites <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>, and left IANA’s two
+single-row <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> entries (values 7 and 255) to <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+rather than naming them; the crawler renders both as explicit members
+(<code class="docutils literal notranslate"><span class="pre">unassigned_7</span></code>, <code class="docutils literal notranslate"><span class="pre">unassigned_255</span></code>), matching the registry.</p></li>
+</ul>
+<p>The protocol-specific prose the hand-curated modules carried – the
+record-layer header citations, the Unassigned/Reserved band rationale, the
+<code class="docutils literal notranslate"><span class="pre">_RESERVED</span></code>-suffix handling – moved into the crawlers’ own module
+docstrings and comments, the way <a class="reference internal" href="../../pcapkit/vendor/linux.html#module-pcapkit.vendor.linux.arphrd" title="pcapkit.vendor.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.linux.arphrd</span></code></a> already
+does for ARPHRD; the generated <code class="docutils literal notranslate"><span class="pre">const</span></code> modules carry only the plain,
+templated docstring every other generated module does.</p>
 </section>
 </section>
 
@@ -631,7 +664,7 @@ crawler would follow later. Tracked as <a class="extlink-issue reference externa
             <ul>
 <li><a class="reference internal" href="#">Const-Vendor Pairing</a><ul>
 <li><a class="reference internal" href="#the-data-attribute-for-a-registry-with-no-web-source">The <code class="docutils literal notranslate"><span class="pre">DATA</span></code> Attribute, for a Registry With No Web Source</a></li>
-<li><a class="reference internal" href="#known-violation">Known Violation</a></li>
+<li><a class="reference internal" href="#link-and-scrape-pairing-tls-content-types-and-handshaketype"><code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-Scrape Pairing: TLS Content Types and HandshakeType</a></li>
 </ul>
 </li>
 </ul>

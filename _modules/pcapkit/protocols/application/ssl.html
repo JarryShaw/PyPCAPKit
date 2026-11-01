@@ -241,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -274,6 +275,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -570,9 +572,10 @@
 <span class="n">_DTLS_VERSION_MAJOR</span> <span class="o">=</span> <span class="mh">0xFE</span>
 
 <span class="c1">#: The content types a genuine record may carry. An allowlist rather than</span>
-<span class="c1">#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: the</span>
-<span class="c1">#: registry names ``invalid(0)``, a sentinel :rfc:`9846#section-5.1` rejects,</span>
-<span class="c1">#: and mints a member for any unassigned value it is asked for.</span>
+<span class="c1">#: every :class:`~pcapkit.const.tls.content_type.ContentType` member: 0 is</span>
+<span class="c1">#: never assigned, a value :rfc:`9846#section-5.1` rejects outright, and the</span>
+<span class="c1">#: enum mints an ``Unassigned``/``Reserved`` member for any value IANA has</span>
+<span class="c1">#: not named.</span>
 <span class="c1">#:</span>
 <span class="c1">#: ``tls12_cid`` (25, :rfc:`9146#section-4`) is left out: its connection ID</span>
 <span class="c1">#: precedes ``length`` and has a negotiated length the record does not carry,</span>
@@ -752,8 +755,9 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a</span>
         <span class="c1"># parse yields, so resolve it through the registry to cover both.</span>
-        <span class="c1"># NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: ``invalid(0)`` is</span>
-        <span class="c1"># named yet never a record's content type.</span>
+        <span class="c1"># NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: an</span>
+        <span class="c1"># unassigned or reserved value still resolves to a named member via</span>
+        <span class="c1"># ``_missing_``, yet is never a record's genuine content type.</span>
         <span class="n">content_type</span> <span class="o">=</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">content_type</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">content_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>

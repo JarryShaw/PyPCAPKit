@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/igmp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1 and 2. Both share the 8-octet structure below. IGMPv1 and IGMPv2 set ve..." />
-<meta name="description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1 and 2. Both share the 8-octet structure below. IGMPv1 and IGMPv2 set ve..." />
+<meta property="og:description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1, 2 and 3. IGMPv1 and IGMPv2 share the 8-octet structure below. IGMPv1 a..." />
+<meta name="description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1, 2 and 3. IGMPv1 and IGMPv2 share the 8-octet structure below. IGMPv1 a..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IGMPv1 - Internet Group Management Protocol version 1" href="igmpv1.html"><link rel="prev" title="HIP - Host Identity Protocol" href="hip.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -528,10 +530,14 @@
 <span id="igmp-internet-group-management-protocol"></span><h1>IGMP - Internet Group Management Protocol<a class="headerlink" href="#module-pcapkit.protocols.internet.igmp" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.igmp" title="pcapkit.protocols.internet.igmp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.igmp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP" title="pcapkit.protocols.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>, the abstract base of the
-Internet Group Management Protocol (IGMP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> versions 1 and 2. Both share
-the 8-octet structure below. <a class="reference internal" href="igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP" title="pcapkit.protocols.internet.igmpv1.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>
-and <a class="reference internal" href="igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP" title="pcapkit.protocols.internet.igmpv2.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> set <code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code>,
-and <code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code> names the version of each message.</p>
+Internet Group Management Protocol (IGMP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> versions 1, 2 and 3. IGMPv1
+and IGMPv2 share the 8-octet structure below.
+<a class="reference internal" href="igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP" title="pcapkit.protocols.internet.igmpv1.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a> and
+<a class="reference internal" href="igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP" title="pcapkit.protocols.internet.igmpv2.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> set <code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code>
+and reuse this schema and data model as-is; IGMPv3’s wire format differs
+materially by message, so <a class="reference internal" href="igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMP" title="pcapkit.protocols.internet.igmpv3.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a>
+carries its own instead – see <a class="reference internal" href="igmpv3.html"><span class="doc">IGMPv3 - Internet Group Management Protocol version 3</span></a>. <code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code> names the version
+of each message read.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -570,9 +576,9 @@ and <code class="xref py py-attr docutils literal notranslate"><span class="pre"
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.igmp.</span></span><span class="sig-name descname"><span class="pre">IGMP</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>]</p>
 <p>This class implements Internet Group Management Protocol.</p>
-<p>The class is abstract: <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> is set by the concrete IGMPv1 and
-IGMPv2 classes. <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.read" title="pcapkit.protocols.internet.igmp.IGMP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> refuses a message that <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> does
-not place in <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>.</p>
+<p>The class is abstract: <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> is set by the concrete IGMPv1,
+IGMPv2 and IGMPv3 classes. <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.read" title="pcapkit.protocols.internet.igmp.IGMP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> refuses a message that
+<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> does not place in <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Group</span> <span class="pre">Management</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.name" title="Link to this definition">¶</a></dt>
@@ -581,8 +587,8 @@ not place in <a class="reference internal" href="#pcapkit.protocols.internet.igm
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.version">
-<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>IGMP version this class reads</p>
@@ -593,7 +599,7 @@ not place in <a class="reference internal" href="#pcapkit.protocols.internet.igm
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.alias">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.alias" title="Link to this definition">¶</a></dt>
-<dd><p>Acronym of corresponding protocol, <code class="docutils literal notranslate"><span class="pre">'IGMPv1'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code>.</p>
+<dd><p>Acronym of corresponding protocol, <code class="docutils literal notranslate"><span class="pre">'IGMPv1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv3'</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -613,15 +619,15 @@ not place in <a class="reference internal" href="#pcapkit.protocols.internet.igm
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> does not place the message in
     <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed packet data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -679,23 +685,28 @@ pseudo-header (<span class="target" id="index-0"></span><a class="rfc reference 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._classify">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_classify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._classify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="Link to this definition">¶</a></dt>
-<dd><p>Classify a parsed IGMP header as IGMPv1 or IGMPv2.</p>
+<dd><p>Classify a parsed IGMP header as IGMPv1, IGMPv2 or IGMPv3.</p>
 <p>A Membership Query is IGMPv1/v2 only at exactly 8 octets: IGMPv1 if
-<code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> is zero, IGMPv2 otherwise. Longer queries are IGMPv3
-and other lengths are ignored (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9776.html#section-7.1"><strong>RFC 9776 Section 7.1</strong></a>).</p>
+<code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> is zero, IGMPv2 otherwise. A Membership Query of 12
+or more octets is IGMPv3’s Query, carrying the source-list extension
+(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-7.1"><strong>RFC 3376 Section 7.1</strong></a>); one of 9 to 11 octets is neither and is
+ignored. The IGMPv3 Membership Report (<code class="docutils literal notranslate"><span class="pre">0x22</span></code>) is always IGMPv3,
+whatever its length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.type.Type" title="pcapkit.const.igmp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The header’s message type.</p></li>
-<li><p><strong>max_resp_time</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The header’s max response time.</p></li>
+<li><p><strong>max_resp_time</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The header’s max response time (the raw Max Resp
+Code octet; unused for a type whose version does not depend
+on it).</p></li>
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The whole IGMP message’s length, in octets.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">0</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">1</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">2</span></span></code></span>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">0</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">1</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">2</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">3</span></span></code></span>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> for that version, <code class="docutils literal notranslate"><span class="pre">0</span></code> for neither.</p>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code> for that version, <code class="docutils literal notranslate"><span class="pre">0</span></code> for none of them.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -780,7 +791,7 @@ pseudo-header involved – the 8-octet message itself for IGMPv1
 v2’s, with <code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> reserved at zero and fewer <a class="reference internal" href="#pcapkit.protocols.data.internet.igmp.IGMP.type" title="pcapkit.protocols.data.internet.igmp.IGMP.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>
 values defined (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>). IGMPv3 (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>) adds a
 group-record-list body of a materially different shape and is out of
-scope here.</p>
+scope here – see <a class="reference internal" href="igmpv3.html#module-pcapkit.protocols.data.internet.igmpv3" title="pcapkit.protocols.data.internet.igmpv3"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.data.internet.igmpv3</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.type">
 <span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.type.Type" title="pcapkit.const.igmp.type.Type"><span class="pre">Type</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.type" title="Link to this definition">¶</a></dt>

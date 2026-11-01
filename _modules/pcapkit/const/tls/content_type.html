@@ -241,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -274,6 +275,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -516,17 +518,7 @@
 <span class="sd">.. module:: pcapkit.const.tls.content_type</span>
 
 <span class="sd">This module contains the constant enumeration for **TLS/DTLS Content Types**,</span>
-<span class="sd">as assigned by IANA in the ``TLS ContentType`` registry [*]_. The record-layer</span>
-<span class="sd">header -- :rfc:`9846#section-5.1` for TLS, :rfc:`9147#section-4`'s</span>
-<span class="sd">``DTLSPlaintext`` for DTLS -- opens with this type in both.</span>
-
-<span class="sd">Every value IANA assigns is named below. Everything else in the 0-255 range it</span>
-<span class="sd">lists as Unassigned (0-19 and 28-31, plus 64-255, which :rfc:`9443` reserves</span>
-<span class="sd">for multiplexing with other protocols on the same port) or as Reserved (32-63,</span>
-<span class="sd">:rfc:`9147`), and :meth:`ContentType._missing_` resolves those to an</span>
-<span class="sd">``Unassigned`` member without growing the registry.</span>
-
-<span class="sd">.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.tls.content_type.ContentType`.</span>
 
 <span class="sd">"""</span>
 
@@ -548,34 +540,28 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ContentType</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[ContentType] TLS/DTLS Content Types"""</span>
 
-    <span class="c1">#: Invalid -- a sentinel :rfc:`9846#section-5.1` names so that a record</span>
-    <span class="c1">#: carrying it can be rejected, never a value sent on the wire; IANA keeps</span>
-    <span class="c1">#: 0 inside its Unassigned 0-19 band rather than assigning it [:rfc:`9846`]</span>
-    <span class="n">invalid</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1">#: ChangeCipherSpec [:rfc:`9846`]</span>
+    <span class="c1">#: change_cipher_spec [:rfc:`9846`]</span>
     <span class="n">change_cipher_spec</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: Alert [:rfc:`9846`]</span>
+    <span class="c1">#: alert [:rfc:`9846`]</span>
     <span class="n">alert</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: Handshake [:rfc:`9846`]</span>
+    <span class="c1">#: handshake [:rfc:`9846`]</span>
     <span class="n">handshake</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: Application Data [:rfc:`9846`]</span>
+    <span class="c1">#: application_data [:rfc:`9846`]</span>
     <span class="n">application_data</span> <span class="o">=</span> <span class="mi">23</span>
 
-    <span class="c1">#: Heartbeat [:rfc:`6520`]</span>
+    <span class="c1">#: heartbeat [:rfc:`6520`]</span>
     <span class="n">heartbeat</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="c1">#: ``tls12_cid`` [:rfc:`9146`]</span>
+    <span class="c1">#: tls12_cid [:rfc:`9146`]</span>
     <span class="n">tls12_cid</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: ACK -- DTLS 1.3 only [:rfc:`9147`]</span>
+    <span class="c1">#: ACK [:rfc:`9147`]</span>
     <span class="n">ack</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: ``return_routability_check`` -- DTLS connection-ID path validation</span>
-    <span class="c1">#: [:rfc:`9853`]</span>
+    <span class="c1">#: return_routability_check [:rfc:`9853`]</span>
     <span class="n">return_routability_check</span> <span class="o">=</span> <span class="mi">27</span>
 
 <div class="viewcode-block" id="ContentType._validate_value">
@@ -584,11 +570,19 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Reject ``value`` unless it passes the range check :meth:`_missing_` makes.</span>
 
+<span class="sd">        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
+<span class="sd">        with that check and the message it raises, so</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the</span>
+<span class="sd">        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the</span>
+<span class="sd">        same words (:issue:`1816`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value about to be looked up or minted.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            EnumValueError: If ``value`` fails that check.</span>
+<span class="sd">            EnumValueError: If ``value`` fails that check. A</span>
+<span class="sd">                :exc:`ValueError`, so an ``except ValueError`` caller is</span>
+<span class="sd">                unaffected.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
@@ -607,8 +601,21 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">19</span><span class="p">:</span>
+            <span class="c1">#: Unassigned (Requires coordination; see [RFC 9443])</span>
+    <span class="c1">#: [:rfc:`5764`][:rfc:`9443`]</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">28</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">31</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">32</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">63</span><span class="p">:</span>
+            <span class="c1">#: Reserved [:rfc:`9147`]</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">64</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
+            <span class="c1">#: Unassigned (Requires coordination; see [RFC 9443])</span>
+    <span class="c1">#: [:rfc:`5764`][:rfc:`9443`]</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

@@ -241,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -274,6 +275,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -516,16 +518,23 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.igmp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.igmp.IGMP`, the abstract base of</span>
-<span class="sd">IGMPv1 (:rfc:`1112`) and IGMPv2 (:rfc:`2236`) messages. Both versions share</span>
-<span class="sd">one 8-octet layout, so the base holds the schema, the data model and the read</span>
-<span class="sd">path. :class:`~pcapkit.protocols.internet.igmpv1.IGMP` and</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.igmpv2.IGMP` set :attr:`version`. The</span>
+<span class="sd">IGMPv1 (:rfc:`1112`), IGMPv2 (:rfc:`2236`) and IGMPv3 (:rfc:`3376`) messages.</span>
+<span class="sd">IGMPv1 and IGMPv2 share one 8-octet layout, so the base holds that shared</span>
+<span class="sd">schema, data model and read path. :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.igmpv2.IGMP` and</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.igmpv3.IGMP` set :attr:`version`; IGMPv3's</span>
+<span class="sd">wire format differs materially (a Query's source-list extension, a Report's</span>
+<span class="sd">group-record list), so it carries its own schema and data model instead. The</span>
 <span class="sd">registry entry for IP protocol 2 is this base, and :meth:`IGMP._dispatch</span>
 <span class="sd">&lt;pcapkit.protocols.internet.igmp.IGMP._dispatch&gt;` picks the version class.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
 <span class="sd">   IGMPv1 (:rfc:`1112`) and IGMPv2 (:rfc:`2236`) (:issue:`2439`).</span>
+
+<span class="sd">.. versionadded:: 1.6.0</span>
+
+<span class="sd">   IGMPv3 (:rfc:`3376`) (:issue:`2448`).</span>
 
 <span class="sd">"""</span>
 
@@ -559,9 +568,9 @@
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IGMP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IGMP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Internet Group Management Protocol.</span>
 
-<span class="sd">    The class is abstract: :attr:`version` is set by the concrete IGMPv1 and</span>
-<span class="sd">    IGMPv2 classes. :meth:`read` refuses a message that :meth:`_classify` does</span>
-<span class="sd">    not place in :attr:`version`.</span>
+<span class="sd">    The class is abstract: :attr:`version` is set by the concrete IGMPv1,</span>
+<span class="sd">    IGMPv2 and IGMPv3 classes. :meth:`read` refuses a message that</span>
+<span class="sd">    :meth:`_classify` does not place in :attr:`version`.</span>
 
 <span class="sd">    """</span>
 
@@ -576,12 +585,12 @@
 
     <span class="nd">@property</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[1, 2]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""IGMP version this class reads: ``1`` or ``2``."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[1, 2, 3]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""IGMP version this class reads: ``1``, ``2`` or ``3``."""</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Acronym of corresponding protocol, ``'IGMPv1'`` or ``'IGMPv2'``."""</span>
+<span class="w">        </span><span class="sd">"""Acronym of corresponding protocol, ``'IGMPv1'``, ``'IGMPv2'`` or ``'IGMPv3'``."""</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'IGMPv</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span>
 
     <span class="nd">@property</span>
@@ -594,15 +603,16 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"]]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"], Literal["IGMPv3"]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Index ID of the protocol, the family name and both versions; the</span>
-<span class="sd">            concrete IGMPv1 and IGMPv2 classes narrow it to their own version.</span>
+<span class="sd">            Index ID of the protocol, the family name and all three</span>
+<span class="sd">            versions; the concrete IGMPv1, IGMPv2 and IGMPv3 classes narrow</span>
+<span class="sd">            it to their own version.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s1">'IGMP'</span><span class="p">,</span> <span class="s1">'IGMPv1'</span><span class="p">,</span> <span class="s1">'IGMPv2'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">'IGMP'</span><span class="p">,</span> <span class="s1">'IGMPv1'</span><span class="p">,</span> <span class="s1">'IGMPv2'</span><span class="p">,</span> <span class="s1">'IGMPv3'</span><span class="p">)</span>
 
 <div class="viewcode-block" id="IGMP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/igmpv2.html#pcapkit.protocols.internet.igmp.IGMP.read">[docs]</a>
@@ -613,12 +623,12 @@
 <span class="sd">            length: Length of packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed packet data.</span>
-
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If :meth:`_classify` does not place the message in</span>
 <span class="sd">                :attr:`version`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -747,30 +757,39 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP._classify">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_classify</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Type | int'</span><span class="p">,</span> <span class="n">max_resp_time</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                  <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[0, 1, 2]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Classify a parsed IGMP header as IGMPv1 or IGMPv2.</span>
+                  <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[0, 1, 2, 3]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Classify a parsed IGMP header as IGMPv1, IGMPv2 or IGMPv3.</span>
 
 <span class="sd">        A Membership Query is IGMPv1/v2 only at exactly 8 octets: IGMPv1 if</span>
-<span class="sd">        ``max_resp_time`` is zero, IGMPv2 otherwise. Longer queries are IGMPv3</span>
-<span class="sd">        and other lengths are ignored (:rfc:`9776#section-7.1`).</span>
+<span class="sd">        ``max_resp_time`` is zero, IGMPv2 otherwise. A Membership Query of 12</span>
+<span class="sd">        or more octets is IGMPv3's Query, carrying the source-list extension</span>
+<span class="sd">        (:rfc:`3376#section-7.1`); one of 9 to 11 octets is neither and is</span>
+<span class="sd">        ignored. The IGMPv3 Membership Report (``0x22``) is always IGMPv3,</span>
+<span class="sd">        whatever its length.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: The header's message type.</span>
-<span class="sd">            max_resp_time: The header's max response time.</span>
+<span class="sd">            max_resp_time: The header's max response time (the raw Max Resp</span>
+<span class="sd">                Code octet; unused for a type whose version does not depend</span>
+<span class="sd">                on it).</span>
 <span class="sd">            length: The whole IGMP message's length, in octets.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            ``1`` or ``2`` for that version, ``0`` for neither.</span>
+<span class="sd">            ``1``, ``2`` or ``3`` for that version, ``0`` for none of them.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv1_Membership_Report</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv2_Membership_Report</span><span class="p">,</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv2_Leave_Group</span><span class="p">):</span>
             <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMPv3_Membership_Report</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">3</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Type</span><span class="o">.</span><span class="n">IGMP_Membership_Query</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-                <span class="k">return</span> <span class="mi">0</span>
-            <span class="k">return</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">max_resp_time</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">max_resp_time</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">3</span>
+            <span class="k">return</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
 
@@ -786,20 +805,22 @@
 <span class="sd">            length: The IGMP message's length, in octets.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.igmpv1.IGMP` or</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.igmpv2.IGMP` for the version</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.igmpv1.IGMP`,</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.igmpv2.IGMP` or</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.igmpv3.IGMP` for the version</span>
 <span class="sd">            the message classifies as; :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            for any other message, which then keeps its octets undissected.</span>
 
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv3</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPv3</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Raw</span>
         <span class="n">version</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">IGMPv1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="n">IGMPv2</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">IGMPv1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="n">IGMPv2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="n">IGMPv3</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

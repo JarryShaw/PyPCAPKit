@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -599,8 +601,10 @@ that select a version.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>,
-recording <code class="docutils literal notranslate"><span class="pre">proto</span></code>, when <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> is in
+<dd class="field-even"><p><a class="reference internal" href="frad.html#pcapkit.protocols.link.frad.FRAD" title="pcapkit.protocols.link.frad.FRAD"><code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code></a>
+when <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> is <a class="reference internal" href="#pcapkit.const.linux.arphrd.ARPHRD.FRAD" title="pcapkit.const.linux.arphrd.ARPHRD.FRAD"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ARPHRD.FRAD</span></code></a>;
+otherwise <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, recording
+<code class="docutils literal notranslate"><span class="pre">proto</span></code>, for every other <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> in
 <a class="reference internal" href="#pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE" title="pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE"><code class="xref py py-data docutils literal notranslate"><span class="pre">_ARPHRD_NOT_ETHERTYPE</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/igmp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of IGMP implementations. Available enumerations include:,, IGMP_Type, IGMP Type Numbers*,,,, IGMP Type Numbers: This module contains the constant enum..." />
-<meta name="description" content="This module contains all constant enumerations of IGMP implementations. Available enumerations include:,, IGMP_Type, IGMP Type Numbers*,,,, IGMP Type Numbers: This module contains the constant enum..." />
+<meta property="og:description" content="This module contains all constant enumerations of IGMP implementations. Available enumerations include:,, IGMP_Type, IGMP Type Numbers*,, IGMP_RecordType, IGMP Group Record Types †,,,, IGMP Type Nu..." />
+<meta name="description" content="This module contains all constant enumerations of IGMP implementations. Available enumerations include:,, IGMP_Type, IGMP Type Numbers*,, IGMP_RecordType, IGMP Group Record Types †,,,, IGMP Type Nu..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="IPv4 Constant Enumerations" href="ipv4.html"><link rel="prev" title="ICMPv6 Constant Enumerations" href="icmpv6.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -533,7 +535,10 @@ enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.igmp.type.Type" title="pcapkit.const.igmp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP_Type</span></code></a></p></td>
-<td><p>IGMP Type Numbers <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<td><p>IGMP Type Numbers <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.igmp.record_type.RecordType" title="pcapkit.const.igmp.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP_RecordType</span></code></a></p></td>
+<td><p>IGMP Group Record Types <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -668,11 +673,93 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.const.igmp.record_type">
+<span id="igmp-group-record-types"></span><h2>IGMP Group Record Types<a class="headerlink" href="#module-pcapkit.const.igmp.record_type" title="Link to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>IGMP Group Record
+Types</strong>, which is automatically generated from
+<a class="reference internal" href="../vendor/igmp.html#pcapkit.vendor.igmp.record_type.RecordType" title="pcapkit.vendor.igmp.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.igmp.record_type.RecordType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.igmp.record_type.</span></span><span class="sig-name descname"><span class="pre">RecordType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/igmp/record_type.html#RecordType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[RecordType] IGMP Group Record Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.MODE_IS_INCLUDE">
+<span class="sig-name descname"><span class="pre">MODE_IS_INCLUDE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.MODE_IS_INCLUDE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.MODE_IS_EXCLUDE">
+<span class="sig-name descname"><span class="pre">MODE_IS_EXCLUDE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.MODE_IS_EXCLUDE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.CHANGE_TO_INCLUDE_MODE">
+<span class="sig-name descname"><span class="pre">CHANGE_TO_INCLUDE_MODE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.CHANGE_TO_INCLUDE_MODE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.CHANGE_TO_EXCLUDE_MODE">
+<span class="sig-name descname"><span class="pre">CHANGE_TO_EXCLUDE_MODE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.CHANGE_TO_EXCLUDE_MODE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.ALLOW_NEW_SOURCES">
+<span class="sig-name descname"><span class="pre">ALLOW_NEW_SOURCES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.ALLOW_NEW_SOURCES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType.BLOCK_OLD_SOURCES">
+<span class="sig-name descname"><span class="pre">BLOCK_OLD_SOURCES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType.BLOCK_OLD_SOURCES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType._validate_value">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/igmp/record_type.html#RecordType._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType._validate_value" title="Link to this definition">¶</a></dt>
+<dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.igmp.record_type.RecordType._missing_" title="pcapkit.const.igmp.record_type.RecordType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.igmp.record_type.RecordType._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/igmp/record_type.html#RecordType._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.igmp.record_type.RecordType._missing_" title="Link to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.igmp.record_type.RecordType" title="pcapkit.const.igmp.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="doc-footnote">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/igmp-type-numbers/igmp-type-numbers.xhtml">https://www.iana.org/assignments/igmp-type-numbers/igmp-type-numbers.xhtml</a></p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.rfc-editor.org/rfc/rfc3376#section-4.2.12">https://www.rfc-editor.org/rfc/rfc3376#section-4.2.12</a></p>
 </aside>
 </aside>
 </section>
@@ -735,6 +822,7 @@ same words (<a class="extlink-issue reference external" href="https://github.com
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code> Constant Enumerations</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.const.igmp.type">IGMP Type Numbers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.const.igmp.record_type">IGMP Group Record Types</a></li>
 </ul>
 </li>
 </ul>

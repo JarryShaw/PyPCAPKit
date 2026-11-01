@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/changelog/1.6.0.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Wave 2 of the roadmap, per the contributing docs’ enhancement-proposal page: the protocol pairs that wanted a shared abstract base, and the two that simply had no dissector at all." />
-<meta name="description" content="Wave 2 of the roadmap, per the contributing docs’ enhancement-proposal page: the protocol pairs that wanted a shared abstract base, and the two that simply had no dissector at all." />
+<meta property="og:description" content="Wave 2 of the roadmap, per the contributing docs’ enhancement-proposal page: the protocol pairs that wanted a shared abstract base, and the two that simply had no dissector at all. Added – FRAD, a ..." />
+<meta name="description" content="Wave 2 of the roadmap, per the contributing docs’ enhancement-proposal page: the protocol pairs that wanted a shared abstract base, and the two that simply had no dissector at all. Added – FRAD, a ..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="1.5.1 – 2026-10-30" href="1.5.1.html"><link rel="prev" title="Changelog" href="../changelog.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -529,6 +531,20 @@
 <p>Wave 2 of the roadmap, per the contributing docs’ enhancement-proposal page: the
 protocol pairs that wanted a shared abstract base, and the two that simply had
 no dissector at all.</p>
+<ul class="simple">
+<li><p><strong>Added</strong> – <a class="reference internal" href="../pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.FRAD" title="pcapkit.protocols.link.frad.FRAD"><code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code></a>, a dissector for Frame
+Relay’s multiprotocol encapsulation (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2427.html"><strong>RFC 2427</strong></a>, obsoleting <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1490.html"><strong>RFC 1490</strong></a>).
+<a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL" title="pcapkit.protocols.link.linux_sll.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a>/
+<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a>/
+<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dispatch to it for the
+<code class="docutils literal notranslate"><span class="pre">ARPHRD_FRAD</span></code> case instead of falling back to
+<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; the direct NLPID and SNAP-encapsulated
+forms both dispatch onward, to IPv4/IPv6 and (via the EtherType registry every
+Ethernet/VLAN/LinuxSLL frame shares) ARP among others. The first of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>’s
+five <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> follow-ups to get a dissector; the other four
+(<code class="docutils literal notranslate"><span class="pre">NETLINK</span></code>, <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code>/<code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code>, <code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code>) remain
+<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
+</ul>
 </section>
 
         </article>

@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -1545,11 +1547,15 @@ is the abstract base <a class="reference internal" href="../pcapkit/protocols/in
 through a shared method body. The two are distinguished by whether they carry pseudo-header
 checksums (ICMPv6 does; ICMPv4 does not) and parse without checksum computation or verification
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>).</p>
-<p><strong>IGMP v1/v2 — done within wave 2</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>).
-The versioned classes <a class="reference internal" href="../pcapkit/protocols/internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP" title="pcapkit.protocols.internet.igmpv1.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a> and
-<a class="reference internal" href="../pcapkit/protocols/internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP" title="pcapkit.protocols.internet.igmpv2.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> share one read path on the
-abstract <a class="reference internal" href="../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP" title="pcapkit.protocols.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a> base.
-<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> IGMPv3 is <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>.</p>
+<p><strong>IGMP — done within wave 2</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>).
+The three concrete classes <a class="reference internal" href="../pcapkit/protocols/internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMP" title="pcapkit.protocols.internet.igmpv1.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>,
+<a class="reference internal" href="../pcapkit/protocols/internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMP" title="pcapkit.protocols.internet.igmpv2.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> and
+<a class="reference internal" href="../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMP" title="pcapkit.protocols.internet.igmpv3.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a> share one read path on
+the abstract <a class="reference internal" href="../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP" title="pcapkit.protocols.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a> base, which
+<a class="reference internal" href="../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> dispatches to the right
+one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>) adds the
+Membership Query’s source-list extension and the Membership Report’s
+group-record list, each a shape of its own.</p>
 <p><strong>Done within wave 2 — TLS/SSL with DTLS.</strong> The <a class="reference internal" href="#dtls">DTLS</a> section above lists
 what is decoded: the shared <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>
 base, TLS, DTLS, handshake message framing, and handshake-fragment
@@ -1588,8 +1594,7 @@ sequenced <em>after</em> wave 2 rather than by preference: the multicast options
 rides in <strong>ICMPv6</strong>, and <span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMPv3</strong> group records. ICMPv6 and
 IGMPv1/v2 are both wave 2 deliverables, now done; MLD itself remains a
 follow-up to ICMPv6 (see <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above), and IGMPv3 is
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a> – neither is part of wave 2’s own scope. Landing the
-registry first would give a dispatch table with nothing but
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>. Landing the registry first would give a dispatch table with
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
 parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is the

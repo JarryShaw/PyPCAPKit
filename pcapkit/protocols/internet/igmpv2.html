@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.internet.igmpv2 contains IGMP, which implements an extractor for Internet Group Management Protocol version 2 (IGMPv2) [ RFC 2236]. It shares its header schema and data model with..." />
 <meta name="description" content="pcapkit.protocols.internet.igmpv2 contains IGMP, which implements an extractor for Internet Group Management Protocol version 2 (IGMPv2) [ RFC 2236]. It shares its header schema and data model with..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPX - Internetwork Packet Exchange" href="ipx.html"><link rel="prev" title="IGMPv1 - Internet Group Management Protocol version 1" href="igmpv1.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IGMPv3 - Internet Group Management Protocol version 3" href="igmpv3.html"><link rel="prev" title="IGMPv1 - Internet Group Management Protocol version 1" href="igmpv1.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>IGMPv2 - Internet Group Management Protocol version 2 - PyPCAPKit</title>
@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -551,7 +553,7 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv2.IGMP.alias">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv2.IGMP.alias" title="Link to this definition">¶</a></dt>
-<dd><p>Acronym of corresponding protocol, <code class="docutils literal notranslate"><span class="pre">'IGMPv1'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code>.</p>
+<dd><p>Acronym of corresponding protocol, <code class="docutils literal notranslate"><span class="pre">'IGMPv1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv3'</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -579,15 +581,15 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="igmp.html#pcapkit.protocols.data.internet.igmp.IGMP" title="pcapkit.protocols.data.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code> does not place the message in
     <a class="reference internal" href="#pcapkit.protocols.internet.igmpv2.IGMP.version" title="pcapkit.protocols.internet.igmpv2.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="igmp.html#pcapkit.protocols.data.internet.igmp.IGMP" title="pcapkit.protocols.data.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed packet data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -601,12 +603,12 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="ipx.html">
+          <a class="next-page" href="igmpv3.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">IPX - Internetwork Packet Exchange</div>
+                <div class="title">IGMPv3 - Internet Group Management Protocol version 3</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

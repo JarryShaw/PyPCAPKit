@@ -248,6 +248,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -281,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -557,72 +559,70 @@ a <a class="reference internal" href="../vendor/default.html#pcapkit.vendor.defa
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[ContentType] TLS/DTLS Content Types</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.invalid">
-<span class="sig-name descname"><span class="pre">invalid</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.invalid" title="Link to this definition">¶</a></dt>
-<dd><p>Invalid – a sentinel <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-5.1"><strong>RFC 9846 Section 5.1</strong></a> names so that a record
-carrying it can be rejected, never a value sent on the wire; IANA keeps
-0 inside its Unassigned 0-19 band rather than assigning it [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.change_cipher_spec">
 <span class="sig-name descname"><span class="pre">change_cipher_spec</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.change_cipher_spec" title="Link to this definition">¶</a></dt>
-<dd><p>ChangeCipherSpec [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>change_cipher_spec [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.alert">
 <span class="sig-name descname"><span class="pre">alert</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.alert" title="Link to this definition">¶</a></dt>
-<dd><p>Alert [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>alert [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.handshake">
 <span class="sig-name descname"><span class="pre">handshake</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.handshake" title="Link to this definition">¶</a></dt>
-<dd><p>Handshake [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>handshake [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.application_data">
 <span class="sig-name descname"><span class="pre">application_data</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.application_data" title="Link to this definition">¶</a></dt>
-<dd><p>Application Data [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>application_data [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.heartbeat">
 <span class="sig-name descname"><span class="pre">heartbeat</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.heartbeat" title="Link to this definition">¶</a></dt>
-<dd><p>Heartbeat [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6520.html"><strong>RFC 6520</strong></a>]</p>
+<dd><p>heartbeat [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6520.html"><strong>RFC 6520</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.tls12_cid">
 <span class="sig-name descname"><span class="pre">tls12_cid</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.tls12_cid" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">tls12_cid</span></code> [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9146.html"><strong>RFC 9146</strong></a>]</p>
+<dd><p>tls12_cid [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9146.html"><strong>RFC 9146</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.ack">
 <span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.ack" title="Link to this definition">¶</a></dt>
-<dd><p>ACK – DTLS 1.3 only [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
+<dd><p>ACK [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType.return_routability_check">
 <span class="sig-name descname"><span class="pre">return_routability_check</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></span><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType.return_routability_check" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">return_routability_check</span></code> – DTLS connection-ID path validation
-[<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9853.html"><strong>RFC 9853</strong></a>]</p>
+<dd><p>return_routability_check [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9853.html"><strong>RFC 9853</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tls.content_type.ContentType._validate_value">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/content_type.html#ContentType._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.content_type.ContentType._validate_value" title="Link to this definition">¶</a></dt>
 <dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.tls.content_type.ContentType._missing_" title="pcapkit.const.tls.content_type.ContentType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check.</p>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -648,7 +648,7 @@ carrying it can be rejected, never a value sent on the wire; IANA keeps
 <span id="tls-dtls-handshaketype"></span><h2>TLS/DTLS HandshakeType<a class="headerlink" href="#module-pcapkit.const.tls.handshake_type" title="Link to this heading">¶</a></h2>
 <p>This module contains the constant enumeration for <strong>TLS/DTLS HandshakeType</strong>,
 hand-curated from IANA’s <code class="docutils literal notranslate"><span class="pre">TLS</span> <span class="pre">HandshakeType</span></code> registry, including the
-DTLS-only messages <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-5.2"><strong>RFC 9147 Section 5.2</strong></a> adds to it.</p>
+DTLS-only messages <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-5.2"><strong>RFC 9147 Section 5.2</strong></a> adds to it.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tls.handshake_type.</span></span><span class="sig-name descname"><span class="pre">HandshakeType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/handshake_type.html#HandshakeType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType" title="Link to this definition">¶</a></dt>
@@ -657,168 +657,188 @@ DTLS-only messages <span class="target" id="index-10"></span><a class="rfc refer
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.hello_request">
 <span class="sig-name descname"><span class="pre">hello_request</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.hello_request" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">hello_request</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p>
+<dd><p>hello_request [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.client_hello">
 <span class="sig-name descname"><span class="pre">client_hello</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.client_hello" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">client_hello</span></code> [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>client_hello [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.server_hello">
 <span class="sig-name descname"><span class="pre">server_hello</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.server_hello" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">server_hello</span></code> [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>server_hello [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.hello_verify_request">
 <span class="sig-name descname"><span class="pre">hello_verify_request</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.hello_verify_request" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">hello_verify_request</span></code> – DTLS 1.2 and earlier only; DTLS 1.3 moved
-its return-routability role to the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> extension
-(<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html#section-5.1"><strong>RFC 9147 Section 5.1</strong></a>) [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>]</p>
+<dd><p>hello_verify_request [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html"><strong>RFC 6347</strong></a>][<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Assigned for interim
+draft, but the functionality was moved to a different message.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.new_session_ticket">
 <span class="sig-name descname"><span class="pre">new_session_ticket</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.new_session_ticket" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">new_session_ticket</span></code> [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>new_session_ticket [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4507.html"><strong>RFC 4507</strong></a>][<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>][<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8447.html"><strong>RFC 8447</strong></a>][RFC Errata 7250]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.end_of_early_data">
 <span class="sig-name descname"><span class="pre">end_of_early_data</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.end_of_early_data" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">end_of_early_data</span></code> [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>end_of_early_data [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.hello_retry_request">
 <span class="sig-name descname"><span class="pre">hello_retry_request</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.hello_retry_request" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">hello_retry_request</span></code> – historical; the functionality moved to an
-extension, and TLS 1.3 carries it on a <code class="docutils literal notranslate"><span class="pre">server_hello</span></code> instead
-(<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html#section-4.2.4"><strong>RFC 9846 Section 4.2.4</strong></a>) [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>hello_retry_request [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Assigned for interim draft, but the
+functionality was moved to an extension.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.unassigned_7">
+<span class="sig-name descname"><span class="pre">unassigned_7</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.unassigned_7" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.encrypted_extensions">
 <span class="sig-name descname"><span class="pre">encrypted_extensions</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.encrypted_extensions" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">encrypted_extensions</span></code> [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>encrypted_extensions [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.request_connection_id">
 <span class="sig-name descname"><span class="pre">request_connection_id</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.request_connection_id" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">request_connection_id</span></code> – DTLS 1.3 only [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
+<dd><p>request_connection_id [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.new_connection_id">
 <span class="sig-name descname"><span class="pre">new_connection_id</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.new_connection_id" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">new_connection_id</span></code> – DTLS 1.3 only [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
+<dd><p>new_connection_id [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.certificate">
 <span class="sig-name descname"><span class="pre">certificate</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.certificate" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">certificate</span></code> [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>certificate [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.server_key_exchange">
 <span class="sig-name descname"><span class="pre">server_key_exchange</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.server_key_exchange" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">server_key_exchange</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p>
+<dd><p>server_key_exchange [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.certificate_request">
 <span class="sig-name descname"><span class="pre">certificate_request</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.certificate_request" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">certificate_request</span></code> [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>certificate_request [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.server_hello_done">
 <span class="sig-name descname"><span class="pre">server_hello_done</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.server_hello_done" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">server_hello_done</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p>
+<dd><p>server_hello_done [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.certificate_verify">
 <span class="sig-name descname"><span class="pre">certificate_verify</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.certificate_verify" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">certificate_verify</span></code> [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>certificate_verify [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.client_key_exchange">
 <span class="sig-name descname"><span class="pre">client_key_exchange</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.client_key_exchange" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">client_key_exchange</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5246.html"><strong>RFC 5246</strong></a>]</p>
+<dd><p>client_key_exchange [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.client_certificate_request">
 <span class="sig-name descname"><span class="pre">client_certificate_request</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.client_certificate_request" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">client_certificate_request</span></code> – TLS 1.2 and earlier only, per IANA’s
-own comment on this assignment [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9261.html"><strong>RFC 9261</strong></a>]</p>
+<dd><p>client_certificate_request [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9261.html"><strong>RFC 9261</strong></a>] – Used in TLS versions prior to
+1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.finished">
 <span class="sig-name descname"><span class="pre">finished</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.finished" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">finished</span></code> [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>finished [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.certificate_url">
 <span class="sig-name descname"><span class="pre">certificate_url</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.certificate_url" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">certificate_url</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6066.html"><strong>RFC 6066</strong></a>]</p>
+<dd><p>certificate_url [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6066.html"><strong>RFC 6066</strong></a>][<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior to
+1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.certificate_status">
 <span class="sig-name descname"><span class="pre">certificate_status</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.certificate_status" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">certificate_status</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6066.html"><strong>RFC 6066</strong></a>]</p>
+<dd><p>certificate_status [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6066.html"><strong>RFC 6066</strong></a>][<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior
+to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.supplemental_data">
 <span class="sig-name descname"><span class="pre">supplemental_data</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.supplemental_data" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">supplemental_data</span></code> – TLS 1.2 and earlier only [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4680.html"><strong>RFC 4680</strong></a>]</p>
+<dd><p>supplemental_data [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4680.html"><strong>RFC 4680</strong></a>][<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>] – Used in TLS versions prior
+to 1.3.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.key_update">
 <span class="sig-name descname"><span class="pre">key_update</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.key_update" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">key_update</span></code> [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>key_update [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.compressed_certificate">
 <span class="sig-name descname"><span class="pre">compressed_certificate</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.compressed_certificate" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">compressed_certificate</span></code> [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8879.html"><strong>RFC 8879</strong></a>]</p>
+<dd><p>compressed_certificate [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8879.html"><strong>RFC 8879</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.ekt_key">
 <span class="sig-name descname"><span class="pre">ekt_key</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.ekt_key" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">ekt_key</span></code> [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8870.html"><strong>RFC 8870</strong></a>]</p>
+<dd><p>ekt_key [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8870.html"><strong>RFC 8870</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.message_hash">
 <span class="sig-name descname"><span class="pre">message_hash</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.message_hash" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">message_hash</span></code> [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+<dd><p>message_hash [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType.unassigned_255">
+<span class="sig-name descname"><span class="pre">unassigned_255</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">255</span></span><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType.unassigned_255" title="Link to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tls.handshake_type.HandshakeType._validate_value">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tls/handshake_type.html#HandshakeType._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tls.handshake_type.HandshakeType._validate_value" title="Link to this definition">¶</a></dt>
 <dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it passes the range check <a class="reference internal" href="#pcapkit.const.tls.handshake_type.HandshakeType._missing_" title="pcapkit.const.tls.handshake_type.HandshakeType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes.</p>
+<p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
+with that check and the message it raises, so
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
+values <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the
+same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Value about to be looked up or minted.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check.</p>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> fails that check. A
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> caller is
+    unaffected.</p>
 </dd>
 </dl>
 </dd></dl>

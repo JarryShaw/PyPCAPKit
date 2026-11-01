@@ -241,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
@@ -274,6 +275,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -516,19 +518,7 @@
 <span class="sd">.. module:: pcapkit.const.tls.handshake_type</span>
 
 <span class="sd">This module contains the constant enumeration for **TLS/DTLS HandshakeType**,</span>
-<span class="sd">as assigned by IANA in the ``TLS HandshakeType`` registry [*]_, including the</span>
-<span class="sd">DTLS-only connection-ID messages :rfc:`9147#section-5.2` adds to that same</span>
-<span class="sd">registry. Every value IANA assigns is named below; the ranges it lists as</span>
-<span class="sd">Unassigned fall through to :meth:`_missing_` like any other unassigned value.</span>
-
-<span class="sd">Each member's name is the message name the protocol uses on the wire. IANA</span>
-<span class="sd">suffixes ``_RESERVED`` onto the ones TLS 1.3 retired -- it keeps the code point</span>
-<span class="sd">reserved rather than reassigning it -- which is a statement about the registry</span>
-<span class="sd">rather than a different message name, so the suffix is not carried into the</span>
-<span class="sd">member name and each such member instead records IANA's own comment on why the</span>
-<span class="sd">assignment is retired.</span>
-
-<span class="sd">.. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.tls.handshake_type.HandshakeType`.</span>
 
 <span class="sd">"""</span>
 
@@ -550,85 +540,92 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HandshakeType</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[HandshakeType] TLS/DTLS HandshakeType"""</span>
 
-    <span class="c1">#: ``hello_request`` -- TLS 1.2 and earlier only [:rfc:`5246`]</span>
+    <span class="c1">#: hello_request [:rfc:`9846`] -- Used in TLS versions prior to 1.3.</span>
     <span class="n">hello_request</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: ``client_hello`` [:rfc:`9846`]</span>
+    <span class="c1">#: client_hello [:rfc:`9846`]</span>
     <span class="n">client_hello</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: ``server_hello`` [:rfc:`9846`]</span>
+    <span class="c1">#: server_hello [:rfc:`9846`]</span>
     <span class="n">server_hello</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: ``hello_verify_request`` -- DTLS 1.2 and earlier only; DTLS 1.3 moved</span>
-    <span class="c1">#: its return-routability role to the ``cookie`` extension</span>
-    <span class="c1">#: (:rfc:`9147#section-5.1`) [:rfc:`6347`]</span>
+    <span class="c1">#: hello_verify_request [:rfc:`6347`][:rfc:`9846`] -- Assigned for interim</span>
+    <span class="c1">#: draft, but the functionality was moved to a different message.</span>
     <span class="n">hello_verify_request</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: ``new_session_ticket`` [:rfc:`9846`]</span>
+    <span class="c1">#: new_session_ticket [:rfc:`4507`][:rfc:`9846`][:rfc:`8447`][RFC Errata 7250]</span>
     <span class="n">new_session_ticket</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: ``end_of_early_data`` [:rfc:`9846`]</span>
+    <span class="c1">#: end_of_early_data [:rfc:`9846`]</span>
     <span class="n">end_of_early_data</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: ``hello_retry_request`` -- historical; the functionality moved to an</span>
-    <span class="c1">#: extension, and TLS 1.3 carries it on a ``server_hello`` instead</span>
-    <span class="c1">#: (:rfc:`9846#section-4.2.4`) [:rfc:`9846`]</span>
+    <span class="c1">#: hello_retry_request [:rfc:`9846`] -- Assigned for interim draft, but the</span>
+    <span class="c1">#: functionality was moved to an extension.</span>
     <span class="n">hello_retry_request</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: ``encrypted_extensions`` [:rfc:`9846`]</span>
+    <span class="c1">#: Unassigned</span>
+    <span class="n">unassigned_7</span> <span class="o">=</span> <span class="mi">7</span>
+
+    <span class="c1">#: encrypted_extensions [:rfc:`9846`]</span>
     <span class="n">encrypted_extensions</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: ``request_connection_id`` -- DTLS 1.3 only [:rfc:`9147`]</span>
+    <span class="c1">#: request_connection_id [:rfc:`9147`]</span>
     <span class="n">request_connection_id</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: ``new_connection_id`` -- DTLS 1.3 only [:rfc:`9147`]</span>
+    <span class="c1">#: new_connection_id [:rfc:`9147`]</span>
     <span class="n">new_connection_id</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: ``certificate`` [:rfc:`9846`]</span>
+    <span class="c1">#: certificate [:rfc:`9846`]</span>
     <span class="n">certificate</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: ``server_key_exchange`` -- TLS 1.2 and earlier only [:rfc:`5246`]</span>
+    <span class="c1">#: server_key_exchange [:rfc:`9846`] -- Used in TLS versions prior to 1.3.</span>
     <span class="n">server_key_exchange</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: ``certificate_request`` [:rfc:`9846`]</span>
+    <span class="c1">#: certificate_request [:rfc:`9846`]</span>
     <span class="n">certificate_request</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: ``server_hello_done`` -- TLS 1.2 and earlier only [:rfc:`5246`]</span>
+    <span class="c1">#: server_hello_done [:rfc:`9846`] -- Used in TLS versions prior to 1.3.</span>
     <span class="n">server_hello_done</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: ``certificate_verify`` [:rfc:`9846`]</span>
+    <span class="c1">#: certificate_verify [:rfc:`9846`]</span>
     <span class="n">certificate_verify</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: ``client_key_exchange`` -- TLS 1.2 and earlier only [:rfc:`5246`]</span>
+    <span class="c1">#: client_key_exchange [:rfc:`9846`] -- Used in TLS versions prior to 1.3.</span>
     <span class="n">client_key_exchange</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: ``client_certificate_request`` -- TLS 1.2 and earlier only, per IANA's</span>
-    <span class="c1">#: own comment on this assignment [:rfc:`9261`]</span>
+    <span class="c1">#: client_certificate_request [:rfc:`9261`] -- Used in TLS versions prior to</span>
+    <span class="c1">#: 1.3.</span>
     <span class="n">client_certificate_request</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: ``finished`` [:rfc:`9846`]</span>
+    <span class="c1">#: finished [:rfc:`9846`]</span>
     <span class="n">finished</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: ``certificate_url`` -- TLS 1.2 and earlier only [:rfc:`6066`]</span>
+    <span class="c1">#: certificate_url [:rfc:`6066`][:rfc:`9846`] -- Used in TLS versions prior to</span>
+    <span class="c1">#: 1.3.</span>
     <span class="n">certificate_url</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: ``certificate_status`` -- TLS 1.2 and earlier only [:rfc:`6066`]</span>
+    <span class="c1">#: certificate_status [:rfc:`6066`][:rfc:`9846`] -- Used in TLS versions prior</span>
+    <span class="c1">#: to 1.3.</span>
     <span class="n">certificate_status</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: ``supplemental_data`` -- TLS 1.2 and earlier only [:rfc:`4680`]</span>
+    <span class="c1">#: supplemental_data [:rfc:`4680`][:rfc:`9846`] -- Used in TLS versions prior</span>
+    <span class="c1">#: to 1.3.</span>
     <span class="n">supplemental_data</span> <span class="o">=</span> <span class="mi">23</span>
 
-    <span class="c1">#: ``key_update`` [:rfc:`9846`]</span>
+    <span class="c1">#: key_update [:rfc:`9846`]</span>
     <span class="n">key_update</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="c1">#: ``compressed_certificate`` [:rfc:`8879`]</span>
+    <span class="c1">#: compressed_certificate [:rfc:`8879`]</span>
     <span class="n">compressed_certificate</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: ``ekt_key`` [:rfc:`8870`]</span>
+    <span class="c1">#: ekt_key [:rfc:`8870`]</span>
     <span class="n">ekt_key</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: ``message_hash`` [:rfc:`9846`]</span>
+    <span class="c1">#: message_hash [:rfc:`9846`]</span>
     <span class="n">message_hash</span> <span class="o">=</span> <span class="mi">254</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">unassigned_255</span> <span class="o">=</span> <span class="mi">255</span>
 
 <div class="viewcode-block" id="HandshakeType._validate_value">
 <a class="viewcode-back" href="../../../../pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType._validate_value">[docs]</a>
@@ -636,11 +633,19 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Reject ``value`` unless it passes the range check :meth:`_missing_` makes.</span>
 
+<span class="sd">        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
+<span class="sd">        with that check and the message it raises, so</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the</span>
+<span class="sd">        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the</span>
+<span class="sd">        same words (:issue:`1816`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value about to be looked up or minted.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            EnumValueError: If ``value`` fails that check.</span>
+<span class="sd">            EnumValueError: If ``value`` fails that check. A</span>
+<span class="sd">                :exc:`ValueError`, so an ``except ValueError`` caller is</span>
+<span class="sd">                unaffected.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
@@ -659,8 +664,13 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="mi">18</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">19</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">27</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">253</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
