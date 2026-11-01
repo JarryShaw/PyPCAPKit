@@ -35,8 +35,9 @@ def dtls_handshake(datagram: 'DTLS_Datagram') -> 'Optional[Data_DTLSHandshake]':
     0 and ``fragment_length`` its ``length`` (:rfc:`6347#section-4.2.3`), by
     :meth:`DTLS.read_handshake
     <pcapkit.protocols.application.dtls.DTLS.read_handshake>`. So a
-    ``ClientHello`` or ``ServerHello`` body decodes as an unfragmented one
-    does, whatever its length, and any other body stays raw octets.
+    ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions`` body decodes
+    as an unfragmented one does, whatever its length, and any other body stays
+    raw octets.
 
     Args:
         datagram: Reassembled message (:term:`reasm.dtls.datagram`).

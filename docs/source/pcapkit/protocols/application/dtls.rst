@@ -121,9 +121,9 @@ Data Models
    :members:
    :show-inheritance:
 
-See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``Extension``, ``Alert``
-and ``ChangeCipherSpec``, shared verbatim with
-:class:`~pcapkit.protocols.application.tls.TLS`.
+See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
+``Extension`` and its decoded bodies, ``Alert`` and ``ChangeCipherSpec``,
+shared verbatim with :class:`~pcapkit.protocols.application.tls.TLS`.
 
 .. rubric:: Footnotes
 

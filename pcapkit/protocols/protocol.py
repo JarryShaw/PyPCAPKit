@@ -69,7 +69,7 @@ from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, Unknow
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from types import FrameType
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Iterable, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
@@ -1878,6 +1878,90 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise StructError(f'{self.__class__.__name__}: unpack failed')
         return ''.join(bin(byte)[2:].zfill(8) for byte in mem)
 
+    def _read_vector(self, data: 'bytes', pos: 'int' = 0, *, size: 'int' = 1,
+                     what: 'str') -> 'tuple[bytes, int]':
+        """Read a length-prefixed vector out of ``data``.
+
+        The vector is a ``size``-octet unsigned big-endian length, then that
+        many octets, as the variable-length vectors of TLS's presentation
+        language are (:rfc:`9846#section-3.4`).
+
+        Args:
+            data: buffer being read
+            pos: offset of the length prefix in ``data``
+            size: octets in the length prefix
+            what: name of the vector, for the error message
+
+        Returns:
+            The vector's octets, and the offset just past them.
+
+        Raises:
+            ProtocolError: If the length prefix, or the octets it counts, run
+                past the end of ``data``. The message names :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        prefix = data[pos:pos + size]
+        if len(prefix) != size:
+            raise ProtocolError(f'{self.alias}: invalid format: {what} length runs past the end of the buffer')
+        start = pos + size
+        end = start + int.from_bytes(prefix, 'big')
+        octets = data[start:end]
+        if len(octets) != end - start:
+            raise ProtocolError(f'{self.alias}: invalid format: {what} runs past the end of the buffer')
+        return octets, end
+
+    def _read_whole_vector(self, data: 'bytes', *, size: 'int' = 1, what: 'str') -> 'bytes':
+        """Read the one length-prefixed vector that ``data`` holds.
+
+        The vector is read as :meth:`_read_vector` reads it from offset zero,
+        and has to end where ``data`` does.
+
+        Args:
+            data: buffer holding the vector and nothing else
+            size: octets in the length prefix
+            what: name of the vector, for the error message
+
+        Returns:
+            The vector's octets.
+
+        Raises:
+            ProtocolError: If the vector runs past the end of ``data``, or
+                octets follow it. The message names :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        octets, end = self._read_vector(data, 0, size=size, what=what)
+        if end != len(data):
+            raise ProtocolError(f'{self.alias}: invalid format: {what} carries excess octets')
+        return octets
+
+    def _read_uints(self, data: 'bytes', *, size: 'int' = 1, what: 'str') -> 'tuple[int, ...]':
+        """Read ``data`` as a run of ``size``-octet unsigned big-endian integers.
+
+        Args:
+            data: buffer holding the integers and nothing else
+            size: octets in each integer
+            what: name of the list, for the error message
+
+        Returns:
+            The integers, in order.
+
+        Raises:
+            ProtocolError: If the length of ``data`` is not a multiple of
+                ``size``, whose trailing octets would otherwise be padded out
+                when the list is made again. The message names :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if len(data) % size:
+            raise ProtocolError(f'{self.alias}: invalid format: {what} length {len(data)} '
+                                f'is not a multiple of {size}')
+        return tuple(int.from_bytes(data[index:index + size], 'big') for index in range(0, len(data), size))
+
     @overload  # pragma: no cover
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
     @overload  # pragma: no cover
@@ -1959,6 +2043,81 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             except struct.error as error:  # pylint: disable=no-member
                 raise StructError(f'{cls.__name__}: pack failed') from error
         return buf
+
+    def _make_uint(self, value: 'Any', *, bits: 'int', name: 'str') -> 'int':
+        """Check that ``value`` is an unsigned integer that fits in ``bits`` bits.
+
+        A :obj:`bool` passes only for a one-bit field, so that a flag given
+        for a wider field is refused rather than read as ``0`` or ``1``.
+
+        Args:
+            value: the value given for the field
+            bits: width of the field, in bits
+            name: name of the field, for the error message
+
+        Returns:
+            ``value`` as a plain :class:`int`.
+
+        Raises:
+            ProtocolError: If ``value`` is not an :class:`int`, is a
+                :obj:`bool` for a field wider than one bit, is negative, or
+                does not fit in ``bits`` bits. The message names
+                :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if (not isinstance(value, int) or (isinstance(value, bool) and bits != 1)
+                or not 0 <= value < (1 << bits)):
+            raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        return int(value)
+
+    @classmethod
+    def _make_vector(cls, octets: 'bytes', *, size: 'int' = 1) -> 'bytes':
+        """Write ``octets`` as a length-prefixed vector.
+
+        The inverse of :meth:`_read_vector`: a ``size``-octet unsigned
+        big-endian length, packed by :meth:`_make_pack`, then ``octets``.
+
+        Args:
+            octets: the vector's octets
+            size: octets in the length prefix
+
+        Returns:
+            The length prefix followed by ``octets``.
+
+        Raises:
+            StructError: If the length of ``octets`` does not fit in ``size``
+                octets.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return cls._make_pack(len(octets), size=size) + octets
+
+    @classmethod
+    def _make_uints(cls, values: 'Iterable[int]', *, size: 'int' = 1) -> 'bytes':
+        """Write ``values`` as a run of ``size``-octet unsigned big-endian integers.
+
+        The inverse of :meth:`_read_uints`, each value packed by
+        :meth:`_make_pack`.
+
+        Args:
+            values: the integers, or anything :class:`int` converts to one,
+                such as an enumeration member
+            size: octets in each integer
+
+        Returns:
+            The packed integers, concatenated in order.
+
+        Raises:
+            StructError: If a value is negative, or does not fit in ``size``
+                octets.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return b''.join(cls._make_pack(int(value), size=size) for value in values)
 
     @overload  # pragma: no cover
     @classmethod

@@ -146,6 +146,8 @@ Application Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_http_frame
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_tls_extension
+
 Miscellaneous Protocol Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

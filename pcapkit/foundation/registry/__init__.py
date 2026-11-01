@@ -48,6 +48,7 @@ __all__ = [
     'register_dccp_option',
 
     'register_http_frame',
+    'register_tls_extension',
 
     'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
     'register_pcapng_record',
