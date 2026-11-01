@@ -233,8 +233,6 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
 :issue:`2529`, where the classes that do not match yet are pending:
-:class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>`,
-:class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`,
 :class:`arp.InARP <pcapkit.protocols.link.arp.InARP>`,
 :class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
 :class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.
