@@ -26,6 +26,9 @@ from pcapkit.protocols.data.link.linux_sll2 import LinuxSLL2
 # BSD Loopback Encapsulation
 from pcapkit.protocols.data.link.loopback import Loopback
 
+# Netlink Socket Framing
+from pcapkit.protocols.data.link.netlink import Netlink
+
 # 802.1Q/802.1ad VLAN Tag Types
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
 from pcapkit.protocols.data.link.vlan import VLAN
@@ -51,6 +54,9 @@ __all__ = [
 
     # BSD Loopback Encapsulation
     'Loopback',
+
+    # Netlink Socket Framing
+    'Netlink',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',

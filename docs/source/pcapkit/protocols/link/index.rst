@@ -32,6 +32,7 @@ link layer, with detailed implementation and methods.
    linux_sll1
    linux_sll2
    loopback
+   netlink
    vlan
    c_tag
    s_tag

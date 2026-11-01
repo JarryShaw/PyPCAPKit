@@ -22,6 +22,24 @@ no dissector at all.
   tracked separately on :pr:`2507` and :pr:`2499`); ``IEEE80211_RADIOTAP``
   remains :class:`~pcapkit.protocols.misc.raw.Raw`.
 
+* **Added** -- :class:`~pcapkit.protocols.link.netlink.Netlink`, a dissector for
+  the fixed 16-octet ``nlmsghdr`` framing of Linux's own kernel/userspace IPC
+  transport (the kernel's own ``netlink(7)`` man page; :rfc:`3549#section-2.3.2`).
+  :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`/
+  :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`/
+  :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dispatch to it for the
+  ``ARPHRD_NETLINK`` case instead of falling back to
+  :class:`~pcapkit.protocols.misc.raw.Raw`. The byte order the header was written
+  in is ambiguous -- Netlink is kernel/userspace IPC, not wire format -- and is
+  guessed the way Wireshark's own netlink dissector does, by
+  :func:`~pcapkit.protocols.link.netlink.nlmsg_byteorder`. Per-family message
+  payloads (routing table entries and the like) and multiple messages packed into
+  one capture are out of scope for this first cut; every message's payload is kept
+  as :class:`~pcapkit.protocols.misc.raw.Raw`, unconditionally. One of
+  :issue:`2460`'s five ``arphrd_type`` follow-ups to get a dissector (``FRAD`` is
+  tracked separately on :pr:`2499`); ``IPGRE``/``IP6GRE`` and
+  ``IEEE80211_RADIOTAP`` remain :class:`~pcapkit.protocols.misc.raw.Raw`.
+
 * **Added** -- :class:`~pcapkit.protocols.link.frad.FRAD`, a dissector for Frame
   Relay's multiprotocol encapsulation (:rfc:`2427`, obsoleting :rfc:`1490`).
   :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`/

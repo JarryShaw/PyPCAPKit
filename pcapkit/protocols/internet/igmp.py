@@ -92,6 +92,11 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv1"], Literal["IGMPv2"], Literal["IGMPv3"]]':
         """Index ID of the protocol.
 
+        :rfc:`1112` names the protocol ``IGMP``, without a version, the same
+        shape :class:`~pcapkit.protocols.internet.icmp.ICMP` takes for
+        :rfc:`792` -- so the family base's own name doubles as IGMPv1's
+        canonical name. :rfc:`2236` names IGMPv2 with its own version.
+
         Returns:
             Index ID of the protocol, the family name and all three
             versions; the concrete IGMPv1, IGMPv2 and IGMPv3 classes narrow
@@ -120,7 +125,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         schema = cast('Schema_IGMP', self.__header__)
 
         if self._classify(schema.type, schema.max_resp_time, length) != self.version:
-            raise ProtocolError(f'{self.alias}: {schema.type!r} is not an {self.alias} '
+            raise ProtocolError(f'{self.alias}: {schema.type!r} is not an IGMPv{self.version} '
                                 f'message ({length} octets)')
 
         igmp = Data_IGMP(
