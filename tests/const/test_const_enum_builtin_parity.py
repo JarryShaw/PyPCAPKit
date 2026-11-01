@@ -376,12 +376,13 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # outliers #647 fixed above, and it is outside
         # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
         # sweep. The int count includes GitHub issue #880's ngap.ProcedureCode
-        # and ngap.ProtocolIE, which are on EnumRegistry.
-        self.assertEqual(len(ints), 127)
+        # and ngap.ProtocolIE, which are on EnumRegistry, as are the ICMP,
+        # ICMPv6 and IGMP registry families added on the base branch.
+        self.assertEqual(len(ints), 129)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)
-        self.assertEqual(len(self.enums), 143)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 137)
+        self.assertEqual(len(self.enums), 145)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 139)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.

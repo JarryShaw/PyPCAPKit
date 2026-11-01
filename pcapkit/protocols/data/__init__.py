@@ -65,6 +65,9 @@ __all__ = [
     # Frame Relay Access Device
     'FRAD',
 
+    # Generic Routing Encapsulation
+    'GRE',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 
@@ -73,6 +76,9 @@ __all__ = [
 
     # BSD Loopback Encapsulation
     'Loopback',
+
+    # Netlink Socket Framing
+    'Netlink',
 
     # IEEE 802.11 Radiotap Header
     'Radiotap',
@@ -117,6 +123,9 @@ __all__ = [
     'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
+
+    # IP Pseudo-Header
+    'IP_Pseudo',
 
     # Internet Control Message Protocol
     'ICMPv4',
@@ -274,6 +283,9 @@ __all__ = [
 
     # Open Shortest Path First
     'OSPF', 'OSPF_CryptographicAuthentication',
+
+    # Secure Sockets Layer version 2
+    'SSLv2', 'SSLv2_ClientHello', 'SSLv2_ServerHello',
 
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',

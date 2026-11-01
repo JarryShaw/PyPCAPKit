@@ -122,6 +122,7 @@ else:
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
     from pcapkit.vendor.sctp import *
+    from pcapkit.vendor.sslv2 import *
     from pcapkit.vendor.tcp import *
     from pcapkit.vendor.tls import *
     from pcapkit.vendor.vlan import *
@@ -189,6 +190,8 @@ __all__ = [
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
     'SCTP_PayloadProtocolIdentifier',
+    # SSLv2
+    'SSLv2_HandshakeType', 'SSLv2_Version',
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS

@@ -121,16 +121,17 @@ __all__ = [
     'PCAPNG',                                               # PCAPNG Format
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
-    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'Radiotap', 'S_Tag', 'VLAN',   # Link Layer
+    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
+    'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',  # Link Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',                   # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
+    'IP_Pseudo',                                            # IP Pseudo-Header
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
     'FTP', 'FTP_DATA',                                      # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF', 'RARP', 'DRARP',
-    'SSL', 'SSLv3', 'TLS', 'DTLS',
+    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
     'Schema', 'schema',                                     # Protocol Schema
     'Data', 'data',                                         # Protocol Data
 

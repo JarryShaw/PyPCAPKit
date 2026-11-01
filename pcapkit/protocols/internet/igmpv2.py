@@ -38,16 +38,23 @@ class IGMP(IGMPBase[Data_IGMP, Schema_IGMP],
         """IGMP version this class reads: ``2``."""
         return 2
 
+    @property
+    def alias(self) -> 'Literal["IGMPv2"]':
+        """Acronym of corresponding protocol."""
+        return 'IGMPv2'
+
     ##########################################################################
     # Methods.
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["IGMP"], Literal["IGMPv2"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["IGMPv2"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
+        :rfc:`2236` names the protocol ``IGMPv2``, carrying its own version.
+
         Returns:
-            Index ID of the protocol, the family name and the version.
+            Index ID of the protocol.
 
         """
-        return ('IGMP', 'IGMPv2')
+        return ('IGMPv2',)

@@ -50,12 +50,15 @@ __all__ = [
     'Raw',
 
     # Link Layer
-    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'Radiotap', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
+    'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',
 
     # Internet Layer
     'AH', 'ESP', 'ICMP', 'ICMPv4', 'ICMPv6', 'IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3',
     'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
+
+    # IP Pseudo-Header
+    'IP_Pseudo',
 
     # IPv6 Extension Header
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext', 'IPv6_Opts',
@@ -70,7 +73,7 @@ __all__ = [
     'NGAP',
     'OSPF',
     'RARP', 'DRARP',
-    'SSL', 'SSLv3', 'TLS', 'DTLS',
+    'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
 ]
 
 #: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.
