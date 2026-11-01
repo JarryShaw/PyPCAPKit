@@ -2425,8 +2425,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             too when :func:`~pcapkit.corekit.decorators.beholder` replaces the
             layer, as it does around :meth:`_import_next_layer`, since the
             replacement's ``error`` reports the failure (:issue:`2308`); outside
-            it, they are reported as the error leaves. A layer captured at least
-            as long as its hint cannot be replaced, and is parsed holding
+            it, they are reported as the error leaves. Under it, a layer is
+            held however much was captured, since one that raises is replaced
+            at any length (:issue:`2516`), so a kept layer's warnings follow
+            those of the layers it carries. Outside it, a layer captured at
+            least as long as its hint cannot be replaced, and is parsed holding
             nothing, even inside one that holds.
 
             A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
@@ -2460,7 +2463,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         captured = min(length, len(file_))
         token = _frame_depth.set(depth)
         try:
-            with hold_warnings(_short_of_hint(klass, captured)) as held:
+            # NOTE: Under ``beholder`` a layer that raises is replaced at any length,
+            # so its warnings are held however much was captured (#2516).
+            with hold_warnings(_beholding.get() or _short_of_hint(klass, captured)) as held:
                 try:
                     next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
                 except Exception:
