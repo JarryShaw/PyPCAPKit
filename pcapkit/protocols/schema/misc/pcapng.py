@@ -821,12 +821,6 @@ class FlagsField(UInt32Field):
 
     """
 
-    def __init__(self, namespace: 'dict[str, tuple[int, int]]',
-                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(callback=callback)
-
-        self._flags = namespace
-
     def pre_process(self, value: 'dict[str, int]', packet: 'dict[str, Any]') -> 'int | bytes':  # type: ignore[override]
         """Process field value before construction (packing).
 
@@ -863,6 +857,12 @@ class FlagsField(UInt32Field):
         """
         word = super().post_process(value, packet)
         return {name: word >> start & ((1 << size) - 1) for name, (start, size) in self._flags.items()}
+
+    def __init__(self, namespace: 'dict[str, tuple[int, int]]',
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(callback=callback)
+
+        self._flags = namespace
 
 
 #: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps
@@ -908,16 +908,6 @@ class OptionEnumField(EnumField):
     """
     if TYPE_CHECKING:
         _namespace: 'Enum_OptionType'
-
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'Enum_OptionType' = Enum_OptionType.opt_endofopt, signed: 'bool' = False,
-                 byteorder: 'Literal["little", "big"]' = 'big',
-                 bit_length: 'Optional[int]' = None,
-                 namespace: 'str' = 'opt',
-                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, default, signed, byteorder, bit_length, Enum_OptionType, callback)
-
-        self._opt_ns = namespace
 
     def pre_process(self, value: 'int | Enum_OptionType', packet: 'dict[str, Any]') -> 'int | bytes':
         """Process field value before construction (packing).
@@ -1002,6 +992,16 @@ class OptionEnumField(EnumField):
                 opt_name=opt_name, opt_value=value)
         return self._namespace.get(value, namespace=namespace)
 
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Enum_OptionType' = Enum_OptionType.opt_endofopt, signed: 'bool' = False,
+                 byteorder: 'Literal["little", "big"]' = 'big',
+                 bit_length: 'Optional[int]' = None,
+                 namespace: 'str' = 'opt',
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, signed, byteorder, bit_length, Enum_OptionType, callback)
+
+        self._opt_ns = namespace
+
 
 @schema_final
 class PCAPNG(Schema):
@@ -1084,68 +1084,6 @@ class Option(EnumSchema[Enum_OptionType]):
         },
     )
 
-    def __init_subclass__(cls, /, code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None,
-                          ns: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
-        """Register option type to :attr:`__enum__` mapping.
-
-        Args:
-            code: Option type code. It can be either a single option type enumeration
-                or a list of option type enumerations.
-            ns: Namespace of option type enumeration. If not given, the value
-                will be inferred from the option type code. Spelled ``ns`` rather
-                than ``namespace`` because ``abc.ABCMeta.__new__()`` names its
-                own fourth parameter ``namespace``, and before Python 3.11 that
-                parameter is positional-or-keyword rather than positional-only --
-                so a class keyword literally called ``namespace`` binds it twice.
-            *args: Arbitrary positional arguments.
-            **kwargs: Arbitrary keyword arguments.
-
-        If ``code`` is provided, the subclass will be registered to the
-        :attr:`__enum__` mapping with the given ``code``. If ``code`` is
-        not given, the subclass will not be registered.
-
-        Examples:
-
-            .. code-block:: python
-
-               from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
-               from pcapkit.protocols.schema.misc.pcapng import Option
-
-               class NewOption(Option, ns='opt', code=Enum_OptionType.opt_new):
-                   ...
-
-        See Also:
-            - :class:`pcapkit.const.pcapng.option_type.OptionType`
-
-        .. versionchanged:: 1.5.0
-
-           The class keyword ``namespace`` is renamed ``ns``, with no alias
-           (:issue:`439`).
-
-        """
-        # NOTE: the base hook goes first, before any of the registration work
-        # below -- see :meth:`EnumSchema.__init_subclass__`, which makes the same
-        # move for the same reason. :meth:`Schema.__init_subclass__` is what
-        # refuses to derive from a finalised schema, and a refusal has to land
-        # before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling
-        # this last would let a raise discard the class object while leaving the
-        # registry pointing at it, so a rejected declaration would still
-        # displace a built-in option schema for the rest of the process.
-        super().__init_subclass__()
-
-        if ns is not None:
-            cls.__namespace__ = ns
-
-        if code is not None:
-            if ns is None:
-                ns = cast('Optional[str]', cls.__namespace__)
-
-            if not isinstance(code, Enum_OptionType):
-                for _code in code:
-                    Option.register(_code, cls, ns)
-            else:
-                Option.register(code, cls, ns)
-
     @staticmethod
     def register(code: 'Enum_OptionType', cls: 'Type[Option]', ns: 'Optional[str]' = None) -> 'None':
         """Register option type to :attr:`__enum__` mapping.
@@ -1209,6 +1147,68 @@ class Option(EnumSchema[Enum_OptionType]):
 
         for key in targets:
             Option.registry[key][code] = cls
+
+    def __init_subclass__(cls, /, code: 'Optional[Enum_OptionType | Iterable[Enum_OptionType]]' = None,
+                          ns: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Register option type to :attr:`__enum__` mapping.
+
+        Args:
+            code: Option type code. It can be either a single option type enumeration
+                or a list of option type enumerations.
+            ns: Namespace of option type enumeration. If not given, the value
+                will be inferred from the option type code. Spelled ``ns`` rather
+                than ``namespace`` because ``abc.ABCMeta.__new__()`` names its
+                own fourth parameter ``namespace``, and before Python 3.11 that
+                parameter is positional-or-keyword rather than positional-only --
+                so a class keyword literally called ``namespace`` binds it twice.
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments.
+
+        If ``code`` is provided, the subclass will be registered to the
+        :attr:`__enum__` mapping with the given ``code``. If ``code`` is
+        not given, the subclass will not be registered.
+
+        Examples:
+
+            .. code-block:: python
+
+               from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
+               from pcapkit.protocols.schema.misc.pcapng import Option
+
+               class NewOption(Option, ns='opt', code=Enum_OptionType.opt_new):
+                   ...
+
+        See Also:
+            - :class:`pcapkit.const.pcapng.option_type.OptionType`
+
+        .. versionchanged:: 1.5.0
+
+           The class keyword ``namespace`` is renamed ``ns``, with no alias
+           (:issue:`439`).
+
+        """
+        # NOTE: the base hook goes first, before any of the registration work
+        # below -- see :meth:`EnumSchema.__init_subclass__`, which makes the same
+        # move for the same reason. :meth:`Schema.__init_subclass__` is what
+        # refuses to derive from a finalised schema, and a refusal has to land
+        # before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling
+        # this last would let a raise discard the class object while leaving the
+        # registry pointing at it, so a rejected declaration would still
+        # displace a built-in option schema for the rest of the process.
+        super().__init_subclass__()
+
+        if ns is not None:
+            cls.__namespace__ = ns
+
+        if code is not None:
+            if ns is None:
+                ns = cast('Optional[str]', cls.__namespace__)
+
+            if not isinstance(code, Enum_OptionType):
+                for _code in code:
+                    Option.register(_code, cls, ns)
+            else:
+                Option.register(code, cls, ns)
 
     if TYPE_CHECKING:
         #: Option type.
@@ -2311,6 +2311,37 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             self.data = [self.entry]
         return self
 
+    @staticmethod
+    def dump_entries(entries: 'list[OrderedMultiDict[str, str | bytes]]') -> 'bytes':
+        """Serialise journal entries, without the block's 32-bit padding.
+
+        Args:
+            entries: The journal entries.
+
+        Returns:
+            Each field as ``KEY=value\\n``, or for a binary value as the name,
+            a newline, its 64-bit little-endian length, the value and a newline,
+            with one blank line between entries.
+
+        """
+        temp = []  # type: list[bytes]
+        for entry in entries:
+            tmp_buf = []  # type: list[bytes]
+            for key, val in entry.items(multi=True):
+                if isinstance(val, str):
+                    tmp_buf.append(f'{key}={val}\n'.encode())
+                else:
+                    tmp_buf.append(b'%s\n%s%s\n' % (key.encode(), struct.pack('<Q', len(val)), val))
+            temp.append(b''.join(tmp_buf))
+        return b'\n'.join(temp)
+
+    if TYPE_CHECKING:
+        #: Journal entry (decoded), or the entry as captured, as one
+        #: :obj:`bytes` item, if it is malformed.
+        data: 'list[OrderedMultiDict[str, str | bytes] | bytes]'
+
+        def __init__(self, length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
+
     def _read_entries(self) -> 'list[OrderedMultiDict[str, str | bytes]]':
         """Walk :attr:`entry` into its journal entries, as :meth:`post_process` describes.
 
@@ -2373,30 +2404,6 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
         return data
 
     @staticmethod
-    def dump_entries(entries: 'list[OrderedMultiDict[str, str | bytes]]') -> 'bytes':
-        """Serialise journal entries, without the block's 32-bit padding.
-
-        Args:
-            entries: The journal entries.
-
-        Returns:
-            Each field as ``KEY=value\\n``, or for a binary value as the name,
-            a newline, its 64-bit little-endian length, the value and a newline,
-            with one blank line between entries.
-
-        """
-        temp = []  # type: list[bytes]
-        for entry in entries:
-            tmp_buf = []  # type: list[bytes]
-            for key, val in entry.items(multi=True):
-                if isinstance(val, str):
-                    tmp_buf.append(f'{key}={val}\n'.encode())
-                else:
-                    tmp_buf.append(b'%s\n%s%s\n' % (key.encode(), struct.pack('<Q', len(val)), val))
-            temp.append(b''.join(tmp_buf))
-        return b'\n'.join(temp)
-
-    @staticmethod
     def _decode_text(octets: 'bytes') -> 'str':
         """Decode a journal field name, key or value, reporting what did not decode.
 
@@ -2416,13 +2423,6 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                  f'({error.reason} at position {error.start}); replacing what did not '
                  f'decode', SchemaWarning, stacklevel=stacklevel())
             return octets.decode('utf-8', errors='replace')
-
-    if TYPE_CHECKING:
-        #: Journal entry (decoded), or the entry as captured, as one
-        #: :obj:`bytes` item, if it is malformed.
-        data: 'list[OrderedMultiDict[str, str | bytes] | bytes]'
-
-        def __init__(self, length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
 
 
 class DSBSecrets(EnumSchema[Enum_SecretsType]):
