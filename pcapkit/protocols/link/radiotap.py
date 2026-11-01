@@ -11,7 +11,7 @@ frame, as seen on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture
 whose ``arphrd_type`` is ``ARPHRD_IEEE80211_RADIOTAP`` --
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches here instead
 of falling back to :class:`~pcapkit.protocols.misc.raw.Raw` for that one
-case; see :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`.
+case; see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
 Radiotap is not part of the 802.11 standard itself: it is a prefix *in front
 of* the raw 802.11 MAC frame, written by the capturing tool rather than by
 the radio. Its structure is a fixed 8-octet start, all little-endian:
@@ -70,6 +70,7 @@ first cut instead:
 import collections
 from typing import TYPE_CHECKING
 
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.radiotap import Radiotap as Data_Radiotap
@@ -77,10 +78,10 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.link.radiotap import Radiotap as Schema_Radiotap
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, NoReturn, Optional, Sequence, Type
+    from typing import Any, DefaultDict, Optional, Sequence, Type
 
     from typing_extensions import Literal
 
@@ -333,17 +334,17 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         return 8
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol is reached only through
-                :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`'s
-                ``arphrd_type`` dispatch, not through a link-layer header
-                type of its own.
+        Returns:
+            Numeral registry index of the protocol in Linux ARP hardware
+            types, the ``arphrd_type`` that
+            :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+            dispatches here.
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_ARPHRD.IEEE80211_RADIOTAP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

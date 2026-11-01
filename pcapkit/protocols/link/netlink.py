@@ -11,12 +11,12 @@ IPC transport, as seen on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2``
 capture whose ``arphrd_type`` is ``ARPHRD_NETLINK`` (an ``nlmon`` interface)
 -- :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches here
 instead of falling back to :class:`~pcapkit.protocols.misc.raw.Raw` for that
-one case; see :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`.
+one case; see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
 Netlink is the kernel's own IPC mechanism (routing table dumps, interface
 notifications and the like), not a "next protocol over this link" the way
-every other ``arphrd_type`` exception is -- there is no next-layer dispatch
-table here at all, every message's payload is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`.
+every other ``arphrd_type`` exception is -- its next-layer registry ships
+empty, so every message's payload is kept as
+:class:`~pcapkit.protocols.misc.raw.Raw` unless its ``nlmsg_type`` is registered.
 
 .. table::
 
@@ -43,7 +43,7 @@ this first cut:
   (``NETLINK_ROUTE``, ``NETLINK_GENERIC``, ...) and is a large surface of its
   own -- routing table entries, link attributes (``rtattr``/``nlattr`` TLV
   chains), and so on. The payload is kept as
-  :class:`~pcapkit.protocols.misc.raw.Raw`, unconditionally.
+  :class:`~pcapkit.protocols.misc.raw.Raw` unless its ``nlmsg_type`` is registered.
 * **Multiple messages packed into one read.** The kernel's own netlink(7)
   page documents that a single read from a netlink socket, and so a single
   captured frame, commonly carries more than one ``nlmsghdr`` message back to
@@ -83,14 +83,16 @@ import collections
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.netlink import Netlink as Data_Netlink
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.netlink import Netlink as Schema_Netlink
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, NoReturn, Optional, Type
+    from typing import Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
 
@@ -136,10 +138,10 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
     """This class implements Linux Netlink socket framing.
 
     Every message's payload is kept as
-    :class:`~pcapkit.protocols.misc.raw.Raw`, unconditionally -- see the
-    module docstring's *Scope* section for why. :attr:`self.__proto__
-    <pcapkit.protocols.link.netlink.Netlink.__proto__>` is kept, as an empty
-    registry, only so :meth:`register` works the same way every other
+    :class:`~pcapkit.protocols.misc.raw.Raw` unless its ``nlmsg_type`` is
+    registered -- see the module docstring's *Scope* section for why.
+    :attr:`self.__proto__ <pcapkit.protocols.link.netlink.Netlink.__proto__>`
+    ships empty, so that :meth:`register` works the same way every other
     :class:`~pcapkit.protocols.link.link.Link` subclass's does.
 
     """
@@ -148,10 +150,9 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
     # Defaults.
     ##########################################################################
 
-    #: Protocol index mapping for decoding next layer. Deliberately empty --
-    #: see the class docstring -- so every key, including the ``nlmsg_type``
-    #: this class dispatches with, resolves through the
-    #: :class:`~collections.defaultdict` fallback to
+    #: Protocol index mapping for decoding next layer, keyed by ``nlmsg_type``.
+    #: Deliberately empty -- see the class docstring -- so every unregistered
+    #: key resolves through the :class:`~collections.defaultdict` fallback to
     #: :class:`~pcapkit.protocols.misc.raw.Raw`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
@@ -311,6 +312,45 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
             payload=payload,
         )
 
+    @classmethod
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        r"""Register a new protocol class for a message type.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: ``nlmsg_type`` of the dissected message
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Link.register
+            <pcapkit.protocols.link.link.Link.register>` because
+            :attr:`self.__proto__ <Netlink.__proto__>` is keyed by
+            ``nlmsg_type`` rather than by EtherType.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this message type is
+                already registered and the incumbent differs from the
+                replacement; see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard.
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'message type {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -320,17 +360,17 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
         return 16
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol is reached only through
-                :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`'s
-                ``arphrd_type`` dispatch, not through a link-layer header
-                type of its own.
+        Returns:
+            Numeral registry index of the protocol in Linux ARP hardware
+            types, the ``arphrd_type`` that
+            :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+            dispatches here.
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_ARPHRD.NETLINK  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

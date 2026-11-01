@@ -456,6 +456,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.apptype import UDP as AppType_UDP
         from pcapkit.const.ipx.packet import Packet as IPXPacket
+        from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
@@ -475,6 +476,9 @@ class ProtocolRegistryTests(unittest.TestCase):
             (registry.register_ethertype, EtherType.Internet_Protocol_version_4,
              [(registry.Link, 'register')]),
             (registry.register_loopback, 2, [(registry.Loopback, 'register')]),
+            (registry.register_arphrd, ARPHRD.FRAD, [(registry.LinuxSLL, 'register')]),
+            (registry.register_frad, 0xCC, [(registry.FRAD, 'register')]),
+            (registry.register_netlink, 16, [(registry.Netlink, 'register')]),
             (registry.register_transtype, TransType.TCP, [(registry.Internet, 'register')]),
             (registry.register_ipx, IPXPacket.NCP, [(registry.IPX, 'register')]),
         ]

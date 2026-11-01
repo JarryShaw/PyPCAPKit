@@ -5,7 +5,7 @@
 ``ARPHRD_IPGRE``/``ARPHRD_IP6GRE`` payload that
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
 :class:`~pcapkit.protocols.misc.raw.Raw` (see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`). Covers the
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
 base header [:rfc:`2784`], the optional Key and Sequence Number extensions
 [:rfc:`2890`], the EtherType-keyed dispatch through
 :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, and
@@ -235,12 +235,19 @@ class TestGRE(unittest.TestCase):
                 GRE(**kwargs)
 
     def test_id_and_index(self) -> None:
+        """``__index__`` is ``IPGRE``, one of the two ``arphrd_type`` keys LinuxSLL
+        dispatches here (#2510); ``IP6GRE`` is the other.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.gre import GRE
-        from pcapkit.utilities.exceptions import UnsupportedCall
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
 
         self.assertEqual(GRE.id(), ('GRE',))
-        with self.assertRaises(UnsupportedCall):
-            GRE.__index__()
+        self.assertIs(GRE.__index__(), ARPHRD.IPGRE)
+        self.assertEqual(GRE.__index__(), 778)
+        for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+            with self.subTest(arphrd=arphrd):
+                self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, arphrd), GRE)
 
     def test_unregistered_protocol_type_is_kept_raw(self) -> None:
         from pcapkit.protocols.link.gre import GRE

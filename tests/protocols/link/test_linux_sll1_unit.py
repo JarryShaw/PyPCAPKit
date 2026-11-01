@@ -2,8 +2,8 @@
 """GitHub issue #2438: the Linux "cooked" capture encapsulation v1 (``LINUX_SLL``).
 
 Covers the 16-octet header, the ``arphrd_type``-gated next-layer rule (see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`), link-address
-validation, and byte-exact round trips.
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`),
+link-address validation, and byte-exact round trips.
 
 Each test imports :mod:`pcapkit` itself, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -75,8 +75,8 @@ class TestLinuxSLL1(unittest.TestCase):
     def test_netlink_arphrd_dispatches_to_netlink(self) -> None:
         """``ARPHRD_NETLINK`` dispatches to
         :class:`~pcapkit.protocols.link.netlink.Netlink`, not
-        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), even though
-        it too is in :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`.
+        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), through
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
         """
         import struct
 
@@ -132,17 +132,16 @@ class TestLinuxSLL1(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_frad_protocol_type_is_not_an_ethertype(self) -> None:
-        """``ARPHRD_FRAD`` is in
-        :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`, so its
-        ``protocol_type`` is never looked up as an EtherType, per tcpdump.org's
-        LINUX_SLL page (:issue:`2460`).
+        """``ARPHRD_FRAD`` is a key of
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`,
+        so its ``protocol_type`` is never looked up as an EtherType, per
+        tcpdump.org's LINUX_SLL page (:issue:`2460`).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll import (_ARPHRD_NOT_ETHERTYPE,
-                                                      _resolve_next_layer_proto)
+        from pcapkit.protocols.link.linux_sll import LinuxSLL, _resolve_next_layer_proto
 
-        self.assertIn(ARPHRD.FRAD, _ARPHRD_NOT_ETHERTYPE)
-        proto = _resolve_next_layer_proto(ARPHRD.FRAD, 0x0800)
+        self.assertIn(ARPHRD.FRAD, LinuxSLL.__proto__)
+        proto = _resolve_next_layer_proto(LinuxSLL.__proto__, ARPHRD.FRAD, 0x0800)
         self.assertIs(type(proto), int)
         self.assertEqual(proto, 0x0800)
 

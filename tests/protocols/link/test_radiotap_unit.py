@@ -5,7 +5,7 @@
 ``arphrd_type`` ``ARPHRD_IEEE80211_RADIOTAP`` payload that
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
 :class:`~pcapkit.protocols.misc.raw.Raw` (see
-:data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`). Covers the
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
 fixed 8-octet start, the present-flags chain (plain and extended), the
 field-data region being skipped rather than decoded, the 802.11 MAC frame
 being kept as :class:`~pcapkit.protocols.misc.raw.Raw` (per the module
@@ -247,12 +247,16 @@ class TestRadiotap(unittest.TestCase):
                 Radiotap(**kwargs)
 
     def test_id_and_index(self) -> None:
+        """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertEqual(Radiotap.id(), ('Radiotap',))
-        with self.assertRaises(UnsupportedCall):
-            Radiotap.__index__()
+        self.assertIs(Radiotap.__index__(), ARPHRD.IEEE80211_RADIOTAP)
+        self.assertEqual(Radiotap.__index__(), 803)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, Radiotap.__index__()),
+                      Radiotap)
 
 
 if __name__ == '__main__':

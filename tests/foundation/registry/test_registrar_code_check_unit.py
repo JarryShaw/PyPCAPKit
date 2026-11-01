@@ -14,7 +14,7 @@ name leases -- calls the registrar with an otherwise valid argument list, and
 compares every registry with the snapshot. The registrars that take a plain
 ``int`` (``NUMBER_REGISTRARS``) accept the ``int``, but still reject
 :obj:`None` and a :class:`str`. Those keyed by no enum at all
-(``INT_ONLY_REGISTRARS``) take nothing but an ``int`` (#2511).
+(``INT_ONLY_REGISTRARS``) take nothing but an ``int`` (#2510, #2511).
 
 Every registrar, those included, also rejects a member of an enum other
 than the one it is typed on (#2224). The registry enums compare equal to their
@@ -90,6 +90,7 @@ MODULE_REGISTRARS = (
     ('register_pcap', ('pcapkit.protocols.misc.pcap.frame:Frame',)),
     ('register_pcapng', ('pcapkit.protocols.misc.pcapng:PCAPNG',)),
     ('register_ethertype', ('pcapkit.protocols.link.link:Link',)),
+    ('register_arphrd', ('pcapkit.protocols.link.linux_sll:LinuxSLL',)),
     ('register_transtype', ('pcapkit.protocols.internet.internet:Internet',)),
 )
 
@@ -121,12 +122,13 @@ REGISTRAR_ENUMS = {
     'register_pcap': 'pcapkit.const.reg.linktype:LinkType',
     'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',
     'register_ethertype': 'pcapkit.const.reg.ethertype:EtherType',
+    'register_arphrd': 'pcapkit.const.linux.arphrd:ARPHRD',
     'register_transtype': 'pcapkit.const.reg.transtype:TransType',
 }
 
-#: Registrars that also take a plain ``int``: the port, PPID, packet type or
-#: address family used, the classes whose ``__proto__`` they write, and any
-#: trailing arguments.
+#: Registrars that also take a plain ``int``: the port, PPID, packet type,
+#: address family, NLPID or message type used, the classes whose
+#: ``__proto__`` they write, and any trailing arguments.
 NUMBER_REGISTRARS = (
     ('register_loopback', 2, ('pcapkit.protocols.link.loopback:Loopback',), ()),
     ('register_ipx', 17, ('pcapkit.protocols.internet.ipx:IPX',), ()),
@@ -135,11 +137,13 @@ NUMBER_REGISTRARS = (
     ('register_sctp', 60, ('pcapkit.protocols.transport.sctp:SCTP',), ()),
     ('register_apptype', 80, ('pcapkit.protocols.transport.tcp:TCP',
                               'pcapkit.protocols.transport.udp:UDP'), ('tcp',)),
+    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad:FRAD',), ()),
+    ('register_netlink', 16, ('pcapkit.protocols.link.netlink:Netlink',), ()),
 )
 
 #: The registrars above whose registry no enum keys, so a plain ``int`` is the
-#: only code they take (#2511).
-INT_ONLY_REGISTRARS = ('register_loopback',)
+#: only code they take (#2510, #2511).
+INT_ONLY_REGISTRARS = ('register_loopback', 'register_frad', 'register_netlink')
 
 
 def resolve(path: 'str') -> 'type':
@@ -270,13 +274,17 @@ class RegistrarCodeCheckTests(unittest.TestCase):
             registrars._check_code(True, registrars.Enum_AppType, TCP, number=True)
 
     def test_int_only_registrars_reject_anything_but_an_int(self) -> None:
-        """No enum keys Loopback's registry, so only a plain ``int`` is a code (#2511).
+        """No enum keys Loopback's, FRAD's or Netlink's registry, so only a plain
+        ``int`` is a code (#2510, #2511).
 
-        ``_check_code`` with ``kind=None`` is the check, so its message keeps the
-        shape the enum-typed ones have.
+        ``_check_code`` with ``kind=None`` is Loopback's check, and
+        ``_check_number`` FRAD's and Netlink's, so each message keeps the shape
+        the enum-typed ones have.
         """
+        from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.protocols.link.frad import FRAD
         from pcapkit.protocols.link.loopback import Loopback
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.utilities.exceptions import RegistryError
@@ -284,13 +292,18 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         for name, _, targets, extra in NUMBER_REGISTRARS:
             if name in INT_ONLY_REGISTRARS:
                 self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
-                                                codes=(None, '2', 2.0, TransType.IPv4))
+                                                codes=(None, '2', 2.0, TransType.IPv4, ARPHRD.FRAD))
         for code, message in ((None, 'None'), (True, 'True'),
                               (TransType.IPv4, 'a member of TransType: ')):
             with self.subTest(code=code):
                 with self.assertRaisesRegex(RegistryError, rf'^Loopback: code must be an int, not {message}'):
                     registrars._check_code(code, None, Loopback)
         registrars._check_code(2, None, Loopback)
+        with self.assertRaisesRegex(RegistryError, r'^FRAD: code must be an int, not None$'):
+            registrars._check_number(None, FRAD)
+        with self.assertRaisesRegex(RegistryError,
+                                    r'^FRAD: code must be an int, not a member of ARPHRD: '):
+            registrars._check_number(ARPHRD.FRAD, FRAD)
 
     def test_every_rejection_names_the_destination_registry(self) -> None:
         """The message says *whose* registry rejected the key (#2268).
