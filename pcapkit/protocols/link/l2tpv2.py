@@ -361,10 +361,6 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             trailer=trailer,
         )
 
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
     @classmethod
     def id(cls) -> 'tuple[Literal["L2TP"], Literal["L2TPv2"]]':
         """Index ID of the protocol.
