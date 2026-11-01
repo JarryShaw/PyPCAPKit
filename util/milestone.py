@@ -6,7 +6,8 @@ is the only place the rule is written in code:
 
 * an open item, a merged pull request, or an issue closed as completed gets the
   open milestone titled after the checked-out ``pcapkit.__version__``,
-  ``PyPCAPKit v<major>.<minor>`` (:func:`milestone_title`);
+  ``PyPCAPKit v<major>.<minor>`` (:func:`milestone_title`), or, where that one is
+  closed, the open release milestone lowest above it (:func:`target_milestone`);
 * a pull request closed unmerged, or an issue closed as not planned or as a
   duplicate, loses any milestone it has, whichever that is;
 * an issue closed with no reason recorded is left as it is.
@@ -16,9 +17,9 @@ already holds a different milestone, such as a later release set by hand, keeps 
 
 The version is read from :file:`pcapkit/__init__.py` as text (:func:`read_version`),
 so nothing from :mod:`pcapkit` is imported or run. Where the milestone for that
-version is missing or closed, an item that would get it is left alone and a
-``::warning::`` says so: creating the next milestone is a release step, done by
-hand.
+version is missing, or closed with no later one open, an item that would get it is
+left alone and a ``::warning::`` says so: creating the next milestone is a release
+step, done by hand.
 
 It runs in one of these modes:
 
@@ -27,7 +28,7 @@ It runs in one of these modes:
   is re-read through the API rather than taken from the event payload, so a run
   applies the rule to the item as it stands when the run starts.
 * ``--backfill`` -- every item, open or closed, with no milestone whose number is
-  above the highest-numbered item of the previous release's milestone
+  above the highest-numbered item of the release milestone before the one given
   (:func:`backfill_bound`), for ``workflow_dispatch``. Items at or below that
   bound belong to releases already made, and the ones among them without a
   milestone were left without one on purpose.
@@ -247,9 +248,24 @@ def milestones(rest: 'Rest', repo: 'str') -> 'list[dict[str, Any]]':
     return list(pages(rest, f'repos/{repo}/milestones?state=all'))
 
 
-def find_open(found: 'list[dict[str, Any]]', title: 'str') -> 'Optional[dict[str, Any]]':
-    """The open milestone titled ``title`` among ``found``, if there is one."""
-    return next((entry for entry in found if entry['title'] == title and entry['state'] == 'open'), None)
+def target_milestone(found: 'list[dict[str, Any]]', version: 'str') -> 'Optional[dict[str, Any]]':
+    """The open milestone among ``found`` that a ``version``'s items get, if there is one.
+
+    It is the one :func:`milestone_title` names. Where that one is closed, its
+    release has shipped while ``__version__`` still names it, so it is the open
+    release milestone with the lowest release above it, compared as numbers so that
+    ``v1.10`` follows ``v1.9`` (#2548). A version with no milestone at all gets none.
+
+    """
+    title = milestone_title(version)
+    own = [entry for entry in found if entry['title'] == title]
+    current = next((entry for entry in own if entry['state'] == 'open'), None)
+    if current is not None or not own:
+        return current
+    floor = release(version)
+    later = [(number, entry) for entry in found if entry['state'] == 'open'
+             for number in [title_release(entry['title'])] if number is not None and number > floor]
+    return min(later, key=lambda pair: pair[0])[1] if later else None
 
 
 def backfill_bound(rest: 'Rest', repo: 'str', found: 'list[dict[str, Any]]',
@@ -336,21 +352,28 @@ def main(argv: 'Optional[list[str]]' = None, rest: 'Rest' = gh_rest,
         items = [rest('GET', f'repos/{args.repo}/issues/{args.item}', None)]
         actions = [action_for(items[0])]
         found = milestones(rest, args.repo) if SET in actions else []
+        milestone = target_milestone(found, version)
     else:
         found = milestones(rest, args.repo)
-        bound = backfill_bound(rest, args.repo, found, release(version))
+        milestone = target_milestone(found, version)
+        # Bounded by the release before the milestone given, not before the version's.
+        given = title if milestone is None else milestone['title']
+        bound = backfill_bound(rest, args.repo, found, release(given[len(PREFIX):]))
         if bound is None:
-            _actions.annotate('warning', f'no release milestone before {title!r}, so nothing bounds the '
+            _actions.annotate('warning', f'no release milestone before {given!r}, so nothing bounds the '
                               'backfill; no item was changed.', title=ANNOTATION)
             return 0
         print(f'backfilling items above #{bound} without a milestone')
         items = unmilestoned(rest, args.repo, bound)
         actions = [action_for(item) for item in items]
 
-    milestone = find_open(found, title)
     if milestone is None and SET in actions:
-        _actions.annotate('warning', f'no open milestone is titled {title!r}, so no item was given one; '
-                          'create it by hand.', title=ANNOTATION)
+        if any(entry['title'] == title for entry in found):
+            message = (f'{title!r} is closed and no later release milestone is open, so no item was given one; '
+                       'create the next one by hand.')
+        else:
+            message = f'no open milestone is titled {title!r}, so no item was given one; create it by hand.'
+        _actions.annotate('warning', message, title=ANNOTATION)
 
     wrote = False
 

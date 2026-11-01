@@ -597,7 +597,9 @@ closes, by the rule under "Milestones and the Project Board" in
 
 * an open item, a merged pull request, or an issue closed as completed gets the open
   milestone titled ``PyPCAPKit v<major>.<minor>`` from the checked-out
-  ``__version__`` -- ``1.5.0b14`` gives ``PyPCAPKit v1.5``;
+  ``__version__`` -- ``1.5.0b14`` gives ``PyPCAPKit v1.5`` -- or, once that one is
+  closed, the open ``PyPCAPKit v<major>.<minor>`` with the lowest release above it,
+  compared as numbers so ``v1.10`` follows ``v1.9`` (:issue:`2548`);
 * a pull request closed unmerged, or an issue closed as not planned or as a
   duplicate, loses any milestone it has;
 * an issue closed with no reason recorded is left as it is.
@@ -609,15 +611,15 @@ the exception: an unmerged or not-planned close takes away whichever milestone t
 item holds, since work closed without shipping belongs to no release.
 
 The run re-reads the item through the API rather than trusting the event payload.
-Where no open milestone has the title, the item is left without one and the run
-emits a ``::warning::``: the script never creates a milestone, since opening the
-next one is a release step done by hand. A removal needs no milestone, so it goes
-ahead regardless.
+Where no milestone has the title, or it is closed and none above it is open, the
+item is left without one and the run emits a ``::warning::``: the script never
+creates a milestone, since opening the next one is a release step done by hand. A
+removal needs no milestone, so it goes ahead regardless.
 
 A ``workflow_dispatch`` backfills: it applies the same rule to every item, open or
 closed, with no milestone whose number is above the highest-numbered item of the
 previous release's milestone, the newest of the ``PyPCAPKit v<major>.<minor>``
-milestones below the current one. Items at or below that bound belong to releases
+milestones below the one it gives. Items at or below that bound belong to releases
 already made, and those among them without a milestone were left so by hand. With
 no earlier milestone to bound it, the backfill warns and changes nothing. Its
 ``dry_run`` input is ticked by default, so a dispatch reports what it would change

@@ -3,6 +3,8 @@
 
 * :class:`TestTitle` and :class:`TestReadVersion` -- the milestone a version maps
   to, and the version read from :file:`pcapkit/__init__.py` as text.
+* :class:`TestTarget` -- the milestone given: the version's own while it is open,
+  else the lowest open one above it, by number (#2548).
 * :class:`TestActionFor` -- the rule: an open item, a merged pull request or an
   issue closed as completed gets the milestone; an unmerged one or one closed as
   not planned loses it; an issue closed with no reason is left alone.
@@ -155,6 +157,33 @@ V15 = {'number': 10, 'title': 'PyPCAPKit v1.5', 'state': 'open'}
 V16 = {'number': 12, 'title': 'PyPCAPKit v1.6', 'state': 'open'}
 V013 = {'number': 1, 'title': 'PyPCAPKit v0.13', 'state': 'closed'}
 OTHER = {'number': 11, 'title': 'Backlog', 'state': 'open'}
+#: v1.5 after its final tag, while ``__version__`` still names it (#2548).
+V15_CLOSED = dict(V15, state='closed')
+V17 = {'number': 13, 'title': 'PyPCAPKit v1.7', 'state': 'open'}
+V19_CLOSED = {'number': 20, 'title': 'PyPCAPKit v1.9', 'state': 'closed'}
+V110 = {'number': 21, 'title': 'PyPCAPKit v1.10', 'state': 'open'}
+V111 = {'number': 22, 'title': 'PyPCAPKit v1.11', 'state': 'open'}
+V20 = {'number': 23, 'title': 'PyPCAPKit v2.0', 'state': 'open'}
+
+
+class TestTarget(unittest.TestCase):
+    """#2548: the version's own milestone while it is open, else the lowest open one above it."""
+
+    def test_each_case(self) -> None:
+        cases = [
+            ('own open', '1.5.1', (V14, V15, V16, OTHER), V15),
+            ('own open, an earlier one open too', '1.5.1', (dict(V14, state='open'), V15, V16), V15),
+            ('own closed', '1.5.1', (V013, V14, V15_CLOSED, V16, OTHER), V16),
+            ('own closed, the lowest later one', '1.5.1', (V15_CLOSED, V17, V16), V16),
+            ('own closed, a later one closed too', '1.5.1', (V15_CLOSED, dict(V16, state='closed'), V17), V17),
+            ('own closed, only an earlier one open', '1.5.1', (dict(V14, state='open'), V15_CLOSED, OTHER), None),
+            ('own closed, none later', '1.5.1', (V14, V15_CLOSED, OTHER), None),
+            ('own absent, a later one open', '1.5.1', (V14, V16, OTHER), None),
+            ('v1.10 follows v1.9', '1.9.2', (V20, V111, V19_CLOSED, V110), V110),
+        ]
+        for case, version, found, want in cases:
+            with self.subTest(case=case):
+                self.assertEqual(milestone.target_milestone(list(found), version), want)
 
 
 class FakeRest:
@@ -203,8 +232,11 @@ class _Runs(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2218-')  # pylint: disable=consider-using-with
         self.addCleanup(tmp.cleanup)
         self.version = os.path.join(tmp.name, '__init__.py')
+        self.write_version('1.5.0b14')
+
+    def write_version(self, version: 'str') -> None:
         with open(self.version, 'w', encoding='utf-8') as file:
-            file.write("__version__ = '1.5.0b14'\n")
+            file.write(f"__version__ = {version!r}\n")
 
     def run_main(self, argv: 'list[str]', fake: 'FakeRest') -> 'tuple[int, str]':
         #: The waits the run asked for, in order; nothing here really sleeps.
@@ -278,19 +310,40 @@ class TestOneItem(_Runs):
         self.assertEqual(fake.patches, [(372, None), (372, 10)])
 
     def test_a_missing_milestone_warns_and_changes_nothing(self) -> None:
-        for case, found in (('absent', (V013, V14, OTHER)),
-                            ('closed', (V013, V14, dict(V15, state='closed')))):
+        for case, found, why in (
+                ('absent', (V013, V14, OTHER),
+                 "no open milestone is titled 'PyPCAPKit v1.5', so no item was given one; create it by hand."),
+                ('closed, none later', (V013, V14, V15_CLOSED, OTHER),
+                 "'PyPCAPKit v1.5' is closed and no later release milestone is open, so no item was given one; "
+                 'create the next one by hand.')):
             with self.subTest(case=case):
                 fake = FakeRest([pull(2205, merged=True)], found=found)
                 code, out = self.run_main(['--item', '2205'], fake)
                 self.assertEqual(code, 0)
                 self.assertEqual(fake.patches, [])
-                self.assertEqual(out, "::warning title=Milestone::no open milestone is titled 'PyPCAPKit v1.5', "
-                                      'so no item was given one; create it by hand.\n0 of 1 item(s) changed\n')
+                self.assertEqual(out, f'::warning title=Milestone::{why}\n0 of 1 item(s) changed\n')
+
+    def test_a_closed_milestone_gives_the_next_open_one(self) -> None:
+        # #2548: 1.5.1 after v1.5's final tag, so its items go to v1.6.
+        self.write_version('1.5.1')
+        for case, item in (('issue opened', issue(2519, state='open', reason=None)),
+                           ('merged pull request', pull(2519, merged=True))):
+            with self.subTest(case=case):
+                fake = FakeRest([item], found=(V013, V14, V15_CLOSED, V17, V16, OTHER))
+                code, out = self.run_main(['--item', '2519'], fake)
+                self.assertEqual(code, 0)
+                self.assertEqual(fake.patches, [(2519, 12)])
+                self.assertEqual(out, "#2519: set milestone to 'PyPCAPKit v1.6'\n1 of 1 item(s) changed\n")
+
+    def test_the_next_release_is_found_numerically(self) -> None:
+        self.write_version('1.9.2')
+        fake = FakeRest([issue(900, state='open', reason=None)], found=(V20, V19_CLOSED, V111, V110))
+        _, out = self.run_main(['--item', '900'], fake)
+        self.assertEqual(fake.patches, [(900, 21)])
+        self.assertIn("#900: set milestone to 'PyPCAPKit v1.10'", out)
 
     def test_the_title_follows_the_version_file(self) -> None:
-        with open(self.version, 'w', encoding='utf-8') as file:
-            file.write("__version__ = '1.4.2'\n")
+        self.write_version('1.4.2')
         fake = FakeRest([issue(300)], found=(dict(V14, state='open'), V15))
         self.run_main(['--item', '300'], fake)
         self.assertEqual(fake.patches, [(300, 9)])
@@ -363,6 +416,22 @@ class TestBackfill(_Runs):
         _, out = self.run_main(['--backfill'], fake)
         self.assertEqual(fake.patches, [])
         self.assertIn("::warning title=Milestone::no open milestone is titled 'PyPCAPKit v1.5'", out)
+
+    def test_a_closed_milestone_bounds_at_its_own_items(self) -> None:
+        # #2548: v1.6 is given, so v1.5 is the release before it, and #400 below
+        # v1.5's newest item was left without a milestone on purpose.
+        self.write_version('1.5.1')
+        items = [issue(400), issue(2501), pull(2502, merged=True), issue(2503, current=V16),
+                 issue(2504, state='open', reason=None)]
+        fake = FakeRest(items, found=(V013, V14, V15_CLOSED, V16, OTHER), newest={9: 336, 10: 2500, 1: 12})
+        code, out = self.run_main(['--backfill'], fake)
+        self.assertEqual(code, 0)
+        self.assertEqual(fake.patches, [(2501, 12), (2502, 12), (2504, 12)])
+        self.assertEqual(out.splitlines(), ['backfilling items above #2500 without a milestone',
+                                            "#2501: set milestone to 'PyPCAPKit v1.6'",
+                                            "#2502: set milestone to 'PyPCAPKit v1.6'",
+                                            "#2504: set milestone to 'PyPCAPKit v1.6'",
+                                            '3 of 3 item(s) changed'])
 
 
 class TestPrecedence(_Runs):
