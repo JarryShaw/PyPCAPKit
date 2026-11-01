@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2516: a trial parse that raises at full length and is kept as ``Raw`` warns nothing.
 
-:meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer` held only a
-next layer captured shorter than its length hint (#1580), but
 :func:`~pcapkit.corekit.decorators.beholder` replaces a layer that raises at any
-length (#2308). Without the fix, a TCP segment to port 443 that starts mid-record
-warned ``packet length < 0`` twice, from TLS's record header and from the SSLv2
-fallback it tries, for a TLS layer the result keeps as ``Raw``. Under
-``beholder`` every layer is now held, and its warnings are dropped with it. A
-kept layer still warns, from the caller's line, after the layers it carries.
+length (#2308), so holding only a next layer captured shorter than its length
+hint (#1580) lets a full-length layer's warnings through: a TCP segment to port
+443 that starts mid-record warns ``packet length < 0`` twice, from TLS's record
+header and from the SSLv2 fallback it tries, for a TLS layer the result keeps as
+``Raw``. Under ``beholder``,
+:meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer` holds every
+layer, and drops a replaced layer's warnings with it. A kept layer warns from the
+caller's line, after the layers it carries. Outside ``beholder``, a full-length
+layer cannot be replaced and holds nothing.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -123,13 +125,13 @@ class TestTrialParseFullLength(unittest.TestCase):
                 self.assertEqual([str(item.message) for item in caught], [])
 
     def test_well_formed_tls_record_warns_nothing(self) -> None:
-        """Control: a whole TLS record on 443 parses as TLS, as before, reporting nothing."""
+        """Control: a whole TLS record on 443 parses as TLS and reports nothing."""
         parsed, caught = self._parse('TCP', TCP_TO_443 + b'\x17\x03\x03\x00\x04abcd')
         self.assertEqual(str(parsed.protochain), 'TCP:TLS 1.2')  # type: ignore[attr-defined]
         self.assertEqual(caught, [])
 
     def test_kept_layer_still_warns_from_the_callers_line(self) -> None:
-        """Control: a kept IPv4 is held now, and reports its warning as it did."""
+        """Control: a kept IPv4 is held, and reports its warning from the caller's line."""
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.utilities.warnings import ProtocolWarning
 
@@ -147,6 +149,27 @@ class TestTrialParseFullLength(unittest.TestCase):
         shim6_cut = _ipv6(140, b'\x00')
         _, caught = self._parse('Ethernet', _ipv4(41, shim6_cut, SECURITY))
         self.assertEqual([str(item.message) for item in caught], SHIM6_CUT_MESSAGES + [OPTION_WARNING])
+
+    def test_full_length_layer_outside_beholder_holds_nothing(self) -> None:
+        """Outside ``beholder``, a full-length IPv4 reports its warning before the layers it carries.
+
+        Nothing can replace it, so it holds nothing, even inside a block that
+        discards: its warning is reported as raised. Only the layers its own
+        ``beholder`` parses are held, and report as their parse ends.
+
+        """
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.utilities.warnings import hold_warnings
+
+        packet = _ipv4(41, _ipv6(140, b'\x00'), SECURITY)[len(MACS) + 2:]  # past the Ethernet header
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            with hold_warnings() as outer:
+                outer.discard = True
+                parsed = ProtocolBase._parse_next_layer(IPv4, packet, len(packet))  # pylint: disable=protected-access
+        self.assertEqual(str(parsed.protochain), 'IPv4:IPv6:IPv6-Ext')
+        self.assertEqual([str(item.message) for item in caught], [OPTION_WARNING] + SHIM6_CUT_MESSAGES)
 
 
 if __name__ == '__main__':

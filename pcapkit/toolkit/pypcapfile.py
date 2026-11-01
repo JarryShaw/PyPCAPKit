@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.decorators import _beholding
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
@@ -500,14 +501,23 @@ def _default_extension_header(protocol: 'int', data: 'bytes') -> 'Optional[tuple
         parser raises anything at all, or fewer octets were captured than the
         header needs.
 
+    Note:
+        The header is parsed on trial as under
+        :func:`~pcapkit.corekit.decorators.beholder`: one that raises is dropped
+        with its warnings, as a replaced next layer is (:issue:`2308`,
+        :issue:`2526`).
+
     """
     # pylint: disable-next=protected-access
     klass = Protocol_IPv4._lookup_next_layer(Protocol_IPv4.__proto__, protocol)
+    token = _beholding.set(True)
     try:
         header = Protocol_IPv4._parse_next_layer(  # pylint: disable=protected-access
             klass, data, len(data), version=4, extension=False, alias=protocol, protocol=klass)
     except Exception:  # as beholder does
         return None
+    finally:
+        _beholding.reset(token)
     nxt = getattr(header.info, 'next', None)  # none on a header cut short, read as raw octets
     if nxt is None:
         return None
