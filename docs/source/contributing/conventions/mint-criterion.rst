@@ -127,13 +127,12 @@ what the generated code happens to look like:
 
 .. note::
 
-   :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s real-service spans are an
-   exception to the first case: ``x11``, ``ircu``, ``swx`` and the other spans IANA
-   assigns to a service resolve with the bare service name, so ``TCP(6001).name`` is
-   ``'x11'``. They lost their code suffix (``x11_6001``) when :issue:`860`'s fix
-   stopped the family minting, and it stays off because restoring it would change
-   ``.name``, which a caller can observe. The port is still on ``.port`` and in the
-   value, ``'x11 [6001 - tcp]'``. Recorded on :issue:`2550`.
+   In the transport registries -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+   :class:`~pcapkit.const.reg.apptype.udp.UDP` and the rest -- the spans IANA assigns
+   to a service are an exception to the first case: ``x11``, ``ircu``, ``swx`` and the
+   others resolve with the bare service name, so ``TCP(6001).name`` is ``'x11'``, not
+   ``'x11_6001'``. Suffixing them would change ``.name``, which a caller can observe.
+   Recorded on :issue:`2550`.
 
 Worked Examples
 ~~~~~~~~~~~~~~~
