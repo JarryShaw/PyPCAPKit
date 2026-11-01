@@ -267,7 +267,9 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             it, as :meth:`HTTP._guess_version
             <pcapkit.protocols.application.http.HTTP._guess_version>` parses it,
             since a dispatched payload reaches this class rather than that one
-            (:issue:`2524`); the preface counts towards :attr:`length`.
+            (:issue:`2524`); the preface counts towards :attr:`length`. A
+            preface with no frame after it is refused, since the data model
+            holds one frame per packet and has no form for a frameless segment.
 
         """
         preface_len = len(_HTTP2_PREFACE)

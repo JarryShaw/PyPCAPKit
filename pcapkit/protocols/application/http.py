@@ -280,9 +280,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         The family base lists its members' names alone, as
         :meth:`IP.id() <pcapkit.protocols.internet.ip.IP.id>` does: ``HTTP/1``
         for :rfc:`9112`'s HTTP/1.1 and the versions before it, and :rfc:`9113`'s
-        ``HTTP/2``. A dispatched layer is the member :meth:`_dispatch` picks, so
-        each name selects its own version, and the ``HTTP`` key selects either
-        through this tuple.
+        ``HTTP/2``. A dispatched layer is the member :meth:`_dispatch_version`
+        picks, so each name selects its own version, and the ``HTTP`` key
+        selects either through this tuple.
 
         Returns:
             Index ID of the protocol; the versioned classes narrow it to their
@@ -497,7 +497,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         It is the counterpart of :meth:`IGMP._dispatch
         <pcapkit.protocols.internet.igmp.IGMP._dispatch>`, named apart from it
-        because, in the transport layer, ``_dispatch`` already names
+        because, in the transport layer, ``_dispatch`` names
         :meth:`AppType._dispatch
         <pcapkit.const.reg.apptype.apptype.AppType._dispatch>`, the port
         registries' lookup hook.
@@ -512,6 +512,18 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             the payload identifies as; :class:`~pcapkit.protocols.misc.raw.Raw`
             for one it does not, which then keeps its octets undissected.
 
+        Note:
+            A connection preface with no frame after it is HTTP/2, and is real
+            traffic, since a client may send the preface and its ``SETTINGS``
+            frame in separate segments. It is still
+            :class:`~pcapkit.protocols.misc.raw.Raw` here, because the HTTP/2
+            data model holds one frame per packet: the frame header's Length,
+            Type, Flags and Stream Identifier are required fields of
+            :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2`, so a
+            frameless segment has no form in it, and
+            :class:`~pcapkit.protocols.application.httpv2.HTTPv2` refuses one.
+            So this does not pick that class for it, and the two agree.
+
         """
         from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
@@ -519,7 +531,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         data = data[:length]
         if data.startswith(_HTTP2_PREFACE):
-            return HTTPv2
+            return HTTPv2 if len(data) > len(_HTTP2_PREFACE) else Raw
         if test_start_line(data):
             return HTTPv1
         if _test_http2_frame(data):

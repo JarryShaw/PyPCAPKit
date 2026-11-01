@@ -127,11 +127,51 @@ class HTTPDispatchTests(unittest.TestCase):
     def test_an_unidentified_payload_is_kept_raw(self) -> None:
         from pcapkit.protocols.misc.raw import Raw
 
-        for label, payload in {**UNIDENTIFIED, 'preface alone': _PREFACE}.items():
+        for label, payload in UNIDENTIFIED.items():
             with self.subTest(payload=label):
                 tcp = self.tcp(payload)
                 self.assertIs(type(tcp.payload), Raw)
                 self.assertEqual(tcp.payload.data, payload)
+
+    def test_a_preface_alone_is_raw_to_the_dispatcher_and_the_parse(self) -> None:
+        """A preface with no frame after it is kept as Raw, byte for byte.
+
+        It is HTTP/2, and a client may send it in a segment of its own, but the
+        HTTP/2 data model holds one frame per packet and has no form for it, so
+        ``HTTPv2`` refuses it and the dispatcher does not pick that class.
+        """
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        self.assertIs(HTTP._dispatch_version(_PREFACE, len(_PREFACE)), Raw)
+        with self.assertRaisesRegex(ProtocolError, 'connection preface with no frame'):
+            self.member('HTTPv2')(io.BytesIO(_PREFACE), len(_PREFACE))
+
+        tcp = self.tcp(_PREFACE)
+        self.assertIs(type(tcp.payload), Raw)
+        self.assertEqual(str(tcp.protochain), 'TCP:Raw')
+        self.assertEqual(tcp.payload.data, _PREFACE)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertEqual(TCP.from_data(tcp.info).data, tcp.data)
+
+    def test_the_dispatcher_picks_only_a_class_that_parses_the_payload(self) -> None:
+        """Whatever member the dispatcher picks parses the payload it picked it for."""
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.misc.raw import Raw
+
+        payloads = {**{label: payload for label, (payload, _) in PAYLOADS.items()},
+                    **UNIDENTIFIED, 'preface alone': _PREFACE}
+        for label, payload in payloads.items():
+            klass = HTTP._dispatch_version(payload, len(payload))
+            if klass is Raw:
+                continue
+            with self.subTest(payload=label, klass=klass.__name__):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    self.assertEqual(klass(io.BytesIO(payload), len(payload)).data, payload)
 
     def test_a_preface_counts_as_header_and_is_kept(self) -> None:
         tcp = self.tcp(_PREFACE + _SETTINGS)
