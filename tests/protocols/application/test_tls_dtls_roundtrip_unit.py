@@ -16,7 +16,8 @@ through :meth:`~pcapkit.protocols.application.application.Application.from_data`
 :meth:`~pcapkit.protocols.application.tls.TLS.make`/
 :meth:`~pcapkit.protocols.application.dtls.DTLS.make` and reading them back
 (the make-then-parse direction) -- so neither direction is a tautology of
-the other.
+the other. Segments of several TLS records are checked the same way, each
+record a layer of its own (#2517).
 
 """
 from __future__ import annotations
@@ -90,6 +91,23 @@ TLS_RECORDS = {
         22, _handshake(1, _client_hello_body()), version=b'\x03\x01'),
     'alert at record version 0x0302': _tls_record(21, b'\x02\x0a', version=b'\x03\x02'),
 }
+
+#: A ``ServerHello`` selecting TLS 1.3 through ``supported_versions`` (type 43).
+_TLS13_SERVER_HELLO = _tls_record(22, _handshake(2, _server_hello_body(extensions=b'\x00\x2b\x00\x02\x03\x04')))
+
+#: Segments of several records each, every one dissected as a TLS layer (#2517).
+TLS_SEGMENTS = {
+    'change_cipher_spec + alert': _tls_record(20, b'\x01') + _tls_record(21, b'\x02\x0a'),
+    # The shape of frame 2 of Wireshark's tls13-rfc8446.pcap.
+    'TLS 1.3 ServerHello + change_cipher_spec + application_data x2': (
+        _TLS13_SERVER_HELLO + _tls_record(20, b'\x01')
+        + _tls_record(23, bytes(range(40))) + _tls_record(23, bytes(range(40, 100)))),
+    'handshake coalescing two messages + application_data': (
+        _tls_record(22, _handshake(0, b'') + _handshake(14, b'')) + _tls_record(23, b'hello')),
+}
+
+#: A record the segment ends inside: 20 octets of a 55-octet record.
+_PARTIAL_RECORD = _tls_record(23, bytes(50))[:20]
 
 
 def _dtls_client_hello_body(cipher_suites: bytes = b'\x13\x01', extensions: 'bytes | None' = b'',
@@ -248,6 +266,117 @@ class TestTLSRoundTrip(unittest.TestCase):
         parsed = TLS(wire, len(wire))
         self.assertEqual(parsed.info.content, b'\x02\x0a\x00')
         self.assertEqual(bytes(TLS.from_data(parsed.info)), wire)
+
+
+def _split_records(wire: bytes) -> 'list[bytes]':
+    """``wire`` cut at each record's declared length, as the specification frames it."""
+    records = []
+    while wire:
+        end = 5 + int.from_bytes(wire[3:5], 'big')
+        records.append(wire[:end])
+        wire = wire[end:]
+    return records
+
+
+def _layers(proto: 'object') -> 'tuple[list, object]':
+    """Each TLS layer of ``proto``'s chain, in order, and the layer that ends it."""
+    from pcapkit.protocols.application.tls import TLS
+
+    layers = []
+    while isinstance(proto, TLS):
+        layers.append(proto)
+        proto = proto.payload
+    return layers, proto
+
+
+class TestTLSSegmentRoundTrip(unittest.TestCase):
+    """Pin every record of a segment as its own layer, rebuilt both directions (#2517)."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_every_record_is_a_tls_layer(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.misc.null import NoPayload
+
+        for name, wire in TLS_SEGMENTS.items():
+            with self.subTest(segment=name):
+                records = _split_records(wire)
+                layers, rest = _layers(TLS(wire, len(wire)))
+                self.assertEqual(len(layers), len(records))
+                self.assertIsInstance(rest, NoPayload)
+                for layer, record in zip(layers, records):
+                    self.assertEqual(int(layer.info.content_type), record[0])
+                    self.assertEqual(layer.info.version, int.from_bytes(record[1:3], 'big'))
+                    self.assertEqual(layer.info.length, len(record) - 5)
+
+    def test_parse_then_rebuild_is_byte_exact(self) -> None:
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.transport.tcp import TCP
+
+        tcp_to_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
+        for name, wire in TLS_SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = TLS(wire, len(wire))
+                rebuilt = TLS.from_data(parsed.info)
+                self.assertEqual(bytes(rebuilt).hex(), wire.hex())
+                self.assertEqual(len(_layers(rebuilt)[0]), len(_split_records(wire)))
+
+                segment = tcp_to_443 + wire
+                tcp = TCP(segment, len(segment))
+                self.assertEqual(str(tcp.protochain), f'TCP:{parsed.protochain}')
+                self.assertEqual(bytes(TCP.from_data(tcp.info)).hex(), segment.hex())
+
+    def test_make_then_parse_is_byte_exact(self) -> None:
+        """Each record made from its parsed content, carrying the next as ``payload``."""
+        from pcapkit.protocols.application.tls import TLS
+
+        for name, wire in TLS_SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = TLS(wire, len(wire))
+                layers, _ = _layers(parsed)
+                maker = object.__new__(TLS)
+                schema = b''  # type: object
+                for layer in reversed(layers):
+                    schema = maker.make(content_type=layer.info.content_type, version=layer.info.version,
+                                        content=layer.info.content, payload=schema)
+                made = bytes(schema)  # type: ignore[call-overload]
+                self.assertEqual(made.hex(), wire.hex())
+                self.assertEqual(str(TLS(made, len(made)).protochain), str(parsed.protochain))
+
+    def test_records_match_the_specification(self) -> None:
+        """Each record's own tier and content, per its header (RFC 9846 section 5.1)."""
+        from pcapkit.const.tls.content_type import ContentType
+        from pcapkit.protocols.application.tls import TLS
+
+        wire = TLS_SEGMENTS['TLS 1.3 ServerHello + change_cipher_spec + application_data x2']
+        layers, _ = _layers(TLS(wire, len(wire)))
+        self.assertEqual([layer.alias for layer in layers], ['TLS 1.3', 'TLS 1.2', 'TLS 1.2', 'TLS 1.2'])
+        self.assertEqual([layer.info.content_type for layer in layers],
+                         [ContentType.handshake, ContentType.change_cipher_spec,
+                          ContentType.application_data, ContentType.application_data])
+        self.assertEqual(layers[1].info.content.msg, 1)
+        self.assertEqual([layer.info.content for layer in layers[2:]], [bytes(range(40)), bytes(range(40, 100))])
+
+        # The issue's example: the alert decodes, rather than staying 7 raw octets.
+        wire = TLS_SEGMENTS['change_cipher_spec + alert']
+        layers, _ = _layers(TLS(wire, len(wire)))
+        self.assertEqual((int(layers[1].info.content.level), int(layers[1].info.content.description)), (2, 10))
+
+    def test_trailing_partial_record_stays_raw(self) -> None:
+        """The record a segment ends inside is the reassembly limit, kept as its own octets."""
+        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, segment in TLS_SEGMENTS.items():
+            with self.subTest(segment=name):
+                wire = segment + _PARTIAL_RECORD
+                parsed = TLS(wire, len(wire))
+                layers, rest = _layers(parsed)
+                self.assertEqual(len(layers), len(_split_records(segment)))
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(bytes(rest), _PARTIAL_RECORD)
+                self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
 
 
 class TestDTLSRoundTrip(unittest.TestCase):

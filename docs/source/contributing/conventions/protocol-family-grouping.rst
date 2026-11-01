@@ -6,7 +6,7 @@ Protocol Family Grouping
 A protocol family is a base class named after the family plus its member classes.
 What each class returns from :meth:`~pcapkit.protocols.protocol.Protocol.id` is what
 the selectors on :class:`~pcapkit.protocols.protocol.Protocol` match against. The
-rulings were set on :pr:`2441`, :pr:`2443`, :pr:`2446` and :issue:`2462`.
+rulings were set on :pr:`2441`, :pr:`2443`, :pr:`2446`, :issue:`2462` and :issue:`2517`.
 
 The ``id()`` Criterion
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -100,6 +100,16 @@ A family-inclusive member is selected by any sibling's registry key (a key of
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name
 and by the key of each family whose ``id()`` lists it: ``AH`` and ``ESP`` by ``IPsec``
 and by ``IPv6_Ext``.
+
+Chained Records
+~~~~~~~~~~~~~~~
+
+**TLS records sharing a TCP segment are chained layers, not a list on one layer**
+(:issue:`2517`): each record dissected after the first is the previous record's payload,
+so its dynamic alias names its own version -- a ``ServerHello`` then a
+``ChangeCipherSpec`` read ``TCP:TLS 1.3:TLS 1.2``. DTLS and SSLv2 do not chain: two DTLS
+records in one datagram read ``DTLS 1.2:Raw`` (:issue:`2535`), and an SSLv2 hello
+followed by a further record reads ``SSLv2:Raw``.
 
 .. _protocol-family-canonical-names:
 

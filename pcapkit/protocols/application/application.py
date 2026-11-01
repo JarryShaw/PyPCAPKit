@@ -44,8 +44,9 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
     on a protocol number. What they do permit is the ``-1`` sentinel, which asks
     for the rest of the packet undissected and resolves to
     :class:`~pcapkit.protocols.misc.raw.Raw` -- trailing bytes are not a further
-    protocol layer -- or to :class:`~pcapkit.protocols.misc.null.NoPayload` when
-    nothing remains.
+    protocol layer, unless the subclass dissects them, as
+    :class:`~pcapkit.protocols.application.tls.TLS` does for a further record --
+    or to :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
 
     """
 

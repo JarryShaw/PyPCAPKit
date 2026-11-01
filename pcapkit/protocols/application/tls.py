@@ -33,12 +33,31 @@ Decoded Fields
 * Everything else -- the same types once encrypted, ``application_data``
   and every other content type -- as opaque :obj:`bytes`.
 
+Records in One Segment
+----------------------
+
+A whole record after the first in a TCP segment is dissected as a further
+:class:`TLS` layer, the previous record's payload (:issue:`2517`): a
+``ServerHello`` followed by a ``ChangeCipherSpec`` reads
+``TCP:TLS 1.3:TLS 1.2``. The exceptions:
+
+* A whole record that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  with no SSLv2 trial.
+* Octets that open no record -- an unsupported content type, a legacy
+  version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
+* A parse told to stop at TLS (``protocol='TLS'`` or ``layer='Application'``)
+  keeps the rest of the segment raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 Known Limitation
 ----------------
 
 **A record split across two TCP segments is not reassembled**, and decodes as
-:class:`~pcapkit.protocols.misc.raw.Raw`. A record may be up to 16 KiB
-against a typical 1460-octet MSS, so this is routine.
+:class:`~pcapkit.protocols.misc.raw.Raw`, as does the partial record a segment
+ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
+this is routine.
 
 .. versionadded:: 1.6.0
 
@@ -46,7 +65,9 @@ against a typical 1460-octet MSS, so this is routine.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.protocols.application.ssl import SSL, TLS13_VERSION
+from pcapkit.corekit.decorators import _beholding, beholder
+from pcapkit.protocols.application.ssl import (_TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES, SSL,
+                                               TLS13_VERSION)
 from pcapkit.protocols.application.sslv2 import SSLv2
 from pcapkit.protocols.data.application.sslv2 import ClientHello as SSLv2_ClientHello
 from pcapkit.protocols.data.application.sslv2 import ServerHello as SSLv2_ServerHello
@@ -54,6 +75,7 @@ from pcapkit.protocols.data.application.sslv2 import SSLv2 as SSLv2_Data
 from pcapkit.protocols.data.application.tls import TLS as Data_TLS
 from pcapkit.protocols.schema.application.tls import TLS as Schema_TLS
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import hold_warnings
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -67,6 +89,10 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['TLS', 'SSLv3']
+
+#: Length of the record header: content type, legacy version and length
+#: (:rfc:`9846#section-5.1`).
+_RECORD_HEADER_LENGTH = 5
 
 #: Legacy record version SSLv3 carries, the one tier with its own :attr:`~TLS.name`.
 _SSLV3_VERSION = 0x0300
@@ -83,6 +109,28 @@ _TLS_VERSION_ALIASES = {
 #: Legacy record versions a TLS 1.3 record may carry: ``0x0303`` always, and
 #: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
 _TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
+
+
+def _opens_whole_record(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with a whole TLS record.
+
+    Only the record header is read, against the same checks as
+    :meth:`SSL._validate_tls_record
+    <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`: a content
+    type a genuine record carries, a ``0x03xx`` legacy version, and a fragment
+    that ends inside ``data``.
+
+    Args:
+        data: Octets after a record.
+
+    Returns:
+        Whether a further record opens ``data`` and ends inside it.
+
+    """
+    if len(data) < _RECORD_HEADER_LENGTH:
+        return False
+    return (data[0] in _WIRE_CONTENT_TYPES and data[1] == _TLS_VERSION_MAJOR
+            and _RECORD_HEADER_LENGTH + int.from_bytes(data[3:5], 'big') <= len(data))
 
 
 class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
@@ -108,7 +156,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
     #: Tier :meth:`read` identified, e.g. ``'TLS 1.2'``; ``'TLS'`` until then.
     _alias = 'TLS'  # type: Literal["TLS", "SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2", "TLS 1.3"]
 
-    #: Header length of the SSLv2 record :meth:`read` adopted; ``None`` for TLS's own.
+    #: Header length of the SSLv2 record :meth:`unpack` adopted; ``None`` for TLS's own.
     _adopted_length = None  # type: Optional[int]
 
     ##########################################################################
@@ -129,13 +177,13 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
     def length(self) -> 'int':
         """Header length of current protocol -- the fixed record header,
         :attr:`~pcapkit.protocols.data.application.tls.TLS.length`'s fragment
-        excluded; or, once :meth:`read` has adopted an SSLv2 record, that
+        excluded; or, once :meth:`unpack` has adopted an SSLv2 record, that
         record's own 2- or 3-octet header.
 
         """
         if self._adopted_length is not None:
             return self._adopted_length
-        return 5
+        return _RECORD_HEADER_LENGTH
 
     ##########################################################################
     # Methods.
@@ -153,13 +201,8 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """
         return ('TLS',)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Any':
-        """Read Transport Layer Security (TLS), or the SSLv2 record port 443 may carry.
-
-        TLS is tried first. Only when :meth:`_read_tls_record` rejects the
-        record is the payload offered to
-        :class:`~pcapkit.protocols.application.sslv2.SSLv2`, whose own header
-        checks are strict, so a genuine TLS record is never taken as SSLv2.
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_TLS':
+        """Read Transport Layer Security (TLS).
 
         Args:
             length: Length of packet data.
@@ -169,19 +212,14 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the payload is neither a TLS record (see
-                :meth:`_read_tls_record`) nor an SSLv2 record.
+            ProtocolError: If the payload is not a TLS record (see
+                :meth:`_read_tls_record`), which :meth:`unpack` then offers
+                to :class:`~pcapkit.protocols.application.sslv2.SSLv2`.
 
         """
         if length is None:
             length = len(self)
-        try:
-            return self._read_tls_record(length, **kwargs)
-        except ProtocolError:
-            parsed = self._read_sslv2_fallback(length, **kwargs)
-            if parsed is None:
-                raise
-            return parsed
+        return self._read_tls_record(length, **kwargs)
 
     def make(self,
              content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
@@ -233,11 +271,56 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             payload=payload,
         )
 
+    def unpack(self, length: 'Optional[int]' = None, *, chained: 'bool' = False,  # pylint: disable=arguments-differ
+               **kwargs: 'Any') -> 'Any':
+        """Unpack (parse) packet data: TLS, or the SSLv2 record port 443 may carry.
+
+        TLS is tried first: the record header and :meth:`read`. Only when
+        that trial rejects the first record of a segment is the payload offered
+        to :class:`~pcapkit.protocols.application.sslv2.SSLv2`, whose own header
+        checks are strict, so a genuine TLS record is never taken as SSLv2.
+
+        Args:
+            length: Length of packet data.
+            chained: Whether the record follows another in its segment; such
+                a record gets no SSLv2 trial, since SSLv2 only opens a
+                connection (:issue:`2517`).
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If the payload is neither a TLS record (see
+                :meth:`_read_tls_record`) nor an SSLv2 record.
+
+        Note:
+            The TLS trial's warnings are dropped when SSLv2 parses the record
+            (:issue:`2525`), and the SSLv2 trial's when it fails. When the record
+            is not parsed, the TLS trial's are dropped only under
+            :func:`~pcapkit.corekit.decorators.beholder` (:issue:`2308`).
+
+        """
+        with hold_warnings() as trial:
+            try:
+                return super().unpack(length, **kwargs)
+            except ProtocolError:
+                parsed = None
+                if not chained:
+                    trial.discard = True
+                    with hold_warnings() as fallback:
+                        parsed = self._read_sslv2_fallback(len(self) if length is None else length, **kwargs)
+                        fallback.discard = parsed is None
+                if parsed is None:
+                    trial.discard = _beholding.get()
+                    raise
+                return parsed
+
     @classmethod
     def from_data(cls, data: 'Any', **kwargs: 'Any') -> 'Any':
         """Create protocol instance from data.
 
-        An SSLv2 record that :meth:`read` adopted from port 443 is rebuilt as
+        An SSLv2 record that :meth:`unpack` adopted from port 443 is rebuilt as
         the SSLv2 record it was parsed from, since TLS's record layout cannot
         carry its 2- or 3-octet header.
 
@@ -261,7 +344,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
     def __length_hint__(self) -> 'Literal[5]':
         """Return an estimated length for the object."""
-        return 5
+        return _RECORD_HEADER_LENGTH  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -389,6 +472,57 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """
         self._adopted_length = obj.length  # pylint: disable=attribute-defined-outside-init
         return super()._adopt_dispatched(obj)
+
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import next layer extractor: a further whole record, or the rest undissected.
+
+        A TCP segment may carry several records (:issue:`2517`). So the ``-1``
+        remainder is dissected as this class when :func:`_opens_whole_record`
+        finds a whole record opening it, and is otherwise kept as
+        :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :meth:`Application._import_next_layer
+        <pcapkit.protocols.application.application.Application._import_next_layer>`
+        keeps it. A partial record, which the segment ends inside, is the
+        reassembly limit, and stays raw.
+
+        Arguments:
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest of the segment) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class for a further record, or as
+            :meth:`Application._import_next_layer
+            <pcapkit.protocols.application.application.Application._import_next_layer>`
+            returns otherwise.
+
+        """
+        if proto == -1 and not self._sigterm and _opens_whole_record(self._get_payload()[:length]):
+            return self._import_next_record(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+        return super()._import_next_layer(proto, length, packet=packet)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_record(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
+                            packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import the further record :meth:`_import_next_layer` found.
+
+        Arguments:
+            proto: next layer protocol index, the ``-1`` sentinel
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            when :func:`~pcapkit.corekit.decorators.beholder` replaces a record
+            that fails to parse, with no SSLv2 trial (see :meth:`unpack`).
+
+        """
+        file_ = self._get_payload()
+        return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx, chained=True)
 
 
 
