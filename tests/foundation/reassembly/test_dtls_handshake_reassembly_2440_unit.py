@@ -4,7 +4,7 @@
 Covers the :class:`~pcapkit.foundation.reassembly.dtls.DTLS` engine in
 isolation, fed fragments directly, and the extraction path: the default engine
 feeds it through :func:`pcapkit.toolkit.pcap.dtls_reassembly`, and
-:func:`pcapkit.foundation.analysis.dtls_handshake` decodes a fragmented
+:func:`pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a fragmented
 ``ClientHello``/``ServerHello`` once the engine reports the message complete.
 
 Every case builds its fragments and captures in memory and reads no sample
@@ -467,7 +467,7 @@ class TestDTLSHandshakeReassembly(unittest.TestCase):
 
 class TestDTLSExtractorReassembly(unittest.TestCase):
     """``Extractor(reassembly=True, dtls=True)`` over real frames, and
-    :func:`~pcapkit.foundation.analysis.dtls_handshake` over what it reassembles."""
+    :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` over what it reassembles."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

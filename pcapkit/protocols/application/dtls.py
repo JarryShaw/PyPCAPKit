@@ -22,8 +22,9 @@ octets, flagged
 :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`.
 ``Extractor(reassembly=True, dtls=True)`` reassembles the message
 (:class:`~pcapkit.foundation.reassembly.dtls.DTLS`), and
-:func:`~pcapkit.foundation.analysis.dtls_handshake` decodes it. Only the first
-record of each datagram is reassembled.
+:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it with
+:meth:`DTLS.read_handshake`. Only the first record of each datagram is
+reassembled.
 
 **A unified-header record with a connection ID is not decoded**
 (:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the
@@ -54,6 +55,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
+    from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -287,6 +289,33 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             self.__header__ = Schema_DTLSCiphertext.unpack(self._file, length, packet)  # type: ignore[assignment]
             return self.read(length, **kwargs)
         return super().unpack(length, **kwargs)
+
+    @classmethod
+    def read_handshake(cls, message: 'bytes') -> 'Data_DTLSHandshake':
+        """Read one handshake message from its own octets, outside any record.
+
+        A message's ``length`` is 24-bit (:rfc:`6347#section-4.2.2`) but a
+        record's is 16-bit, so a message reassembled from its fragments may be
+        too long for any record to carry to :meth:`read`.
+
+        Args:
+            message: The handshake header, fragment header and body.
+
+        Returns:
+            The message, decoded as :meth:`read` decodes one in a record.
+
+        Raises:
+            ProtocolError: If ``message`` is not exactly one handshake message,
+                or its body is malformed for its ``msg_type``.
+
+        """
+        # NOTE: a bare instance, for the ``alias`` the shared decoders name in an error.
+        self = cls.__new__(cls)
+        messages = self._read_tls_handshake_messages(message, dtls=True)
+        if len(messages) != 1:
+            raise ProtocolError(f'{self.alias}: invalid format: {len(messages)} handshake '
+                                'messages where exactly one is expected')
+        return cast('Data_DTLSHandshake', messages[0])
 
     ##########################################################################
     # Data models.

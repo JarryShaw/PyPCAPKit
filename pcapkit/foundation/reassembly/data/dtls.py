@@ -107,7 +107,7 @@ class Datagram(Info, Generic[_AT]):
     #: Total message length, as declared by its fragments.
     length: 'int'
     #: Reassembled message body, undecoded;
-    #: :func:`~pcapkit.foundation.analysis.dtls_handshake` decodes it.
+    #: :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it.
     body: 'bytes | tuple[bytes, ...]'
 
     if TYPE_CHECKING:

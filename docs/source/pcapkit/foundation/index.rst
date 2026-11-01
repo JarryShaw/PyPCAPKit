@@ -18,6 +18,6 @@ management APIs for :mod:`pcapkit`.
    extraction
    engines/index
    reassembly/index
-   analysis
+   analysis/index
    traceflow/index
    registry

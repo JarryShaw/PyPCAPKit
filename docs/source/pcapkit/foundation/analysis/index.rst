@@ -11,4 +11,7 @@ so that a caller does not interpret the raw reassembled octets itself
 
 .. versionadded:: 1.6.0
 
-.. autofunction:: pcapkit.foundation.analysis.dtls_handshake
+.. toctree::
+   :maxdepth: 2
+
+   dtls

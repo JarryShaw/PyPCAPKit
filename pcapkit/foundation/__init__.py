@@ -13,6 +13,7 @@ APIs for :mod:`pcapkit`, TCP/IP and DTLS reassembly implementations, and
 the :mod:`~pcapkit.foundation.analysis` of what they reassemble.
 
 """
+from pcapkit.foundation.analysis import *
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly import *
 from pcapkit.foundation.registry import *
@@ -23,6 +24,8 @@ __all__ = [
 
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
     'ReassemblyManager',
+
+    'dtls_handshake',
 
     'TCP_TraceFlow',
     'TraceFlowManager',

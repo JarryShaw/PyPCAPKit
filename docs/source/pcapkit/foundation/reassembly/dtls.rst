@@ -66,7 +66,7 @@ Terminology
        that built it, and ``body``, the reassembled payload (a contiguous
        :obj:`bytes`, or -- under ``strict=True`` and an incomplete message --
        a :obj:`tuple` of the octet runs actually received), which
-       :func:`~pcapkit.foundation.analysis.dtls_handshake` decodes.
+       :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes.
 
    reasm.dtls.buffer
        Data structure for internal buffering

@@ -4,19 +4,25 @@ Reassembly Integration
 -----------------------
 
 Where a new reassembly engine under :mod:`pcapkit.foundation.reassembly` plugs into
-the rest of the package. The owner's ruling, on this session's DTLS reassembly work.
+the rest of the package. The owner's ruling, given on the DTLS reassembly work of
+:issue:`2440`.
 
 The Rule
 ~~~~~~~~
 
 #. **A protocol class does not handle or integrate reassembly itself.** The protocol
    dissector stays a parser; it does not reach into
-   :mod:`pcapkit.foundation.reassembly` directly.
+   :mod:`pcapkit.foundation.reassembly` directly. A public method that parses a
+   reassembled unit from its own octets is still a parser, so a protocol class may
+   offer one (:issue:`2496`).
 #. **A new engine needs a new** :mod:`pcapkit.toolkit` **helper** that declares which
    output engines (|dpkt|_, |pyshark|_, ``scapy``, the default) support it.
 #. **A new engine's reassembled outcome needs a new**
    :mod:`pcapkit.foundation.analysis` **method** to parse that outcome into a usable
-   result, rather than leaving the caller to interpret raw reassembled bytes.
+   result, rather than leaving the caller to interpret raw reassembled bytes. The
+   package mirrors :mod:`pcapkit.foundation.reassembly`: a module per engine, whose
+   public names the package, :mod:`pcapkit.foundation` and :mod:`pcapkit.all`
+   export (:issue:`2496`).
 #. **Reassembly always follows the RFC's own definition**, never an algorithm this
    package invents. Where the RFC states no required algorithm -- buffer the whole
    message, accept overlaps -- the engine does the same and adds no timeout, cap or
@@ -35,23 +41,25 @@ Compliance, Measured
 function on an already-parsed frame, feeding the result to the reassembly instance the
 :class:`~pcapkit.foundation.extraction.Extractor` holds; for DTLS that function is
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`).
+:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
+is the parser method the rule allows.
 
-**Point 2 describes infrastructure that does not exist yet, for any engine.** No
-single :mod:`pcapkit.toolkit` helper enumerates which output engines support a given
-reassembly engine -- support is established ad hoc, per engine backend, in three
-different shapes (define the extraction functions; define them raising
-:exc:`~pcapkit.utilities.exceptions.UnsupportedCall`; or disable reassembly at the
-engine level, as :mod:`pcapkit.foundation.engines.pyshark` does). DTLS takes the
-first shape on the default engine and the third on every other.
+**No engine meets point 2.** No single :mod:`pcapkit.toolkit` helper enumerates which
+output engines support a given reassembly engine. Support is established ad hoc, per
+engine backend, by defining the extraction functions, by defining them raising
+:exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, or by disabling reassembly at the
+engine level, as :mod:`pcapkit.foundation.engines.pyshark` does. DTLS defines them for
+the default engine and is disabled at the engine level on every other.
 
 **Point 3 holds for DTLS alone.**
-:func:`~pcapkit.foundation.analysis.dtls_handshake` parses a reassembled DTLS
+:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` parses a reassembled DTLS
 handshake message (:issue:`2496`). IP and TCP have no such method: what parses their
 outcome is the general-purpose
 :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` dispatcher,
 reused via :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, not a method
 written for reassembly specifically.
 
-DTLS still differs from the IP/TCP shape in two ways, neither covered by the rule:
-its reassembled body is reported eagerly, with no deferred ``packet``, and
-:class:`~pcapkit.foundation.reassembly.dtls.DTLS` sets no ``__protocol_type__``.
+DTLS differs from the IP/TCP shape where the rule is silent: its reassembled body is
+reported eagerly, with no deferred ``packet``, and
+:class:`~pcapkit.foundation.reassembly.dtls.DTLS` sets no ``__protocol_type__``
+(:issue:`2531`).

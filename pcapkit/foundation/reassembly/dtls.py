@@ -46,7 +46,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         (:rfc:`6347#section-4.2.3`, :rfc:`9147#section-5.5`). The
         :class:`~pcapkit.foundation.extraction.Extractor` feeds it through
         :func:`pcapkit.toolkit.pcap.dtls_reassembly`, which reads the 4-tuple
-        off the frame, and :func:`~pcapkit.foundation.analysis.dtls_handshake`
+        off the frame, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
         decodes what it reassembles.
 
     Example:

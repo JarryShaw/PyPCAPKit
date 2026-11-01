@@ -88,7 +88,8 @@ class TestPublicSurface(_Base):
         from pcapkit.toolkit import pcap
 
         self.assertEqual(pcap.__all__, ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly',
-                                        'tcp_traceflow', 'tcp_segment', 'TCPSegment'])
+                                        'dtls_reassembly', 'tcp_traceflow', 'tcp_segment',
+                                        'TCPSegment'])
 
     def test_callers_share_the_public_helper(self) -> None:
         from pcapkit.toolkit import pcap, pcapng

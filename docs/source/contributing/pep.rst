@@ -251,9 +251,9 @@ records** (:rfc:`6347#section-4.2.3`, :issue:`2440`), via
 and the epoch. ``Extractor(reassembly=True, dtls=True)`` opts in on the
 default engine, which feeds it through
 :func:`pcapkit.toolkit.pcap.dtls_reassembly`, and
-:func:`~pcapkit.foundation.analysis.dtls_handshake` decodes each reassembled
-message (:issue:`2496`). In the frame itself every fragment's body stays that
-one fragment's raw octets -- see
+:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes each
+reassembled message, of any length (:issue:`2496`). In the frame itself every
+fragment's body stays that one fragment's raw octets -- see
 :attr:`DTLSHandshake.is_fragmented <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`.
 An unfragmented message is unaffected either way.
 

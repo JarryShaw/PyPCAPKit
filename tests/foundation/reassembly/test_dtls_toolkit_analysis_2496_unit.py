@@ -5,7 +5,7 @@
 engine reads each frame's fragmented handshake messages with
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (or its PCAP-NG twin),
 :class:`~pcapkit.foundation.reassembly.dtls.DTLS` reassembles them, and
-:func:`pcapkit.foundation.analysis.dtls_handshake` decodes the result. The
+:func:`pcapkit.foundation.analysis.dtls.dtls_handshake` decodes the result. The
 engines that do not parse with pcapkit's own protocols turn DTLS reassembly off.
 
 Every capture is built in memory; no sample capture is read.
@@ -169,16 +169,30 @@ class DTLSAnalysisTests(unittest.TestCase):
         self.assertEqual((decoded.message_seq, decoded.fragment_offset, decoded.fragment_length,
                           decoded.is_fragmented), (4, 0, 5, False))
 
-    def test_a_message_too_long_for_one_record_stays_raw(self) -> None:
+    def test_a_message_too_long_for_one_record_still_decodes(self) -> None:
         """A genuine ``ClientHello`` whose extensions take it past what a
-        record's 16-bit length holds is reported raw rather than overflowing."""
+        record's 16-bit length holds decodes all the same."""
         from pcapkit.foundation.analysis import dtls_handshake
+        from pcapkit.protocols.data.application.tls import ClientHello, Extension
 
         body = _client_hello_body(extensions=b'\x00\x15' + (65500).to_bytes(2, 'big') + bytes(65500))
         self.assertGreater(len(body) + 12, 0xFFFF)
         decoded = dtls_handshake(self._datagram(body))
-        self.assertEqual(decoded.body, body)
-        self.assertFalse(decoded.is_fragmented)
+        self.assertIsInstance(decoded.body, ClientHello)
+        self.assertEqual(decoded.body.extensions, (Extension(type=21, data=bytes(65500)),))
+        self.assertEqual((decoded.length, decoded.fragment_length, decoded.is_fragmented),
+                         (len(body), len(body), False))
+
+    def test_the_function_is_exported_as_reassembly_names_are(self) -> None:
+        import pcapkit.all
+        import pcapkit.foundation
+        import pcapkit.foundation.analysis
+        from pcapkit.foundation.analysis.dtls import dtls_handshake
+
+        for module in (pcapkit.foundation.analysis, pcapkit.foundation, pcapkit.all):
+            with self.subTest(module=module.__name__):
+                self.assertIn('dtls_handshake', module.__all__)
+                self.assertIs(module.dtls_handshake, dtls_handshake)
 
     def test_an_incomplete_message_is_not_decoded(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
