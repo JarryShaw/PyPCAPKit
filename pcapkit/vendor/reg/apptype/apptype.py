@@ -191,9 +191,10 @@ class TransportProtocol(EnumLookup, IntEnum):
         name miss reaches the caller as
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
         :class:`AppType` and its per-transport registries raise
-        :exc:`ValueError` from their own ``get()`` because it takes an
-        :class:`int` port and never accepts a name; that is not a name-miss
-        policy, so it sets none for this class to follow. The
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError` from their own
+        ``get()`` because it takes an :class:`int` port and never accepts a
+        name; that is not a name-miss policy, so it sets none for this class
+        to follow. The
         maintainer's ruling given in review of the work for :issue:`808`, that
         :class:`TransportProtocol` is not to be extended at all, holds either
         way: the refusal is a refusal and mints nothing, whichever exception
@@ -550,12 +551,27 @@ class {NAME}(EnumRegistry, StrEnum):
                          f'{{cls.__name__}}')
 
     @classmethod
-    def get(cls, key: 'int', *,  # type: ignore[override] # pylint: disable=arguments-differ
+    def get(cls, key: 'int', default: 'Any' = NO_DEFAULT, *,
             proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> '{NAME}':
         """Resolve port ``key`` to the member for its canonical service.
 
+        Takes the ``default`` :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+        advertises, since an override honours the base's signature rather than
+        suppressing the mismatch (:issue:`935`), and answers a miss as the base
+        does, from :mod:`pcapkit.utilities.exceptions` (:issue:`923`).
+
         Args:
             key: Port number to look up.
+            default: An already-registered value to fall back to when ``key``
+                resolves to nothing: a member's ``value``, such as
+                ``'http [80 - tcp]'``, and not a port or a member, which hashes
+                as its port. Resolved as
+                :meth:`~pcapkit.corekit.enum.EnumLookup.get` resolves its own,
+                through ``_value2member_map_`` and so never minting, in the
+                registry ``key`` was dispatched to, or else in the class called
+                on, which on :class:`{NAME}` itself holds no members.
+                :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, the default, means
+                *no default*.
             proto: Transport protocol carrying ``key``. Selects the registry to
                 search when called on :class:`{NAME}` itself, which holds no
                 members; ignored when called on one of those registries, each of
@@ -582,53 +598,60 @@ class {NAME}(EnumRegistry, StrEnum):
             registry's own transport (:issue:`2048`).
 
         Raises:
-            ValueError: If called on a class that holds no members, i.e. on
-                :class:`{NAME}` itself, with a ``proto`` naming no registry to
-                delegate to. Also for a ``key`` that is not a port number, since
-                this registry resolves ports and not service names -- including
-                one outside ``0..65535``, whose rejection by :meth:`_missing_` this
-                method propagates rather than minting over, so that ``get`` is
-                never more permissive than ``{NAME}(...)``. Also covers a
-                ``proto`` int that matches no registry at all, composite or
-                not -- looked up as the whole value it is rather than
-                decoded into the registries its bits would each name, so it
-                is refused only when that whole value itself names none of
-                them, not simply for being composite -- see
-                :meth:`_dispatch`.
+            EnumValueError: If ``key`` resolves to nothing and there is no
+                usable ``default``: a ``key`` that is not a port number, since
+                this registry resolves ports and not service names, including
+                one outside ``0..65535``, which :meth:`_missing_` rejects rather
+                than minting over, so that ``get`` is never more permissive than
+                ``{NAME}(...)``; or, on :class:`{NAME}` itself, a ``proto``
+                naming no registry to delegate to, composite or not (see
+                :meth:`_dispatch`). A :exc:`ValueError`, and quiet, as from the
+                base.
+            EnumKeyError: If, on :class:`{NAME}` itself, ``proto`` is a name no
+                :class:`TransportProtocol` member carries, from
+                :meth:`TransportProtocol.get`.
 
         """
-        owner = cls._dispatch(key, proto)
+        owner = cls
+        try:
+            owner = cls._dispatch(key, proto)
 
-        matched = owner.__registry__.getlist(key)  # type: ignore[union-attr]
-        if matched:
-            canonical = owner.__canonical__.get(key)
-            if canonical is not None:
-                for member in matched:
-                    if member.svc == canonical:
-                        return member
-            # NOTE: IANA's oldest row, for a port whose collision postdates
-            # :data:`__canonical__` -- including one ``aenum.extend_enum``
-            # created, which must not displace what the registry already
-            # answered with.
-            return matched[0]
+            matched = owner.__registry__.getlist(key)  # type: ignore[union-attr]
+            if matched:
+                canonical = owner.__canonical__.get(key)
+                if canonical is not None:
+                    for member in matched:
+                        if member.svc == canonical:
+                            return member
+                # NOTE: IANA's oldest row, for a port whose collision postdates
+                # :data:`__canonical__` -- including one ``aenum.extend_enum``
+                # created, which must not displace what the registry already
+                # answered with.
+                return matched[0]
 
-        # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
-        # for, and that answer does not mint (GitHub issue #860), following the
-        # owner's ruling there that ``get`` should not mint because it lacks the
-        # information to create a new member: only IANA-registered values are
-        # legitimate, and ``register`` is the proper way to add one. That ruling
-        # was given for the FEATCode, Command and Method branches, and covers
-        # this family under the same issue. A port outside ``0..65535`` *raises*
-        # rather than reaching here at all. Minting on the ``None`` answer would
-        # name a member ``PORT_{{key}}_{{transport}}`` -- GitHub issue #758's
-        # defect, which also minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the
-        # latter a name no attribute access could reach -- so, as inside
-        # :meth:`_missing_` itself, the port gets an unregistered member
-        # instead: neither is a value anyone asked to be named. A port IANA
-        # lists on other transports only is in no span on this one: 8011,
-        # reserved on TCP and ``bier-echo`` on UDP, answers ``unknown`` on DCCP
-        # and SCTP (#2048).
-        ret = owner._missing_(key)
+            # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
+            # for, and that answer does not mint (GitHub issue #860), following the
+            # owner's ruling there that ``get`` should not mint because it lacks the
+            # information to create a new member: only IANA-registered values are
+            # legitimate, and ``register`` is the proper way to add one. That ruling
+            # was given for the FEATCode, Command and Method branches, and covers
+            # this family under the same issue. A port outside ``0..65535`` *raises*
+            # rather than reaching here at all. Minting on the ``None`` answer would
+            # name a member ``PORT_{{key}}_{{transport}}`` -- GitHub issue #758's
+            # defect, which also minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the
+            # latter a name no attribute access could reach -- so, as inside
+            # :meth:`_missing_` itself, the port gets an unregistered member
+            # instead: neither is a value anyone asked to be named. A port IANA
+            # lists on other transports only is in no span on this one: 8011,
+            # reserved on TCP and ``bier-echo`` on UDP, answers ``unknown`` on DCCP
+            # and SCTP (#2048).
+            ret = owner._missing_(key)
+        except ValueError as error:
+            # NOTE: answered as EnumLookup.get answers a value miss (#923, #2545),
+            # with ``default`` from the registry dispatched to, else from ``cls``.
+            if default is NO_DEFAULT or default not in owner._value2member_map_:
+                raise EnumValueError(str(error), quiet=True) from error
+            return owner._value2member_map_[default]
         if ret is None:
             ret = owner._unregistered_member(key, 'unknown', owner.__transport__)
         return ret
