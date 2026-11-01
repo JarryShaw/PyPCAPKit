@@ -224,9 +224,13 @@ commit, so the label and the message agree by construction:
      - tooling and repository hygiene, with no library behaviour change
    * - ``release``
      - version bumps and distribution rollups
-   * - ``const``
-     - regenerated IANA or vendor constant tables, members keeping their numeric
-       values
+
+.. note::
+
+   ``const`` is not a type: no commit subject takes a ``const:`` prefix. It marks
+   regenerated IANA or vendor constant tables, members keeping their numeric values,
+   and like ``breaking`` below it is **additive**, going on alongside the type label
+   rather than instead of it.
 
 **Issue kind**, for issues rather than pull requests: ``design`` marks a pattern being
 decided rather than a defect or a request, and a majority of the rulings on these pages
