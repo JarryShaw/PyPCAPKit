@@ -85,6 +85,10 @@ class TransportProtocol(EnumLookup, IntEnum):
         it, for one behaviour the base does not reproduce on its own: **case
         folding**. This class matches a name case-insensitively
         (``key.lower()``); the base's own ``str`` branch is case-sensitive.
+        The basis is :rfc:`6335#section-8.1.1`, which writes the transport
+        protocol upper case where IANA's registry writes it lower case: a
+        spelling disagreement, which GitHub issue :issue:`903` ruled is
+        enough for case-insensitivity.
         Lowering ``key`` before delegating reproduces that: every member name
         here is already lower-case, so a lowered ``key`` still hits the base's
         exact ``_member_map_`` lookup.

@@ -224,11 +224,12 @@ class {NAME}(EnumRegistry, StrEnum):
                 the canonical upper-case member names, then against member
                 values, so ``'baseline-control'`` resolves to
                 ``BASELINE_CONTROL`` (:issue:`2284`) -- deliberately unlike
-                :meth:`get`, which is case-**sensitive** per
-                :rfc:`9110#section-9.1`. The split was ruled deliberate on
-                GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between
-                the two, so the two rationales are not left contradicting each
-                other with nothing tying them together.
+                :meth:`get`, which checks names and values too
+                (GitHub issue :issue:`908`) but case-**sensitively**, per
+                :rfc:`9110#section-9.1` (:issue:`896`). The owner kept this
+                fold on GitHub issue :issue:`2552`, departing from that RFC on
+                purpose: HTTP methods are case-insensitive here, and member
+                names follow Python's naming conventions.
 
         """
         if not isinstance(value, str):
