@@ -56,9 +56,7 @@ a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
 * Octets that open no record -- a header cut short, or a record the segment
   ends inside -- stay raw, with no error.
 * A parse told to stop at SSLv2 (``protocol='SSLv2'`` or ``layer='Application'``)
-  keeps the rest of the segment raw, except behind the SSLv2 fallback of
-  :class:`~pcapkit.protocols.application.tls.TLS` on port 443, which is not
-  handed the stop.
+  keeps the rest of the segment raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
   bounds how many are dissected.
 
