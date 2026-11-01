@@ -75,15 +75,16 @@ class TestLinuxSLL2(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_the_non_ethertype_arphrds_are_kept_raw(self) -> None:
-        """``NETLINK``, ``IPGRE``, ``IP6GRE``, ``IEEE80211_RADIOTAP`` and
-        ``FRAD``, per tcpdump.org's LINUX_SLL2 page, are kept raw.
+        """``NETLINK``, ``IPGRE``, ``IP6GRE`` and ``IEEE80211_RADIOTAP``, per
+        tcpdump.org's LINUX_SLL2 page, are kept raw. ``FRAD`` is the
+        exception: see :meth:`test_frad_arphrd_dispatches_to_frad`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
         from pcapkit.protocols.misc.raw import Raw
 
         for arphrd in (ARPHRD.NETLINK, ARPHRD.IPGRE, ARPHRD.IP6GRE,
-                       ARPHRD.IEEE80211_RADIOTAP, ARPHRD.FRAD):
+                       ARPHRD.IEEE80211_RADIOTAP):
             with self.subTest(arphrd=arphrd):
                 raw = _header(0x0800, 0, 0, arphrd, 2, b'', 0) + IPV4
                 parsed = LinuxSLL2(raw, len(raw))
@@ -95,6 +96,24 @@ class TestLinuxSLL2(unittest.TestCase):
                 self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:Raw')
                 self.assertEqual(parsed.data, raw)
                 self._assert_rebuilds(parsed)
+
+    def test_frad_arphrd_dispatches_to_frad(self) -> None:
+        """GitHub issue #2460: ``ARPHRD_FRAD`` dispatches to
+        :class:`~pcapkit.protocols.link.frad.FRAD` rather than falling back to
+        :class:`~pcapkit.protocols.misc.raw.Raw`.
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+
+        frad = bytes.fromhex('0c21') + b'\x03\xcc' + IPV4
+        raw = _header(0x0800, 0, 0, ARPHRD.FRAD, 2, b'', 0) + frad
+        parsed = LinuxSLL2(raw, len(raw))
+        self.assertEqual(parsed.info.arphrd_type, ARPHRD.FRAD)
+        self.assertEqual(type(parsed.payload).__name__, 'FRAD')
+        self.assertEqual(parsed.payload.info.dlci, 50)
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL2:FRAD:IPv4:UDP')
+        self.assertEqual(parsed.data, raw)
+        self._assert_rebuilds(parsed)
 
     def test_non_ethernet_non_excluded_arphrds_still_dispatch_by_ethertype(self) -> None:
         """Loopback, PPP and SLIP/CSLIP are not among the exceptions, so

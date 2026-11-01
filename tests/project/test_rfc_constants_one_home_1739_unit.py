@@ -214,6 +214,15 @@ NOT_A_COPY = {
     ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
         "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
         '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'dlci_hi': (0, 6)}"):
+        "the 6-bit width of a Q.922 address field's high-order DLCI bits "
+        '(:rfc:`2427#section-3`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'cr': (6, 1)}"):
+        'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the IPv6 Next Header offset',
+    ('pcapkit/protocols/schema/link/frad.py', "{'fecn': (12, 1)}"):
+        'the FECN bit at bit offset 12 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the TCP Data Offset octet',
     ('pcapkit/protocols/application/dtls.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
         "the shortest DTLS 1.3 ciphertext, the record-number sample length "
         '(:rfc:`9147#section-4.2.3`), not a pcap record header',
@@ -225,6 +234,9 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
+    ('pcapkit/protocols/link/frad.py', '0 <= snap_pid <= 65535'):
+        "the max value of a SNAP PID, FRAD's own 2-octet field (:rfc:`2427#section-3`), "
+        'not an IP total length',
     ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
         'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
     ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
