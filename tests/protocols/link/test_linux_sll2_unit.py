@@ -155,6 +155,21 @@ class TestLinuxSLL2(unittest.TestCase):
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 
+    def test_frad_protocol_type_is_not_an_ethertype(self) -> None:
+        """``ARPHRD_FRAD`` is in
+        :data:`~pcapkit.protocols.link.linux_sll._ARPHRD_NOT_ETHERTYPE`, so its
+        ``protocol_type`` is never looked up as an EtherType, per tcpdump.org's
+        LINUX_SLL2 page (:issue:`2502`).
+        """
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import (_ARPHRD_NOT_ETHERTYPE,
+                                                      _resolve_next_layer_proto)
+
+        self.assertIn(ARPHRD.FRAD, _ARPHRD_NOT_ETHERTYPE)
+        proto = _resolve_next_layer_proto(ARPHRD.FRAD, 0x0800)
+        self.assertIs(type(proto), int)
+        self.assertEqual(proto, 0x0800)
+
     def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
         """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both
         dispatch to :class:`~pcapkit.protocols.link.gre.GRE` rather than

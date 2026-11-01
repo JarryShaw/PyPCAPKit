@@ -36,6 +36,7 @@ _ETHERTYPE_FIELD = EnumField(length=2, namespace=Enum_EtherType)
 #: ``arphrd_type`` values whose ``protocol_type`` is not an EtherType, per
 #: tcpdump.org's LINUX_SLL and LINUX_SLL2 pages.
 _ARPHRD_NOT_ETHERTYPE = frozenset({
+    ARPHRD.FRAD,
     ARPHRD.IPGRE,
     ARPHRD.IEEE80211_RADIOTAP,
     ARPHRD.IP6GRE,
