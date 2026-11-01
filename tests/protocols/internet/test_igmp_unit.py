@@ -424,26 +424,33 @@ class IGMPVersionedClassTests(unittest.TestCase):
 
         self.assertEqual(IGMPv1.id(), ('IGMP',))
         self.assertEqual(IGMPv2.id(), ('IGMPv2',))
-        self.assertEqual(IGMPv3.id(), ('IGMP', 'IGMPv3'))
+        self.assertEqual(IGMPv3.id(), ('IGMPv3',))
         self.assertEqual(object.__new__(IGMPv1).version, 1)
         self.assertEqual(object.__new__(IGMPv2).version, 2)
         self.assertEqual(object.__new__(IGMPv3).version, 3)
 
     def test_base_id_covers_all_three_versions(self) -> None:
+        """The base lists each version's canonical name, and only those: IGMPv1's
+        is the family name itself, so no ``id()`` carries ``'IGMPv1'``."""
         from pcapkit.protocols.internet.igmp import IGMP
 
-        self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3'))
+        self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv2', 'IGMPv3'))
+        members = (igmp_class('IGMPv1'), igmp_class('IGMPv2'), igmp_class('IGMPv3'))
+        self.assertEqual(IGMP.id(), tuple(name for member in members for name in member.id()))
+        for klass in (IGMP, *members):
+            with self.subTest(klass=klass.__module__):
+                self.assertNotIn('IGMPv1', klass.id())
 
     def test_each_version_narrows_the_base_id(self) -> None:
         v1, v2, v3 = igmp_class('IGMPv1'), igmp_class('IGMPv2'), igmp_class('IGMPv3')
         self.assertEqual(v1.id(), ('IGMP',))
         self.assertEqual(v2.id(), ('IGMPv2',))
-        self.assertEqual(v3.id(), ('IGMP', 'IGMPv3'))
+        self.assertEqual(v3.id(), ('IGMPv3',))
         self.assertNotIn('IGMPv2', v1.id())
         self.assertNotIn('IGMPv3', v1.id())
-        self.assertNotIn('IGMPv1', v2.id())
+        self.assertNotIn('IGMP', v2.id())
         self.assertNotIn('IGMPv3', v2.id())
-        self.assertNotIn('IGMPv1', v3.id())
+        self.assertNotIn('IGMP', v3.id())
         self.assertNotIn('IGMPv2', v3.id())
 
     def test_igmpv1_parses_its_own_messages_directly(self) -> None:
@@ -1137,6 +1144,63 @@ class IGMPDispatchTests(unittest.TestCase):
                     parsed = IPv4(io.BytesIO(outer), len(outer))
                 self.assertIsInstance(parsed.payload, expected_classes[version])
                 self.assertEqual(parsed.payload.alias, expected_alias(version))
+
+
+class IGMPSelectorTests(unittest.TestCase):
+    """Selectors on parsed IGMP layers, per the *Selector Matching* section of
+    ``protocol-family-grouping.rst``: the family name selects every version, and
+    each version name selects its own (#2512)."""
+
+    #: Every IGMP selector: the family name, then each version's registry key.
+    SELECTORS = ('IGMP', 'IGMPv1', 'IGMPv2', 'IGMPv3')
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def parse(packet: 'bytes'):
+        """Return ``(frame, layer)``: ``packet`` carried by IPv4, and the IGMP
+        layer IP protocol 2 dispatched it to."""
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            frame = IPv4(io.BytesIO(outer), len(outer))
+        return frame, frame.payload
+
+    def test_in_and_getitem_select_the_family_and_the_own_version(self) -> None:
+        """``in`` and ``[]`` expand the selector, a registry key or its class
+        alike: ``'IGMP'`` reaches every version, a version key only its own --
+        ``'IGMPv1'`` through its registry key, since no ``id()`` carries it.
+        The protochain also compares each alias, which here is the same name."""
+        from pcapkit.protocols import __proto__ as registry
+        from pcapkit.utilities.exceptions import ProtocolNotFound
+
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            frame, layer = self.parse(packet)
+            self.assertIsInstance(layer, igmp_class(version))
+            for selector in self.SELECTORS:
+                expected = selector in ('IGMP', version)
+                for key in (selector, registry[selector.upper()]):
+                    with self.subTest(packet=name, selector=key):
+                        self.assertIs(key in layer, expected)
+                        self.assertIs(key in frame, expected)
+                        self.assertIs(key in frame.protochain, expected)
+                        if expected:
+                            self.assertIs(frame[key], layer)
+                        else:
+                            with self.assertRaises(ProtocolNotFound):
+                                frame[key]  # pylint: disable=pointless-statement
+
+    def test_string_eq_matches_the_layer_s_own_name_only(self) -> None:
+        """String ``==`` is not expanded, so a layer equals its own canonical
+        name alone: ``'IGMP'`` only on IGMPv1, ``'IGMPv3'`` only on IGMPv3."""
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            _, layer = self.parse(packet)
+            for selector in self.SELECTORS:
+                with self.subTest(packet=name, selector=selector):
+                    self.assertIs(layer == selector, selector == expected_alias(version))
 
 
 if __name__ == '__main__':
