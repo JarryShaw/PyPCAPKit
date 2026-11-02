@@ -2020,13 +2020,28 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Parsed option data.
 
+        Raises:
+            ProtocolError: If the length is not the one the ``A``, ``a``, ``M`` and
+                ``m`` flags give, or, with ``M`` set, that plus the 2-octet checksum.
+
         Note:
             The reserved field spans the 4 low bits of the subtype octet and the
             3 high bits of the flags octet; it is kept as one 7-bit value. The
             checksum is absent when the option length leaves no room for it,
             i.e., when checksums were not negotiated.
 
+        .. versionchanged:: 1.6.0
+
+           A length the flags do not give is refused, rather than read with the
+           missing fields as zeros or the extra octets dropped (:issue:`2669`).
+
         """
+        flags = schema.flags
+        size = 4 + ((8 if flags['a'] else 4) if flags['A'] else 0) \
+            + ((8 if flags['m'] else 4) + 6 if flags['M'] else 0)
+        if schema.length != size and not (flags['M'] and schema.length == size + 2):
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
+
         data = Data_MPTCPDSS(
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,

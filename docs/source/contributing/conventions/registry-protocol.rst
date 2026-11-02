@@ -863,6 +863,21 @@ unless its ``EXCUSED`` table gives the reason. It fails as well on a map whose o
 defines no ``register*`` classmethod of its own, unless its ``INHERITED`` table names
 the one typed for that map's keys.
 
+**A protocol's table from a code to the layout read under it is such a map as well, and
+each layout is a concrete schema.** Ruled in review of :pr:`2657` (:issue:`2576`): the
+table is a class-level map on the protocol, with its ``register_<kind>`` classmethod and
+its wrapper, and never a dictionary at module level; each layout is a
+:class:`~pcapkit.protocols.schema.schema.Schema` subclass with typed fields, defined with
+the protocol's other schemas, and never built inside the map. Radiotap's field types are
+the example:
+:attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.Radiotap.__field__>` is
+written by :meth:`Radiotap.register_field <pcapkit.protocols.link.radiotap.Radiotap.register_field>`
+and :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field`, in the
+shape of :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk`
+above, and each type's layout is a
+:class:`~pcapkit.protocols.schema.link.radiotap.RadiotapField` subclass, whose fields
+are the type's subfields and whose ``__align__`` is its alignment.
+
 .. _registry-protocol-index:
 
 The Registry Index

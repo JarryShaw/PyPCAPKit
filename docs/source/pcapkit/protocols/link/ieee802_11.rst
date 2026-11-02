@@ -44,7 +44,8 @@ Scope
 * **The FCS** (§9.2.4.8), where one was captured, stays at the end of the
   body: this class does not decide whether a capture carries one, which
   behind radiotap is a Flags bit
-  :class:`~pcapkit.protocols.link.radiotap.Radiotap` does not decode.
+  :class:`~pcapkit.protocols.link.radiotap.Radiotap` decodes but does not
+  pass on.
 * **Pad octets** that radiotap's data-pad flag says follow the header stay
   at the start of the body, for the same reason.
 * **A protocol version other than 0** is refused: version 1 is the PV1

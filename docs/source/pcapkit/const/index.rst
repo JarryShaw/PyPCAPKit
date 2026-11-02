@@ -24,8 +24,8 @@ Some behave otherwise, and :ref:`mint-criterion` gives the full split:
 
 * :class:`~pcapkit.const.mh.cga_type.CGAType` installs a permanent member, so
   ``__members__`` and iteration grow.
-* :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header flag
-  registries, such as
+* :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header and radiotap
+  flag registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`, hand back to
   |aenum|_'s flag base, which caches the composed object in the value lookup
   table only: a second lookup returns the same object, while ``__members__``
@@ -74,6 +74,7 @@ Link Layer
    ieee802_11
    l2tp
    linux
+   radiotap
    vlan
 
 Internet Layer

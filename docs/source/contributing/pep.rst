@@ -1220,8 +1220,8 @@ neither header treats as carrying an EtherType each have a dissector of their ow
 ``NETLINK`` to :class:`~pcapkit.protocols.link.netlink.Netlink`, ``IPGRE`` and
 ``IP6GRE`` to :class:`~pcapkit.protocols.link.gre.GRE`, ``FRAD`` to
 :class:`~pcapkit.protocols.link.frad.FRAD`, and ``IEEE80211_RADIOTAP`` to
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` (:issue:`2502`), which keeps its
-optional fields undissected (:issue:`2576`) and hands the 802.11 frame to
+:class:`~pcapkit.protocols.link.radiotap.Radiotap` (:issue:`2502`), which decodes its
+optional fields (:issue:`2576`) and hands the 802.11 frame to
 :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, which dissects the MAC
 header and keeps the frame body :class:`~pcapkit.protocols.misc.raw.Raw`
 (:issue:`2575`).

@@ -35,6 +35,15 @@ __all__ = [
     'Loopback',
     'Netlink',
     'Radiotap',
+    'Radiotap_Field', 'Radiotap_Unknown', 'Radiotap_TSFT', 'Radiotap_Flags', 'Radiotap_Rate',
+    'Radiotap_Channel', 'Radiotap_FHSS', 'Radiotap_AntennaSignal', 'Radiotap_AntennaNoise',
+    'Radiotap_LockQuality', 'Radiotap_TXAttenuation', 'Radiotap_DBTXAttenuation',
+    'Radiotap_DBmTXPower', 'Radiotap_Antenna', 'Radiotap_DBAntennaSignal',
+    'Radiotap_DBAntennaNoise', 'Radiotap_RXFlags', 'Radiotap_TXFlags', 'Radiotap_RTSRetries',
+    'Radiotap_DataRetries', 'Radiotap_MCS', 'Radiotap_AMPDUStatus', 'Radiotap_VHT',
+    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEMU', 'Radiotap_HEMUOtherUser',
+    'Radiotap_ZeroLengthPSDU', 'Radiotap_LSIG', 'Radiotap_VendorNamespace', 'Radiotap_S1G',
+    'Radiotap_USIG', 'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols

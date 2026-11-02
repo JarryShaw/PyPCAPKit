@@ -123,6 +123,7 @@ else:
     from pcapkit.vendor.mh import *
     from pcapkit.vendor.ngap import *
     from pcapkit.vendor.ospf import *
+    from pcapkit.vendor.radiotap import *
     from pcapkit.vendor.sctp import *
     from pcapkit.vendor.sslv2 import *
     from pcapkit.vendor.tcp import *
@@ -195,6 +196,11 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # Radiotap
+    'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
+    'Radiotap_TXFlags', 'Radiotap_MCSKnown', 'Radiotap_AMPDUFlags', 'Radiotap_VHTKnown',
+    'Radiotap_VHTFlags', 'Radiotap_VHTCoding', 'Radiotap_TimestampFlags',
+    'Radiotap_HEMUOtherUserKnown', 'Radiotap_LSIGData1', 'Radiotap_S1GKnown', 'Radiotap_EHTKnown',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
     'SCTP_PayloadProtocolIdentifier',

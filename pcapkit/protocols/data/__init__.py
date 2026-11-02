@@ -85,7 +85,17 @@ __all__ = [
     'Netlink',
 
     # IEEE 802.11 Radiotap Header
-    'Radiotap',
+    'Radiotap', 'Radiotap_Field', 'Radiotap_Unknown', 'Radiotap_TSFT', 'Radiotap_Flags',
+    'Radiotap_Rate', 'Radiotap_Channel', 'Radiotap_FHSS', 'Radiotap_AntennaSignal',
+    'Radiotap_AntennaNoise', 'Radiotap_LockQuality', 'Radiotap_TXAttenuation',
+    'Radiotap_DBTXAttenuation', 'Radiotap_DBmTXPower', 'Radiotap_Antenna',
+    'Radiotap_DBAntennaSignal', 'Radiotap_DBAntennaNoise', 'Radiotap_RXFlags',
+    'Radiotap_TXFlags', 'Radiotap_RTSRetries', 'Radiotap_DataRetries', 'Radiotap_MCS',
+    'Radiotap_AMPDUStatus', 'Radiotap_VHT',
+    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEMU', 'Radiotap_HEMUOtherUser',
+    'Radiotap_ZeroLengthPSDU', 'Radiotap_LSIG', 'Radiotap_TLVFields',
+    'Radiotap_RadiotapNamespace', 'Radiotap_VendorNamespace', 'Radiotap_S1G', 'Radiotap_USIG',
+    'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
