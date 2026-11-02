@@ -896,7 +896,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         )
         self.assertEqual(
             proto._make_mptcp_unknown(MPTCPOption.Reserved_for_Private_Use,
-                                      data=b'\xfa\x01').to_dict()['data'],
+                                      data=b'\x0a\x01').to_dict()['data'],
             b'\x01',
         )
         self.assertIsNone(proto._make_mptcp_capable(MPTCPOption.MP_CAPABLE,
