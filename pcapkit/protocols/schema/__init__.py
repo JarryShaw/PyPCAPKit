@@ -195,7 +195,7 @@ __all__ = [
     'SCTP_ProtocolViolationCause',
 
     # Application Layer Protocols
-    'DTLS', 'DTLS_Ciphertext',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_CIDCiphertext',
     'FTP',
     'NGAP',
     'OSPF', 'OSPF_CryptographicAuthentication',

@@ -3,6 +3,7 @@
 
 # Datagram Transport Layer Security
 from pcapkit.protocols.data.application.dtls import DTLS
+from pcapkit.protocols.data.application.dtls import DTLSCIDCiphertext as DTLS_CIDCiphertext
 from pcapkit.protocols.data.application.dtls import DTLSCiphertext as DTLS_Ciphertext
 from pcapkit.protocols.data.application.dtls import DTLSHandshake as DTLS_Handshake
 
@@ -64,6 +65,7 @@ from pcapkit.protocols.data.application.tls import TLS
 from pcapkit.protocols.data.application.tls import Alert as TLS_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as TLS_ChangeCipherSpec
 from pcapkit.protocols.data.application.tls import ClientHello as TLS_ClientHello
+from pcapkit.protocols.data.application.tls import ConnectionId as TLS_ConnectionId
 from pcapkit.protocols.data.application.tls import EncryptedExtensions as TLS_EncryptedExtensions
 from pcapkit.protocols.data.application.tls import Extension as TLS_Extension
 from pcapkit.protocols.data.application.tls import ExtensionData as TLS_ExtensionData
@@ -86,7 +88,7 @@ from pcapkit.protocols.data.application.tls import \
 
 __all__ = [
     # Datagram Transport Layer Security
-    'DTLS', 'DTLS_Ciphertext', 'DTLS_Handshake',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_CIDCiphertext', 'DTLS_Handshake',
 
     # File Transfer Protocol
     'FTP',
@@ -119,7 +121,7 @@ __all__ = [
     # Transport Layer Security
     'TLS',
     'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_EncryptedExtensions',
-    'TLS_Extension', 'TLS_ExtensionData',
+    'TLS_Extension', 'TLS_ExtensionData', 'TLS_ConnectionId',
     'TLS_ServerName', 'TLS_ServerNameList', 'TLS_NamedGroupList', 'TLS_SignatureSchemeList',
     'TLS_ProtocolNameList', 'TLS_SupportedVersionsClientHello', 'TLS_SupportedVersionsServerHello',
     'TLS_KeyShareEntry', 'TLS_KeyShareClientHello', 'TLS_KeyShareHelloRetryRequest',
