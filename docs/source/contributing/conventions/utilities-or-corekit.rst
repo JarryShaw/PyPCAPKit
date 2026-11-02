@@ -53,3 +53,25 @@ checks that. What needs IPv4 and IPv6 stays beside
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`. The package holds one
 module per checksum family, so a new family sits beside
 :mod:`~pcapkit.corekit.checksum.internet`.
+
+Context Variables
+~~~~~~~~~~~~~~~~~
+
+Where a :class:`~contextvars.ContextVar` lives depends on which modules use it.
+Settled by the owner on :issue:`2616`:
+
+*  **One that more than one module sets or reads lives in**
+   :mod:`pcapkit.utilities.contextvars`, under a public name in its ``__all__``. No
+   other module re-exports it, so every reader imports it from there.
+*  **One that only its own module uses stays in that module**, private, as
+   ``_exthdr_rebuilt`` does in :mod:`pcapkit.protocols.internet.internet`.
+
+A shared variable kept in one of the modules that use it makes the others import a
+private name from that module, and ties them to its place in the import graph. A
+module of bare declarations that imports nothing from :mod:`pcapkit` passes the
+``utilities`` question above, so any module may import it --
+:mod:`pcapkit.corekit.checksum` included, which must not reach
+:mod:`pcapkit.protocols`. :file:`tests/project/test_shared_contextvars_2616_unit.py`
+fails on a module that takes a context variable from anywhere else, by name or as an
+attribute of an imported module, and on a variable there that is private, missing
+from ``__all__``, or read by one module alone.

@@ -25,12 +25,12 @@ parsed from is a fragment, see :func:`fragment_payload`.
 
 """
 import contextlib
-import contextvars
 import enum
 import struct
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.utilities.contextvars import in_fragment, rebuilding
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ChecksumWarning, warn
 
@@ -42,18 +42,6 @@ __all__ = [
     'internet_checksum', 'compute_checksum', 'partial_checksum', 'verify_checksum',
     'fragment_payload',
 ]
-
-#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
-#: :meth:`Protocol._make_payload
-#: <pcapkit.protocols.protocol.Protocol._make_payload>`, so that the layer
-#: it is rebuilt for parses the same octets again; see
-#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`. It lives here so that
-#: :func:`verify_checksum` reads it without importing :mod:`pcapkit.protocols`.
-_rebuilding = contextvars.ContextVar('_rebuilding', default=False)
-
-#: contextvars.ContextVar[bool]: Whether the layer being parsed is the payload
-#: of an IP fragment, see :func:`fragment_payload`.
-_in_fragment = contextvars.ContextVar('_in_fragment', default=False)
 
 
 class ChecksumStatus(EnumLookup, enum.IntEnum):
@@ -193,7 +181,7 @@ def verify_checksum(alias: 'str', data: 'bytes', field: 'bytes', *, length: 'Opt
     value = int.from_bytes(field, 'big')
     rest = total + (~value & 0xFFFF)
     expected = ~((rest & 0xFFFF) + (rest >> 16)) & 0xFFFF
-    if not _rebuilding.get():
+    if not rebuilding.get():
         warn(f'{alias}: checksum {value:#06x} is wrong; {expected:#06x} expected',
              ChecksumWarning, stacklevel=stacklevel())
     return ChecksumStatus.INVALID
@@ -212,8 +200,8 @@ def fragment_payload(fragment: 'bool') -> 'Iterator[None]':
         fragment: Whether the IP layer is a fragment; an atomic one is not.
 
     """
-    token = _in_fragment.set(fragment)
+    token = in_fragment.set(fragment)
     try:
         yield
     finally:
-        _in_fragment.reset(token)
+        in_fragment.reset(token)

@@ -1,4 +1,4 @@
-IPv6 - Internet Protocol version 6
+IPv6 - Internet Protocol Version 6
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv6

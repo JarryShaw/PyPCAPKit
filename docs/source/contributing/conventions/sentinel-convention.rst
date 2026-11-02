@@ -42,8 +42,9 @@ derives from it mechanically -- title-case each underscore-separated word and ap
 GitHub issue :issue:`911`'s housing ruling -- one module for all of them -- is why the table
 names a single defining module, and it is the only import path. The modules that *use* a
 sentinel import it from there but do not re-export it: :issue:`1744` dropped the
-per-module re-exports, under the ruling on :issue:`1715` that a moved name keeps no
-re-export at its old path. Import the object, and the type for an annotation, from
+per-module re-exports, under the ruling that a moved name keeps no re-export at its old
+path. It was ruled in review of :pr:`1715` (:issue:`1711`), overturning the re-export
+that issue's own plan kept. Import the object, and the type for an annotation, from
 :mod:`pcapkit.corekit.sentinels`.
 
 Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep it;

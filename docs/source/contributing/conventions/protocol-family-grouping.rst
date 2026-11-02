@@ -12,7 +12,8 @@ The ``id()`` Criterion
 ~~~~~~~~~~~~~~~~~~~~~~
 
 **A family base lists its direct concrete subclasses.** An abstract intermediate is
-left out, and so is everything beneath it. :pr:`2441`.
+left out, and so is everything beneath it. Ruled in review of :pr:`2441`; no issue
+holds the ruling.
 
 The member list takes either of these forms:
 
@@ -46,7 +47,7 @@ HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 sh
 :class:`~pcapkit.protocols.internet.ip.IP`, AH and ESP share
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, and SSLv2 and SSLv3 share
 :class:`~pcapkit.protocols.application.ssl.SSL` (:ref:`below <protocol-family-ssl>`).
-:pr:`2441`.
+Ruled in review of :pr:`2441`; no issue holds the ruling.
 
 .. _protocol-family-ssl:
 
@@ -250,20 +251,21 @@ parser's ``error``, a frame the segment ends inside stays
 Canonical Names
 ~~~~~~~~~~~~~~~
 
-**A versioned protocol's display name includes its version.** This is the stated
-preference on :pr:`2444`, not a settled rule.
+**A versioned protocol's display name includes its version.** This is the preference
+stated in review of :pr:`2444`, not a settled rule; no issue holds it.
 :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`'s ``name`` is
 ``Layer 2 Tunnelling Protocol version 2``. The HTTP/1.1 and HTTP/2 classes define no
 ``name`` of their own, so they report ``Hypertext Transfer Protocol``, which carries
 no version.
 
-**ICMPv4 is the case where the RFC's own name carries no version.** The ruling on
-:pr:`2446`: ``ICMPv4`` keeps its versioned class and module name, but its ``id()``
-drops the version for the RFC canonical name (:rfc:`792` names it plain ``ICMP``),
-and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own version, since
-:rfc:`4443` names it with one.
+**ICMPv4 is the case where the RFC's own name carries no version.** Ruled in review
+of :pr:`2446` (:issue:`2436`): ``ICMPv4`` keeps its versioned class and module name,
+but its ``id()`` drops the version for the RFC canonical name (:rfc:`792` names it
+plain ``ICMP``), and its ``name`` carries no "version 4". ``ICMPv6`` keeps its own
+version, since :rfc:`4443` names it with one.
 
-**IGMPv1 follows the same shape, by the same reasoning** (:issue:`2439`, :pr:`2506`).
+**IGMPv1 follows the same shape, by the same reasoning**, ruled in review of
+:pr:`2506`; no issue holds the ruling.
 :rfc:`1112` names IGMPv1's protocol plain ``IGMP``, so
 :meth:`IGMPv1.id() <pcapkit.protocols.internet.igmpv1.IGMPv1.id>` is ``('IGMP',)`` and
 its ``alias`` is ``'IGMP'``, while
@@ -292,8 +294,9 @@ Selector Matching
 ~~~~~~~~~~~~~~~~~
 
 **A family name selects every version, and each version name selects its own.**
-:pr:`2443`. On an IPv4 frame, ``'IP' in`` is ``True`` and ``'IPv6' in`` is ``False``.
-On an IPv6 frame, ``'IP' in`` is ``True`` and ``'IPv4' in`` is ``False``.
+Ruled in review of :pr:`2443` (:issue:`2438`). On an IPv4 frame, ``'IP' in`` is
+``True`` and ``'IPv6' in`` is ``False``. On an IPv6 frame, ``'IP' in`` is ``True``
+and ``'IPv4' in`` is ``False``.
 
 HTTP follows it too (:issue:`2524`). On an HTTP/1.1 frame, ``'HTTP' in`` and
 ``'HTTP/1' in`` are ``True`` and ``'HTTP/2' in`` is ``False``, since the layer is
@@ -335,7 +338,7 @@ No Invented Suffixes
 :class:`~pcapkit.protocols.application.http.HTTP`,
 :class:`~pcapkit.protocols.link.vlan.VLAN` and
 :class:`~pcapkit.protocols.link.l2tp.L2TP` are the precedent. No ``_Family`` suffix is
-added (:pr:`2446`).
+added, as ruled in review of :pr:`2446` (:issue:`2436`).
 
 **A protocol class takes its module's name**, whatever its canonical name and
 ``id()``. The family base takes the family's name and a member its module's versioned

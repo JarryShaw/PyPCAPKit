@@ -436,10 +436,12 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
         """An environment secret: "If the environment requires approval, a job cannot
         access environment secrets until one of the required reviewers approves it".
 
-        #1660's Python Versions ``pr`` job is the one other reader, behind the same
-        environment, minting the token it opens its pull request with.
+        #1660's Python Versions and #2561's Issue and PR Kinds ``pr`` jobs are the
+        other readers, behind the same environment, minting the token each opens its
+        pull request with.
         """
-        readers_by_workflow = {WORKFLOW.name: ['github'], 'cron-python-versions.yml': ['pr']}
+        readers_by_workflow = {WORKFLOW.name: ['github'], 'cron-python-versions.yml': ['pr'],
+                               'cron-issue-pr-kinds.yml': ['pr']}
         for path in sorted(WORKFLOW.parent.glob('*.yml')):
             text = strip_comments(path.read_text(encoding='utf-8'))
             blocks = job_blocks(text, path)

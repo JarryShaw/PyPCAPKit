@@ -9,7 +9,8 @@
 :mod:`pcapkit` is built with: user-refined exceptions and
 warnings, logging, the tunable limits of
 :mod:`~pcapkit.utilities.config`, a compatibility layer,
-timestamp conversion, and wrappers around third-party
+timestamp conversion, the context variables its modules
+share, and wrappers around third-party
 libraries. It imports nothing from :mod:`pcapkit`
 outside itself (:issue:`1712`).
 

@@ -1,0 +1,112 @@
+name: Issue and PR Kinds
+
+# #2561: keeps tests/project/issue_pr_roles_fixtures/kinds.json current, the
+# snapshot of issue and pull request numbers the #1103 roles test checks each
+# :issue: and :pr: role against. `detect` regenerates it with
+# util/issue_pr_kinds.py; `pr` proposes a change on `bot/issue-pr-kinds` for the
+# owner to merge, and nothing here pushes `main`. `pr` pushes with the release
+# App's token, not GITHUB_TOKEN, whose pushes start nothing, so the pull
+# request's own checks run.
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays at 06:17 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+# One run at a time, so two runs cannot race for the branch. A queued run is
+# kept, not cancelled: it regenerates from the tracker and skips what the
+# branch already proposes.
+concurrency:
+  group: issue-pr-kinds
+  cancel-in-progress: false
+
+jobs:
+  # No secret and a read-only token: it reads the tracker and writes only this
+  # checkout. The script runs on the runner's own python3, standard library only.
+  detect:
+    name: Regenerate the issue and pull request kinds
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    outputs:
+      publish: ${{ steps.regenerate.outputs.publish }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # `publish` is false when nothing changed, or when the open pull request
+      # from `bot/issue-pr-kinds` already holds this file, so an unmerged
+      # proposal is not re-pushed, nor its approval asked for, every week.
+      - name: Regenerate the kinds
+        id: regenerate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 util/issue_pr_kinds.py --github-output
+
+      - name: Upload the kinds
+        if: ${{ steps.regenerate.outputs.publish == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: issue-pr-kinds
+          path: tests/project/issue_pr_roles_fixtures/kinds.json
+          retention-days: 30
+
+      - name: Say why no pull request opens
+        if: ${{ steps.regenerate.outputs.publish == 'true' && vars.RELEASE_APP_CLIENT_ID == '' }}
+        run: >-
+          echo "::warning title=No pull request without the release App::vars.RELEASE_APP_CLIENT_ID is unset,
+          so the pr job skips. Set up the App as docs/source/contributing/releasing.rst describes."
+
+  # The release App's key is a secret of the `github-release` environment, so
+  # the owner approves only a run with something to propose. The token has no
+  # `workflows` permission, so the script recreates the branch rather than move
+  # it past a workflow change on main.
+  pr:
+    name: Open or update the pull request
+    needs: detect
+    if: >-
+      ${{ needs.detect.outputs.publish == 'true' && vars.RELEASE_APP_CLIENT_ID != '' &&
+      github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: github-release
+    # GITHUB_TOKEN only downloads `detect`'s artifact; the App's token does the rest.
+    permissions:
+      actions: read
+
+    steps:
+      - name: Mint the release App's token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # The commit `detect` read, so the branch is cut from it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Download the kinds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name issue-pr-kinds
+          --dir "$RUNNER_TEMP/kinds"
+
+      - name: Push the kinds and open or update their pull request
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 util/issue_pr_kinds.py --publish "$RUNNER_TEMP/kinds/kinds.json" --run-url "$RUN_URL"

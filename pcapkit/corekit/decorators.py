@@ -24,13 +24,13 @@ so they live with the packet model rather than in :mod:`pcapkit.utilities`
    decorators either.
 
 """
-import contextvars
 import functools
 import io
 import os
 import traceback
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import (CaughtByCaller, ProtocolError, StreamEOFError,
                                           StructError, stacklevel)
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
@@ -54,14 +54,6 @@ __all__ = ['seekset', 'beholder', 'prepare']
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
-
-#: contextvars.ContextVar[bool]: Whether a layer that raises is discarded by its
-#: caller, as :func:`beholder` replaces it and
-#: :func:`~pcapkit.toolkit.pypcapfile._default_extension_header` drops it, so
-#: that :meth:`Protocol._parse_next_layer
-#: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` drops its warnings
-#: with it (:issue:`2308`).
-_beholding = contextvars.ContextVar('_beholding', default=False)
 
 
 def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Callable[P, R_seekset]':
@@ -183,14 +175,14 @@ def beholder(
 
         try:
             # call method
-            token = _beholding.set(True)
+            token = beholding.set(True)
             try:
                 # NOTE: The whole call is quiet for a ProtocolError, which the ``except`` below
                 # records; the recovery runs after it, loud unless an outer block is active (#2588).
                 with CaughtByCaller(ProtocolError):
                     return func(*args, **kwargs)
             finally:
-                _beholding.reset(token)
+                beholding.reset(token)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
                 from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel

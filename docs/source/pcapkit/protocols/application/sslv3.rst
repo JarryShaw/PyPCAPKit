@@ -1,4 +1,4 @@
-SSLv3 - Secure Sockets Layer version 3
+SSLv3 - Secure Sockets Layer Version 3
 ======================================
 
 .. module:: pcapkit.protocols.application.sslv3

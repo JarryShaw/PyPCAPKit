@@ -52,9 +52,11 @@ independent implementations, in the way
 :class:`~pcapkit.protocols.internet.ip.IP` and
 :class:`~pcapkit.protocols.internet.icmp.ICMP` already cover their families:
 IP and IPsec, and TLS/SSL with DTLS. **Done** for TLS/SSL
-with DTLS: :class:`~pcapkit.protocols.application.ssl.SSL` is the shared
-record-layer base of :class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.dtls.DTLS` -- see the `DTLS`_ section
+with DTLS: :class:`~pcapkit.protocols.application.sslv2.SSLv2`,
+:class:`~pcapkit.protocols.application.tls.TLS` and
+:class:`~pcapkit.protocols.application.dtls.DTLS` share
+:class:`~pcapkit.protocols.application.ssl.SSL` as their base by name, and only
+TLS and DTLS share its record layer -- see the `DTLS`_ section
 below. Neighbor Discovery (:rfc:`4861`, the ``NDP`` above) and Multicast
 Listener Discovery (:rfc:`9777`), both carried in ICMPv6, are not implemented.
 :class:`~pcapkit.protocols.link.vlan.VLAN` is the closer precedent for a pair
@@ -93,8 +95,9 @@ capture using one parses, but yields an opaque chunk instead of its fields.
 That is true of many of the registered chunk types, chunk parameters and error
 causes; :doc:`/pcapkit/const/sctp` lists them all.
 
-The other thing wanted for SCTP is reassembly, which no protocol beyond IP and
-TCP has -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
+The other thing wanted for SCTP is reassembly, which
+:mod:`pcapkit.foundation.reassembly` has only for IP, TCP and DTLS handshake
+messages -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
 :mod:`pcapkit.foundation` rather than in the protocol.
 
 ESP
@@ -248,6 +251,21 @@ separate question and is not needed to make the record structure legible, in
 the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
 without keys.
 
+**Done** for SSLv2 too (draft-hickman-netscape-ssl-00, :issue:`2457`):
+:class:`~pcapkit.protocols.application.sslv2.SSLv2` shares
+:class:`~pcapkit.protocols.application.ssl.SSL` by name only, since its 2- or
+3-octet record header carries no content type and no ``0x03xx`` version. No port
+binds it: on TCP port 443, TLS offers it a segment whose first record TLS
+rejects, and adopts the parse only when that record is a complete
+``CLIENT-HELLO`` or ``SERVER-HELLO``, keeping anything else
+:class:`~pcapkit.protocols.misc.raw.Raw`. A whole record after the first is a
+further layer, the previous record's payload (:issue:`2567`), with the exceptions
+:mod:`pcapkit.protocols.application.sslv2` lists. Among them, a record with a
+``RECORD-LENGTH`` of ``0`` is :class:`~pcapkit.protocols.misc.raw.Raw` together
+with everything after it, and :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+bounds how many are dissected. :ref:`protocol-family-ssl` gives how ``id()`` and
+``alias`` tell the family's members apart.
+
 **Done: reassembling a handshake message DTLS has fragmented across several
 records** (:rfc:`6347#section-4.2.3`, :issue:`2440`), via
 :class:`~pcapkit.foundation.reassembly.dtls.DTLS`, keyed on the UDP 4-tuple
@@ -280,7 +298,8 @@ small part of each is bound to a dissector; everything else resolves to
 complaint and yields nothing useful.
 
 * :class:`~pcapkit.const.reg.linktype.LinkType` --
-  ``NULL``, ``ETHERNET``, ``LOOP``, ``IPV4`` and ``IPV6``, declared identically
+  ``NULL``, ``ETHERNET``, ``LOOP``, ``LINUX_SLL``, ``IPV4``, ``IPV6`` and
+  ``LINUX_SLL2``, declared identically
   in :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, which also read ``RAW`` as
   ``IPV4`` or ``IPV6`` by its version nibble.
@@ -293,8 +312,9 @@ complaint and yields nothing useful.
 * :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- the ports bound in
   :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` and
   :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`, out of
-  a registry carrying every IANA service name: TCP 20 to FTP-DATA and 21 to FTP,
-  ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TPv2.
+  a registry carrying every IANA service name: TCP 20 to FTP-DATA, 21 to FTP and
+  443 to TLS, ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to
+  L2TPv2 and 5684 to DTLS.
 * :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   -- the values in :attr:`SCTP.__proto__
   <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to
@@ -371,8 +391,8 @@ Follow-ups to the bindings above:
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
 **Done.** ICMP (1), ICMPv6 (58) and IGMP (2) -- the internet layer gaps most
-likely to be met in a real capture -- are all now implemented; ECN and Shim6
-above remain the open ones.
+likely to be met in a real capture -- are all implemented; ECN and Shim6
+above are the open ones.
 
 PCAPNG Support
 --------------
@@ -586,7 +606,8 @@ both of the following are worth knowing before reaching for them:
 Both engines support less than the ``default`` engine does, deliberately:
 `pypcap`_ performs no protocol dissection, so it disables reassembly *and* flow
 tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6 reassembly while
-keeping IPv4 and TCP. Each gap is announced through an
+keeping IPv4 and TCP, and it disables DTLS reassembly, which reads :mod:`pcapkit`'s
+own DTLS layer. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
 rather than by silently returning nothing, save that `pypcapfile`_ leaves TCP
 behind a VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH
@@ -657,12 +678,12 @@ Reassembly Beyond IP and TCP
 ----------------------------
 
 **Still open.**
-:doc:`/pcapkit/foundation/reassembly/index` covers IPv4, IPv6 and TCP, and no more.
+:doc:`/pcapkit/foundation/reassembly/index` covers IPv4, IPv6, TCP and DTLS
+handshake messages (see `DTLS`_ above), and no more.
 IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
-back together, and ``sctp`` appears nowhere in
-:mod:`pcapkit.foundation.reassembly` at all.
+back together, and :mod:`pcapkit.foundation.reassembly` has no SCTP reassembler.
 
 What that costs is concrete. The dissector already exposes everything a
 reassembler needs, on
@@ -808,15 +829,18 @@ Smaller items in the same subsystem:
 
 Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
-``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
+``pcap_ct`` disable it entirely, ``pypcapfile`` disables IPv6 and DTLS
+reassembly, and the ``dpkt`` and ``scapy`` engines disable DTLS reassembly.
 :doc:`/pcapkit/foundation/engines/index` tabulates that.
 
 Checksum and Integrity Verification
 -----------------------------------
 
 These protocols parse a checksum or CRC field —
+:class:`~pcapkit.protocols.link.gre.GRE`,
 :class:`~pcapkit.protocols.internet.hip.HIP`,
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+:class:`~pcapkit.protocols.internet.igmp.IGMP`,
 :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
 :class:`~pcapkit.protocols.internet.ipx.IPX`,
@@ -829,9 +853,9 @@ These protocols parse a checksum or CRC field —
 check whether the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
 IPv4, OSPF, TCP, UDP and DCCP check it too, as do ICMP and ICMPv6, as the
-one's-complement half below describes. For HIP, HOPOPT, IPv6-Opts, IPX and MH the
-field is recorded and never questioned, so a corrupted capture parses as cleanly
-as an intact one.
+one's-complement half below describes. For GRE, HIP, HOPOPT, IGMP, IPv6-Opts, IPX
+and MH the field is recorded and never questioned, so a corrupted capture parses
+as cleanly as an intact one; verifying GRE's and IGMP's is :issue:`2618`.
 
 **These are different problems and they want separating**, because only one
 of them is cryptographic and the distinction decides what is actually hard.
@@ -944,7 +968,7 @@ offload heuristic on :issue:`2470`.
   DCCP has no checksum to leave out, and Linux computed it in software rather
   than offloading it. Settled at implementation (:issue:`2489`).
 
-The cryptographic half is sequenced for **wave 2 or 3**, and could be done sooner
+The cryptographic half is sequenced for **wave 3**, and could be done sooner
 since ESP has already laid the groundwork.
 
 Deterministic Construction Arguments
@@ -992,7 +1016,7 @@ constructor's keyword set once, when
 :func:`~pcapkit.protocols.schema.schema.schema_final` is applied at
 class-definition time, rather than inferring it afresh at every call --
 :attr:`~pcapkit.protocols.protocol.Protocol.__own_make_keywords__`
-(:issue:`2358`) settles the same kind of question explicitly rather than
+(:issue:`2286`) settles the same kind of question explicitly rather than
 inferring it, though for a different question: which keywords a ``make()``
 override owns, not what the names passed to it resolve against.
 
@@ -1007,8 +1031,13 @@ exactly why this belongs on this page rather than as a quick issue. Done, it
 removes the root cause of the :issue:`2356`/:issue:`2394` family rather than
 leaving its next instance to be found and patched the same way.
 
-Sequenced for **wave 2 or 3**, alongside the other open design questions
-above -- it is not blocked on anything, only on someone scoping it.
+**Scoped for 1.6.0.** The owner took this direction for every ``make()``, ruled
+in review of :pr:`2593` (:issue:`2489`): a field holding an enum takes the member
+or an ``int``, resolved with the enumeration's ``get`` rather than inferred from
+the caller's frame. The shipped ``X_default``, ``X_namespace`` and ``X_reversed``
+keywords go in 1.6.0 with no deprecation period, ruled on :issue:`2594`, which
+carries the change across :file:`pcapkit/protocols/` in one pass and leaves the
+helper's name and module to it.
 
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
@@ -1048,24 +1077,7 @@ extra hop: a push to ``main`` triggers **Unit Tests**
 (``cron-vendor.yml``) via ``workflow_run`` -- ``cron-vendor.yml`` carries no
 ``push`` trigger of its own, deliberately, per the comment on its
 ``workflow_run`` trigger -- and *that* completion triggers **Create Release**
-itself. :doc:`workflows` draws the repository-wide version of this graph;
-here is just the path that matters for a release:
-
-.. mermaid::
-
-   flowchart TD
-       PUSH["push: main"]
-
-       UT["Unit Tests<br/>unit-tests.yml"]
-       VU["Vendor Update<br/>cron-vendor.yml"]
-       CR["Create Release<br/>create-release.yml"]
-
-       PUSH --> UT
-       UT ==>|workflow_run: completed| VU
-       VU ==>|workflow_run: completed| CR
-
-       classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH trig
+itself. :doc:`workflows` draws the chain among the repository's other workflows.
 
 Every publishing job — ``github``, ``tag``, ``pypi``, ``conda`` — is gated on
 ``startsWith(github.ref_name, 'v')`` or on evidence that its own target still
@@ -1139,10 +1151,11 @@ bidirectional flow tracing. Its defect tail closed out through the
 post-wave-1 consistency sweep described under `Release Plan — 1.5.0 in Two
 Steps`_ above.
 
-**Wave 2 — the protocol pairs that want a shared abstract base**, per `More
-Protocols, More!!!`_ above: **TLS/SSL with DTLS** and **IGMP** and **DCCP** on
-their own. These are grouped because the shared-base question is the design work
-and doing either half of a pair alone would answer it twice.
+**Wave 2 — the protocol pairs that want a shared abstract base, done** (ruled on
+:issue:`2564`), per `More Protocols, More!!!`_ above: **TLS/SSL with DTLS** and
+**IGMP** and **DCCP** on their own. These are grouped because the shared-base
+question is the design work and doing either half of a pair alone would answer it
+twice.
 
 **DCCP — done within wave 2** (:issue:`2489`).
 :class:`~pcapkit.protocols.transport.dccp.DCCP` dissects every :rfc:`4340` packet
@@ -1171,7 +1184,8 @@ group-record list, each a shape of its own.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
-base, TLS, DTLS, handshake message framing, the hello and
+base, SSLv2 (:issue:`2457`, :issue:`2567`), TLS, DTLS, handshake message
+framing, the hello and
 ``EncryptedExtensions`` extension lists with their registered extension bodies
 (:issue:`2514`), and handshake-fragment reassembly (:issue:`2440`).
 
@@ -1187,9 +1201,18 @@ or IPv6 by its version nibble (:issue:`1502`), and
 :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` with
 :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` dissect the Linux
 cooked-capture variants (:issue:`2438`). The ``arphrd_type`` values
-neither header treats as carrying an EtherType (``NETLINK``, ``IPGRE``, ``IP6GRE``,
-``IEEE80211_RADIOTAP``, ``FRAD``) have no dissector of their own, tracked
-as :issue:`2460`. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown
+neither header treats as carrying an EtherType each have a dissector of their own
+(:issue:`2460`), dispatched through :attr:`LinuxSLL.__proto__
+<pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>` (:issue:`2510`):
+``NETLINK`` to :class:`~pcapkit.protocols.link.netlink.Netlink`, ``IPGRE`` and
+``IP6GRE`` to :class:`~pcapkit.protocols.link.gre.GRE`, ``FRAD`` to
+:class:`~pcapkit.protocols.link.frad.FRAD`, and ``IEEE80211_RADIOTAP`` to
+:class:`~pcapkit.protocols.link.radiotap.Radiotap` (:issue:`2502`), which keeps its
+optional fields undissected (:issue:`2576`) and hands the 802.11 frame to
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, which dissects the MAC
+header and keeps the frame body :class:`~pcapkit.protocols.misc.raw.Raw`
+(:issue:`2575`).
+Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown
 link type", which is why the toolkit raises for an unresolvable link-layer
 name instead of defaulting to :attr:`LinkType.NULL
 <pcapkit.const.reg.linktype.LinkType.NULL>`.
@@ -1200,7 +1223,7 @@ new transport and wants that settled first, the rest because a capture in
 the wild is rare enough that the work buys little until the commoner protocols
 are in.
 
-**Queued behind wave 2 — the Mobility Header sub-layer registry.** Several
+**Sequenced after wave 2 — the Mobility Header sub-layer registry.** Several
 mobility options carry a payload belonging to another protocol, and those
 payloads want carrying as :class:`~pcapkit.protocols.misc.raw.Raw` through a
 per-payload registry rather than as bare :obj:`bytes` — see `Mobility Header`_
@@ -1210,8 +1233,8 @@ is wanted instead of
 sequenced *after* wave 2 rather than by preference: the multicast options embed
 :rfc:`9777` MLD (which obsoletes :rfc:`3810`; :rfc:`2710` for MLDv1), which
 rides in **ICMPv6**, and :rfc:`3376` **IGMPv3** group records. ICMPv6 and
-IGMP, IGMPv3 included (:issue:`2448`), are both wave 2 deliverables, now done;
-MLD itself remains a follow-up to ICMPv6 (see `More Protocols, More!!!`_
+IGMP, IGMPv3 included (:issue:`2448`), are both wave 2 deliverables, done;
+MLD itself is a follow-up to ICMPv6 (see `More Protocols, More!!!`_
 above). Landing the registry first would give a dispatch table with
 :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
 counter-argument is real though, and worth weighing rather than dismissing: changing the
@@ -1221,7 +1244,7 @@ taking that churn early and registering dissectors later. The remaining format, 
 :rfc:`6088` traffic selectors of :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a
 registry of its own and nobody has claimed it.
 
-**Wave 2 or 3 — per-entry coverage of the option and parameter registries.** The
+**Wave 3 — per-entry coverage of the option and parameter registries.** The
 option, parameter, block and frame registries are *enumerated* but not
 *implemented* throughout: a code can be registered, and named, and still have no
 working per-entry read/make pair behind it. The goal of this item is to close
@@ -1268,10 +1291,11 @@ missing is the implementations behind the codes, not the accounting of them.
 family the same accounting for the separate question of whether a registered
 protocol's dispatch reaches it.
 
-**Between wave 1 and wave 2 — a library-wide consistency sweep.** Clearing
+**Between wave 1 and wave 2 — a library-wide consistency sweep, done**, its
+findings listed under `Release Plan — 1.5.0 in Two Steps`_ above. Clearing
 defects one at a time, each found because something else was being worked on
-nearby, is a poor way to find the rest of them. So before wave 2 starts the
-library gets swept deliberately, in strands:
+nearby, is a poor way to find the rest of them. So the sweep is deliberate, and
+divided into strands:
 
 * **Prose against code.** Docstrings, the README, and inline comments checked
   against what the code does. A docstring outliving the thing it described is a
@@ -1331,7 +1355,7 @@ files what it merely suspects transfers the work rather than doing it, and this
 project has already had to correct a finding whose count and whose diagnosis were
 both wrong when re-derived.
 
-**Queued for wave 2 or 3 — cryptographic integrity verification.** See `Checksum
+**Queued for wave 3 — cryptographic integrity verification.** See `Checksum
 and Integrity Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC``
 and its signature parameters could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
@@ -1345,10 +1369,10 @@ one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is **done**
 the parsing and the constructing path, rather than a back-reference from a
 parsed protocol to its parent.
 
-**Queued for wave 2 or 3 — deterministic construction arguments.** See
-`Deterministic Construction Arguments`_ above: dropping ``make()``'s implicit
-string-to-enum inference for an explicit resolution helper is a likely-breaking
-change at every call site that relies on it today, so scoping it -- which call
-sites change, and how much of string acceptance goes with the inference -- is
-deliberate design work rather than something to fold into the next defect fix
-on this family.
+**Scoped for 1.6.0 — deterministic construction arguments** (:issue:`2594`). See
+`Deterministic Construction Arguments`_ above: every ``make()`` takes an enum
+field as the member or an ``int``, dropping the implicit string-to-enum inference
+and the ``X_default``, ``X_namespace`` and ``X_reversed`` keywords behind it, and
+an explicit helper resolves a bare string. That breaks every call site relying on
+the inference, so it lands as one change rather than folded into the next defect
+fix on this family.

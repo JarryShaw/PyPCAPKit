@@ -5,8 +5,8 @@ Reassembly Integration
 
 Where a new reassembly engine under :mod:`pcapkit.foundation.reassembly` plugs into
 the rest of the package. Points 1 to 3 are the owner's ruling on the DTLS reassembly
-work of :issue:`2440`, whose pull-request review applies it; the issue itself does not
-hold it. Point 4 rests on :pr:`2469`, which settled the DTLS case alone: in review of
+work, applied in review of :pr:`2451` (:issue:`2440`); the issue itself does not hold
+it. Point 4 rests on :pr:`2469`, which settled the DTLS case alone: in review of
 how DTLS sizes a handshake message's buffer, the owner had DTLS reassembly follow its
 RFCs.
 No issue holds that ruling.

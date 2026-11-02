@@ -27,7 +27,7 @@ from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
-from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, pad_length
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -376,7 +376,10 @@ def parameter_total_len(length: 'int') -> 'int':
 
         Total Length = 11 + Length - (Length + 3) % 8;
 
-    -- and this function is that formula, spelled the way the RFC spells it.
+    -- which is ``4 + Length``, the header and the contents, padded to the next
+    multiple of eight. This function spells it that way, through
+    :func:`~pcapkit.corekit.fields.strings.pad_length`; the two agree at every
+    ``Length``.
 
     The distinction that matters is *which* quantity gets aligned. ``Length``
     is "Length of the Contents, in bytes, excluding Type, Length, and
@@ -412,7 +415,8 @@ def parameter_total_len(length: 'int') -> 'int':
     """
     if length < 0:
         raise FieldValueError(f'HIP: invalid parameter length: {length}')
-    return 11 + length - (length + 3) % 8
+    total = 4 + length
+    return total + pad_length(total, 8)
 
 
 def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':

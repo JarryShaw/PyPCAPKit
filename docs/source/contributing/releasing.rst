@@ -315,18 +315,18 @@ One-time setup:
 1. Register a GitHub App with the **Contents** and **Workflows** repository
    permissions at read and write, and install it on this repository only. Add
    **Pull requests** at read and write too, and accept it on the installation:
-   the Python Versions workflow's ``pr`` job opens its pull request with a token
-   of this App, with contents and pull requests write only (:issue:`1660`,
-   :doc:`workflows`).
+   the Python Versions and Issue and PR Kinds workflows' ``pr`` jobs open their
+   pull requests with a token of this App, with contents and pull requests write
+   only (:issue:`1660`, :issue:`2561`, :doc:`workflows`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
 3. Store the App's private key as ``RELEASE_APP_PRIVATE_KEY``, a secret of the
    ``github-release`` environment rather than of the repository: "If the
    environment requires approval, a job cannot access environment secrets
-   until one of the required reviewers approves it". ``github`` and Python
-   Versions' ``pr`` are the only jobs that name the environment or read the
-   secret.
+   until one of the required reviewers approves it". ``github`` and the ``pr``
+   jobs of Python Versions and Issue and PR Kinds are the only jobs that name the
+   environment or read the secret.
 
 Unlike ``GITHUB_TOKEN``'s, the App's tag starts a tag-push run. It would rerun
 the release test gate, ask for a second approval and race the first run's
@@ -601,7 +601,7 @@ Anaconda files that commit's ``conda`` legs cannot build: 1.5.0b14's
 ``osx-64`` legs were broken at its tag (:issue:`2140`). While ``main``'s version
 is still the tagged one, dispatching Conda Update with ``publish`` on ``main``
 builds ``main`` and uploads every platform under a bumped build
-(:issue:`2060`, :pr:`2150`), and the warning a later commit's run posts for an
+(:issue:`2060`), and the warning a later commit's run posts for an
 unfinished release names that remedy wherever Anaconda files are missing.
 
 **A re-run does not need to be verified by hand against the PyPI and Anaconda

@@ -1,4 +1,4 @@
-IPv4 - Internet Protocol version 4
+IPv4 - Internet Protocol Version 4
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv4
