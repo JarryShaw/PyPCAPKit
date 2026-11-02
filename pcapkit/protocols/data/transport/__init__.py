@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
 """data models for transport layer protocols"""
 
+# Datagram Congestion Control Protocol
+from pcapkit.protocols.data.transport.dccp import DCCP
+from pcapkit.protocols.data.transport.dccp import AckVector as DCCP_AckVector
+from pcapkit.protocols.data.transport.dccp import AckVectorRun as DCCP_AckVectorRun
+from pcapkit.protocols.data.transport.dccp import Change as DCCP_Change
+from pcapkit.protocols.data.transport.dccp import Confirm as DCCP_Confirm
+from pcapkit.protocols.data.transport.dccp import DataChecksum as DCCP_DataChecksum
+from pcapkit.protocols.data.transport.dccp import DataDropped as DCCP_DataDropped
+from pcapkit.protocols.data.transport.dccp import DataDroppedBlock as DCCP_DataDroppedBlock
+from pcapkit.protocols.data.transport.dccp import ElapsedTime as DCCP_ElapsedTime
+from pcapkit.protocols.data.transport.dccp import InitCookie as DCCP_InitCookie
+from pcapkit.protocols.data.transport.dccp import Mandatory as DCCP_Mandatory
+from pcapkit.protocols.data.transport.dccp import NDPCount as DCCP_NDPCount
+from pcapkit.protocols.data.transport.dccp import Option as DCCP_Option
+from pcapkit.protocols.data.transport.dccp import Padding as DCCP_Padding
+from pcapkit.protocols.data.transport.dccp import SlowReceiver as DCCP_SlowReceiver
+from pcapkit.protocols.data.transport.dccp import Timestamp as DCCP_Timestamp
+from pcapkit.protocols.data.transport.dccp import TimestampEcho as DCCP_TimestampEcho
+from pcapkit.protocols.data.transport.dccp import UnassignedOption as DCCP_UnassignedOption
+
 # Transmission Control Protocol
 from pcapkit.protocols.data.transport.tcp import CC as TCP_CC
 from pcapkit.protocols.data.transport.tcp import MPTCP as TCP_MPTCP
@@ -115,6 +135,13 @@ from pcapkit.protocols.data.transport.sctp import \
 from pcapkit.protocols.data.transport.udp import UDP
 
 __all__ = [
+    # Datagram Congestion Control Protocol
+    'DCCP', 'DCCP_AckVectorRun', 'DCCP_DataDroppedBlock',
+    'DCCP_Option',
+    'DCCP_UnassignedOption', 'DCCP_Padding', 'DCCP_Mandatory', 'DCCP_SlowReceiver', 'DCCP_Change',
+    'DCCP_Confirm', 'DCCP_InitCookie', 'DCCP_NDPCount', 'DCCP_AckVector', 'DCCP_DataDropped',
+    'DCCP_Timestamp', 'DCCP_TimestampEcho', 'DCCP_ElapsedTime', 'DCCP_DataChecksum',
+
     # Transmission Control Protocol
     'TCP',
     'TCP_Flags', 'TCP_SACKBlock',

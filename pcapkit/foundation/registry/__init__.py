@@ -42,9 +42,10 @@ __all__ = [
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_apptype',
-    'register_tcp', 'register_udp', 'register_sctp',
+    'register_tcp', 'register_udp', 'register_sctp', 'register_dccp',
     'register_tcp_option', 'register_tcp_mp_option',
     'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
+    'register_dccp_option',
 
     'register_http_frame',
 

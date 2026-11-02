@@ -16,6 +16,7 @@ from pcapkit.const.pcapng import *
 
 # per protocol
 from pcapkit.const.arp import *
+from pcapkit.const.dccp import *
 from pcapkit.const.esp import *
 from pcapkit.const.ftp import *
 from pcapkit.const.hip import *
@@ -41,6 +42,9 @@ __all__ = [
     'ETHERTYPE', 'LINKTYPE', 'TRANSTYPE', 'APPTYPE',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
+    # DCCP
+    'DCCP_PacketType', 'DCCP_ResetCode', 'DCCP_Option', 'DCCP_Feature',
+    'DCCP_AckVectorState', 'DCCP_DropCode',
     # ESP
     'ESP_Cipher', 'ESP_Integrity',
     # FTP

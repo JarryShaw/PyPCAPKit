@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, cast, overload
 
 import aenum
 
+from pcapkit.const.dccp.option import Option as DCCP_Option
 from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
 from pcapkit.const.http.frame import Frame as HTTP_Frame
 from pcapkit.const.icmp.type import Type as ICMPv4_Type
@@ -85,11 +86,13 @@ from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSB
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
+from pcapkit.protocols.schema.transport.dccp import Option as Schema_DCCP_Option
 from pcapkit.protocols.schema.transport.sctp import Chunk as Schema_SCTP_Chunk
 from pcapkit.protocols.schema.transport.sctp import ErrorCause as Schema_SCTP_ErrorCause
 from pcapkit.protocols.schema.transport.sctp import Parameter as Schema_SCTP_Parameter
 from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
 from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
+from pcapkit.protocols.transport.dccp import DCCP
 from pcapkit.protocols.transport.sctp import SCTP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
@@ -133,6 +136,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
+    from pcapkit.protocols.transport.dccp import OptionConstructor as DCCP_OptionConstructor
+    from pcapkit.protocols.transport.dccp import OptionParser as DCCP_OptionParser
     from pcapkit.protocols.transport.sctp import CauseConstructor as SCTP_CauseConstructor
     from pcapkit.protocols.transport.sctp import CauseParser as SCTP_CauseParser
     from pcapkit.protocols.transport.sctp import ChunkConstructor as SCTP_ChunkConstructor
@@ -163,9 +168,10 @@ __all__ = [
     'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_apptype',
-    'register_tcp', 'register_udp', 'register_sctp',
+    'register_tcp', 'register_udp', 'register_sctp', 'register_dccp',
     'register_tcp_option', 'register_tcp_mp_option',
     'register_sctp_chunk', 'register_sctp_parameter', 'register_sctp_cause',
+    'register_dccp_option',
 
     'register_http_frame',
 
@@ -1966,6 +1972,90 @@ def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CausePar
     if schema is not None:
         Schema_SCTP_ErrorCause.register(code, schema)
     logger.debug('registered SCTP error cause parser: %s', code.name)
+
+
+@overload
+def register_dccp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_dccp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.transport.dccp.DCCP.__proto__
+def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                  class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.transport.dccp.DCCP.__proto__` registry.
+
+    Arguments:
+        code: port number
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
+            is not accepted, even though it is one) nor an
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a
+            member of another enum.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, Enum_AppType, DCCP, number=True)
+    if isinstance(code, Enum_AppType):
+        code = code.port
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    DCCP.register(code, module)
+    logger.debug('registered DCCP port: %s', code)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (DCCP, code))
+
+
+# NOTE: pcapkit.protocols.transport.dccp.DCCP.__option__
+def register_dccp_option(code: 'DCCP_Option', meth: 'str | tuple[DCCP_OptionParser, DCCP_OptionConstructor]', *,
+                         schema: 'Optional[Type[Schema_DCCP_Option]]' = None) -> 'None':
+    """Register an option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.transport.dccp.DCCP.__option__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.transport.dccp.DCCP` option type as in
+            :class:`~pcapkit.const.dccp.option.Option`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.schema.transport.dccp.Option`.
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.dccp.option.Option`
+            member, e.g. a member of another enum, or ``meth``
+            is a name with no matching ``_read_opt_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, DCCP_Option, DCCP)
+    if isinstance(meth, str) and not hasattr(DCCP, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid DCCP option parser function')
+
+    DCCP.register_option(code, meth)
+    if schema is not None:
+        Schema_DCCP_Option.register(code, schema)
+    logger.debug('registered DCCP option parser: %s', code.name)
 
 
 ###############################################################################

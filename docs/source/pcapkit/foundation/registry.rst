@@ -137,6 +137,10 @@ Transport Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_cause
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_dccp
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_dccp_option
+
 Application Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

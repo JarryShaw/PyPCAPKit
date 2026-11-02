@@ -70,6 +70,7 @@ Transport Layer
 .. toctree::
    :maxdepth: 2
 
+   dccp
    sctp
    tcp
 

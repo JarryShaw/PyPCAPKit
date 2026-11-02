@@ -377,12 +377,12 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
         # sweep. The int count includes GitHub issue #880's ngap.ProcedureCode
         # and ngap.ProtocolIE, which are on EnumRegistry, as are the ICMP,
-        # ICMPv6 and IGMP registry families added on the base branch.
-        self.assertEqual(len(ints), 129)
+        # ICMPv6, IGMP and DCCP registry families.
+        self.assertEqual(len(ints), 135)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)
-        self.assertEqual(len(self.enums), 145)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 139)
+        self.assertEqual(len(self.enums), 151)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 145)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.

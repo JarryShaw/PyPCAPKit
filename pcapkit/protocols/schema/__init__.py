@@ -151,6 +151,11 @@ __all__ = [
     'MH_UnknownExtension', 'MH_MultiPrefixExtension', 'MH_ExperimentalExtension',
 
     # Transport Layer Protocols
+    'DCCP',
+    'DCCP_Option',
+    'DCCP_UnassignedOption', 'DCCP_Padding', 'DCCP_Mandatory', 'DCCP_SlowReceiver', 'DCCP_Change',
+    'DCCP_Confirm', 'DCCP_InitCookie', 'DCCP_NDPCount', 'DCCP_AckVector', 'DCCP_DataDropped',
+    'DCCP_Timestamp', 'DCCP_TimestampEcho', 'DCCP_ElapsedTime', 'DCCP_DataChecksum',
     'TCP',
     'TCP_SACKBlock',
     'TCP_Option',

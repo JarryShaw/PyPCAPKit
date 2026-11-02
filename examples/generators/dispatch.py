@@ -380,6 +380,9 @@ def _internet_payload(code: 'int') -> 'bytes':
         return _tcp(9999)
     if code == TransType.UDP:
         return _udp(9999)
+    if code == TransType.DCCP:
+        from pcapkit.protocols.transport.dccp import DCCP
+        return bytes(DCCP(srcport=50000, dstport=9999, seq=1, payload=b'\x01\x02\x03'))
     if code == TransType.IPv6:
         return _ip6(6, _tcp(9999))
     if code == TransType.IPv6_Route:
@@ -695,6 +698,7 @@ PINNED_TARGETS = {
     'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
     'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
     'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
+    'internet/DCCP': ('pcapkit.protocols.transport.dccp', 'DCCP'),
     'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
     'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
     'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
