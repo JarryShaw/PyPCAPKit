@@ -824,16 +824,25 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._make_opt_smf_dpd(Option.SMF_DPD, mode=2)
 
-        with mock.patch(f'{protocol_cls.__module__}.warn') as warn:
-            pdm = proto._make_opt_pdm(
+        # A parsed scale that no longer describes its delta is derived again.
+        pdm = proto._make_opt_pdm(
+            Option.PDM,
+            data.PDMOption(type=Option.PDM, length=12, scaledtlr=0,
+                           scaledtls=0, psntp=1, psnlr=2,
+                           deltatlr=1 << 20, deltatls=1 << 21,
+                           **base),
+        )
+        self.assertEqual((pdm.scaledtlr, pdm.scaledtls), (5, 6))
+        # A delta no one-octet scale can bring into two octets is refused, not
+        # written with its scale wrapped (#2614).
+        with self.assertRaisesRegex(ProtocolError, 'invalid PDM delta time last received'):
+            proto._make_opt_pdm(
                 Option.PDM,
                 data.PDMOption(type=Option.PDM, length=12, scaledtlr=0,
                                scaledtls=0, psntp=1, psnlr=2,
                                deltatlr=1 << 300, deltatls=1 << 301,
                                **base),
             )
-        self.assertGreater(pdm.scaledtlr, 0)
-        self.assertEqual(warn.call_count, 2)
 
         qs_req = proto._make_opt_qs(
             Option.Quick_Start,
