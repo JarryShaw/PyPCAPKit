@@ -148,9 +148,8 @@ class IGMPChecksumReadTests(IGMPChecksumTestCase):
                                              f'0x{whole[2:4].hex()} expected')])
 
     def test_truncated_and_off(self) -> None:
-        # A Report of IGMPv3 cut short is Raw, its group records unparsed, so the
-        # IGMPv3 case is a Query.
-        for name in ('v2-report', 'v3-query'):
+        # An IGMPv3 Report cut short parses as far as it goes (#2650).
+        for name in ('v2-report', 'v3-query', 'v3-report'):
             packet = message(MESSAGES[name][0][:2], MESSAGES[name][0][4:] + b'XY')
             with self.subTest(name):
                 self.assertEqual(self.status(wire.ipv4(packet, proto=2)[:-1]), (self.Status.TRUNCATED, []))

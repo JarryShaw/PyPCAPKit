@@ -73,6 +73,9 @@ CASES = (
     ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
     ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
     ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
+    ('igmpv3-report', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '45000040123400000102bd710a000001e0000016' '2200c7e100000002'
+        '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
     ('ipv6', IPV6, {}, _ipv6(59, b'')),
     ('ipv6-chain', IPV6, {}, bytes.fromhex(
         '600000000020004000000000000000000000000000000001000000000000000000000000000000023c'
