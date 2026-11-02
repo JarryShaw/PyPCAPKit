@@ -48,7 +48,6 @@ import enum
 import io
 import math
 import platform
-import re
 import struct
 import sys
 import time
@@ -65,7 +64,7 @@ from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.byteorder import packet_byteorder
-from pcapkit.corekit.fields.strings import DecodedString
+from pcapkit.corekit.fields.strings import DecodedString, pad_length
 from pcapkit.corekit.infoclass import OrderedMultiInfo
 from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
@@ -260,9 +259,6 @@ if TYPE_CHECKING:
 
     _FlagsEnum = TypeVar('_FlagsEnum', 'PacketDirection', 'PacketReception')
     _S = TypeVar('_S', bound='Schema | bytes')
-
-# EUI address pattern
-PAT_EUI_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){7}[0-9a-f]{2}')
 
 
 def _option_key(code: 'Enum_OptionType') -> 'Union[Enum_OptionType, Tuple[str, int]]':
@@ -2337,64 +2333,29 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             )
         return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
-    def _read_eui_addr(self, addr: 'bytes') -> 'str':
-        """Read EUI address.
-
-        Args:
-            addr: EUI address.
-
-        Returns:
-            Colon (``:``) separated *hex* encoded EUI address.
-
-        """
-        return addr.hex(':')
-
     def _make_mac_addr(self, addr: 'str | bytes | bytearray', *, size: 'Optional[int]' = 6,
                        name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
-        """Make MAC address.
+        """Make a MAC address, or an EUI-64 one with ``size=8``.
 
         Args:
-            addr: MAC address.
+            addr: MAC or EUI address.
             size: Octets in the address, as for :meth:`Protocol._make_mac_addr
                 <pcapkit.protocols.protocol.Protocol._make_mac_addr>`.
             name: Name of the address, for the error message.
             alias: Prefix of the error message, ``'PCAP-NG'`` by default.
 
         Returns:
-            MAC address packed as ``size`` octets, 6 by default.
+            The address packed as ``size`` octets, 6 by default.
 
         Raises:
             ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
                 or :class:`bytearray` (a :obj:`bool` included), or is not a
-                ``:``- or ``-``-separated *hex* encoded MAC address.
+                ``:``- or ``-``-separated *hex* encoded address of ``size``
+                octets.
 
         """
         prefix = 'PCAP-NG' if alias is None else alias
         return super()._make_mac_addr(addr, size=size, name=name, alias=prefix)
-
-    def _make_eui_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
-        """Make EUI address.
-
-        Args:
-            addr: EUI address.
-
-        Returns:
-            EUI address packed as 8 octets.
-
-        Raises:
-            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
-                or :class:`bytearray` (a :obj:`bool` included), or is not a
-                ``:``- or ``-``-separated *hex* encoded EUI-64 address.
-
-        """
-        if not isinstance(addr, (str, bytes, bytearray)):
-            raise ProtocolError(f'PCAP-NG: invalid EUI address: must be a str, bytes or '
-                                f'bytearray, not {addr!r}')
-        _addr = addr.encode() if isinstance(addr, str) else addr
-
-        if PAT_EUI_ADDR.fullmatch(_addr) is not None:
-            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'PCAP-NG: invalid EUI address: {addr!r}')
 
     def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ
@@ -2730,7 +2691,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                  ProtocolWarning, stacklevel=stacklevel())
         # NOTE: Likewise for more packet data than the original length, padding
         # aside (#1414).
-        if data.captured_len > (data.original_len + 3) // 4 * 4:
+        if data.captured_len > data.original_len + pad_length(data.original_len, 4):
             warn(f'PCAP-NG: [Block {header.type}] packet data of {data.captured_len} octet(s) '
                  f'exceeds the original length of {data.original_len}; kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
@@ -3401,7 +3362,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         option = Data_IF_EUIAddrOption(
             type=schema.type,
             length=schema.length,
-            interface=self._read_eui_addr(schema.interface),
+            interface=self._read_mac_addr(schema.interface),
         )
         return option
 
@@ -4522,7 +4483,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         # NOTE: The body is padded to 32 bits, and Block Total Length counts it
         # together with the 12 octets of block type and both length fields.
-        data += bytes(-len(data) % 4)
+        data += bytes(pad_length(len(data), 4))
         length = len(data) + GENERIC_BLOCK_MINIMUM
 
         return Schema_UnknownBlock(
@@ -4546,13 +4507,30 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             version: Version information.
             major_version: Major version number.
             minor_version: Minor version number.
-            section_length: Section length.
+            section_length: Section length, ``-1`` (or ``0xFFFFFFFFFFFFFFFF``)
+                for "not specified".
             options: Block options.
             byteorder: Byte order of the section; a parsed block keeps its own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed block schema.
+
+        Raises:
+            ProtocolError: If ``section_length`` is not an :obj:`int` (a
+                :obj:`bool` included), or is outside ``-2 ** 63`` to
+                ``2 ** 64 - 1``.
+
+        .. versionchanged:: 1.6.0
+
+           ``section_length`` is checked by
+           :meth:`~pcapkit.protocols.protocol.Protocol._make_sint`, so a value
+           outside the 64-bit field in either spelling, a :obj:`bool` or a
+           non-integer raises
+           :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than being
+           written masked or failing to pack; ``-1`` and
+           ``0xFFFFFFFFFFFFFFFF`` still write the same octets
+           (:issue:`2614`).
 
         """
         if block is not None:
@@ -4571,6 +4549,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 major_version = version[0]
             if minor_version is None:
                 minor_version = version[1]
+        # NOTE: the field is signed and the specification spells "not specified"
+        # both -1 and 0xFFFFFFFFFFFFFFFF, so both spellings are accepted and the
+        # field packs them to the same octets; any other value is refused (#2617).
+        self._make_sint(section_length, bits=64, name='[SHB] section_length', alias='PCAP-NG', allow_unsigned=True)
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='opt')
@@ -4613,8 +4595,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed block schema.
 
         Raises:
-            ProtocolError: If ``snaplen`` is outside ``0`` to ``0xFFFFFFFF``,
-                which the 32-bit SnapLen field would truncate (:issue:`2278`).
+            ProtocolError: If ``snaplen`` is not an :obj:`int` (a :obj:`bool`
+                included), or is outside ``0`` to ``0xFFFFFFFF``, which the
+                32-bit SnapLen field would truncate (:issue:`2278`).
 
         .. versionchanged:: 1.5.0
 
@@ -4622,6 +4605,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
            the 32-bit field silently truncated to ``0xFFFFFFFF`` -- to ``0``,
            and a value outside the field's range now raises instead of being
            truncated (:issue:`2278`).
+
+        .. versionchanged:: 1.6.0
+
+           ``snaplen`` is checked by
+           :meth:`~pcapkit.protocols.protocol.Protocol._make_uint`, so a
+           :obj:`bool` or a non-integer raises
+           :exc:`~pcapkit.utilities.exceptions.ProtocolError` too
+           (:issue:`2614`).
 
         """
         if block is not None and hasattr(block, 'block_raw'):
@@ -4633,8 +4624,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         else:
             linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[assignment]
                                             reversed=linktype_reversed, pack=False)
-        if not 0 <= snaplen <= 0xFFFF_FFFF:
-            raise ProtocolError(f'PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: {snaplen!r}')
+        snaplen = self._make_uint(snaplen, bits=32, name='[IDB] snaplen', alias='PCAP-NG')
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='if')
@@ -4699,7 +4689,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # to it rather than written out whole behind a clipped length.
         if len(packet_data) > captured_len:
             packet_data = bytes(packet_data)[:captured_len]
-        packet_len = math.ceil(len(packet_data) / 4) * 4
+        packet_len = len(packet_data) + pad_length(len(packet_data), 4)
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='epb')
@@ -4754,7 +4744,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             captured_len = min(original_len, snaplen)
         if len(packet_data) > captured_len:
             packet_data = bytes(packet_data)[:captured_len]
-        packet_len = math.ceil(len(packet_data) / 4) * 4
+        packet_len = len(packet_data) + pad_length(len(packet_data), 4)
 
         return self._make_padding(Schema_SimplePacketBlock(
             length=packet_len + BLOCK_MINIMUM[Enum_BlockType.Simple_Packet_Block],
@@ -4872,7 +4862,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data = Schema_SystemdJournalExportBlock.dump_entries(entries)
         # NOTE: The entry MUST be zero-padded to 32 bits, and the Block Total
         # Length counts that padding, as the ``entry`` field reads it back.
-        data += bytes(-len(data) % 4)
+        data += bytes(pad_length(len(data), 4))
 
         return Schema_SystemdJournalExportBlock(
             length=len(data) + GENERIC_BLOCK_MINIMUM,
@@ -4962,7 +4952,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             }}))
         else:
             secrets_held = len(secrets_data_val)
-        secrets_padded = secrets_held + -secrets_held % 4
+        secrets_padded = secrets_held + pad_length(secrets_held, 4)
         # NOTE: A Secrets Length running past the block is kept as declared, as
         # an EPB keeps its captured length, so the block rebuilds as captured;
         # the block length is still sized from the secrets written (#1980).
@@ -5028,15 +5018,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         else:
             options_value, _ = [], 0
 
-        # NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit
-        # boundary, and zero when already there. Integer arithmetic throughout,
-        # unlike the ``math.ceil(n / 4) * 4`` idiom used elsewhere in this
-        # file, which routes a length through a float.
         cb_data = data.pack() if isinstance(data, Schema) else data
-        cb_data += bytes(-len(cb_data) % 4)
+        cb_data += bytes(pad_length(len(cb_data), 4))
         for option in options_value:
             cb_data += option.pack() if isinstance(option, Schema) else option
-        cb_data += bytes(-len(cb_data) % 4)
+        cb_data += bytes(pad_length(len(cb_data), 4))
 
         # NOTE: both custom block types span the same fixed fields, and this
         # method makes either, so the one entry stands for both.
@@ -5062,7 +5048,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             block: Block data model.
             interface_id: Interface ID.
-            drop_count: Drops count.
+            drop_count: Drops count, ``0xFFFF`` for "not available".
             timestamp: Packet timestamp.
             captured_len: Captured length.
             original_len: Original length.
@@ -5072,6 +5058,18 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             Constructed block schema.
+
+        Raises:
+            ProtocolError: If ``drop_count`` is not an :obj:`int` (a
+                :obj:`bool` included), or is outside ``0`` to ``0xFFFF``.
+
+        .. versionchanged:: 1.6.0
+
+           ``drop_count`` is checked by
+           :meth:`~pcapkit.protocols.protocol.Protocol._make_uint`, so a value
+           the 16-bit field cannot hold, ``-1`` included, or a :obj:`bool`
+           raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+           than being written masked (:issue:`2614`).
 
         """
         warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
@@ -5087,6 +5085,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             original_len = block.original_len
             packet_data = self._make_packet_data(block)
             options = self._block_area(block, 'options')
+        drop_count = self._make_uint(drop_count, bits=16, name='[PB] drop_count', alias='PCAP-NG')
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
         if captured_len is None:
@@ -5103,7 +5102,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # to it rather than written out whole behind a clipped length.
         if len(packet_data) > captured_len:
             packet_data = bytes(packet_data)[:captured_len]
-        packet_len = math.ceil(len(packet_data) / 4) * 4
+        packet_len = len(packet_data) + pad_length(len(packet_data), 4)
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='pack')
@@ -5493,7 +5492,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         return Schema_IF_EUIAddrOption(
             type=type,
             length=8,
-            interface=self._make_eui_addr(interface),
+            interface=self._make_mac_addr(interface, size=8, name='EUI address'),
         )
 
     def _make_option_if_speed(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_SpeedOption]' = None, *,
@@ -5589,6 +5588,16 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``tzone`` is none of those types, or is a
+                :obj:`bool`, or its seconds do not fit the signed 32-bit field.
+
+        .. versionchanged:: 1.6.0
+
+           An offset the signed 32-bit field cannot hold, or a :obj:`bool`,
+           raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+           than being written truncated (:issue:`2614`).
+
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be in Interface Description Block, '
@@ -5609,6 +5618,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         else:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option timezone must be int, timedelta or timezone, '
                                 f'not {builtins.type(tzone).__name__}')
+        # NOTE: checked rather than masked, see ``IF_TZoneOption.tzone``; the
+        # signed value is written, as the field reads it back.
+        self._make_sint(tzone_val, bits=32, name='[if_tzone] tzone', alias='PCAP-NG')
 
         return Schema_IF_TZoneOption(
             type=type,
@@ -5737,6 +5749,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``offset`` is not an :obj:`int`, is a
+                :obj:`bool`, or does not fit the signed 64-bit field.
+
+        .. versionchanged:: 1.6.0
+
+           An offset the signed 64-bit field cannot hold, a :obj:`bool` or a
+           non-integer raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+           rather than being written truncated, written as zero (``None``) or
+           failing to pack (:issue:`2614`).
+
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be in Interface Description Block, '
@@ -5747,6 +5770,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         if option is not None:
             offset = option.offset
+        # NOTE: checked rather than masked, see ``IF_TSOffsetOption.tsoffset``.
+        self._make_sint(offset, bits=64, name='[if_tsoffset] offset', alias='PCAP-NG')
 
         return Schema_IF_TSOffsetOption(
             type=type,

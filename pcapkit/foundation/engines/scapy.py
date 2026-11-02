@@ -38,6 +38,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import struct
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
@@ -106,7 +107,7 @@ def _read_tsoffset(options: 'bytes', endian: 'str') -> 'int':
             break
         if code == 14 and length == 8 and len(options) >= 12:
             return cast('int', struct.unpack(f'{endian}q', options[4:12])[0])
-        options = options[4 + length + (-length % 4):]
+        options = options[4 + length + pad_length(length, 4):]
     return 0
 
 
