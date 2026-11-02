@@ -14,4 +14,6 @@ so that a caller does not interpret the raw reassembled octets itself
 .. toctree::
    :maxdepth: 2
 
+   ip
+   tcp
    dtls

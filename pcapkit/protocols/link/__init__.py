@@ -20,6 +20,7 @@ from pcapkit.protocols.link.inarp import InARP
 from pcapkit.protocols.link.ethernet import Ethernet
 from pcapkit.protocols.link.frad import FRAD
 from pcapkit.protocols.link.gre import GRE
+from pcapkit.protocols.link.ieee802_11 import IEEE802_11
 from pcapkit.protocols.link.loopback import Loopback
 from pcapkit.protocols.link.netlink import Netlink
 from pcapkit.protocols.link.radiotap import Radiotap
@@ -46,6 +47,6 @@ __all__ = [
     'LINKTYPE',
 
     # Link Layer Protocols
-    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'InARP', 'L2TP', 'L2TPv2', 'LinuxSLL', 'LinuxSLL1',
-    'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'FRAD', 'GRE', 'IEEE802_11', 'InARP', 'L2TP', 'L2TPv2',
+    'LinuxSLL', 'LinuxSLL1', 'LinuxSLL2', 'Loopback', 'Netlink', 'Radiotap', 'S_Tag', 'VLAN',
 ]

@@ -646,6 +646,37 @@ def _frad_build(nlpid: 'int') -> 'Any':
 
 
 ###############################################################################
+# Radiotap -- link type of the frame behind the header.
+###############################################################################
+
+
+def _radiotap_registry() -> 'Any':
+    from pcapkit.protocols.link.radiotap import Radiotap
+    return Radiotap.__proto__
+
+
+def _radiotap_build(code: 'Any') -> 'Any':
+    """An 802.11 Ack behind radiotap, on a ``LINUX_SLL`` capture.
+
+    :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.Radiotap.read>`
+    consults ``LinkType.IEEE802_11`` alone, so that is the only code with a
+    case.
+
+    """
+    from pcapkit.const.linux.arphrd import ARPHRD
+    from pcapkit.const.reg.linktype import LinkType
+    from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+    from pcapkit.protocols.link.radiotap import Radiotap
+
+    if code != LinkType.IEEE802_11:
+        raise ValueError(f'no radiotap case for link type {code!r}')
+    ack = bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+    frame = bytes(LinuxSLL1(arphrd_type=ARPHRD.IEEE80211_RADIOTAP, payload=bytes(Radiotap(payload=ack))))
+    return _extract_first(_pcap_bytes((frame,), linktype=int(LinkType.LINUX_SLL)), '.pcap')
+
+
+###############################################################################
 # The families, the cases, and the probe.
 ###############################################################################
 
@@ -672,8 +703,8 @@ def _link_enum() -> 'Any':
 
 
 #: Every family this module exercises, one per ``__proto__`` table named in
-#: GitHub issue #496, the loopback table #1574 added, and FRAD's NLPID table
-#: (#2560).
+#: GitHub issue #496, the loopback table #1574 added, FRAD's NLPID table
+#: (#2560), and the radiotap table of #2575.
 FAMILIES = (
     Family('link', _link_registry, _link_build, _link_enum),
     Family('internet', _internet_registry, _internet_build),
@@ -684,6 +715,7 @@ FAMILIES = (
     Family('pcapng-frame', _pcapng_registry, _pcapng_build),
     Family('loopback', _loopback_registry, _loopback_build),
     Family('frad', _frad_registry, _frad_build),
+    Family('radiotap', _radiotap_registry, _radiotap_build),
 )
 
 #: The families keyed by label, for a caller -- :func:`probe` -- that wants
@@ -798,6 +830,9 @@ PINNED_TARGETS = {
     # -- FRAD.__proto__ (NLPID, keyed in decimal: 0x8E, 0xCC) ------------------
     'frad/142': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
     'frad/204': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+
+    # -- Radiotap.__proto__ (LinkType of the frame behind it) --------------------
+    'radiotap/IEEE802_11': ('pcapkit.protocols.link.ieee802_11', 'IEEE802_11'),
 }
 
 

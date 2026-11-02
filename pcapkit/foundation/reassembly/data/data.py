@@ -160,12 +160,15 @@ class Deferred(Generic[_KT]):
     * :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` builds a
       ``Deferred[TransType]``. It passes the payload protocol type, a
       :class:`~pcapkit.const.reg.transtype.TransType` read from the reassembled
-      datagram's **Protocol** / **Next Header** field, to
+      datagram's **Protocol** / **Next Header** field, to the parse
+      :func:`~pcapkit.foundation.analysis.ip.ip_datagram` runs:
       :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`,
       which looks the next layer up by protocol registry number.
     * :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` builds a
       ``Deferred[tuple[AppType_TCP, AppType_TCP]]``. It passes a
-      ``(source, destination)`` port pair, because :meth:`Transport.analyze
+      ``(source, destination)`` port pair to the parse
+      :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, because
+      :meth:`Transport.analyze
       <pcapkit.protocols.transport.transport.Transport.analyze>` overrides that
       parameter to one: a reassembled transport-layer payload carries no
       protocol number, so its application protocol is inferred from the ports.
@@ -209,10 +212,10 @@ class Deferred(Generic[_KT]):
     either way.
 
     Args:
-        analyze: The analyser to call:
-            :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
-            bound to the reassembly object's protocol for IP and TCP, the
-            handshake decoder for DTLS.
+        analyze: The analyser to call: the parse
+            :mod:`pcapkit.foundation.analysis` runs for the engine, bound to
+            the reassembly object's protocol for IP and TCP, whose ``analyze``
+            it calls, and the handshake decoder for DTLS.
         proto: What the analyser dispatches the payload on -- the payload
             protocol type for IP, the port pair for TCP, the handshake header
             for DTLS, as above.
@@ -224,7 +227,10 @@ class Deferred(Generic[_KT]):
 
        Also constrained to the DTLS handshake header, and the analyser may
        return a :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`
-       (:issue:`2531`).
+       (:issue:`2531`). IP's and TCP's analyser is the parse their
+       :mod:`pcapkit.foundation.analysis` module runs, bound to the
+       reassembly's protocol, rather than that protocol's bound ``analyze``
+       (:issue:`2581`).
 
     """
 

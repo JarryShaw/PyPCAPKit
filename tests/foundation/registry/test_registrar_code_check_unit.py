@@ -93,6 +93,7 @@ MODULE_REGISTRARS = (
     ('register_pcapng', ('pcapkit.protocols.misc.pcapng:PCAPNG',)),
     ('register_ethertype', ('pcapkit.protocols.link.link:Link',)),
     ('register_arphrd', ('pcapkit.protocols.link.linux_sll:LinuxSLL',)),
+    ('register_radiotap', ('pcapkit.protocols.link.radiotap:Radiotap',)),
     ('register_transtype', ('pcapkit.protocols.internet.internet:Internet',)),
 )
 
@@ -126,6 +127,7 @@ REGISTRAR_ENUMS = {
     'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',
     'register_ethertype': 'pcapkit.const.reg.ethertype:EtherType',
     'register_arphrd': 'pcapkit.const.linux.arphrd:ARPHRD',
+    'register_radiotap': 'pcapkit.const.reg.linktype:LinkType',
     'register_transtype': 'pcapkit.const.reg.transtype:TransType',
 }
 

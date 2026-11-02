@@ -35,13 +35,8 @@ bounds the whole of it; the 802.11 MAC frame starts at that offset.
 Scope
 -----
 
-Decoding every optional field radiotap.org defines, and the 802.11 MAC frame
-behind them, is future work tracked on :issue:`2460` and :issue:`2502` --
-this is already the widest of that issue's five follow-ups, and the 802.11
-MAC frame is a protocol family of its own (frame control, address fields
-that vary in count with ToDS/FromDS, sequence control, optional QoS/HT
-control, then a body that again dispatches by frame type/subtype). This
-first cut instead:
+Decoding every optional field radiotap.org defines is tracked on
+:issue:`2576`. This class:
 
 * **Decodes** the fixed 8-octet start -- ``it_version``, ``it_pad``,
   ``it_len`` -- and walks the present-flags chain far enough to know how many
@@ -51,13 +46,13 @@ first cut instead:
   select -- the octets between the present-flags chain and ``it_len`` are
   kept whole and undissected, as
   :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.fields`.
-* **Leaves opaque** everything from ``it_len`` on: the 802.11 MAC frame
-  itself, which has no dissector anywhere in this package yet. It is kept as
-  :class:`~pcapkit.protocols.misc.raw.Raw` (or
-  :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing follows),
-  unconditionally -- there is no next-layer dispatch table here, the same
-  choice :class:`~pcapkit.protocols.link.netlink.Netlink` makes for its own
-  per-family payloads.
+* **Hands** everything from ``it_len`` on, the 802.11 MAC frame, to
+  :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`
+  (:class:`~pcapkit.protocols.misc.null.NoPayload` when nothing follows).
+  The header names no next protocol, since an 802.11 frame always follows it,
+  so the frame is looked up in
+  :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
+  under :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`.
 
 .. [*] <https://www.radiotap.org/>; the Linux kernel's
    ``include/net/ieee80211_radiotap.h`` and ``net/wireless/radiotap.c``; and
@@ -71,7 +66,7 @@ import collections
 from typing import TYPE_CHECKING
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
-from pcapkit.corekit.decorators import beholder
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.radiotap import Radiotap as Data_Radiotap
 from pcapkit.protocols.link.link import Link
@@ -79,11 +74,14 @@ from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.link.radiotap import Radiotap as Schema_Radiotap
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, Sequence, Type
+    from typing import Any, ClassVar, DefaultDict, Optional, Sequence, Type
 
     from typing_extensions import Literal
+
+    from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['Radiotap']
 
@@ -103,13 +101,19 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
               schema=Schema_Radiotap, data=Data_Radiotap):
     """This class implements the IEEE 802.11 radiotap header.
 
-    The 802.11 MAC frame this header precedes has no dissector in this
-    package; it is always kept as :class:`~pcapkit.protocols.misc.raw.Raw`
-    (or :class:`~pcapkit.protocols.misc.null.NoPayload`), registered in
-    :attr:`self.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
-    only so :meth:`register` works the same way every other
-    :class:`~pcapkit.protocols.link.link.Link` subclass's does -- see the
-    module docstring's *Scope* section for what is, and is not, decoded.
+    The 802.11 MAC frame this header precedes is dispatched through the
+    registry below, keyed by the link type of the frame:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Index
+         - Protocol
+       * - :attr:`~pcapkit.const.reg.linktype.LinkType.IEEE802_11`
+         - :class:`pcapkit.protocols.link.ieee802_11.IEEE802_11`
+
+    See the module docstring's *Scope* section for what is, and is not,
+    decoded.
 
     """
 
@@ -117,14 +121,19 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
     # Defaults.
     ##########################################################################
 
-    #: Protocol index mapping for decoding next layer. Deliberately empty --
-    #: see the class docstring -- so every key resolves through the
-    #: :class:`~collections.defaultdict` fallback to
-    #: :class:`~pcapkit.protocols.misc.raw.Raw`. Unused in practice, since
-    #: :meth:`_import_next_layer` is overridden below and never consults it.
+    #: Protocol index mapping for decoding next layer, keyed by the link type
+    #: of the frame the header precedes; :meth:`read` always looks up
+    #: :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
-    )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+        {
+            Enum_LinkType.IEEE802_11: ModuleDescriptor('pcapkit.protocols.link.ieee802_11', 'IEEE802_11'),
+        },
+    )  # type: DefaultDict[int | Enum_LinkType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    #: What :attr:`__proto__` is keyed by, declared as
+    #: :attr:`Link.__proto_key__ <pcapkit.protocols.link.link.Link.__proto_key__>` is.
+    __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_LinkType, False)
 
     ##########################################################################
     # Properties.
@@ -200,7 +209,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         #: The octets after the fixed start: any extended present-flags
         #: words, the field-data region, and the 802.11 frame, all run
-        #: together -- see :meth:`_import_next_layer` for how the frame is
+        #: together -- see :meth:`_get_payload` for how the frame is
         #: separated back out.
         rest = schema.payload
 
@@ -224,9 +233,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         tail_offset = min(tail_offset, len(rest))
 
         fields = rest[offset:tail_offset]
-        #: int: Offset into :meth:`self._get_payload() <pcapkit.protocols.protocol.Protocol._get_payload>`
-        #: where the 802.11 MAC frame starts -- read by
-        #: :meth:`_import_next_layer`.
+        #: int: Offset into the header schema's payload where the 802.11 MAC
+        #: frame starts -- read by :meth:`_get_payload`.
         self._mac_offset = tail_offset  # pylint: disable=attribute-defined-outside-init
 
         radiotap = Data_Radiotap(
@@ -237,7 +245,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             fields=fields,
         )
         header_len = _FIXED_HEADER_LEN + tail_offset
-        return self._decode_next_layer(radiotap, 0, max(0, length - header_len))
+        return self._decode_next_layer(radiotap, Enum_LinkType.IEEE802_11, max(0, length - header_len))
 
     def make(self,
              it_version: 'int' = 0,
@@ -263,8 +271,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
                 whole; see the module docstring's *Scope* section.
             it_len: Total header length, header included; computed from
                 ``present`` and ``fields`` when omitted.
-            payload: Payload data (the 802.11 MAC frame, opaque to this
-                class).
+            payload: Payload data (the 802.11 MAC frame).
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -315,6 +322,51 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             it_present=present[0],
             payload=chain_bytes + fields + payload_bytes,
         )
+
+    @classmethod
+    def register(cls, code: 'Enum_LinkType',  # type: ignore[override]
+                 protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        r"""Register a new protocol class for the frame a radiotap header precedes.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: link type as in :class:`~pcapkit.const.reg.linktype.LinkType`
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Link.register
+            <pcapkit.protocols.link.link.Link.register>` because
+            :attr:`self.__proto__ <Radiotap.__proto__>` is keyed by link type
+            rather than by EtherType. Any link type is accepted, but
+            :meth:`read` consults
+            :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`
+            alone: that is the key a replacement 802.11 dissector takes, and
+            an entry under any other key is stored and never reached.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this link type is
+                already registered and the incumbent differs from the
+                replacement; see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard,
+                and for the shipped descriptor a restore puts back (:issue:`1504`).
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'link type {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     ##########################################################################
     # Data models.
@@ -370,60 +422,20 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             'payload': cls._make_payload(data),
         }
 
-    @beholder  # type: ignore[arg-type]
-    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
-        """Import next layer extractor.
+    def _get_payload(self) -> 'bytes':
+        """Get the 802.11 MAC frame this header precedes.
 
-        Arguments:
-            proto: next layer protocol index -- unused, see below.
-            length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack
-                <pcapkit.protocols.protocol.Protocol.unpack>`)
+        The header schema's payload starts right after the fixed 8-octet
+        start, so it also holds the present-flags chain and the field-data
+        region it selects; those belong to this header, and the frame starts
+        ``self._mac_offset`` octets in, as :meth:`read` records it. Both
+        :meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`
+        and the :class:`~pcapkit.protocols.misc.raw.Raw` that
+        :func:`~pcapkit.corekit.decorators.beholder` falls back to on a
+        refused frame read from here.
 
         Returns:
-            Instance of next layer: always
-            :class:`~pcapkit.protocols.misc.raw.Raw`, or
-            :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing
-            follows -- the 802.11 MAC frame this header precedes has no
-            dissector in this package; see the module docstring's *Scope*
-            section. The only reason this overrides the base
-            implementation is to start that payload at
-            :attr:`self._mac_offset` rather than immediately after the
-            fixed 8-octet start: everything in between -- the
-            present-flags chain and the field-data region it selects --
-            belongs to this header, not to the frame behind it, and
-            :meth:`self._get_payload <pcapkit.protocols.protocol.Protocol._get_payload>`
-            does not know that boundary on its own.
+            The 802.11 MAC frame, as :obj:`bytes`.
 
         """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
-
-        file_ = self._get_payload()
-        offset = min(self._mac_offset, len(file_))
-        file_ = file_[offset:]
-        # NOTE: ``length``, as handed down from :meth:`read` through
-        # :meth:`_decode_next_layer`, already counts only the octets beyond
-        # the *whole* header (fixed start, present-flags chain and
-        # field-data region) -- i.e. it is already relative to the start
-        # ``file_`` is being trimmed to here, not to
-        # :meth:`self._get_payload() <pcapkit.protocols.protocol.Protocol._get_payload>`'s
-        # untrimmed start. Subtracting ``offset`` a second time would read
-        # as though the chain and field-data region were being skipped
-        # twice.
-        if length is None:
-            length = len(file_)
-        else:
-            length = max(0, min(length, len(file_)))
-
-        if not min(length, len(file_)):
-            from pcapkit.protocols.misc.null import \
-                NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            from pcapkit.protocols.misc.raw import \
-                Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-
-        return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
-                                      layer=self._exlayer, protocol=self._exproto,
-                                      __context__=self._exctx)
+        return self.__header__.get_payload()[self._mac_offset:]

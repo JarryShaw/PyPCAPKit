@@ -1,0 +1,130 @@
+IEEE 802.11 - Wireless LAN MAC Header
+=====================================
+
+.. module:: pcapkit.protocols.link.ieee802_11
+
+:mod:`pcapkit.protocols.link.ieee802_11` contains
+:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` only, which implements
+the extractor for the IEEE 802.11 MAC header [*]_ of a protocol version 0
+frame, as :class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its
+fields, in the order they appear, numeric ones little-endian:
+
+.. table::
+
+   ======================= ======= ============================================
+   Name                    Octets  Present
+   ======================= ======= ============================================
+   ``frame_control``       2       always (§9.2.4.1)
+   ``duration_id``         2       always (§9.2.4.2)
+   ``addr1``               6       always (§9.2.4.3)
+   ``addr2``               6       Management, Data, and Control frames that
+                                   carry a TA (§9.2.4.3, §9.3.1)
+   ``addr3``               6       Management and Data frames (§9.2.4.3)
+   ``seq_ctrl``            2       Management and Data frames (§9.2.4.4)
+   ``addr4``               6       Data frames with To DS and From DS set
+                                   (§9.2.4.3)
+   ``qos_control``         2       QoS Data subtypes (§9.2.4.5)
+   ``ht_control``          4       QoS Data subtypes and Management frames
+                                   with +HTC/Order set (§9.2.4.6)
+   ======================= ======= ============================================
+
+:func:`~pcapkit.protocols.schema.link.ieee802_11.layout` gives the rule per
+frame type. A Control frame of a subtype whose layout this class does not
+model, and an Extension frame, are read as the minimal frame format of
+§9.2.3: the first three fields only. A Control Frame Extension frame and an
+S1G Beacon lay out B8-B15 of Frame Control differently; see
+:class:`~pcapkit.protocols.data.link.ieee802_11.FrameControl`.
+
+Scope
+-----
+
+* **The frame body** (§9.2.4.7) is kept as
+  :class:`~pcapkit.protocols.misc.raw.Raw`, protected or not.
+* **The FCS** (§9.2.4.8), where one was captured, stays at the end of the
+  body: whether a capture carries it is a radiotap Flags bit, which
+  :class:`~pcapkit.protocols.link.radiotap.Radiotap` does not decode.
+* **Pad octets** that radiotap's data-pad flag says follow the header stay
+  at the start of the body, for the same reason.
+* **A protocol version other than 0** is refused: version 1 is the PV1
+  frame format of §9.8, whose Frame Control field is laid out differently,
+  and versions 2 and 3 are reserved.
+
+.. autoclass:: pcapkit.protocols.link.ieee802_11.IEEE802_11
+   :no-members:
+   :show-inheritance:
+
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+
+   .. automethod:: id
+
+   .. automethod:: read
+   .. automethod:: make
+
+   .. automethod:: __length_hint__
+   .. automethod:: __index__
+
+   .. automethod:: _make_data
+   .. automethod:: _read_frame_control
+   .. automethod:: _make_frame_control
+   .. automethod:: _read_mac_addr
+   .. automethod:: _make_mac_addr
+   .. automethod:: _read_seq_ctrl
+   .. automethod:: _make_seq_ctrl
+   .. automethod:: _read_qos_control
+   .. automethod:: _make_qos_control
+   .. automethod:: _read_ht_control
+   .. automethod:: _make_ht_control
+
+.. autodata:: pcapkit.protocols.link.ieee802_11.SUBTYPE
+   :no-value:
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.link.ieee802_11
+
+.. autoclass:: pcapkit.protocols.schema.link.ieee802_11.IEEE802_11
+   :members:
+   :show-inheritance:
+
+.. autofunction:: pcapkit.protocols.schema.link.ieee802_11.layout
+
+.. autoclass:: pcapkit.protocols.schema.link.ieee802_11.Layout
+   :members:
+   :show-inheritance:
+
+.. autodata:: pcapkit.protocols.schema.link.ieee802_11.CONTROL_WITH_ADDR2
+   :no-value:
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.link.ieee802_11
+
+.. autoclass:: pcapkit.protocols.data.link.ieee802_11.IEEE802_11
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.ieee802_11.FrameControl
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.ieee802_11.SequenceControl
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.ieee802_11.QoSControl
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.ieee802_11.HTControl
+   :members:
+   :show-inheritance:
+
+.. rubric:: Footnotes
+
+.. [*] IEEE Std 802.11-2020, clause 9, *Frame formats*. The clause numbers
+   above are its own, checked against Wireshark's ``packet-ieee80211.c`` where
+   it cites one: §9.2.4.1.10, §9.2.4.6, §9.2.4.7 and §9.8.

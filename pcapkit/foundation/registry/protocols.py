@@ -70,6 +70,7 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.link.linux_sll import LinuxSLL
 from pcapkit.protocols.link.loopback import Loopback
 from pcapkit.protocols.link.netlink import Netlink
+from pcapkit.protocols.link.radiotap import Radiotap
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import ProtocolBase
@@ -162,7 +163,7 @@ __all__ = [
 
     'register_ethertype',
     'register_loopback',
-    'register_arphrd', 'register_frad', 'register_netlink',
+    'register_arphrd', 'register_frad', 'register_netlink', 'register_radiotap',
 
     'register_transtype',
     'register_ipx',
@@ -1035,6 +1036,55 @@ def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] 
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (Netlink, code))
+
+
+@overload
+def register_radiotap(code: 'Enum_LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
+@overload
+def register_radiotap(code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None': ...
+
+
+# NOTE: pcapkit.protocols.link.radiotap.Radiotap.__proto__
+def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
+                      class_: 'str | NullType' = NULL) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.link.radiotap.Radiotap.__proto__` registry, keyed
+    by the link type of the frame a radiotap header precedes. Any link type is
+    accepted, but :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.Radiotap.read>`
+    consults :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`
+    alone: registering that key replaces the 802.11 dissector, and an entry
+    under any other key is stored and never reached.
+
+    Arguments:
+        code: link type as in :class:`~pcapkit.const.reg.linktype.LinkType`
+        module: module name or module descriptor or a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+        class\_: class name
+
+    Raises:
+        RegistryError: If ``code`` is not a :class:`~pcapkit.const.reg.linktype.LinkType`
+            member, e.g. a member of another enum, or ``module``
+            is not a :class:`~pcapkit.protocols.protocol.ProtocolBase`
+            subclass.
+
+    """
+    _check_code(code, Enum_LinkType, Radiotap)
+    if isinstance(module, str):
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
+
+    Radiotap.register(code, module)
+    logger.debug('registered radiotap link type: %s', code.name)
+
+    # register protocol to protocol registry
+    if isinstance(module, ModuleDescriptor):
+        module = module.klass
+    _register_name(module, (Radiotap, code))
 
 
 ###############################################################################

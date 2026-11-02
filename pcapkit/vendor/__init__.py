@@ -113,6 +113,7 @@ else:
     from pcapkit.vendor.http import *
     from pcapkit.vendor.icmp import *
     from pcapkit.vendor.icmpv6 import *
+    from pcapkit.vendor.ieee802_11 import *
     from pcapkit.vendor.igmp import *
     from pcapkit.vendor.ipv4 import *
     from pcapkit.vendor.ipv6 import *
@@ -157,6 +158,9 @@ __all__ = [
     # ICMPv6
     'ICMPv6_Type', 'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode',
     'ICMPv6_ParameterProblemCode',
+    # IEEE 802.11
+    'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
+    'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',
     # IGMP
     'IGMP_Type', 'IGMP_RecordType',
     # IPv4

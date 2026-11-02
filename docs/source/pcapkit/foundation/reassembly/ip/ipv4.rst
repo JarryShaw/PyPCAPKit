@@ -95,9 +95,11 @@ Terminology
 
        .. note::
 
-          ``packet`` is analysed on the first read, not when the datagram is
-          submitted. A datagram is submitted for *every* frame whose **DF** flag
-          is clear -- an unfragmented one included -- and the analysis
+          ``packet`` is what :func:`~pcapkit.foundation.analysis.ip.ip_datagram`
+          parses ``payload`` to, unless ``__protocol_type__`` names another
+          protocol, and it is analysed on the first read, not when the
+          datagram is submitted. A datagram is submitted for *every* frame
+          whose **DF** flag is clear -- an unfragmented one included -- and the analysis
           is a second full parse of the payload, so running it eagerly would
           charge every caller for a result most never read. Reading the attribute, or any
           mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,

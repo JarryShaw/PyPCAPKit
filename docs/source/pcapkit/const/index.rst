@@ -31,6 +31,8 @@ Some behave otherwise, and :ref:`mint-criterion` gives the full split:
   table only: a second lookup returns the same object, while ``__members__``
   and iteration are unchanged.
 * :class:`~pcapkit.const.hip.transport.Transport`,
+  :class:`~pcapkit.const.ieee802_11.type.Type`,
+  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype`,
   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
   :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` and the memberless
   :class:`~pcapkit.const.reg.apptype.apptype.AppType` base raise
@@ -69,6 +71,7 @@ Link Layer
    :maxdepth: 2
 
    arp
+   ieee802_11
    l2tp
    linux
    vlan
