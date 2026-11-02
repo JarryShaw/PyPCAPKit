@@ -152,7 +152,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``version``, and so do ICMP and Linux cooked-capture octets, which carry no
   version; their ``from_data`` on a :class:`dict` raises it too, as does a
   version a family has no member for, such as L2TP's ``3``. A member built
-  directly takes ``version`` as well, which must be its own. IPv4 and IPv6
+  directly takes ``version`` as well, which must be its own. HTTP's base follows
+  the same rules, a breaking change given below (:issue:`2628`, :pr:`2651`).
+  IPv4 and IPv6
   check the Version field before the rest of the header, so octets of the other
   version raise ``[IPv4] invalid version: 6`` say, where IPv4's error named
   whichever field they broke first.
@@ -301,7 +303,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Added** -- verification and computation of the one's-complement Internet
   checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, ICMP, ICMPv6 and OSPFv2,
   in :mod:`pcapkit.corekit.checksum.internet` (:issue:`2470`, :issue:`2472`,
-  :issue:`2473`, :issue:`2474`, :issue:`2475`, :pr:`2543`), where
+  :issue:`2473`, :issue:`2474`, :issue:`2475`, :pr:`2543`), and of IGMP and
+  GRE (:issue:`2618`, :pr:`2654`), where
   :mod:`pcapkit.corekit.checksum` holds a module per checksum family and
   imports nothing from :mod:`pcapkit.protocols` (:issue:`2580`, :pr:`2586`).
   Parsing verifies only under ``PCAPKIT_CHECKSUM_VERIFY``, off by default,
@@ -315,8 +318,14 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` it builds, and
   ``make()`` of TCP, UDP and ICMPv6 also takes a ``pseudo``. What checksum
   offload leaves on the sending host is ``NOT_COMPUTED`` rather than a
-  mismatch; a fragment's TCP, UDP, ICMP or ICMPv6 checksum, which covers
-  octets the fragment lacks, is ``NO_PSEUDO_HEADER``.
+  mismatch; a fragment's TCP, UDP, ICMP, ICMPv6, IGMP or GRE checksum, which
+  covers octets the fragment lacks, is ``NO_PSEUDO_HEADER``.
+  :func:`~pcapkit.corekit.checksum.internet.verify_message` verifies a
+  checksum that covers its own message alone, as ICMP's, IGMP's and GRE's do,
+  giving ``NO_PSEUDO_HEADER`` for a fragment's payload. GRE verifies only with
+  its ``C`` bit set, and is ``NOT_COMPUTED`` with it clear; its ``make()``
+  takes ``checksum_present`` to set the bit and compute the checksum. GRE
+  states no length, so a frame the capture cut short reads as ``INVALID``.
 
 * **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
   :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
@@ -340,7 +349,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 
 * **Added** -- :mod:`pcapkit.utilities.contextvars`, holding the context
   variables more than one module sets or reads -- ``beholding``,
-  ``frame_depth``, ``in_fragment`` and ``rebuilding`` -- and importing nothing
+  ``frame_depth`` and ``rebuilding`` -- and importing nothing
   from :mod:`pcapkit` (:issue:`2616`, :pr:`2623`).
 
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
@@ -413,7 +422,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.application.httpv2.HTTPv2` member, never an
   instance of the base, and so does a TCP or UDP payload on an HTTP port, whose
   data sits under ``httpv1`` or ``httpv2`` where it sat under ``http``
-  (:issue:`2524`, :pr:`2544`). The members are renamed after their modules,
+  (:issue:`2524`, :pr:`2544`). Building it from fields takes ``version``,
+  ``1`` or ``2``, as the other versioned bases above do, and raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` without it, where 1.5.x
+  built an HTTP/1.1 message; its ``from_data`` takes the member from the data
+  model's class and refuses a :class:`dict`, where 1.5.x took one
+  (:issue:`2628`, :pr:`2651`). The members are renamed after their modules,
   ``httpv1.HTTP`` and ``httpv2.HTTP`` becoming ``HTTPv1`` and ``HTTPv2`` along
   with their schema and data classes, with no re-export at the old paths
   (:issue:`2529`); ``pcapkit.HTTPv1``, ``pcapkit.HTTPv2`` and the package
@@ -432,7 +446,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   passes for an HTTP/2 frame header but ``HTTPv2`` refuses carries that
   parser's own error on either path, where it was ``'HTTP: unknown version'``.
   ``HTTPv2`` itself now parses a payload opening with the connection preface,
-  kept as ``preface``, and its ``make()`` takes ``preface``.
+  kept as ``preface``, and its ``make()`` takes ``preface``, which ``HTTPv1``
+  refuses, where 1.5.x wrote the HTTP/2 preface ahead of the HTTP/1 message
+  (:issue:`2628`, :pr:`2651`).
 
 * **Changed** -- **a breaking change to** IPv6 reassembly: a fragment
   overlapping another of its datagram, other than an exact duplicate, abandons
@@ -533,10 +549,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :pr:`2634`). A versioned family's base takes its member from the ``version``
   keyword, or else from the octets or the data model, never from a field, has no
   default member, and refuses octets that carry no version unless ``version``
-  names one (:issue:`2574`, :pr:`2639`). The member-order convention's reference
-  class is :class:`~pcapkit.protocols.link.arp.ARP`, where it was
-  :class:`~pcapkit.protocols.link.ethernet.Ethernet`, whose MAC address helpers
-  moved to the base class (:issue:`2614`, :pr:`2638`).
+  names one (:issue:`2574`, :pr:`2639`); HTTP's base follows that rule, its
+  ``from_data`` reading the data model's class, since the HTTP data models
+  carry no ``version`` (:issue:`2628`, :pr:`2651`). The member-order
+  convention's reference class is :class:`~pcapkit.protocols.link.arp.ARP`,
+  where it was :class:`~pcapkit.protocols.link.ethernet.Ethernet`, whose MAC
+  address helpers moved to the base class (:issue:`2614`, :pr:`2638`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -598,6 +616,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   a trial parse they rejected. The extension-header trial now drops them as
   under ``beholder``, and the IPv4 and TCP header check holds its trial's and
   discards them when it raises (:issue:`2526`, :pr:`2577`).
+
+* **Fixed** -- an extraction with the PyShark engine could end in pyshark's
+  ``TSharkCrashException`` with ``retcode: 255`` for a ``tshark`` that exited
+  cleanly, when a ``Popen.poll()`` reaped it before the :mod:`asyncio` child
+  watcher could, which then reported ``255`` (CPython gh-87744). Closing the
+  capture absorbs that crash, logging it at :data:`logging.DEBUG`, on every
+  Python, when the capture was read to its end and each ``tshark`` it lists
+  reports ``255`` to :mod:`asyncio` and ``0`` to its ``Popen``; any other
+  error is raised (:issue:`2633`, :pr:`2642`).
 
 * **Fixed** -- selecting ``'IPv6_Ext'`` matched none of the dedicated
   extension headers:
