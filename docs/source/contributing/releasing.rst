@@ -321,12 +321,23 @@ One-time setup:
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
-3. Store the App's private key as ``RELEASE_APP_PRIVATE_KEY``, a secret of the
-   ``github-release`` environment rather than of the repository: "If the
-   environment requires approval, a job cannot access environment secrets
-   until one of the required reviewers approves it". ``github`` and the ``pr``
-   jobs of Python Versions and Issue and PR Kinds are the only jobs that name the
-   environment or read the secret.
+3. Store the App's private key as ``RELEASE_APP_PRIVATE_KEY`` in each
+   environment below, the same value in each, replaced in all of them on a
+   rotation, rather than at the repository, where every job could read it:
+
+   * ``github-release``, for ``github``: "If the environment requires approval,
+     a job cannot access environment secrets until one of the required reviewers
+     approves it".
+   * ``release-app``, for the ``pr`` jobs of Python Versions and Issue and PR
+     Kinds. Create it with no required reviewer and its deployment branches
+     limited to ``main``, where those jobs run.
+
+   A job reads only the secrets of the environment it names, so the scheduled
+   jobs need a copy outside ``github-release``, or they would wait on its
+   approval, which the owner ruled on :issue:`2648` is for Create Release alone.
+   ``github`` is the only job naming ``github-release``, and those ``pr`` jobs
+   the only others reading the key; where ``release-app`` has no key, each warns
+   and opens nothing.
 
 Unlike ``GITHUB_TOKEN``'s, the App's tag starts a tag-push run. It would rerun
 the release test gate, ask for a second approval and race the first run's
@@ -504,7 +515,8 @@ that it can run regardless of which of them skipped.
 
 Only ``github-release`` carries a required reviewer; ``conda-tag``,
 ``pypi`` and ``anaconda`` kept their environments but had their reviewers
-removed on :issue:`887`.
+removed on :issue:`887`, and ``release-app``, which no Create Release job names,
+has none either (`The Release App`_, :issue:`2648`).
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``, and ``conda`` depends on
 ``tag`` and ``github`` -- so nothing downstream of ``github`` can

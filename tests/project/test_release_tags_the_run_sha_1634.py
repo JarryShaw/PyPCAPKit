@@ -437,8 +437,8 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
         access environment secrets until one of the required reviewers approves it".
 
         #1660's Python Versions and #2561's Issue and PR Kinds ``pr`` jobs are the
-        other readers, behind the same environment, minting the token each opens its
-        pull request with.
+        other readers, minting the token each opens its pull request with from the
+        same key in ``release-app``, which has no reviewer (#2648).
         """
         readers_by_workflow = {WORKFLOW.name: ['github'], 'cron-python-versions.yml': ['pr'],
                                'cron-issue-pr-kinds.yml': ['pr']}
@@ -450,7 +450,8 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
                 self.assertEqual(readers, readers_by_workflow.get(path.name, []))
                 self.assertNotRegex(text, r'(?i)toJSON\(\s*secrets\s*\)', 'every secret, this one included')
                 for job in readers:
-                    self.assertEqual(declared_environment(blocks[job]), 'github-release')
+                    self.assertEqual(declared_environment(blocks[job]),
+                                     'github-release' if path == WORKFLOW else 'release-app')
         uses = [label(step) for step in self.steps['github'] if SECRET.search(repr(step))]
         self.assertEqual(uses, [MINT_STEP])
         self.assertEqual(declared_environment(job_blocks(WORKFLOW.read_text(encoding='utf-8'))['github']),

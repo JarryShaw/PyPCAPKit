@@ -42,7 +42,7 @@ jobs:
 
       # `publish` is false when nothing changed, or when the open pull request
       # from `bot/issue-pr-kinds` already holds this file, so an unmerged
-      # proposal is not re-pushed, nor its approval asked for, every week.
+      # proposal is not re-pushed every week.
       - name: Regenerate the kinds
         id: regenerate
         env:
@@ -63,8 +63,8 @@ jobs:
           echo "::warning title=No pull request without the release App::vars.RELEASE_APP_CLIENT_ID is unset,
           so the pr job skips. Set up the App as docs/source/contributing/releasing.rst describes."
 
-  # The release App's key is a secret of the `github-release` environment, so
-  # the owner approves only a run with something to propose. The token has no
+  # #2648: the release App's key is a secret of `release-app`, which has no
+  # reviewer, as only Create Release waits for an approval. The token has no
   # `workflows` permission, so the script recreates the branch rather than move
   # it past a workflow change on main.
   pr:
@@ -75,14 +75,27 @@ jobs:
       github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: github-release
+    environment: release-app
     # GITHUB_TOKEN only downloads `detect`'s artifact; the App's token does the rest.
     permissions:
       actions: read
 
     steps:
+      # Without the key in `release-app`, warn and skip the rest rather than fail
+      # at minting. The expression keeps the key itself out of the step's env.
+      - name: Check for the release App's key
+        id: key
+        env:
+          KEY_SET: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          echo "set=$KEY_SET" >> "$GITHUB_OUTPUT"
+          if [ "$KEY_SET" != true ]; then
+            echo "::warning title=No pull request without the release App's key::the release-app environment has no RELEASE_APP_PRIVATE_KEY secret, so the pr job skips. Store the App's key there as docs/source/contributing/releasing.rst describes."
+          fi
+
       - name: Mint the release App's token
         id: app
+        if: ${{ steps.key.outputs.set == 'true' }}
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
@@ -92,11 +105,13 @@ jobs:
 
       # The commit `detect` read, so the branch is cut from it.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ steps.key.outputs.set == 'true' }}
         with:
           ref: ${{ github.sha }}
           token: ${{ steps.app.outputs.token }}
 
       - name: Download the kinds
+        if: ${{ steps.key.outputs.set == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
@@ -104,6 +119,7 @@ jobs:
           --dir "$RUNNER_TEMP/kinds"
 
       - name: Push the kinds and open or update their pull request
+        if: ${{ steps.key.outputs.set == 'true' }}
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}

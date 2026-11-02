@@ -70,10 +70,10 @@ jobs:
 
       # Writes the proposal to $RUNNER_TEMP/proposal. `publish` is false when
       # nothing changed, or when `bot/python-versions`' open pull request
-      # already proposes these tiers, so an unmerged proposal is not re-pushed,
-      # nor its approval asked for, every week. A branch holding commits it did
-      # not make that proposes other tiers fails here, before any approval, as
-      # `publish` would refuse it. The token reads the pull request's state.
+      # already proposes these tiers, so an unmerged proposal is not re-pushed
+      # every week. A branch holding commits it did not make that proposes
+      # other tiers fails here rather than in `pr`, as `publish` would refuse it.
+      # The token reads the pull request's state.
       - name: Recompute the tiers
         id: update
         env:
@@ -103,7 +103,7 @@ jobs:
           python util/update_python_versions.py body "$RUNNER_TEMP/proposal"
           --audit-outcome "$AUDIT_OUTCOME" --audit-log "$RUNNER_TEMP/audit.log" --run-url "$RUN_URL"
 
-      # Kept for as long as an environment approval can wait. The proposal holds
+      # Kept so a re-run of `pr` can read it. The proposal holds
       # files/.github/..., which upload-artifact leaves out unless told otherwise.
       - name: Upload the proposal
         if: ${{ steps.update.outputs.publish == 'true' }}
@@ -190,7 +190,7 @@ jobs:
           elif env.get('ON_MAIN') != 'true':
               lines.append('- Pull request: none, as this run is not on `main`')
           else:
-              lines.append('- Pull request: the `pr` job opens or updates it once `github-release` is approved')
+              lines.append('- Pull request: the `pr` job opens or updates it')
           target.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           with open(env['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
               file.write(f"status={'warning' if warned else 'success'}\n")
@@ -206,12 +206,12 @@ jobs:
           path: ${{ runner.temp }}/python-versions-report.md
           retention-days: 14
 
-  # The release App's key is a secret of the `github-release` environment,
-  # which needs the owner's approval, so he is asked only when there is
-  # something to propose. The token has no `workflows` permission, so it cannot
-  # push a workflow file, and `update` writes none. `publish` force-pushes
-  # `bot/python-versions` alone, refusing while its pull request is open if it
-  # holds commits it did not make; with none open it recreates it from main.
+  # #2648: the release App's key is a secret of `release-app`, which has no
+  # reviewer, as only Create Release waits for an approval. The token has no
+  # `workflows` permission, so it cannot push a workflow file, and `update`
+  # writes none. `publish` force-pushes `bot/python-versions` alone, refusing
+  # while its pull request is open if it holds commits it did not make; with
+  # none open it recreates it from main.
   pr:
     name: Open or update the pull request
     needs: detect
@@ -220,14 +220,27 @@ jobs:
       github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: github-release
+    environment: release-app
     # GITHUB_TOKEN only downloads `detect`'s artifact; the App's token does the rest.
     permissions:
       actions: read
 
     steps:
+      # Without the key in `release-app`, warn and skip the rest rather than fail
+      # at minting. The expression keeps the key itself out of the step's env.
+      - name: Check for the release App's key
+        id: key
+        env:
+          KEY_SET: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          echo "set=$KEY_SET" >> "$GITHUB_OUTPUT"
+          if [ "$KEY_SET" != true ]; then
+            echo "::warning title=No pull request without the release App's key::the release-app environment has no RELEASE_APP_PRIVATE_KEY secret, so the pr job skips. Store the App's key there as docs/source/contributing/releasing.rst describes."
+          fi
+
       - name: Mint the release App's token
         id: app
+        if: ${{ steps.key.outputs.set == 'true' }}
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
@@ -237,12 +250,14 @@ jobs:
 
       # The commit `detect` read, with full history for the branch's merge base.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ steps.key.outputs.set == 'true' }}
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           token: ${{ steps.app.outputs.token }}
 
       - name: Download the proposal
+        if: ${{ steps.key.outputs.set == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
@@ -250,6 +265,7 @@ jobs:
           --dir "$RUNNER_TEMP/proposal"
 
       - name: Push the proposal and open or update its pull request
+        if: ${{ steps.key.outputs.set == 'true' }}
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
@@ -257,9 +273,8 @@ jobs:
         run: python3 util/update_python_versions.py publish "$RUNNER_TEMP/proposal"
 
   # #2030: posts `detect`'s report, on `always()` so a run failed by the audit
-  # or the script is posted too. Not after `pr`, which waits on the owner's
-  # approval of `github-release`; the pull request it opens is its own record.
-  # util/discussion_report.py writes a warning rather than failing;
+  # or the script is posted too. Not after `pr`, whose pull request is its own
+  # record. util/discussion_report.py writes a warning rather than failing;
   # `continue-on-error` covers the rest.
   discussion:
     name: Post the Python version report

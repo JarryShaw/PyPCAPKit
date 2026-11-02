@@ -4,7 +4,7 @@
 :file:`.github/workflows/cron-issue-pr-kinds.yml` runs :file:`util/issue_pr_kinds.py`
 every Monday and on dispatch. ``detect`` regenerates
 :file:`tests/project/issue_pr_roles_fixtures/kinds.json` with a read-only token;
-``pr``, behind ``github-release``, commits it on ``bot/issue-pr-kinds`` with the
+``pr``, in ``release-app``, commits it on ``bot/issue-pr-kinds`` with the
 release App's token and opens that branch's pull request. ``main`` is never pushed.
 
 * :class:`TestTheWorkflow` pins the triggers, the permissions, the one secret and
@@ -68,7 +68,7 @@ class FakeRun:
 
 
 class TestTheWorkflow(unittest.TestCase):
-    """Two jobs: ``detect`` with no secret, ``pr`` with the App's token behind ``github-release``."""
+    """``detect`` with no secret, ``pr`` with the App's token from ``release-app``."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -108,9 +108,10 @@ class TestTheWorkflow(unittest.TestCase):
                          'vars': {'RELEASE_APP_CLIENT_ID': client}, 'github': {'ref': ref}}
                 self.assertIs(evaluate_condition(condition, state), expected)
 
-    def test_pr_mints_the_narrow_token_behind_github_release_and_pushes_through_the_script(self) -> None:
+    def test_pr_mints_the_narrow_token_from_release_app_and_pushes_through_the_script(self) -> None:
+        """test_release_app_environment_2648.py pins the key check, the other step reading a secret."""
         job = self.jobs['pr']
-        self.assertEqual(job['environment'], 'github-release')
+        self.assertEqual(job['environment'], 'release-app')
         self.assertEqual(job['needs'], 'detect')
         self.assertEqual(job['permissions'], {'actions': 'read'})
         mint = self.step('pr', "Mint the release App's token")
@@ -121,7 +122,8 @@ class TestTheWorkflow(unittest.TestCase):
             'permission-contents': 'write',
             'permission-pull-requests': 'write',
         })
-        self.assertEqual([step for step in job['steps'] if 'secrets.' in json.dumps(step)], [mint])
+        check = self.step('pr', "Check for the release App's key")
+        self.assertEqual([step for step in job['steps'] if 'secrets.' in json.dumps(step)], [check, mint])
         push = self.step('pr', 'Push the kinds and open or update their pull request')
         self.assertEqual(push['run'].split()[:4], ['python3', 'util/issue_pr_kinds.py', '--publish',
                                                    '"$RUNNER_TEMP/kinds/kinds.json"'])
