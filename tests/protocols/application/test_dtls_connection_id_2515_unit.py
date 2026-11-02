@@ -386,6 +386,9 @@ class QuietRefusalTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        # NOTE: Imported before the sentinels go in, since importing pcapkit
+        # outside development mode installs tbtrim's hook itself.
+        import pcapkit  # pylint: disable=import-outside-toplevel,unused-import
         saved_sys, saved_threading = sys.excepthook, threading.excepthook
 
         def _restore() -> None:
