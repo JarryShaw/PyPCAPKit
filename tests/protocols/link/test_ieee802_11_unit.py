@@ -422,12 +422,11 @@ class TestIEEE802_11(unittest.TestCase):
                 IEEE802_11(**kwargs)
 
     def test_id_index_and_names(self) -> None:
+        from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertEqual(IEEE802_11.id(), ('IEEE802_11',))
-        with self.assertRaises(UnsupportedCall):
-            IEEE802_11.__index__()
+        self.assertIs(IEEE802_11.__index__(), LinkType.IEEE802_11)  # 105 (#2608)
         made = IEEE802_11()
         self.assertEqual((made.name, made.alias), ('IEEE 802.11 Wireless LAN', '802.11'))
         self.assertEqual(made.__length_hint__(), 36)

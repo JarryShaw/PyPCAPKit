@@ -291,6 +291,18 @@ def _linux_sll2(payload: 'bytes') -> 'bytes':
     return bytes(LinuxSLL2(payload=payload))
 
 
+def _wlan_ack() -> 'bytes':
+    """An 802.11 Ack frame, which carries no body."""
+    from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+    return bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+
+
+def _radiotap(payload: 'bytes') -> 'bytes':
+    """A minimal radiotap header carrying ``payload``."""
+    from pcapkit.protocols.link.radiotap import Radiotap
+    return bytes(Radiotap(payload=payload))
+
+
 ###############################################################################
 # Link -- EtherType.
 ###############################################################################
@@ -580,6 +592,10 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
         return _linux_sll(_ip4(6, _tcp(9999))), False
     if code == LinkType.LINUX_SLL2:
         return _linux_sll2(_ip4(6, _tcp(9999))), False
+    if code == LinkType.IEEE802_11:
+        return _wlan_ack(), False
+    if code == LinkType.IEEE802_11_RADIOTAP:
+        return _radiotap(_wlan_ack()), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -811,6 +827,8 @@ PINNED_TARGETS = {
     'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
     'pcap-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
     'pcap-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
+    'pcap-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
+    'pcap-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
 
     # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
     'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
@@ -820,6 +838,8 @@ PINNED_TARGETS = {
     'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
     'pcapng-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
     'pcapng-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
+    'pcapng-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
+    'pcapng-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
 
     # -- Loopback.__proto__ (address family) ------------------------------------
     'loopback/2': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
