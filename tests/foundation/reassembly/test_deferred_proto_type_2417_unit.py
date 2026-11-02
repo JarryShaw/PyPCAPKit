@@ -229,9 +229,10 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """What that type variable is constrained to, each one evaluated.
 
         A constraint is written as a string literal, since
-        :class:`~pcapkit.const.reg.transtype.TransType` and
-        :class:`~pcapkit.const.reg.apptype.tcp.TCP` are both imported
-        under ``TYPE_CHECKING`` and nothing at runtime has either in scope; the
+        :class:`~pcapkit.const.reg.transtype.TransType`,
+        :class:`~pcapkit.const.reg.apptype.tcp.TCP` and
+        :class:`~pcapkit.const.tls.handshake_type.HandshakeType` are imported
+        under ``TYPE_CHECKING`` and nothing at runtime has any in scope; the
         namespace is rebuilt here rather than asking
         :func:`typing.get_type_hints`, which raises :exc:`NameError` on them.
         :class:`~typing.TypeVar` keeps such a constraint as the string itself
@@ -244,10 +245,12 @@ class DeclaredProtoTypeTests(unittest.TestCase):
         """
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.transtype import TransType
+        from pcapkit.const.tls.handshake_type import HandshakeType
 
         return tuple(
             eval(getattr(constraint, '__forward_arg__', constraint),  # pylint: disable=eval-used
-                 {'TransType': TransType, 'AppType_TCP': AppType_TCP})
+                 {'TransType': TransType, 'AppType_TCP': AppType_TCP,
+                  'HandshakeType': HandshakeType})
             for constraint in cls._proto_type_variable().__constraints__
         )
 
@@ -266,6 +269,27 @@ class DeclaredProtoTypeTests(unittest.TestCase):
     def _tcp_proto(self, bufid=TCP_BUFID):
         """The ``proto`` ``TCP.submit`` hands to :class:`Deferred`."""
         return tcp_proto(bufid)
+
+    def _dtls_proto(self):
+        """The ``proto`` DTLS reassembly hands :class:`Deferred` for a complete
+        message (#2531): its ``(msg_type, length, message_seq)``."""
+        from pcapkit.const.tls.handshake_type import HandshakeType
+        from pcapkit.foundation.reassembly.data.dtls import Packet
+        from pcapkit.foundation.reassembly.dtls import DTLS
+
+        reasm = DTLS()
+        reasm(Packet((ip_address('192.0.2.1'), 1234, ip_address('198.51.100.2'), 5684, 0), 1,
+                     HandshakeType.certificate, 5, 7, 0, 5, b'hello', 1000.0))
+        datagram, = reasm.datagram
+        return held(datagram).proto
+
+    def test_dtls_passes_the_handshake_header(self) -> None:
+        """The body decodes by ``msg_type``; ``length`` and ``message_seq`` frame it."""
+        from pcapkit.const.tls.handshake_type import HandshakeType
+
+        msg_type, length, message_seq = self._dtls_proto()
+        self.assertIs(msg_type, HandshakeType.certificate)
+        self.assertEqual((length, message_seq), (5, 7))
 
     def test_ip_passes_the_payload_protocol_type(self) -> None:
         """IP reassembly reads it from the datagram's **Protocol** field."""
@@ -307,14 +331,15 @@ class DeclaredProtoTypeTests(unittest.TestCase):
     def test_declared_type_admits_what_each_reassembler_passes(self) -> None:
         """The regression: the port pair was outside the declared type.
 
-        Each value has to land on *exactly one* constraint, and the two on
-        different ones -- otherwise the type parameter is not distinguishing the
-        two reassemblers and a union would have done.
+        Each value has to land on *exactly one* constraint, and each on a
+        different one -- otherwise the type parameter is not distinguishing the
+        reassemblers and a union would have done.
 
         """
         declared = self._declared_proto_types()
         matched = {}
-        for name, value in (('ip', self._ip_proto()), ('tcp', self._tcp_proto())):
+        values = (('ip', self._ip_proto()), ('tcp', self._tcp_proto()), ('dtls', self._dtls_proto()))
+        for name, value in values:
             with self.subTest(reassembler=name):
                 admitting = [each for each in declared if admits(each, value)]
                 self.assertEqual(len(admitting), 1,
@@ -322,12 +347,11 @@ class DeclaredProtoTypeTests(unittest.TestCase):
                                  f'one of {declared!r}')
                 matched[name] = admitting[0]
         # NOTE: a failing ``subTest`` does not stop the loop, so one of these may
-        # be absent; reading it anyway would raise :exc:`KeyError` over the real
-        # failure the subtest has already reported.
-        if len(matched) == 2:
-            self.assertNotEqual(matched['ip'], matched['tcp'],
-                                f'both reassemblers resolved to {matched["ip"]!r}, so the type '
-                                'parameter distinguishes nothing a union would not')
+        # be absent; comparing anyway would report a collision that is not there.
+        if len(matched) == len(values):
+            self.assertEqual(len(set(matched.values())), len(values),
+                             f'reassemblers share a constraint in {matched!r}, so the type '
+                             'parameter distinguishes nothing a union would not')
 
     def test_the_held_analyser_is_not_called_to_learn_this(self) -> None:
         """``packet`` is still deferred after ``proto`` has been read."""

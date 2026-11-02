@@ -10,7 +10,7 @@ its own placeholder class and nothing else.
 
 :class:`DeferredPacketTests` pins the shared class against a placeholder of its
 own, so it holds whatever either subsystem later does with the mixin.
-:class:`WiringTests` pins the three real models.
+:class:`WiringTests` pins the real models, DTLS reassembly's among them (#2531).
 
 Each test imports what it needs itself, rather than the module importing it at
 the top. On a tree without :mod:`pcapkit.corekit.packet`, every test then fails
@@ -27,10 +27,11 @@ import unittest
 #: The module under test, read as source by the import-layering check.
 MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / 'packet.py'
 
-#: The three models, as ``(module, class, module holding its placeholder)``.
+#: The models, as ``(module, class, module holding its placeholder)``.
 MODELS = (
     ('pcapkit.foundation.reassembly.data.ip', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
     ('pcapkit.foundation.reassembly.data.tcp', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
+    ('pcapkit.foundation.reassembly.data.dtls', 'Datagram', 'pcapkit.foundation.reassembly.data.data'),
     ('pcapkit.foundation.traceflow.data.tcp', 'Index', 'pcapkit.foundation.traceflow.data.data'),
 )
 
@@ -198,7 +199,7 @@ class DeferredPacketTests(unittest.TestCase):
 
 
 class WiringTests(unittest.TestCase):
-    """The three real models share the one class, each with its own placeholder."""
+    """The real models share the one class, each with its own placeholder."""
 
     def test_every_model_shares_the_one_class_mixin_first(self) -> 'None':
         from pcapkit.corekit.packet import DeferredPacket
@@ -231,6 +232,7 @@ class WiringTests(unittest.TestCase):
         from pcapkit.corekit.packet import DeferredPacket
         from pcapkit.foundation.reassembly.data.data import Completion
         from pcapkit.foundation.reassembly.data.data import Deferred as ReassemblyDeferred
+        from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
         from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
         from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
         from pcapkit.foundation.traceflow.data.data import Deferred as TraceFlowDeferred
@@ -249,11 +251,16 @@ class WiringTests(unittest.TestCase):
         def index(packet: 'object') -> 'DeferredPacket':
             return Index(fpout=None, index=(1,), label='label', forward=(1,), reverse=(), packet=packet)
 
+        def message(packet: 'object') -> 'DeferredPacket':
+            return DTLS_Datagram(completed=Completion.COMPLETE, id=None, index=(1,), message_seq=0,
+                                 msg_type=None, length=7, body=b'payload', packet=packet)
+
         cases = (
             ('ip', lambda packet: datagram(IP_Datagram, packet), reassembly, traceflow,
              ('parsed', 'proto', b'payload')),
             ('tcp', lambda packet: datagram(TCP_Datagram, packet), reassembly, traceflow,
              ('parsed', 'proto', b'payload')),
+            ('dtls', message, reassembly, traceflow, ('parsed', 'proto', b'payload')),
             ('trace', index, traceflow, reassembly, ('reassembled',)),
         )
         for (label, build, own, other, expected) in cases:

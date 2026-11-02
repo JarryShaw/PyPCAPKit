@@ -15,13 +15,15 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.apptype import TCP as AppType_TCP
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.const.tls.handshake_type import HandshakeType
     from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
+    from pcapkit.protocols.data.application.dtls import DTLSHandshake
     from pcapkit.protocols.protocol import ProtocolBase
 
 # registry key an analyser dispatches a reassembled payload on; see ``Deferred``
-_KT = TypeVar('_KT', 'TransType', 'tuple[AppType_TCP, AppType_TCP]')
+_KT = TypeVar('_KT', 'TransType', 'tuple[AppType_TCP, AppType_TCP]', 'tuple[HandshakeType, int, int]')
 
 
 class Completion(EnumLookup, StrEnum):
@@ -125,7 +127,7 @@ class Deferred(Generic[_KT]):
     the datagram just reassembled. Nothing about postponing it is specific to any
     one reassembler, which is why this lives beside
     :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in
-    either protocol's data module.
+    any one protocol's data module.
 
     IP reassembly is the case that made it necessary. IPv4 reassembly submits a
     datagram for *every* frame whose **DF** flag is clear -- not only the
@@ -139,7 +141,9 @@ class Deferred(Generic[_KT]):
     TCP reassembly defers its ``packet`` as well
     (:meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>`), at a far
     smaller saving, being FIN/RST-driven rather than per-frame -- 222 submits per
-    :file:`http.pcap` pass against 1117.
+    :file:`http.pcap` pass against 1117. DTLS reassembly defers its own for
+    parity with IP and TCP rather than for a saving, since a handshake message
+    reaches it only once fragmented (:issue:`2531`).
 
     Holding the call here defers it to the first read of
     :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.ip.Datagram.packet>`,
@@ -147,10 +151,10 @@ class Deferred(Generic[_KT]):
     wants the parsed payload still gets exactly the object an eager call would
     produce, and one that does not never pays for it.
 
-    The class is generic because the two reassemblers do *not* dispatch on the
+    The class is generic because the reassemblers do *not* dispatch on the
     same kind of value, and each analyser declares the one it takes. The type
     parameter is that value's type, so an instance's ``proto`` and the parameter
-    its ``analyze`` expects are the same type rather than a union either call
+    its ``analyze`` expects are the same type rather than a union every call
     site would have to widen to:
 
     * :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` builds a
@@ -165,8 +169,15 @@ class Deferred(Generic[_KT]):
       <pcapkit.protocols.transport.transport.Transport.analyze>` overrides that
       parameter to one: a reassembled transport-layer payload carries no
       protocol number, so its application protocol is inferred from the ports.
+    * :meth:`DTLS._datagram_from_fragment
+      <pcapkit.foundation.reassembly.dtls.DTLS._datagram_from_fragment>` builds a
+      ``Deferred[tuple[HandshakeType, int, int]]`` for a complete message. It
+      passes the message's ``(msg_type, length, message_seq)``, its handshake
+      header as if unfragmented (:rfc:`6347#section-4.2.3`), to the decoder
+      :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs, which reads
+      the body by its :class:`~pcapkit.const.tls.handshake_type.HandshakeType`.
 
-    Those are the two cases the type parameter is constrained to. Both are
+    Those are the cases the type parameter is constrained to. IP's and TCP's are
     *named registry values* rather than one named value and one pair of bare
     port numbers: a port is a member of
     :class:`~pcapkit.const.reg.apptype.tcp.TCP` here -- the per-transport
@@ -198,20 +209,28 @@ class Deferred(Generic[_KT]):
     either way.
 
     Args:
-        analyze: The analyser to call, i.e.
+        analyze: The analyser to call:
             :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`
-            bound to the reassembly object's protocol.
+            bound to the reassembly object's protocol for IP and TCP, the
+            handshake decoder for DTLS.
         proto: What the analyser dispatches the payload on -- the payload
-            protocol type for IP, the port pair for TCP, as above.
+            protocol type for IP, the port pair for TCP, the handshake header
+            for DTLS, as above.
         payload: Reassembled payload to parse.
 
     .. versionadded:: 1.5.0
+
+    .. versionchanged:: 1.6.0
+
+       Also constrained to the DTLS handshake header, and the analyser may
+       return a :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`
+       (:issue:`2531`).
 
     """
 
     __slots__ = ('analyze', 'proto', 'payload')
 
-    def __init__(self, analyze: 'Callable[[_KT, bytes], ProtocolBase]',
+    def __init__(self, analyze: 'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]',
                  proto: '_KT', payload: 'bytes') -> 'None':
         # NOTE: the two type-parameterized attributes are annotated on their
         # assignment, as ``_omd_bucket`` in :mod:`pcapkit.corekit.multidict`
@@ -219,11 +238,11 @@ class Deferred(Generic[_KT]):
         # infers each one from this assignment, and it cannot infer a *class*
         # attribute's type from a type variable -- it asks for an annotation
         # instead. ``payload`` needs none: :obj:`bytes` is inferred.
-        self.analyze: 'Callable[[_KT, bytes], ProtocolBase]' = analyze
+        self.analyze: 'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]' = analyze
         self.proto: '_KT' = proto
         self.payload = payload
 
-    def __call__(self) -> 'ProtocolBase':
+    def __call__(self) -> 'ProtocolBase | DTLSHandshake':
         """Run the postponed analysis.
 
         Returns:

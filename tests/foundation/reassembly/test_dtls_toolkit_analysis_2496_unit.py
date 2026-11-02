@@ -148,7 +148,7 @@ class DTLSAnalysisTests(unittest.TestCase):
 
         return Datagram(completed=Completion[completed], id=DatagramID(*FLOW, 0), index=(1, 2),
                         message_seq=4, msg_type=HandshakeType.get(msg_type),
-                        length=len(body) if length is None else length, body=body)
+                        length=len(body) if length is None else length, body=body, packet=None)
 
     def test_a_hello_decodes_as_the_unfragmented_message_does(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
