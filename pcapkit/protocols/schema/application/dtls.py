@@ -65,6 +65,10 @@ class DTLSCiphertext(Schema):
     :class:`DTLS <pcapkit.protocols.schema.application.dtls.DTLS>`'s legacy
     header cannot describe it.
 
+    The record does not carry its connection ID's length
+    (:rfc:`9147#section-4`), so the parser gives it as the ``__cid_length__``
+    key of the packet context; packing takes it from ``cid``.
+
     """
 
     #: Unified-header first octet: fixed prefix, ``C``, ``S``, ``L`` and ``EE``.
@@ -75,6 +79,11 @@ class DTLSCiphertext(Schema):
         'length_present': (5, 1),
         'epoch': (6, 2),
     })
+    #: Connection ID; absent when ``C`` is clear.
+    cid: 'bytes | None' = ConditionalField(
+        BytesField(length=lambda pkt: pkt['__cid_length__']),
+        condition=lambda pkt: bool(pkt['flags']['connection_id']),
+    )
     #: Sequence number, 8 or 16 bits as ``S`` says (header-protected on the wire).
     sequence_number: 'int' = SwitchField(
         selector=lambda pkt: UInt16Field() if pkt['flags']['sequence_long'] else UInt8Field(),
@@ -93,8 +102,17 @@ class DTLSCiphertext(Schema):
     #: buffer. Empty when :attr:`fragment` runs to the end of the buffer.
     payload: 'bytes' = PayloadField()
 
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Give packing the length of :attr:`cid`, which the record does not carry.
+
+        Args:
+            packet: packet data
+
+        """
+        packet['__cid_length__'] = len(packet.get('cid') or b'')
+
     if TYPE_CHECKING:
-        def __init__(self, flags: 'dict[str, int]', sequence_number: 'int', length: 'int | None', fragment: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, flags: 'dict[str, int]', cid: 'bytes | None', sequence_number: 'int', length: 'int | None', fragment: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @schema_final
