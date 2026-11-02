@@ -11,14 +11,20 @@ tests and other unrendered files keep ``#NNN``, which
 
 * :class:`ScannerTests` -- the scanners skip literals, code blocks, comments,
   link targets and URL fragments, and flag the rest.
+* :class:`KindTests` -- a role up to :data:`NEWEST` is flagged when :data:`KINDS`
+  records its number as the other kind or as neither; one above it is skipped.
+* :class:`RefreshScriptTests` -- :file:`util/issue_pr_kinds.py` writes
+  :data:`KINDS_FILE` in the form it is committed in, from ``gh api --paginate``.
 * :class:`RenderedTextTests` -- no ``.rst`` page under :file:`docs/source`, no
   :file:`pcapkit/` docstring and no ``#:`` doc-comment holds a hand-written link
-  to an issue or pull request of this repository, or a bare ``#NNN``.
+  to an issue or pull request of this repository, or a bare ``#NNN``, and every
+  role there names what its number is.
 
 Links to other repositories, to Discussions and to a comment on an issue keep
 their explicit URLs, which a role cannot express; ``GH-NNN`` is a deliberate
 issue form and is not matched. Everything is read as text or parsed with
-:mod:`ast` and :mod:`tokenize`; nothing is imported or built.
+:mod:`ast` and :mod:`tokenize`; :mod:`pcapkit` is not imported, nothing is
+built, and the refresh script's ``gh`` call is mocked.
 
 """
 
@@ -26,11 +32,17 @@ from __future__ import annotations
 
 import ast
 import io
+import json
 import pathlib
 import re
+import subprocess  # nosec B404
+import tempfile
 import tokenize
 import unittest
 from typing import TYPE_CHECKING
+from unittest import mock
+
+from util import issue_pr_kinds
 
 if TYPE_CHECKING:
     from typing import Iterator
@@ -50,6 +62,22 @@ HAND_LINK = re.compile(r'`[^`<]*<https://github\.com/JarryShaw/PyPCAPKit/(?:issu
 #: A bare ``#NNN``. The look-behind leaves out URL fragments (``page#12``),
 #: character references (``&#12;``) and ``##12``.
 BARE_NUMBER = re.compile(r'(?<![\w&#/])#\d+(?![\w-])')
+
+#: An ``:issue:`` or ``:pr:`` role, with or without a caption, and its number.
+ROLE = re.compile(r'(?<![\w`]):(issue|pr):`(?:[^`<]*<)?(\d+)>?`')
+
+#: Each issue and pull request number of this repository's tracker, mapped to the
+#: role it takes, as ``python util/issue_pr_kinds.py`` last wrote them; re-run it
+#: to check a role citing a number above :data:`NEWEST`.
+KINDS_FILE = pathlib.Path(__file__).resolve().with_name('issue_pr_roles_fixtures') / 'kinds.json'
+KINDS = {number: kind for kind, numbers in json.loads(KINDS_FILE.read_text('utf-8')).items()
+         for number in numbers}
+#: The highest number :data:`KINDS` records. A lower one it lacks, such as a
+#: Discussion's, is neither an issue nor a pull request.
+NEWEST = max(KINDS)
+
+#: What each role names, for a failure message.
+KIND_NAMES = {'issue': 'an issue', 'pr': 'a pull request'}
 
 #: An inline literal, which renders verbatim.
 INLINE_LITERAL = re.compile(r'``.+?``', re.DOTALL)
@@ -227,16 +255,49 @@ def scan_python(source: 'str') -> 'Iterator[tuple[int, str]]':
         yield from scan_text(text, line)
 
 
+def scan_roles(text: 'str', first_line: 'int' = 1) -> 'Iterator[tuple[int, str, int]]':
+    """The line, role and number of each ``:issue:`` and ``:pr:`` role in ``text``."""
+    body = INLINE_LITERAL.sub(_blank, '\n'.join(rendered_lines(text)))
+    for match in ROLE.finditer(body):
+        yield first_line + body.count('\n', 0, match.start()), match.group(1), int(match.group(2))
+
+
+def rendered_texts() -> 'Iterator[tuple[str, int, str]]':
+    """The path, first line and text of each ``.rst`` page, docstring and ``#:`` doc-comment."""
+    for path in sorted(DOCS.rglob('*.rst')):
+        yield path.relative_to(ROOT).as_posix(), 1, path.read_text('utf-8')
+    for path in sorted(PACKAGE.rglob('*.py')):
+        name, source = path.relative_to(ROOT).as_posix(), path.read_text('utf-8')
+        for line, text in docstrings(source):
+            yield name, line, text
+        for line, text in doc_comments(source):
+            yield name, line, text
+
+
 def repository_matches() -> 'list[tuple[str, int, str]]':
     """Every match in the rendered text of the repository."""
-    found = []
-    for path in sorted(DOCS.rglob('*.rst')):
-        name = path.relative_to(ROOT).as_posix()
-        found.extend((name, line, text) for line, text in scan_text(path.read_text('utf-8')))
-    for path in sorted(PACKAGE.rglob('*.py')):
-        name = path.relative_to(ROOT).as_posix()
-        found.extend((name, line, text) for line, text in scan_python(path.read_text('utf-8')))
-    return found
+    return [(name, line, text) for name, first, body in rendered_texts()
+            for line, text in scan_text(body, first)]
+
+
+def repository_roles() -> 'list[tuple[str, int, str, int]]':
+    """Every ``:issue:`` and ``:pr:`` role in the rendered text of the repository."""
+    return [(name, line, role, number) for name, first, body in rendered_texts()
+            for line, role, number in scan_roles(body, first)]
+
+
+def wrong_kinds(roles: 'list[tuple[str, int, str, int]]',
+                kinds: 'dict[int, str]') -> 'list[str]':
+    """Each role up to the highest number in ``kinds`` that it records as another kind or lacks.
+
+    A number above that highest is newer than ``kinds`` and is skipped.
+
+    """
+    newest = max(kinds)
+    return [f'{path}:{line}: :{role}:`{number}` '
+            + (f'names {KIND_NAMES[kinds[number]]}' if number in kinds
+               else 'is neither an issue nor a pull request')
+            for path, line, role, number in roles if number <= newest and kinds.get(number) != role]
 
 
 class ScannerTests(unittest.TestCase):
@@ -281,15 +342,78 @@ class ScannerTests(unittest.TestCase):
         found = {(path, text) for path, _, text in repository_matches()}
         self.assertEqual(sorted(ALLOWED - found), [], 'stale ALLOWED entries')
 
+    def test_reads_roles_outside_literals(self) -> None:
+        text = (':issue:`12`, :pr:`34`, :issue:`a caption <56>`, :discussion:`78`,\n'
+                '``:issue:`90``` and::\n\n    :pr:`91`\n\nend :pr:`92`.\n')
+        self.assertEqual(list(scan_roles(text)),
+                         [(1, 'issue', 12), (1, 'pr', 34), (1, 'issue', 56), (6, 'pr', 92)])
+
+
+class KindTests(unittest.TestCase):
+    """A role is checked against the kind its number is recorded as."""
+
+    def test_flags_the_other_kind_and_a_gap_and_skips_a_newer_number(self) -> None:
+        roles = [('a.rst', 1, 'issue', 2), ('a.rst', 2, 'pr', 3), ('a.rst', 3, 'issue', 4),
+                 ('a.rst', 4, 'pr', 5), ('a.rst', 5, 'issue', 7), ('a.rst', 6, 'pr', 8)]
+        self.assertEqual(wrong_kinds(roles, {2: 'pr', 3: 'issue', 4: 'issue', 6: 'pr'}),
+                         ['a.rst:1: :issue:`2` names a pull request',
+                          'a.rst:2: :pr:`3` names an issue',
+                          'a.rst:4: :pr:`5` is neither an issue nor a pull request'])
+
+    def test_kinds_file_records_each_number_once(self) -> None:
+        data = json.loads(KINDS_FILE.read_text('utf-8'))
+        self.assertEqual(sorted(data), sorted(KIND_NAMES))
+        for kind, numbers in data.items():
+            with self.subTest(kind=kind):
+                self.assertEqual(numbers, sorted(set(numbers)))
+        self.assertEqual(set(data['issue']) & set(data['pr']), set())
+
+
+class RefreshScriptTests(unittest.TestCase):
+    """:file:`util/issue_pr_kinds.py` writes :data:`KINDS_FILE` from the tracker."""
+
+    def test_render_writes_the_committed_form(self) -> None:
+        self.assertEqual(issue_pr_kinds.render(KINDS), KINDS_FILE.read_text('utf-8'))
+        self.assertEqual(issue_pr_kinds.OUTPUT, KINDS_FILE)
+
+    def test_fetch_reads_every_page(self) -> None:
+        done = subprocess.CompletedProcess([], 0, stdout='2\tissue\n3\tpr\n', stderr='')
+        with mock.patch.object(issue_pr_kinds.subprocess, 'run', return_value=done) as run:
+            self.assertEqual(issue_pr_kinds.fetch('o/r'), {2: 'issue', 3: 'pr'})
+        command = run.call_args.args[0]
+        self.assertEqual(command[:3], ['gh', 'api', '--paginate'])
+        self.assertIn('repos/o/r/issues?state=all&per_page=100', command)
+
+    def test_fetch_fails_on_an_error_or_an_empty_tracker(self) -> None:
+        for done in (subprocess.CompletedProcess([], 1, stdout='', stderr='HTTP 401'),
+                     subprocess.CompletedProcess([], 0, stdout='', stderr='')):
+            with self.subTest(returncode=done.returncode), \
+                    mock.patch.object(issue_pr_kinds.subprocess, 'run', return_value=done), \
+                    self.assertRaises(RuntimeError):
+                issue_pr_kinds.fetch('o/r')
+
+    def test_main_writes_the_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = pathlib.Path(tmp, 'kinds.json')
+            with mock.patch.object(issue_pr_kinds, 'fetch', return_value={3: 'pr', 2: 'issue'}), \
+                    mock.patch('sys.stdout', new_callable=io.StringIO):
+                self.assertEqual(issue_pr_kinds.main(['--output', str(output)]), 0)
+            self.assertEqual(json.loads(output.read_text('utf-8')), {'issue': [2], 'pr': [3]})
+
 
 class RenderedTextTests(unittest.TestCase):
-    """No rendered text cites an issue or pull request without a role."""
+    """No rendered text cites an issue or pull request without a role of its kind."""
 
     def test_rendered_text_uses_roles(self) -> None:
         offending = [f'{path}:{line}: {text}' for path, line, text in repository_matches()
                      if (path, text) not in ALLOWED]
         self.assertEqual(offending, [], 'cite issues as :issue:`NNN` and pull requests as '
                                         ':pr:`NNN` in .rst pages, docstrings and #: doc-comments')
+
+    def test_roles_name_what_the_number_is(self) -> None:
+        self.assertEqual(wrong_kinds(repository_roles(), KINDS), [],
+                         f'use the role of what the number is, recording an unlisted one in '
+                         f'{KINDS_FILE.relative_to(ROOT).as_posix()}')
 
 
 if __name__ == '__main__':

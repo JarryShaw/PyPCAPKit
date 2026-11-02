@@ -4,9 +4,9 @@ Customisation & Extensions
 :mod:`pcapkit` is built for customisation: new protocols, layers, fields and
 even new file formats can all be added from outside the library.
 
-------------------------
-What's in for Protocols?
-------------------------
+---------------------
+Customising Protocols
+---------------------
 
 :class:`~pcapkit.protocols.protocol.Protocol` is the most essential concept
 and class in :mod:`pcapkit`: the user-facing abstract base class for a

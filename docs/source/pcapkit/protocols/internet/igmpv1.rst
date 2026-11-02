@@ -1,4 +1,4 @@
-IGMPv1 - Internet Group Management Protocol version 1
+IGMPv1 - Internet Group Management Protocol Version 1
 =============================================================
 
 .. module:: pcapkit.protocols.internet.igmpv1

@@ -7,8 +7,9 @@ Const-Vendor Pairing
 under** :mod:`pcapkit.vendor`, with no exception. A registry copied from an IANA,
 IETF or similar web-published table is never hand-maintained -- the crawler
 re-scrapes the source and regenerates the module, so a hand edit to the generated
-file is silently discarded on the next run. :issue:`2441`, raised in cross-review
-and knowingly deferred rather than fixed.
+file is silently discarded on the next run. Raised in cross-review of :pr:`2441`,
+which deferred the TLS crawlers; ruled on :issue:`2495`, where the owner allowed no
+exception and pointed a hand-maintained registry at the ``DATA`` attribute below.
 
 The ``DATA`` Attribute, for a Registry With No Web Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +45,8 @@ other generated module does.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`~pcapkit.const.tls.content_type.ContentType` and
-:class:`~pcapkit.const.tls.handshake_type.HandshakeType` (:pr:`2441`) now have
-matching crawlers -- :mod:`pcapkit.vendor.tls.content_type` and
+:class:`~pcapkit.const.tls.handshake_type.HandshakeType`, which came with the TLS
+record layer, have matching crawlers -- :mod:`pcapkit.vendor.tls.content_type` and
 :mod:`pcapkit.vendor.tls.handshake_type`, exported as ``TLS_ContentType`` and
 ``TLS_HandshakeType`` -- closing the gap :issue:`2495` tracked. Both take the
 normal ``LINK``-and-scrape shape against IANA's ``tls-parameters-5.csv`` and
@@ -56,9 +57,9 @@ ARPHRD, TLS's source is a live, web-published table, so neither reads a
 Running either crawler is a true no-op against the committed ``const``
 modules: regenerating both reproduces the tree byte-for-byte, the same
 guarantee ARPHRD and the ``sslv2`` restack carry. Getting there meant
-regenerating the ``const`` modules committed alongside :pr:`2441`, which
-predated the crawler and had drifted from it in three ways, caught in
-cross-review of :pr:`2503`:
+regenerating the ``const`` modules committed with the TLS record layer, which
+predated the crawler and had drifted from it in the ways cross-review of
+:pr:`2503` (:issue:`2495`) caught:
 
 * the committed ``ContentType`` resolved values 32-63 to ``Unassigned`` via a
   flat ``_missing_`` fallback, while IANA's registry -- and the crawler --

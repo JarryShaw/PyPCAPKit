@@ -1,4 +1,4 @@
-L2TPv2 - Layer Two Tunnelling Protocol version 2
+L2TPv2 - Layer Two Tunnelling Protocol Version 2
 ================================================
 
 .. module:: pcapkit.protocols.link.l2tpv2

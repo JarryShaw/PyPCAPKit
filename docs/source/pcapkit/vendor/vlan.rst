@@ -13,7 +13,7 @@ vendor crawlers include:
    * - :const:`VLAN_PriorityLevel <pcapkit.vendor.vlan.priority_level.PriorityLevel>`
      - Priority Levels [*]_
 
-Priority levels defined in IEEE 802.1p
+Priority Levels Defined in IEEE 802.1p
 ======================================
 
 .. module:: pcapkit.vendor.vlan.priority_level

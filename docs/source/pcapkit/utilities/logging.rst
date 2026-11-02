@@ -42,8 +42,8 @@ Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``, ``pca
 
 .. autodata:: pcapkit.utilities.logging.ROOT_LOGGER_NAME
 
-What ``DEBUG`` Will Tell You
-============================
+``DEBUG`` Logging
+=================
 
 At :data:`logging.DEBUG` the library reports what it did with a file: which
 input was opened, which engine was requested and which was actually used

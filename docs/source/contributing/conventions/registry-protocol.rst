@@ -162,7 +162,7 @@ Which branch a key takes, and what each miss ends in:
 
    flowchart TD
        GET["get(key, default)"] -->|"isinstance(key, str)"| NAME["\_member\_map\_ lookup"]
-       GET -->|"otherwise"| VALUE["_validate_value(key)<br/>then cls(key)"]
+       GET -->|"otherwise"| VALUE["\_validate\_value(key)<br/>then cls(key)"]
        NAME -->|"miss, no usable default"| KEYERR["EnumKeyError<br/>quiet, derives KeyError"]
        NAME -->|"hit,<br/>or miss, key is a registered value,<br/>or miss, default is a registered value"| OK["canonical member"]
        VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value"| OK

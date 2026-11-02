@@ -343,6 +343,16 @@ Format and Mechanics
    :file:`tests/project/test_docs_issue_pr_roles_1103_unit.py` fails on a bare number
    or a hand-written link in rendered text, and
    :file:`tests/project/test_issue_refs_in_comments.py` on a role in a plain comment.
+   The first also fails on a role of the wrong kind, reading each number's kind from
+   :file:`tests/project/issue_pr_roles_fixtures/kinds.json`, which
+   ``python util/issue_pr_kinds.py`` regenerates from the tracker, and which the
+   scheduled Issue and PR Kinds workflow proposes a refresh of
+   (:doc:`/contributing/workflows`).
+   It skips a number above the file's highest until a refresh, and fails on a lower
+   one the file lacks, such as a Discussion's. Its ``ALLOWED`` set exempts the
+   hand-written links and the bare ``#1962`` on :doc:`/contributing/workflows`, which
+   other tests pin in that form, so converting one means changing its pin in the same
+   commit.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
    worked example: every one is defined in :mod:`pcapkit.corekit.sentinels`, and
