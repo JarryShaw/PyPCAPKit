@@ -5,9 +5,9 @@
 .. module:: pcapkit.corekit.checksum.internet
 
 :mod:`pcapkit.corekit.checksum.internet` contains the one's-complement
-Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, ICMP, ICMPv6
-and OSPF: :class:`ChecksumStatus`, the outcome a parse records, and the
-functions that compute and verify the checksum. It imports nothing from
+Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP, ICMP, ICMPv6,
+IGMP, GRE and OSPF: :class:`ChecksumStatus`, the outcome a parse records, and
+the functions that compute and verify the checksum. It imports nothing from
 :mod:`pcapkit.protocols`, which builds on it (:issue:`2580`).
 
 Verification is opt-in and computation opt-out, by
@@ -17,20 +17,21 @@ mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
 which a filter can silence alone (:issue:`2470`).
 
 A checksum over the IP pseudo-header is left to the enclosing IP layer, see
-:mod:`pcapkit.protocols.misc.checksum.ip_pseudo`. A checksum over the upper
-layer alone, as ICMP's, is verified as it is parsed, unless the IP layer it is
-parsed from is a fragment, see :func:`fragment_payload`.
+:mod:`pcapkit.protocols.misc.checksum.ip_pseudo`. A checksum over the message
+alone, as ICMP's, IGMP's and GRE's, is verified as it is parsed, unless the IP
+layer it is parsed from is a fragment, see :func:`verify_message`.
 
 .. versionadded:: 1.6.0
 
 """
 import contextlib
+import contextvars
 import enum
 import struct
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.utilities.contextvars import in_fragment, rebuilding
+from pcapkit.utilities.contextvars import rebuilding
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ChecksumWarning, warn
 
@@ -40,8 +41,14 @@ if TYPE_CHECKING:
 __all__ = [
     'ChecksumStatus',
     'internet_checksum', 'compute_checksum', 'partial_checksum', 'verify_checksum',
-    'fragment_payload',
+    'verify_message', 'fragment_payload',
 ]
+
+#: contextvars.ContextVar[bool]: Whether the layer being parsed is the payload
+#: of an IP fragment, as :func:`fragment_payload` sets it and
+#: :func:`verify_message` reads it. Only this module uses it, so it stays here
+#: (:issue:`2616`).
+_in_fragment = contextvars.ContextVar('pcapkit.corekit.checksum.internet._in_fragment', default=False)
 
 
 class ChecksumStatus(EnumLookup, enum.IntEnum):
@@ -187,21 +194,52 @@ def verify_checksum(alias: 'str', data: 'bytes', field: 'bytes', *, length: 'Opt
     return ChecksumStatus.INVALID
 
 
+def verify_message(alias: 'str', data: 'bytes', field: 'bytes', *,
+                   length: 'Optional[int]' = None) -> 'ChecksumStatus':
+    """Verify the checksum ``field`` of a message that covers itself alone.
+
+    ICMP's (:rfc:`792`), IGMP's (:rfc:`2236#section-2.3`,
+    :rfc:`3376#section-4.1.2`) and GRE's (:rfc:`2784#section-2.5`) checksums
+    cover the octets of their own message, with no pseudo-header, so they are
+    verified as the message is parsed, unless an IP fragment carries it; see
+    :func:`fragment_payload`.
+
+    Args:
+        alias: Protocol alias, to name in the warning.
+        data: Octets the checksum covers, the checksum field included.
+        field: The checksum field, as on the wire.
+        length: Octets the checksum covers, as the headers declare it; the
+            length of ``data`` by default.
+
+    Returns:
+        :attr:`~ChecksumStatus.NO_PSEUDO_HEADER` for the payload of an IP
+        fragment, otherwise as :func:`verify_checksum`.
+
+    Warns:
+        ChecksumWarning: As :func:`verify_checksum` does.
+
+    """
+    if _in_fragment.get():
+        return ChecksumStatus.NO_PSEUDO_HEADER
+    return verify_checksum(alias, data, field, length=length)
+
+
 @contextlib.contextmanager
 def fragment_payload(fragment: 'bool') -> 'Iterator[None]':
     """Mark the payload an IP layer parses as a fragment's, or not.
 
-    A checksum over the upper layer alone, as ICMP's (:rfc:`792`), covers all
-    of the datagram's data, which a fragment carries part of, so the upper
-    layer of one records :attr:`~ChecksumStatus.NO_PSEUDO_HEADER` rather than
-    being verified (:issue:`2470`). The nearest enclosing IP layer decides.
+    A checksum over the message alone, as ICMP's (:rfc:`792`), covers all
+    of the datagram's data, which a fragment carries part of, so
+    :func:`verify_message` records :attr:`~ChecksumStatus.NO_PSEUDO_HEADER` for
+    the upper layer of one rather than verifying it (:issue:`2470`). The
+    nearest enclosing IP layer decides.
 
     Args:
         fragment: Whether the IP layer is a fragment; an atomic one is not.
 
     """
-    token = in_fragment.set(fragment)
+    token = _in_fragment.set(fragment)
     try:
         yield
     finally:
-        in_fragment.reset(token)
+        _in_fragment.reset(token)

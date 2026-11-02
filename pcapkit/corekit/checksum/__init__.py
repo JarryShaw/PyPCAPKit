@@ -14,10 +14,11 @@ one's-complement Internet checksum (:rfc:`1071`).
 
 """
 from pcapkit.corekit.checksum.internet import (ChecksumStatus, compute_checksum, fragment_payload,
-                                               internet_checksum, partial_checksum, verify_checksum)
+                                               internet_checksum, partial_checksum, verify_checksum,
+                                               verify_message)
 
 __all__ = [
     'ChecksumStatus',
     'internet_checksum', 'compute_checksum', 'partial_checksum', 'verify_checksum',
-    'fragment_payload',
+    'verify_message', 'fragment_payload',
 ]

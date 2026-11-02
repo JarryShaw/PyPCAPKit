@@ -15,7 +15,7 @@ a module at any layer may import it; see :ref:`utilities-or-corekit`.
 """
 import contextvars
 
-__all__ = ['beholding', 'frame_depth', 'in_fragment', 'rebuilding']
+__all__ = ['beholding', 'frame_depth', 'rebuilding']
 
 #: contextvars.ContextVar[bool]: Whether a layer that raises is discarded by its
 #: caller, as :func:`~pcapkit.corekit.decorators.beholder` replaces it and
@@ -30,10 +30,6 @@ beholding = contextvars.ContextVar('pcapkit.utilities.contextvars.beholding', de
 #: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` parses; see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 frame_depth = contextvars.ContextVar('pcapkit.utilities.contextvars.frame_depth', default=0)
-
-#: contextvars.ContextVar[bool]: Whether the layer being parsed is the payload
-#: of an IP fragment, see :func:`~pcapkit.corekit.checksum.internet.fragment_payload`.
-in_fragment = contextvars.ContextVar('pcapkit.utilities.contextvars.in_fragment', default=False)
 
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
 #: :meth:`Protocol._make_payload

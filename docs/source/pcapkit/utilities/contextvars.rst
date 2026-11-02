@@ -17,8 +17,5 @@ a module at any layer may import it; see :ref:`utilities-or-corekit`.
 .. autodata:: pcapkit.utilities.contextvars.frame_depth
    :no-value:
 
-.. autodata:: pcapkit.utilities.contextvars.in_fragment
-   :no-value:
-
 .. autodata:: pcapkit.utilities.contextvars.rebuilding
    :no-value:

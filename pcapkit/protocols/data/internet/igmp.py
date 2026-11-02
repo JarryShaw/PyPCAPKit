@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.igmp.type import Type as Enum_Type
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = ['IGMP']
 
@@ -50,5 +51,9 @@ class IGMP(Protocol):
     group: 'IPv4Address'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`checksum`, present only when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
+        checksum_status: 'ChecksumStatus'
+
         def __init__(self, version: 'Literal[1, 2]', type: 'Enum_Type', max_resp_time: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
                      checksum: 'bytes', group: 'IPv4Address') -> 'None': ...

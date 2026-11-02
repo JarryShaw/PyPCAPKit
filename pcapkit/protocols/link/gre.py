@@ -53,7 +53,11 @@ Scope
 Only the framing above is dissected. The Key and Sequence Number fields are
 recorded but not interpreted further -- their meaning (which traffic flow, and
 where in its sequence) is a matter for the tunnel endpoints, not something a
-passive dissector can resolve from the header alone. RFC 2637's Enhanced GRE
+passive dissector can resolve from the header alone. The Checksum, when ``C``
+is set, covers the header and the payload with no pseudo-header
+(:rfc:`2784#section-2.5`); :meth:`~pcapkit.protocols.link.gre.GRE.read`
+verifies it and :meth:`~pcapkit.protocols.link.gre.GRE.make` computes it
+(:issue:`2618`). RFC 2637's Enhanced GRE
 (version 1, used by PPTP) has a different, incompatible layout from this point
 on -- a Key field split into Payload Length and Call ID, and an optional
 Acknowledgment Number -- and is out of scope; :meth:`read` refuses it rather
@@ -69,6 +73,7 @@ from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.data.link.gre import GRE as Data_GRE
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.gre import GRE as Schema_GRE
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -94,6 +99,14 @@ class GRE(Link[Data_GRE, Schema_GRE],
     ``type`` field -- so, unlike
     :class:`~pcapkit.protocols.link.frad.FRAD`, this class declares no
     registry of its own.
+
+    The checksum, present when ``C`` is set, is verified on read under
+    :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, and computed by
+    :meth:`make` when ``checksum_present`` asks for one without giving it.
+    Neither this header nor the Linux cooked-capture header before it states
+    a length, so the octets verified are the ones captured: a frame the
+    capture cut short reads as
+    :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`.
 
     """
 
@@ -195,11 +208,25 @@ class GRE(Link[Data_GRE, Schema_GRE],
             sequence_number=_sequence_number,
             len=_hdr_len,
         )
+
+        # NOTE: The checksum covers the header and the payload, with no
+        # pseudo-header (RFC 2784 section 2.5); with C clear there is none.
+        if config.CHECKSUM_VERIFY:
+            from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
+                ChecksumStatus, verify_message)
+            if _checksum is None:
+                status = ChecksumStatus.NOT_COMPUTED
+            else:
+                status = verify_message(self.alias, self._data, _checksum.to_bytes(2, 'big'), length=length)
+            gre.__update__([
+                ('checksum_status', status),
+            ])
         return self._decode_next_layer(gre, schema.protocol_type, length - _hdr_len)
 
     def make(self,
              checksum: 'Optional[int]' = None,
              reserved1: 'Optional[int]' = None,
+             checksum_present: 'Optional[bool]' = None,
              key: 'Optional[int]' = None,
              sequence_number: 'Optional[int]' = None,
              reserved: 'int' = 0,
@@ -216,13 +243,22 @@ class GRE(Link[Data_GRE, Schema_GRE],
         value is given, as :meth:`L2TPv2.make
         <pcapkit.protocols.link.l2tpv2.L2TPv2.make>` infers ``S`` from
         whether ``ns``/``nr`` are given: passing ``checksum`` sets ``C``,
-        ``key`` sets ``K``, and ``sequence_number`` sets ``S``.
+        ``key`` sets ``K``, and ``sequence_number`` sets ``S``. ``C`` can be
+        set without a ``checksum`` too, through ``checksum_present``, as
+        L2TPv2's ``length_flag`` sets ``L`` without a length.
 
         Args:
-            checksum: Checksum; setting this also sets ``C``.
+            checksum: Checksum; setting this also sets ``C``. If :data:`None`
+                with ``C`` set, computed over the header and ``payload``
+                (:rfc:`2784#section-2.5`) when
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, zero
+                when it is off.
             reserved1: Reserved1; only meaningful, and only accepted, when
-                ``checksum`` is also given. Defaults to ``0`` when
-                ``checksum`` is given and this is not.
+                ``C`` is set. Defaults to ``0`` when ``C`` is set and this is
+                not.
+            checksum_present: Whether ``C`` is set, and the Checksum and
+                Reserved1 fields present. When :data:`None`, ``C`` is set if
+                ``checksum`` is given.
             key: Key, :rfc:`2890`; setting this also sets ``K``.
             sequence_number: Sequence Number, :rfc:`2890`; setting this also
                 sets ``S``.
@@ -241,8 +277,8 @@ class GRE(Link[Data_GRE, Schema_GRE],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``reserved1`` is given without ``checksum``; if
-                ``reserved`` sets a bit outside ``0x4FF8``; if ``version``
+            ProtocolError: If ``checksum`` or ``reserved1`` is given with ``C``
+                clear; if ``reserved`` sets a bit outside ``0x4FF8``; if ``version``
                 does not fit in 3 bits; or if ``checksum``, ``key`` or
                 ``sequence_number`` is given but does not fit the width of
                 its field (16 bits for ``checksum``, 32 bits for ``key`` and
@@ -253,11 +289,15 @@ class GRE(Link[Data_GRE, Schema_GRE],
                                           namespace=protocol_type_namespace,
                                           reversed=protocol_type_reversed, pack=False)
 
-        checksum_present = checksum is not None
+        if checksum_present is None:
+            checksum_present = checksum is not None
+        elif not checksum_present and checksum is not None:
+            raise ProtocolError(f'{self.alias}: checksum given with checksum_present=False')
         if reserved1 is not None and not checksum_present:
             raise ProtocolError(f'{self.alias}: reserved1 given without checksum')
         if checksum_present:
-            checksum = self._make_uint(checksum, bits=16, name='checksum')
+            if checksum is not None:
+                checksum = self._make_uint(checksum, bits=16, name='checksum')
             if reserved1 is None:
                 reserved1 = 0
             else:
@@ -275,7 +315,7 @@ class GRE(Link[Data_GRE, Schema_GRE],
             raise ProtocolError(f'{self.alias}: reserved bits outside 0x4FF8: {reserved:#06x}')
         self._make_uint(version, bits=3, name='version')
 
-        return Schema_GRE(
+        schema = Schema_GRE(
             flags={
                 'checksum_present': checksum_present,
                 'reserved_1': (reserved >> 14) & 0b1,
@@ -285,12 +325,17 @@ class GRE(Link[Data_GRE, Schema_GRE],
                 'version': version,
             },
             protocol_type=protocol_type_,  # type: ignore[arg-type]
-            checksum=checksum,
+            checksum=0 if checksum_present and checksum is None else checksum,
             reserved1=reserved1,
             key=key,
             sequence_number=sequence_number,
             payload=payload,
         )
+
+        if checksum_present and checksum is None and config.CHECKSUM_COMPUTE:
+            from pcapkit.corekit.checksum.internet import internet_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            schema.checksum = internet_checksum(schema.pack())
+        return schema
 
     ##########################################################################
     # Data models.

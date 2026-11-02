@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
     from pcapkit.const.reg.ethertype import EtherType
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = ['GRE']
 
@@ -50,6 +51,12 @@ class GRE(Protocol):
     len: 'int'
 
     if TYPE_CHECKING:
+        #: Outcome of verifying :attr:`checksum`, present only when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on;
+        #: :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`
+        #: when :attr:`checksum_present` is clear.
+        checksum_status: 'ChecksumStatus'
+
         def __init__(self, checksum_present: 'bool', key_present: 'bool',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
                      sequence_present: 'bool', reserved: 'int', version: 'int',  # pylint: disable=unused-argument
                      protocol_type: 'EtherType', checksum: 'Optional[int]',  # pylint: disable=unused-argument

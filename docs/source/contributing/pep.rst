@@ -852,16 +852,16 @@ These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.transport.udp.UDP` — and SCTP was the first to
 check whether the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
-IPv4, OSPF, TCP, UDP and DCCP check it too, as do ICMP and ICMPv6, as the
-one's-complement half below describes. For GRE, HIP, HOPOPT, IGMP, IPv6-Opts, IPX
-and MH the field is recorded and never questioned, so a corrupted capture parses
-as cleanly as an intact one; verifying GRE's and IGMP's is :issue:`2618`.
+IPv4, OSPF, TCP, UDP and DCCP check it too, as do ICMP, ICMPv6, IGMP and GRE, as
+the one's-complement half below describes. For HIP, HOPOPT, IPv6-Opts, IPX and MH
+the field is recorded and never questioned, so a corrupted capture parses as
+cleanly as an intact one.
 
 **These are different problems and they want separating**, because only one
 of them is cryptographic and the distinction decides what is actually hard.
 
 **The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
-DCCP, ICMP/ICMPv6 and OSPF, needs no cryptography at all — it is sixteen-bit addition
+DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography at all — it is sixteen-bit addition
 with end-around carry, and implementing it is an afternoon. What blocks it is the
 **IP pseudo-header**: the TCP, UDP, DCCP and ICMPv6 checksums are computed over source
 and destination addresses, the protocol number and the payload length, all of
@@ -922,8 +922,9 @@ from *wrong*, or it will cry wolf on the commonest capture there is —
 :class:`~pcapkit.protocols.internet.esp.ESPStatus`'s ``NO_SA`` member is the
 model for how to spell "expected, not an error".
 
-**The one's-complement half is done** (:issue:`2470`, :issue:`2472` to
-:issue:`2475`), on :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
+**The one's-complement half is done** for every protocol named above
+(:issue:`2470`, :issue:`2472` to :issue:`2475`, :issue:`2489`, :issue:`2618`), on
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
 (:issue:`2471`) and :mod:`pcapkit.corekit.checksum.internet`, settled as
 below: the toggles by the owner on :issue:`2471`, the rest at implementation,
 as the offload question above asked; the owner accepted the toggles and the
@@ -948,11 +949,21 @@ offload heuristic on :issue:`2470`.
   mandatory (:rfc:`8200#section-8.1`).
 * **A fragment is**
   :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER`,
-  atomic ones aside: TCP, UDP, ICMP and ICMPv6 checksums cover all of the
+  atomic ones aside: TCP, UDP, ICMP, ICMPv6 and IGMP checksums cover all of the
   datagram's data, which it carries part of. OSPF's Packet Length says what its
   checksum covers, so it is verified when the fragment holds that much, and
   :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
   otherwise.
+* **IGMP covers the whole IP payload in every version, and GRE its header and
+  payload only when** ``C`` **is set** (:rfc:`2236#section-2.5`,
+  :rfc:`3376#section-4.1.2`, :rfc:`2784#section-2.5`). The IGMPv1 rule follows
+  :rfc:`2236`, which updates :rfc:`1112`'s 8-octet one. A GRE header with ``C``
+  clear is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`,
+  and ``make()`` computes one when ``checksum_present`` asks without giving it.
+  Neither GRE nor the Linux cooked-capture header carries a length, so a GRE frame
+  the capture cut short is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`. Settled at
+  implementation (:issue:`2618`).
 * **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
   a pseudo-header that carries the whole packet's length, as TCP's does, so a
   fragment is
@@ -1361,7 +1372,8 @@ and its signature parameters could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
 one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is **done**
-(:issue:`2470`, :issue:`2472` to :issue:`2475`), and DCCP's with it (:issue:`2489`).
+(:issue:`2470`, :issue:`2472` to :issue:`2475`), and DCCP's with it (:issue:`2489`),
+as are IGMP's and GRE's (:issue:`2618`).
 
 **IP pseudo-header — done** (:issue:`2471`).
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` is the
