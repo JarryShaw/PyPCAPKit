@@ -310,7 +310,12 @@ __all__ = [
 
     # Transport Layer Security
     'TLS',
-    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_Extension',
+    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_EncryptedExtensions',
+    'TLS_Extension', 'TLS_ExtensionData',
+    'TLS_ServerName', 'TLS_ServerNameList', 'TLS_NamedGroupList', 'TLS_SignatureSchemeList',
+    'TLS_ProtocolNameList', 'TLS_SupportedVersionsClientHello', 'TLS_SupportedVersionsServerHello',
+    'TLS_KeyShareEntry', 'TLS_KeyShareClientHello', 'TLS_KeyShareHelloRetryRequest',
+    'TLS_KeyShareServerHello',
     'TLS_Alert', 'TLS_ChangeCipherSpec',
 
     # No Payload

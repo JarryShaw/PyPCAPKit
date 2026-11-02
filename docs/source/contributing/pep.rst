@@ -238,8 +238,12 @@ DTLS's own divergence (the epoch/sequence-number pair in its record header,
 and the fragment header each handshake message carries) staying in
 :class:`~pcapkit.protocols.application.dtls.DTLS` alone. ``ClientHello`` and
 ``ServerHello`` decode down to their cipher suite(s), compression method(s)
-and extension list (TYPE+LENGTH framed, extension bodies undecoded); every
-other handshake message is message-TYPE-level framing only. Decryption is a
+and extension list, and ``EncryptedExtensions`` down to its extension list. An
+extension body decodes where
+:attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.SSL.__extension__>`
+registers a decoder for its type, and stays raw octets where none is
+registered or the decoder rejects it (:issue:`2514`). Every other handshake
+message is message-TYPE-level framing only. Decryption is a
 separate question and is not needed to make the record structure legible, in
 the same way :class:`ESP <pcapkit.protocols.internet.esp.ESP>` parses
 without keys.
@@ -1167,8 +1171,9 @@ group-record list, each a shape of its own.
 
 **Done within wave 2 — TLS/SSL with DTLS.** The `DTLS`_ section above lists
 what is decoded: the shared :class:`~pcapkit.protocols.application.ssl.SSL`
-base, TLS, DTLS, handshake message framing, and handshake-fragment
-reassembly (:issue:`2440`).
+base, TLS, DTLS, handshake message framing, the hello and
+``EncryptedExtensions`` extension lists with their registered extension bodies
+(:issue:`2514`), and handshake-fragment reassembly (:issue:`2440`).
 
 **Done ahead of wave 2 — handlers for the** ``DLT_NULL``, ``DLT_RAW``,
 ``DLT_LINUX_SLL`` **and** ``DLT_LINUX_SLL2`` **link types.** Each is a

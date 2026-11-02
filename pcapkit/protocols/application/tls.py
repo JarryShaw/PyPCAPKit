@@ -25,7 +25,10 @@ Decoded Fields
   decides which are):
 
   * ``ClientHello``/``ServerHello`` down to their cipher suites, compression
-    methods and extensions (type and length only).
+    methods and extensions, and ``EncryptedExtensions`` down to its
+    extensions; an extension's body decodes where
+    :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.SSL.__extension__>`
+    registers a decoder for its type.
   * Every other handshake message at type and length only.
   * ``Alert`` and ``ChangeCipherSpec`` in full.
 

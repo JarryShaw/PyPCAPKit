@@ -26,9 +26,9 @@ version and the length, and DTLS adds a fragment header to each handshake
 message. Each record header is declared in its subclass's own schema, and
 :class:`~pcapkit.protocols.application.dtls.DTLS` reads the epoch and sequence
 number. This base class carries the logic the two share -- content-type
-dispatch, handshake-message decoding (including the DTLS fragment header), and
-the record-level validation that keeps dispatch from accepting bytes that
-cannot be a genuine record.
+dispatch, handshake-message decoding (including the DTLS fragment header), the
+extension registry, and the record-level validation that keeps dispatch from
+accepting bytes that cannot be a genuine record.
 
 .. versionadded:: 1.6.0
 
@@ -41,6 +41,23 @@ cannot be a genuine record.
    :show-inheritance:
 
    .. automethod:: id
+   .. automethod:: register_extension
+
+   .. automethod:: _read_ext_unknown
+   .. automethod:: _read_ext_server_name
+   .. automethod:: _read_ext_supported_groups
+   .. automethod:: _read_ext_signature_algorithms
+   .. automethod:: _read_ext_alpn
+   .. automethod:: _read_ext_supported_versions
+   .. automethod:: _read_ext_key_share
+
+   .. automethod:: _make_ext_unknown
+   .. automethod:: _make_ext_server_name
+   .. automethod:: _make_ext_supported_groups
+   .. automethod:: _make_ext_signature_algorithms
+   .. automethod:: _make_ext_alpn
+   .. automethod:: _make_ext_supported_versions
+   .. automethod:: _make_ext_key_share
 
    .. automethod:: _validate_tls_record
 
@@ -58,8 +75,14 @@ cannot be a genuine record.
    .. automethod:: _read_tls_server_hello
    .. automethod:: _make_tls_server_hello
 
+   .. automethod:: _read_tls_encrypted_extensions
+   .. automethod:: _make_tls_encrypted_extensions
+
    .. automethod:: _read_tls_extensions
    .. automethod:: _make_tls_extensions
+
+   .. autoattribute:: __extension__
+      :no-value:
 
 Data Models
 -----------
@@ -78,7 +101,59 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.application.tls.EncryptedExtensions
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.application.tls.Extension
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.ExtensionData
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.ServerNameList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.ServerName
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.NamedGroupList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.SignatureSchemeList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.ProtocolNameList
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.SupportedVersionsClientHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.SupportedVersionsServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareClientHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareHelloRetryRequest
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareServerHello
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareEntry
    :members:
    :show-inheritance:
 

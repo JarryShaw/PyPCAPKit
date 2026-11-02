@@ -100,7 +100,7 @@ __all__ = [
     # TCP
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # TLS/DTLS
-    'TLS_ContentType', 'TLS_HandshakeType',
+    'TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

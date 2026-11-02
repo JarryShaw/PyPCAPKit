@@ -45,8 +45,9 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
     for the rest of the packet undissected and resolves to
     :class:`~pcapkit.protocols.misc.raw.Raw` -- trailing bytes are not a further
     protocol layer, unless the subclass dissects them, as
-    :class:`~pcapkit.protocols.application.tls.TLS` and
-    :class:`~pcapkit.protocols.application.sslv2.SSLv2` do for a further record and
+    :class:`~pcapkit.protocols.application.tls.TLS`,
+    :class:`~pcapkit.protocols.application.sslv2.SSLv2` and
+    :class:`~pcapkit.protocols.application.dtls.DTLS` do for a further record and
     :class:`~pcapkit.protocols.application.httpv2.HTTPv2` for a further frame --
     or to :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
 

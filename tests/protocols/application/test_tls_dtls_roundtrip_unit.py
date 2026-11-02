@@ -16,8 +16,9 @@ through :meth:`~pcapkit.protocols.application.application.Application.from_data`
 :meth:`~pcapkit.protocols.application.tls.TLS.make`/
 :meth:`~pcapkit.protocols.application.dtls.DTLS.make` and reading them back
 (the make-then-parse direction) -- so neither direction is a tautology of
-the other. Segments of several TLS records are checked the same way, each
-record a layer of its own (#2517).
+the other. Segments of several TLS records, and datagrams of several DTLS
+records, are checked the same way, each record a layer of its own (#2517,
+#2535).
 
 """
 from __future__ import annotations
@@ -50,8 +51,7 @@ def _client_hello_body(cipher_suites: bytes = b'\x13\x01', extensions: 'bytes | 
             + tail)
 
 
-def _server_hello_body(extensions: 'bytes | None' = b'') -> bytes:
-    version = b'\x03\x03'
+def _server_hello_body(extensions: 'bytes | None' = b'', version: bytes = b'\x03\x03') -> bytes:
     random = bytes(range(32, 64))
     session_id = b''
     cipher_suite = b'\x13\x01'
@@ -178,6 +178,40 @@ DTLS_RECORDS = {
         22, _dtls_handshake(1, _CH_BODY, message_seq=0, fragment_offset=0,
                             fragment_length=len(_CH_BODY)), version=b'\xfe\xff'),
 }
+
+
+def _unified_record(fragment: bytes, *, seq: int, length_present: bool = True) -> bytes:
+    """A unified-header record at epoch 2, the handshake traffic keys' (RFC 9147
+    section 6.1), with an 8-bit sequence number: first octet ``001 0 0 L 10``
+    (RFC 9147 section 4)."""
+    if length_present:
+        return bytes([0x26, seq]) + len(fragment).to_bytes(2, 'big') + fragment
+    return bytes([0x22, seq]) + fragment
+
+
+#: A DTLS ``ServerHello`` selecting DTLS 1.3 through ``supported_versions`` (type 43),
+#: at the ``legacy_version`` RFC 9147 section 5.4 gives it.
+_DTLS13_SH_BODY = _server_hello_body(extensions=b'\x00\x2b\x00\x02\xfe\xfc', version=b'\xfe\xfd')
+_DTLS13_SERVER_HELLO = _dtls_record(22, _dtls_handshake(
+    2, _DTLS13_SH_BODY, message_seq=0, fragment_offset=0, fragment_length=len(_DTLS13_SH_BODY)), seq=0)
+
+#: Datagrams of several records each, every one dissected as a DTLS layer (#2535).
+DTLS_DATAGRAMS = {
+    'change_cipher_spec + alert': _dtls_record(20, b'\x01', seq=1) + _dtls_record(21, b'\x02\x0a', seq=2),
+    # A DTLS 1.2 client's second flight: ClientKeyExchange, then the epoch-1 Finished.
+    'ClientKeyExchange + change_cipher_spec + encrypted Finished': (
+        _dtls_record(22, _dtls_handshake(16, bytes(range(33)), message_seq=2, fragment_offset=0,
+                                         fragment_length=33), seq=2)
+        + _dtls_record(20, b'\x01', seq=3)
+        + _dtls_record(22, (b'\x5c\x91\x0e\xd7' * 12)[:48], epoch=1, seq=0)),
+    # A DTLS 1.3 server flight: the last record may omit its length (RFC 9147 section 4).
+    'DTLS 1.3 ServerHello + unified-header records, the last without a length': (
+        _DTLS13_SERVER_HELLO + _unified_record(bytes(range(32)), seq=0)
+        + _unified_record(bytes(range(32, 80)), seq=1, length_present=False)),
+}
+
+#: A record the datagram ends inside: 20 octets of a 63-octet record.
+_PARTIAL_DTLS_RECORD = _dtls_record(23, bytes(50))[:20]
 
 
 class TestTLSRoundTrip(unittest.TestCase):
@@ -455,6 +489,150 @@ class TestDTLSRoundTrip(unittest.TestCase):
 
         self.assertFalse(message.is_fragmented)
         self.assertEqual(message.body.cookie, b'')
+
+
+def _split_dtls_records(wire: bytes) -> 'list[bytes]':
+    """``wire`` cut at each record's end, as RFC 9147 section 4 frames it: a legacy
+    header's length, a unified header's length, or the end of the datagram."""
+    records = []
+    while wire:
+        if wire[0] >> 5 == 0b001:
+            header = 1 + (2 if wire[0] & 0x08 else 1) + (2 if wire[0] & 0x04 else 0)
+            end = header + int.from_bytes(wire[header - 2:header], 'big') if wire[0] & 0x04 else len(wire)
+        else:
+            end = 13 + int.from_bytes(wire[11:13], 'big')
+        records.append(wire[:end])
+        wire = wire[end:]
+    return records
+
+
+def _dtls_layers(proto: 'object') -> 'tuple[list, object]':
+    """Each DTLS layer of ``proto``'s chain, in order, and the layer that ends it."""
+    from pcapkit.protocols.application.dtls import DTLS
+
+    layers = []
+    while isinstance(proto, DTLS):
+        layers.append(proto)
+        proto = proto.payload
+    return layers, proto
+
+
+class TestDTLSDatagramRoundTrip(unittest.TestCase):
+    """Pin every record of a datagram as its own layer, rebuilt both directions (#2535)."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_every_record_is_a_dtls_layer(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.data.application.dtls import DTLSCiphertext
+        from pcapkit.protocols.misc.null import NoPayload
+
+        for name, wire in DTLS_DATAGRAMS.items():
+            with self.subTest(datagram=name):
+                records = _split_dtls_records(wire)
+                layers, rest = _dtls_layers(DTLS(wire, len(wire)))
+                self.assertEqual(len(layers), len(records))
+                self.assertIsInstance(rest, NoPayload)
+                for layer, record in zip(layers, records):
+                    if isinstance(layer.info, DTLSCiphertext):
+                        self.assertEqual(layer.info.epoch, record[0] & 0x03)
+                        self.assertEqual(layer.info.content, record[layer.length:])
+                        continue
+                    self.assertEqual(int(layer.info.content_type), record[0])
+                    self.assertEqual(layer.info.version, int.from_bytes(record[1:3], 'big'))
+                    self.assertEqual(layer.info.epoch, int.from_bytes(record[3:5], 'big'))
+                    self.assertEqual(layer.info.sequence_number, int.from_bytes(record[5:11], 'big'))
+                    self.assertEqual(layer.info.length, len(record) - 13)
+
+    def test_parse_then_rebuild_is_byte_exact(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.transport.udp import UDP
+
+        for name, wire in DTLS_DATAGRAMS.items():
+            with self.subTest(datagram=name):
+                parsed = DTLS(wire, len(wire))
+                rebuilt = DTLS.from_data(parsed.info)
+                self.assertEqual(bytes(rebuilt).hex(), wire.hex())
+                self.assertEqual(len(_dtls_layers(rebuilt)[0]), len(_split_dtls_records(wire)))
+
+                datagram = (50000).to_bytes(2, 'big') + (5684).to_bytes(2, 'big') \
+                    + (8 + len(wire)).to_bytes(2, 'big') + b'\x00\x00' + wire
+                udp = UDP(datagram, len(datagram))
+                self.assertEqual(str(udp.protochain), f'UDP:{parsed.protochain}')
+                self.assertEqual(bytes(UDP.from_data(udp.info)).hex(), datagram.hex())
+
+    def test_make_then_parse_is_byte_exact(self) -> None:
+        """Each record made from its parsed fields, carrying the next as ``payload``."""
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.data.application.dtls import DTLSCiphertext
+
+        for name, wire in DTLS_DATAGRAMS.items():
+            with self.subTest(datagram=name):
+                parsed = DTLS(wire, len(wire))
+                layers, _ = _dtls_layers(parsed)
+                maker = object.__new__(DTLS)
+                schema = b''  # type: object
+                for layer in reversed(layers):
+                    info = layer.info
+                    if isinstance(info, DTLSCiphertext):
+                        schema = maker.make(ciphertext=True, epoch=info.epoch,
+                                            sequence_number=info.sequence_number,
+                                            sequence_long=info.sequence_long,
+                                            length_present=info.length is not None,
+                                            content=info.content, payload=schema)
+                    else:
+                        schema = maker.make(content_type=info.content_type, version=info.version,
+                                            epoch=info.epoch, sequence_number=info.sequence_number,
+                                            content=info.content, payload=schema)
+                made = bytes(schema)  # type: ignore[call-overload]
+                self.assertEqual(made.hex(), wire.hex())
+                self.assertEqual(str(DTLS(made, len(made)).protochain), str(parsed.protochain))
+
+    def test_records_match_the_specification(self) -> None:
+        """Each record's own tier and fields, per its header (RFC 9147 section 4)."""
+        from pcapkit.const.tls.content_type import ContentType
+        from pcapkit.protocols.application.dtls import DTLS
+
+        wire = DTLS_DATAGRAMS['DTLS 1.3 ServerHello + unified-header records, the last without a length']
+        layers, _ = _dtls_layers(DTLS(wire, len(wire)))
+        self.assertEqual([layer.alias for layer in layers], ['DTLS 1.3'] * 3)
+        self.assertEqual(layers[0].info.content_type, ContentType.handshake)
+        self.assertEqual(int(layers[0].info.content[0].msg_type), 2)
+        self.assertEqual([(layer.info.epoch, layer.info.sequence_number) for layer in layers[1:]],
+                         [(2, 0), (2, 1)])
+        self.assertEqual([layer.info.length for layer in layers[1:]], [32, None])
+        self.assertEqual([layer.info.content for layer in layers[1:]], [bytes(range(32)), bytes(range(32, 80))])
+
+        wire = DTLS_DATAGRAMS['ClientKeyExchange + change_cipher_spec + encrypted Finished']
+        layers, _ = _dtls_layers(DTLS(wire, len(wire)))
+        self.assertEqual([layer.alias for layer in layers], ['DTLS 1.2'] * 3)
+        self.assertEqual([(layer.info.epoch, layer.info.sequence_number) for layer in layers],
+                         [(0, 2), (0, 3), (1, 0)])
+        self.assertEqual(int(layers[0].info.content[0].msg_type), 16)
+        self.assertEqual(layers[1].info.content.msg, 1)
+        self.assertEqual(layers[2].info.content, (b'\x5c\x91\x0e\xd7' * 12)[:48])
+
+        # The alert decodes, rather than staying 15 raw octets.
+        wire = DTLS_DATAGRAMS['change_cipher_spec + alert']
+        layers, _ = _dtls_layers(DTLS(wire, len(wire)))
+        self.assertEqual((int(layers[1].info.content.level), int(layers[1].info.content.description)), (2, 10))
+
+    def test_trailing_partial_record_stays_raw(self) -> None:
+        """A record the datagram ends inside is kept as its own octets, with no error."""
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name in ('change_cipher_spec + alert', 'ClientKeyExchange + change_cipher_spec + encrypted Finished'):
+            with self.subTest(datagram=name):
+                wire = DTLS_DATAGRAMS[name] + _PARTIAL_DTLS_RECORD
+                parsed = DTLS(wire, len(wire))
+                layers, rest = _dtls_layers(parsed)
+                self.assertEqual(len(layers), len(_split_dtls_records(DTLS_DATAGRAMS[name])))
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(bytes(rest), _PARTIAL_DTLS_RECORD)
+                self.assertIsNone(rest.info.error)  # type: ignore[attr-defined]
+                self.assertEqual(bytes(DTLS.from_data(parsed.info)).hex(), wire.hex())
 
 
 if __name__ == '__main__':

@@ -64,9 +64,25 @@ from pcapkit.protocols.data.application.tls import TLS
 from pcapkit.protocols.data.application.tls import Alert as TLS_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as TLS_ChangeCipherSpec
 from pcapkit.protocols.data.application.tls import ClientHello as TLS_ClientHello
+from pcapkit.protocols.data.application.tls import EncryptedExtensions as TLS_EncryptedExtensions
 from pcapkit.protocols.data.application.tls import Extension as TLS_Extension
+from pcapkit.protocols.data.application.tls import ExtensionData as TLS_ExtensionData
 from pcapkit.protocols.data.application.tls import Handshake as TLS_Handshake
+from pcapkit.protocols.data.application.tls import KeyShareClientHello as TLS_KeyShareClientHello
+from pcapkit.protocols.data.application.tls import KeyShareEntry as TLS_KeyShareEntry
+from pcapkit.protocols.data.application.tls import \
+    KeyShareHelloRetryRequest as TLS_KeyShareHelloRetryRequest
+from pcapkit.protocols.data.application.tls import KeyShareServerHello as TLS_KeyShareServerHello
+from pcapkit.protocols.data.application.tls import NamedGroupList as TLS_NamedGroupList
+from pcapkit.protocols.data.application.tls import ProtocolNameList as TLS_ProtocolNameList
 from pcapkit.protocols.data.application.tls import ServerHello as TLS_ServerHello
+from pcapkit.protocols.data.application.tls import ServerName as TLS_ServerName
+from pcapkit.protocols.data.application.tls import ServerNameList as TLS_ServerNameList
+from pcapkit.protocols.data.application.tls import SignatureSchemeList as TLS_SignatureSchemeList
+from pcapkit.protocols.data.application.tls import \
+    SupportedVersionsClientHello as TLS_SupportedVersionsClientHello
+from pcapkit.protocols.data.application.tls import \
+    SupportedVersionsServerHello as TLS_SupportedVersionsServerHello
 
 __all__ = [
     # Datagram Transport Layer Security
@@ -102,6 +118,11 @@ __all__ = [
 
     # Transport Layer Security
     'TLS',
-    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_Extension',
+    'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_EncryptedExtensions',
+    'TLS_Extension', 'TLS_ExtensionData',
+    'TLS_ServerName', 'TLS_ServerNameList', 'TLS_NamedGroupList', 'TLS_SignatureSchemeList',
+    'TLS_ProtocolNameList', 'TLS_SupportedVersionsClientHello', 'TLS_SupportedVersionsServerHello',
+    'TLS_KeyShareEntry', 'TLS_KeyShareClientHello', 'TLS_KeyShareHelloRetryRequest',
+    'TLS_KeyShareServerHello',
     'TLS_Alert', 'TLS_ChangeCipherSpec',
 ]

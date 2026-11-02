@@ -46,6 +46,28 @@ A unified-header record has no legacy version to read. Its first octet's top
 three bits are ``001``, which no legacy content type (20 through 27) sets, so
 the two formats are told apart by that octet alone.
 
+Records in One Datagram
+-----------------------
+
+A whole record after the first in a UDP datagram is dissected as a further
+:class:`~pcapkit.protocols.application.dtls.DTLS` layer, the previous record's
+payload (:rfc:`6347#section-4.1.1`, :rfc:`9147#section-4.3`, :issue:`2535`): a
+``ChangeCipherSpec`` followed by an ``Alert`` reads ``UDP:DTLS 1.2:DTLS 1.2``.
+A unified-header record is delimited by its length; one without a length runs
+to the end of the datagram, so it is the last (:rfc:`9147#section-4`). The
+exceptions:
+
+* A whole record that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it.
+* Octets that open no whole record stay raw, with no error: an unsupported
+  content type, a legacy version outside ``0xFExx``, a header cut short, a
+  length past the end of the datagram, or a unified header with a connection
+  ID, which leaves the record's end unknown.
+* A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
+  keeps the rest of the datagram raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 Known Limitations
 -----------------
 
@@ -121,9 +143,9 @@ Data Models
    :members:
    :show-inheritance:
 
-See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``Extension``, ``Alert``
-and ``ChangeCipherSpec``, shared verbatim with
-:class:`~pcapkit.protocols.application.tls.TLS`.
+See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
+``Extension`` and its decoded bodies, ``Alert`` and ``ChangeCipherSpec``,
+shared verbatim with :class:`~pcapkit.protocols.application.tls.TLS`.
 
 .. rubric:: Footnotes
 

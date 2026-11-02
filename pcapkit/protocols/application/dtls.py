@@ -13,6 +13,27 @@ binds it at port 5684. As with :class:`~pcapkit.protocols.application.tls.TLS`,
 :meth:`~DTLS.read` sets :attr:`~DTLS.alias` from the record's legacy version,
 or to ``DTLS 1.3`` for a unified-header record.
 
+Records in One Datagram
+-----------------------
+
+A whole record after the first in a UDP datagram is dissected as a further
+:class:`DTLS` layer, the previous record's payload (:rfc:`6347#section-4.1.1`,
+:rfc:`9147#section-4.3`, :issue:`2535`): a ``ChangeCipherSpec`` followed by an
+``Alert`` reads ``UDP:DTLS 1.2:DTLS 1.2``. A unified-header record is delimited
+by its length; one without a length runs to the end of the datagram, so it is
+the last (:rfc:`9147#section-4`). The exceptions:
+
+* A whole record that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it.
+* Octets that open no whole record stay raw, with no error: an unsupported
+  content type, a legacy version outside ``0xFExx``, a header cut short, a
+  length past the end of the datagram, or a unified header with a connection
+  ID, which leaves the record's end unknown.
+* A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
+  keeps the rest of the datagram raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 Known Limitations
 -----------------
 
@@ -41,7 +62,9 @@ ones on the wire.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.protocols.application.ssl import DTLS13_VERSION, SSL
+from pcapkit.corekit.decorators import beholder
+from pcapkit.protocols.application.ssl import (_DTLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES,
+                                               DTLS13_VERSION, SSL)
 from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
 from pcapkit.protocols.data.application.dtls import DTLSCiphertext as Data_DTLSCiphertext
 from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
@@ -60,6 +83,10 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['DTLS']
+
+#: Length of a legacy record header: content type, legacy version, epoch,
+#: sequence number and length (:rfc:`9147#section-4`).
+_LEGACY_HEADER_LENGTH = 13
 
 #: Legacy record version DTLS 1.0 carries (:rfc:`4347#section-4.1`).
 _DTLSV1_0_VERSION = 0xFEFF
@@ -105,6 +132,44 @@ def _ciphertext_header_length(flags: 'dict[str, int]') -> 'int':
     return 1 + (2 if flags['sequence_long'] else 1) + (2 if flags['length_present'] else 0)
 
 
+def _opens_whole_record(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with a whole DTLS record.
+
+    Only the record header is read. A legacy header gets the checks of
+    :meth:`SSL._validate_tls_record
+    <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`: a content
+    type a genuine record carries, a ``0xFExx`` legacy version, and a fragment
+    that ends inside ``data``. A unified header must carry no connection ID,
+    whose negotiated length leaves the record's end unknown, and a fragment
+    that ends inside ``data``; without a length it runs to the end of ``data``,
+    as the last record of a datagram does (:rfc:`9147#section-4`).
+
+    Args:
+        data: Octets after a record.
+
+    Returns:
+        Whether a further record opens ``data`` and ends inside it.
+
+    """
+    if not data:
+        return False
+    if _is_unified_header(data[0]):
+        # NOTE: the ``C``, ``S`` and ``L`` bits of ``001CSLEE``, as the header schema reads them.
+        flags = {'connection_id': data[0] >> 4 & 1, 'sequence_long': data[0] >> 3 & 1,
+                 'length_present': data[0] >> 2 & 1}
+        header = _ciphertext_header_length(flags)
+        if flags['connection_id'] or len(data) < header:
+            return False
+        if not flags['length_present']:
+            return True
+    else:
+        header = _LEGACY_HEADER_LENGTH
+        if len(data) < header or data[0] not in _WIRE_CONTENT_TYPES or data[1] != _DTLS_VERSION_MAJOR:
+            return False
+    # Either header ends with its 16-bit length.
+    return header + int.from_bytes(data[header - 2:header], 'big') <= len(data)
+
+
 class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
     """This class implements all protocols in the DTLS record-layer family.
 
@@ -148,7 +213,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         schema = getattr(self, '__header__', None)
         if isinstance(schema, Schema_DTLSCiphertext):
             return _ciphertext_header_length(schema.flags)
-        return 13
+        return _LEGACY_HEADER_LENGTH
 
     ##########################################################################
     # Methods.
@@ -323,7 +388,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
     def __length_hint__(self) -> 'Literal[13]':
         """Return an estimated length for the object."""
-        return 13
+        return _LEGACY_HEADER_LENGTH  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -472,3 +537,53 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         )
         remaining = available - (self.length + len(schema.fragment))
         return self._decode_next_layer(dtls, -1, remaining)
+
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import next layer extractor: a further whole record, or the rest undissected.
+
+        A UDP datagram may carry several records (:rfc:`9147#section-4.3`,
+        :issue:`2535`). So the ``-1`` remainder is dissected as this class when
+        :func:`_opens_whole_record` finds a whole record opening it, and is
+        otherwise kept as :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :meth:`Application._import_next_layer
+        <pcapkit.protocols.application.application.Application._import_next_layer>`
+        keeps it.
+
+        Arguments:
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest of the datagram) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class for a further record, or as
+            :meth:`Application._import_next_layer
+            <pcapkit.protocols.application.application.Application._import_next_layer>`
+            returns otherwise.
+
+        """
+        if proto == -1 and not self._sigterm and _opens_whole_record(self._get_payload()[:length]):
+            return self._import_next_record(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+        return super()._import_next_layer(proto, length, packet=packet)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_record(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
+                            packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import the further record :meth:`_import_next_layer` found.
+
+        Arguments:
+            proto: next layer protocol index, the ``-1`` sentinel
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            when :func:`~pcapkit.corekit.decorators.beholder` replaces a record
+            that fails to parse.
+
+        """
+        file_ = self._get_payload()
+        return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx)
