@@ -85,6 +85,7 @@ from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateN
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.data.internet.mh import \
@@ -1138,6 +1139,25 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          (:issue:`1223`, :issue:`1324`, :issue:`1329`, :issue:`1418`,
          :issue:`1437`).
 
+    .. versionchanged:: 1.6.0
+
+       :meth:`make` and the message, option and sub-option makers, given an
+       integer argument its field cannot carry -- negative, too wide, or a
+       :obj:`bool` for a field wider than one bit -- raise
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       writing a different value or raising another exception; so does the
+       access network identifier sub-option maker for a raw geo-location
+       degree that does not fit 24 bits as two's complement, where it masked
+       it. The option makers check their registry codes and their one-octet
+       ``Option Length`` too; the message makers' registry codes are not
+       range-checked (:issue:`2614`).
+
+    .. versionremoved:: 1.6.0
+
+       ``_decode_signed``, the two's-complement decoder of the geo-location
+       degrees; :meth:`~pcapkit.protocols.protocol.Protocol._read_sint` reads
+       them instead (:issue:`2614`).
+
     """
 
     ##########################################################################
@@ -1434,7 +1454,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``data`` is none of the forms this maker reads --
                 raw :obj:`bytes`, a :obj:`dict` of message arguments, an
                 :class:`~pcapkit.protocols.data.internet.mh.MH` data model or a
-                :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema.
+                :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema;
+                or if ``reserved``, or the header length of the message, does
+                not fit in one octet.
 
         .. versionchanged:: 1.5.0
 
@@ -1477,9 +1499,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_MH(
             next=next_val,
-            length=(len(data_val) + 6) // 8 - 1,
+            length=self._make_uint((len(data_val) + 6) // 8 - 1, bits=8, name='header length'),
             type=type_val,
-            reserved=reserved,
+            reserved=self._make_uint(reserved, bits=8, name='reserved octet'),
             chksum=chksum,
             data=data_val,
             payload=payload,
@@ -5294,9 +5316,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         The geo-location degrees of :rfc:`6757#section-3.1.2` are 24-bit
         **two's-complement** fixed-point values with nine integer bits. A
         :class:`~pcapkit.corekit.fields.strings.BitField` reads them unsigned, so
-        the sign is applied here, and both the decoded degrees and the raw signed
-        integers are recorded -- the latter so that the exact wire value survives
-        a round trip through the data model.
+        the sign is applied here by :meth:`_read_sint`, and both the decoded
+        degrees and the raw signed integers are recorded -- the latter so that
+        the exact wire value survives a round trip through the data model.
 
         Note:
             Dispatch is on the sub-option type code rather than on ``isinstance``
@@ -5327,8 +5349,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 )  # type: Data_ANISuboption
             elif code == Enum_ANISuboption.Geo_Location:
                 geo = cast('Schema_ANIGeoLocationSuboption', schema)
-                raw_lat = self._decode_signed(geo.location['latitude'], 24)
-                raw_lon = self._decode_signed(geo.location['longitude'], 24)
+                raw_lat = self._read_sint(geo.location['latitude'], 24)
+                raw_lon = self._read_sint(geo.location['longitude'], 24)
                 data = Data_ANIGeoLocationSuboption(
                     type=code,
                     length=self._mh_option_length(geo.length),
@@ -5379,29 +5401,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             suboptions.add(code, data)
 
         return suboptions
-
-    @staticmethod
-    def _decode_signed(value: 'int', width: 'int') -> 'int':
-        """Reinterpret an unsigned integer as a two's-complement signed one.
-
-        Args:
-            value: Unsigned value as read from the wire.
-            width: Field width, in bits.
-
-        Returns:
-            The signed value the same bits denote.
-
-        Note:
-            :class:`~pcapkit.corekit.fields.strings.BitField` reads a sub-field as
-            an unsigned integer, since that is what almost every bit-packed field
-            in the mobility header is. The geo-location degrees of
-            :rfc:`6757#section-3.1.2` are the exception, so they are converted
-            here rather than by teaching the field about signedness -- a change
-            that would touch every other user of it.
-
-        """
-        sign_bit = 1 << (width - 1)
-        return value - (1 << width) if value & sign_bit else value
 
     def _read_opt_ani(self, schema: 'Schema_AccessNetworkIdentifierOption', *,
                       options: 'Option') -> 'Data_AccessNetworkIdentifierOption':
@@ -6681,6 +6680,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``msg_reserved`` does not fit its field.
+
         """
         if message is not None:
             msg_reserved = message.msg_reserved
@@ -6689,7 +6691,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_BindingRefreshRequestMessage(
-            reserved=msg_reserved,
+            reserved=self._make_uint(msg_reserved, bits=16, name='reserved bits'),
             options=self._make_mh_options(options),
         )
 
@@ -6776,6 +6778,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``nonce_index`` does not fit its field.
+
         """
         if message is not None:
             nonce_index = message.nonce_index
@@ -6786,7 +6791,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_HomeTestMessage(
-            nonce_index=nonce_index,
+            nonce_index=self._make_uint(nonce_index, bits=16, name='nonce index'),
             cookie=cookie,
             token=token,
             options=self._make_mh_options(options),
@@ -6811,6 +6816,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``nonce_index`` does not fit its field.
+
         """
         if message is not None:
             nonce_index = message.nonce_index
@@ -6821,7 +6829,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_CareofTestMessage(
-            nonce_index=nonce_index,
+            nonce_index=self._make_uint(nonce_index, bits=16, name='nonce index'),
             cookie=cookie,
             token=token,
             options=self._make_mh_options(options),
@@ -6871,6 +6879,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
+                its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -6893,8 +6905,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
             options = options or []
 
+        # NOTE: The field counts units of 4 seconds, so the seconds are checked
+        # before they are rounded up to units, and the units after.
+        lifetime_val = self._make_uint(lifetime_val, bits=18, name='lifetime')
+
         return Schema_BindingUpdateMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'A': ack,
                 'H': home,
@@ -6908,9 +6924,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'B': bulk_binding,
                 'S': multicast,
                 'D': dmm,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=4, name='reserved bits'),
             },
-            lifetime=math.ceil(lifetime_val / 4),
+            lifetime=self._make_uint(math.ceil(lifetime_val / 4), bits=16,
+                                     name='lifetime in units of 4 seconds'),
             options=self._make_mh_options(options),
         )
 
@@ -6956,6 +6973,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
+                its field.
+
         """
         if message is not None:
             status_val = message.status
@@ -6976,6 +6997,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
             options = options or []
 
+        # NOTE: The field counts units of 4 seconds, so the seconds are checked
+        # before they are rounded up to units, and the units after.
+        lifetime_val = self._make_uint(lifetime_val, bits=18, name='lifetime')
+
         return Schema_BindingAcknowledgementMessage(
             status=status_val,
             flags={
@@ -6986,10 +7011,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'B': bulk_binding,
                 'S': multicast,
                 'D': dmm,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=1, name='reserved bits'),
             },
-            seq=seq,
-            lifetime=math.ceil(lifetime_val / 4),
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
+            lifetime=self._make_uint(math.ceil(lifetime_val / 4), bits=16,
+                                     name='lifetime in units of 4 seconds'),
             options=self._make_mh_options(options),
         )
 
@@ -7067,6 +7093,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
+                its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7082,15 +7112,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_FastBindingUpdateMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'A': ack,
                 'H': home,
                 'L': lla_compat,
                 'K': key_mngt,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=12, name='reserved bits'),
             },
-            lifetime=lifetime_val,
+            lifetime=self._make_uint(lifetime_val, bits=16, name='lifetime'),
             options=self._make_mh_options(options),
         )
 
@@ -7127,6 +7157,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
+                its field.
+
         """
         if message is not None:
             status_val = message.status
@@ -7145,10 +7179,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status=status_val,
             flags={
                 'K': key_mngt,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=7, name='reserved bits'),
             },
-            seq=seq,
-            lifetime=lifetime_val,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
+            lifetime=self._make_uint(lifetime_val, bits=16, name='lifetime'),
             options=self._make_mh_options(options),
         )
 
@@ -7234,6 +7268,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7250,13 +7287,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_HandoverInitiateMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'S': assign,
                 'U': buffer,
                 'P': proxy,
                 'F': forward,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=4, name='reserved bits'),
             },
             code=code_val,
             options=self._make_mh_options(options),
@@ -7293,6 +7330,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7308,12 +7348,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_HandoverAcknowledgeMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'U': buffer,
                 'P': proxy,
                 'F': forward,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=5, name='reserved bits'),
             },
             code=code_val,
             options=self._make_mh_options(options),
@@ -7375,6 +7415,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             unsolicited = message.unsolicited
@@ -7389,9 +7432,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'U': unsolicited,
                 'R': response,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits'),
             },
-            seq=seq,
+            seq=self._make_uint(seq, bits=32, name='sequence number'),
             options=self._make_mh_options(options),
         )
 
@@ -7436,6 +7479,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             br_type_val = message.br_type  # type: Enum_BindingRevocation
@@ -7456,12 +7502,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_BindingRevocationMessage(
             br_type=br_type_val,
             code=code_val,
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'P': proxy,
                 'V': ipv4_hoa,
                 'G': global_revocation,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=13, name='reserved bits'),
             },
             options=self._make_mh_options(options),
         )
@@ -7489,6 +7535,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or the lifetime does not fit its field.
+
         """
         if message is not None:
             msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
@@ -7500,9 +7549,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_LocalizedRoutingInitiationMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             reserved=msg_reserved,
-            lifetime=lifetime_val,
+            lifetime=self._make_uint(lifetime_val, bits=16, name='lifetime'),
             options=self._make_mh_options(options),
         )
 
@@ -7537,6 +7586,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
+                its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7552,13 +7605,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_LocalizedRoutingAcknowledgmentMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             flags={
                 'U': unsolicited,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=7, name='reserved bits'),
             },
             status=status_val,
-            lifetime=lifetime_val,
+            lifetime=self._make_uint(lifetime_val, bits=16, name='lifetime'),
             options=self._make_mh_options(options),
         )
 
@@ -7591,6 +7644,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7605,12 +7661,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_UpdateNotificationMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             reason=reason_val,
             flags={
                 'A': ack,
                 'D': retransmit,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits'),
             },
             options=self._make_mh_options(options),
         )
@@ -7641,6 +7697,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` does not fit its field.
+
         """
         if message is not None:
             msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00\x00')
@@ -7653,7 +7712,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_UpdateNotificationAcknowledgementMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             status=status_val,
             reserved=msg_reserved,
             options=self._make_mh_options(options),
@@ -7696,6 +7755,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             fb_type_val = message.fb_type  # type: Enum_FlowBindingType
@@ -7713,11 +7775,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_FlowBindingMessage(
             fb_type=fb_type_val,
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='sequence number'),
             code=code_val,
             flags={
                 'A': ack,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=7, name='reserved bits'),
             },
             options=self._make_mh_options(options),
         )
@@ -7740,6 +7802,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` does not fit its field.
+
         """
         if message is not None:
             msg_reserved = getattr(message, 'msg_reserved', b'\x00')
@@ -7749,7 +7814,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_SubscriptionQueryMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=8, name='sequence number'),
             reserved=msg_reserved,
             options=self._make_mh_options(options),
         )
@@ -7773,6 +7838,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
         """
         if message is not None:
             seq = message.seq
@@ -7783,10 +7851,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options = options or []
 
         return Schema_SubscriptionResponseMessage(
-            seq=seq,
+            seq=self._make_uint(seq, bits=8, name='sequence number'),
             flags={
                 'I': info,
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=7, name='reserved bits'),
             },
             options=self._make_mh_options(options),
         )
@@ -7823,10 +7891,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             multiple ``Pad1`` options.
 
         """
-        if offset % 8 == 0:
+        pad_len = pad_length(offset, 8)
+        if pad_len == 0:
             return [], 0
-
-        pad_len = 8 - (offset % 8)
         if pad_len == 1:
             return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
         return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
@@ -7892,13 +7959,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             data = option.data
 
         return Schema_UnassignedOption(
             type=type,
-            length=len(data),
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
             data=data,
         )
 
@@ -7919,6 +7990,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``length`` does not fit the one-octet
+                ``Option Length``.
 
         Warns:
             ProtocolWarning: If ``length`` is non-zero for a ``Pad1``, which
@@ -7949,7 +8024,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_PadOption(
             type=type,
-            length=length,
+            length=self._make_uint(length, bits=8, name='Option Length'),
             data=data,
         )
 
@@ -7969,6 +8044,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the interval does not fit its field.
+
         """
         if option is not None:
             interval_val = math.ceil(option.interval.total_seconds() / 4)
@@ -7978,7 +8056,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_BindingRefreshAdviceOption(
             type=type,
             length=2,
-            interval=interval_val,
+            interval=self._make_uint(interval_val, bits=16, name='refresh interval'),
         )
 
     def _make_opt_aca(self, type: 'Enum_Option', option: 'Optional[Data_AlternateCareofAddressOption]' = None, *,
@@ -8021,6 +8099,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``home`` or ``careof`` does not fit its field.
+
         """
         if option is not None:
             home = option.home
@@ -8029,8 +8110,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_NonceIndicesOption(
             type=type,
             length=4,
-            home=home,
-            careof=careof,
+            home=self._make_uint(home, bits=16, name='home nonce index'),
+            careof=self._make_uint(careof, bits=16, name='care-of nonce index'),
         )
 
     def _make_opt_bad(self, type: 'Enum_Option', option: 'Optional[Data_AuthorizationDataOption]' = None, *,
@@ -8051,6 +8132,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``data`` is not a multiple of eight octets, the
                 length :meth:`_read_opt_bad` accepts for an :rfc:`6275`
                 authenticator.
+                Also if the option is too long for its one-octet ``Option Length``.
 
         """
         if option is not None:
@@ -8062,7 +8144,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_AuthorizationDataOption(
             type=type,
-            length=len(data),
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
             data=data,
         )
 
@@ -8116,13 +8198,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             address = option.lla
 
         return Schema_LinkLayerAddressOption(
             type=type,
-            length=len(address) + 1,
+            length=self._make_uint(len(address) + 1, bits=8, name='Option Length'),
             code=Enum_LLACode.MN,  # type: ignore[arg-type]
             lla=address,
         )
@@ -8179,6 +8265,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 subtypes -- an :obj:`int` is converted rather than rejected
                 there -- or anything :class:`ipaddress.IPv6Address` itself does
                 not accept for ``IPv6_Address``.
+                Also if ``subtype`` does not fit in one octet, or the option is too long
+                for its one-octet ``Option Length``.
 
         """
         if option is not None:
@@ -8285,20 +8373,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI identifier '
                     f'must be str, not int -- pass str({identifier!r}) if a '
                     f'decimal-digit NAI is really what is wanted')
-            # NOTE: every other subtype's field is a
-            # BytesField(length=pkt['length'] - 1) (see mn_id_selector) -- a
-            # numeric identifier, so unlike NAI there IS a non-arbitrary wire
-            # form: its own minimal big-endian encoding. That is self-consistent
-            # with the declared length by construction and round-trips exactly.
-            # ``math.ceil(identifier.bit_length() / 8)`` is the right width;
-            # the ``int`` itself must be converted, because handing it to
-            # ``BytesField`` unconverted leaves ``struct.pack()`` nothing it can
-            # pack. ``bit_length()`` is 0 for 0 itself, which would
-            # otherwise declare a zero-octet identifier -- collapsing "the
-            # identifier's value is 0" into "there is no identifier" -- so the
-            # width is floored at one octet, matching what any reasonable
-            # encoder would produce.
-            id_len = max(1, math.ceil(identifier.bit_length() / 8))
+            # NOTE: Every other subtype's field is a BytesField (see mn_id_selector),
+            # so the identifier is written as its minimal big-endian octets, at least one.
+            id_len = self._uint_size(identifier, minimum=1)
             identifier = identifier.to_bytes(id_len, 'big')
         elif subtype_val == Enum_MNIDSubtype.NAI:
             # NOTE: NAI's field is a StringField (see mn_id_selector), which
@@ -8347,9 +8424,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     f'identifier must be bytes, not {identifier!r}')
             id_len = len(identifier)
 
+        self._make_uint(subtype_val, bits=8, name='MN-ID subtype')
         return Schema_MNIDOption(
             type=type,
-            length=1 + id_len,
+            length=self._make_uint(1 + id_len, bits=8, name='Option Length'),
             subtype=subtype_val,
             identifier=identifier,
         )
@@ -8381,7 +8459,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``data`` is not two octets more than a multiple of
                 four, which is the only length leaving an ``Option Length`` of
-                ``5 + len(data)`` that :meth:`_read_opt_auth` accepts.
+                ``5 + len(data)`` that :meth:`_read_opt_auth` accepts; or if
+                ``spi`` does not fit in four octets.
+                Also if the option is too long for its one-octet ``Option Length``.
 
         """
         if option is not None:
@@ -8398,9 +8478,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_AuthOption(
             type=type,
-            length=5 + len(data),
+            length=self._make_uint(5 + len(data), bits=8, name='Option Length'),
             subtype=subtype_val,
-            spi=spi,
+            spi=self._make_uint(spi, bits=32, name='SPI'),
             data=data,
         )
 
@@ -8475,6 +8555,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             parameters = cast('list[Data_CGAParameter]', option.parameters)  # type: ignore[assignment]
@@ -8512,7 +8596,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_CGAParametersOption(
             type=type,
-            length=length,
+            length=self._make_uint(length, bits=8, name='Option Length'),
             parameters=param,
         )
 
@@ -8530,13 +8614,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             signature = option.signature
 
         return Schema_SignatureOption(
             type=type,
-            length=len(signature),
+            length=self._make_uint(len(signature), bits=8, name='Option Length'),
             signature=signature,
         )
 
@@ -8554,13 +8642,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             token = option.token
 
         return Schema_PermanentHomeKeygenTokenOption(
             type=type,
-            length=len(token),
+            length=self._make_uint(len(token), bits=8, name='Option Length'),
             token=token,
         )
 
@@ -8620,13 +8712,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             data = option.data
 
         return Schema_ExperimentalMobilityOption(
             type=type,
-            length=len(data),
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
             data=data,
         )
 
@@ -8648,7 +8744,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``data`` is empty, since the ``length`` field then
-                reads as ``0``, which :meth:`_read_opt_badf` rejects.
+                reads as ``0``, which :meth:`_read_opt_badf` rejects; or if
+                ``spi`` does not fit in four octets.
+                Also if the option is too long for its one-octet ``Option Length``.
 
         Note:
             The ``length`` field counts the authenticator only, excluding the
@@ -8665,8 +8763,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_BADFOption(
             type=type,
-            length=len(data),
-            spi=spi,
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
+            spi=self._make_uint(spi, bits=32, name='SPI'),
             data=data,
         )
 
@@ -8695,15 +8793,25 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``code`` is an :obj:`int` that
+                does not fit in one octet.
+
         """
         if option is not None:
             code_val = option.code
             prefix_length = option.prefix_length
             address = option.address
         else:
+            if isinstance(code, int):
+                # NOTE: Before the lookup, whose strict registry would raise a
+                # bare EnumValueError naming neither MH nor the field.
+                self._make_uint(code, bits=8, name='code')
             code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
                                         reversed=code_reversed, pack=False)
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -8741,6 +8849,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit its field.
+                Also if ``status`` does not fit in one octet, or the option is too long
+                for its one-octet ``Option Length``.
+
         """
         if option is not None:
             status_val = option.status  # type: Enum_DNSStatusCode
@@ -8751,11 +8864,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
                                           reversed=status_reversed, pack=False)
 
+        self._make_uint(status_val, bits=8, name='status')
         return Schema_DNSUpdateOption(
             type=type,
-            length=2 + len(identity),
+            length=self._make_uint(2 + len(identity), bits=8, name='Option Length'),
             status=status_val,
-            flags={'R': int(remove), 'reserved': reserved},
+            flags={'R': int(remove), 'reserved': self._make_uint(reserved, bits=7,
+                                                                 name='reserved bits')},
             identity=identity,
         )
 
@@ -8778,6 +8893,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``vendor`` or ``subtype`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             vendor = option.vendor
@@ -8786,9 +8905,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_VendorSpecificOption(
             type=type,
-            length=5 + len(data),
-            vendor=vendor,
-            subtype=subtype,
+            length=self._make_uint(5 + len(data), bits=8, name='Option Length'),
+            vendor=self._make_uint(vendor, bits=32, name='vendor ID'),
+            subtype=self._make_uint(subtype, bits=8, name='vendor subtype'),
             data=data,
         )
 
@@ -8806,6 +8925,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             identifier = option.identifier
@@ -8816,7 +8939,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_ServiceSelectionOption(
             type=type,
-            length=len(encoded),
+            length=self._make_uint(len(encoded), bits=8, name='Option Length'),
             identifier=identifier,
         )
 
@@ -8839,12 +8962,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -8878,6 +9006,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit its field.
+                Also if ``hi`` does not fit in one octet.
+
         """
         if option is not None:
             hi_val = option.hi  # type: Enum_HandoffType
@@ -8886,10 +9018,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             hi_val = self._make_index(hi, hi_default, namespace=hi_namespace,  # type: ignore[assignment]
                                       reversed=hi_reversed, pack=False)
 
+        self._make_uint(hi_val, bits=8, name='handoff type')
         return Schema_HandoffIndicatorOption(
             type=type,
             length=2,
-            reserved=reserved,
+            reserved=self._make_uint(reserved, bits=8, name='reserved octet'),
             hi=hi_val,
         )
 
@@ -8916,6 +9049,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``att`` does not fit in one octet.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -8924,6 +9060,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             att_val = self._make_index(att, att_default, namespace=att_namespace,  # type: ignore[assignment]
                                        reversed=att_reversed, pack=False)
 
+        self._make_uint(att_val, bits=8, name='access technology type')
         return Schema_AccessTechnologyTypeOption(
             type=type,
             length=2,
@@ -8948,6 +9085,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00')
@@ -8955,7 +9096,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_MNLLIdentifierOption(
             type=type,
-            length=2 + len(lli),
+            length=self._make_uint(2 + len(lli), bits=8, name='Option Length'),
             reserved=reserved,
             lli=lli,
         )
@@ -9000,6 +9141,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``seconds`` or ``fraction`` does not fit its field.
+
         Note:
             The fixed-point pair is taken from
             :attr:`~pcapkit.protocols.data.internet.mh.TimestampOption.pmip_timestamp`
@@ -9013,10 +9157,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seconds = option.pmip_timestamp.seconds
             fraction = option.pmip_timestamp.fraction
 
-        if not 0 <= seconds < 2 ** 48:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid timestamp seconds: {seconds}')
-        if not 0 <= fraction < 2 ** 16:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid timestamp fraction: {fraction}')
+        seconds = self._make_uint(seconds, bits=48, name='timestamp seconds')
+        fraction = self._make_uint(fraction, bits=16, name='timestamp fraction')
 
         return Schema_TimestampOption(
             type=type,
@@ -9041,6 +9183,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``counter`` does not fit its field.
+
         """
         if option is not None:
             counter = option.counter
@@ -9048,7 +9193,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_RestartCounterOption(
             type=type,
             length=4,
-            counter=counter,
+            counter=self._make_uint(counter, bits=32, name='restart counter'),
         )
 
     def _make_opt_ipv4_hoa(self, type: 'Enum_Option', option: 'Optional[Data_IPv4HomeAddressOption]' = None, *,
@@ -9071,6 +9216,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is zero, negative, a
+                :obj:`bool`, or longer than the address, or ``reserved``
+                does not fit its field.
+
         """
         if option is not None:
             prefix_length = option.prefix_length
@@ -9078,6 +9228,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             request_prefix = option.request_prefix
             reserved = option.reserved
 
+        prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
         if prefix_length == 0 or prefix_length > 32:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -9087,7 +9238,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'prefix_length': prefix_length,
                 'P': int(request_prefix),
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=9, name='reserved bits'),
             },
             address=address,
         )
@@ -9119,6 +9270,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``reserved`` does not fit
+                its field.
+                Also if ``status`` does not fit in one octet.
+
         """
         if option is not None:
             status_val = option.status  # type: Enum_DSMIPv6HomeAddress
@@ -9129,14 +9286,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
                                           reversed=status_reversed, pack=False)
 
+        prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
         if prefix_length > 32:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
+        self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4AddressAcknowledgementOption(
             type=type,
             length=6,
             status=status_val,
-            flags={'prefix_length': prefix_length, 'reserved': reserved},
+            flags={'prefix_length': prefix_length,
+                   'reserved': self._make_uint(reserved, bits=2, name='reserved bits')},
             address=address,
         )
 
@@ -9159,6 +9319,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` or the refresh interval does not fit its
+                field.
+
         """
         if option is not None:
             force = option.force
@@ -9170,8 +9334,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_NATDetectionOption(
             type=type,
             length=6,
-            flags={'F': int(force), 'reserved': reserved},
-            refresh=refresh_val,
+            flags={'F': int(force), 'reserved': self._make_uint(reserved, bits=15,
+                                                                name='reserved bits')},
+            refresh=self._make_uint(refresh_val, bits=32, name='refresh interval'),
         )
 
     def _make_opt_ipv4_coa(self, type: 'Enum_Option', option: 'Optional[Data_IPv4CareofAddressOption]' = None, *,
@@ -9221,6 +9386,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``key`` does not fit its field.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00')
@@ -9230,7 +9398,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=2 if key is None else 6,
             reserved=reserved,
-            key=key,
+            key=None if key is None else self._make_uint(key, bits=32, name='GRE key'),
         )
 
     def _make_opt_bid(self, type: 'Enum_Option', option: 'Optional[Data_BindingIdentifierOption]' = None, *,
@@ -9261,6 +9429,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``bid`` or ``bid_pri`` does not fit its field.
+                Also if ``status`` does not fit in one octet.
+
         Note:
             The option length is derived from the address family, since that is
             the only thing that carries it on the wire: 4 with no address, 8 for
@@ -9277,8 +9449,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
                                           reversed=status_reversed, pack=False)
 
-        if bid_pri > 0x7F:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid binding priority: {bid_pri}')
+        bid = self._make_uint(bid, bits=16, name='binding identifier')
+        bid_pri = self._make_uint(bid_pri, bits=7, name='binding priority')
 
         if address is None:
             length = 4
@@ -9296,6 +9468,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length = 8 if addr.version == 4 else 20
             address = addr
 
+        self._make_uint(status_val, bits=8, name='status')
         return Schema_BindingIdentifierOption(
             type=type,
             length=length,
@@ -9327,19 +9500,26 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``reserved`` does not fit
+                its field.
+
         """
         if option is not None:
             prefix_length = option.prefix_length
             reserved = option.reserved
             address = option.address
 
+        prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
         if prefix_length > 32:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_IPv4HomeAddressRequestOption(
             type=type,
             length=6,
-            flags={'prefix_length': prefix_length, 'reserved': reserved},
+            flags={'prefix_length': prefix_length,
+                   'reserved': self._make_uint(reserved, bits=10, name='reserved bits')},
             address=address,
         )
 
@@ -9369,6 +9549,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``reserved`` does not fit
+                its field.
+                Also if ``status`` does not fit in one octet.
+
         """
         if option is not None:
             status_val = option.status  # type: Enum_HomeAddressReply
@@ -9379,14 +9565,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
                                           reversed=status_reversed, pack=False)
 
+        prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
         if prefix_length > 32:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
+        self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4HomeAddressReplyOption(
             type=type,
             length=6,
             status=status_val,
-            flags={'prefix_length': prefix_length, 'reserved': reserved},
+            flags={'prefix_length': prefix_length,
+                   'reserved': self._make_uint(reserved, bits=2, name='reserved bits')},
             address=address,
         )
 
@@ -9442,6 +9631,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the mode does not fit the one-bit ``S`` flag, or
+                ``reserved`` does not fit its field.
+
         """
         if option is not None:
             mode_val = int(option.mode)
@@ -9450,13 +9643,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             mode_val = self._make_index(mode, mode_default, namespace=mode_namespace,
                                         reversed=mode_reversed, pack=False)
 
-        if mode_val > 1:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid DHCP support mode: {mode_val}')
+        mode_val = self._make_uint(mode_val, bits=1, name='DHCP support mode')
 
         return Schema_IPv4DHCPSupportModeOption(
             type=type,
             length=2,
-            flags={'S': mode_val, 'reserved': reserved},
+            flags={'S': mode_val, 'reserved': self._make_uint(reserved, bits=15,
+                                                              name='reserved bits')},
         )
 
     def _make_opt_cr(self, type: 'Enum_Option', option: 'Optional[Data_ContextRequestOption]' = None, *,
@@ -9476,6 +9669,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
 
         """
         if option is not None:
@@ -9503,7 +9700,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_ContextRequestOption(
             type=type,
-            length=2 + len(buffer),
+            length=self._make_uint(2 + len(buffer), bits=8, name='Option Length'),
             reserved=reserved,
             requests=bytes(buffer),
         )
@@ -9538,7 +9735,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If an explicit ``code`` is not the code
                 :rfc:`5949#section-6.2.2` gives the address family of
-                ``address`` (:issue:`2280`).
+                ``address`` (:issue:`2280`), or does not fit in one octet.
 
         Note:
             The option length is derived from the address family rather than from
@@ -9586,7 +9783,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LMAAddressOption(
             type=type,
             length=6 if addr.version == 4 else 18,
-            code=code_val,
+            code=self._make_uint(code_val, bits=8, name='code'),
             reserved=reserved,
             address=addr,
         )
@@ -9642,6 +9839,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the lifetime does not fit in one octet, or
+                ``reserved`` does not fit its field.
+
         """
         if option is not None:
             late = option.late
@@ -9651,13 +9852,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(
                 lifetime.total_seconds() * 10)
 
-        if lifetime_val > 0xFF:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid lifetime: {lifetime_val}')
+        lifetime_val = self._make_uint(lifetime_val, bits=8, name='lifetime')
 
         return Schema_TransientBindingOption(
             type=type,
             length=2,
-            flags={'L': int(late), 'reserved': reserved},
+            flags={'L': int(late), 'reserved': self._make_uint(reserved, bits=7,
+                                                               name='reserved bits')},
             lifetime=lifetime_val,
         )
 
@@ -9675,15 +9876,22 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If an entry of ``fid`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             fid = list(option.fid)
         else:
             fid = fid or []
 
+        for item in fid:
+            self._make_uint(item, bits=16, name='flow identifier')
+
         return Schema_FlowSummaryOption(
             type=type,
-            length=len(fid) * 2,
+            length=self._make_uint(len(fid) * 2, bits=8, name='Option Length'),
             fid=fid,
         )
 
@@ -9727,6 +9935,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed sub-option schema.
 
+        Raises:
+            ProtocolError: If an entry of a ``BID_Reference`` sub-option's ``bid`` does
+                not fit its field.
+
         Note:
             The data model parameter is named ``option`` rather than ``data``
             to match :meth:`_make_opt_fid` and the rest of this module -- and
@@ -9760,6 +9972,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 bid = list(cast('Data_BIDReferenceSuboption', option).bid)
             else:
                 bid = cast('list[int]', kwargs.get('bid') or [])
+            for item in bid:
+                self._make_uint(item, bits=16, name='binding identifier')
             return Schema_BIDReferenceSuboption(type=code, length=len(bid) * 2, bid=bid)
 
         if code == Enum_FlowIDSuboption.Traffic_Selector:
@@ -9845,6 +10059,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``fid`` or ``fid_pri`` does not fit its field.
+                Also if ``status`` does not fit in one octet, or the option is too long
+                for its one-octet ``Option Length``.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -9861,11 +10080,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         length = 6 + sum(len(entry) if isinstance(entry, bytes) else len(entry.pack())
                          for entry in entries)
 
+        self._make_uint(status_val, bits=8, name='status')
         return Schema_FlowIdentificationOption(
             type=type,
-            length=length,
-            fid=fid,
-            fid_pri=fid_pri,
+            length=self._make_uint(length, bits=8, name='Option Length'),
+            fid=self._make_uint(fid, bits=16, name='flow identifier'),
+            fid_pri=self._make_uint(fid_pri, bits=16, name='flow identifier priority'),
             reserved=reserved,
             status=status_val,
             suboptions=entries,
@@ -9916,7 +10136,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If neither or both addresses are given.
-                :rfc:`6463#section-4.2` requires exactly one.
+                :rfc:`6463#section-4.2` requires exactly one. Also if
+                ``reserved`` does not fit its field.
 
         """
         if option is not None:
@@ -9934,7 +10155,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={
                 'K': int(ipv6 is not None),
                 'N': int(ipv4 is not None),
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=14, name='reserved bits'),
             },
             ipv6=ipv6,
             ipv4=ipv4,
@@ -9962,6 +10183,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If a priority, session or capacity value does not fit its
+                field.
+
         """
         if option is not None:
             priority = option.priority
@@ -9973,11 +10198,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LoadInformationOption(
             type=type,
             length=18,
-            priority=priority,
-            sessions_in_use=sessions_in_use,
-            max_sessions=max_sessions,
-            used_capacity=used_capacity,
-            max_capacity=max_capacity,
+            priority=self._make_uint(priority, bits=16, name='priority'),
+            sessions_in_use=self._make_uint(sessions_in_use, bits=32, name='sessions in use'),
+            max_sessions=self._make_uint(max_sessions, bits=32, name='maximum sessions'),
+            used_capacity=self._make_uint(used_capacity, bits=32, name='used capacity'),
+            max_capacity=self._make_uint(max_capacity, bits=32, name='maximum capacity'),
         )
 
     def _make_opt_alt_ipv4_coa(self, type: 'Enum_Option',
@@ -10030,6 +10255,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``group_id`` does not fit its field.
+                Also if ``subtype`` does not fit in one octet.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -10039,12 +10268,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
+        self._make_uint(subtype_val, bits=8, name='group identifier subtype')
         return Schema_MNGroupIdentifierOption(
             type=type,
             length=6,
             subtype=subtype_val,
             reserved=reserved,
-            group_id=group_id,
+            group_id=self._make_uint(group_id, bits=32, name='group identifier'),
         )
 
     def _make_opt_mag_addr(self, type: 'Enum_Option', option: 'Optional[Data_MAGIPv6AddressOption]' = None, *,
@@ -10067,6 +10297,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``address_length`` does not fit its field.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -10077,7 +10310,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=18,
             reserved=reserved,
-            address_length=address_length,
+            address_length=self._make_uint(address_length, bits=8, name='address length'),
             address=address,
         )
 
@@ -10121,10 +10354,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed sub-option schema.
 
+        Raises:
+            ProtocolError: If a raw geo-location degree does not fit in 24
+                bits as two's complement, or a sub-option's ``reserved``,
+                ``format``, ``group_id`` or ``timer`` does not fit its field.
+
         Note:
             The geo-location degrees are re-encoded from the **raw** signed
             integers rather than from the decoded floats, since a float cannot
-            always be converted back to the same 24-bit fixed-point value.
+            always be converted back to the same 24-bit fixed-point value, and
+            :meth:`_make_sint` gives back the bits :meth:`_read_sint` read.
 
             The data model parameter is named ``option`` rather than ``data`` so
             that it cannot shadow a sub-option field of that name -- see
@@ -10145,7 +10384,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 ap_name = cast('bytes', kwargs.get('ap_name', b''))
             return Schema_ANINetworkIdentifierSuboption(
                 type=code, length=3 + len(net_name) + len(ap_name),
-                flags={'E': int(utf8), 'reserved': reserved}, net_name_len=len(net_name), net_name=net_name,
+                flags={'E': int(utf8), 'reserved': self._make_uint(reserved, bits=7,
+                                                                   name='reserved bits')},
+                net_name_len=len(net_name), net_name=net_name,
                 ap_name_len=len(ap_name), ap_name=ap_name)
 
         if code == Enum_ANISuboption.Geo_Location:
@@ -10157,8 +10398,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 raw_lon = cast('int', kwargs.get('raw_longitude', 0))
             return Schema_ANIGeoLocationSuboption(
                 type=code, length=6, location={
-                    'latitude': raw_lat & 0xFFFFFF,
-                    'longitude': raw_lon & 0xFFFFFF,
+                    'latitude': self._make_sint(raw_lat, bits=24, name='ANI geo-location latitude'),
+                    'longitude': self._make_sint(raw_lon, bits=24, name='ANI geo-location longitude'),
                 })
 
         if code == Enum_ANISuboption.Operator_Identifier:
@@ -10184,7 +10425,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 location = cast('bytes', kwargs.get('location', b''))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_ANICivicLocationSuboption(
-                type=code, length=2 + len(location), format=fmt, reserved=octets,
+                type=code, length=2 + len(location),
+                format=self._make_uint(fmt, bits=8, name='civic location format'), reserved=octets,
                 location=location)
 
         if code == Enum_ANISuboption.MAG_Group_Identifier:
@@ -10192,7 +10434,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 group_id = cast('Data_ANIMAGGroupIdentifierSuboption', option).group_id
             else:
                 group_id = cast('int', kwargs.get('group_id', 0))
-            return Schema_ANIMAGGroupIdentifierSuboption(type=code, length=2, group_id=group_id)
+            return Schema_ANIMAGGroupIdentifierSuboption(
+                type=code, length=2, group_id=self._make_uint(group_id, bits=16,
+                                                              name='MAG group identifier'))
 
         if code == Enum_ANISuboption.ANI_Update_Timer:
             if option is not None:
@@ -10202,7 +10446,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 raw_timer = kwargs.get('timer', 0)
                 timer = raw_timer if isinstance(raw_timer, int) else math.ceil(
                     raw_timer.total_seconds() / 4)
-            return Schema_ANIUpdateTimerSuboption(type=code, length=2, timer=timer)
+            return Schema_ANIUpdateTimerSuboption(
+                type=code, length=2, timer=self._make_uint(timer, bits=16, name='ANI update timer'))
 
         if option is not None:
             payload = cast('Data_UnassignedANISuboption', option).data
@@ -10224,6 +10469,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             suboptions = option.suboptions
@@ -10239,7 +10488,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_AccessNetworkIdentifierOption(
             type=type,
-            length=length,
+            length=self._make_uint(length, bits=8, name='Option Length'),
             suboptions=entries,
         )
 
@@ -10262,6 +10511,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             mode = option.mode
@@ -10276,8 +10529,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_IPv4TrafficOffloadSelectorOption(
             type=type,
-            length=length,
-            flags={'M': int(mode), 'reserved': reserved},
+            length=self._make_uint(length, bits=8, name='Option Length'),
+            flags={'M': int(mode), 'reserved': self._make_uint(reserved, bits=31,
+                                                               name='reserved bits')},
             selector=entries,
         )
 
@@ -10304,6 +10558,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``protocol``, ``reserved`` or ``records`` does not fit its
+                field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             protocol = option.protocol
@@ -10314,10 +10573,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_DynamicIPMulticastSelectorOption(
             type=type,
-            length=4 + len(data),
-            protocol=protocol,
-            flags={'M': int(mode), 'reserved': reserved},
-            records=records,
+            length=self._make_uint(4 + len(data), bits=8, name='Option Length'),
+            protocol=self._make_uint(protocol, bits=8, name='protocol'),
+            flags={'M': int(mode), 'reserved': self._make_uint(reserved, bits=7,
+                                                               name='reserved bits')},
+            records=self._make_uint(records, bits=16, name='number of records'),
             data=data,
         )
 
@@ -10344,6 +10604,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             taken as an argument, so that the flag and the emitted width cannot
             disagree.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``reserved`` does not fit
+                its field.
+
         """
         if option is not None:
             reserved = option.reserved
@@ -10360,13 +10625,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix, f'{self.alias}: [OptNo {type}] invalid mobile network prefix')
         ipv4 = addr.version == 4
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > (32 if ipv4 else 128):
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_DelegatedMNPOption(
             type=type,
             length=6 if ipv4 else 18,
-            flags={'V': int(ipv4), 'reserved': reserved},
+            flags={'V': int(ipv4), 'reserved': self._make_uint(reserved, bits=7,
+                                                               name='reserved bits')},
             prefix_length=prefix_length,
             prefix=addr,
         )
@@ -10388,6 +10655,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``igmp_type`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             igmp_type = option.igmp_type
@@ -10395,8 +10666,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_ActiveMulticastSubscriptionIPv4Option(
             type=type,
-            length=1 + len(context),
-            igmp_type=igmp_type,
+            length=self._make_uint(1 + len(context), bits=8, name='Option Length'),
+            igmp_type=self._make_uint(igmp_type, bits=8, name='IGMP type'),
             context=context,
         )
 
@@ -10417,6 +10688,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``mld_type`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             mld_type = option.mld_type
@@ -10424,8 +10699,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_ActiveMulticastSubscriptionIPv6Option(
             type=type,
-            length=1 + len(context),
-            mld_type=mld_type,
+            length=self._make_uint(1 + len(context), bits=8, name='Option Length'),
+            mld_type=self._make_uint(mld_type, bits=8, name='MLD type'),
             context=context,
         )
 
@@ -10469,6 +10744,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed attribute schema.
 
+        Raises:
+            ProtocolError: If a rate, priority, vendor or reserved value does not fit
+                its field.
+
         Note:
             The data model parameter is named ``option`` rather than ``data``
             deliberately. The vendor-specific attribute of
@@ -10496,7 +10775,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 rate = cast('int', kwargs.get('rate', 0))
             return Schema_PerSessionBitRateAttribute(
                 type=code, length=6,
-                flags={'S': int(service), 'E': int(exclude), 'reserved': reserved}, rate=rate)
+                flags={'S': int(service), 'E': int(exclude),
+                       'reserved': self._make_uint(reserved, bits=14, name='reserved bits')},
+                rate=self._make_uint(rate, bits=32, name='bit rate'))
 
         if code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
                     Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
@@ -10510,7 +10791,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 rate = cast('int', kwargs.get('rate', 0))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            return Schema_BitRateAttribute(type=code, length=6, reserved=octets, rate=rate)
+            return Schema_BitRateAttribute(type=code, length=6, reserved=octets,
+                                           rate=self._make_uint(rate, bits=32, name='bit rate'))
 
         if code == Enum_QoSAttribute.Allocation_Retention_Priority:
             if option is not None:
@@ -10526,7 +10808,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_AllocationRetentionPriorityAttribute(
                 type=code, length=2, reserved=octets,
-                priority={'PL': level, 'PC': capability, 'PV': vulnerability})
+                priority={
+                    'PL': self._make_uint(level, bits=4, name='priority level'),
+                    'PC': self._make_uint(capability, bits=2, name='preemption capability'),
+                    'PV': self._make_uint(vulnerability, bits=2, name='preemption vulnerability'),
+                })
 
         if code == Enum_QoSAttribute.QoS_Traffic_Selector:
             if option is not None:
@@ -10556,8 +10842,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 payload = cast('bytes', kwargs.get('data', b''))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
             return Schema_QoSVendorSpecificAttribute(
-                type=code, length=7 + len(payload), reserved=octets, vendor=vendor,
-                subtype=subtype, data=payload)
+                type=code, length=7 + len(payload), reserved=octets,
+                vendor=self._make_uint(vendor, bits=32, name='vendor ID'),
+                subtype=self._make_uint(subtype, bits=8, name='vendor subtype'), data=payload)
 
         if option is not None:
             payload = cast('Data_UnassignedQoSAttribute', option).data
@@ -10588,6 +10875,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``sr_id``, ``dscp`` or ``oc`` does not fit its field.
+                Also if the option is too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00\x00')
@@ -10598,8 +10889,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         else:
             attributes = attributes or []
 
-        if dscp > 0x3F:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid DSCP: {dscp}')
+        dscp = self._make_uint(dscp, bits=6, name='DSCP')
 
         entries = self._make_qos_attributes(attributes)
         length = 6 + sum(len(entry) if isinstance(entry, bytes) else len(entry.pack())
@@ -10607,10 +10897,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_QualityOfServiceOption(
             type=type,
-            length=length,
-            sr_id=sr_id,
+            length=self._make_uint(length, bits=8, name='Option Length'),
+            sr_id=self._make_uint(sr_id, bits=8, name='service request identifier'),
             tc=dscp << 2,
-            oc=oc,
+            oc=self._make_uint(oc, bits=8, name='operational code'),
             reserved=reserved,
             attributes=entries,
         )
@@ -10681,7 +10971,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If the payload is not a whole number of 32-bit words.
                 :rfc:`7411#section-5.3` measures this option's length in words, so
                 a payload that is not a multiple of 4 octets cannot be described by
-                it at all.
+                it at all. Also if ``code`` does not fit in one octet, or the option is
+                too long for its one-octet ``Option Length``.
 
         """
         if option is not None:
@@ -10695,8 +10986,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_MulticastMobilityOption(
             type=type,
-            length=len(data) // 4,
-            code=code,
+            length=self._make_uint(len(data) // 4, bits=8, name='Option Length'),
+            code=self._make_uint(code, bits=8, name='code'),
             reserved=reserved,
             data=data,
         )
@@ -10721,7 +11012,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the payload is not a whole number of 32-bit words.
+            ProtocolError: If the payload is not a whole number of 32-bit words,
+                or ``code`` or ``status`` does not fit in one octet.
+                Also if the option is too long for its one-octet ``Option Length``.
 
         """
         if option is not None:
@@ -10735,9 +11028,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_MulticastAcknowledgementOption(
             type=type,
-            length=len(data) // 4,
-            code=code,
-            status=status,
+            length=self._make_uint(len(data) // 4, bits=8, name='Option Length'),
+            code=self._make_uint(code, bits=8, name='code'),
+            status=self._make_uint(status, bits=8, name='status'),
             data=data,
         )
 
@@ -10799,6 +11092,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed sub-option schema.
 
+        Raises:
+            ProtocolError: If a timer or count does not fit its field.
+
         Note:
             The data model parameter is named ``option`` rather than ``data`` so
             that it cannot shadow a sub-option field of that name -- see
@@ -10818,8 +11114,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 initial = self._seconds(kwargs.get('initial_retransmission', 0))
                 maximum = self._seconds(kwargs.get('max_retransmission', 0))
             return Schema_BindingReregistrationControlSuboption(
-                type=code, length=6, start_time=start,
-                initial_retransmission=initial, max_retransmission=maximum)
+                type=code, length=6,
+                start_time=self._make_uint(start, bits=16, name='re-registration start time'),
+                initial_retransmission=self._make_uint(initial, bits=16,
+                                                       name='initial retransmission timer'),
+                max_retransmission=self._make_uint(maximum, bits=16,
+                                                   name='maximum retransmission timer'))
 
         if code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
             if option is not None:
@@ -10832,8 +11132,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 delay = self._seconds(kwargs.get('retransmission_delay', 0))
                 count = cast('int', kwargs.get('max_retransmissions', 0))
             return Schema_HeartbeatControlSuboption(
-                type=code, length=6, interval=interval,
-                retransmission_delay=delay, max_retransmissions=count)
+                type=code, length=6,
+                interval=self._make_uint(interval, bits=16, name='heartbeat interval'),
+                retransmission_delay=self._make_uint(delay, bits=16, name='retransmission delay'),
+                max_retransmissions=self._make_uint(count, bits=16, name='maximum retransmissions'))
 
         if option is not None:
             payload = cast('Data_UnassignedLMAControlledMAGSuboption', option).data
@@ -10856,6 +11158,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             suboptions = option.suboptions
@@ -10871,7 +11177,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_LMAControlledMAGParametersOption(
             type=type,
-            length=length,
+            length=self._make_uint(length, bits=8, name='Option Length'),
             suboptions=entries,
         )
 
@@ -10907,7 +11213,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If both flags are set, which
-                :rfc:`8278#section-4.1` forbids.
+                :rfc:`8278#section-4.1` forbids, or if ``label``, ``bid`` or
+                ``reserved`` does not fit its field.
+                Also if ``att`` does not fit in one octet.
 
         """
         if option is not None:
@@ -10925,16 +11233,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             raise ProtocolError(f'{self.alias}: [OptNo {type}] the bulk re-registration and '
                                 'registration overwrite flags are mutually exclusive')
 
+        self._make_uint(att_val, bits=8, name='access technology type')
         return Schema_MAGMultipathBindingOption(
             type=type,
             length=6,
             att=att_val,
-            label=label,
-            bid=bid,
+            label=self._make_uint(label, bits=8, name='interface label'),
+            bid=self._make_uint(bid, bits=8, name='binding identifier'),
             flags={
                 'B': int(bulk),
                 'O': int(overwrite),
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=22, name='reserved bits'),
             },
         )
 
@@ -10963,6 +11272,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``subtype`` does not fit in one octet, or the option is
+                too long for its one-octet ``Option Length``.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -10972,9 +11285,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
+        self._make_uint(subtype_val, bits=8, name='MAG identifier subtype')
         return Schema_MAGIdentifierOption(
             type=type,
-            length=2 + len(identifier),
+            length=self._make_uint(2 + len(identifier), bits=8, name='Option Length'),
             subtype=subtype_val,
             reserved=reserved,
             identifier=identifier,
@@ -10999,12 +11313,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -11035,12 +11354,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -11073,6 +11397,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
@@ -11080,6 +11408,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             maar = option.maar
             prefix = option.prefix
 
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
@@ -11157,6 +11486,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00')
@@ -11164,7 +11497,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_DLIFLinkLayerAddressOption(
             type=type,
-            length=2 + len(lla),
+            length=self._make_uint(2 + len(lla), bits=8, name='Option Length'),
             reserved=reserved,
             lla=lla,
         )
@@ -11267,6 +11600,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed extension schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` or an entry of ``prefixes`` does not fit its
+                field.
+
         """
         if option is not None:
             flag = option.flag
@@ -11281,6 +11618,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         else:
             prefixes = prefixes or []
 
+        for item in prefixes:
+            self._make_uint(item, bits=64, name='prefix')
+
         return Schema_MultiPrefixExtension(
             type=type,
             # NOTE: The extension data is the 4-octet flags word followed by one
@@ -11292,7 +11632,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=4 + len(prefixes) * 8,
             flags={
                 'P': int(flag),
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=31, name='reserved bits'),
             },
             prefixes=prefixes,
         )

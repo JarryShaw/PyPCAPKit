@@ -1528,7 +1528,11 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
     zeros they were read as. The ``__short_read__`` record that
     :func:`keep_short_read` left in ``data`` names the field the capture ended
     inside and how much of it there was, so everything from that point on is
-    dropped (:issue:`1458`). A header cut short has no payload past it.
+    dropped (:issue:`1458`). A header cut short has no payload past it, so it
+    ends the rebuilt data, and what the protocol writes ahead of it is kept:
+    the HTTP/2 connection preface ``HTTP.pack`` writes (:issue:`2665`). This
+    holds while ``pack`` writes nothing after the header schema, as no protocol
+    rebuilt here does; a trailer would keep as many of the cut octets.
 
     """
     record = data.get('__short_read__') if isinstance(data, collections.abc.Mapping) else None
@@ -1537,7 +1541,9 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
         return protocol
 
     name, count = record
-    offset = 0
+    # NOTE: Where the header starts, past what is written ahead of it (#2665); the
+    # width is summed from the buffers, as ``Schema.unpack`` sums it, not repacked.
+    offset = len(protocol._data) - sum(map(len, header.__buffer__.values()))  # pylint: disable=protected-access
     for key in header.__fields__:
         if key == name:
             offset += min(count, len(header.__buffer__[key]))

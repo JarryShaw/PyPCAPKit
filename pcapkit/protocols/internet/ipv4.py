@@ -57,6 +57,7 @@ from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as Data_ESECOption
@@ -221,6 +222,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          :exc:`ValueError`, an :exc:`OverflowError` or a
          :exc:`~pcapkit.utilities.exceptions.FieldValueError`, or a different
          value written in its place (:issue:`2617`).
+       * :meth:`make` and the SID, MTU, Traceroute, timestamp, security,
+         E-SEC, router alert, Quick-Start and route option makers, given a
+         value a fixed-width field cannot carry -- negative, too wide, or a
+         :obj:`bool` for a field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception; so do the
+         route and timestamp makers for a slot count that is a :obj:`bool`,
+         and :meth:`make` for options too long for the IHL. The registry
+         codes :meth:`make` takes, such as ``protocol``, are not
+         range-checked (:issue:`2614`).
 
     """
 
@@ -533,6 +544,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``id``, ``reserved``, ``offset``, ``ttl`` or the
+                total length does not fit its field, or the options make a
+                header too long for its four-bit IHL.
+
         .. versionchanged:: 1.5.0
 
            Takes ``reserved`` ahead of ``df`` (:issue:`1326`), and
@@ -553,14 +569,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,
                                  reversed=protocol_reversed, pack=False)
-        ttl_val = ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds())
+        ttl_val = self._make_uint(ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds()),
+                                  bits=8, name='TTL')
+        id = self._make_uint(id, bits=16, name='identification')
+        reserved = self._make_uint(reserved, bits=1, name='reserved flag')
+        offset = self._make_uint(offset, bits=13, name='fragment offset')
 
         if options is not None:
             options_value, options_length = self._make_ipv4_options(options, padding)
         else:
             options_value, options_length = [], 0
 
-        ihl = 5 + math.ceil(options_length / 4)
+        ihl = self._make_uint(5 + math.ceil(options_length / 4), bits=4, name='IHL')
 
         # NOTE: An explicit ``total_length`` is written as given, so that a
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
@@ -569,6 +589,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # what a plain ``IPv4(payload=...)`` wants.
         if total_length is None:
             total_length = ihl * 4 + len(payload)
+        total_length = self._make_uint(total_length, bits=16, name='total length')
 
         schema = Schema_IPv4(
             vihl={
@@ -942,8 +963,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # lost on parse. The terminator is an EOOL option *schema*, like the
         # NOP padding: the ``options`` field takes only schemas and
         # :obj:`bytes`, not the bare wire code.
-        if total_length % 4:
-            pad_len = 4 - (total_length % 4)
+        pad_len = pad_length(total_length, 4)
+        if pad_len:
             total_length += pad_len
 
             # zero octets after an EOOL already in the list, as EOOL schemas
@@ -1657,9 +1678,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``authorities`` names a bit position that is not a
-                protection authority -- a negative one, or one that :rfc:`1108`
-                reserves as a field termination indicator.
+            ProtocolError: If ``level`` does not fit in one octet, or
+                ``authorities`` names a bit position that is not a protection
+                authority -- a negative one, one that :rfc:`1108` reserves as a
+                field termination indicator, or one past what the one-octet
+                option length can count.
 
         Notes:
             :rfc:`1108#section-2.4` lays each protection authority octet out as
@@ -1690,9 +1713,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         if authorities:
             for auth in authorities:
-                if auth < 0:
-                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid protection '
-                                        f'authority: {auth}')
+                # NOTE: 11 bits keeps the bitmap below 256 octets; the option
+                # length below draws the exact line.
+                self._make_uint(auth, bits=11, name='protection authority')
                 if auth % 8 == 7:
                     # ``.name`` where there is one, rather than
                     # ``Enum_ProtectionAuthority.get(auth)``: that call runs
@@ -1741,8 +1764,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         return Schema_SECOption(
             type=kind,
-            length=3 + len(data),
-            level=level_val,
+            length=self._make_uint(3 + len(data), bits=8, name='option length'),
+            level=self._make_uint(level_val, bits=8, name='classification level'),
             data=data,
         )
 
@@ -1766,6 +1789,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``counts`` is not a number of slots the
+                one-octet length can count.
+
         """
         if option is not None:
             slots = list(option.route or ())  # type: list[IPv4Address | str | bytes | int]
@@ -1774,6 +1801,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length = option.length
         else:
             route = [] if route is None else route
+            # NOTE: 63 slots fill the one-octet length: 3 + 4 * 63 = 255.
+            counts = self._make_uint(counts, bits=6, name='address count')
             length = 3 + counts * 4
             pointer = 4 + min(len(route), counts) * 4
 
@@ -1816,7 +1845,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Raises:
             ProtocolError: If ``option`` is not given and ``timestamp`` is
-                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`.
+                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`, or
+                ``counts`` is not a non-negative :obj:`int`; or if ``overflow``
+                does not fit in four bits, or a timestamp or a word of
+                ``remaining`` in 32 bits.
             FieldValueError: If an address is a :obj:`bool` or is not a valid
                 IPv4 address.
 
@@ -1853,6 +1885,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             ts_list = []
             remainder = b''
+            # NOTE: Not _make_uint: a count past what the header holds is
+            # clamped to it below rather than refused, so it has no width.
+            if isinstance(counts, bool) or not isinstance(counts, int) or counts < 0:
+                raise ProtocolError(f'{self.alias}: invalid timestamp count: {counts!r}')
             if timestamp is None:
                 timestamp = []
             if isinstance(timestamp, list):
@@ -1913,10 +1949,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length=length,
             pointer=pointer,
             flags={
-                'oflw': overflow,
+                'oflw': self._make_uint(overflow, bits=4, name='timestamp overflow count'),
                 'flag': flag,
             },
-            ts_data=ts_list,
+            ts_data=[self._make_uint(word, bits=32, name='timestamp slot') for word in ts_list],
             remainder=remainder,
         )
 
@@ -1936,6 +1972,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``format`` does not fit in one octet.
+
         """
         if option is not None:
             length = option.length
@@ -1947,7 +1986,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_ESECOption(
             type=kind,
             length=length,
-            format=format,
+            format=self._make_uint(format, bits=8, name='E-SEC format code'),
             info=info,
         )
 
@@ -1971,6 +2010,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``counts`` is not a number of slots the
+                one-octet length can count.
+
         """
         if option is not None:
             slots = list(option.route or ())  # type: list[IPv4Address | str | bytes | int]
@@ -1979,6 +2022,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length = option.length
         else:
             route = [] if route is None else route
+            # NOTE: 63 slots fill the one-octet length: 3 + 4 * 63 = 255.
+            counts = self._make_uint(counts, bits=6, name='address count')
             length = 3 + counts * 4
             pointer = 4 + min(len(route), counts) * 4
 
@@ -2008,6 +2053,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``sid`` does not fit in two octets.
+
         """
         if option is not None:
             sid = option.sid
@@ -2015,7 +2063,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_SIDOption(
             type=kind,
             length=4,
-            sid=sid,
+            sid=self._make_uint(sid, bits=16, name='stream ID'),
         )
 
     def _make_opt_ssr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_SSROption]' = None, *,
@@ -2038,6 +2086,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``counts`` is not a number of slots the
+                one-octet length can count.
+
         """
         if option is not None:
             slots = list(option.route or ())  # type: list[IPv4Address | str | bytes | int]
@@ -2046,6 +2098,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length = option.length
         else:
             route = [] if route is None else route
+            # NOTE: 63 slots fill the one-octet length: 3 + 4 * 63 = 255.
+            counts = self._make_uint(counts, bits=6, name='address count')
             length = 3 + counts * 4
             pointer = 4 + min(len(route), counts) * 4
 
@@ -2075,6 +2129,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``mtu`` does not fit in two octets.
+
         """
         if option is not None:
             mtu = option.mtu
@@ -2082,7 +2139,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_MTUPOption(
             type=kind,
             length=4,
-            mtu=mtu,
+            mtu=self._make_uint(mtu, bits=16, name='MTU'),
         )
 
     def _make_opt_mtur(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_MTUROption]' = None, *,
@@ -2099,6 +2156,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``mtu`` does not fit in two octets.
+
         """
         if option is not None:
             mtu = option.mtu
@@ -2106,7 +2166,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_MTUROption(
             type=kind,
             length=4,
-            mtu=mtu,
+            mtu=self._make_uint(mtu, bits=16, name='MTU'),
         )
 
     def _make_opt_tr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TROption]' = None, *,
@@ -2129,6 +2189,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``id``, ``out`` or ``ret`` does not fit in two
+                octets.
+
         """
         if option is not None:
             id = option.id
@@ -2139,9 +2203,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_TROption(
             type=kind,
             length=12,
-            id=id,
-            out=out,
-            ret=ret,
+            id=self._make_uint(id, bits=16, name='traceroute ID number'),
+            out=self._make_uint(out, bits=16, name='traceroute outbound hop count'),
+            ret=self._make_uint(ret, bits=16, name='traceroute return hop count'),
             origin=origin,
         )
 
@@ -2165,6 +2229,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the router alert value does not fit in two
+                octets.
+
         """
         if option is not None:
             alert_val = option.alert
@@ -2172,6 +2240,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             alert_val = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
                                          reversed=alert_reversed, pack=False)
 
+        self._make_uint(alert_val, bits=16, name='router alert value')
         return Schema_RTRALTOption(
             type=kind,
             length=4,
@@ -2214,8 +2283,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Raises:
             ProtocolError: If ``func`` does not fit in four bits, the rate code
-                cannot carry ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does
-                not fit its field.
+                cannot carry ``rate``, or ``ttl``, ``unused``, ``nonce`` or
+                ``reserved`` does not fit its field.
 
         """
         if isinstance(option, Data_UnassignedOption):
@@ -2257,14 +2326,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                reserved=unused,
+                reserved=self._make_uint(unused, bits=8, name='Quick-Start not-used octet'),
                 nonce={
                     'nonce': nonce,
                     'reserved': reserved,
                 },
             )
-        if not 0 <= func_enum < 16:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid QS function: {func_enum}')
+        func_val = self._make_uint(func_enum, bits=4, name='QS function')
         ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
-        data = bytes([(func_enum << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
+        data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
         return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, data=data))

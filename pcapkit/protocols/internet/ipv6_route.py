@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, cast, overload
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
@@ -115,6 +116,16 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
          (:issue:`1235`), and the reserved octets of a Source Route or Type 2
          header and the ``Pad`` octets of an RPL one as captured
          (:issue:`1223`).
+
+    .. versionchanged:: 1.6.0
+
+       :meth:`make` and the RPL source route maker, given a value a
+       fixed-width field cannot carry -- negative, too wide, or a :obj:`bool`
+       for a field wider than one bit -- raise
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than writing
+       a different value or raising another exception. The registry codes
+       :meth:`make` takes, ``next`` and ``type``, are not range-checked
+       (:issue:`2614`).
 
     """
 
@@ -285,7 +296,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 read for any other ``data``.
             ProtocolError: If ``data`` is :obj:`bytes` that do not parse as
                 the routing data of ``type``, or is of none of the accepted
-                types.
+                types; or if ``seg_left``, or ``hdr_ext_len`` or the
+                ``Hdr Ext Len`` computed from ``data``, does not fit in one
+                octet.
 
         .. versionchanged:: 1.5.0
 
@@ -352,9 +365,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         return Schema_IPv6_Route(
             next=next_val,
-            length=length,
+            length=self._make_uint(length, bits=8, name='Hdr Ext Len'),
             type=type_val,
-            seg_left=seg_left,
+            seg_left=self._make_uint(seg_left, bits=8, name='Segments Left'),
             data=data_val,
             payload=payload,
         )
@@ -761,7 +774,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         if route is not None:
             data = route.data
 
-        pad_len = (8 - (len(data) + 4) % 8) % 8
+        pad_len = pad_length(len(data) + 4, 8)
         if pad_len:
             data += bytes(pad_len)
 
@@ -853,7 +866,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Raises:
             FieldValueError: If an entry of ``ip`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
-            ProtocolError: If ``ip`` is empty.
+            ProtocolError: If ``ip`` is empty, or ``reserved`` does not fit in
+                its twenty bits.
 
         """
         if route is not None:
@@ -925,14 +939,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 prefix_e = os_path.commonprefix(test_list)
                 cmpr_e = min(len(prefix_e), 15)
 
-                # NOTE: the outer ``% 8`` keeps an already 8-octet-aligned
-                # vector from being handed a *full* 8 octets of padding
-                # (``8 - 0`` is 8, not 0). That is reachable whenever ``dst``
-                # shares no prefix with the addresses, making ``cmpr_i`` and
-                # ``cmpr_e`` both 0 and the vector a multiple of 16, and it
-                # contradicts :rfc:`6554#section-3`: when CmprI and CmprE are
-                # both 0, Pad MUST be 0. Same idiom as ``_make_data_type_none``.
-                pad = (8 - ((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e)) % 8) % 8
+                # NOTE: An aligned vector gets no padding, as :rfc:`6554#section-3`
+                # requires a Pad of 0 when CmprI and CmprE are both 0.
+                pad = pad_length((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e), 8)
 
                 ip_val = []
                 for item in ip[:-1]:
@@ -952,7 +961,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             },
             pad={
                 'pad_len': pad,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=20, name='RPL reserved bits'),
             },
             addresses=ip_val,
             padding=padding,

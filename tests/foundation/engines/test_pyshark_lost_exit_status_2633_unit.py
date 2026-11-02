@@ -294,9 +294,10 @@ async def run(code):
 for code in (0, 2):
     process = loop.run_until_complete(run(code))
     capture = Capture(process)
+    closing = engine(capture)  # imports pcapkit before patch.dict, whose exit would unload it
     with stand_in_pyshark():
         try:
-            engine(capture).close()
+            closing.close()
             raised = None
         except Exception as error:
             raised = type(error).__name__

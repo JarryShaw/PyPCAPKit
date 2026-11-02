@@ -107,11 +107,21 @@ CASES = (
         '9c40138906008f3a0100000000000001123456782004010268656c6c6f')),
     ('sctp', 'transport.sctp:SCTP', {}, bytes.fromhex(
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
+    # #2673: a COOKIE ACK, then an INIT with an IPv4 Address parameter, in an IPv4
+    # datagram declaring all of it, so a cut leaves its length past the data
+    ('sctp-ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '450000401234000040847bcfc0000201c6336402' '13881389deadbeef00000000' '0b000004'
+        '0100001c000000010000ffff0001000100000001' '00050008c0000202')),
     ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),
     ('http1', 'application.httpv1:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
     # an HTTP/2 SETTINGS frame of three settings, to TCP port 80 (#2659)
     ('httpv2-settings', 'internet.ipv4:IPv4', {}, bytes.fromhex(
         '450000431234000040067c4ac0000201c6336402' '9c40005000000001000000015010ffff00000000'
+        '000012040000000000' '000100001000' '000300000064' '000400010000')),
+    # the same, after the connection preface (#2665)
+    ('httpv2-preface', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '4500005b1234000040067c32c0000201c6336402' '9c40005000000001000000015010ffff00000000'
+        '505249202a20485454502f322e300d0a0d0a534d0d0a0d0a'
         '000012040000000000' '000100001000' '000300000064' '000400010000')),
 )
 

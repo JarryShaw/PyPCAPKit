@@ -3,7 +3,7 @@
 """header schema for stream control transmission protocol"""
 
 import io
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
@@ -49,7 +49,9 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Callable
+    from typing import IO, Any, Callable, Optional
+
+    from typing_extensions import Self
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -895,7 +897,9 @@ class ChunkListField(OptionField):
     cannot be told apart from a chunk cut short. They are not parsed but
     reported as option padding, which :meth:`Schema.unpack
     <pcapkit.protocols.schema.schema.Schema.unpack>` hands back to the stream for
-    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`).
+    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`). The area reaches no
+    further than the octets present, as :meth:`SCTP.unpack` sizes it
+    (:issue:`2673`).
 
     """
 
@@ -961,6 +965,49 @@ class SCTP(Schema):
     #: Octets captured after the last whole chunk, see :class:`ChunkListField`
     #: and :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
+
+    @classmethod
+    def unpack(cls, data: 'bytes | IO[bytes]',  # type: ignore[override]
+               length: 'Optional[int]' = None, packet: 'Optional[dict[str, Any]]' = None) -> 'Self':
+        """Unpack :obj:`bytes` into :class:`SCTP`, no further than the octets present.
+
+        Args:
+            data: Packed data.
+            length: Length of data, as the enclosing layer declares it.
+            packet: Unpacked data.
+
+        Returns:
+            Unpacked data as :class:`SCTP`.
+
+        SCTP has no packet length field (:rfc:`9260#section-3`), so a ``length``
+        past the octets present, as an IPv4 Total Length the capture cut short of
+        declares, is cut to them. Sized past them, :attr:`chunks` would record the
+        data as ending inside it while :class:`ChunkListField` hands the octets
+        after the last whole chunk to :attr:`trailer`, so :meth:`Schema.pack
+        <pcapkit.protocols.schema.schema.Schema.pack>` would drop them and
+        ``bytes(schema)`` count them twice (:issue:`2673`).
+
+        When no octet follows the last whole chunk, which the capture may have cut
+        inside its padding, the data does end inside :attr:`chunks`, so the cut is
+        recorded there as :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` records a short read, and
+        packing writes back only the octets read.
+
+        """
+        cut = False
+        if length is not None:
+            if isinstance(data, bytes):
+                present = len(data)
+            else:
+                start = data.tell()
+                present = data.seek(0, io.SEEK_END) - start
+                data.seek(start, io.SEEK_SET)
+            cut, length = length > present, min(length, present)
+
+        schema = cast('Self', super().unpack(data, length, packet))  # type: ignore[call-arg,misc]
+        if cut and not schema.__buffer__['trailer'] and '__short_read__' not in schema.__dict__:
+            schema.__dict__['__short_read__'] = ('chunks', len(schema.__buffer__['chunks']))
+        return schema
 
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int',
