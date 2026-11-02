@@ -132,7 +132,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     # place of the omitted values, so that it could not be packed at all and
     # failed with an error naming a field class rather than a field.
     #
-    # :class:`~pcapkit.protocols.schema.misc.null.NoPayload` is what the test
+    # :class:`~pcapkit.protocols.schema.misc.no_payload.NoPayload` is what the test
     # protects: it declares an argument-less ``__init__`` of its own so that no
     # generated one displaces it.
     if '__init__' not in cls.__dict__:

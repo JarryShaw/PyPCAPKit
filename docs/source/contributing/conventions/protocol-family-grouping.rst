@@ -363,5 +363,4 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 ``data/`` **modules follow the same layout**: the top-level class takes the module's
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
-:issue:`2529`, where the class that does not match yet is pending:
-:class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.
+:issue:`2529`.

@@ -9,7 +9,7 @@ Auxiliary Protocols
 These include the PCAP header classes, the PCAP-NG
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` class, the
 :class:`~pcapkit.protocols.misc.raw.Raw` class for not-supported protocols, and
-the :class:`~pcapkit.protocols.misc.null.NoPayload` class for indication of
+the :class:`~pcapkit.protocols.misc.no_payload.NoPayload` class for indication of
 empty payload.
 
 .. toctree::
@@ -18,5 +18,5 @@ empty payload.
    pcap
    pcapng
    raw
-   null
+   no_payload
    checksum

@@ -143,7 +143,7 @@ class DefaultDescriptorResolutionTests(unittest.TestCase):
 
         """
         Dummy = self._dummy_protocol()
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.misc.raw import Raw
 
         for _ in range(5):

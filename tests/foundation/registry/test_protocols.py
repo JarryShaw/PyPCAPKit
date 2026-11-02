@@ -306,7 +306,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.protocols.misc.raw import Raw

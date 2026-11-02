@@ -196,7 +196,7 @@ class IPv6UnitTests(unittest.TestCase):
         from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.misc.raw import Raw
 
         proto = object.__new__(IPv6)

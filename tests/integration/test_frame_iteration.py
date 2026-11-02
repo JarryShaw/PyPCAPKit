@@ -96,7 +96,7 @@ def stack(frame: 'Any') -> 'list[Any]':
     apart, which is what :class:`ExtractionLimitTests` has to assert on.
 
     """
-    from pcapkit.protocols.misc.null import NoPayload
+    from pcapkit.protocols.misc.no_payload import NoPayload
 
     walked = []  # type: list[Any]
     current = frame.payload

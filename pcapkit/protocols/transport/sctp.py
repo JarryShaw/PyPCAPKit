@@ -968,7 +968,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         whose payload protocol identifier selects the next layer. Should the
         packet carry no DATA chunk, an empty :obj:`bytes` is returned and the
         next layer resolves to
-        :class:`~pcapkit.protocols.misc.null.NoPayload`.
+        :class:`~pcapkit.protocols.misc.no_payload.NoPayload`.
 
         Returns:
             Payload of the packet as :obj:`bytes`.

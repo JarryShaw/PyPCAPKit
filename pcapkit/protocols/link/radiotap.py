@@ -48,7 +48,7 @@ Decoding every optional field radiotap.org defines is tracked on
   :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.fields`.
 * **Hands** everything from ``it_len`` on, the 802.11 MAC frame, to
   :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`
-  (:class:`~pcapkit.protocols.misc.null.NoPayload` when nothing follows).
+  (:class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing follows).
   The header names no next protocol, since an 802.11 frame always follows it,
   so the frame is looked up in
   :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`

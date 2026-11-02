@@ -176,7 +176,7 @@ class TestLoopback(unittest.TestCase):
 
     def _assert_capture(self, linktype: int, records: 'list[tuple[bytes, str]]', ipv4: int) -> 'list':
         """Extract ``records`` under ``linktype`` in both formats; check chains and rebuilds."""
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.misc.pcap.frame import Frame
 
         frames = []

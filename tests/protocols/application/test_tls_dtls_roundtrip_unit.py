@@ -331,7 +331,7 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
 
     def test_every_record_is_a_tls_layer(self) -> None:
         from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for name, wire in TLS_SEGMENTS.items():
             with self.subTest(segment=name):
@@ -526,7 +526,7 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
     def test_every_record_is_a_dtls_layer(self) -> None:
         from pcapkit.protocols.application.dtls import DTLS
         from pcapkit.protocols.data.application.dtls import DTLSCiphertext
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for name, wire in DTLS_DATAGRAMS.items():
             with self.subTest(datagram=name):

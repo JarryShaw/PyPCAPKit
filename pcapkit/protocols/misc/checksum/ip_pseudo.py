@@ -66,7 +66,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.checksum.ip_pseudo import IP_Pseudo as Data_IP_Pseudo
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPv6
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH, jumbo_payload_length
 from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
@@ -338,7 +338,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                                     f'expected {IPV4_PSEUDO_LEN} or {IPV6_PSEUDO_LEN}')
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
-        #: pcapkit.protocols.misc.null.NoPayload: Next layer (no payload).
+        #: pcapkit.protocols.misc.no_payload.NoPayload: Next layer (no payload).
         self._next = NoPayload()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, self.alias)

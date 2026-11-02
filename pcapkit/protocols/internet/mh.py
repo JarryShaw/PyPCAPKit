@@ -285,7 +285,7 @@ from pcapkit.protocols.data.internet.mh import \
     UpdateNotificationMessage as Data_UpdateNotificationMessage
 from pcapkit.protocols.data.internet.mh import VendorSpecificOption as Data_VendorSpecificOption
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
 from pcapkit.protocols.schema.internet.mh import \
     AccessNetworkIdentifierOption as Schema_AccessNetworkIdentifierOption

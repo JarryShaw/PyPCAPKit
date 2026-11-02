@@ -64,7 +64,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                 data = DummyData(value=value)
                 self._next = next_protocol
                 if self._next is None:
-                    from pcapkit.protocols.misc.null import NoPayload
+                    from pcapkit.protocols.misc.no_payload import NoPayload
                     self._next = NoPayload()
                 self._protos = ProtoChain(self.__class__, self.alias, basis=self._next.protochain)
                 return data
@@ -340,7 +340,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         DummyProtocol.__proto__ = collections.defaultdict(lambda: BrokenRaw, {2: BrokenRaw, 3: EOFProtocol})
         self.assertIsInstance(DummyProtocol.analyze(2, b'bad'), Raw)
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         self.assertIsInstance(DummyProtocol.analyze(3, b''), NoPayload)
 
         proto = DummyProtocol(packet=b'abpayload')
@@ -527,7 +527,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
     def test_make_payload_branches(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         self.assertIsInstance(DummyProtocol._make_payload({}), NoPayload)  # type: ignore[arg-type]
         self.assertIsInstance(DummyProtocol._make_payload({  # type: ignore[arg-type]

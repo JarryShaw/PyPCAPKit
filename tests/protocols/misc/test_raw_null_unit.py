@@ -45,7 +45,7 @@ class RawNullUnitTests(unittest.TestCase):
         self.assertIsNone(raw._info.protocol)
 
     def test_no_payload_properties_read_make_and_index_error(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         null = object.__new__(NoPayload)

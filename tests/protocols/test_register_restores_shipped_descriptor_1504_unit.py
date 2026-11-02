@@ -113,7 +113,7 @@ class TestRestoreShippedDescriptor(unittest.TestCase):
         for module, name, code in SITES:
             yield name, getattr(importlib.import_module(module), name), _code(code)
         table = collections.defaultdict(lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
-                                        {1: ModuleDescriptor('pcapkit.protocols.misc.null', 'NoPayload')})
+                                        {1: ModuleDescriptor('pcapkit.protocols.misc.no_payload', 'NoPayload')})
         yield 'ProtocolBase', type('W1504Scratch', (Raw,), {'__module__': __name__, '__proto__': table}), 1
 
     def _each_site(self, check):  # type: ignore[no-untyped-def]

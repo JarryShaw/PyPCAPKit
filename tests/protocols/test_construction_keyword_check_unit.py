@@ -157,7 +157,7 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
             return 2
 
         def read(self, length: 'int | None' = None, **kwargs: 'Any') -> 'DummyData':
-            from pcapkit.protocols.misc.null import NoPayload
+            from pcapkit.protocols.misc.no_payload import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -381,7 +381,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         def read(self, length: 'int | None' = None, *, eggs: 'int' = 0,
                  **kwargs: 'Any') -> 'Any':
             from pcapkit.corekit.protochain import ProtoChain
-            from pcapkit.protocols.misc.null import NoPayload
+            from pcapkit.protocols.misc.no_payload import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -408,7 +408,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         """
         def read(self, length: 'int | None' = None, **kwargs: 'Any') -> 'Any':
             from pcapkit.corekit.protochain import ProtoChain
-            from pcapkit.protocols.misc.null import NoPayload
+            from pcapkit.protocols.misc.no_payload import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -582,7 +582,7 @@ class ScopeTests(unittest.TestCase):
         default :meth:`ProtocolBase._make_data
         <pcapkit.protocols.protocol.ProtocolBase._make_data>` is ``data.to_dict()``
         -- so ``from_data`` hands ``packet`` to a ``make`` that very often does not
-        declare it. :class:`~pcapkit.protocols.misc.null.NoPayload` is the case
+        declare it. :class:`~pcapkit.protocols.misc.no_payload.NoPayload` is the case
         that matters, because :meth:`ProtocolBase._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
         innermost layer of every packet: refusing ``packet`` breaks ``from_data``

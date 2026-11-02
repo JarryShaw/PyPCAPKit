@@ -555,7 +555,7 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
             them poisons every later test that imports :mod:`pcapkit`.
         raw_cls: Stand-in to bind as ``pcapkit.protocols.misc.raw.Raw``.
         null_cls: Stand-in to bind as
-            ``pcapkit.protocols.misc.null.NoPayload``.
+            ``pcapkit.protocols.misc.no_payload.NoPayload``.
 
     Raises:
         RuntimeError: If ``test`` is not under :func:`isolate_modules`.
@@ -569,9 +569,9 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
     raw_module.Raw = raw_cls
     sys.modules['pcapkit.protocols.misc.raw'] = raw_module
 
-    null_module = types.ModuleType('pcapkit.protocols.misc.null')
+    null_module = types.ModuleType('pcapkit.protocols.misc.no_payload')
     null_module.NoPayload = null_cls
-    sys.modules['pcapkit.protocols.misc.null'] = null_module
+    sys.modules['pcapkit.protocols.misc.no_payload'] = null_module
 
 
 def _reset_abc_caches() -> None:

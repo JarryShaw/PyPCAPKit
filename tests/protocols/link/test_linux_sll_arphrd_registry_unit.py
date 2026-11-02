@@ -132,7 +132,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
 
     def test_an_empty_payload_is_no_payload_on_either_path(self) -> None:
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for version, header, _ in self._versions():
             for arphrd in (ARPHRD.FRAD, 1):
