@@ -26,7 +26,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
 from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, NumberField,
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString, PaddingField,
-                                            StringField)
+                                            StringField, pad_length)
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
@@ -1233,7 +1233,7 @@ class UnknownOption(_OPT_Option):
     #: Option value.
     data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length']))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> 'None': ...
@@ -1254,7 +1254,7 @@ class CommentOption(_OPT_Option, code=Enum_OptionType.opt_comment):
     #: Comment text.
     comment: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> 'None': ...
@@ -1272,7 +1272,7 @@ class CustomOption(_OPT_Option, code=[Enum_OptionType.opt_custom_2988,
     #: Custom data.
     data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 4))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'int', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
@@ -1398,7 +1398,7 @@ class IF_NameOption(_IF_Option, code=Enum_OptionType.if_name):
     #: Interface name.
     name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
@@ -1411,7 +1411,7 @@ class IF_DescriptionOption(_IF_Option, code=Enum_OptionType.if_description):
     #: Interface description.
     description: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', description: 'str') -> 'None': ...
@@ -1424,7 +1424,7 @@ class IF_IPv4AddrOption(_IF_Option, code=Enum_OptionType.if_IPv4addr):
     #: IPv4 interface.
     interface: 'IPv4Interface' = IPv4InterfaceField()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv4Interface | str') -> 'None': ...
@@ -1437,7 +1437,7 @@ class IF_IPv6AddrOption(_IF_Option, code=Enum_OptionType.if_IPv6addr):
     #: IPv6 interface.
     interface: 'IPv6Interface' = IPv6InterfaceField()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv6Interface | str') -> 'None': ...
@@ -1450,7 +1450,7 @@ class IF_MACAddrOption(_IF_Option, code=Enum_OptionType.if_MACaddr):
     #: MAC interface.
     interface: 'bytes' = BytesField(length=6)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
@@ -1463,7 +1463,7 @@ class IF_EUIAddrOption(_IF_Option, code=Enum_OptionType.if_EUIaddr):
     #: EUI interface.
     interface: 'bytes' = BytesField(length=8)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
@@ -1476,7 +1476,7 @@ class IF_SpeedOption(_IF_Option, code=Enum_OptionType.if_speed):
     #: Interface speed, in bits per second.
     speed: 'int' = UInt64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> 'None': ...
@@ -1493,7 +1493,7 @@ class IF_TSResolOption(_IF_Option, code=Enum_OptionType.if_tsresol):
         'resolution': (1, 7),
     })
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     def post_process(self, packet: 'dict[str, Any]') -> 'IF_TSResolOption':
         """Revise ``schema`` data after unpacking process.
@@ -1523,7 +1523,7 @@ class IF_TZoneOption(_IF_Option, code=Enum_OptionType.if_tzone):
     #: Interface time zone (as in seconds difference from GMT).
     tzone: 'int' = Int32Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', tzone: 'int') -> 'None': ...
@@ -1538,7 +1538,7 @@ class IF_FilterOption(_IF_Option, code=Enum_OptionType.if_filter):
     #: Capture filter.
     filter: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', filter: 'bytes') -> 'None': ...
@@ -1551,7 +1551,7 @@ class IF_OSOption(_IF_Option, code=Enum_OptionType.if_os):
     #: OS information.
     os: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', os: 'str') -> 'None': ...
@@ -1564,7 +1564,7 @@ class IF_FCSLenOption(_IF_Option, code=Enum_OptionType.if_fcslen):
     #: FCS length.
     fcslen: 'int' = UInt8Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', fcslen: 'int') -> 'None': ...
@@ -1577,7 +1577,7 @@ class IF_TSOffsetOption(_IF_Option, code=Enum_OptionType.if_tsoffset):
     #: Timestamp offset (in seconds).
     tsoffset: 'int' = Int64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', tsoffset: 'int') -> 'None': ...
@@ -1590,7 +1590,7 @@ class IF_HardwareOption(_IF_Option, code=Enum_OptionType.if_hardware):
     #: Hardware information.
     hardware: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', hardware: 'str') -> 'None': ...
@@ -1603,7 +1603,7 @@ class IF_TxSpeedOption(_IF_Option, code=Enum_OptionType.if_txspeed):
     #: Interface transmit speed, in bits per second.
     tx_speed: 'int' = UInt64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', tx_speed: 'int') -> 'None': ...
@@ -1616,7 +1616,7 @@ class IF_RxSpeedOption(_IF_Option, code=Enum_OptionType.if_rxspeed):
     #: Interface receive speed, in bits per second.
     rx_speed: 'int' = UInt64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', rx_speed: 'int') -> 'None': ...
@@ -1689,7 +1689,7 @@ class EPB_FlagsOption(_EPB_Option, code=Enum_OptionType.epb_flags):
     #: Flags.
     flags: 'EPBFlags' = FlagsField(namespace=PACKET_FLAGS, callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
@@ -1704,7 +1704,7 @@ class EPB_HashOption(_EPB_Option, code=Enum_OptionType.epb_hash):
     #: Hash value.
     data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
@@ -1717,7 +1717,7 @@ class EPB_DropCountOption(_EPB_Option, code=Enum_OptionType.epb_dropcount):
     #: Number of packets dropped by the interface.
     drop_count: 'int' = UInt64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', drop_count: 'int') -> 'None': ...
@@ -1730,7 +1730,7 @@ class EPB_PacketIDOption(_EPB_Option, code=Enum_OptionType.epb_packetid):
     #: Packet ID.
     packet_id: 'int' = UInt64Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', packet_id: 'int') -> 'None': ...
@@ -1743,7 +1743,7 @@ class EPB_QueueOption(_EPB_Option, code=Enum_OptionType.epb_queue):
     #: Queue ID.
     queue_id: 'int' = UInt32Field(callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', queue_id: 'int') -> 'None': ...
@@ -1758,7 +1758,7 @@ class EPB_VerdictOption(_EPB_Option, code=Enum_OptionType.epb_verdict):
     #: Verdict value.
     value: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
@@ -1785,7 +1785,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     #: Packet data, bounded by the block (see :func:`captured_area`).
     packet_data: 'bytes' = PayloadField(length=captured_area('captured_len'))
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - captured_area('captured_len')(pkt) % 4) % 4)
+    padding_data: 'bytes' = PaddingField(align=4, after=captured_area('captured_len'))
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: The padding is recomputed here rather than read back from
@@ -1793,7 +1793,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
         # buffer while packing and never lands in the packet data, so its name
         # is not a key here on the packing path.
         length=bounded_area(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]
-                                        - (captured_area('captured_len')(pkt) + 3) // 4 * 4),
+                                        - (size := captured_area('captured_len')(pkt)) - pad_length(size, 4)),
         base_schema=_EPB_Option,
         type_name='type',
         registry=Option.registry['epb'],
@@ -1853,7 +1853,7 @@ def _spb_data_length(packet: 'dict[str, Any]') -> 'int':
     snaplen = packet.get('snaplen')
     if snaplen is not None and snaplen < size:
         size = snaplen
-    if area > (size + 3) // 4 * 4:
+    if area > size + pad_length(size, 4):
         size = area
     return size
 
@@ -1872,7 +1872,7 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
     #: block holds; see :func:`_spb_data_length`.
     packet_data: 'bytes' = PayloadField(length=_spb_data_length)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - len(pkt['packet_data']) % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after=lambda pkt: len(pkt['packet_data']))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1932,7 +1932,7 @@ class UnknownRecord(NameResolutionRecord):
     #: Unknown record data.
     data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length']))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_RecordType', length: 'int', data: 'bytes') -> 'None': ...
@@ -1955,7 +1955,7 @@ class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
     #: Name resolution data.
     resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 4), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -1986,7 +1986,7 @@ class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
     #: Name resolution data.
     resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 16), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -2024,7 +2024,7 @@ class NS_DNSNameOption(_NS_Option, code=Enum_OptionType.ns_dnsname):
     #: DNS name.
     name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
@@ -2302,7 +2302,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
         try:
             self.data = self._read_entries()
             rebuilt = self.dump_entries(cast('list[OrderedMultiDict[str, str | bytes]]', self.data))
-            if self.entry not in (rebuilt, rebuilt + bytes(-len(rebuilt) % 4)):
+            if self.entry not in (rebuilt, rebuilt + bytes(pad_length(len(rebuilt), 4))):
                 raise ProtocolError('PCAP-NG: [systemd Journal Export] parsed entry does not '
                                     'rebuild to the octets captured')
         except ProtocolError as error:
@@ -2630,13 +2630,13 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
         selector=dsb_secrets_selector,
     )
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - secrets_area(pkt) % 4) % 4)
+    padding_data: 'bytes' = PaddingField(align=4, after=secrets_area)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
         length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block]
-                           - (secrets_area(pkt) + 3) // 4 * 4),
+                           - (size := secrets_area(pkt)) - pad_length(size, 4)),
         base_schema=_DSB_Option,
         type_name='type',
         registry=Option.registry['dsb'],
@@ -2731,7 +2731,7 @@ class PACK_FlagsOption(_PACK_Option, code=Enum_OptionType.pack_flags):
     #: Flags.
     flags: 'PACKFlags' = FlagsField(namespace=PACKET_FLAGS, callback=byteorder_callback)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'PACKFlags') -> 'None': ...
@@ -2746,7 +2746,7 @@ class PACK_HashOption(_PACK_Option, code=Enum_OptionType.pack_hash):
     #: Hash value.
     data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(align=4, after='length')
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
@@ -2775,13 +2775,13 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     #: Packet data, bounded by the block (see :func:`captured_area`).
     packet_data: 'bytes' = PayloadField(length=captured_area('captured_length'))
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - captured_area('captured_length')(pkt) % 4) % 4)
+    padding_data: 'bytes' = PaddingField(align=4, after=captured_area('captured_length'))
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
         length=bounded_area(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Packet_Block]
-                                        - (captured_area('captured_length')(pkt) + 3) // 4 * 4),
+                                        - (size := captured_area('captured_length')(pkt)) - pad_length(size, 4)),
         base_schema=_PACK_Option,
         type_name='type',
         registry=Option.registry['pack'],

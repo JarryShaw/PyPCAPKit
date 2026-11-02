@@ -46,11 +46,12 @@ __tier__ = 'LATEST'
 #: * ``Field`` and ``_TextField`` are abstract bases, kept out of ``import *`` as
 #:   every package's base class is (see
 #:   :data:`tests.project.test_public_api.DELIBERATE_NON_EXPORTS`).
-#: * ``packet_byteorder``, ``byteorder_callback``, ``parse_ip_address`` and
-#:   ``nested_packet_context`` are helpers for writing a field or its callbacks,
-#:   reached by their module path. ``nested_packet_context`` in particular builds
-#:   the packet context a nested schema's callbacks receive; star-exporting it
-#:   would drop a generic name into the caller's namespace (#2174).
+#: * ``packet_byteorder``, ``byteorder_callback``, ``parse_ip_address``,
+#:   ``nested_packet_context`` and ``pad_length`` are helpers for writing a field
+#:   or its callbacks, reached by their module path. ``nested_packet_context``
+#:   in particular builds the packet context a nested schema's callbacks
+#:   receive; star-exporting it would drop a generic name into the caller's
+#:   namespace (#2174).
 #: * ``DecodedString`` is the value type :class:`~pcapkit.corekit.fields.strings.StringField`
 #:   returns, not a field.
 FIELDS_DELIBERATE_NON_EXPORTS = {
@@ -58,7 +59,7 @@ FIELDS_DELIBERATE_NON_EXPORTS = {
     'pcapkit.corekit.fields.field': ('Field',),
     'pcapkit.corekit.fields.ipaddress': ('parse_ip_address',),
     'pcapkit.corekit.fields.misc': ('nested_packet_context',),
-    'pcapkit.corekit.fields.strings': ('DecodedString', '_TextField'),
+    'pcapkit.corekit.fields.strings': ('DecodedString', '_TextField', 'pad_length'),
 }
 
 
