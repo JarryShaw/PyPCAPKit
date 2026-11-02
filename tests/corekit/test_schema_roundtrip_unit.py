@@ -20,7 +20,9 @@ callbacks subscript -- is a *driver*, and the drivers are searched over small
 values until the instance closes; a name the schema reads from its enclosing
 layer is supplied the same way, as packet context. Where none closes, the first
 instance that packed is the one reported. :data:`OVERRIDES` holds the few
-values no field type implies (a magic number, a NUL-terminated name).
+values no field type implies (a magic number, a NUL-terminated name), and
+:data:`PARSE_CONTEXT` the context only the parse reads, which packing derives
+for itself and so never reports missing.
 
 A *dispatcher* -- a schema whose ``post_process`` returns the schema it
 selected, such as TCP's ``_MPTCP`` -- is checked through its targets instead:
@@ -64,6 +66,10 @@ MANY_DRIVERS = (0, 1, 2, 4, 8, 16)
 #: Ceiling on driver combinations tried per schema.
 MAX_COMBINATIONS = 400
 
+#: Connection ID the DTLS record case carries. A non-empty one gives the parse a
+#: length to read and the patterned variant octets to misplace (#2645).
+CID = bytes(range(1, 5))
+
 #: Field values no field type implies, by schema label. A value is either the
 #: value itself or a callable taking the schema's module.
 OVERRIDES = {
@@ -78,6 +84,17 @@ OVERRIDES = {
     # Type 0 is reserved, so the first member is no IGMP message at all; only
     # IGMPv3's own schema switches on it (the flat base/v1/v2 one does not).
     'internet.igmpv3:IGMPv3': {'type': lambda module: module.Enum_Type.IGMP_Membership_Query},
+    # The record does not carry the CID's length, so PARSE_CONTEXT gives it.
+    'application.dtls:DTLSCIDCiphertext': {'cid': CID},
+}  # type: dict[str, dict[str, Any]]
+
+#: Packet context the enclosing layer gives a schema's parser and its packing does
+#: not need. :func:`build` finds a name the enclosing layer owes from the
+#: ``KeyError`` that packing raises, and ``pre_pack`` supplies this one from the
+#: values being packed, so only the reparse reads it. A DTLS record's CID length
+#: is agreed out of band, not carried [RFC 9146 section 4].
+PARSE_CONTEXT = {
+    'application.dtls:DTLSCIDCiphertext': {'__cid_length__': len(CID)},
 }  # type: dict[str, dict[str, Any]]
 
 #: Packet context a dispatch target needs from its enclosing layer.
@@ -556,7 +573,7 @@ def patterned(cls: 'type', schema: 'Any', ctx: 'dict[str, Any]') -> 'Outcome':
 def run_patterned(cls: 'type') -> 'Outcome':
     """Build ``cls`` and check its patterned variant."""
     try:
-        out = build(cls)
+        out = build(cls, extra=PARSE_CONTEXT.get(label_of(cls), {}))
     except RuntimeError as exc:
         return Outcome('UNBUILT', str(exc))
     if len(out) == 2:
@@ -567,7 +584,7 @@ def run_patterned(cls: 'type') -> 'Outcome':
 def run_schema(cls: 'type') -> 'Outcome':
     """Build ``cls`` and check it."""
     try:
-        out = build(cls)
+        out = build(cls, extra=PARSE_CONTEXT.get(label_of(cls), {}))
     except RuntimeError as exc:
         return Outcome('UNBUILT', str(exc))
     if len(out) == 2:
@@ -641,7 +658,7 @@ class SchemaRoundTripTests(KnownFailureTable, unittest.TestCase):
         self.check_table(labels)
         _, dispatch = self._cases()
         classes = schema_classes()
-        for table in (OVERRIDES, DISPATCHERS, DISPATCH_CONTEXT, UNBUILDABLE):
+        for table in (OVERRIDES, DISPATCHERS, DISPATCH_CONTEXT, PARSE_CONTEXT, UNBUILDABLE):
             self.assertEqual(sorted(set(table) - set(classes)), [], 'stale table entries')
         self.assertEqual(sorted(set(DISPATCHERS.values()) - set(classes)), [])
         for dispatcher in DISPATCHERS:
