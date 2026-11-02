@@ -35,6 +35,7 @@ from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
 from pcapkit.const.sctp.parameter import Parameter as Enum_Parameter
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.sctp import SCTP as Data_SCTP
@@ -245,7 +246,7 @@ def _padding_width(schema: 'Schema') -> 'int':
 
     """
     length = schema.__dict__.get('length')
-    return -length % 4 if isinstance(length, int) else 0
+    return pad_length(length, 4) if isinstance(length, int) else 0
 
 
 def _restore_padding(data: 'Optional[Data]', schema: 'Schema_T') -> 'Schema_T':
@@ -439,6 +440,16 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     :meth:`~pcapkit.protocols.transport.sctp.SCTP._read_cause_donone`.
 
     .. versionadded:: 1.5.0
+
+    .. versionchanged:: 1.6.0
+
+       :meth:`make` and the chunk, parameter and error cause makers raise
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError` for an integer field
+       given a value its width cannot hold, a length included, rather than
+       writing its low bits or raising a
+       :exc:`~pcapkit.utilities.exceptions.FieldValueError` or a bare
+       :exc:`ValueError`, and for a checksum that is not four octets, rather
+       than padding or cutting it (:issue:`2614`).
 
     """
 
@@ -700,7 +711,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Raises:
             ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
-                (:issue:`2287`).
+                (:issue:`2287`), ``vtag`` does not fit 32 bits, ``chksum`` is
+                not four octets, or a chunk maker rejects its chunk.
 
         Note:
             There is no ``payload`` argument: SCTP carries its user data in the
@@ -716,8 +728,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         schema = Schema_SCTP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.sctp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.sctp),
-            vtag=vtag,
-            chksum=b'\x00\x00\x00\x00' if chksum is None else chksum,
+            vtag=self._make_uint(vtag, bits=32, name='verification tag'),
+            chksum=b'\x00\x00\x00\x00' if chksum is None else self._make_octets(chksum, size=4, name='checksum'),
             chunks=chunks_value,
             trailer=trailer,
         )
@@ -1918,7 +1930,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_UnknownChunk(
             type=code,
             flags=flags,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Chunk {code}] length'),
             value=value,
         )
 
@@ -1956,7 +1968,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Raises:
             ProtocolError: If ``data`` is empty, since :rfc:`9260#section-3.3.1`
-                requires at least one byte of user data.
+                requires at least one byte of user data, or a field does not
+                fit its width.
 
         """
         if chunk is not None:
@@ -1978,17 +1991,17 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_DATAChunk(
             type=code,
             flags={
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=4, name=f'[Chunk {code}] reserved'),
                 'I': int(I),
                 'U': int(U),
                 'B': int(B),
                 'E': int(E),
             },
-            length=len(data) + 16,
-            tsn=tsn,
-            stream_id=stream_id,
-            stream_seq=stream_seq,
-            ppid=ppid,
+            length=self._make_uint(len(data) + 16, bits=16, name=f'[Chunk {code}] length'),
+            tsn=self._make_uint(tsn, bits=32, name=f'[Chunk {code}] tsn'),
+            stream_id=self._make_uint(stream_id, bits=16, name=f'[Chunk {code}] stream_id'),
+            stream_seq=self._make_uint(stream_seq, bits=16, name=f'[Chunk {code}] stream_seq'),
+            ppid=self._make_uint(ppid, bits=32, name=f'[Chunk {code}] ppid'),
             data=data,
         )
 
@@ -2019,7 +2032,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed chunk schema.
 
         Raises:
-            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or a field
+                does not fit its width.
 
         Note:
             The chunk flags are reserved by :rfc:`9260#section-3.3.2`, so they
@@ -2047,12 +2061,12 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_INITChunk(
             type=code,
             flags=flags,
-            length=length,
-            init_tag=init_tag,
-            a_rwnd=a_rwnd,
-            outbound_streams=outbound_streams,
-            inbound_streams=inbound_streams,
-            init_tsn=init_tsn,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
+            init_tag=self._make_uint(init_tag, bits=32, name=f'[Chunk {code}] init_tag'),
+            a_rwnd=self._make_uint(a_rwnd, bits=32, name=f'[Chunk {code}] a_rwnd'),
+            outbound_streams=self._make_uint(outbound_streams, bits=16, name=f'[Chunk {code}] outbound_streams'),
+            inbound_streams=self._make_uint(inbound_streams, bits=16, name=f'[Chunk {code}] inbound_streams'),
+            init_tsn=self._make_uint(init_tsn, bits=32, name=f'[Chunk {code}] init_tsn'),
             parameters=parameters_value,
         )
 
@@ -2083,7 +2097,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed chunk schema.
 
         Raises:
-            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or a field
+                does not fit its width.
 
         """
         if chunk is not None:
@@ -2107,12 +2122,12 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_INITACKChunk(
             type=code,
             flags=flags,
-            length=length,
-            init_tag=init_tag,
-            a_rwnd=a_rwnd,
-            outbound_streams=outbound_streams,
-            inbound_streams=inbound_streams,
-            init_tsn=init_tsn,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
+            init_tag=self._make_uint(init_tag, bits=32, name=f'[Chunk {code}] init_tag'),
+            a_rwnd=self._make_uint(a_rwnd, bits=32, name=f'[Chunk {code}] a_rwnd'),
+            outbound_streams=self._make_uint(outbound_streams, bits=16, name=f'[Chunk {code}] outbound_streams'),
+            inbound_streams=self._make_uint(inbound_streams, bits=16, name=f'[Chunk {code}] inbound_streams'),
+            init_tsn=self._make_uint(init_tsn, bits=32, name=f'[Chunk {code}] init_tsn'),
             parameters=parameters_value,
         )
 
@@ -2140,7 +2155,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed chunk schema.
 
         Raises:
-            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or a
+                field, a gap ack block's offset or a duplicate TSN does not
+                fit its width.
 
         Note:
             The counts of gap ack blocks and duplicate TSNs are derived from the
@@ -2161,19 +2178,22 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         for block in gap_blocks or []:
             if isinstance(block, Schema_GapAckBlock):
                 blocks.append(block)
-            elif isinstance(block, Data_GapAckBlock):
-                blocks.append(Schema_GapAckBlock(start=block.start, end=block.end))
             else:
-                start, end = cast('tuple[int, int]', block)
-                blocks.append(Schema_GapAckBlock(start=start, end=end))
-        tsn_list = list(dup_tsn or [])
+                start, end = ((block.start, block.end) if isinstance(block, Data_GapAckBlock)
+                              else cast('tuple[int, int]', block))
+                blocks.append(Schema_GapAckBlock(
+                    start=self._make_uint(start, bits=16, name=f'[Chunk {code}] gap block start'),
+                    end=self._make_uint(end, bits=16, name=f'[Chunk {code}] gap block end'),
+                ))
+        tsn_list = [self._make_uint(tsn, bits=32, name=f'[Chunk {code}] dup_tsn') for tsn in dup_tsn or []]
 
         return Schema_SACKChunk(
             type=code,
             flags=flags,
-            length=16 + len(blocks) * 4 + len(tsn_list) * 4,
-            cum_tsn_ack=cum_tsn_ack,
-            a_rwnd=a_rwnd,
+            length=self._make_uint(16 + len(blocks) * 4 + len(tsn_list) * 4, bits=16,
+                                   name=f'[Chunk {code}] length'),
+            cum_tsn_ack=self._make_uint(cum_tsn_ack, bits=32, name=f'[Chunk {code}] cum_tsn_ack'),
+            a_rwnd=self._make_uint(a_rwnd, bits=32, name=f'[Chunk {code}] a_rwnd'),
             num_gap_blocks=len(blocks),
             num_dup_tsn=len(tsn_list),
             gap_blocks=blocks,
@@ -2216,7 +2236,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_HeartbeatChunk(
             type=code,
             flags=flags,
-            length=length,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
             parameters=parameters_value,
         )
 
@@ -2256,7 +2276,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_HeartbeatACKChunk(
             type=code,
             flags=flags,
-            length=length,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
             parameters=parameters_value,
         )
 
@@ -2278,6 +2298,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 7 bits.
+
         """
         if chunk is not None:
             reserved = chunk.flags.reserved
@@ -2294,10 +2317,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_AbortChunk(
             type=code,
             flags={
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=7, name=f'[Chunk {code}] reserved'),
                 'T': int(T),
             },
-            length=length,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
             error=error_value,
         )
 
@@ -2318,7 +2341,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed chunk schema.
 
         Raises:
-            ProtocolError: If ``flags`` is **NOT** exactly one byte.
+            ProtocolError: If ``flags`` is **NOT** exactly one byte, or
+                ``cum_tsn_ack`` does not fit 32 bits.
 
         """
         if chunk is not None:
@@ -2331,7 +2355,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=code,
             flags=flags,
             length=8,
-            cum_tsn_ack=cum_tsn_ack,
+            cum_tsn_ack=self._make_uint(cum_tsn_ack, bits=32, name=f'[Chunk {code}] cum_tsn_ack'),
         )
 
     def _make_chunk_shutdown_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ShutdownACKChunk]' = None, *,
@@ -2399,7 +2423,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_ErrorChunk(
             type=code,
             flags=flags,
-            length=length,
+            length=self._make_uint(length, bits=16, name=f'[Chunk {code}] length'),
             error=error_value,
         )
 
@@ -2433,7 +2457,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_CookieEchoChunk(
             type=code,
             flags=flags,
-            length=len(cookie) + 4,
+            length=self._make_uint(len(cookie) + 4, bits=16, name=f'[Chunk {code}] length'),
             cookie=cookie,
         )
 
@@ -2482,6 +2506,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed chunk schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 7 bits.
+
         """
         if chunk is not None:
             reserved = chunk.flags.reserved
@@ -2490,7 +2517,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_ShutdownCompleteChunk(
             type=code,
             flags={
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=7, name=f'[Chunk {code}] reserved'),
                 'T': int(T),
             },
             length=4,
@@ -2841,7 +2868,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnknownParameter(
             type=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Param {code}] length'),
             value=value,
         )
 
@@ -2865,7 +2892,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_HeartbeatInfoParameter(
             type=code,
-            length=len(info) + 4,
+            length=self._make_uint(len(info) + 4, bits=16, name=f'[Param {code}] length'),
             info=info,
         )
 
@@ -2937,7 +2964,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_StateCookieParameter(
             type=code,
-            length=len(cookie) + 4,
+            length=self._make_uint(len(cookie) + 4, bits=16, name=f'[Param {code}] length'),
             cookie=cookie,
         )
 
@@ -2961,7 +2988,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnrecognizedParameter(
             type=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Param {code}] length'),
             value=value,
         )
 
@@ -2979,6 +3006,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed parameter schema.
 
+        Raises:
+            ProtocolError: If ``increment`` does not fit 32 bits.
+
         """
         if param is not None:
             increment = param.increment
@@ -2986,7 +3016,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_CookiePreservativeParameter(
             type=code,
             length=8,
-            increment=increment,
+            increment=self._make_uint(increment, bits=32, name=f'[Param {code}] increment'),
         )
 
     def _make_param_hostname(self, code: 'Enum_Parameter', param: 'Optional[Data_HostNameAddressParameter]' = None, *,
@@ -3021,7 +3051,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_HostNameAddressParameter(
             type=code,
-            length=len(name) + 4,
+            length=self._make_uint(len(name) + 4, bits=16, name=f'[Param {code}] length'),
             name=name,
         )
 
@@ -3051,7 +3081,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_SupportedAddressTypesParameter(
             type=code,
-            length=len(types_value) * 2 + 4,
+            length=self._make_uint(len(types_value) * 2 + 4, bits=16, name=f'[Param {code}] length'),
             types=types_value,
         )
 
@@ -3553,7 +3583,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnknownCause(
             code=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Cause {code}] length'),
             value=value,
         )
 
@@ -3574,7 +3604,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed error cause schema.
 
         Raises:
-            ProtocolError: If ``reserved`` is **NOT** exactly two bytes.
+            ProtocolError: If ``reserved`` is **NOT** exactly two bytes, or
+                ``stream_id`` does not fit 16 bits.
 
         """
         if cause is not None:
@@ -3586,7 +3617,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_InvalidStreamIdentifierCause(
             code=code,
             length=8,
-            stream_id=stream_id,
+            stream_id=self._make_uint(stream_id, bits=16, name=f'[Cause {code}] stream_id'),
             reserved=reserved,
         )
 
@@ -3621,7 +3652,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_MissingMandatoryParameterCause(
             code=code,
-            length=8 + len(types_value) * 2,
+            length=self._make_uint(8 + len(types_value) * 2, bits=16, name=f'[Cause {code}] length'),
             num=len(types_value),
             types=types_value,
         )
@@ -3640,6 +3671,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed error cause schema.
 
+        Raises:
+            ProtocolError: If ``staleness`` does not fit 32 bits.
+
         """
         if cause is not None:
             staleness = cause.staleness
@@ -3647,7 +3681,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_StaleCookieCause(
             code=code,
             length=8,
-            staleness=staleness,
+            staleness=self._make_uint(staleness, bits=32, name=f'[Cause {code}] staleness'),
         )
 
     def _make_cause_out_of_resource(self, code: 'Enum_CauseCode', cause: 'Optional[Data_OutOfResourceCause]' = None,
@@ -3689,7 +3723,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnresolvableAddressCause(
             code=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Cause {code}] length'),
             value=value,
         )
 
@@ -3714,7 +3748,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnrecognizedChunkTypeCause(
             code=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Cause {code}] length'),
             value=value,
         )
 
@@ -3757,7 +3791,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UnrecognizedParametersCause(
             code=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Cause {code}] length'),
             value=value,
         )
 
@@ -3775,6 +3809,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed error cause schema.
 
+        Raises:
+            ProtocolError: If ``tsn`` does not fit 32 bits.
+
         """
         if cause is not None:
             tsn = cause.tsn
@@ -3782,7 +3819,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return Schema_NoUserDataCause(
             code=code,
             length=8,
-            tsn=tsn,
+            tsn=self._make_uint(tsn, bits=32, name=f'[Cause {code}] tsn'),
         )
 
     def _make_cause_cookie_shutdown(self, code: 'Enum_CauseCode', cause: 'Optional[Data_CookieReceivedWhileShuttingDownCause]' = None,
@@ -3824,7 +3861,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_RestartOfAnAssociationWithNewAddressesCause(
             code=code,
-            length=len(value) + 4,
+            length=self._make_uint(len(value) + 4, bits=16, name=f'[Cause {code}] length'),
             value=value,
         )
 
@@ -3848,7 +3885,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_UserInitiatedAbortCause(
             code=code,
-            length=len(info) + 4,
+            length=self._make_uint(len(info) + 4, bits=16, name=f'[Cause {code}] length'),
             info=info,
         )
 
@@ -3872,6 +3909,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         return Schema_ProtocolViolationCause(
             code=code,
-            length=len(info) + 4,
+            length=self._make_uint(len(info) + 4, bits=16, name=f'[Cause {code}] length'),
             info=info,
         )

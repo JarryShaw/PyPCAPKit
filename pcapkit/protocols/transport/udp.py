@@ -86,10 +86,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
     .. versionchanged:: 1.6.0
 
-       The checksum is computed when :meth:`make` is given none, over the
-       ``pseudo`` it is given or by the enclosing IP layer, and verified by that
-       layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-       (:issue:`2474`).
+       * The checksum is computed when :meth:`make` is given none, over the
+         ``pseudo`` it is given or by the enclosing IP layer, and verified by
+         that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+         (:issue:`2474`).
+       * :meth:`make` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+         for a Length past 16 bits, given or computed, and a checksum that is
+         not two octets, where it wrote the Length's low 16 bits and padded or
+         cut the checksum (:issue:`2614`).
 
     """
 
@@ -248,7 +252,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
                 computed over ``pseudo`` (:rfc:`768`), or left to an IP layer
                 this datagram is the payload of; zero, i.e. none, otherwise.
             total_length: Length of the datagram, header included; computed from
-                the header and the payload when omitted.
+                the header and the payload when omitted. A jumbogram's is
+                given as zero (:rfc:`2675#section-4`).
             payload: Payload data.
             trailer: Octets after the datagram, outside the Length field;
                 written as is and not counted in a computed ``total_length``.
@@ -261,7 +266,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
         Raises:
             ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
-                (:issue:`2287`).
+                (:issue:`2287`), ``total_length``, given or computed, does not
+                fit 16 bits, or ``checksum`` is not two octets.
 
         .. versionchanged:: 1.5.0
 
@@ -279,12 +285,13 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         # what a plain ``UDP(payload=...)`` wants.
         if total_length is None:
             total_length = 8 + len(payload)
+        total_length = self._make_uint(total_length, bits=16, name='length')
 
         schema = Schema_UDP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.udp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.udp),
             len=total_length,
-            checksum=b'\x00\x00' if checksum is None else checksum,
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             payload=payload,
             trailer=trailer,
         )
