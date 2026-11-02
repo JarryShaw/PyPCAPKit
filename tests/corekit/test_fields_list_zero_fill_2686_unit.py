@@ -121,6 +121,37 @@ class ListZeroFillTests(unittest.TestCase):
                 self.field(ratio * 6 + 1).unpack(b'', {})
             self.assertEqual(ledger, [6, ratio * 6])
 
+    def test_a_failed_fill_gives_back_the_octets_read(self) -> None:
+        """Items that fail inside the fill leave the octets read as they were, so one
+        bad list does not refuse the later cuts of its context; the fill stays charged.
+        Only a failure restores them: a later fill that succeeds is counted as usual."""
+        from pcapkit.corekit.fields.numbers import UInt16Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        @schema_final
+        class NonZero(Schema):
+            """A 16-bit value that refuses to be zero once parsed."""
+
+            value: int = UInt16Field()
+
+            def post_process(self, packet: 'dict') -> 'Schema':
+                if self.value == 0:
+                    raise ProtocolError('a zero item')
+                return self
+
+        field = self.ListField(length=12, item_type=self.SchemaField(length=2, schema=NonZero))
+        with self.budget() as ledger:
+            self.field(12).unpack(bytes(12), {})
+            self.assertEqual(ledger, [12, 0])
+            with self.assertRaisesRegex(ProtocolError, 'a zero item'):
+                field.unpack(b'\x00\x01', {})
+            self.assertEqual(ledger, [12, 10])
+
+            # a fill that succeeds keeps the octets its items read, as before the failure
+            self.field(12).unpack(bytes(2), {})
+            self.assertEqual(ledger, [14, 20])
+
     def test_a_fresh_context_gets_a_ledger_of_its_own(self) -> None:
         """A fill that is the first read of a context starts that context's ledger."""
         import contextvars

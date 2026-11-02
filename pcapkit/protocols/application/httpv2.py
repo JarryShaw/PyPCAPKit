@@ -604,10 +604,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             Key-value pairs for protocol construction.
 
         """
-        # NOTE: No ``length``: :meth:`make` computes the frame's Length from the
-        # frame it builds, and a ``length`` keyword would instead be taken by
-        # ``ProtocolBase.__init__`` as the number of octets to parse back --
-        # the payload length alone, nine octets short of the frame.
+        # NOTE: No ``length``: ``make`` computes the Length from the frame it builds, and
+        # ``ProtocolBase.__init__`` would take a ``length`` as the octets to parse back.
         return {
             'type': data.type,
             'flags': data.flags.__value__ if data.flags is not None else 0,

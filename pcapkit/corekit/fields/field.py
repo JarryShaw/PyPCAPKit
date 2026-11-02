@@ -83,7 +83,7 @@ _T = TypeVar('_T')
 #: *not* weighed against it: a shortfall within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`
 #: neither consults this ledger nor is charged to it, which is what keeps every
 #: legitimate short read answering the same however much preceded it. Only the
-#: 32-bit band above reads and writes ``[1]``, and :func:`_zero_fill_items`, whose
+#: 32-bit band above reads and writes ``[1]``, and :func:`_zero_filled_items`, whose
 #: fill of a list of schema items has no free band (:issue:`2686`).
 _zero_pad_ledger = contextvars.ContextVar(
     'pcapkit.corekit.fields.field._zero_pad_ledger',
@@ -119,21 +119,22 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
         _zero_pad_ledger.reset(token)
 
 
-def _zero_fill_items(name: 'str', length: 'int', data: 'bytes') -> 'bytes':
+@contextlib.contextmanager
+def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[bytes]':
     """Zero-fill the octets of a list of schema items to its declared width.
 
     :meth:`FieldBase.unpack` reads a field the data ends inside as though its
     missing octets were zeros, and :meth:`ListField.unpack
     <pcapkit.corekit.fields.collections.ListField.unpack>` gives a list of
     schema items the same reading here, so its items cover the width it
-    declares (:issue:`2686`).
+    declares (:issue:`2686`). The items are read inside the block.
 
     Args:
         name: Field name.
         length: Octets the field declares.
         data: Octets actually present, fewer than ``length``.
 
-    Returns:
+    Yields:
         ``data``, zero-filled to ``length``.
 
     Raises:
@@ -172,10 +173,15 @@ def _zero_fill_items(name: 'str', length: 'int', data: 'bytes') -> 'bytes':
                 )
         ledger[1] += padding
 
-    # NOTE: The items credit the zeros they read as octets supplied, so they are
-    # taken off in advance and the fill earns no allowance of its own.
+    # NOTE: The items credit the zeros they read as octets supplied, so they are taken off in
+    # advance; items that fail credit an unknown share, so the octets read go back as they were.
+    read = ledger[0]
     ledger[0] -= padding
-    return data + bytes(padding)
+    try:
+        yield data + bytes(padding)
+    except BaseException:
+        ledger[0] = read
+        raise
 
 
 #: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative
