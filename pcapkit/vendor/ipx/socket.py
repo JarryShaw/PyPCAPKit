@@ -11,22 +11,21 @@ which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
 """
 
 ###############################################################################
-# NOTE: fix duplicated name of ``socket``
+# NOTE: fix duplicated name of ``socket``; restored in ``finally``, so a failed
+# import does not lose the entry (#2589).
 import sys
 
 path = sys.path.pop(0)
-###############################################################################
+try:
+    import collections
+    from typing import TYPE_CHECKING
 
-import collections
-from typing import TYPE_CHECKING
+    from pcapkit.vendor.default import Vendor
 
-from pcapkit.vendor.default import Vendor
-
-if TYPE_CHECKING:
-    from collections import Counter
-
-###############################################################################
-sys.path.insert(0, path)
+    if TYPE_CHECKING:
+        from collections import Counter
+finally:
+    sys.path.insert(0, path)
 ###############################################################################
 
 __all__ = ['Socket']
