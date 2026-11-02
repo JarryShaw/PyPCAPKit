@@ -744,6 +744,68 @@ class SnapshotRestoreTests(unittest.TestCase):
         self.assertIn(sibling, sys.modules)
 
 
+class ParentAttributeRestoreTests(unittest.TestCase):
+    """:func:`~tests._support.restore_modules` puts a sub-package prefix back on its parent.
+
+    Importing ``parent.child`` binds ``child`` on ``parent`` as well as in
+    :data:`sys.modules`. When only ``parent.child`` is isolated, ``parent`` stays
+    imported, so restoring the table alone left ``parent.child`` on the generation
+    imported inside the region, and ``import parent.child as m`` then returned it
+    (#2646). A synthetic parent keeps this independent of what :mod:`pcapkit` holds.
+
+    """
+
+    PARENT = '_support_probe_parent'
+    CHILD = '_support_probe_parent.child'
+
+    def setUp(self) -> None:
+        self.addCleanup(self._forget_probes)
+        self.parent = types.ModuleType(self.PARENT)
+        self.original = types.ModuleType(self.CHILD)
+        sys.modules[self.PARENT] = self.parent
+        sys.modules[self.CHILD] = self.original
+        self.parent.child = self.original
+
+    def _forget_probes(self) -> None:
+        for name in (self.CHILD, self.PARENT):
+            sys.modules.pop(name, None)
+
+    def _reimport_in_the_region(self) -> None:
+        """Bind another generation of the child, as an import inside the region does."""
+        generation = types.ModuleType(self.CHILD)
+        sys.modules[self.CHILD] = generation
+        self.parent.child = generation
+
+    def test_a_rebound_child_is_bound_to_its_original_again(self) -> None:
+        snapshot = snapshot_modules([self.CHILD])
+        self._reimport_in_the_region()
+
+        restore_modules(snapshot, [self.CHILD])
+
+        self.assertIs(sys.modules[self.CHILD], self.original)
+        self.assertIs(self.parent.child, self.original)
+
+    def test_a_child_absent_before_is_not_left_on_its_parent(self) -> None:
+        del sys.modules[self.CHILD]
+        del self.parent.child
+        snapshot = snapshot_modules([self.CHILD])
+        self._reimport_in_the_region()
+
+        restore_modules(snapshot, [self.CHILD])
+
+        self.assertNotIn(self.CHILD, sys.modules)
+        self.assertFalse(hasattr(self.parent, 'child'))
+
+    def test_a_name_the_parent_defines_for_itself_is_left_alone(self) -> None:
+        snapshot = snapshot_modules([self.CHILD])
+        self._reimport_in_the_region()
+        own = self.parent.child = object()
+
+        restore_modules(snapshot, [self.CHILD])
+
+        self.assertIs(self.parent.child, own)
+
+
 class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
     """A test that installs a stand-in leaves :data:`sys.modules` as it found it.
 

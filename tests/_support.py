@@ -656,7 +656,8 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
     The inverse of :func:`snapshot_modules` over the *bindings*, and exact in
     both directions: a name the test added is removed, a name it dropped is put
     back, and a name it rebound is bound to what it held before. Nothing outside
-    ``prefixes`` is touched.
+    ``prefixes`` is touched, bar the attribute a prefix is bound to on its parent
+    package, which :func:`_rebind_parent_attributes` puts back.
 
     Bindings are the whole of it, though, and the limit is worth stating. This
     restores which module object a name refers to; it does not restore the
@@ -682,11 +683,37 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
             sys.modules.pop(name, None)
     for name, module in snapshot.items():
         sys.modules[name] = module
+    _rebind_parent_attributes(prefixes)
     # For the same reason :func:`purge_modules` does it: whatever the test
     # imported while the region was purged built a second set of ``Mapping``
     # subclasses and churned the shared ABC caches, and those stale answers
     # outlive the modules that caused them.
     _reset_abc_caches()
+
+
+def _rebind_parent_attributes(prefixes: 'tuple[str, ...]') -> None:
+    """Bind each prefix on its parent package to the module :data:`sys.modules` holds.
+
+    Importing ``a.b`` binds ``b`` on ``a`` as well as in :data:`sys.modules`, and
+    ``import a.b as m`` reads that attribute first. A prefix whose parent lies outside
+    the region, ``pcapkit.vendor`` under ``pcapkit``, would keep the generation
+    imported inside it after the table is restored (#2646). A prefix with no parent,
+    as ``pcapkit`` itself, has nothing to rebind.
+
+    """
+    for prefix in prefixes:
+        parent_name, _, child = prefix.rpartition('.')
+        parent = sys.modules.get(parent_name) if parent_name else None
+        if parent is None or _under_prefix(parent_name, prefixes):
+            continue
+        current = getattr(parent, child, None)
+        if current is not None and not isinstance(current, types.ModuleType):
+            continue  # the parent's own name shadows the submodule; not ours to undo
+        held = sys.modules.get(prefix)
+        if held is not None:
+            setattr(parent, child, held)
+        elif current is not None:
+            delattr(parent, child)
 
 
 #: Returned by :func:`_is_running_test` when a runtime has no ``_outcome`` at all,

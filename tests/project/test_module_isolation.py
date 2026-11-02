@@ -65,7 +65,12 @@ audit turned up are covered there:
   fixture gets to heal anything. This case is the cross-file half of the same
   claim, and cheap enough to keep for the symmetry.
 
-``pytest --noconftest`` over the same files shows both as well and is the quicker
+One more is a sub-package isolation (#2646): ``isolate_modules(self, ('pcapkit.vendor',))``
+restored the table but left ``pcapkit.vendor`` bound on ``pcapkit`` to the generation
+imported inside it, so a later patch of ``pcapkit.vendor`` landed on a module that
+``pcapkit.vendor.__main__`` did not read.
+
+``pytest --noconftest`` over the same files shows each of them and is the quicker
 thing to reach for by hand. :mod:`unittest` is what is automated here because it
 needs no flag to get there, and because a second runner is worth exercising for
 its own sake.
@@ -141,6 +146,13 @@ UNMASKED_ORDERS = [
         'the CLI stand-ins left in sys.modules (#688)',
         ['tests.cli.test_main', 'tests.project.test_public_api'],
         "cannot import name 'show_flag_values' from 'pcapkit.utilities.compat'",
+    ),
+    (
+        'the pcapkit.vendor attribute left on its parent (#2646)',
+        ['tests.vendor.test_vendor_exit_code_unit',
+         'tests.vendor.test_vendor_ipx_sys_path_2589_unit',
+         'tests.vendor.test_vendor_missing_extra_1850_unit'],
+        'a target ran',
     ),
 ]
 
@@ -308,6 +320,10 @@ class UnmaskedOrderTests(unittest.TestCase):
 
     def test_the_cli_stand_ins_do_not_reach_a_later_test(self) -> None:
         label, modules, symptom = UNMASKED_ORDERS[1]
+        self.assert_unittest_selection_passes(label, modules, symptom)
+
+    def test_a_sub_package_isolation_leaves_the_parent_attribute_alone(self) -> None:
+        label, modules, symptom = UNMASKED_ORDERS[2]
         self.assert_unittest_selection_passes(label, modules, symptom)
 
 
