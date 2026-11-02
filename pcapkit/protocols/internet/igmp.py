@@ -412,7 +412,10 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         :rfc:`3376#section-4.1.2`, :rfc:`3376#section-4.2.2`). That holds for
         IGMPv1 as well: :rfc:`1112` defines an 8-octet message, and :rfc:`2236`,
         which updates it, sums a longer one whole (:rfc:`2236#section-2.5`). See
-        :func:`~pcapkit.corekit.checksum.internet.verify_message`.
+        :func:`~pcapkit.corekit.checksum.internet.verify_message`. A message the
+        data ends inside, as its header's ``__short_read__`` records, is
+        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
+        (:issue:`2689`).
 
         Args:
             igmp: Parsed message data.
@@ -421,9 +424,16 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         """
         if config.CHECKSUM_VERIFY:
-            from pcapkit.corekit.checksum.internet import verify_message  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
+                ChecksumStatus, verify_message)
+            # NOTE: The checksum covers the whole message, so a message the data
+            # ends inside leaves part of what it covers uncaptured (#2689).
+            if '__short_read__' in self.__header__.__dict__:
+                status = ChecksumStatus.TRUNCATED
+            else:
+                status = verify_message(self.alias, self._data, checksum, length=length)
             igmp.__update__([
-                ('checksum_status', verify_message(self.alias, self._data, checksum, length=length)),
+                ('checksum_status', status),
             ])
 
     @classmethod

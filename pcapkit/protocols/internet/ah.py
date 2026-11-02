@@ -195,7 +195,9 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             # IPv6 header, so hold NoPayload here so that membership does not raise (#2484).
             self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
             return ah
-        return self._decode_next_layer(ah, schema.next, length - ah.length)
+        # NOTE: The payload is the rest of the parent's, so a frame's cut the
+        # parent handed on is handed on in turn (#2689).
+        return self._decode_next_layer(ah, schema.next, length - ah.length, declared=False)
 
     def make(self,
              next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,

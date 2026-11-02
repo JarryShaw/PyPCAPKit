@@ -38,11 +38,12 @@ frame_depth = contextvars.ContextVar('pcapkit.utilities.contextvars.frame_depth'
 #: contextvars.ContextVar[tuple[int, int] | None]: The captured and the original
 #: length of the frame being dissected, in octets, as its PCAP record or PCAP-NG
 #: packet block states them; :data:`None` outside a frame, and inside the payload
-#: of an :class:`~pcapkit.protocols.internet.internet.Internet` layer, which
-#: bounds it. A frame the capture cut short holds fewer octets than were on the
-#: wire, which a layer stating no length of its own, as
-#: :class:`~pcapkit.protocols.link.gre.GRE`, cannot tell from the octets it is
-#: handed (:issue:`2653`).
+#: of an :class:`~pcapkit.protocols.internet.internet.Internet` layer that
+#: bounds it, which neither an IPv4 Total Length of 0 nor
+#: :class:`~pcapkit.protocols.internet.ah.AH` does (:issue:`2689`). A frame
+#: the capture cut short holds fewer octets than were on the wire, which a layer
+#: stating no length of its own, as :class:`~pcapkit.protocols.link.gre.GRE`,
+#: cannot tell from the octets it is handed (:issue:`2653`).
 frame_length = contextvars.ContextVar(
     'pcapkit.utilities.contextvars.frame_length', default=None,
 )  # type: contextvars.ContextVar[Optional[tuple[int, int]]]

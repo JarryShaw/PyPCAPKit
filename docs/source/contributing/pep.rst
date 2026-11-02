@@ -959,13 +959,17 @@ offload heuristic on :issue:`2470`.
   :rfc:`3376#section-4.1.2`, :rfc:`2784#section-2.5`). The IGMPv1 rule follows
   :rfc:`2236`, which updates :rfc:`1112`'s 8-octet one. A GRE header with ``C``
   clear is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`,
-  and ``make()`` computes one when ``checksum_present`` asks without giving it.
-  Neither GRE nor the Linux cooked-capture header carries a length, so a GRE frame
-  the capture cut short there is
-  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`, settled at
-  implementation (:issue:`2618`); behind IPv4 or IPv6, which state the payload
-  length, it is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
-  (:issue:`2649`).
+  and ``make()`` computes one when ``checksum_present`` asks without giving it
+  (:issue:`2618`). Neither GRE nor the Linux cooked-capture header carries a
+  length, so a GRE message the capture cut short there is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED` by the
+  original length its PCAP record or PCAP-NG packet block states (:issue:`2653`);
+  behind IPv4 or IPv6, by the payload length they state (:issue:`2649`). An IPv4
+  Total Length of 0 states none, so behind one, and through an AH after it, GRE,
+  ICMP and IGMP go by the original length as well (:issue:`2689`). A GRE or IGMP
+  header the data ends inside is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED` too
+  (:issue:`2689`).
 * **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
   a pseudo-header that carries the whole packet's length, as TCP's does, so a
   fragment is
