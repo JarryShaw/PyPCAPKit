@@ -42,6 +42,24 @@ handshake message bodies; every other
 body whose declared sub-field lengths do not fit the record (e.g.
 ciphertext), is kept as raw octets, header and message type decoded.
 
+Records in One Segment
+----------------------
+
+A whole record after the first in a TCP segment is dissected as a further
+:class:`~pcapkit.protocols.application.sslv2.SSLv2` layer, the previous record's
+payload, whatever its message type (:issue:`2567`): a ``CLIENT-HELLO`` followed by
+a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
+
+* A whole record that fails to decode -- a ``RECORD-LENGTH`` of ``0``, which
+  leaves no ``MSG-TYPE`` -- becomes :class:`~pcapkit.protocols.misc.raw.Raw`
+  together with everything after it.
+* Octets that open no record -- a header cut short, or a record the segment
+  ends inside -- stay raw, with no error.
+* A parse told to stop at SSLv2 (``protocol='SSLv2'`` or ``layer='Application'``)
+  keeps the rest of the segment raw.
+* Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 .. versionadded:: 1.6.0
 
 .. raw:: html

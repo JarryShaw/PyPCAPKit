@@ -125,12 +125,12 @@ and by ``IPv6_Ext``, ``HTTPv1`` and ``HTTPv2`` by ``HTTP``.
 Chained Records
 ~~~~~~~~~~~~~~~
 
-**TLS records sharing a TCP segment are chained layers, not a list on one layer**
-(:issue:`2517`): each record dissected after the first is the previous record's payload,
-so its dynamic alias names its own version -- a ``ServerHello`` then a
-``ChangeCipherSpec`` read ``TCP:TLS 1.3:TLS 1.2``. DTLS and SSLv2 do not chain: two DTLS
-records in one datagram read ``DTLS 1.2:Raw`` (:issue:`2535`), and an SSLv2 hello
-followed by a further record reads ``SSLv2:Raw``.
+**TLS and SSLv2 records sharing a TCP segment are chained layers, not a list on one
+layer** (:issue:`2517`, :issue:`2567`): each record dissected after the first is the
+previous record's payload, so a TLS record's dynamic alias names its own version -- a
+``ServerHello`` then a ``ChangeCipherSpec`` read ``TCP:TLS 1.3:TLS 1.2`` -- and an SSLv2
+``CLIENT-HELLO`` then a ``CLIENT-MASTER-KEY`` read ``TCP:SSLv2:SSLv2``. DTLS does not
+chain: two DTLS records in one datagram read ``DTLS 1.2:Raw`` (:issue:`2535`).
 
 .. _protocol-family-canonical-names:
 

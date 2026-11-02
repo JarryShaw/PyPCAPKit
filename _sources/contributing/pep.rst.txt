@@ -895,7 +895,7 @@ model for how to spell "expected, not an error".
 
 **The one's-complement half is done** (:issue:`2470`, :issue:`2472` to
 :issue:`2475`), on :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
-(:issue:`2471`) and :mod:`pcapkit.protocols.misc.checksum.checksum`, settled as
+(:issue:`2471`) and :mod:`pcapkit.corekit.checksum.internet`, settled as
 below: the toggles by the owner on :issue:`2471`, the rest at implementation,
 as the offload question above asked; the owner accepted the toggles and the
 offload heuristic on :issue:`2470`.
@@ -912,17 +912,17 @@ offload heuristic on :issue:`2470`.
   and :class:`~pcapkit.protocols.internet.ipv6.IPv6` verify their upper layer's
   checksum once parsed, and compute it for an upper layer constructed as their
   payload; ``make()`` of TCP, UDP and ICMPv6 also takes the ``pseudo`` itself.
-* **Offload is** :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`,
+* **Offload is** :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`,
   modelled on ``NO_SA``: a zero IPv4 or TCP checksum, or a TCP or UDP one holding
   the pseudo-header's sum alone, as Linux offload leaves it, never warns. So does
   a zero UDP checksum over IPv4 (:rfc:`768`), but not over IPv6, where it is
   mandatory (:rfc:`8200#section-8.1`).
 * **A fragment is**
-  :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NO_PSEUDO_HEADER`,
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER`,
   atomic ones aside: TCP, UDP, ICMP and ICMPv6 checksums cover all of the
   datagram's data, which it carries part of. OSPF's Packet Length says what its
   checksum covers, so it is verified when the fragment holds that much, and
-  :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.TRUNCATED`
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
   otherwise.
 
 The cryptographic half is sequenced for **wave 2 or 3**, and could be done sooner
