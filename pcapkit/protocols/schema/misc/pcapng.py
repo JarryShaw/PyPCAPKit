@@ -31,7 +31,8 @@ from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
-from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, SchemaWarning, warn
+from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, SchemaWarning,
+                                        hold_warnings, warn)
 
 __all__ = [
     'PCAPNG',
@@ -663,30 +664,30 @@ def zigbee_key_held(schema: 'Type[_ZigBeeKey]', data: 'bytes') -> '_ZigBeeKey':
         data: The Secrets Data octets, as the block held them.
 
     Returns:
-        A ``schema`` instance that packs back to exactly ``data``.
+        A ``schema`` instance that holds, and packs back to, exactly ``data``.
 
-    The fixed fields are read from ``data``, and any octets past them are kept
-    as the schema's ``trailing`` octets. A ``data`` short of the fixed width is
-    read as though zero-filled and recorded as a short read, so that packing
-    cuts it back to the octets held, as :meth:`Schema._cut_short_read
-    <pcapkit.protocols.schema.schema.Schema._cut_short_read>` describes. A key
-    shorter than its fixed width, or a Secrets Length longer than it, then
-    rebuilds byte for byte (:issue:`1986`).
+    ``data`` is unpacked as the block's Secrets Data is, with any octets past
+    the fixed fields kept as the schema's ``trailing`` octets. A ``data`` short
+    of the fixed width is a short read, which :meth:`Schema.unpack
+    <pcapkit.protocols.schema.schema.Schema.unpack>` records for
+    :meth:`Schema._cut_short_read
+    <pcapkit.protocols.schema.schema.Schema._cut_short_read>`. A key shorter
+    than its fixed width, or a Secrets Length longer than it, then rebuilds
+    byte for byte (:issue:`1986`). The length is declared, so an empty ``data``
+    is an empty key rather than the end of the stream. The short read's
+    warnings are dropped, since the parse that held ``data`` reported them.
+
+    .. versionchanged:: 1.6.0
+
+       The schema's buffers hold ``data`` as given, rather than zero-filled
+       to the fixed width, so its :func:`bytes` and :func:`len` are those of
+       ``data`` and a block sized from it is written as captured
+       (:issue:`2688`).
 
     """
-    fixed = [(name, field.length) for (name, field) in schema.__fields__.items()
-             if name != 'trailing']
-    width = sum(length for (_, length) in fixed)
-    padded = data.ljust(width, b'\x00')
-    value = cast('_ZigBeeKey', schema.unpack(padded))  # type: ignore[call-arg,misc]
-
-    offset = 0
-    for (name, length) in fixed:
-        if len(data) < offset + length:
-            value.__dict__['__short_read__'] = (name, len(data) - offset)
-            break
-        offset += length
-    return value
+    with hold_warnings() as held:
+        held.discard = True
+        return cast('_ZigBeeKey', schema.unpack(data, len(data)))  # type: ignore[call-arg,misc]
 
 
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
