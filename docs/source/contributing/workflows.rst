@@ -1744,8 +1744,7 @@ regenerated, the ruleset edits to make by hand, the script's notes, the audit's
 outcome, and why no pull request opens, if none does. It reports ``warning`` for a
 hand-edit note, for a failed audit of a changed tree, or for an unset
 ``vars.RELEASE_APP_CLIENT_ID``. Its ``discussion`` job needs ``detect`` alone,
-because ``pr`` waits for the owner's approval of ``github-release``, and the pull
-request it opens is its own record.
+since the pull request ``pr`` opens is its own record.
 
 ``lint.yml`` has no push trigger, so it posts as ``scheduled`` to ``lint: weekly
 lint report``, on ``schedule`` and ``workflow_dispatch``, never on a pull request,
@@ -2004,8 +2003,8 @@ release cycle, PyPy's releases, setup-python's ``versions-manifest.json`` and
 the runner-images README, recomputes the tiers by the rules in that script's
 docstring, rewrites the file and the prose these tests pin to it, and runs the
 audit modules on the result. Only when that changes something does ``pr``
-enter ``github-release``, so the owner approves only those runs. It mints a
-release App token (:doc:`releasing`, "The Release App") with contents and pull
+run, in ``release-app``, an environment with no reviewer. It mints a release App
+token (:doc:`releasing`, "The Release App") with contents and pull
 requests write, force-pushes ``bot/python-versions`` and opens or updates its
 one pull request, whose body lists each move and why, the ``Compat`` contexts to
 change in the ruleset by hand, and every renamed check run. It never pushes
@@ -2014,7 +2013,7 @@ push, so workflow comments name the tiers rather than restate them. While the
 branch's pull request is open, it does not re-push tiers a commit on the branch
 already proposes, hand edits or merges of ``main`` on top or not, nor overwrite
 commits it did not make: when the branch holds some and proposes other tiers,
-``detect`` fails before asking for the approval. Once that pull request is
+``detect`` fails, so ``pr`` does not run. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from ``main``, a closed proposal's tiers included. It reports a pre-release
 instead of writing it. Nor does it retire a job (:issue:`1747`):
@@ -2040,7 +2039,7 @@ Every Monday, or on dispatch, its ``detect`` job runs
 ``python3 util/issue_pr_kinds.py --github-output`` with a read-only token and no
 secret. It proposes nothing when the file is unchanged, or when the open pull
 request from ``bot/issue-pr-kinds`` already holds it, so an unmerged proposal is
-not re-pushed every week. Otherwise ``pr`` enters ``github-release``, mints a
+not re-pushed every week. Otherwise ``pr`` enters ``release-app``, mints a
 release App token with contents and pull requests write, as `Python Versions`_'s
 ``pr`` does, and runs the script with ``--publish``: it commits the file on top of
 the commit ``detect`` read, force-pushes ``bot/issue-pr-kinds``, and opens that
@@ -2053,16 +2052,26 @@ the old pull request and opens a new one.
 Deployment ``environment:``
 ----------------------------
 
-These jobs declare a deployment ``environment:`` and can therefore pause for an
-approval, in ``create-release.yml``, ``cron-python-versions.yml`` and
-``cron-issue-pr-kinds.yml``:
+These jobs of ``create-release.yml`` declare a deployment ``environment:``, and
+``github`` alone pauses for an approval:
 
 * ``github`` -- ``environment: github-release``
 * ``tag`` -- ``environment: conda-tag``
 * ``pypi`` -- ``environment: pypi``
 * ``conda`` -- ``environment: anaconda``
-* ``pr`` -- ``environment: github-release``, for the release App's key (see
-  `Python Versions`_ and `Issue and PR Kinds (#2561)`_)
+
+The ``pr`` jobs of ``cron-python-versions.yml`` and ``cron-issue-pr-kinds.yml``
+declare ``environment: release-app``, for the release App's key (see
+`Python Versions`_ and `Issue and PR Kinds (#2561)`_). That environment has no
+reviewer, as the owner ruled on :issue:`2648` that only Create Release waits for
+an approval, and it deploys from ``main`` alone, where those jobs run.
+:doc:`releasing`'s "The Release App" says why the key is stored there as well
+as in ``github-release``. Where ``release-app`` has no key, each ``pr`` warns
+from its ``Check for the release App's key`` step and skips its other steps.
+:file:`tests/project/test_release_app_environment_2648.py` fails when a job other
+than Create Release's ``github`` names ``github-release``, when ``github`` does
+not name it, or when any other job reading the key, in Create Release or
+elsewhere, names anything but ``release-app``.
 
 ``ANACONDA_TOKEN`` is a secret of the ``anaconda`` environment, and the
 ``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of

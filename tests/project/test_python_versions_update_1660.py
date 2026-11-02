@@ -5,7 +5,7 @@
 release cycle, PyPy's releases, setup-python's ``versions-manifest.json`` and the
 runner-images README, rewrites the file and the prose the audit pins to it, and
 lists the check runs a tier move renames. :file:`.github/workflows/cron-python-versions.yml`
-runs it weekly: ``detect`` with no secret, ``pr`` behind ``github-release`` with a
+runs it weekly: ``detect`` with no secret, ``pr`` in ``release-app`` with a
 release App token of contents and pull requests write, pushing
 ``bot/python-versions`` alone. The owner's rulings on #1660: a pull request he
 merges, never a push to ``main``; the release App, given Pull requests; the
@@ -1227,7 +1227,7 @@ class TestPublishing(ScratchOrigin):
 
 
 class TestTheProposalIsNotRepeated(unittest.TestCase):
-    """``publish`` is false while the branch's open pull request proposes these tiers, so no approval is asked."""
+    """``publish`` is false while the branch's open pull request proposes these tiers, so ``pr`` is not started."""
 
     def test_publish_follows_the_branchs_fingerprint(self) -> None:
         """Any commit ahead of ``main`` carrying it counts; a branch publish would refuse fails here instead.
@@ -1265,7 +1265,7 @@ class TestDetectAgainstAHandEditedBranch(ScratchOrigin):
 
     The pull request body tells the owner to finish a failed audit by hand on the
     branch. A ``detect`` reading only the tip would take his commit for no
-    proposal, ask for the approval every week, and ``publish`` would refuse it.
+    proposal, start ``pr`` every week, and ``publish`` would refuse it.
 
     """
 
@@ -1305,7 +1305,7 @@ class TestDetectAgainstAHandEditedBranch(ScratchOrigin):
         self.assertEqual((status, written['publish']), (1, 'false'), printed)
         self.assertIn('::error title=Not overwriting bot/python-versions::it holds commits this workflow did not '
                       'make', printed)
-        # What publish says of the same branch, had the approval been asked for.
+        # What publish says of the same branch, had `pr` been started.
         status, printed = self.publish(self.checkout(), out)
         self.assertEqual(status, 1)
         self.assertIn('::error title=Not overwriting bot/python-versions::', printed)
@@ -1571,7 +1571,7 @@ class TestTheWorkflowCommands(unittest.TestCase):
 
 
 class TestTheWorkflow(unittest.TestCase):
-    """``detect`` holds no secret; ``pr`` mints the narrow token behind ``github-release``."""
+    """``detect`` holds no secret; ``pr`` mints the narrow token from ``release-app``."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -1652,9 +1652,10 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertIn(f'--name {upload["with"]["name"]}', ' '.join(download['run'].split()))
         self.assertEqual(download['env'], {'GH_TOKEN': '${{ github.token }}'})
 
-    def test_pr_mints_contents_and_pull_requests_write_behind_github_release(self) -> None:
+    def test_pr_mints_contents_and_pull_requests_write_from_release_app(self) -> None:
+        """test_release_app_environment_2648.py pins the key check, the other step reading a secret."""
         job = self.jobs['pr']
-        self.assertEqual(job['environment'], 'github-release')
+        self.assertEqual(job['environment'], 'release-app')
         self.assertEqual(job['needs'], 'detect')
         mint = self.step('pr', "Mint the release App's token")
         self.assertTrue(_workflows.pinned(mint['uses'], 'actions/create-github-app-token'), mint['uses'])
@@ -1666,7 +1667,8 @@ class TestTheWorkflow(unittest.TestCase):
             'permission-contents': 'write',
             'permission-pull-requests': 'write',
         })
-        self.assertEqual([step for step in job['steps'] if 'secrets.' in json.dumps(step)], [mint])
+        check = self.step('pr', "Check for the release App's key")
+        self.assertEqual([step for step in job['steps'] if 'secrets.' in json.dumps(step)], [check, mint])
 
     def test_pr_runs_only_with_something_to_propose_the_app_and_main(self) -> None:
         condition = self.jobs['pr']['if']

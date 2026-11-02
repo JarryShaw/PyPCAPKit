@@ -78,7 +78,7 @@ Its commands:
     request is open: when one carries this proposal, hand edits on top or not,
     it is not proposed again, and when the branch holds commits this job did
     not make and proposes other tiers, ``update`` refuses as ``publish`` would,
-    rather than have an approval asked for a refusal. A branch with no open
+    rather than start ``pr`` for a refusal. A branch with no open
     pull request was merged or closed, and is proposed afresh.
 ``body``
     Render the pull request body from a proposal, with the audit's result.
@@ -1466,7 +1466,7 @@ def command_update(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> '
             _actions.annotate('notice', f'{branch} already proposes these tiers ({plan["fingerprint"]}); close its '
                               'pull request to have them proposed again.', title='Already proposed')
         elif foreign(held):
-            # publish would refuse, so no approval is asked for that.
+            # publish would refuse, so `pr` is not started for that.
             publish, status = False, 1
             older = ', '.join(sorted({found for found in held if found})) or 'none'
             _actions.annotate('error', f'it holds commits this workflow did not make and proposes {older}, not these '

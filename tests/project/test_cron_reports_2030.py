@@ -232,10 +232,13 @@ class TestTheWorkflowsPost(unittest.TestCase):
                       if pinned(entry.get('uses'), 'actions/download-artifact')]
         self.assertEqual(download['if'], "needs.conda-update.result != 'skipped'")
 
-    def test_the_versions_report_does_not_wait_on_the_approval(self) -> None:
-        """``pr`` waits on the owner's approval of ``github-release``, so ``discussion`` does not need it."""
+    def test_the_versions_report_does_not_wait_on_pr(self) -> None:
+        """``pr``'s pull request is its own record, so ``discussion`` does not need ``pr``.
+
+        ``pr`` reads the App's key from ``release-app``, which has no reviewer (#2648).
+        """
         jobs = load(VERSIONS)['jobs']
-        self.assertEqual(jobs['pr']['environment'], 'github-release')
+        self.assertEqual(jobs['pr']['environment'], 'release-app')
         self.assertNotIn('pr', jobs['discussion']['needs'])
 
     def test_no_workflow_run_consumer_reads_either(self) -> None:
@@ -429,7 +432,7 @@ class TestThePythonVersionsReport(_ReportStep):
             '- Ruleset 23497679, by hand: add `Python 3.10 (KTLO)`\n'
             '- held: 3.17 is a prerelease\n'
             '- Audit: success\n'
-            '- Pull request: the `pr` job opens or updates it once `github-release` is approved\n', 'success'))
+            '- Pull request: the `pr` job opens or updates it\n', 'success'))
 
     def test_a_quiet_week(self) -> None:
         self.plan(changed_files=[], changes=[], latest=['3.14', '3.14'], required={'remove': [], 'add': []},
