@@ -727,9 +727,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             declares the size of the whole area it may read, but stops at the
             end-of-option-list marker and reports the unconsumed remainder
             through ``__option_padding__``. Since that remainder has not been
-            parsed, we rewind ``data`` by it, so that the fields which size
-            themselves from ``__option_padding__`` read the remainder itself
-            rather than the same number of octets from beyond it.
+            parsed, we rewind ``data`` by as much of it as was read, so that the
+            fields which size themselves from ``__option_padding__`` read the
+            remainder itself rather than the same number of octets from beyond
+            it, and record a cut inside it (:issue:`2685`).
 
         """
         # force cast arg type since decorator changed their signatures
@@ -793,7 +794,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # NOTE: bounded as the payload read above is (#1975).
             byte = data.read(min(length, sys.maxsize))
             self.__buffer__[field.name] = byte
-            if not isinstance(field, ForwardMatchField):
+            if not isinstance(field, (ForwardMatchField, OptionField)):
                 self._note_short_read(field.name, length, byte)
 
             value = field.unpack(byte, packet.copy())
@@ -837,15 +838,22 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
             elif isinstance(field, OptionField) and field.option_padding > 0:
-                # the option list ended before the declared field length was
-                # exhausted; give the unconsumed remainder back to ``data``
-                # so that the following fields can read it
-                data.seek(-field.option_padding, io.SEEK_CUR)
+                # NOTE: The option list ended before the declared area did, and
+                # ``option_padding`` is the rest of that area; give back as much
+                # of it as was read, so that the following fields read it and
+                # record a cut inside it themselves (#2685).
                 consumed = length - field.option_padding
+                kept = min(consumed, len(byte))
+                if kept < len(byte):
+                    data.seek(kept - len(byte), io.SEEK_CUR)
 
-                self.__buffer__[field.name] = byte[:consumed]
+                self.__buffer__[field.name] = byte[:kept]
                 packet['__length__'] -= consumed
+                if kept == len(byte):
+                    self._note_short_read(field.name, length, byte)
             else:
+                if isinstance(field, OptionField):
+                    self._note_short_read(field.name, length, byte)
                 packet['__length__'] -= length
 
             if packet['__length__'] < 0:

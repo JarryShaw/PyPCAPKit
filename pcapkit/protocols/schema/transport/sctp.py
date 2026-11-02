@@ -3,7 +3,7 @@
 """header schema for stream control transmission protocol"""
 
 import io
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
@@ -49,9 +49,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Callable, Optional
-
-    from typing_extensions import Self
+    from typing import IO, Any, Callable
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -95,13 +93,15 @@ def padding_length(pkt: 'dict[str, Any]') -> 'int':
         pkt: Packet data.
 
     Returns:
-        Number of padding bytes, clamped to the number of bytes left in the
-        enclosing structure, so that a final chunk captured without (all of)
-        its padding still parses, although :rfc:`9260#section-3.2` has the
-        sender pad every chunk. When packing, it is clamped as well
-        to the ``__padding__`` width :func:`pre_pack_padding` hands over, so a
-        final chunk captured without (all of) its padding rebuilds without it
-        (:issue:`1474`).
+        Number of padding bytes the ``length`` calls for. A final chunk captured
+        without (all of) its padding, although :rfc:`9260#section-3.2` has the
+        sender pad every chunk, reads short, which :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` records so that
+        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` writes
+        back only the octets read, and :class:`PaddedOptionField` lets it parse
+        (:issue:`2680`). When packing, it is clamped to the ``__padding__``
+        width :func:`pre_pack_padding` hands over, so such a chunk rebuilt from
+        its data model is short of its padding as well (:issue:`1474`).
 
     """
     length = pkt.get('length') or 0
@@ -110,11 +110,7 @@ def padding_length(pkt: 'dict[str, Any]') -> 'int':
     width = pkt.get('__padding__')
     if isinstance(width, int) and width >= 0:
         padding = min(padding, width)
-
-    remaining = pkt.get('__length__')
-    if not isinstance(remaining, int) or remaining < 0:
-        return padding
-    return min(padding, remaining)
+    return padding
 
 
 def pre_pack_padding(schema: 'Schema', packet: 'dict[str, Any]') -> 'None':
@@ -194,7 +190,8 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
       ``__option_padding__``. The last chunk of a packet may omit that padding
       altogether, so the chunks wrap this callback in :func:`bounded`: the span
       then ends with the data, and the final parameter or cause reads only the
-      padding that is there (:issue:`1479`).
+      padding that is there (:issue:`1479`), recording the cut
+      (:issue:`2680`).
     * On construction, a separate padding field could not compute its own size:
       :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` passes
       one shared ``packet`` mapping down into the nested schemas, and each
@@ -210,6 +207,39 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
         length = pkt.get('length') or 0
         return max(length - base + pad_length(length, 4), 0)
     return callback
+
+
+class PaddedOptionField(OptionField):
+    """List of chunks, parameters or error causes, the last of which may be cut
+    inside its trailing padding.
+
+    :meth:`OptionField.unpack <pcapkit.corekit.fields.collections.OptionField.unpack>`
+    refuses an item that reads past the end of the data (:issue:`1325`). The
+    last chunk of a packet may lack (some of) its padding, though, and so may
+    the last parameter or cause of that chunk, which share it
+    (:func:`nested_length`). An item's ``length`` leaves its padding out and
+    the receiver ignores it (:rfc:`9260#section-3.2`), and
+    :class:`ChunkListField` hands on only chunks whose ``length`` octets are
+    all present, so an item short of its padding alone is cut rather than
+    overrun. It records that as a short read of its ``padding``, and is kept
+    (:issue:`2680`).
+
+    """
+
+    def _accepts_short_read(self, option: 'Schema') -> 'bool':
+        """Whether ``option`` read short inside its trailing padding alone.
+
+        Args:
+            option: Item just unpacked, which read short.
+
+        Returns:
+            Whether the short read :meth:`Schema.unpack
+            <pcapkit.protocols.schema.schema.Schema.unpack>` recorded is of the
+            item's ``padding``.
+
+        """
+        record = option.__dict__.get('__short_read__')
+        return record is not None and record[0] == 'padding'
 
 
 class ErrorCause(EnumSchema[Enum_CauseCode]):
@@ -643,7 +673,7 @@ class INITChunk(Chunk, code=Enum_Chunk.Initiation):
     init_tsn: 'int' = UInt32Field()
     #: Optional and variable-length parameters, including the chunk's own
     #: trailing padding; see :func:`nested_length`.
-    parameters: 'list[Parameter]' = OptionField(
+    parameters: 'list[Parameter]' = PaddedOptionField(
         length=bounded(nested_length(20)),
         base_schema=Parameter,
         type_name='type',
@@ -673,7 +703,7 @@ class INITACKChunk(Chunk, code=Enum_Chunk.Initiation_Acknowledgement):
     init_tsn: 'int' = UInt32Field()
     #: Optional and variable-length parameters, including the chunk's own
     #: trailing padding; see :func:`nested_length`.
-    parameters: 'list[Parameter]' = OptionField(
+    parameters: 'list[Parameter]' = PaddedOptionField(
         length=bounded(nested_length(20)),
         base_schema=Parameter,
         type_name='type',
@@ -728,7 +758,7 @@ class HeartbeatChunk(Chunk, code=Enum_Chunk.Heartbeat_Request):
 
     #: Heartbeat information parameters, including the chunk's own trailing
     #: padding; see :func:`nested_length`.
-    parameters: 'list[Parameter]' = OptionField(
+    parameters: 'list[Parameter]' = PaddedOptionField(
         length=bounded(nested_length(4)),
         base_schema=Parameter,
         type_name='type',
@@ -746,7 +776,7 @@ class HeartbeatACKChunk(Chunk, code=Enum_Chunk.Heartbeat_Acknowledgement):
 
     #: Heartbeat information parameters, including the chunk's own trailing
     #: padding; see :func:`nested_length`.
-    parameters: 'list[Parameter]' = OptionField(
+    parameters: 'list[Parameter]' = PaddedOptionField(
         length=bounded(nested_length(4)),
         base_schema=Parameter,
         type_name='type',
@@ -769,7 +799,7 @@ class AbortChunk(Chunk, code=Enum_Chunk.Abort):
     })
     #: Zero or more error causes, including the chunk's own trailing padding;
     #: see :func:`nested_length`.
-    error: 'list[ErrorCause]' = OptionField(
+    error: 'list[ErrorCause]' = PaddedOptionField(
         length=bounded(nested_length(4)),
         base_schema=ErrorCause,
         type_name='code',
@@ -812,7 +842,7 @@ class ErrorChunk(Chunk, code=Enum_Chunk.Operation_Error):
 
     #: One or more error causes, including the chunk's own trailing padding;
     #: see :func:`nested_length`.
-    error: 'list[ErrorCause]' = OptionField(
+    error: 'list[ErrorCause]' = PaddedOptionField(
         length=bounded(nested_length(4)),
         base_schema=ErrorCause,
         type_name='code',
@@ -874,7 +904,7 @@ def whole_chunks_length(data: 'bytes') -> 'int':
     Returns:
         Number of octets up to the end of the last chunk whose declared
         ``length`` octets are all present, with as much of its padding as there
-        is, see :func:`padding_length`. A ``length`` below the four-octet chunk
+        is, see :class:`PaddedOptionField`. A ``length`` below the four-octet chunk
         header (:rfc:`9260#section-3.2`) delimits nothing, so the run stops
         there too; four zero octets would otherwise read as a DATA chunk.
 
@@ -889,7 +919,7 @@ def whole_chunks_length(data: 'bytes') -> 'int':
     return end
 
 
-class ChunkListField(OptionField):
+class ChunkListField(PaddedOptionField):
     """Chunk list that stops at the last whole chunk.
 
     SCTP has no packet length field, so octets after the last whole chunk --
@@ -897,9 +927,12 @@ class ChunkListField(OptionField):
     cannot be told apart from a chunk cut short. They are not parsed but
     reported as option padding, which :meth:`Schema.unpack
     <pcapkit.protocols.schema.schema.Schema.unpack>` hands back to the stream for
-    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`). The area reaches no
-    further than the octets present, as :meth:`SCTP.unpack` sizes it
-    (:issue:`2673`).
+    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`). The padding is the
+    rest of the area declared, as for any
+    :class:`~pcapkit.corekit.fields.collections.OptionField`, so an area the data
+    ends inside hands back only the octets present (:issue:`2685`). The last
+    whole chunk may be cut inside its padding, and is kept as
+    :class:`PaddedOptionField` keeps one (:issue:`2680`).
 
     """
 
@@ -927,7 +960,7 @@ class ChunkListField(OptionField):
             chunks = super().unpack(data[:whole], packet)
         finally:
             self._length = area
-        self._option_padding += len(data) - whole
+        self._option_padding += max(area, 0) - whole
         return chunks
 
 
@@ -965,49 +998,6 @@ class SCTP(Schema):
     #: Octets captured after the last whole chunk, see :class:`ChunkListField`
     #: and :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
-
-    @classmethod
-    def unpack(cls, data: 'bytes | IO[bytes]',  # type: ignore[override]
-               length: 'Optional[int]' = None, packet: 'Optional[dict[str, Any]]' = None) -> 'Self':
-        """Unpack :obj:`bytes` into :class:`SCTP`, no further than the octets present.
-
-        Args:
-            data: Packed data.
-            length: Length of data, as the enclosing layer declares it.
-            packet: Unpacked data.
-
-        Returns:
-            Unpacked data as :class:`SCTP`.
-
-        SCTP has no packet length field (:rfc:`9260#section-3`), so a ``length``
-        past the octets present, as an IPv4 Total Length the capture cut short of
-        declares, is cut to them. Sized past them, :attr:`chunks` would record the
-        data as ending inside it while :class:`ChunkListField` hands the octets
-        after the last whole chunk to :attr:`trailer`, so :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` would drop them and
-        ``bytes(schema)`` count them twice (:issue:`2673`).
-
-        When no octet follows the last whole chunk, which the capture may have cut
-        inside its padding, the data does end inside :attr:`chunks`, so the cut is
-        recorded there as :meth:`Schema.unpack
-        <pcapkit.protocols.schema.schema.Schema.unpack>` records a short read, and
-        packing writes back only the octets read.
-
-        """
-        cut = False
-        if length is not None:
-            if isinstance(data, bytes):
-                present = len(data)
-            else:
-                start = data.tell()
-                present = data.seek(0, io.SEEK_END) - start
-                data.seek(start, io.SEEK_SET)
-            cut, length = length > present, min(length, present)
-
-        schema = cast('Self', super().unpack(data, length, packet))  # type: ignore[call-arg,misc]
-        if cut and not schema.__buffer__['trailer'] and '__short_read__' not in schema.__dict__:
-            schema.__dict__['__short_read__'] = ('chunks', len(schema.__buffer__['chunks']))
-        return schema
 
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int',
