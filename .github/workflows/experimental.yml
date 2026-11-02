@@ -682,7 +682,8 @@ jobs:
 
       # `experimental`'s selection, the `ALL` tier (#1958), asked of
       # tests/_tiers.py on the leg's own CPython, as `test` asks it; the flags
-      # are `test`'s.
+      # are `test`'s. The ignores go in an `@` argument file, since an
+      # argument each overflows Windows' command line (#2678).
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -699,10 +700,11 @@ jobs:
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
+          args="$RUNNER_TEMP/latest-tier.args"
           for module in $skipped; do
-            set -- "$@" --ignore="$module"
-          done
-          python -m pytest "$@"
+            printf '%s\n' "--ignore=$module"
+          done > "$args"
+          python -m pytest "$@" "@$args"
 
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}

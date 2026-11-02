@@ -16,8 +16,8 @@ monitor, superseded watcher) cannot run on Windows.
 * :class:`TestItRunsOnWindows`: every ``run:`` is Git Bash's, none calls a
   Linux-only tool, and the checkout keeps LF line endings.
 * :class:`TestTheTestsStep`: run as bash runs it, the step hands pytest ``test``'s
-  flags and ignores the ``LATEST`` tier, and a tier it cannot list fails the step
-  with a warning.
+  flags and ignores the ``LATEST`` tier through an ``@`` argument file (#2678), and a
+  tier it cannot list fails the step with a warning.
 * :class:`TestItHoldsLatestBackNowhere`: the weekly tier job does not wait for a Windows
   build before it moves ``latest``.
 * :class:`TestTheReporters`: CI Reports and the CI Timing review read the job as a
@@ -263,7 +263,8 @@ class TestItRunsOnWindows(unittest.TestCase):
 class TestTheTestsStep(unittest.TestCase):
     """``Run unit tests``, run as bash runs it against a stand-in ``python``."""
 
-    def run_step(self, **env: 'str') -> 'tuple[subprocess.CompletedProcess[str], list[str], str]':
+    def run_step(self, **env: 'str') -> 'tuple[subprocess.CompletedProcess[str], list[str], str, list[str]]':
+        """The step's result, the ``python`` argv, ``$RUNNER_TEMP``, and the argv as pytest expands it."""
         with tempfile.TemporaryDirectory(prefix='pcapkit-2060-') as tmp:
             stub = pathlib.Path(tmp, 'python')
             stub.write_text(PYTHON_STUB, encoding='utf-8')
@@ -273,18 +274,23 @@ class TestTheTestsStep(unittest.TestCase):
                 'ANNOTATION_LEVEL': 'warning', 'ARGS_FILE': str(record), 'RUNNER_TEMP': tmp,
                 'REAL_PYTHON': sys.executable, 'PATH': tmp + os.pathsep + os.environ.get('PATH', ''), **env})
             argv = record.read_text(encoding='utf-8').splitlines() if record.exists() else []
-            return result, argv, tmp
+            # pytest's parser reads an `@` argument's file as one argument a line (#2678).
+            expanded = [line for arg in argv for line in (
+                pathlib.Path(arg[1:]).read_text(encoding='utf-8').splitlines() if arg.startswith('@') else [arg])]
+            return result, argv, tmp, expanded
 
     def test_it_runs_the_all_tier_with_tests_flags(self) -> None:
+        """#2678: the ignores go in ``$RUNNER_TEMP``'s argument file, off Windows' command line."""
         from tests import _tiers  # pylint: disable=import-outside-toplevel
-        result, argv, tmp = self.run_step()
+        result, argv, tmp, expanded = self.run_step()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         latest = list(_tiers.latest_tier_paths())
         self.assertTrue(latest)
-        self.assertEqual(argv, ['-m', 'pytest', '-q', '-n', 'logical', '--dist', 'load', '--durations=30',
-                                '--durations-min=1.0', f'--junitxml={tmp}/junit.xml', '--ignore=tests/integration',
-                                '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py',
-                                *(f'--ignore={path}' for path in latest)])
+        flags = ['-m', 'pytest', '-q', '-n', 'logical', '--dist', 'load', '--durations=30', '--durations-min=1.0',
+                 f'--junitxml={tmp}/junit.xml', '--ignore=tests/integration', '--ignore-glob=*_runtime.py',
+                 '--ignore-glob=*_regression.py']
+        self.assertEqual(argv, [*flags, f'@{tmp}/latest-tier.args'])
+        self.assertEqual(expanded, [*flags, *(f'--ignore={path}' for path in latest)])
 
     def test_its_flags_are_tests(self) -> None:
         """The flags as unit-tests.yml ``test``'s step writes them."""
@@ -297,7 +303,7 @@ class TestTheTestsStep(unittest.TestCase):
         self.assertEqual(own.group(0).split(), theirs.group(0).split())  # type: ignore[union-attr]
 
     def test_a_tier_it_cannot_list_fails_the_step_with_a_warning(self) -> None:
-        result, argv, _ = self.run_step(FAIL_C='1')
+        result, argv, _, _ = self.run_step(FAIL_C='1')
         self.assertEqual(result.returncode, 1)
         self.assertEqual(argv, [])
         self.assertIn('::warning title=Could not compute the LATEST tier::', result.stdout)
