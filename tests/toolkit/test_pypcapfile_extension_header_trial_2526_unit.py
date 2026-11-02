@@ -31,10 +31,11 @@ __tier__ = 'ALL'
 HIP, MOBILITY_HEADER = 139, 135
 #: The first 8 octets of a HIP header, whose fixed part is 40.
 HIP_CUT = bytes.fromhex('b0ff89ff0042ff1c')
-#: A Mobility Header of 8 octets, 16 short of the Binding Error message it
-#: carries, then 1 octet of its UDP payload.
-MH_BINDING_ERROR = bytes.fromhex('11000742d5bd297b99')
-#: The warning the Mobility Header's message reports.
+#: A Mobility Header declaring 24 octets, cut to its first 8, so 16 short of
+#: the Binding Error message it carries. A Header Len short of the message
+#: would be refused (#2669).
+MH_BINDING_ERROR = bytes.fromhex('11020742d5bd297b')
+#: The warning the cut Mobility Header reports.
 MH_WARNING = 'packet length < 0: -16'
 
 
@@ -79,7 +80,7 @@ class TestExtensionHeaderTrial(unittest.TestCase):
         self.assertEqual(caught, [])
 
     def test_kept_header_warns_from_the_callers_line(self) -> None:
-        """Control: a Mobility Header the trial keeps reports its message's warning."""
+        """Control: a Mobility Header the trial keeps reports its warning."""
         from pcapkit.toolkit.pypcapfile import _default_extension_header
         from pcapkit.utilities.warnings import SchemaWarning
 
@@ -88,7 +89,7 @@ class TestExtensionHeaderTrial(unittest.TestCase):
             warnings.simplefilter('always')
             line = inspect.currentframe().f_lineno + 1  # type: ignore[union-attr]
             answer = _default_extension_header(MOBILITY_HEADER, MH_BINDING_ERROR)
-        self.assertEqual(answer, (17, 8))
+        self.assertEqual(answer, (17, 24))
         self.assertEqual([(item.category, str(item.message), item.filename, item.lineno) for item in caught],
                          [(SchemaWarning, MH_WARNING, __file__, line)])
 

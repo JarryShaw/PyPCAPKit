@@ -1395,10 +1395,27 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If ``Header Len`` declares fewer octets than the fixed
+                fields of the message type take, a message :rfc:`6275#section-9.2`
+                has the receiver discard.
+
+        .. versionchanged:: 1.6.0
+
+           * Such a message is refused, rather than read with the missing fields
+             as zeros and rebuilt longer than captured (:issue:`2669`).
+           * A header cut short is rebuilt with the ``Header Len`` it declared,
+             rather than one worked out from the message (:issue:`2669`).
+
         """
         if length is None:
             length = len(self)
         schema = self.__header__
+
+        # NOTE: A whole message whose fields run past its Header Len reads the rest as
+        # zeros, and its rebuild writes them and a longer Header Len back (#2669).
+        if '__short_read__' not in schema.__dict__ and '__short_read__' in schema.data.__dict__:
+            raise ProtocolError(f'{self.alias}: [Type {schema.type}] invalid header length: {schema.length}')
 
         name = self._lookup_registry(self.__message__, schema.type)
         if isinstance(name, str):
@@ -1497,9 +1514,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         # whatever happens to be past the end of the buffer.
         data_val = self._pad_mh_message(data_val)
 
+        # NOTE: A capture cut short rebuilds with the Header Len it declared, not one
+        # worked out from the message, and its short read cuts the rest (#2669).
+        header_len = (len(data_val) + 6) // 8 - 1
+        if isinstance(data, Data_MH) and data.get('__short_read__') is not None:
+            header_len = data.length // 8 - 1
+
         return Schema_MH(
             next=next_val,
-            length=self._make_uint((len(data_val) + 6) // 8 - 1, bits=8, name='header length'),
+            length=self._make_uint(header_len, bits=8, name='header length'),
             type=type_val,
             reserved=self._make_uint(reserved, bits=8, name='reserved octet'),
             chksum=chksum,
