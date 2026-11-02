@@ -102,6 +102,10 @@ CASES = (
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
     ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),
     ('http1', 'application.httpv1:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
+    # an HTTP/2 SETTINGS frame of three settings, to TCP port 80 (#2659)
+    ('httpv2-settings', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '450000431234000040067c4ac0000201c6336402' '9c40005000000001000000015010ffff00000000'
+        '000012040000000000' '000100001000' '000300000064' '000400010000')),
 )
 
 
