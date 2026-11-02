@@ -404,7 +404,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   built it (:issue:`2617`, :pr:`2630`). That is a negative or non-integer
   rate, a TCP rate from 1 to 79 kbps, a Request TTL outside 0 to 255, an
   IPv4 reserved value of 4 or more, and ``True`` as a TTL, nonce or
-  reserved value. Refusing a TCP rate under 80 kbps reverses 1.5.0's
+  reserved value. IPv4's maker also refuses ``True`` as its function, and a
+  Report of Approved Rate's not-used octet outside 0 to 255 (:issue:`2614`,
+  :pr:`2677`). Refusing a TCP rate under 80 kbps reverses 1.5.0's
   rounding of one down to zero (:issue:`1119`); a rate between two codes still
   rounds down to the lower. HOPOPT's and IPv6_Opts' Quick-Start maker builds an
   unassigned function code as the unassigned option their reader keeps it as,
@@ -427,6 +429,40 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   timeout by name, where a negative one raised a bare :exc:`ValueError` and
   ``True`` built one second. The Quick-Start TTL Diff, which :rfc:`4782`
   defines modulo 256, wraps as in 1.5.x.
+
+* **Changed** -- **a breaking change to** building
+  :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
+  :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`,
+  :class:`~pcapkit.protocols.internet.mh.MH` and
+  :class:`~pcapkit.protocols.internet.hip.HIP`, as TCP's, UDP's and SCTP's
+  above: a header, option or parameter field given an integer it cannot hold,
+  or ``True`` where it is wider than one bit, raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` naming the field, where
+  1.5.x wrote it masked to the field's width, and so does a header too long
+  for its length field (:issue:`2614`, :pr:`2677`). So ``IPv4(ttl=256)``
+  raises ``IPv4: invalid TTL: 256``, where it wrote ``0``, and
+  ``IPv4(id=True)`` raises, where it wrote ``1``; a Binding Update's sequence
+  number of ``-1`` raises ``MH: invalid sequence number: -1``, where it wrote
+  ``0xFFFF``; and a HOPOPT or HIP header too long for its length field raises
+  ``HOPOPT: invalid Hdr Ext Len: 256`` or
+  ``HIPv2: invalid header length: 256``, where that field was written ``0``.
+  A bit field raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` for
+  a value too wide and a bare :exc:`ValueError` or :exc:`OverflowError` for a
+  negative one, where IPv4 options too long for the IHL, say, raise
+  ``IPv4: invalid IHL: 16``. A PDM scale past
+  255, given or needed for its delta, raises
+  ``HOPOPT: invalid PDM scale of delta time last received: 256`` say, where
+  it warned with :exc:`~pcapkit.utilities.warnings.ProtocolWarning` and was
+  written wrapped. HIP's lifetimes refuse ``True``, which built as ``1``, and
+  a NaN or infinite one, which raised a bare :exc:`ValueError` or
+  :exc:`OverflowError`. Where one of these checks replaces a refusal 1.5.x
+  made, its message drops the option's or parameter's tag, as
+  ``HOPOPT: invalid RPL reserved flags: 32``, where it read
+  ``HOPOPT: [OptNo 99] invalid RPL reserved flags: 32``. ``MH._decode_signed``,
+  which decoded the geo-location degrees, is removed with no alias; the base
+  class's ``_read_sint`` decodes them.
 
 * **Changed** -- **a breaking change to** building
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` blocks: a field given a value
@@ -722,7 +758,17 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   and rebuilds as captured, and
   :class:`~pcapkit.protocols.application.httpv2.HTTPv2`'s ``make()`` takes
   ``frame_length``, from the frame's own length to ``0xFFFFFF``, so that the
-  declared Length survives (:issue:`2659`, :pr:`2666`).
+  declared Length survives (:issue:`2659`, :pr:`2666`). A frame of any type
+  the capture cut short after the connection preface rebuilds as captured
+  too, where ``from_data`` gave the preface's first octets, as many as were
+  captured of the frame (:issue:`2665`, :pr:`2675`).
+
+* **Fixed** -- an :class:`~pcapkit.protocols.transport.sctp.SCTP` packet the
+  capture cut short of the length declared for it, by an IPv4 Total Length,
+  an IPv6 Payload Length or a caller's ``length``, rebuilt through
+  ``from_data`` without the octets after its last whole chunk, which its
+  header schema's ``bytes()`` counted twice. It rebuilds as captured, as one
+  parsed with no length declared did (:issue:`2673`, :pr:`2679`).
 
 * **Fixed** -- importing :mod:`pcapkit.vendor.ipx`, or running its packet or
   socket crawler, without ``requests`` installed lost an entry of
