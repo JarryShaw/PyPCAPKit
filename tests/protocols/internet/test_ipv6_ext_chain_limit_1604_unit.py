@@ -75,7 +75,7 @@ def frame(carrier: str, count: int, *, mixed: bool = False) -> bytes:
 
 def raw_of(parsed: object) -> object:
     """The first :class:`~pcapkit.protocols.misc.raw.Raw` layer of ``parsed``, if any."""
-    from pcapkit.protocols.misc.null import NoPayload
+    from pcapkit.protocols.misc.no_payload import NoPayload
     from pcapkit.protocols.misc.raw import Raw
 
     layer = parsed

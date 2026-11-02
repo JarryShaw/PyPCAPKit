@@ -108,7 +108,7 @@ def beholder(
     This decorator calls the decorated function. Should any exception be
     raised, it re-parses the current layer's payload as
     :class:`~pcapkit.protocols.misc.raw.Raw` -- or as
-    :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an
+    :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, if the error is an
     end-of-file :exc:`~pcapkit.utilities.exceptions.StructError` -- whose
     ``error`` is the exception's message.
 
@@ -185,7 +185,7 @@ def beholder(
                 beholding.reset(token)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
                 from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]

@@ -61,7 +61,7 @@ from pcapkit.protocols.data.application.tls import \
     SupportedVersionsClientHello as Data_SupportedVersionsClientHello
 from pcapkit.protocols.data.application.tls import \
     SupportedVersionsServerHello as Data_SupportedVersionsServerHello
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn

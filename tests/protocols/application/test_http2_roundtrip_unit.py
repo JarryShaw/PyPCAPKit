@@ -230,7 +230,7 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
     def test_every_frame_is_an_http2_layer(self) -> None:
         """Each layer holds the frame header the specification frames (RFC 9113, section 4.1)."""
         from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):

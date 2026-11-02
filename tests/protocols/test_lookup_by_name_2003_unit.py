@@ -148,7 +148,7 @@ class LookupByNameTests(unittest.TestCase):
 
     def test_dict_without_the_dispatch_keys_is_not_guessed_at(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         ip6 = IPv6(HOP_DST_DST)
         exported = ip6.info.to_dict()

@@ -76,7 +76,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as PCAPNG_ZigBeeNW
 
 # misc protocols
 from pcapkit.protocols.schema.misc.raw import Raw
-from pcapkit.protocols.schema.misc.null import NoPayload
+from pcapkit.protocols.schema.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.misc.checksum import IP_Pseudo
 
 __all__ = [

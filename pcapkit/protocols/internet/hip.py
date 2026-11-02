@@ -128,7 +128,7 @@ from pcapkit.protocols.data.internet.hip import UnassignedParameter as Data_Unas
 from pcapkit.protocols.data.internet.hip import ViaRVSParameter as Data_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
 from pcapkit.protocols.schema.internet.hip import AckDataParameter as Schema_AckDataParameter
 from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKParameter

@@ -122,7 +122,7 @@ class TestRegistryStoredDescriptor(unittest.TestCase):
         self.assertIs(scratch.__proto__[1], descriptor)
         self.assertEqual(self._count(scratch.register, 1, ModuleDescriptor(*descriptor)), 0)
         self.assertIs(scratch.__proto__[1], descriptor)
-        other = ModuleDescriptor('pcapkit.protocols.misc.null', 'NoPayload')
+        other = ModuleDescriptor('pcapkit.protocols.misc.no_payload', 'NoPayload')
         self.assertEqual(self._count(scratch.register, 1, other), 1)
         self.assertIs(scratch.__proto__[1], other.klass)
 

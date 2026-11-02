@@ -57,7 +57,7 @@ class TestRawLinktypeDispatch(unittest.TestCase):
         return {'num': frame._fnum, 'sct': frame._sect, 'ctx': frame._ctx}
 
     def test_version_nibble_selects_the_layer(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for build, suffix in FORMATS:
             with self.subTest(format=suffix):

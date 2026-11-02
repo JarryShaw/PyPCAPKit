@@ -150,7 +150,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_ftp_data_still_parses_and_rebuilds_as_raw(self) -> None:
         """The ``Application`` base leaves ``Raw``'s parsing and rebuild untouched."""
         from pcapkit.protocols.application.ftp_data import FTP_DATA
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.utilities.exceptions import IntError
 
         packet = FTP_DATA(b'binary-file-contents')
@@ -300,7 +300,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_rarp_still_attaches_a_padded_frames_trailer(self) -> None:
         """Ethernet pads a short RARP frame; ``ARP.read`` dispatches the padding."""
         from pcapkit.protocols.application.rarp import RARP
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.misc.raw import Raw
 
         unpadded = RARP(rarp_request())

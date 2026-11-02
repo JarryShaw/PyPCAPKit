@@ -230,7 +230,7 @@ class IGMPRoundTripTests(unittest.TestCase):
 
     def test_no_trailing_octets_have_no_payload(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         parsed = IGMPv1(io.BytesIO(IGMP_PACKETS['v1-query'][0]), 8)
         self.assertIsInstance(parsed.payload, NoPayload)

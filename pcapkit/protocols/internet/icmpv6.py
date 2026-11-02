@@ -37,7 +37,7 @@ from pcapkit.protocols.data.internet.icmpv6 import ParameterProblem as Data_Para
 from pcapkit.protocols.data.internet.icmpv6 import TimeExceeded as Data_TimeExceeded
 from pcapkit.protocols.data.internet.icmpv6 import Unknown as Data_Unknown
 from pcapkit.protocols.internet.icmp import ICMP
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.icmpv6 import \
     DestinationUnreachable as Schema_DestinationUnreachable
 from pcapkit.protocols.schema.internet.icmpv6 import Echo as Schema_Echo

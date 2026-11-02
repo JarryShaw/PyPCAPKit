@@ -179,7 +179,7 @@ class SchemaUnitTests(unittest.TestCase):
                 return 0
 
             def read(self, length: int | None = None, **kwargs: object) -> DummyData:
-                from pcapkit.protocols.misc.null import NoPayload
+                from pcapkit.protocols.misc.no_payload import NoPayload
                 self._next = NoPayload()
                 self._protos = ProtoChain(self.__class__, self.alias)
                 return DummyData()
@@ -311,7 +311,7 @@ class SchemaUnitTests(unittest.TestCase):
     def test_generated_init_is_installed_and_runs_post_init(self) -> None:
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
-        from pcapkit.protocols.schema.misc.null import NoPayload
+        from pcapkit.protocols.schema.misc.no_payload import NoPayload
         from pcapkit.protocols.schema.schema import Schema, schema_final
 
         @schema_final

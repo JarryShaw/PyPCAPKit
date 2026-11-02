@@ -5,7 +5,7 @@ GitHub issue #1434: a jumbogram [:rfc:`2675`] sets the Payload Length to zero
 and carries its real length in a Jumbo Payload option of the Hop-by-Hop
 Options header. :class:`~pcapkit.protocols.internet.ipv6.IPv6` read only the
 Payload Length, so its next layer was
-:class:`~pcapkit.protocols.misc.null.NoPayload` and the whole jumbo payload
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload` and the whole jumbo payload
 ended up in ``info.trailer``. The Jumbo Payload Length gives the payload
 extent, and only the octets past it are ``trailer``. Every packet rebuilds
 byte for byte.

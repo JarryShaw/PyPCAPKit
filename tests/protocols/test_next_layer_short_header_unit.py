@@ -4,7 +4,7 @@
 This guards against GitHub issue #1170, where every ``_import_next_layer``
 parsed the next layer from
 whatever octets were captured, however few, and only picked
-:class:`~pcapkit.protocols.misc.null.NoPayload` for a declared length of zero.
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload` for a declared length of zero.
 :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` zero-fills
 the fields the stream ends inside, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilt a header that
@@ -42,7 +42,7 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
 
     def test_ipv6_header_without_payload_octets(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         parsed = IPv6(IPV6, len(IPV6))
         self.assertIsInstance(parsed.payload, NoPayload)
@@ -71,7 +71,7 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
 
     def test_udp_header_without_payload_octets(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.transport.udp import UDP as UDP_
 
         packet = IPV4 + UDP[:8]

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -155,7 +155,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         else:
             alias = self.alias
 
-        #: pcapkit.protocols.misc.null.NoPayload: Next layer (no payload).
+        #: pcapkit.protocols.misc.no_payload.NoPayload: Next layer (no payload).
         self._next = NoPayload()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, alias)

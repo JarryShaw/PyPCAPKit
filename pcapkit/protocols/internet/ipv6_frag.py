@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as Data_IPv6_Frag
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6_Frag
 from pcapkit.utilities.exceptions import UnsupportedCall
 

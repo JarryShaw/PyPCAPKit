@@ -226,7 +226,7 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 #: <pcapkit.protocols.protocol.Protocol.from_data>` reconstructs from.
 #: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does
 #: not declare a ``packet``, starting with
-#: :class:`~pcapkit.protocols.misc.null.NoPayload`, the innermost layer of every
+#: :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the innermost layer of every
 #: packet. It is also a real field name for some protocols --
 #: :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>` takes the HIP
 #: packet *type* under it -- and listing it here does not change how it binds,
@@ -655,7 +655,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Protocol chain of current instance.
 
         Note:
-            :class:`~pcapkit.protocols.misc.null.NoPayload` has no chain and
+            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` has no chain and
             narrows this to :obj:`None`; :meth:`_decode_next_layer` passes it
             on as ``basis``, which
             :class:`~pcapkit.corekit.protochain.ProtoChain` accepts.
@@ -984,7 +984,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
+                from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             else:
                 from pcapkit.protocols.misc.raw import Raw as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
@@ -1568,7 +1568,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 return self
 
         # then check recursively
-        from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.misc.no_payload import \
+            NoPayload  # pylint: disable=import-outside-toplevel
 
         payload = self._next
         while not isinstance(payload, NoPayload):
@@ -1600,7 +1601,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 return True
 
         # then check recursively
-        from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.misc.no_payload import \
+            NoPayload  # pylint: disable=import-outside-toplevel
 
         payload = self._next
         while not isinstance(payload, NoPayload):
@@ -2324,7 +2326,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         This method uses ``__next_type__`` and ``__next_name__`` to
         determine the payload type and name. If either of them is missing or
         :data:`None`, or ``data`` holds nothing under ``__next_name__``, a
-        :class:`~pcapkit.protocols.misc.null.NoPayload` instance will be
+        :class:`~pcapkit.protocols.misc.no_payload.NoPayload` instance will be
         returned, exactly as for a protocol with no next layer. Otherwise, the
         payload will be constructed by :meth:`Protocol.from_data
         <pcapkit.protocols.protocol.Protocol.from_data>`.
@@ -2354,7 +2356,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         name = cast('Optional[str]', data.get('__next_name__'))
         if (proto is None or not (isinstance(proto, type) and issubclass(proto, ProtocolBase))
                 or name is None or name not in data):
-            from pcapkit.protocols.misc.null import \
+            from pcapkit.protocols.misc.no_payload import \
                 NoPayload  # pylint: disable=import-outside-toplevel
             return NoPayload()
 
@@ -2510,7 +2512,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             length = len(file_)
 
         if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
@@ -2587,7 +2589,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         depth = frame_depth.get() + 1
         limit = config.FRAME_LAYER_LIMIT
         if limit != -1 and depth > limit:
-            from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
             # NOTE: Nothing is lost if the next layer is raw already, or empty.

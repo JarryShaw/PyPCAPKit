@@ -93,7 +93,7 @@ def _protocol(outer):  # type: ignore[no-untyped-def]
             return len(self.__header__)
 
         def read(self, length=None, **kwargs):  # type: ignore[no-untyped-def]
-            from pcapkit.protocols.misc.null import NoPayload
+            from pcapkit.protocols.misc.no_payload import NoPayload
 
             schema = self.__header__
             self._next = NoPayload()

@@ -117,7 +117,7 @@ def outcome(layer: 'Any', as_dict: 'bool' = False) -> 'str':
 
 def walk(frame: 'Any') -> 'Iterator[tuple[str, Any]]':
     """Yield ``(path, layer)`` for the payload chain and every IPv6 extension header."""
-    from pcapkit.protocols.misc.null import NoPayload
+    from pcapkit.protocols.misc.no_payload import NoPayload
 
     path = ''
     layer = frame
@@ -193,7 +193,7 @@ class CaptureRoundTripTests(unittest.TestCase):
         self.assertEqual(set(LAYER_GAPS) - seen, set(), 'LAYER_GAPS names cases that no longer exist')
 
     def test_every_layer_rebuilds_from_its_info_as_a_dict(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         hit = set()
         with time_limit(SWEEP_TIMEOUT):

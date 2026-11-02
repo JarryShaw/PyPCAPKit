@@ -395,7 +395,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             extension: if is extension header, see :meth:`_next_exthdr_depth`
 
         Returns:
-            :class:`~pcapkit.protocols.misc.null.NoPayload` if there is
+            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` if there is
             nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the
             parse stops at this layer, or the next layer is an IPv6 extension
             header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the
@@ -411,7 +411,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         """
         if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
             return NoPayload, {}
         if self._sigterm:
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel

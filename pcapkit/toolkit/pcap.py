@@ -28,7 +28,7 @@ from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHa
 from pcapkit.protocols.internet.ip import IP as Protocol_IP
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPv6
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN

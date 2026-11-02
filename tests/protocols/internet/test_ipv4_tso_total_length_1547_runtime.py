@@ -184,7 +184,7 @@ class TSOTotalLengthTests(unittest.TestCase):
         # as the trailer, and the Total Length is written back as it was.
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         frame = _records()[1][0][3]
         lengths: 'list[int]' = []
