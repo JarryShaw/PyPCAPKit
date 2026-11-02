@@ -566,7 +566,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # A layer with no ``next`` field ends the walk, as RFC 8200 section 4
             # has a node discard the packet on a malformed header (#2477).
             # It is not recorded as an extension header.
-            # A Raw is reused as the upper layer, so its error logs once.
+            # A Raw is reused as the upper layer, so the header is not parsed again.
             if not hasattr(info, 'next'):
                 from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
                 # Exact type on purpose: Raw subclasses exist, so isinstance would over-match.

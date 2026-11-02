@@ -72,6 +72,64 @@ dispatcher gives :class:`~pcapkit.protocols.application.httpv2.HTTPv2` that its 
 then refuses, such as a preface and three octets, are
 :class:`~pcapkit.protocols.misc.raw.Raw` with the parser's ``error``.
 
+.. _protocol-family-refusals:
+
+Handled Refusals
+~~~~~~~~~~~~~~~~
+
+**A refusal a next-layer fallback handles is quiet**, for every protocol and not only
+a family's members (:issue:`2588`). The fallback is
+:func:`~pcapkit.corekit.decorators.beholder`. It decorates
+:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`
+and the overrides that parse a next layer themselves.
+:meth:`Application._import_next_layer
+<pcapkit.protocols.application.application.Application._import_next_layer>` and
+:meth:`TLS._import_next_layer <pcapkit.protocols.application.tls.TLS._import_next_layer>`
+are not decorated: they delegate to decorated methods, the base's or TLS's
+``_import_next_record``. The decorated call runs inside a
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` block naming
+:exc:`~pcapkit.utilities.exceptions.ProtocolError`. A refused layer, the HTTP/2 case
+above or a GRE header of a nonzero version, is then recorded on the ``error`` of the
+:class:`~pcapkit.protocols.misc.raw.Raw` that replaces it, and nowhere else: nothing
+reaches the ``pcapkit`` logger at any level, and neither :func:`sys.excepthook` nor
+:func:`threading.excepthook` is replaced. A refusal the parser handles is the control
+flow :class:`~pcapkit.utilities.exceptions.BaseError`'s quiet mode exists for, and
+installing a hook from an error the library caught itself is a process-wide side
+effect.
+
+**The block spans the whole call to the next layer**, not the refusal alone. Every
+:exc:`~pcapkit.utilities.exceptions.ProtocolError` built while that call is on the
+stack is quiet, at any depth, unless an inner
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` says otherwise:
+
+* one a parser below catches itself, such as the ``supported_versions`` peek of
+  :meth:`SSL._tls_negotiates <pcapkit.protocols.application.ssl.SSL._tls_negotiates>`
+  or TLS's SSLv2 trial, which is then recorded nowhere;
+* one reporting library state rather than the octets, such as a
+  :class:`~pcapkit.corekit.module.ModuleDescriptor` entry whose class its module has
+  since lost -- by a later removal, or by a write to ``__proto__`` directly, since
+  :func:`~pcapkit.foundation.registry.protocols.register_tcp` refuses such an entry --
+  which ends as the ``Raw`` layer's ``error``;
+* one raised by an inner fallback's recovery, since the block of the fallback around
+  it is still active.
+
+What stays loud:
+
+* **Building the refusing layer directly.** ``GRE(...)`` or ``IPv4(...)`` on the same
+  octets raises an error that logs at :data:`logging.CRITICAL` and, outside development
+  mode, installs the hooks.
+* **Any other error class.** An error the fallback absorbs is as loud as it was
+  constructed, and :func:`~pcapkit.corekit.decorators.beholder` logs it at
+  :data:`logging.WARNING` as well.
+* **A refusal built under an inner** ``CaughtByCaller()``. A block naming no class,
+  such as the one :meth:`~pcapkit.corekit.enum.EnumRegistry.register` enters, makes
+  errors loud again inside the fallback's.
+* **The outermost fallback's recovery.** Reading the payload and building the ``Raw``
+  run after the block has ended, so under the outermost
+  :func:`~pcapkit.corekit.decorators.beholder` of a parse an error raised there reaches
+  the caller loud. Each block restores the one around it on exit, so none outlives
+  that parse.
+
 .. _protocol-family-shapes:
 
 Member Shapes
