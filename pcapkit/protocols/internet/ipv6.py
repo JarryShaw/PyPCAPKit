@@ -340,6 +340,30 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             schema.payload = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
         return schema
 
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv6':
+        """Unpack (parse) packet data.
+
+        The Version field is checked before the header schema is parsed, so
+        octets of another version are refused as such, rather than by whichever
+        field of this header they break first (:issue:`2574`).
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If the Version field is not ``6``.
+
+        """
+        if cast('Optional[Schema_IPv6]', self.__header__) is None and self._data:
+            version = self._data[0] >> 4
+            if version != 6:
+                raise ProtocolError(f'[IPv6] invalid version: {version}')
+        return super().unpack(length, **kwargs)
+
     @classmethod
     def id(cls) -> 'tuple[Literal["IPv6"]]':  # type: ignore[override]
         """Index ID of the protocol.

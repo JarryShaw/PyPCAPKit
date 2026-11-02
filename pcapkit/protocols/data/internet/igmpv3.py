@@ -10,6 +10,8 @@ from pcapkit.protocols.data.protocol import Protocol
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
 
+    from typing_extensions import Literal
+
     from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
     from pcapkit.const.igmp.type import Type as Enum_Type
 
@@ -27,6 +29,11 @@ class IGMPv3(Protocol):
 
     """
 
+    #: Version of IGMP, always ``3``. It is on no octet: it names the class
+    #: that read or built the message, as on the IGMPv1/v2 data model, and
+    #: :meth:`IGMP.from_data <pcapkit.protocols.internet.igmp.IGMP.from_data>`
+    #: dispatches on it (:issue:`2574`).
+    version: 'Literal[3]'
     #: Message type.
     type: 'Enum_Type'
     #: Header length, in octets. IGMP has no header field of its own that
@@ -79,7 +86,7 @@ class Query(IGMPv3):
     sources: 'tuple[IPv4Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Type', length: 'int', max_resp_code: 'int',
+        def __init__(self, version: 'Literal[3]', type: 'Enum_Type', length: 'int', max_resp_code: 'int',
                      max_resp_time: 'int', checksum: 'bytes', group: 'IPv4Address',
                      resv: 'int', s_flag: 'bool', qrv: 'int', qqic: 'int', qqi: 'int',
                      sources: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
@@ -128,6 +135,7 @@ class Report(IGMPv3):
     records: 'tuple[GroupRecord, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Type', length: 'int', reserved_1: 'int', checksum: 'bytes',
+        def __init__(self, version: 'Literal[3]', type: 'Enum_Type', length: 'int', reserved_1: 'int',
+                     checksum: 'bytes',
                      reserved_2: 'bytes', num_group_records: 'int',
                      records: 'tuple[GroupRecord, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
