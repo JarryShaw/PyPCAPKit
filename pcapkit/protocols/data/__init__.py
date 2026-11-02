@@ -91,11 +91,12 @@ __all__ = [
     'Radiotap_DBTXAttenuation', 'Radiotap_DBmTXPower', 'Radiotap_Antenna',
     'Radiotap_DBAntennaSignal', 'Radiotap_DBAntennaNoise', 'Radiotap_RXFlags',
     'Radiotap_TXFlags', 'Radiotap_RTSRetries', 'Radiotap_DataRetries', 'Radiotap_MCS',
-    'Radiotap_AMPDUStatus', 'Radiotap_VHT',
-    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEMU', 'Radiotap_HEMUOtherUser',
+    'Radiotap_MCSFlags', 'Radiotap_AMPDUStatus', 'Radiotap_VHT',
+    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEData1', 'Radiotap_HEData2', 'Radiotap_HEMU',
+    'Radiotap_HEMUFlags1', 'Radiotap_HEMUFlags2', 'Radiotap_HEMUOtherUser',
     'Radiotap_ZeroLengthPSDU', 'Radiotap_LSIG', 'Radiotap_TLVFields',
     'Radiotap_RadiotapNamespace', 'Radiotap_VendorNamespace', 'Radiotap_S1G', 'Radiotap_USIG',
-    'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
+    'Radiotap_USIGCommon', 'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',

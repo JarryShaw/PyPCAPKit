@@ -17,9 +17,9 @@ from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceFie
                                               IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField, SwitchField)
-from pcapkit.corekit.fields.numbers import (EnumField, Int8Field, Int16Field, Int32Field,
-                                            Int64Field, NumberField, PortEnumField, UInt8Field,
-                                            UInt16Field, UInt32Field, UInt64Field)
+from pcapkit.corekit.fields.numbers import (BitmapField, EnumField, Int8Field, Int16Field,
+                                            Int32Field, Int64Field, NumberField, PortEnumField,
+                                            UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 
 __all__ = [
@@ -29,6 +29,7 @@ __all__ = [
     'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field',
     'EnumField', 'PortEnumField',
+    'BitmapField',
 
     'BytesField',
     'StringField',

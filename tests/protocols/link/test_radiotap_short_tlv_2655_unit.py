@@ -46,14 +46,19 @@ WHOLE = {
     'vendor': (30, bytes.fromhex('001374') + struct.pack('<BHH', 0x01, 0x0505, 0) + b'\xaa\xbb'),
 }
 
+#: The U-SIG ``common`` word of :data:`WHOLE`, ``0x11223344``, split into its
+#: subfields by hand: bits 12 to 31 hold them, and bits 0 to 11 are known bits.
+COMMON = {'phy_version': 3, 'bandwidth': 4, 'ul_dl': 0, 'bss_color': 0x24, 'txop': 8,
+          'known': 0x344}
+
 #: Each cut: the item, the octets of its data kept, the octets of its layout
 #: (the length its control is padded back to), the ``__short_read__`` the cut
 #: gives, and the subfields it decodes to, worked out by hand.
 CUTS = {
     'U-SIG at a field boundary': ('U-SIG', 8, 12, ('mask', 0),
-                                  {'common': 0x11223344, 'value': 0x55667788, 'mask': 0}),
+                                  {'common': COMMON, 'value': 0x55667788, 'mask': 0}),
     'U-SIG inside a field': ('U-SIG', 6, 12, ('value', 2),
-                             {'common': 0x11223344, 'value': 0x7788, 'mask': 0}),
+                             {'common': COMMON, 'value': 0x7788, 'mask': 0}),
     'S1G at a field boundary': ('S1G', 4, 6, ('data2', 0), {'known': 0x0103, 'data1': 0x0405, 'data2': 0}),
     'S1G inside a field': ('S1G', 3, 6, ('data1', 1), {'known': 0x0103, 'data1': 0x05, 'data2': 0}),
     'EHT at a field boundary': ('EHT', 4, 40, ('data', 0), {'known': 3, 'data': (0,) * 9, 'user_info': ()}),
@@ -284,7 +289,9 @@ class TestRadiotapShortTLV(unittest.TestCase):
         from pcapkit.protocols.link.radiotap import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
-        usig = {'common': 1, 'value': 2, 'mask': 3}
+        usig = {'common': COMMON, 'value': 2, 'mask': 3}
+        # whole, the item builds, so each refusal below is its record's
+        Radiotap(present=(PRESENT,), fields=[(28, {'tlvs': [{'type': 33, 'data': usig}]})])
         for record in (('nosuch', 0), ('mask', -1), ('mask', True), ('mask', '0'), ('mask',), 'mask'):
             with self.subTest(record=record):
                 with self.assertRaises(ProtocolError):

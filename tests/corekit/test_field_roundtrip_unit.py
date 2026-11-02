@@ -119,6 +119,7 @@ def field_cases() -> 'tuple[FieldCase, ...]':  # pylint: disable=too-many-locals
     """Every field case, built against the current :mod:`pcapkit` import."""
     import aenum
 
+    from pcapkit.const.radiotap.he_data1_known import HEData1Known
     from pcapkit.const.reg.apptype import AppType, TransportProtocol
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.fields import collections as fcoll
@@ -189,6 +190,23 @@ def field_cases() -> 'tuple[FieldCase, ...]':  # pylint: disable=too-many-locals
             f'PortEnumField/{proto.name}',
             lambda proto=proto: fnum.PortEnumField(length=2, namespace=AppType, proto=proto),
             (AppType.get(80, proto=proto),), _wires(2) + (b'\xd4\x31',)))
+    split = {'a': (0, 2), 'b': (2, 3)}
+    cases.append(FieldCase(
+        'BitmapField/unnamed-rest', lambda: fnum.BitmapField(length=1, namespace=split),
+        ({'a': 0, 'b': 0}, {'a': 3, 'b': 7}, {'a': 1, 'b': 5, '__unnamed__': 0xe0}),
+        _wires(1) + (b'\xa5',)))
+    cases.append(FieldCase(
+        'BitmapField/flags-rest', lambda: fnum.BitmapField(
+            length=2, namespace={'ppdu_format': (0, 2)}, remainder='known', flags=HEData1Known,
+            byteorder='little'),
+        ({'ppdu_format': 0, 'known': 0}, {'ppdu_format': 3, 'known': 0xfffc},
+         {'ppdu_format': 2, 'known': HEData1Known.HE_DATA1_BSS_COLOR_KNOWN}),
+        _wires(2) + (b'\x02\x80',)))
+    cases.append(FieldCase(
+        'BitmapField/int-rest', lambda: fnum.BitmapField(
+            length=4, namespace={'lo': (0, 4), 'mid': (12, 6)}, remainder='rest',
+            byteorder='little'),
+        ({'lo': 0, 'mid': 0, 'rest': 0}, {'lo': 15, 'mid': 63, 'rest': 0xfffc0ff0}), _wires(4)))
 
     # -- strings ------------------------------------------------------------
     for width in (0, 1, 4):

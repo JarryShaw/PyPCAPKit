@@ -32,12 +32,22 @@ from radiotap.org [*]_. Available enumerations include:
      - VHT Coding Flags
    * - :class:`Radiotap_TimestampFlags <pcapkit.const.radiotap.timestamp_flags.TimestampFlags>`
      - Timestamp Flags
+   * - :class:`Radiotap_HEData1Known <pcapkit.const.radiotap.he_data1_known.HEData1Known>`
+     - HE Data1 Known Flags
+   * - :class:`Radiotap_HEData2Known <pcapkit.const.radiotap.he_data2_known.HEData2Known>`
+     - HE Data2 Known Flags
+   * - :class:`Radiotap_HEMUFlags1Known <pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known>`
+     - HE-MU Flags1 Known Flags
+   * - :class:`Radiotap_HEMUFlags2Known <pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known>`
+     - HE-MU Flags2 Known Flags
    * - :class:`Radiotap_HEMUOtherUserKnown <pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown>`
      - HE-MU-other-user Known Flags
    * - :class:`Radiotap_LSIGData1 <pcapkit.const.radiotap.lsig_data1.LSIGData1>`
      - L-SIG Data1 Flags
    * - :class:`Radiotap_S1GKnown <pcapkit.const.radiotap.s1g_known.S1GKnown>`
      - S1G Known Flags
+   * - :class:`Radiotap_USIGCommonKnown <pcapkit.const.radiotap.usig_common_known.USIGCommonKnown>`
+     - U-SIG Common Known Flags
    * - :class:`Radiotap_EHTKnown <pcapkit.const.radiotap.eht_known.EHTKnown>`
      - EHT Known Flags
 
@@ -186,6 +196,58 @@ which is automatically generated from :class:`pcapkit.vendor.radiotap.timestamp_
    :undoc-members:
    :show-inheritance:
 
+HE Data1 Known Flags
+====================
+
+.. module:: pcapkit.const.radiotap.he_data1_known
+
+This module contains the constant enumeration for **Radiotap HE Data1 Known Flags**,
+which is automatically generated from :class:`pcapkit.vendor.radiotap.he_data1_known.HEData1Known`.
+
+.. autoclass:: pcapkit.const.radiotap.he_data1_known.HEData1Known
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HE Data2 Known Flags
+====================
+
+.. module:: pcapkit.const.radiotap.he_data2_known
+
+This module contains the constant enumeration for **Radiotap HE Data2 Known Flags**,
+which is automatically generated from :class:`pcapkit.vendor.radiotap.he_data2_known.HEData2Known`.
+
+.. autoclass:: pcapkit.const.radiotap.he_data2_known.HEData2Known
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HE-MU Flags1 Known Flags
+========================
+
+.. module:: pcapkit.const.radiotap.he_mu_flags1_known
+
+This module contains the constant enumeration for **Radiotap HE-MU Flags1 Known Flags**,
+which is automatically generated from :class:`pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
+
+.. autoclass:: pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HE-MU Flags2 Known Flags
+========================
+
+.. module:: pcapkit.const.radiotap.he_mu_flags2_known
+
+This module contains the constant enumeration for **Radiotap HE-MU Flags2 Known Flags**,
+which is automatically generated from :class:`pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
+
+.. autoclass:: pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 HE-MU-other-user Known Flags
 ============================
 
@@ -221,6 +283,19 @@ This module contains the constant enumeration for **Radiotap S1G Known Flags**,
 which is automatically generated from :class:`pcapkit.vendor.radiotap.s1g_known.S1GKnown`.
 
 .. autoclass:: pcapkit.const.radiotap.s1g_known.S1GKnown
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+U-SIG Common Known Flags
+========================
+
+.. module:: pcapkit.const.radiotap.usig_common_known
+
+This module contains the constant enumeration for **Radiotap U-SIG Common Known Flags**,
+which is automatically generated from :class:`pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown`.
+
+.. autoclass:: pcapkit.const.radiotap.usig_common_known.USIGCommonKnown
    :members:
    :undoc-members:
    :show-inheritance:

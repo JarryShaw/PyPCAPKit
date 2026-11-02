@@ -72,7 +72,11 @@ retries, bits 16 and 17, from its unofficially used ones, which those three
 size alike; OpenBSD writes a 2-octet RSSI field at bit 16 instead, which is not
 read. A bitmap radiotap.org defines bit by bit is a member of its flag registry
 under :mod:`pcapkit.const.radiotap`, which keeps the bits it does not name. A
-field type registered through
+bitmap that mixes value subfields with known bits -- the MCS ``flags``, the HE
+``data1`` and ``data2``, the HE-MU ``flags1`` and ``flags2`` and the U-SIG
+``common`` -- is split: each value subfield is an integer, and its other bits,
+the undefined ones among them, a member of its known-bits registry. A field
+type registered through
 :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field` is
 decoded the same way.
 
@@ -445,6 +449,10 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.link.radiotap.MCSFlags
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.link.radiotap.AMPDUStatus
    :members:
    :show-inheritance:
@@ -461,7 +469,23 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData1
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData2
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.link.radiotap.HEMU
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags1
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags2
    :members:
    :show-inheritance:
 
@@ -494,6 +518,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.link.radiotap.USIG
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.USIGCommon
    :members:
    :show-inheritance:
 
