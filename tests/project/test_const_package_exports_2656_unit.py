@@ -52,13 +52,9 @@ NOT_A_REGISTRY = {
 }
 
 #: Registry packages of :mod:`pcapkit.const` that :file:`pcapkit/const/__init__.py` does not
-#: re-export, a recorded defect (#2661). Each reason names what is missing. Wiring a package
-#: deletes its entry, which ``test_unwired_entries_hold`` enforces.
-KNOWN_UNWIRED = {
-    'linux': 'no "from pcapkit.const.linux import *" in pcapkit/const/__init__.py, and the name '
-             'is unprefixed: pcapkit.const.linux.__all__ lists ARPHRD, where the house prefix '
-             'gives Linux_ARPHRD, as pcapkit.vendor.linux.__all__ lists it',
-}
+#: re-export, a recorded defect. Each reason names what is missing and the issue that tracks
+#: it. Wiring a package deletes its entry, which ``test_unwired_entries_hold`` enforces.
+KNOWN_UNWIRED = {}  # type: dict[str, str]
 
 #: A ``.. toctree::`` directive, capturing its indentation.
 TOCTREE = re.compile(r'^(\s*)\.\. toctree::\s*$')
