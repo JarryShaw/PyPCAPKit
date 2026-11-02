@@ -346,7 +346,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(L2TP.__module__, 'pcapkit.protocols.link.l2tp')
         self.assertEqual(L2TPv2.__module__, 'pcapkit.protocols.link.l2tpv2')
 
-    def test_l2tp_index_is_unsupported_and_make_data_preserves_flags(self) -> None:
+    def test_l2tpv2_index_is_its_udp_port_and_make_data_preserves_flags(self) -> None:
+        from pcapkit.const.reg.apptype import UDP
         from pcapkit.protocols.link.l2tp import L2TP
         from pcapkit.protocols.link.l2tpv2 import L2TPv2
         from pcapkit.utilities.exceptions import UnsupportedCall
@@ -364,14 +365,13 @@ class LinkProtocolUnitTests(unittest.TestCase):
         )
         proto = object.__new__(L2TPv2)
 
-        # Neither the abstract base nor v2 has a numeral registry index: v2 is
-        # reached by UDP port 1701, and a port is not an ``__index__`` value
-        # anywhere in this package. An L2TPv3 class would be the first with one
-        # (IP protocol 115).
-        for klass in (L2TP, L2TPv2):
-            with self.subTest(protocol=klass.__name__):
-                with self.assertRaises(UnsupportedCall):
-                    klass.__index__()
+        # The abstract base has no numeral registry index; v2's is UDP port 1701,
+        # where UDP dispatches it (#2627). IP protocol 115 names L2TPv3 instead.
+        with self.assertRaises(UnsupportedCall):
+            L2TP.__index__()
+        self.assertIs(type(L2TPv2.__index__()), int)
+        self.assertEqual(int(proto), int(UDP.l2tp))
+        self.assertEqual(int(proto), 1701)
         self.assertEqual(proto.__length_hint__(), 16)
         values = L2TPv2._make_data(data)
         self.assertEqual(values['type'], True)

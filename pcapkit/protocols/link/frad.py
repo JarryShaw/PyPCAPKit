@@ -29,7 +29,7 @@ schema.
 import collections
 from typing import TYPE_CHECKING
 
-from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.frad import FRAD as Data_FRAD
@@ -339,17 +339,21 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         return 10
 
     @classmethod
-    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_LinkType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            Numeral registry index of the protocol in Linux ARP hardware
-            types, the ``arphrd_type`` that
+            Numeral registry index of the protocol in `tcpdump`_ link-layer
+            header types, ``LINKTYPE_FRELAY``: a Q.922 LAPF frame from the
+            address field on, with no FCS.
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
-            dispatches here.
+            names its own key for this class, ``ARPHRD_FRAD``
+            (:ref:`registry-protocol-index`).
+
+        .. _tcpdump: https://www.tcpdump.org/linktypes.html
 
         """
-        return Enum_ARPHRD.FRAD  # type: ignore[return-value]
+        return Enum_LinkType.FRELAY  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

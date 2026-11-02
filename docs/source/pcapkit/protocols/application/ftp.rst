@@ -35,6 +35,8 @@ which implements an extractor for File Transfer Protocol
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: __index__
+
    .. automethod:: _make_data
 
 Auxiliary Data

@@ -5,7 +5,7 @@ through a registry of its own.
 Covers :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
 as shipped, dispatch through it and through the EtherType path from both versions,
 a parse stopping at either version on either path (#2532),
-the ``__index__`` of the classes it reaches, and the registrars of it and of
+the keys of the classes it reaches, and the registrars of it and of
 :class:`~pcapkit.protocols.link.frad.FRAD`'s and
 :class:`~pcapkit.protocols.link.netlink.Netlink`'s registries.
 
@@ -208,7 +208,11 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                     self.assertEqual(version(raw, len(raw), **stop).protochain.chain,
                                      f'{alias}:IPv4:UDP')
 
-    def test_index_is_the_arphrd_type_that_dispatches_here(self) -> None:
+    def test_each_arphrd_type_dispatches_to_its_class(self) -> None:
+        """Each key is spelled out, not read off ``__index__``, which returns
+        the class's LinkType or TransType value (#2627), bar Netlink's, which
+        is ``ARPHRD_NETLINK``.
+        """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.frad import FRAD
         from pcapkit.protocols.link.gre import GRE
@@ -216,13 +220,13 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         from pcapkit.protocols.link.netlink import Netlink
         from pcapkit.protocols.link.radiotap import Radiotap
 
-        for klass, member in ((FRAD, ARPHRD.FRAD), (GRE, ARPHRD.IPGRE),
-                              (Radiotap, ARPHRD.IEEE80211_RADIOTAP), (Netlink, ARPHRD.NETLINK)):
-            with self.subTest(protocol=klass.__name__):
-                self.assertIs(klass.__index__(), member)
-                self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, klass.__index__()),
-                              klass)
-        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, ARPHRD.IP6GRE), GRE)
+        for klass, member in ((FRAD, ARPHRD.FRAD), (GRE, ARPHRD.IPGRE), (GRE, ARPHRD.IP6GRE),
+                              (Radiotap, ARPHRD.IEEE80211_RADIOTAP)):
+            with self.subTest(protocol=klass.__name__, arphrd=int(member)):
+                self.assertIsNot(klass.__index__(), member)
+                self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, member), klass)
+        self.assertIs(Netlink.__index__(), ARPHRD.NETLINK)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, ARPHRD.NETLINK), Netlink)
 
     ##########################################################################
     # The registrars.

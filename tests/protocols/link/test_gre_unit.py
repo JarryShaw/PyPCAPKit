@@ -236,16 +236,17 @@ class TestGRE(unittest.TestCase):
                 GRE(**kwargs)
 
     def test_id_and_index(self) -> None:
-        """``__index__`` is ``IPGRE``, which LinuxSLL dispatches here alongside
-        ``IP6GRE`` (#2510).
+        """``__index__`` is IANA protocol number 47 (#2627); LinuxSLL dispatches
+        here under ``IPGRE`` and ``IP6GRE``, keys it names itself (#2510).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.link.gre import GRE
         from pcapkit.protocols.link.linux_sll import LinuxSLL
 
         self.assertEqual(GRE.id(), ('GRE',))
-        self.assertIs(GRE.__index__(), ARPHRD.IPGRE)
-        self.assertEqual(GRE.__index__(), 778)
+        self.assertIs(GRE.__index__(), TransType.GRE)
+        self.assertEqual(GRE.__index__(), 47)
         for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
             with self.subTest(arphrd=arphrd):
                 self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, arphrd), GRE)

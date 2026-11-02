@@ -39,8 +39,8 @@ IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second
 route is why
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
 leaves 115 unbound: the binding waits on an ``L2TPv3`` class, not on a
-different framing decision. It also means v3 is the first member of this family
-to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
+different framing decision. It also means 115 names v3 alone: v2's
+:meth:`~pcapkit.protocols.protocol.Protocol.__index__` is its UDP port.
 
 Binding :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead does not
 work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3

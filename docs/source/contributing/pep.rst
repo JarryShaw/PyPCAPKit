@@ -336,9 +336,10 @@ Some wanted only a table entry, because the dissector was already there:
 
 * **Done.** :class:`~pcapkit.protocols.application.ospf.OSPF` is bound at
   :class:`~pcapkit.const.reg.transtype.TransType` 89 (``OSPFIGP``) and
-  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
-  ``__index__`` raises on both, which is correct: neither is reached through a
-  link-layer EtherType.
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701, and
+  ``__index__`` returns those values: ``TransType.OSPFIGP``, and 1701 as an
+  :class:`int`, as an AppType-valued index is the member's port
+  (:ref:`registry-protocol-index`).
 * **Done.** :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA` is bound at TCP
   port 20 (IANA ``ftp-data``). It is a thin
   :class:`~pcapkit.protocols.misc.raw.Raw` subclass, so this buys the payload a
@@ -370,11 +371,10 @@ Follow-ups to the bindings above:
   reason is structural: it references :rfc:`3931`, i.e. L2TPv3 over IP, and **there is
   no** ``L2TPv3`` **class for it to point at**. What exists is
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing, reached over
-  UDP 1701. So the binding waits on a v3 dissector, which is also the first member of the
-  family to carry an :meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own --
-  115 being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and what
-  ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F [:rfc:`2341`],
-  a separate protocol, not an earlier L2TP.
+  UDP 1701, which is its :meth:`~pcapkit.protocols.protocol.Protocol.__index__`. So the
+  binding waits on a v3 dissector. :mod:`pcapkit.protocols.link.l2tp` records what v3
+  needs, and what ``L2F`` needs alongside it: the version nibble reading ``1`` selects
+  L2F [:rfc:`2341`], a separate protocol, not an earlier L2TP.
 * The :class:`~pcapkit.protocols.link.l2tp.L2TP` family lives under
   :mod:`pcapkit.protocols.link` and so reports ``layer == 'Link'``, although it
   is carried inside UDP. That is deliberate: a tunnelling protocol is placed by what

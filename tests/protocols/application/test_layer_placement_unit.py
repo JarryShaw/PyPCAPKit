@@ -149,9 +149,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_ftp_data_still_parses_and_rebuilds_as_raw(self) -> None:
         """The ``Application`` base leaves ``Raw``'s parsing and rebuild untouched."""
+        from pcapkit.const.reg.apptype import TCP
         from pcapkit.protocols.application.ftp_data import FTP_DATA
         from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.utilities.exceptions import IntError
 
         packet = FTP_DATA(b'binary-file-contents')
         self.assertEqual(packet.info.packet, b'binary-file-contents')
@@ -160,9 +160,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertEqual(bytes(FTP_DATA.from_data(packet.info)), b'binary-file-contents')
         self.assertEqual(FTP_DATA(packet=b'abc').data, b'abc')
 
-        # reached by TCP port 20, a port is no index: ``Application``'s refusal
-        with self.assertRaises(IntError):
-            FTP_DATA.__index__()
+        # its own index, TCP port 20, ahead of ``Application``'s refusal (#2627)
+        self.assertIs(type(FTP_DATA.__index__()), int)
+        self.assertEqual(int(packet), int(TCP.ftp_data))
 
     def test_link_owns_layer_but_raw_does_not(self) -> None:
         """The mechanism the ordering convention rests on, asserted directly."""

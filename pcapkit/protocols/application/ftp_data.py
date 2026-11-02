@@ -43,10 +43,10 @@ class FTP_DATA(Application, Raw):  # pylint: disable=abstract-method
 
        Derives from :class:`~pcapkit.protocols.application.application.Application`
        as well as :class:`~pcapkit.protocols.misc.raw.Raw`, so its layer is
-       ``'Application'``, where it was :obj:`None`, and its ``__index__`` is
+       ``'Application'``, where it was :obj:`None`, and its ``__index__`` became
        :meth:`Application.__index__
        <pcapkit.protocols.application.application.Application.__index__>`,
-       raising :exc:`~pcapkit.utilities.exceptions.IntError` where it raised
+       raising :exc:`~pcapkit.utilities.exceptions.IntError` where it had raised
        :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (:issue:`2285`).
 
     """
@@ -60,3 +60,32 @@ class FTP_DATA(Application, Raw):  # pylint: disable=abstract-method
     def name(self) -> 'Literal["FTP_DATA"]':  # type: ignore[override]
         """Name of current protocol."""
         return 'FTP_DATA'
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: TCP port 20, the port of
+            :attr:`TCP.ftp_data <pcapkit.const.reg.apptype.tcp.TCP.ftp_data>` as
+            an :class:`int`, which
+            :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+            dispatches here (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        .. versionchanged:: 1.6.0
+
+           Returns TCP port 20, where it raised
+           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
+
+        """
+        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
+
+        return int(TCP.ftp_data)  # type: ignore[call-overload]
