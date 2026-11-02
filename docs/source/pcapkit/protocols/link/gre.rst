@@ -7,11 +7,14 @@ GRE - Generic Routing Encapsulation
 :class:`~pcapkit.protocols.link.gre.GRE`
 only, which implements the extractor for the Generic Routing Encapsulation
 base header [*]_ plus the optional Key and Sequence Number extensions [*]_, as
-seen on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose
-``arphrd_type`` is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- both land on this
-one class, the "IP"/"IP6" distinction being only which outer IP version the
-tunnel carries. Its structure, with every optional field present, is
-described as below:
+reached through IP protocol number 47 behind any layer sharing
+:attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`,
+IPv4 and IPv6 among them, or as seen on a
+``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose
+``arphrd_type`` is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE``
+and ``ARPHRD_IP6GRE`` both land on this one class, the "IP"/"IP6" distinction
+being only which outer IP version the tunnel carries. Its structure, with
+every optional field present, is described as below:
 
 .. table::
 
@@ -46,6 +49,11 @@ family registry Ethernet, VLAN and LinuxSLL already share -- unlike
 its own. A nonzero Version Number (RFC 2637's "Enhanced GRE"/PPTP, version 1)
 is a different, incompatible protocol and is refused rather than misread; see
 the module docstring's *Scope* section.
+
+Flow tracing and TCP reassembly follow the tunnel's inner flow, keyed by the
+IP header nearest the TCP segment as for any tunnel (:issue:`1581`), and IPv4
+reassembly of an outer datagram fragmented in transit yields a parsed GRE
+layer.
 
 .. autoclass:: pcapkit.protocols.link.gre.GRE
    :no-members:

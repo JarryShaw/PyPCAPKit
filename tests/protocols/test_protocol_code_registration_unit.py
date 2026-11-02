@@ -365,12 +365,14 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
 
+        # RFC 3692 reserves 254 for experimentation, so nothing ships bound there.
+        code = TransType.Use_for_experimentation_and_testing_254
         with mock.patch.dict(Internet.__proto__, {}, clear=False):
-            class MyGre(Internet, code=TransType.GRE):
+            class Experimental(Internet, code=code):
                 __layer__ = 'Internet'
 
-            self.assertIs(Internet.__proto__[TransType.GRE], MyGre)
-        self.assertNotIn(TransType.GRE, Internet.__proto__)
+            self.assertIs(Internet.__proto__[code], Experimental)
+        self.assertNotIn(code, Internet.__proto__)
 
     def test_class_keyword_with_an_arphrd_member_reaches_linux_sll_dispatch(self) -> None:
         """``code=ARPHRD.X`` registers where a cooked frame dispatches (#2533)."""
@@ -404,19 +406,21 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
 
+        # RFC 3692 reserves 254 for experimentation, so nothing ships bound there.
+        code = TransType.Use_for_experimentation_and_testing_254
         with mock.patch.dict(Internet.__proto__, {}, clear=False):
-            class Parent(Internet, code=TransType.GRE):
+            class Parent(Internet, code=code):
                 __layer__ = 'Internet'
 
-            self.assertIs(Internet.__proto__[TransType.GRE], Parent)
+            self.assertIs(Internet.__proto__[code], Parent)
 
             class Child(Parent):
                 __layer__ = 'Internet'
 
             # ``Child`` passed no ``code=``, so the entry must still be ``Parent``.
-            self.assertIs(Internet.__proto__[TransType.GRE], Parent)
+            self.assertIs(Internet.__proto__[code], Parent)
             self.assertNotIn(Child, Internet.__proto__.values())
-        self.assertNotIn(TransType.GRE, Internet.__proto__)
+        self.assertNotIn(code, Internet.__proto__)
 
     def test_backward_compatible_dispatch_tables_are_unaffected(self) -> None:
         """No built-in protocol class passes ``code=``, so nothing shipped moves.

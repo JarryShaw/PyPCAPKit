@@ -72,9 +72,10 @@ class FRAD(Schema):
     """Header schema for a Frame Relay Access Device (FRAD) frame.
 
     The frame is Frame Relay's multiprotocol encapsulation [:rfc:`2427`,
-    obsoleting :rfc:`1490`] as presented to a ``LINKTYPE_LINUX_SLL``/
-    ``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type`` is ``ARPHRD_FRAD``:
-    the Q.922 LAPF address onward, with no trailing FCS.
+    obsoleting :rfc:`1490`] as presented to a ``LINKTYPE_FRELAY`` capture,
+    or to a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose
+    ``arphrd_type`` is ``ARPHRD_FRAD``: the Q.922 LAPF address onward, with no
+    trailing FCS.
 
     """
 

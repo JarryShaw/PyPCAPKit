@@ -85,6 +85,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
          - :class:`pcapkit.protocols.link.ethernet.Ethernet`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IEEE802_11`
          - :class:`pcapkit.protocols.link.ieee802_11.IEEE802_11`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.FRELAY`
+         - :class:`pcapkit.protocols.link.frad.FRAD`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.LOOP`
          - :class:`pcapkit.protocols.link.loopback.Loopback`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.LINUX_SLL`
@@ -119,6 +121,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Enum_LinkType.NULL:                ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
             Enum_LinkType.ETHERNET:            ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
             Enum_LinkType.IEEE802_11:          ModuleDescriptor('pcapkit.protocols.link', 'IEEE802_11'),
+            Enum_LinkType.FRELAY:              ModuleDescriptor('pcapkit.protocols.link', 'FRAD'),
             Enum_LinkType.LOOP:                ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
             Enum_LinkType.LINUX_SLL:           ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL1'),
             Enum_LinkType.IEEE802_11_RADIOTAP: ModuleDescriptor('pcapkit.protocols.link', 'Radiotap'),

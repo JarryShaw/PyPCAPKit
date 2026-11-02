@@ -126,8 +126,7 @@ class GREChecksumTests(unittest.TestCase):
         self.assertIs(self.status(bad)[0], self.Status.INVALID)
 
     def test_a_fragment_is_not_verified(self) -> None:
-        # Nothing binds GRE under IP, but a layer an IP fragment carries is not
-        # verified, whatever it is.
+        # A layer an IP fragment carries is not verified, whatever it is.
         from pcapkit.corekit.checksum.internet import fragment_payload
 
         with fragment_payload(True):

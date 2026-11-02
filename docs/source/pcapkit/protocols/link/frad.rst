@@ -6,8 +6,9 @@ FRAD - Frame Relay Access Device
 :mod:`pcapkit.protocols.link.frad` contains
 :class:`~pcapkit.protocols.link.frad.FRAD`
 only, which implements the extractor for Frame Relay's multiprotocol
-encapsulation [*]_, as seen on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2``
-capture whose ``arphrd_type`` is ``ARPHRD_FRAD``. Its structure, the Q.922
+encapsulation [*]_, as seen on a ``LINKTYPE_FRELAY`` capture, or on a
+``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type`` is
+``ARPHRD_FRAD``. Its structure, the Q.922
 LAPF address onward with no trailing FCS, is described as below:
 
 .. table::

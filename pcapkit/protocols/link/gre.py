@@ -7,9 +7,13 @@
 :mod:`pcapkit.protocols.link.gre` contains
 :class:`~pcapkit.protocols.link.gre.GRE` only, which implements the extractor
 for the Generic Routing Encapsulation base header [:rfc:`2784`] plus the
-optional Key and Sequence Number extensions [:rfc:`2890`], as seen on a
+optional Key and Sequence Number extensions [:rfc:`2890`]. It is reached
+through IP protocol number 47 behind any layer sharing
+:attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`,
+IPv4 and IPv6 among them, and on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
-is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- both land on this one class:
+is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE`` and
+``ARPHRD_IP6GRE`` both land on this one class:
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches here instead
 of falling back to :class:`~pcapkit.protocols.misc.raw.Raw` for either case;
 see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`. The
@@ -359,7 +363,9 @@ class GRE(Link[Data_GRE, Schema_GRE],
 
         Returns:
             Numeral registry index of the protocol in `IANA`_ protocol
-            numbers.
+            numbers, which
+            :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+            is keyed by.
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
             names its own keys for this class,
             :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE` and

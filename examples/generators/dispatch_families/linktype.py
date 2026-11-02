@@ -59,6 +59,9 @@ def _payload(code: 'Any') -> 'tuple[bytes, bool]':
         return _wlan_ack(), False
     if code == LinkType.IEEE802_11_RADIOTAP:
         return _radiotap(_wlan_ack()), False
+    if code == LinkType.FRELAY:  # direct NLPID 0xCC, IPv4
+        from pcapkit.protocols.link.frad import FRAD
+        return bytes(FRAD(nlpid=0xCC, payload=_ip4(6, _tcp(9999)))), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -110,6 +113,7 @@ PINNED_TARGETS = {
     'pcap-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
     'pcap-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
     'pcap-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
+    'pcap-frame/FRELAY': ('pcapkit.protocols.link', 'FRAD'),
 
     # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
     'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
@@ -121,4 +125,5 @@ PINNED_TARGETS = {
     'pcapng-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
     'pcapng-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
     'pcapng-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
+    'pcapng-frame/FRELAY': ('pcapkit.protocols.link', 'FRAD'),
 }
