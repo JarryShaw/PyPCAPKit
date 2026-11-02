@@ -70,14 +70,13 @@ Scope
    .. automethod:: _make_data
    .. automethod:: _read_frame_control
    .. automethod:: _make_frame_control
-   .. automethod:: _read_mac_addr
-   .. automethod:: _make_mac_addr
    .. automethod:: _read_seq_ctrl
    .. automethod:: _make_seq_ctrl
    .. automethod:: _read_qos_control
    .. automethod:: _make_qos_control
    .. automethod:: _read_ht_control
    .. automethod:: _make_ht_control
+   .. automethod:: _make_mac_addr
 
 .. autodata:: pcapkit.protocols.link.ieee802_11.SUBTYPE
    :no-value:

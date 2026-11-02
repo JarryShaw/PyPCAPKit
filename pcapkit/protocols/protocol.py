@@ -1872,6 +1872,81 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise StructError(f'{self.__class__.__name__}: unpack failed')
         return ''.join(bin(byte)[2:].zfill(8) for byte in mem)
 
+    def _read_octets(self, data: 'bytes', pos: 'int' = 0, *, size: 'int', what: 'str') -> 'bytes':
+        """Read exactly ``size`` octets out of ``data`` at ``pos``.
+
+        A plain slice comes back short past the end of ``data``, which would
+        let a truncated field parse rather than fail.
+
+        Args:
+            data: buffer being read
+            pos: offset of the octets in ``data``
+            size: octets to read
+            what: name of the field, for the error message
+
+        Returns:
+            The ``size`` octets at ``pos``.
+
+        Raises:
+            ProtocolError: If fewer than ``size`` octets remain from ``pos``.
+                The message names :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        octets = data[pos:pos + size]
+        if len(octets) != size:
+            raise ProtocolError(f'{self.alias}: invalid format: {what} runs past the end of the buffer')
+        return octets
+
+    def _read_uint(self, data: 'bytes', pos: 'int' = 0, *, size: 'int', what: 'str',
+                   lilendian: 'bool' = False) -> 'int':
+        """Read a ``size``-octet unsigned integer out of ``data`` at ``pos``.
+
+        :meth:`_read_unpack` reads the file; this reads a buffer already in
+        hand. The inverse is :meth:`_make_pack`, not :meth:`_make_uint`, which
+        checks a value and packs nothing.
+
+        Args:
+            data: buffer being read
+            pos: offset of the integer in ``data``
+            size: octets in the integer
+            what: name of the field, for the error message
+            lilendian: little-endian flag
+
+        Returns:
+            The integer.
+
+        Raises:
+            ProtocolError: If fewer than ``size`` octets remain from ``pos``,
+                as :meth:`_read_octets` raises it.
+
+        .. versionadded:: 1.6.0
+
+        """
+        octets = self._read_octets(data, pos, size=size, what=what)
+        return int.from_bytes(octets, 'little' if lilendian else 'big')
+
+    @staticmethod
+    def _read_sint(value: 'int', bits: 'int') -> 'int':
+        """Read ``value``, an unsigned ``bits``-bit field, as a two's-complement one.
+
+        It takes the unsigned integer a field has already read, such as a
+        :class:`~pcapkit.corekit.fields.strings.BitField` sub-field, rather
+        than a buffer.
+
+        Args:
+            value: the unsigned value read from the field
+            bits: width of the field, in bits
+
+        Returns:
+            The signed value the same bits denote.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return value - (1 << bits) if value & (1 << (bits - 1)) else value
+
     def _read_vector(self, data: 'bytes', pos: 'int' = 0, *, size: 'int' = 1,
                      what: 'str') -> 'tuple[bytes, int]':
         """Read a length-prefixed vector out of ``data``.
@@ -1896,15 +1971,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         .. versionadded:: 1.6.0
 
         """
-        prefix = data[pos:pos + size]
-        if len(prefix) != size:
-            raise ProtocolError(f'{self.alias}: invalid format: {what} length runs past the end of the buffer')
         start = pos + size
-        end = start + int.from_bytes(prefix, 'big')
-        octets = data[start:end]
-        if len(octets) != end - start:
-            raise ProtocolError(f'{self.alias}: invalid format: {what} runs past the end of the buffer')
-        return octets, end
+        end = start + self._read_uint(data, pos, size=size, what=f'{what} length')
+        return self._read_octets(data, start, size=end - start, what=what), end
 
     def _read_whole_vector(self, data: 'bytes', *, size: 'int' = 1, what: 'str') -> 'bytes':
         """Read the one length-prefixed vector that ``data`` holds.
@@ -1955,6 +2024,48 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise ProtocolError(f'{self.alias}: invalid format: {what} length {len(data)} '
                                 f'is not a multiple of {size}')
         return tuple(int.from_bytes(data[index:index + size], 'big') for index in range(0, len(data), size))
+
+    def _read_mac_addr(self, addr: 'bytes') -> 'str':
+        """Read a MAC address, an EUI-64 one included.
+
+        Args:
+            addr: the address octets
+
+        Returns:
+            Colon (``:``) separated *hex* encoded address.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return addr.hex(':')
+
+    def _read_text(self, data: 'bytes') -> 'tuple[str, Optional[str]]':
+        """Decode text, recording how to encode it back.
+
+        The text is decoded by :meth:`decode`. Where the result does not
+        encode back to ``data`` as UTF-8 -- which ``make()`` uses by default --
+        the detected charset is returned with it, or ``'latin-1'`` (decoding
+        again) if that does not reproduce ``data`` either, so that the original
+        octets survive a rebuild.
+
+        Args:
+            data: raw text
+
+        Returns:
+            The decoded text and the charset to encode it with, the latter
+            :obj:`None` for UTF-8.
+
+        .. versionadded:: 1.6.0
+
+        """
+        value = self.decode(data)
+        for charset in (None, detect(data)):
+            try:
+                if value.encode(charset or 'utf-8') == data:
+                    return value, charset
+            except (LookupError, UnicodeError):
+                pass
+        return data.decode('latin-1'), 'latin-1'
 
     @overload  # pragma: no cover
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
@@ -2038,7 +2149,39 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 raise StructError(f'{cls.__name__}: pack failed') from error
         return buf
 
-    def _make_uint(self, value: 'Any', *, bits: 'int', name: 'str') -> 'int':
+    def _make_octets(self, value: 'Any', *, size: 'int', name: 'str',
+                     alias: 'Optional[str]' = None) -> 'bytes':
+        """Check that ``value`` is exactly ``size`` octets.
+
+        The octets :meth:`_read_octets` reads are written as they are, so
+        their size is all there is to check.
+
+        Args:
+            value: the value given for the field
+            size: octets in the field
+            name: name of the field, for the error message
+            alias: prefix of the error message, for a caller whose
+                :attr:`alias` raises before ``read()`` sets it; :attr:`alias`
+                by default
+
+        Returns:
+            ``value`` as :class:`bytes`.
+
+        Raises:
+            ProtocolError: If ``value`` is not :class:`bytes` or
+                :class:`bytearray`, or is not ``size`` octets long. The
+                message names ``alias``.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if not isinstance(value, (bytes, bytearray)) or len(value) != size:
+            unit = 'octet' if size == 1 else 'octets'
+            raise ProtocolError(f'{self.alias if alias is None else alias}: invalid {name}: '
+                                f'must be {size} {unit}, not {value!r}')
+        return bytes(value)
+
+    def _make_uint(self, value: 'Any', *, bits: 'int', name: 'str', alias: 'Optional[str]' = None) -> 'int':
         """Check that ``value`` is an unsigned integer that fits in ``bits`` bits.
 
         A :obj:`bool` passes only for a one-bit field, so that a flag given
@@ -2048,6 +2191,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             value: the value given for the field
             bits: width of the field, in bits
             name: name of the field, for the error message
+            alias: prefix of the error message, for a caller whose
+                :attr:`alias` raises before ``read()`` sets it; :attr:`alias`
+                by default
 
         Returns:
             ``value`` as a plain :class:`int`.
@@ -2055,16 +2201,64 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Raises:
             ProtocolError: If ``value`` is not an :class:`int`, is a
                 :obj:`bool` for a field wider than one bit, is negative, or
-                does not fit in ``bits`` bits. The message names
-                :attr:`alias`.
+                does not fit in ``bits`` bits. The message names ``alias``.
 
         .. versionadded:: 1.6.0
 
         """
         if (not isinstance(value, int) or (isinstance(value, bool) and bits != 1)
                 or not 0 <= value < (1 << bits)):
-            raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+            raise ProtocolError(f'{self.alias if alias is None else alias}: invalid {name}: {value!r}')
         return int(value)
+
+    def _make_sint(self, value: 'Any', *, bits: 'int', name: 'str') -> 'int':
+        """Check that ``value`` is a signed integer that fits in ``bits`` bits.
+
+        The inverse of :meth:`_read_sint`. A :obj:`bool` is refused whatever
+        ``bits`` is, since no signed field holds a flag.
+
+        Args:
+            value: the value given for the field
+            bits: width of the field, in bits
+            name: name of the field, for the error message
+
+        Returns:
+            The unsigned integer whose ``bits`` bits denote ``value`` in
+            two's complement.
+
+        Raises:
+            ProtocolError: If ``value`` is not an :class:`int`, is a
+                :obj:`bool`, or does not fit in ``bits`` bits as two's
+                complement. The message names :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        bound = 1 << (bits - 1)
+        if not isinstance(value, int) or isinstance(value, bool) or not -bound <= value < bound:
+            raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        return value & ((1 << bits) - 1)
+
+    @staticmethod
+    def _uint_size(value: 'int', *, minimum: 'int' = 0) -> 'int':
+        """Count the octets a non-negative integer needs.
+
+        ``value.bit_length()`` is rounded up to whole octets: ``// 8`` alone
+        floors, and counts one octet too few for a width that is not a
+        multiple of eight.
+
+        Args:
+            value: the integer, not negative
+            minimum: the fewest octets to count, for a field that cannot be
+                empty although ``0`` needs none
+
+        Returns:
+            The octets ``value`` needs, and at least ``minimum``.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return max(minimum, (value.bit_length() + 7) // 8)
 
     @classmethod
     def _make_vector(cls, octets: 'bytes', *, size: 'int' = 1) -> 'bytes':
@@ -2112,6 +2306,45 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         return b''.join(cls._make_pack(int(value), size=size) for value in values)
+
+    def _make_mac_addr(self, addr: 'str | bytes | bytearray', *, size: 'Optional[int]' = 6,
+                       name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
+        """Make a MAC address, or an EUI-64 one with ``size=8``.
+
+        The inverse of :meth:`_read_mac_addr`.
+
+        Args:
+            addr: ``:``- or ``-``-separated *hex* encoded address
+            size: octets in the address, or :data:`None` for any number of
+                them, none included
+            name: name of the address, for the error message
+            alias: prefix of the error message, for a caller whose
+                :attr:`alias` raises before ``read()`` sets it or is not the
+                prefix its messages carry; :attr:`alias` by default
+
+        Returns:
+            The address octets.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or is not a
+                ``:``- or ``-``-separated *hex* encoded address of ``size``
+                octets. The message names ``alias``.
+
+        .. versionadded:: 1.6.0
+
+        """
+        prefix = self.alias if alias is None else alias
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'{prefix}: invalid {name}: must be a str, bytes or '
+                                f'bytearray, not {addr!r}')
+        text = addr.encode() if isinstance(addr, str) else bytes(addr)
+        octets = text.replace(b'-', b':').split(b':') if text else []
+        if ((size is None or len(octets) == size)
+                and all(len(octet) == 2 and all(chr(digit) in string.hexdigits for digit in octet)
+                        for octet in octets)):
+            return bytes.fromhex(b''.join(octets).decode())
+        raise ProtocolError(f'{prefix}: invalid {name}: {addr!r}')
 
     @overload  # pragma: no cover
     @classmethod

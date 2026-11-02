@@ -98,7 +98,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
             with self.subTest(packet_length=packet_length):
                 with self.assertRaises(ProtocolError) as caught:
                     OSPF(packet_length=packet_length)
-                self.assertIn('invalid packet length', str(caught.exception))
+                self.assertEqual(str(caught.exception), f'OSPF: invalid packet length: {packet_length!r}')
         self.assertEqual(bytes(OSPF(packet_length=0xFFFF))[2:4], b'\xff\xff')
 
     def test_make_crypto_auth_from_bytes(self) -> None:

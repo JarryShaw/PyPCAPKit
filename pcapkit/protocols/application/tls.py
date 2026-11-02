@@ -260,12 +260,20 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         Returns:
             Constructed packet data.
 
+        Raises:
+            StructError: If a record-header field, or a field of ``content``,
+                does not fit its width.
+
         """
         content_type_ = cast('Enum_ContentType', self._make_index(
             content_type, content_type_default, namespace=content_type_namespace,
             reversed=content_type_reversed, pack=False))
 
         fragment = data if data is not None else self._make_tls_content(content_type_, content, dtls=False)
+        # NOTE: the schema masks a field to its width, so each is packed here first, to
+        # refuse a wider value with the StructError the content makers raise.
+        for value, size in ((int(content_type_), 1), (version, 2), (len(fragment), 2)):
+            self._make_pack(value, size=size)
         return Schema_TLS(
             content_type=content_type_,
             version=version,

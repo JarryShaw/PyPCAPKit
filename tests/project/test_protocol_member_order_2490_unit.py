@@ -240,7 +240,7 @@ def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, dict[str, str]]':
 class TestAudit(unittest.TestCase):
     """The audit finds each rule broken in a planted class body, and nothing in a sound one."""
 
-    #: A class body in the order: Ethernet's utilities, with a registry fallback.
+    #: A class body in the order: ``_make_data()``, a helper pair and a registry fallback.
     SOUND = '''
 class Sound:
     @property
@@ -314,13 +314,15 @@ class TestMemberOrder(unittest.TestCase):
         self.assertLess(len(KNOWN_EXCEPTIONS) * 2, len(self.findings))
 
     def test_the_reference_is_in_order(self) -> 'None':
-        name = 'pcapkit.protocols.link.ethernet.Ethernet'
+        name = 'pcapkit.protocols.link.arp.ARP'
         self.assertEqual(self.findings[name], {})
         self.assertNotIn(name, KNOWN_EXCEPTIONS)
-        # The page's example: rule b finds the helper pair it shows.
-        node = dict(classes(PROTOCOLS / 'link' / 'ethernet.py'))[name]
+        # The page's example: its utilities are _make_data() and the helper pairs rule b finds.
+        node = dict(classes(PROTOCOLS / 'link' / 'arp.py'))[name]
         utilities = [member for member, group in members(node) if group == 3]
-        self.assertEqual(helpers(node, utilities), ['_read_mac_addr', '_make_mac_addr'])
+        pairs = ['_read_addr_resolve', '_make_addr_resolve', '_read_proto_resolve', '_make_proto_resolve']
+        self.assertEqual(helpers(node, utilities), pairs)
+        self.assertEqual(utilities, ['_make_data', *pairs])
 
     def test_every_exception_is_still_broken(self) -> 'None':
         stale = sorted(f'{name} [{kind}] ({remover})'

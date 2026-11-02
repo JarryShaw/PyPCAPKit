@@ -260,8 +260,6 @@ if TYPE_CHECKING:
     _FlagsEnum = TypeVar('_FlagsEnum', 'PacketDirection', 'PacketReception')
     _S = TypeVar('_S', bound='Schema | bytes')
 
-# Ethernet address pattern
-PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 # EUI address pattern
 PAT_EUI_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){7}[0-9a-f]{2}')
 
@@ -2335,18 +2333,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             )
         return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
-    def _read_mac_addr(self, addr: 'bytes') -> 'str':
-        """Read MAC address.
-
-        Args:
-            addr: MAC address.
-
-        Returns:
-            Colon (``:``) separated *hex* encoded MAC address.
-
-        """
-        return addr.hex(':')
-
     def _read_eui_addr(self, addr: 'bytes') -> 'str':
         """Read EUI address.
 
@@ -2359,14 +2345,19 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         return addr.hex(':')
 
-    def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
+    def _make_mac_addr(self, addr: 'str | bytes | bytearray', *, size: 'Optional[int]' = 6,
+                       name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
         """Make MAC address.
 
         Args:
             addr: MAC address.
+            size: Octets in the address, as for :meth:`Protocol._make_mac_addr
+                <pcapkit.protocols.protocol.Protocol._make_mac_addr>`.
+            name: Name of the address, for the error message.
+            alias: Prefix of the error message, ``'PCAP-NG'`` by default.
 
         Returns:
-            MAC address packed as 6 octets.
+            MAC address packed as ``size`` octets, 6 by default.
 
         Raises:
             ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
@@ -2374,14 +2365,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 ``:``- or ``-``-separated *hex* encoded MAC address.
 
         """
-        if not isinstance(addr, (str, bytes, bytearray)):
-            raise ProtocolError(f'PCAP-NG: invalid MAC address: must be a str, bytes or '
-                                f'bytearray, not {addr!r}')
-        _addr = addr.encode() if isinstance(addr, str) else addr
-
-        if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'PCAP-NG: invalid MAC address: {addr!r}')
+        prefix = 'PCAP-NG' if alias is None else alias
+        return super()._make_mac_addr(addr, size=size, name=name, alias=prefix)
 
     def _make_eui_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
         """Make EUI address.
