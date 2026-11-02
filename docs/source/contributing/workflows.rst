@@ -1286,8 +1286,13 @@ warning, on setup-python's ``python`` or the image's, since Windows has no
 endings`` sets ``core.autocrlf false`` and ``core.eol lf`` before the checkout, so the
 tests read the tree the other legs read, not the CRLF one the image's Git writes under
 ``* text=auto``. ``Run unit tests`` asks ``latest_tier_paths()`` on the leg's CPython,
-as ``test`` does, and passes ``test``'s flags. None of the Linux containment above runs
-there: Windows has no cgroup scope, ``prlimit`` or ``RLIMIT_FSIZE``, so no
+as ``test`` does, and passes ``test``'s flags. It writes each module printed as an
+``--ignore`` line of ``$RUNNER_TEMP/latest-tier.args`` and hands pytest ``@`` and that
+path, since an argument per module runs past Windows' command-line limit
+(:issue:`2678`). pytest's parser reads the file an ``@`` argument names, an argument
+per line, and each xdist worker parses the same command line. Git Bash hands the path to
+``python`` in the runner's ``D:\a\_temp`` form unchanged, as it does ``--junitxml``'s.
+None of the Linux containment above runs there: Windows has no cgroup scope, ``prlimit`` or ``RLIMIT_FSIZE``, so no
 :file:`util/cap_file_size.py`; no ``/proc`` for the resource monitor; and no process
 group for :file:`util/superseded.py`'s watcher, so the step's cap bounds the tests, and
 a run superseded once the leg has started runs it to its end. Python Versions' weekly
