@@ -32,12 +32,14 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`pcapkit.vendor.linux.arphrd.ARPHRD` from a hand-maintained table. It
   names only the ``<linux/if_arp.h>`` values that table lists, so any other,
   ``ARPHRD_ETHER`` included, reads as ``Unassigned`` (:issue:`2495`,
-  :pr:`2497`).
+  :pr:`2497`), and :mod:`pcapkit.const` exports it as ``Linux_ARPHRD``
+  (:issue:`2661`, :pr:`2663`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.frad.FRAD`, a dissector for Frame
   Relay's multiprotocol encapsulation (:rfc:`2427`, obsoleting :rfc:`1490`),
   which :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches to for
-  ``ARPHRD_FRAD`` (:pr:`2499`). The direct NLPID and SNAP-encapsulated forms
+  ``ARPHRD_FRAD`` (:pr:`2499`), as do PCAP and PCAP-NG frames of
+  ``LINKTYPE_FRELAY`` (107) (:issue:`2649`, :pr:`2667`). The direct NLPID and SNAP-encapsulated forms
   both dispatch onward, to IPv4/IPv6 and (via the EtherType registry every
   Ethernet/VLAN/LinuxSLL frame shares) ARP among others; any other NLPID or
   SNAP OUI is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, and
@@ -64,7 +66,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches to for both
   ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` -- the same GRE framing either way,
   the two differing only in the tunnel's outer IP version (:issue:`2501`,
-  :pr:`2508`). The Protocol Type field dispatches onward as an EtherType,
+  :pr:`2508`), as does an IP layer for IP protocol 47, through the registry
+  (:attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`)
+  IPv4 and IPv6 share (:issue:`2649`, :pr:`2667`). So with reassembly and
+  tracing on, analysis follows a GRE tunnel: TCP inside GRE over IP
+  reassembles under its inner addresses, and a fragmented GRE datagram
+  reassembles to a parsed GRE layer. The Protocol Type field dispatches onward as an EtherType,
   through the family registry
   (:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`)
   Ethernet, VLAN and LinuxSLL share. A non-zero Version, :rfc:`2637`'s
@@ -125,7 +132,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   otherwise, one of 12 or more IGMPv3 (:issue:`2439`, :issue:`2448`,
   :pr:`2444`, :pr:`2465`). An IGMPv3 Query carries its source list and a
   Membership Report its group records, and an IGMPv3 Query's Max Resp Code and
-  QQIC are decoded from their floating-point form. Any other message, a 9- to
+  QQIC are decoded from their floating-point form. An IGMPv3 message the
+  capture cut short, a Report cut inside its group records included, parses as
+  far as its octets go and rebuilds as captured, whether parsed on its own or
+  carried by IPv4, and IGMPv3's ``make()`` takes ``num_group_records``, from
+  the record count to ``0xFFFF`` (:issue:`2650`, :issue:`2660`, :pr:`2662`,
+  :pr:`2672`). Any other message, a 9- to
   11-octet Query included, is kept as :class:`~pcapkit.protocols.misc.raw.Raw`.
   IGMPv1 takes the plain ``IGMP`` of :rfc:`1112` as its ``id()`` and alias, and
   IGMPv2's and IGMPv3's ``id()`` are their own names alone, ``('IGMPv2',)`` and
@@ -174,7 +186,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   port's dissector, and
   :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp_option` an
   option parser. The registries are :mod:`pcapkit.const.dccp`, crawled from
-  IANA.
+  IANA. Its ``make()`` refuses a value a field cannot hold with
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` naming the field
+  (:issue:`2614`, :pr:`2670`).
 
 * **Added** -- :class:`~pcapkit.protocols.application.tls.TLS` (SSLv3 and TLS
   1.0 to 1.3) at TCP 443 and :class:`~pcapkit.protocols.application.dtls.DTLS`
@@ -325,7 +339,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   giving ``NO_PSEUDO_HEADER`` for a fragment's payload. GRE verifies only with
   its ``C`` bit set, and is ``NOT_COMPUTED`` with it clear; its ``make()``
   takes ``checksum_present`` to set the bit and compute the checksum. GRE
-  states no length, so a frame the capture cut short reads as ``INVALID``.
+  states no length, so outside an IP layer, which states one, it takes the
+  captured and original lengths of its frame, and a GRE layer the capture cut
+  short is ``TRUNCATED`` either way (:issue:`2653`, :pr:`2668`).
 
 * **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
   :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
@@ -349,8 +365,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 
 * **Added** -- :mod:`pcapkit.utilities.contextvars`, holding the context
   variables more than one module sets or reads -- ``beholding``,
-  ``frame_depth`` and ``rebuilding`` -- and importing nothing
-  from :mod:`pcapkit` (:issue:`2616`, :pr:`2623`).
+  ``frame_depth``, ``frame_length`` and ``rebuilding`` -- and importing
+  nothing from :mod:`pcapkit` (:issue:`2616`, :pr:`2623`). ``frame_length``
+  holds the captured and original length of the frame being dissected, as its
+  PCAP record or PCAP-NG packet block states them, and is :data:`None` outside
+  a frame and inside an IP layer's payload (:issue:`2653`, :pr:`2668`).
 
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
   known extension header whose dedicated parser raises is now the upper layer,
@@ -390,6 +409,39 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   rounds down to the lower. HOPOPT's and IPv6_Opts' Quick-Start maker builds an
   unassigned function code as the unassigned option their reader keeps it as,
   as IPv4's does.
+
+* **Changed** -- **a breaking change to** building
+  :class:`~pcapkit.protocols.transport.tcp.TCP`,
+  :class:`~pcapkit.protocols.transport.udp.UDP` and
+  :class:`~pcapkit.protocols.transport.sctp.SCTP`: a header or option field
+  given an integer it cannot hold raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` naming the field, where
+  1.5.x wrote it masked to the field's width, and a fixed-size octet field
+  given the wrong number of octets raises, where it was padded or cut
+  (:issue:`2614`, :pr:`2670`). So ``TCP(window=70000)`` raises
+  ``TCP: invalid window: 70000``, where it wrote ``0x1170``;
+  ``TCP(seq_no=-1)`` and ``SCTP(vtag=-1)`` raise, where they wrote
+  ``0xFFFFFFFF``; a UDP payload of ``0xFFF8`` octets raises, where its Length
+  was written ``0``; and ``TCP(checksum=b'\x01')`` raises, where it wrote
+  ``0100``. The TCP User Timeout refuses a negative, ``True`` or non-numeric
+  timeout by name, where a negative one raised a bare :exc:`ValueError` and
+  ``True`` built one second. The Quick-Start TTL Diff, which :rfc:`4782`
+  defines modulo 256, wraps as in 1.5.x.
+
+* **Changed** -- **a breaking change to** building
+  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` blocks: a field given a value
+  it cannot hold raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+  where 1.5.x wrote it masked (:issue:`2614`, :pr:`2671`). The Section Header
+  Block's Section Length takes ``-2**63`` to ``2**64 - 1``, ``-1`` and
+  ``0xFFFFFFFFFFFFFFFF`` writing the same octets, and refuses anything else,
+  where ``2**64`` wrote ``0``, ``True`` wrote ``1`` and ``None`` the ``-1``
+  sentinel. The obsolete Packet Block's Drops Count takes ``0`` to ``0xFFFF``,
+  where ``-1`` wrote ``0xFFFF``, ``0x10000`` wrote ``0`` and ``True`` wrote
+  ``1``. The ``if_tzone`` and ``if_tsoffset`` options refuse a value outside
+  their signed 32 and 64 bits, where they wrote it masked, and the Interface
+  Description Block's snaplen refusal reads
+  ``PCAP-NG: invalid [IDB] snaplen: 4294967296``, where it read
+  ``PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: 4294967296``.
 
 * **Changed** -- **a breaking change to**
   :class:`~pcapkit.protocols.application.drarp.DRARP` and
@@ -498,6 +550,19 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   (:issue:`2614`, :pr:`2638`). A one-character :class:`str` given as flags, which
   passed the check and failed to pack, is refused the same way.
 
+* **Changed** -- a protocol's ``__index__`` returns its value in the LinkType,
+  EtherType, TransType or AppType registry wherever one names it, and a class
+  an AppType member names returns that member's port as an :class:`int`
+  (:issue:`2627`, :pr:`2652`). So
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`,
+  :class:`~pcapkit.protocols.application.ftp.FTP`,
+  :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, the HTTP classes
+  and :class:`~pcapkit.protocols.application.ngap.NGAP`, which raised in 1.5.x,
+  return 1701, 21, 20, 80 and 38412, and TLS, SSLv3 and DTLS the ports TCP and
+  UDP dispatch them at, 443 and 5684; Radiotap, FRAD and GRE return their
+  LinkType or TransType member. SSLv2 and the SSL base, which nothing
+  dispatches to, raise as before, and no value 1.5.x returned changes.
+
 * **Changed** -- protocol class bodies are reordered to the member-order
   convention, with no change in behaviour, and a project test guards the
   order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
@@ -554,7 +619,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   carry no ``version`` (:issue:`2628`, :pr:`2651`). The member-order
   convention's reference class is :class:`~pcapkit.protocols.link.arp.ARP`,
   where it was :class:`~pcapkit.protocols.link.ethernet.Ethernet`, whose MAC
-  address helpers moved to the base class (:issue:`2614`, :pr:`2638`).
+  address helpers moved to the base class (:issue:`2614`, :pr:`2638`). A
+  protocol's ``__index__`` returns its LinkType, EtherType, TransType or
+  AppType value ahead of any other registry's code, an AppType value as its
+  port (:issue:`2627`, :pr:`2652`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -586,6 +654,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   of each role's kind reads, and opens or updates a pull request from
   ``bot/issue-pr-kinds`` when it changes, never pushing ``main``
   (:issue:`2561`, :pr:`2626`).
+
+* **Changed** -- of the workflows, only Create Release waits for a deployment
+  approval: the ``pr`` jobs of the Issue and PR Kinds and Python Versions
+  workflows read the release App's key from the ``release-app`` environment,
+  which has no required reviewer, where they entered ``github-release`` and
+  waited on its approval, and skip with a warning while that environment
+  holds no key (:issue:`2648`, :pr:`2658`).
 
 * **Changed** -- a pull request no longer adds its own changelog bullet: an
   unreleased version's entries are written centrally by the maintainer, and
@@ -639,6 +714,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   The layer now holds :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the
   upper layer belonging to the enclosing IPv6 header (:issue:`2484`,
   :issue:`2487`, :pr:`2486`, :pr:`2488`).
+
+* **Fixed** -- an HTTP/2 ``SETTINGS`` frame the capture cut short inside its
+  settings raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
+  the list of settings, so a segment carrying one was kept as
+  :class:`~pcapkit.protocols.misc.raw.Raw`. It parses as far as its octets go
+  and rebuilds as captured, and
+  :class:`~pcapkit.protocols.application.httpv2.HTTPv2`'s ``make()`` takes
+  ``frame_length``, from the frame's own length to ``0xFFFFFF``, so that the
+  declared Length survives (:issue:`2659`, :pr:`2666`).
 
 * **Fixed** -- importing :mod:`pcapkit.vendor.ipx`, or running its packet or
   socket crawler, without ``requests`` installed lost an entry of
