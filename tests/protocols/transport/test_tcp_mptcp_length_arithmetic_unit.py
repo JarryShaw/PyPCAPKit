@@ -135,7 +135,7 @@ import unittest
 __tier__ = 'ALL'
 
 #: Header fields shared by the constructed TCP segments here, matching
-#: :data:`examples.generators.options.TCP_BASE` and
+#: :data:`examples.generators.option_families.tcp.TCP_BASE` and
 #: :data:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.TCP_BASE`.
 TCP_BASE = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,

@@ -8,7 +8,7 @@ the worst shape a defect can take in a packet library: the octets are wrong,
 nothing says so, and the mapping that produced them reads correctly.
 
 The cost is not hypothetical. Issue #602 was
-:data:`examples.generators.options.TCP_BASE` asking for ``seq=1`` where
+:data:`examples.generators.option_families.tcp.TCP_BASE` asking for ``seq=1`` where
 :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` spells the parameter
 ``seq_no``. Measured without the fix::
 
@@ -328,7 +328,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`
         does not, and :meth:`HIP.__post_init__
         <pcapkit.protocols.internet.hip.HIP.__post_init__>` forwards it to both --
-        so ``examples/generators/options.py``'s ``_hip_build`` passing
+        so ``examples/generators/option_families/hip.py``'s ``_hip_build`` passing
         ``extension=True`` on the construction path is correct code that a check
         against ``make`` alone would have broken. Asserted from the signatures, so
         it fails if either side of the asymmetry moves.

@@ -2,8 +2,8 @@
 """``TCP_BASE`` builds the segment it describes.
 
 Every frame in :file:`examples/captures/options-tcp.pcap` is a TCP segment whose
-header comes from :data:`examples.generators.options.TCP_BASE` and whose only
-per-case difference is the one option it carries. So that mapping is the
+header comes from :data:`examples.generators.option_families.tcp.TCP_BASE` and
+whose only per-case difference is the one option it carries. So that mapping is the
 description of every one of those fixture frames, and a key it spells wrongly is a
 description that does not match the octets.
 
@@ -202,7 +202,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
                                   parameter.KEYWORD_ONLY)
         }
 
-        undeclared = sorted(set(options.TCP_BASE) - declared)
+        undeclared = sorted(set(options.FAMILY_MODULES['tcp'].TCP_BASE) - declared)
         self.assertEqual(undeclared, [], (
             f'TCP_BASE passes {undeclared} to TCP.make, which does not declare '
             f'them; they are absorbed by **kwargs and silently dropped, so the '
@@ -242,7 +242,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
 
         """
         options = _load_generator()
-        self.assertEqual(dict(options.TCP_BASE), EXPECTED_HEADER)
+        self.assertEqual(dict(options.FAMILY_MODULES['tcp'].TCP_BASE), EXPECTED_HEADER)
 
     def test_an_undeclared_keyword_is_refused_rather_than_absorbed(self) -> None:
         """Constructing with an undeclared keyword raises.
@@ -298,7 +298,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         options = _load_generator()
         for wrong, right in (('seq', 'seq_no'), ('ack_flag', 'ack'),
                              ('urgent_pointer', 'urgent')):
-            keywords = dict(options.TCP_BASE)
+            keywords = dict(options.FAMILY_MODULES['tcp'].TCP_BASE)
             keywords[wrong] = keywords.pop(right)
 
             with self.subTest(keyword=wrong):
@@ -330,7 +330,7 @@ class TCPBaseHeaderTests(unittest.TestCase):
         """
         from pcapkit.protocols.transport.tcp import TCP
 
-        return TCP(**{**self.options.TCP_BASE, **overrides})
+        return TCP(**{**self.options.FAMILY_MODULES['tcp'].TCP_BASE, **overrides})
 
     def test_the_header_fields_are_the_ones_expected(self) -> None:
         """Every value the mapping states reaches the field it names.

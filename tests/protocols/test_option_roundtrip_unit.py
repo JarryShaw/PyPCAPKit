@@ -71,7 +71,9 @@ it runs on a fresh checkout with nothing generated.
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
+import pkgutil
 import sys
 import types
 import unittest
@@ -93,6 +95,43 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: low single-digit milliseconds; the point of the deadline is the cases that
 #: never finish at all.
 CASE_TIMEOUT = 30
+
+#: The non-empty option-like maps no family exercises, by ``module.Class.__map__``
+#: path, and why. Empty: every one is some family's registry (#2615).
+UNCOVERED = {}  # type: dict[str, str]
+
+
+def _option_registries() -> 'dict[str, dict[Any, Any]]':
+    """Every non-empty registry map a protocol class defines itself, by path, but ``__proto__``.
+
+    The dunder :class:`dict` maps in each
+    :class:`~pcapkit.protocols.protocol.ProtocolBase` descendant's own
+    :func:`vars`, found once every shipped protocol module is imported, as
+    :mod:`tests.foundation.registry.test_registry_wrapper_coverage_2511_unit`
+    finds them. ``__proto__`` is the dispatch harness's, in
+    :mod:`tests.protocols.test_dispatch_registry_unit`.
+
+    """
+    import pcapkit.protocols as package
+    from pcapkit.protocols.protocol import ProtocolBase
+
+    for info in pkgutil.walk_packages(package.__path__, 'pcapkit.protocols.'):
+        if 'NotImplemented' not in info.name:
+            importlib.import_module(info.name)
+    found = {}  # type: dict[str, dict[Any, Any]]
+    seen = set()  # type: set[type]
+    pending = [ProtocolBase]  # type: list[type]
+    while pending:
+        klass = pending.pop()
+        if klass in seen:
+            continue
+        seen.add(klass)
+        pending.extend(klass.__subclasses__())
+        for name, value in vars(klass).items():
+            if (name.startswith('__') and name.endswith('__') and isinstance(value, dict)
+                    and name not in ('__annotations__', '__proto__') and value):
+                found[f'{klass.__module__}.{klass.__qualname__}.{name}'] = value
+    return found
 
 
 class Gap(NamedTuple):
@@ -135,8 +174,8 @@ EXPECTED_FAILURES = {
     #   :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`
     #   (#576);
     # * the three MP_JOIN layouts of RFC 8684 section 3.2, of which this suite
-    #   reaches only the SYN form that ``examples.generators.options``'
-    #   ``TCP_BASE`` selects, in
+    #   reaches only the SYN form that the generator's ``TCP_BASE``
+    #   (examples/generators/option_families/tcp.py) selects, in
     #   :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`
     #   (#587);
     # * the IPv4 ``SID`` option width, against wire octets, in
@@ -266,8 +305,9 @@ class OptionRoundTripTests(unittest.TestCase):
                 }
                 self.assertEqual(
                     set(registry), covered | skipped,
-                    f'{family.label}: every code in the registry needs a case in '
-                    f'examples/generators/options.py, or an entry in its SKIP table'
+                    f'{family.label}: every code in the registry needs a case, or '
+                    f'an entry in the SKIP table of its module under '
+                    f'examples/generators/option_families/'
                 )
 
     def test_every_registered_code_resolves_without_growing_the_registry(self) -> None:
@@ -323,6 +363,41 @@ class OptionRoundTripTests(unittest.TestCase):
             f'these entries of EXPECTED_FAILURES name cases that no longer '
             f'exist; delete them, or fix the label'
         )
+
+    def test_each_family_module_owns_its_entries(self) -> None:
+        """A family module adds families no other labels, and skips only their codes.
+
+        The modules under :file:`examples/generators/option_families/` are
+        merged into ``FAMILIES`` and ``SKIP`` (#2615), and a merge would
+        otherwise let one module's family or entry replace another's without a
+        word.
+
+        """
+        labels = [family.label for family in self.options.FAMILIES]
+        self.assertEqual(sorted(labels), sorted(set(labels)), 'a family label is used twice')
+        for stem, module in self.options.FAMILY_MODULES.items():
+            own = {family.label for family in module.FAMILIES}
+            with self.subTest(module=stem):
+                self.assertTrue(own, f'{stem} adds no family')
+                strays = sorted(key for key in getattr(module, 'SKIP', {}) if key[0] not in own)
+                self.assertEqual(strays, [], f"{stem} skips codes of another module's family")
+
+    def test_every_option_registry_has_a_family(self) -> None:
+        """Every non-empty option-like map is a family's registry, or in :data:`UNCOVERED`.
+
+        Derived from the tree's own maps rather than from the family modules,
+        so a family module that goes missing still fails here, as does a map
+        no family exercises (#2615). Checked both ways, so an
+        :data:`UNCOVERED` entry whose map gains a family, or empties, is stale.
+
+        """
+        covered = {id(family.registry()) for family in self.options.FAMILIES}
+        uncovered = sorted(path for path, table in _option_registries().items()
+                           if id(table) not in covered)
+        self.assertEqual(uncovered, sorted(UNCOVERED),
+                         'a non-empty registry map needs a family in a module under '
+                         'examples/generators/option_families/, or an UNCOVERED '
+                         'entry saying what covers it instead')
 
     def test_round_trip_is_identity_or_a_recorded_gap(self) -> None:
         """Every case either closes the cycle, or fails exactly as recorded.
@@ -408,7 +483,7 @@ class OptionRoundTripTests(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
 
-        base = dict(self.options.HIP_BASE)
+        base = dict(self.options.FAMILY_MODULES['hip'].HIP_BASE)
         one = [(Parameter.SEQ, {})]  # type: list[tuple[Any, dict[str, Any]]]
 
         for copies in (1, 2):

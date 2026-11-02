@@ -36,7 +36,8 @@ spelled out rather than left to imply a total that silently dropped
 for a separate reason and covered by its own test below): the main sweep,
 plus :data:`EXPECTED_TO_RESOLVE_ANYTHING`, plus
 :data:`EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`, plus ``FilterType`` -- together,
-the population :meth:`test_the_sweep_size_is_pinned` counts.
+the population :meth:`test_the_sweep_matches_the_census` holds to
+:mod:`tests.const.census`.
 
 :class:`~pcapkit.const.pcapng.option_type.OptionType` and
 :class:`~pcapkit.const.reg.apptype.AppType` are outside this sweep because
@@ -72,6 +73,7 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum, IntFlag
 
 from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+from tests.const import census
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
@@ -289,15 +291,17 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         self.assertIs(Operation.get(99999, 1), Operation.REQUEST)
         self.assertIs(LinkType.get(-5, 1), LinkType.ETHERNET)
 
-    def test_the_sweep_size_is_pinned(self) -> None:
+    def test_the_sweep_matches_the_census(self) -> None:
         # If this drifts, a const enum was added, removed or renamed, and the
-        # exception sets below need a fresh look rather than a silent pass.
-        # GitHub issue #880's ngap.ProcedureCode and ngap.ProtocolIE are on
+        # exception sets below need a fresh look rather than a silent pass; the
+        # sweep is the census's 'int' and 'flag' registries (#2615). GitHub
+        # issue #880's ngap.ProcedureCode and ngap.ProtocolIE are on
         # EnumRegistry rather than hand-rolled IntEnum classes in
         # pcapkit.protocols.application.ngap; neither needs an exception-set
         # entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
-        self.assertEqual(len(self.enums), 147)
+        self.assertEqual(census.compare(map(_qualname, self.enums), census.names('int', 'flag')),
+                         census.AGREES, census.ADVICE)
         for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
                           EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK):
             self.assertTrue(expected.issubset(names),
@@ -325,7 +329,10 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
             if qualname in EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK:
                 # Covered by its own test below: it raises for UNRESOLVABLE
                 # like the rest of this sweep, but has no real member to use
-                # as ``fallback`` -- see the set's own comment.
+                # as ``fallback`` -- see the set's own comment. Asserted, as
+                # above, so the set cannot quietly excuse a registry that has one.
+                self.assertEqual(list(obj), [],
+                                 f'{qualname} has a member to fall back to and belongs in the sweep')
                 continue
             with self.subTest(enum=qualname):
                 with self.assertRaises(ValueError):
@@ -333,11 +340,12 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 fallback = next(iter(obj)).value
                 self.assertIs(obj.get(UNRESOLVABLE, fallback), obj(fallback))
                 covered += 1
-        # The sweep size ``test_the_sweep_size_is_pinned`` pins, less every
-        # registry excused above: ``EXPECTED_TO_RESOLVE_ANYTHING`` and
-        # ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``, with
-        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` empty.
-        self.assertEqual(covered, 144)
+        # The census's integer registries, less every one excused above. Each
+        # excusal asserts its own reason, here or in a test of its own, so the
+        # derived figure lets no registry out of the sweep unchecked (#2615).
+        excused = (EXPECTED_TO_RESOLVE_ANYTHING | EXPECTED_WITHOUT_AN_INTEGER_DEFAULT
+                   | EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK)
+        self.assertEqual(covered, len(census.names('int', 'flag') - excused))
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

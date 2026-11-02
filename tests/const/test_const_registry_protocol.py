@@ -20,8 +20,10 @@ the four methods honours the contract the maintainer wrote for it.
 """
 from __future__ import annotations
 
+import ast
 import importlib
 import pathlib
+import re
 import unittest
 from typing import TYPE_CHECKING
 
@@ -30,6 +32,7 @@ from aenum import IntEnum, IntFlag, StrEnum, extend_enum
 from pcapkit.corekit.enum import EnumRegistry
 from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
                             restore_modules, snapshot_modules)
+from tests.const import census
 
 if TYPE_CHECKING:
     from typing import Any
@@ -77,6 +80,20 @@ CONVERTED_VENDORS = (
 #: Every method of the protocol the ruling says must always exist.
 PROTOCOL = ('get', 'get_all', 'register', 'register_alias', 'register_aliases',
             '_unregistered_member')
+
+
+def _is_generated_shape(source: 'str') -> 'bool':
+    """Whether ``source`` reads as the default template's output.
+
+    The checks
+    :meth:`GeneratedTemplateSourceInheritsTests.test_every_generated_const_module_is_accounted_for`
+    asserts one by one: the base imported, a registry declared on it over
+    :class:`~aenum.IntEnum`, and no copy of :data:`PROTOCOL`.
+
+    """
+    return ('from pcapkit.corekit.enum import EnumRegistry' in source
+            and re.search(r'class \w+\(EnumRegistry, IntEnum\):', source) is not None
+            and not any(f'def {method}(' in source for method in PROTOCOL))
 
 
 def _unused_value(cls: 'Any') -> 'int':
@@ -138,6 +155,33 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
                 source = (REPO_ROOT / relpath).read_text()
                 self.assertIn('from pcapkit.corekit.enum import EnumRegistry', source)
                 self.assertNotIn("def get(key: 'int | str'", source)
+
+    def test_each_converted_entry_is_what_converted_means(self) -> None:
+        """Each :data:`CONVERTED` entry is a bespoke template whose members carry nothing extra.
+
+        Its crawler, the one :data:`CONVERTED_VENDORS` pairs it with, spells a
+        module-level ``LINE`` template of its own rather than rendering the
+        default one, and neither that crawler nor the const module defines a
+        ``__new__``. So a default-template registry cannot be filed here in place
+        of the generated side of
+        :meth:`GeneratedTemplateSourceInheritsTests.test_every_generated_const_module_is_accounted_for`
+        (#2615).
+
+        """
+        crawlers = [relpath.replace('pcapkit/const/', 'pcapkit/vendor/', 1)
+                    for _, _, relpath in CONVERTED]
+        self.assertEqual(sorted(crawlers), sorted(CONVERTED_VENDORS))
+        for (_, name, relpath), crawler in zip(CONVERTED, crawlers):
+            with self.subTest(registry=name):
+                tree = ast.parse((REPO_ROOT / crawler).read_text())
+                self.assertTrue(any(isinstance(node, ast.Assign)
+                                    and any(isinstance(target, ast.Name) and target.id == 'LINE'
+                                            for target in node.targets)
+                                    for node in tree.body),
+                                f'{crawler} renders the default template, so {name} is not converted')
+                for path in (relpath, crawler):
+                    self.assertNotIn('def __new__(', (REPO_ROOT / path).read_text(),
+                                     f'{path} attaches attributes in __new__, so {name} is not converted')
 
 
 class ProtocolIsInheritedTests(unittest.TestCase):
@@ -846,8 +890,20 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         generated = [path for path in all_files
                      if path not in converted_relpaths and path not in EXCLUDED_FROM_INTENUM_CENSUS]
 
-        self.assertEqual(len(all_files), 151)
-        self.assertEqual(len(generated), 134)
+        # The tree's modules are the census's (#2615). The split is then exact
+        # while each converted or excluded path is one of them, no path is
+        # both, an excluded module is not the generated shape -- the reason it
+        # is excluded -- and a converted one is what CONVERTED means, which
+        # test_each_converted_entry_is_what_converted_means checks; so neither
+        # set can hide a generated module.
+        self.assertEqual(census.compare(all_files, census.paths()), census.AGREES, census.ADVICE)
+        self.assertEqual(sorted((converted_relpaths | EXCLUDED_FROM_INTENUM_CENSUS) - set(all_files)),
+                         [], 'CONVERTED or EXCLUDED_FROM_INTENUM_CENSUS names a module not in the tree')
+        self.assertEqual(sorted(converted_relpaths & EXCLUDED_FROM_INTENUM_CENSUS), [])
+        for relpath in sorted(EXCLUDED_FROM_INTENUM_CENSUS):
+            with self.subTest(excluded=relpath):
+                self.assertFalse(_is_generated_shape((REPO_ROOT / relpath).read_text()),
+                                 f'{relpath} is the generated shape, so it is not excluded')
         for relpath in generated:
             with self.subTest(module=relpath):
                 source = (REPO_ROOT / relpath).read_text()

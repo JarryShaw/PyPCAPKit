@@ -69,6 +69,7 @@ from aenum import IntEnum, IntFlag
 
 from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
                             restore_modules, snapshot_modules)
+from tests.const import census
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
@@ -192,15 +193,16 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         cls.enums = _iter_const_int_enums()
 
     def test_every_registry_enum_was_discovered(self) -> None:
-        # Pins the size of the sweep itself: if this drifts, a const enum was
-        # added, removed, or renamed, and EXPECTED_TO_REJECT_ZERO (and the
-        # analysis in GitHub issue #492) needs a fresh look rather than a
-        # silent pass. ``TransportProtocol`` has no ``IntFlag`` base (GitHub
-        # issue #808), so it is in this sweep rather than
-        # ``_iter_const_int_flags``'s, and so are GitHub issue #880's
+        # Holds the sweep to the census's 'int' registries (#2615): if this
+        # drifts, a const enum was added, removed, or renamed, and
+        # EXPECTED_TO_REJECT_ZERO (and the analysis in GitHub issue #492) needs
+        # a fresh look rather than a silent pass. ``TransportProtocol`` has no
+        # ``IntFlag`` base (GitHub issue #808), so it is in this sweep rather
+        # than ``_iter_const_int_flags``'s, as are GitHub issue #880's
         # ngap.ProcedureCode and ngap.ProtocolIE, which are on EnumRegistry.
-        names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
-        self.assertEqual(len(self.enums), 141)
+        found = [f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums]
+        names = set(found)
+        self.assertEqual(census.compare(found, census.names('int')), census.AGREES, census.ADVICE)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
                         f'expected reject-list entries missing from the sweep: '
                         f'{EXPECTED_TO_REJECT_ZERO - names}')
@@ -308,14 +310,16 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         # snapshot rebinds it straight back to the pristine modules instead.
         cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
-    def test_the_sweep_size_is_pinned(self) -> None:
+    def test_the_sweep_matches_the_census(self) -> None:
         """A flag enum added or removed needs a fresh look, not a silent pass.
 
+        The sweep is the census's ``'flag'`` registries (#2615).
         ``TransportProtocol`` has no ``IntFlag`` base (GitHub issue #808), so
         it is in ``_iter_const_int_enums``'s sweep rather than this one.
         """
-        names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.flags}
-        self.assertEqual(len(self.flags), 6)
+        found = [f'{obj.__module__}.{obj.__qualname__}' for obj in self.flags]
+        names = set(found)
+        self.assertEqual(census.compare(found, census.names('flag')), census.AGREES, census.ADVICE)
 
         expected = {f'pcapkit.const.mh.{stem}.{name}'
                     for stem, name, _, _ in MH_FLAG_ENUMS}
