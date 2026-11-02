@@ -18,7 +18,8 @@ These checks pin that:
   reads it, and :mod:`pcapkit.toolkit.pypcapfile`, a reader of several, binds
   none of those names at all;
 * :class:`TestNotReinlined` -- no module in :data:`SWEPT`, the homes included,
-  spells a homed value anywhere but in the home's own definition: not as an
+  spells a homed value anywhere but in the home's own definition, or as the
+  field width a value helper takes (see :func:`_field_widths`): not as an
   operand, a call argument, a subscript, a default, a returned value, a tuple
   or table element, a branch of a conditional, nor an assignment at any level.
   Each match that means something else is listed in :data:`NOT_A_COPY` or
@@ -237,9 +238,6 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
-    ('pcapkit/protocols/link/frad.py', '0 <= snap_pid <= 65535'):
-        "the max value of a SNAP PID, FRAD's own 2-octet field (:rfc:`2427#section-3`), "
-        'not an IP total length',
     ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
         'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
     ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
@@ -374,12 +372,6 @@ NOT_A_COPY = {
     ('pcapkit/protocols/link/gre.py', 'return 16'):
         "GRE's own longest possible header -- the 4-octet base plus all three optional "
         'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
-    ('pcapkit/protocols/link/gre.py', '0 <= checksum <= 65535'):
-        "the max value of GRE's own 2-octet Checksum field (:rfc:`2784#section-2.5`), "
-        'not an IP total length',
-    ('pcapkit/protocols/link/gre.py', '0 <= reserved1 <= 65535'):
-        "the max value of GRE's own 2-octet Reserved1 field (:rfc:`2784#section-2.6`), "
-        'not an IP total length',
     ('pcapkit/protocols/schema/link/gre.py', "{'reserved_2': (4, 9)}"):
         "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
         'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
@@ -449,17 +441,14 @@ UNRELATED = {
                                       'and the 28-octet IPv4 ARP length'),
     'pcapkit/protocols/link/loopback.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
-    'pcapkit/protocols/link/ieee802_11.py': ((6, 9, 12, 16, 32), 'a 6-octet MAC address, '
-                                             'Frame Control bit offsets, and the 12-, 16- and '
-                                             '32-bit widths of 802.11 header fields'),
+    'pcapkit/protocols/link/ieee802_11.py': ((6, 9, 12), 'a 6-octet MAC address, and '
+                                             'Frame Control bit offsets'),
     'pcapkit/protocols/link/l2tpv2.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
     'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
-    'pcapkit/protocols/link/netlink.py': ((16, 65535), "the nlmsghdr fixed header length (16 "
-                                          'octets, not a PCAP record header) and the max value '
-                                          "of its 16-bit nlmsg_type/nlmsg_flags fields (not "
-                                          'an IPv4 total length)'),
+    'pcapkit/protocols/link/netlink.py': ((16,), 'the nlmsghdr fixed header length (16 '
+                                          'octets), not a PCAP record header'),
     'pcapkit/protocols/link/radiotap.py': ((65535,), "the max value of radiotap's own "
                                            '2-octet it_len field, not an IP total length'),
     'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
@@ -619,6 +608,27 @@ def _context(text: 'str', operand: 'ast.Constant', parents: 'dict[int, ast.AST]'
     return _segment(text, node)
 
 
+#: Value helpers and the keyword each takes a field width by, in bits or octets (#2614).
+_WIDTHS = {'_make_uint': 'bits', '_make_sint': 'bits', '_make_pack': 'size',
+           '_read_uint': 'size', '_make_octets': 'size'}
+
+
+def _field_widths(tree: 'ast.Module') -> 'set[int]':
+    """``id`` of every constant given as a width to a :data:`_WIDTHS` helper.
+
+    A field's own width, not a copy of a homed constant that shares its value.
+
+    """
+    exempt = set()  # type: set[int]
+    for node in ast.walk(tree):
+        callee = getattr(getattr(node, 'func', None), 'attr', None)
+        if isinstance(node, ast.Call) and callee in _WIDTHS:
+            exempt.update(id(keyword.value) for keyword in node.keywords
+                          if keyword.arg == _WIDTHS[callee]
+                          and isinstance(keyword.value, ast.Constant))
+    return exempt
+
+
 def _sweep() -> 'list[tuple[str, int, int, str]]':
     """Every homed value in :data:`SWEPT`: module, value, line, expression.
 
@@ -626,7 +636,8 @@ def _sweep() -> 'list[tuple[str, int, int, str]]':
     subscript, a default, a returned value, an element of a tuple or a table,
     a branch of a conditional, or an assignment at any level, which is how a
     renamed copy (``_TCP_HDR = 20``) would read. Only the homes' own
-    definitions, their tables included, are not hits.
+    definitions, their tables included, and the widths :func:`_field_widths`
+    finds are not hits.
 
     """
     values = _swept_values()
@@ -637,7 +648,7 @@ def _sweep() -> 'list[tuple[str, int, int, str]]':
             text = path.read_text(encoding='utf-8')
             tree = ast.parse(text)
             parents = _parents(tree)
-            sites = _home_sites(rel, tree)
+            sites = _home_sites(rel, tree) | _field_widths(tree)
             for node in ast.walk(tree):
                 if (isinstance(node, ast.Constant) and type(node.value) is int
                         and node.value in values and id(node) not in sites):
