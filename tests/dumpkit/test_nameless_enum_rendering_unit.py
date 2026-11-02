@@ -20,6 +20,24 @@ if TYPE_CHECKING:
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
+#: Flag registries whose field is wider than the bits they declare, to the
+#: schema field holding each: a radiotap bitmap keeps the bits radiotap.org does
+#: not name, so its bound is its subfield's width rather than its declared
+#: bits' (#2576). Checked both ways by ``test_each_wider_field_is_wider``.
+WIDER_FIELDS = {
+    'pcapkit.const.radiotap.ampdu_flags.AMPDUFlags': ('AMPDUStatus', 'flags'),
+    'pcapkit.const.radiotap.channel_flags.ChannelFlags': ('Channel', 'flags'),
+    'pcapkit.const.radiotap.eht_known.EHTKnown': ('EHT', 'known'),
+    'pcapkit.const.radiotap.lsig_data1.LSIGData1': ('LSIG', 'data1'),
+    'pcapkit.const.radiotap.rx_flags.RXFlags': ('RXFlags', 'flags'),
+    'pcapkit.const.radiotap.s1g_known.S1GKnown': ('S1G', 'known'),
+    'pcapkit.const.radiotap.timestamp_flags.TimestampFlags': ('Timestamp', 'flags'),
+    'pcapkit.const.radiotap.tx_flags.TXFlags': ('TXFlags', 'flags'),
+    'pcapkit.const.radiotap.vht_coding.VHTCoding': ('VHT', 'coding'),
+    'pcapkit.const.radiotap.vht_flags.VHTFlags': ('VHT', 'flags'),
+    'pcapkit.const.radiotap.vht_known.VHTKnown': ('VHT', 'known'),
+}
+
 
 class StdFlags(enum.IntFlag):
     """``ACK`` and ``SYN`` of :class:`pcapkit.const.tcp.flags.Flags`, as a stdlib flag enumeration.
@@ -354,6 +372,15 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         # outside every single one of them.
         self.assertGreaterEqual(len(widths), 3, widths)
 
+    def test_each_wider_field_is_wider(self) -> None:
+        """Each :data:`WIDER_FIELDS` entry is a flag registry whose field outgrows its declared bits."""
+        registries = _flag_registries()
+        for label in WIDER_FIELDS:
+            with self.subTest(registry=label):
+                self.assertIn(label, registries)
+                self.assertGreater(_field_mask(registries[label]).bit_length(),
+                                   _declared_bits(registries[label]).bit_length())
+
 
 def _const_path() -> 'list[str]':
     """The filesystem path of :mod:`pcapkit.const`, for :func:`pkgutil.walk_packages`.
@@ -427,19 +454,21 @@ def _field_mask(registry: 'FlagRegistry') -> int:
     """The width of *registry*'s field, as an all-ones mask.
 
     Every flag registry in the library bounds its :meth:`~enum.Enum._missing_`
-    to the field its declared bits live in, and for every one of them that bound
-    is exactly the smallest all-ones mask covering every declared bit --
-    ``0xFFF`` for ``Flags``' ``1 << 0 .. 1 << 11``, ``0xFF`` for the eight-bit
-    Mobility Header flags, ``0x07`` for the three-bit
-    :class:`~pcapkit.const.ftp.command.CommandType`.
+    to the field its declared bits live in, and for every one of them but those
+    of :data:`WIDER_FIELDS` that bound is exactly the smallest all-ones mask
+    covering every declared bit -- ``0xFFF`` for ``Flags``' ``1 << 0 .. 1 << 11``,
+    ``0xFF`` for the eight-bit Mobility Header flags, ``0x07`` for the three-bit
+    :class:`~pcapkit.const.ftp.command.CommandType`. Those of :data:`WIDER_FIELDS`
+    take their schema field's width instead.
 
     :class:`~pcapkit.const.reg.apptype.TransportProtocol` is a plain
     :class:`~aenum.IntEnum` (GitHub issue #808), so it does not match
     ``issubclass(attribute, (enum.Flag, aenum.Flag))`` and this function never
     sees it at all.
 
-    Derived rather than read off the source, so it cannot drift from the guard
-    and needs no table to maintain. That it does not drift is itself asserted, by
+    Derived rather than read off the guard's source, so it cannot drift from the
+    guard; :data:`WIDER_FIELDS` names fields, not widths. That it does not drift
+    is itself asserted, by
     :meth:`NamelessEnumRenderingTests.test_a_value_past_the_field_is_refused_rather_than_rendered`.
 
     Args:
@@ -449,6 +478,12 @@ def _field_mask(registry: 'FlagRegistry') -> int:
         An all-ones mask as wide as the registry's field.
 
     """
+    wider = WIDER_FIELDS.get(f'{registry.__module__}.{registry.__name__}')
+    if wider is not None:
+        from pcapkit.protocols.schema.link import radiotap  # pylint: disable=import-outside-toplevel
+
+        schema, name = wider
+        return (1 << 8 * getattr(radiotap, schema).__fields__[name].length) - 1
     return (1 << _declared_bits(registry).bit_length()) - 1
 
 

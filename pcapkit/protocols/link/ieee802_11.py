@@ -41,9 +41,9 @@ The frame body (§9.2.4.7) follows the header and is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, protected or not. The FCS
 (§9.2.4.8), where one was captured, stays at the end of the body: this class
 does not decide whether a capture carries one, which behind radiotap is a
-Flags bit :class:`~pcapkit.protocols.link.radiotap.Radiotap` does not decode.
-For the same reason, the pad octets that radiotap's data-pad flag says follow
-the header stay at the start of the body.
+Flags bit :class:`~pcapkit.protocols.link.radiotap.Radiotap` decodes but does
+not pass on. For the same reason, the pad octets that radiotap's data-pad flag
+says follow the header stay at the start of the body.
 
 A frame of any protocol version but 0 is refused: version 1 is the PV1 frame
 format of §9.8, whose Frame Control field is laid out differently, and

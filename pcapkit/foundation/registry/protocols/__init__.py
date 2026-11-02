@@ -44,6 +44,7 @@ __all__ = [
     'register_ethertype',
     'register_loopback',
     'register_arphrd', 'register_frad', 'register_netlink', 'register_radiotap',
+    'register_radiotap_field',
 
     'register_transtype',
     'register_ipx',

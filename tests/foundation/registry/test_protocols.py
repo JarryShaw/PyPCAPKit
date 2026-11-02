@@ -33,6 +33,7 @@ SCHEMA_REGISTRARS = (
     'register_pcapng_option',
     'register_pcapng_record',
     'register_pcapng_secrets',
+    'register_radiotap_field',
     'register_sctp_cause',
     'register_sctp_chunk',
     'register_sctp_parameter',
@@ -914,11 +915,13 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.sctp.cause_code import CauseCode
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter as SCTPParameter
+        from pcapkit.const.radiotap.field_type import FieldType
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option as TCPOption
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import application as reg_application
         from pcapkit.foundation.registry.protocols import internet as reg_internet
+        from pcapkit.foundation.registry.protocols import link as reg_link
         from pcapkit.foundation.registry.protocols import misc as reg_misc
         from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import RegistryError
@@ -961,6 +964,8 @@ class ProtocolRegistryTests(unittest.TestCase):
              RecordType.nrb_record_ipv4),
             (registry.register_pcapng_secrets, reg_misc.PCAPNG, '_read_secrets_unit',
              reg_misc.Schema_PCAPNG_DSBSecrets, 'register_secrets', SecretsType.TLS_Key_Log),
+            (registry.register_radiotap_field, reg_link.Radiotap, '_read_field_unit',
+             reg_link.Schema_Radiotap_Field, 'register_field', FieldType.TSFT),
         ]
 
         schema = object

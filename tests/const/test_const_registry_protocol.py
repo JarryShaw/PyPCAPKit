@@ -64,6 +64,20 @@ CONVERTED = (
     ('pcapkit.const.mh.handover_initiate_flag', 'HandoverInitiateFlag', 'pcapkit/const/mh/handover_initiate_flag.py'),
     ('pcapkit.const.ipv6.extension_header', 'ExtensionHeader', 'pcapkit/const/ipv6/extension_header.py'),
     ('pcapkit.const.tcp.flags', 'Flags', 'pcapkit/const/tcp/flags.py'),
+    ('pcapkit.const.radiotap.flags', 'Flags', 'pcapkit/const/radiotap/flags.py'),
+    ('pcapkit.const.radiotap.channel_flags', 'ChannelFlags', 'pcapkit/const/radiotap/channel_flags.py'),
+    ('pcapkit.const.radiotap.rx_flags', 'RXFlags', 'pcapkit/const/radiotap/rx_flags.py'),
+    ('pcapkit.const.radiotap.tx_flags', 'TXFlags', 'pcapkit/const/radiotap/tx_flags.py'),
+    ('pcapkit.const.radiotap.mcs_known', 'MCSKnown', 'pcapkit/const/radiotap/mcs_known.py'),
+    ('pcapkit.const.radiotap.ampdu_flags', 'AMPDUFlags', 'pcapkit/const/radiotap/ampdu_flags.py'),
+    ('pcapkit.const.radiotap.vht_coding', 'VHTCoding', 'pcapkit/const/radiotap/vht_coding.py'),
+    ('pcapkit.const.radiotap.timestamp_flags', 'TimestampFlags', 'pcapkit/const/radiotap/timestamp_flags.py'),
+    ('pcapkit.const.radiotap.he_mu_other_user_known', 'HEMUOtherUserKnown', 'pcapkit/const/radiotap/he_mu_other_user_known.py'),
+    ('pcapkit.const.radiotap.lsig_data1', 'LSIGData1', 'pcapkit/const/radiotap/lsig_data1.py'),
+    ('pcapkit.const.radiotap.s1g_known', 'S1GKnown', 'pcapkit/const/radiotap/s1g_known.py'),
+    ('pcapkit.const.radiotap.vht_known', 'VHTKnown', 'pcapkit/const/radiotap/vht_known.py'),
+    ('pcapkit.const.radiotap.vht_flags', 'VHTFlags', 'pcapkit/const/radiotap/vht_flags.py'),
+    ('pcapkit.const.radiotap.eht_known', 'EHTKnown', 'pcapkit/const/radiotap/eht_known.py'),
 )
 
 #: The crawlers whose bespoke templates are converted, and which must therefore
@@ -75,6 +89,7 @@ CONVERTED_VENDORS = (
     'pcapkit/vendor/mh/handover_initiate_flag.py',
     'pcapkit/vendor/ipv6/extension_header.py',
     'pcapkit/vendor/tcp/flags.py',
+    'pcapkit/vendor/radiotap/flags.py',
 )
 
 #: Every method of the protocol the ruling says must always exist.
@@ -94,6 +109,26 @@ def _is_generated_shape(source: 'str') -> 'bool':
     return ('from pcapkit.corekit.enum import EnumRegistry' in source
             and re.search(r'class \w+\(EnumRegistry, IntEnum\):', source) is not None
             and not any(f'def {method}(' in source for method in PROTOCOL))
+
+
+def _template_crawler(crawler: 'str') -> 'str':
+    """The crawler whose ``LINE`` renders the registry ``crawler`` generates.
+
+    ``crawler`` itself, unless its class subclasses another crawler module's, as
+    each :mod:`pcapkit.vendor.radiotap` flag crawler does
+    :mod:`pcapkit.vendor.radiotap.flags`'s (#2576); then that module. A
+    subclass of :class:`pcapkit.vendor.default.Vendor` stays ``crawler``.
+
+    """
+    tree = ast.parse((REPO_ROOT / crawler).read_text())
+    bases = {base.id for node in tree.body if isinstance(node, ast.ClassDef)
+             for base in node.bases if isinstance(base, ast.Name)}
+    for node in tree.body:
+        if (isinstance(node, ast.ImportFrom) and node.module is not None
+                and node.module.startswith('pcapkit.vendor.') and node.module.count('.') == 3
+                and any(alias.name in bases for alias in node.names)):
+            return node.module.replace('.', '/') + '.py'
+    return crawler
 
 
 def _unused_value(cls: 'Any') -> 'int':
@@ -159,19 +194,20 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
     def test_each_converted_entry_is_what_converted_means(self) -> None:
         """Each :data:`CONVERTED` entry is a bespoke template whose members carry nothing extra.
 
-        Its crawler, the one :data:`CONVERTED_VENDORS` pairs it with, spells a
-        module-level ``LINE`` template of its own rather than rendering the
-        default one, and neither that crawler nor the const module defines a
-        ``__new__``. So a default-template registry cannot be filed here in place
-        of the generated side of
+        The crawler rendering it, which :func:`_template_crawler` finds and
+        :data:`CONVERTED_VENDORS` lists, spells a module-level ``LINE`` template
+        of its own rather than rendering the default one, and neither the
+        crawlers nor the const module define a ``__new__``. So a
+        default-template registry cannot be filed here in place of the
+        generated side of
         :meth:`GeneratedTemplateSourceInheritsTests.test_every_generated_const_module_is_accounted_for`
         (#2615).
 
         """
-        crawlers = [relpath.replace('pcapkit/const/', 'pcapkit/vendor/', 1)
-                    for _, _, relpath in CONVERTED]
-        self.assertEqual(sorted(crawlers), sorted(CONVERTED_VENDORS))
-        for (_, name, relpath), crawler in zip(CONVERTED, crawlers):
+        owners = [relpath.replace('pcapkit/const/', 'pcapkit/vendor/', 1) for _, _, relpath in CONVERTED]
+        crawlers = [_template_crawler(owner) for owner in owners]
+        self.assertEqual(sorted(set(crawlers)), sorted(CONVERTED_VENDORS))
+        for (_, name, relpath), owner, crawler in zip(CONVERTED, owners, crawlers):
             with self.subTest(registry=name):
                 tree = ast.parse((REPO_ROOT / crawler).read_text())
                 self.assertTrue(any(isinstance(node, ast.Assign)
@@ -179,7 +215,7 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
                                             for target in node.targets)
                                     for node in tree.body),
                                 f'{crawler} renders the default template, so {name} is not converted')
-                for path in (relpath, crawler):
+                for path in (relpath, owner, crawler):
                     self.assertNotIn('def __new__(', (REPO_ROOT / path).read_text(),
                                      f'{path} attaches attributes in __new__, so {name} is not converted')
 
