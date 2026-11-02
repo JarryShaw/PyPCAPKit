@@ -26,7 +26,6 @@ from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
 from pcapkit.protocols.schema.internet.hip import LocatorSetParameter
 from pcapkit.protocols.schema.internet.mh import CGAParametersOption
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.warnings import SchemaWarning
 
 #: One plain IPv6 locator: traffic, type 0, ``Locator Length`` 4, flags, lifetime.
@@ -95,19 +94,21 @@ class LengthLessSchemaFieldTests(unittest.TestCase):
         self.assertEqual(warned, [])
         self.assertEqual([(item.a, item.b) for item in result.items], [(0x0001, 0x0203), (0x0405, 0x0607)])
 
-    def test_truncated_variable_item_still_warns_and_raises(self) -> 'None':
-        # A remainder of zero must not become ``prepare``'s quiet
-        # ``StreamEOFError``, which an extractor reads as end of capture.
-        for name, schema, data in (
-            ('hip', LocatorSetParameter, locator_set(2, truncate=10)),
-            ('mh', CGAParametersOption, cga_option(CGA_PARAMETER[:-3])),
+    def test_truncated_variable_item_still_warns_and_rebuilds(self) -> 'None':
+        # A truncated item must not become ``prepare``'s quiet ``StreamEOFError``,
+        # which an extractor reads as end of capture: the list reads it
+        # zero-filled to its length and records the cut (#2686).
+        for name, schema, data, field in (
+            ('hip', LocatorSetParameter, locator_set(2, truncate=10), 'locators'),
+            ('mh', CGAParametersOption, cga_option(CGA_PARAMETER[:-3]), 'parameters'),
         ):
             with self.subTest(name=name):
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
-                    with self.assertRaises(FieldValueError):
-                        schema.unpack(data)
+                    result = schema.unpack(data)
                 self.assertTrue(any(issubclass(w.category, SchemaWarning) for w in caught))
+                self.assertEqual(result.__dict__['__short_read__'][0], field)
+                self.assertEqual(result.pack(), data)
 
     def test_fixed_length_item_running_short_still_warns(self) -> 'None':
         _, warned = self.unpack(ShortFixedList, b'\x06' + bytes(range(6)))

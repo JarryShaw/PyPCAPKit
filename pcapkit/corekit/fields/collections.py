@@ -4,7 +4,7 @@
 import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import FieldBase
+from pcapkit.corekit.fields.field import FieldBase, _zero_fill_items
 from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -174,8 +174,19 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             Unpacked field value.
 
         Raises:
-            FieldValueError: If the items overrun the field, or if a schema item
-                consumes nothing from ``buffer`` -- see the note below.
+            FieldValueError: If the items overrun the field, if a schema item
+                consumes nothing from ``buffer`` -- see the note below -- or if
+                schema items short of the field's length cannot be zero-filled.
+
+        When ``buffer`` falls short of the field's length, schema items are read
+        from its octets zero-filled to that length, as
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        reads any other field, so the items cover the length declared.
+
+        .. versionchanged:: 1.6.0
+
+           Schema items short of the field's length are zero-filled to it, where
+           an item past the data was refused as consuming nothing (:issue:`2686`).
 
         """
         length = self._length
@@ -215,17 +226,22 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`
         # afterwards.
         is_schema = isinstance(self._item_type, SchemaField)
+        if is_schema and length > 0:
+            start = file.tell()
+            present = file.seek(0, io.SEEK_END) - start
+            file.seek(start, io.SEEK_SET)
+            if present < length:
+                file = io.BytesIO(_zero_fill_items(self.name, length, file.read()))
 
         # NOTE: The item-typed branch below sizes each item by ``field.length``,
         # which is what it read, but the schema branch sizes it by ``len(data)``,
-        # which is only what the schema *recorded*. A schema reading a stream that
-        # has already run out records nothing, so ``length -= len(data)`` makes no
-        # progress and the loop spins forever. Reachable from a TCP segment: a
-        # ``SACK`` option declaring more octets than the option area holds leaves
-        # ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.
-        # Remembering where the previous item ended is what bounds the iteration
-        # count, since it does not depend on what the schema reports. Cf. #431,
-        # which is the same defect in the ``OptionField`` subclass.
+        # which is only what the schema *recorded*. A schema that reads nothing
+        # records nothing, so ``length -= len(data)`` makes no progress and the
+        # loop spins forever. The zero-fill above gives every item octets to read,
+        # but an item schema may still consume none of them. Remembering where the
+        # previous item ended is what bounds the iteration count, since it does
+        # not depend on what the schema reports. Cf. #431, which is the same
+        # defect in the ``OptionField`` subclass.
         #
         # ``start`` is where the field itself begins. The comparison needs stream
         # positions, but the diagnostic wants an offset into the field, and the two
