@@ -1298,7 +1298,7 @@ def fill_template(template: 'str', description: 'str', audit_outcome: 'str') -> 
     text = re.sub(r'(?m)^- \[ \] `ci`', '- [x] `ci`', template)
     audit = {'success': 'passed', 'failure': 'failed'}.get(audit_outcome, audit_outcome)
     text = re.sub(r'(?m)^(- \[ \] `make test` passes.*)$', rf'\1 -- not run; the audit {audit} (below)', text)
-    text = re.sub(r'(?m)^(- \[ \] Added a \[changelog entry\].*)$', r'\1 — N/A — centralised in #657', text)
+    text = re.sub(r'(?m)^(- \[ \] Described the user-visible change.*)$', r'\1 — N/A — centralised in #657', text)
     placeholder = re.search(r'(?m)^&emsp; Explanation of your \*pull request\*.*$', text)
     if placeholder is None:
         return text.rstrip('\n') + '\n\n' + description + '\n'
