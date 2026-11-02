@@ -11,7 +11,7 @@ family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
 * :class:`~pcapkit.protocols.application.sslv2.SSLv2` -- SSL 2.0, whose
   record layer shares no wire format with the others;
 * :class:`~pcapkit.protocols.application.tls.TLS` -- SSLv3 and TLS 1.0
-  through TLS 1.3, with :class:`~pcapkit.protocols.application.tls.SSLv3` as
+  through TLS 1.3, with :class:`~pcapkit.protocols.application.sslv3.SSLv3` as
   its thin subclass for explicit construction;
 * :class:`~pcapkit.protocols.application.dtls.DTLS` -- DTLS 1.0, 1.2 and 1.3.
 

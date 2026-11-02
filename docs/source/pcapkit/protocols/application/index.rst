@@ -26,6 +26,7 @@ function rather than encapsulation, see
    ssl
    sslv2
    tls
+   sslv3
    dtls
 
 .. todo::

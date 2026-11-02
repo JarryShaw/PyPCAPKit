@@ -800,7 +800,7 @@ class VersionDispatchTests(unittest.TestCase):
         :class:`~pcapkit.protocols.application.tls.TLS` would.
 
         """
-        from pcapkit.protocols.application.tls import SSLv3
+        from pcapkit.protocols.application.sslv3 import SSLv3
 
         tls_wire = b'\x17\x03\x00\x00\x05hello'
         parsed = SSLv3(tls_wire, len(tls_wire))
@@ -816,7 +816,7 @@ class VersionDispatchTests(unittest.TestCase):
         it happened to be instantiated as.
 
         """
-        from pcapkit.protocols.application.tls import SSLv3
+        from pcapkit.protocols.application.sslv3 import SSLv3
 
         tls_1_0_wire = b'\x17\x03\x01\x00\x05hello'
         parsed = SSLv3(tls_1_0_wire, len(tls_1_0_wire))
@@ -1168,7 +1168,8 @@ class ExportTests(unittest.TestCase):
         import pcapkit.protocols.application
         from pcapkit.protocols.application.dtls import DTLS
         from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.application.tls import TLS, SSLv3
+        from pcapkit.protocols.application.sslv3 import SSLv3
+        from pcapkit.protocols.application.tls import TLS
 
         classes = {'SSL': SSL, 'SSLv3': SSLv3, 'TLS': TLS, 'DTLS': DTLS}
         for module in (pcapkit, pcapkit.all, pcapkit.protocols, pcapkit.protocols.application):

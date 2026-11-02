@@ -186,7 +186,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.SSL"
        click SSLv2 "application/sslv2.html#pcapkit.protocols.application.sslv2.SSLv2"
        click TLS "application/tls.html#pcapkit.protocols.application.tls.TLS"
-       click SSLv3 "application/tls.html#pcapkit.protocols.application.tls.SSLv3"
+       click SSLv3 "application/sslv3.html#pcapkit.protocols.application.sslv3.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.Raw"

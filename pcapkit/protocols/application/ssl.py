@@ -9,7 +9,7 @@
 which is the umbrella base class for the Secure Sockets Layer protocol
 family [*]_ -- the SSL versions, Transport Layer Security
 (:class:`~pcapkit.protocols.application.tls.TLS`, which also covers SSLv3
-through :class:`~pcapkit.protocols.application.tls.SSLv3`) and Datagram TLS
+through :class:`~pcapkit.protocols.application.sslv3.SSLv3`) and Datagram TLS
 (:class:`~pcapkit.protocols.application.dtls.DTLS`).
 
 The TLS record header (:rfc:`9846#section-5.1`) is a

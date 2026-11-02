@@ -63,8 +63,8 @@ holds the ruling. By the ``id()`` criterion,
 TLS 1.3**, in the ARP shape (:ref:`protocol-family-shapes`): ``id()`` stays
 ``('TLS',)`` and ``alias`` names the version read. Only record version ``0x0300`` is
 branded SSLv3, in ``name`` as well as ``alias``; every later version is TLS.
-:class:`~pcapkit.protocols.application.tls.SSLv3` ``('SSLv3',)`` narrows ``id()`` and
-nothing else, as :class:`~pcapkit.protocols.link.arp.InARP` does under ARP, and nothing
+:class:`~pcapkit.protocols.application.sslv3.SSLv3` ``('SSLv3',)`` narrows ``id()`` and
+nothing else, as :class:`~pcapkit.protocols.link.inarp.InARP` does under ARP, and nothing
 dispatches to it: an SSLv3 record on TCP port 443 parses as TLS with alias ``SSLv3``.
 :class:`~pcapkit.protocols.application.dtls.DTLS` ``('DTLS',)`` reads DTLS 1.0, 1.2 and
 1.3 the same way.
@@ -345,6 +345,5 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 ``data/`` **modules follow the same layout**: the top-level class takes the module's
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
-:issue:`2529`, where the classes that do not match yet are pending:
-:class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
+:issue:`2529`, where the class that does not match yet is pending:
 :class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

@@ -116,7 +116,7 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.tls.TLS`                                      |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
-|                                                                  | SSL Family     | :class:`pcapkit.protocols.application.tls.SSLv3`                                    |
+|                                                                  | SSL Family     | :class:`pcapkit.protocols.application.sslv3.SSLv3`                                  |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.dtls.DTLS`                                    |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
