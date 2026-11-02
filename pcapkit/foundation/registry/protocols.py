@@ -49,10 +49,12 @@ from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
 from pcapkit.const.tcp.option import Option as TCP_Option
+from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import MISSING, NULL
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTPv2
+from pcapkit.protocols.application.ssl import SSL
 from pcapkit.protocols.internet.hip import HIP
 from pcapkit.protocols.internet.hopopt import HOPOPT
 from pcapkit.protocols.internet.icmpv4 import ICMPv4
@@ -111,6 +113,8 @@ if TYPE_CHECKING:
     from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
+    from pcapkit.protocols.application.ssl import ExtensionConstructor as TLS_ExtensionConstructor
+    from pcapkit.protocols.application.ssl import ExtensionParser as TLS_ExtensionParser
     from pcapkit.protocols.internet.hip import ParameterConstructor as HIP_ParameterConstructor
     from pcapkit.protocols.internet.hip import ParameterParser as HIP_ParameterParser
     from pcapkit.protocols.internet.hopopt import OptionConstructor as HOPOPT_OptionConstructor
@@ -174,6 +178,7 @@ __all__ = [
     'register_dccp_option',
 
     'register_http_frame',
+    'register_tls_extension',
 
     'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
     'register_pcapng_record',
@@ -2093,6 +2098,41 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     if schema is not None:
         Schema_HTTP_FrameType.register(code, schema)
     logger.debug('registered HTTP/2 frame parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.application.ssl.SSL.__extension__
+def register_tls_extension(code: 'TLS_ExtensionType',
+                           meth: 'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]') -> 'None':
+    """Register an extension parser.
+
+    The function will register the given extension parser to the
+    :data:`pcapkit.protocols.application.ssl.SSL.__extension__` registry, which
+    :class:`~pcapkit.protocols.application.tls.TLS` and
+    :class:`~pcapkit.protocols.application.dtls.DTLS` share.
+
+    Args:
+        code: TLS/DTLS extension type as in
+            :class:`~pcapkit.const.tls.extension_type.ExtensionType`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the ``extension_data``. A name names the
+            ``_read_ext_*`` and ``_make_ext_*`` methods, and has to name an
+            existing ``_read_ext_*`` one.
+
+    Raises:
+        RegistryError: If ``code`` is not an
+            :class:`~pcapkit.const.tls.extension_type.ExtensionType` member,
+            e.g. a member of another enum, or ``meth`` is a name with no
+            matching ``_read_ext_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, TLS_ExtensionType, SSL)  # type: ignore[type-abstract]
+    if isinstance(meth, str) and not hasattr(SSL, f'_read_ext_{meth}'):
+        raise RegistryError('method must be a valid TLS extension parser function')
+
+    SSL.register_extension(code, meth)
+    logger.debug('registered TLS extension parser: %s', code.name)
 
 
 ###############################################################################

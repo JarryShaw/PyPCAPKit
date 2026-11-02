@@ -22,34 +22,63 @@ message. Each record header is declared in its subclass's own schema
 :class:`~pcapkit.protocols.schema.application.dtls.DTLS`), and
 :class:`~pcapkit.protocols.application.dtls.DTLS` reads the epoch and sequence
 number. This base class carries the logic the two share -- content-type
-dispatch and handshake-message decoding -- parameterised by a ``dtls`` flag
-where the DTLS handshake fragment header has to be read or written.
+dispatch, handshake-message decoding and the extension registry -- parameterised
+by a ``dtls`` flag where the DTLS handshake fragment header has to be read or
+written.
 
 .. [*] https://en.wikipedia.org/wiki/Transport_Layer_Security
 
 .. versionadded:: 1.6.0
 
 """
-from typing import TYPE_CHECKING, Generic
+import collections
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
+from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
 from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.tls import Alert as Data_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as Data_ChangeCipherSpec
 from pcapkit.protocols.data.application.tls import ClientHello as Data_ClientHello
+from pcapkit.protocols.data.application.tls import EncryptedExtensions as Data_EncryptedExtensions
 from pcapkit.protocols.data.application.tls import Extension as Data_Extension
 from pcapkit.protocols.data.application.tls import Handshake as Data_Handshake
+from pcapkit.protocols.data.application.tls import KeyShareClientHello as Data_KeyShareClientHello
+from pcapkit.protocols.data.application.tls import KeyShareEntry as Data_KeyShareEntry
+from pcapkit.protocols.data.application.tls import \
+    KeyShareHelloRetryRequest as Data_KeyShareHelloRetryRequest
+from pcapkit.protocols.data.application.tls import KeyShareServerHello as Data_KeyShareServerHello
+from pcapkit.protocols.data.application.tls import NamedGroupList as Data_NamedGroupList
+from pcapkit.protocols.data.application.tls import ProtocolNameList as Data_ProtocolNameList
 from pcapkit.protocols.data.application.tls import ServerHello as Data_ServerHello
+from pcapkit.protocols.data.application.tls import ServerName as Data_ServerName
+from pcapkit.protocols.data.application.tls import ServerNameList as Data_ServerNameList
+from pcapkit.protocols.data.application.tls import SignatureSchemeList as Data_SignatureSchemeList
+from pcapkit.protocols.data.application.tls import \
+    SupportedVersionsClientHello as Data_SupportedVersionsClientHello
+from pcapkit.protocols.data.application.tls import \
+    SupportedVersionsServerHello as Data_SupportedVersionsServerHello
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Callable, DefaultDict, Iterable, Optional, Union
 
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
+
+    from pcapkit.protocols.data.application.tls import ExtensionData as Data_ExtensionData
+
+    #: Parser of an ``extension_data`` field registered as a callable.
+    ExtensionParser = Callable[[Enum_ExtensionType, bytes, NamedArg(Enum_HandshakeType, 'msg_type')],
+                               Union[Data_ExtensionData, bytes]]
+    #: Constructor of an ``extension_data`` field registered as a callable.
+    ExtensionConstructor = Callable[[Enum_ExtensionType, DefaultArg(Optional[Data_ExtensionData]),
+                                     NamedArg(Enum_HandshakeType, 'msg_type'), KwArg(Any)], bytes]
 
 __all__ = ['SSL']
 
@@ -80,14 +109,18 @@ _WIRE_CONTENT_TYPES = frozenset({
     Enum_ContentType.return_routability_check,
 })
 
-#: The ``supported_versions`` extension type (:rfc:`9846#section-4.3.1`), where
-#: TLS 1.3 and DTLS 1.3 negotiate the version their record header does not carry.
-_EXT_SUPPORTED_VERSIONS = 43
-
 #: The ``supported_versions`` value for TLS 1.3 (:rfc:`9846#section-4.3.1`).
 TLS13_VERSION = 0x0304
 #: The ``supported_versions`` value for DTLS 1.3 (:rfc:`9147#section-5.3`).
 DTLS13_VERSION = 0xFEFC
+
+#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest``: the
+#: SHA-256 of ``"HelloRetryRequest"`` (:rfc:`9846#section-4.2.3`).
+_HRR_RANDOM = bytes.fromhex('cf21ad74e59a6111be1d8c021e65b891c2a211167abb8c5e079e09e2c8a8339c')
+
+#: The ``host_name`` ``NameType`` of ``server_name``, the only one defined
+#: (:rfc:`6066#section-3`).
+_HOST_NAME = 0
 
 
 def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
@@ -104,24 +137,23 @@ def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
         Every version the extension lists, in order: zero or more for a
         ``ClientHello`` (a list), exactly one for a ``ServerHello`` (a bare
         selection), or nothing at all when ``message`` carries no
-        ``supported_versions`` extension -- including when it carries no
-        ``extensions`` at all.
+        ``supported_versions`` extension, or one left undecoded. A
+        ``ClientHello`` list of odd length is left undecoded, so it yields
+        nothing, not even the whole pairs before its stray octet.
 
     """
     extensions = getattr(message, 'extensions', None)
     if not extensions:
         return ()
     for extension in extensions:
-        if int(extension.type) != _EXT_SUPPORTED_VERSIONS:
+        if extension.type != Enum_ExtensionType.supported_versions:
             continue
         data = extension.data
-        # A ``ClientHello`` lists several versions behind a 1-octet length
-        # prefix; a ``ServerHello`` selects exactly one, with no length
-        # prefix of its own (:rfc:`9846#section-4.3.1`).
-        versions = data[1:] if isinstance(message, Data_ClientHello) else data
-        return tuple(
-            int.from_bytes(versions[i:i + 2], 'big') for i in range(0, len(versions) - 1, 2)
-        )
+        if isinstance(data, Data_SupportedVersionsClientHello):
+            return tuple(data.versions)
+        if isinstance(data, Data_SupportedVersionsServerHello):
+            return (data.selected_version,)
+        return ()
     return ()
 
 
@@ -149,6 +181,41 @@ def _take(data: 'bytes', pos: 'int', size: 'int', *, what: 'str', alias: 'str') 
     if len(chunk) != size:
         raise ProtocolError(f'{alias}: invalid format: {what} runs past the end of the buffer')
     return chunk
+
+
+def _read_key_share_entry(proto: 'SSL', data: 'bytes', pos: 'int') -> 'tuple[Data_KeyShareEntry, int]':
+    """Read one ``KeyShareEntry`` (:rfc:`9846#section-4.3.8`) at ``pos``.
+
+    Args:
+        proto: Protocol reading the entry, whose alias the error message names.
+        data: Buffer being read.
+        pos: Offset of the entry.
+
+    Returns:
+        The entry, and the offset just past it.
+
+    Raises:
+        ProtocolError: If the entry runs past the end of ``data``.
+
+    """
+    group = int.from_bytes(_take(data, pos, 2, what='key_share.group', alias=proto.alias), 'big')
+    key_exchange, end = proto._read_vector(data, pos + 2, size=2,  # pylint: disable=protected-access
+                                           what='key_share.key_exchange')
+    return Data_KeyShareEntry(group=group, key_exchange=key_exchange), end
+
+
+def _make_key_share_entry(proto: 'SSL', entry: 'Data_KeyShareEntry') -> 'bytes':
+    """Write one ``KeyShareEntry`` -- the inverse of :func:`_read_key_share_entry`."""
+    key_exchange = proto._make_vector(entry.key_exchange, size=2)  # pylint: disable=protected-access
+    return int(entry.group).to_bytes(2, 'big') + key_exchange
+
+
+def _hello_type(random: 'bytes') -> 'Enum_HandshakeType':
+    """The message a ``ServerHello`` with ``random`` is: a ``HelloRetryRequest``
+    for :data:`_HRR_RANDOM`, a ``ServerHello`` otherwise."""
+    if random == _HRR_RANDOM:
+        return cast('Enum_HandshakeType', Enum_HandshakeType.hello_retry_request)
+    return cast('Enum_HandshakeType', Enum_HandshakeType.server_hello)
 
 
 def _tls_handshake_tiles(fragment: 'bytes') -> 'bool':
@@ -188,7 +255,57 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
     - Datagram TLS, DTLS 1.0 through DTLS 1.3
       (:class:`~pcapkit.protocols.application.dtls.DTLS`) [:rfc:`4347`, :rfc:`6347`, :rfc:`9147`]
 
+    The ``extension_data`` of these extensions decodes, in ``ClientHello``,
+    ``ServerHello``, ``HelloRetryRequest`` and ``EncryptedExtensions``:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Extension Type
+         - Extension Parser
+         - Extension Constructor
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.server_name`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_server_name`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_server_name`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.supported_groups`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_supported_groups`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_supported_groups`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.signature_algorithms`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_signature_algorithms`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_signature_algorithms`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.application_layer_protocol_negotiation`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_alpn`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_alpn`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.supported_versions`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_supported_versions`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_supported_versions`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.key_share`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_key_share`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_key_share`
+
     """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Extension type to method mapping, see :meth:`_read_tls_extensions` and
+    #: :meth:`_make_tls_extensions`. A :obj:`str` value names the methods
+    #: ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to
+    #: :meth:`_read_ext_unknown` and :meth:`_make_ext_unknown` when the class
+    #: has no such method, as an unregistered type does; any other value is a
+    #: ``(parser, constructor)`` pair of callables.
+    __extension__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_ExtensionType.server_name: 'server_name',                         # [RFC 6066]
+            Enum_ExtensionType.supported_groups: 'supported_groups',               # [RFC 9846]
+            Enum_ExtensionType.signature_algorithms: 'signature_algorithms',       # [RFC 9846]
+            Enum_ExtensionType.application_layer_protocol_negotiation: 'alpn',     # [RFC 7301]
+            Enum_ExtensionType.supported_versions: 'supported_versions',           # [RFC 9846]
+            Enum_ExtensionType.key_share: 'key_share',                             # [RFC 9846]
+        },
+    )  # type: DefaultDict[Enum_ExtensionType | int, str | tuple[ExtensionParser, ExtensionConstructor]]
 
     ##########################################################################
     # Methods.
@@ -206,9 +323,485 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         """
         return ('SSLv2', 'TLS', 'DTLS')
 
+    @classmethod
+    def register_extension(cls, code: 'Enum_ExtensionType',
+                           meth: 'str | tuple[ExtensionParser, ExtensionConstructor]') -> 'None':
+        """Register an extension parser.
+
+        Args:
+            code: TLS/DTLS extension type.
+            meth: Name of the ``_read_ext_${name}`` and ``_make_ext_${name}``
+                methods, or a ``(parser, constructor)`` pair of callables; see
+                :attr:`__extension__`.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
+        """
+        incumbent = cls.__extension__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
+            warn(f'TLS: [Extension {code}] extension already registered, overwriting', RegistryWarning)
+        cls.__extension__[code] = meth
+
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _read_ext_unknown(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                          msg_type: 'Enum_HandshakeType') -> 'bytes':  # pylint: disable=unused-argument
+        """Read an extension with no decoder registered: its raw octets.
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            ``data`` unchanged.
+
+        """
+        return data
+
+    def _read_ext_server_name(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                              msg_type: 'Enum_HandshakeType') -> 'Data_ServerNameList | bytes':  # pylint: disable=unused-argument
+        """Read a ``server_name`` extension.
+
+        Structure of ``ServerNameList`` [:rfc:`6066#section-3`]:
+
+        .. code-block:: text
+
+           struct {
+               NameType name_type;
+               select (name_type) {
+                   case host_name: HostName;
+               } name;
+           } ServerName;
+
+           enum {
+               host_name(0), (255)
+           } NameType;
+
+           opaque HostName<1..2^16-1>;
+
+           struct {
+               ServerName server_name_list<1..2^16-1>
+           } ServerNameList;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded list; or ``data`` when empty, as a ``ServerHello``'s
+            and an ``EncryptedExtensions``' are.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed, or names a type other
+                than ``host_name``, whose ``name`` has no defined structure.
+
+        """
+        if not data:
+            return data
+
+        alias = self.alias
+        body = self._read_whole_vector(data, size=2, what='server_name.server_name_list')
+        names = []  # type: list[Data_ServerName]
+        pos = 0
+        while pos < len(body):
+            name_type = _take(body, pos, 1, what='server_name.name_type', alias=alias)[0]
+            if name_type != _HOST_NAME:
+                raise ProtocolError(f'{alias}: invalid format: server_name.name_type {name_type} '
+                                    'is not host_name')
+            name, pos = self._read_vector(body, pos + 1, size=2, what='server_name.name')
+            names.append(Data_ServerName(name_type=name_type, name=name))
+        return Data_ServerNameList(server_name_list=tuple(names))
+
+    def _read_ext_supported_groups(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                                   msg_type: 'Enum_HandshakeType') -> 'Data_NamedGroupList':  # pylint: disable=unused-argument
+        """Read a ``supported_groups`` extension.
+
+        Structure of ``NamedGroupList`` [:rfc:`9846#section-4.3.7`]:
+
+        .. code-block:: text
+
+           struct {
+               NamedGroup named_group_list<2..2^16-1>;
+           } NamedGroupList;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded list.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        what = 'supported_groups.named_group_list'
+        body = self._read_whole_vector(data, size=2, what=what)
+        return Data_NamedGroupList(named_group_list=self._read_uints(body, size=2, what=what))
+
+    def _read_ext_signature_algorithms(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                                       msg_type: 'Enum_HandshakeType') -> 'Data_SignatureSchemeList':  # pylint: disable=unused-argument
+        """Read a ``signature_algorithms`` extension.
+
+        Structure of ``SignatureSchemeList`` [:rfc:`9846#section-4.3.3`]:
+
+        .. code-block:: text
+
+           struct {
+               SignatureScheme supported_signature_algorithms<2..2^16-2>;
+           } SignatureSchemeList;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded list.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        what = 'signature_algorithms.supported_signature_algorithms'
+        body = self._read_whole_vector(data, size=2, what=what)
+        return Data_SignatureSchemeList(supported_signature_algorithms=self._read_uints(body, size=2, what=what))
+
+    def _read_ext_alpn(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                       msg_type: 'Enum_HandshakeType') -> 'Data_ProtocolNameList':  # pylint: disable=unused-argument
+        """Read an ``application_layer_protocol_negotiation`` extension.
+
+        Structure of ``ProtocolNameList`` [:rfc:`7301#section-3.1`]:
+
+        .. code-block:: text
+
+           opaque ProtocolName<1..2^8-1>;
+
+           struct {
+               ProtocolName protocol_name_list<2..2^16-1>
+           } ProtocolNameList;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded list.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        body = self._read_whole_vector(data, size=2, what='alpn.protocol_name_list')
+        names = []  # type: list[bytes]
+        pos = 0
+        while pos < len(body):
+            name, pos = self._read_vector(body, pos, size=1, what='alpn.protocol_name')
+            names.append(name)
+        return Data_ProtocolNameList(protocol_name_list=tuple(names))
+
+    def _read_ext_supported_versions(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                                     msg_type: 'Enum_HandshakeType') -> 'Data_SupportedVersionsClientHello | Data_SupportedVersionsServerHello | bytes':  # pylint: disable=line-too-long
+        """Read a ``supported_versions`` extension.
+
+        Structure of ``SupportedVersions`` [:rfc:`9846#section-4.3.1`]:
+
+        .. code-block:: text
+
+           struct {
+               select (Handshake.msg_type) {
+                   case client_hello:
+                        ProtocolVersion versions<2..254>;
+
+                   case server_hello: /* and HelloRetryRequest */
+                        ProtocolVersion selected_version;
+               };
+           } SupportedVersions;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded versions for ``msg_type``; or ``data`` for a message
+            the structure does not cover.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        alias = self.alias
+        if msg_type == Enum_HandshakeType.client_hello:
+            what = 'supported_versions.versions'
+            body = self._read_whole_vector(data, size=1, what=what)
+            return Data_SupportedVersionsClientHello(versions=self._read_uints(body, size=2, what=what))
+        if msg_type in (Enum_HandshakeType.server_hello, Enum_HandshakeType.hello_retry_request):
+            if len(data) != 2:
+                raise ProtocolError(f'{alias}: invalid format: supported_versions.selected_version '
+                                    'must be exactly two octets')
+            return Data_SupportedVersionsServerHello(selected_version=int.from_bytes(data, 'big'))
+        return data
+
+    def _read_ext_key_share(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                            msg_type: 'Enum_HandshakeType') -> 'Data_KeyShareClientHello | Data_KeyShareHelloRetryRequest | Data_KeyShareServerHello | bytes':  # pylint: disable=line-too-long
+        """Read a ``key_share`` extension.
+
+        Structure of ``key_share`` [:rfc:`9846#section-4.3.8`]:
+
+        .. code-block:: text
+
+           struct {
+               NamedGroup group;
+               opaque key_exchange<1..2^16-1>;
+           } KeyShareEntry;
+
+           struct {
+               KeyShareEntry client_shares<0..2^16-1>;
+           } KeyShareClientHello;
+
+           struct {
+               NamedGroup selected_group;
+           } KeyShareHelloRetryRequest;
+
+           struct {
+               KeyShareEntry server_share;
+           } KeyShareServerHello;
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded structure for ``msg_type``; or ``data`` for a message
+            the structure does not cover.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        alias = self.alias
+        if msg_type == Enum_HandshakeType.client_hello:
+            body = self._read_whole_vector(data, size=2, what='key_share.client_shares')
+            shares = []  # type: list[Data_KeyShareEntry]
+            pos = 0
+            while pos < len(body):
+                entry, pos = _read_key_share_entry(self, body, pos)
+                shares.append(entry)
+            return Data_KeyShareClientHello(client_shares=tuple(shares))
+        if msg_type == Enum_HandshakeType.hello_retry_request:
+            if len(data) != 2:
+                raise ProtocolError(f'{alias}: invalid format: key_share.selected_group '
+                                    'must be exactly two octets')
+            return Data_KeyShareHelloRetryRequest(selected_group=int.from_bytes(data, 'big'))
+        if msg_type == Enum_HandshakeType.server_hello:
+            entry, end = _read_key_share_entry(self, data, 0)
+            if end != len(data):
+                raise ProtocolError(f'{alias}: invalid format: key_share.server_share carries excess octets')
+            return Data_KeyShareServerHello(server_share=entry)
+        return data
+
+    def _make_ext_unknown(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_ExtensionData]' = None, *,  # pylint: disable=unused-argument
+                          msg_type: 'Enum_HandshakeType', **kwargs: 'Any') -> 'bytes':  # pylint: disable=unused-argument
+        """Make an extension with no constructor registered.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``, which this type has no
+                structure to write.
+            msg_type: Handshake message carrying the extension.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Empty ``extension_data`` when ``data`` is :data:`None`.
+
+        Raises:
+            ProtocolError: If ``data`` is given.
+
+        """
+        if data is not None:
+            raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no constructor for '
+                                f'{type(data).__name__}; pass the raw octets instead')
+        return b''
+
+    def _make_ext_server_name(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_ServerNameList]' = None, *,  # pylint: disable=unused-argument
+                              msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
+                              server_name_list: 'Iterable[Data_ServerName]' = (), **kwargs: 'Any') -> 'bytes':
+        """Make a ``server_name`` extension.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            server_name_list: Server names, if ``data`` is not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        """
+        names = data.server_name_list if data is not None else server_name_list
+        return self._make_vector(b''.join(bytes([int(name.name_type)]) + self._make_vector(name.name, size=2)
+                                          for name in names), size=2)
+
+    def _make_ext_supported_groups(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_NamedGroupList]' = None, *,  # pylint: disable=unused-argument,line-too-long
+                                   msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
+                                   named_group_list: 'Iterable[int]' = (), **kwargs: 'Any') -> 'bytes':
+        """Make a ``supported_groups`` extension.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            named_group_list: ``NamedGroup`` values, if ``data`` is not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        """
+        groups = data.named_group_list if data is not None else named_group_list
+        return self._make_vector(self._make_uints(groups, size=2), size=2)
+
+    def _make_ext_signature_algorithms(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_SignatureSchemeList]' = None, *,  # pylint: disable=unused-argument,line-too-long
+                                       msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
+                                       supported_signature_algorithms: 'Iterable[int]' = (),
+                                       **kwargs: 'Any') -> 'bytes':
+        """Make a ``signature_algorithms`` extension.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            supported_signature_algorithms: ``SignatureScheme`` values, if
+                ``data`` is not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        """
+        schemes = data.supported_signature_algorithms if data is not None else supported_signature_algorithms
+        return self._make_vector(self._make_uints(schemes, size=2), size=2)
+
+    def _make_ext_alpn(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_ProtocolNameList]' = None, *,  # pylint: disable=unused-argument
+                       msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
+                       protocol_name_list: 'Iterable[bytes]' = (), **kwargs: 'Any') -> 'bytes':
+        """Make an ``application_layer_protocol_negotiation`` extension.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            protocol_name_list: ``ProtocolName`` octet strings, if ``data`` is
+                not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        """
+        names = data.protocol_name_list if data is not None else protocol_name_list
+        return self._make_vector(b''.join(self._make_vector(name, size=1) for name in names), size=2)
+
+    def _make_ext_supported_versions(self, ext_type: 'Enum_ExtensionType',  # pylint: disable=unused-argument
+                                     data: 'Optional[Data_SupportedVersionsClientHello | Data_SupportedVersionsServerHello]' = None, *,  # pylint: disable=line-too-long
+                                     msg_type: 'Enum_HandshakeType', versions: 'Iterable[int]' = (),
+                                     selected_version: 'Optional[int]' = None, **kwargs: 'Any') -> 'bytes':
+        """Make a ``supported_versions`` extension.
+
+        ``data`` decides the structure when given, ``msg_type`` otherwise.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            versions: ``ProtocolVersion`` values for a ``ClientHello``, if
+                ``data`` is not given.
+            selected_version: ``ProtocolVersion`` selected by a
+                ``ServerHello`` or ``HelloRetryRequest``, if ``data`` is not
+                given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        Raises:
+            ProtocolError: If neither ``data`` nor ``msg_type`` names a
+                structure, or ``selected_version`` is missing.
+
+        """
+        if data is None:
+            if msg_type == Enum_HandshakeType.client_hello:
+                data = Data_SupportedVersionsClientHello(versions=tuple(versions))
+            elif selected_version is not None and msg_type in (Enum_HandshakeType.server_hello,
+                                                               Enum_HandshakeType.hello_retry_request):
+                data = Data_SupportedVersionsServerHello(selected_version=selected_version)
+        if isinstance(data, Data_SupportedVersionsClientHello):
+            return self._make_vector(self._make_uints(data.versions, size=2), size=1)
+        if isinstance(data, Data_SupportedVersionsServerHello):
+            return int(data.selected_version).to_bytes(2, 'big')
+        raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no supported_versions structure '
+                            f'for {msg_type!r}')
+
+    def _make_ext_key_share(self, ext_type: 'Enum_ExtensionType',  # pylint: disable=unused-argument
+                            data: 'Optional[Data_KeyShareClientHello | Data_KeyShareHelloRetryRequest | Data_KeyShareServerHello]' = None, *,  # pylint: disable=line-too-long
+                            msg_type: 'Enum_HandshakeType', client_shares: 'Iterable[Data_KeyShareEntry]' = (),
+                            selected_group: 'Optional[int]' = None,
+                            server_share: 'Optional[Data_KeyShareEntry]' = None, **kwargs: 'Any') -> 'bytes':
+        """Make a ``key_share`` extension.
+
+        ``data`` decides the structure when given, ``msg_type`` otherwise.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            client_shares: Key shares for a ``ClientHello``, if ``data`` is
+                not given.
+            selected_group: ``NamedGroup`` for a ``HelloRetryRequest``, if
+                ``data`` is not given.
+            server_share: Key share for a ``ServerHello``, if ``data`` is
+                not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        Raises:
+            ProtocolError: If neither ``data`` nor ``msg_type`` names a
+                structure, or the argument it needs is missing.
+
+        """
+        if data is None:
+            if msg_type == Enum_HandshakeType.client_hello:
+                data = Data_KeyShareClientHello(client_shares=tuple(client_shares))
+            elif msg_type == Enum_HandshakeType.hello_retry_request and selected_group is not None:
+                data = Data_KeyShareHelloRetryRequest(selected_group=selected_group)
+            elif msg_type == Enum_HandshakeType.server_hello and server_share is not None:
+                data = Data_KeyShareServerHello(server_share=server_share)
+        if isinstance(data, Data_KeyShareClientHello):
+            return self._make_vector(b''.join(_make_key_share_entry(self, entry) for entry in data.client_shares),
+                                     size=2)
+        if isinstance(data, Data_KeyShareHelloRetryRequest):
+            return int(data.selected_group).to_bytes(2, 'big')
+        if isinstance(data, Data_KeyShareServerHello):
+            return _make_key_share_entry(self, data.server_share)
+        raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no key_share structure for {msg_type!r}')
 
     def _adopt_dispatched(self, obj: 'Any') -> 'Any':
         """Adopt the parse of a sibling tier this dispatcher delegated to.
@@ -424,9 +1017,10 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 ``fragment``.
 
         Notes:
-            Only an unfragmented ``ClientHello``/``ServerHello`` body is
-            decoded; other bodies stay undecoded (:issue:`2437`). A fragmented
-            DTLS message is decoded once reassembled, by
+            Only an unfragmented ``ClientHello``, ``ServerHello`` or
+            ``EncryptedExtensions`` body is decoded; other bodies stay
+            undecoded (:issue:`2437`). A fragmented DTLS message is decoded
+            once reassembled, by
             :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` (:issue:`2440`).
 
         """
@@ -464,6 +1058,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 body = self._read_tls_client_hello(body_bytes, dtls=dtls)  # type: Any
             elif not is_fragmented and msg_type == Enum_HandshakeType.server_hello:
                 body = self._read_tls_server_hello(body_bytes)
+            elif not is_fragmented and msg_type == Enum_HandshakeType.encrypted_extensions:
+                body = self._read_tls_encrypted_extensions(body_bytes)
             else:
                 body = body_bytes
 
@@ -511,6 +1107,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 body_bytes = self._make_tls_client_hello(body, dtls=dtls)
             elif isinstance(body, Data_ServerHello):
                 body_bytes = self._make_tls_server_hello(body)
+            elif isinstance(body, Data_EncryptedExtensions):
+                body_bytes = self._make_tls_encrypted_extensions(body)
             else:
                 body_bytes = bytes(body)
 
@@ -634,7 +1232,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             pos += 2
             extensions_raw = _take(body, pos, ext_total_len, what='client_hello.extensions', alias=alias)
             pos += ext_total_len
-            extensions = self._read_tls_extensions(extensions_raw)
+            extensions = self._read_tls_extensions(
+                extensions_raw, msg_type=cast('Enum_HandshakeType', Enum_HandshakeType.client_hello))
 
         if pos != len(body):
             raise ProtocolError(f'{alias}: invalid format: client_hello carries excess octets')
@@ -646,7 +1245,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         )
 
     def _read_tls_server_hello(self, body: 'bytes') -> 'Data_ServerHello':
-        """Decode a ``ServerHello`` handshake message body.
+        """Decode a ``ServerHello`` handshake message body, or a
+        ``HelloRetryRequest``'s, whose ``random`` is :data:`_HRR_RANDOM`.
 
         Structure of ``ServerHello`` [:rfc:`9846#section-4.2.3`]:
 
@@ -693,7 +1293,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             pos += 2
             extensions_raw = _take(body, pos, ext_total_len, what='server_hello.extensions', alias=alias)
             pos += ext_total_len
-            extensions = self._read_tls_extensions(extensions_raw)
+            extensions = self._read_tls_extensions(extensions_raw, msg_type=_hello_type(random))
 
         if pos != len(body):
             raise ProtocolError(f'{alias}: invalid format: server_hello carries excess octets')
@@ -703,8 +1303,33 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             compression_method=compression_method, extensions=extensions,
         )
 
-    def _read_tls_extensions(self, data: 'bytes') -> 'tuple[Data_Extension, ...]':
-        """Decode an extension list -- TYPE and LENGTH framing only.
+    def _read_tls_encrypted_extensions(self, body: 'bytes') -> 'Data_EncryptedExtensions':
+        """Decode an ``EncryptedExtensions`` handshake message body.
+
+        Structure of ``EncryptedExtensions`` [:rfc:`9846#section-4.4.1`]:
+
+        .. code-block:: text
+
+           struct {
+               Extension extensions<0..2^16-1>;
+           } EncryptedExtensions;
+
+        Args:
+            body: Message body.
+
+        Returns:
+            Decoded ``EncryptedExtensions``.
+
+        Raises:
+            ProtocolError: If ``body`` is malformed.
+
+        """
+        extensions_raw = self._read_whole_vector(body, size=2, what='encrypted_extensions.extensions')
+        msg_type = cast('Enum_HandshakeType', Enum_HandshakeType.encrypted_extensions)
+        return Data_EncryptedExtensions(extensions=self._read_tls_extensions(extensions_raw, msg_type=msg_type))
+
+    def _read_tls_extensions(self, data: 'bytes', *, msg_type: 'Enum_HandshakeType') -> 'tuple[Data_Extension, ...]':
+        """Decode an extension list.
 
         Structure of one extension [:rfc:`9846#section-4.3`]:
 
@@ -715,11 +1340,19 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                opaque extension_data<0..2^16-1>;
            } Extension;
 
-        An extension's body is kept undecoded (:issue:`2437`).
+        Each ``extension_data`` is read by the parser :attr:`__extension__`
+        registers for its type. The framing delimits it, so one its parser
+        rejects with a :exc:`~pcapkit.utilities.exceptions.ProtocolError` is
+        kept as its raw octets rather than failing the message. The parser runs
+        in a :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block, so
+        that error is quiet: nothing is logged and no exception hook installed.
 
         Args:
             data: The extension list, i.e. one or more concatenated
                 extensions, with no further length prefix of its own.
+            msg_type: Handshake message carrying the list, which the structure
+                of some extensions depends on; ``hello_retry_request`` for a
+                ``ServerHello`` that is a ``HelloRetryRequest``.
 
         Returns:
             The decoded extensions, in order.
@@ -734,12 +1367,25 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         total = len(data)
         while pos < total:
             header = _take(data, pos, 4, what='extension header', alias=self.alias)
-            ext_type = int.from_bytes(header[0:2], 'big')
+            ext_type = Enum_ExtensionType.get(int.from_bytes(header[0:2], 'big'))
             ext_len = int.from_bytes(header[2:4], 'big')
             pos += 4
             ext_data = _take(data, pos, ext_len, what='extension data', alias=self.alias)
             pos += ext_len
-            extensions.append(Data_Extension(type=ext_type, data=ext_data))
+
+            name = self._lookup_registry(self.__extension__, ext_type)
+            if isinstance(name, str):
+                meth = cast('ExtensionParser', getattr(self, f'_read_ext_{name}', self._read_ext_unknown))
+            else:
+                meth = name[0]
+            try:
+                # NOTE: a rejected body is kept raw below, so its ProtocolError is
+                # quiet, whoever raised it, as EnumLookup.get's misses are (#1845).
+                with CaughtByCaller(ProtocolError):
+                    ext_body = meth(ext_type, ext_data, msg_type=msg_type)  # type: Data_ExtensionData | bytes
+            except ProtocolError:
+                ext_body = ext_data
+            extensions.append(Data_Extension(type=ext_type, data=ext_body))
         return tuple(extensions)
 
     def _make_tls_content(self, content_type: 'Enum_ContentType', content: 'Any', *,
@@ -795,7 +1441,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         out += bytes([len(compression_methods)]) + compression_methods
 
         if data.extensions is not None:
-            extensions_raw = self._make_tls_extensions(data.extensions)
+            extensions_raw = self._make_tls_extensions(
+                data.extensions, msg_type=cast('Enum_HandshakeType', Enum_HandshakeType.client_hello))
             out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
         return bytes(out)
 
@@ -818,15 +1465,36 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         out += bytes([int(data.compression_method)])
 
         if data.extensions is not None:
-            extensions_raw = self._make_tls_extensions(data.extensions)
+            extensions_raw = self._make_tls_extensions(data.extensions, msg_type=_hello_type(data.random))
             out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
         return bytes(out)
 
-    def _make_tls_extensions(self, extensions: 'tuple[Data_Extension, ...]') -> 'bytes':
-        """Encode an extension list -- the inverse of :meth:`_read_tls_extensions`.
+    def _make_tls_encrypted_extensions(self, data: 'Data_EncryptedExtensions') -> 'bytes':
+        """Encode an ``EncryptedExtensions`` handshake message body -- the
+        inverse of :meth:`_read_tls_encrypted_extensions`.
 
         Args:
-            extensions: Decoded extensions.
+            data: Decoded ``EncryptedExtensions``.
+
+        Returns:
+            Encoded message body.
+
+        """
+        msg_type = cast('Enum_HandshakeType', Enum_HandshakeType.encrypted_extensions)
+        return self._make_vector(self._make_tls_extensions(data.extensions, msg_type=msg_type), size=2)
+
+    def _make_tls_extensions(self, extensions: 'Iterable[Data_Extension | tuple[Enum_ExtensionType | int, dict[str, Any]]]',  # pylint: disable=line-too-long
+                             *, msg_type: 'Enum_HandshakeType') -> 'bytes':
+        """Encode an extension list -- the inverse of :meth:`_read_tls_extensions`.
+
+        Raw ``extension_data`` octets are written as they are; anything else
+        goes to the constructor :attr:`__extension__` registers for the type.
+
+        Args:
+            extensions: Decoded extensions, or ``(type, kwargs)`` pairs for the
+                registered constructor to build from.
+            msg_type: Handshake message carrying the list, as for
+                :meth:`_read_tls_extensions`.
 
         Returns:
             Encoded extension list, with no further length prefix of its own.
@@ -834,7 +1502,22 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         """
         out = bytearray()
         for extension in extensions:
-            out += int(extension.type).to_bytes(2, 'big')
-            out += len(extension.data).to_bytes(2, 'big')
-            out += extension.data
+            if isinstance(extension, tuple):
+                code, kwargs = extension
+                ext_type = Enum_ExtensionType.get(code)
+                data = None  # type: Optional[Data_ExtensionData | bytes]
+            else:
+                ext_type, data, kwargs = extension.type, extension.data, {}
+
+            if isinstance(data, bytes):
+                ext_data = data
+            else:
+                name = self._lookup_registry(self.__extension__, ext_type)
+                if isinstance(name, str):
+                    meth = cast('ExtensionConstructor', getattr(self, f'_make_ext_{name}', self._make_ext_unknown))
+                else:
+                    meth = name[1]
+                ext_data = meth(ext_type, data, msg_type=msg_type, **kwargs)
+
+            out += int(ext_type).to_bytes(2, 'big') + self._make_vector(ext_data, size=2)
         return bytes(out)

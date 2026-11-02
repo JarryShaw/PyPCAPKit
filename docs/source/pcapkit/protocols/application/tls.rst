@@ -9,7 +9,7 @@ extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
 TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
 1.3 (:rfc:`9846`, which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`,
 :rfc:`7627`, :rfc:`8422` and :rfc:`8446`) -- at the record layer, plus
-handshake message TYPE-level framing.
+handshake message framing and the bodies `Decoded Fields`_ lists.
 
 Version Identification
 ----------------------
@@ -75,7 +75,10 @@ Decoded Fields
   decides which are):
 
   * ``ClientHello``/``ServerHello`` down to their cipher suites, compression
-    methods and extensions (type and length only).
+    methods and extensions, and ``EncryptedExtensions`` down to its
+    extensions; an extension's body decodes where
+    :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.SSL.__extension__>`
+    registers a decoder for its type.
   * Every other handshake message at type and length only.
   * ``Alert`` and ``ChangeCipherSpec`` in full.
 
@@ -150,8 +153,9 @@ Data Model
    :members:
    :show-inheritance:
 
-See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``Handshake``, ``Extension``,
-``Alert`` and ``ChangeCipherSpec``, shared verbatim with
+See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
+``Handshake``, ``Extension`` and its decoded bodies, ``Alert`` and
+``ChangeCipherSpec``, shared verbatim with
 :class:`~pcapkit.protocols.application.dtls.DTLS`.
 
 .. rubric:: Footnotes

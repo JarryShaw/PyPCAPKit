@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
-    from pcapkit.protocols.data.application.tls import ClientHello, ServerHello
+    from pcapkit.protocols.data.application.tls import ClientHello, EncryptedExtensions, ServerHello
 
 __all__ = [
     'DTLS',
@@ -32,8 +32,9 @@ class DTLSHandshake(Handshake):
     (:rfc:`6347#section-4.2.2`), so that a handshake message that does not fit
     in one datagram can be split across several.
 
-    :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`
-    or :class:`~pcapkit.protocols.data.application.tls.ServerHello` when
+    :attr:`body` decodes to a :class:`~pcapkit.protocols.data.application.tls.ClientHello`,
+    :class:`~pcapkit.protocols.data.application.tls.ServerHello` or
+    :class:`~pcapkit.protocols.data.application.tls.EncryptedExtensions` when
     :attr:`is_fragmented` is :data:`False`. A fragmented message's :attr:`body`
     is the fragment's raw octets;
     :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes the
@@ -47,7 +48,7 @@ class DTLSHandshake(Handshake):
     #: Total message length (24-bit), fragment headers and bodies excluded.
     length: 'int'
     #: Message body -- see the class docstring for when this decodes.
-    body: 'Union[ClientHello, ServerHello, bytes]'
+    body: 'Union[ClientHello, ServerHello, EncryptedExtensions, bytes]'
     #: Message sequence number.
     message_seq: 'int'
     #: Fragment offset (24-bit) into the reassembled message.
@@ -59,7 +60,7 @@ class DTLSHandshake(Handshake):
     is_fragmented: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, msg_type: 'Enum_HandshakeType', length: 'int', body: 'Union[ClientHello, ServerHello, bytes]', message_seq: 'int', fragment_offset: 'int', fragment_length: 'int', is_fragmented: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, msg_type: 'Enum_HandshakeType', length: 'int', body: 'Union[ClientHello, ServerHello, EncryptedExtensions, bytes]', message_seq: 'int', fragment_offset: 'int', fragment_length: 'int', is_fragmented: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
