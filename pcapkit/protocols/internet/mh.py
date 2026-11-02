@@ -3044,6 +3044,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed MH options data.
 
+        Raises:
+            ProtocolError: If an option read by a ``_read_opt_*`` method has fields
+                that do not take exactly the octets its ``Option Length`` declares
+                [:rfc:`6275#section-6.2.1`]. A parser registered as a callable
+                reports its own length, and is not checked.
+
+        .. versionchanged:: 1.6.0
+
+           Such an option is refused, rather than read from octets outside it and
+           rebuilt with the length its fields give (:issue:`2684`).
+
         """
         options = OrderedMultiDict()  # type: Option
 
@@ -3058,6 +3069,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 meth = name[0]
             data = meth(schema, options=options)
+
+            # NOTE: Fields are read at their own widths, so a length they do not fill
+            # exactly reads octets not the option's, and rebuilds as another (#2684).
+            if isinstance(name, str) and len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
 
             # record option data
             options.add(type, data)
@@ -4962,6 +4978,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed sub-option data.
 
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``Sub-Opt Length`` declares [:rfc:`6089#section-4.2.1`], or a
+                target care-of address is neither IPv4 nor IPv6
+                [:rfc:`7109#section-6.2.2`], as the binding identifier option's
+                is refused.
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options`, rather than read from octets outside it or
+           left unable to rebuild (:issue:`2684`).
+
         """
         suboptions = OrderedMultiDict()  # type: FlowIDSuboption
 
@@ -5002,6 +5031,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 )
             elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
                 target = cast('Schema_TargetCareofAddressSuboption', schema)
+                if target.length not in (6, 18):
+                    raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {target.length}')
                 data = Data_TargetCareofAddressSuboption(
                     type=code,
                     length=self._mh_option_length(target.length),
@@ -5016,6 +5047,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     data=unknown.data,
                 )
 
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {schema.length}')
             suboptions.add(code, data)
 
         return suboptions
@@ -5354,6 +5387,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed sub-option data.
 
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``ANI Length`` declares [:rfc:`6757#section-3.1`].
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
         """
         suboptions = OrderedMultiDict()  # type: ANISuboption
 
@@ -5421,6 +5463,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     data=unknown.data,
                 )
 
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [ANI SubOpt {code}] invalid sub-option length: {schema.length}')
             suboptions.add(code, data)
 
         return suboptions
@@ -5749,6 +5793,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed attribute data.
 
+        Raises:
+            ProtocolError: If an attribute's fields do not take exactly the octets
+                its ``Length`` declares [:rfc:`7222#section-4.2`].
+
+        .. versionchanged:: 1.6.0
+
+           Such an attribute is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
         """
         attributes = OrderedMultiDict()  # type: QoSAttribute
 
@@ -5816,6 +5869,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     data=unknown.data,
                 )
 
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [QoS Attr {code}] invalid attribute length: {schema.length}')
             attributes.add(code, data)
 
         return attributes
@@ -5840,8 +5895,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             The traffic class octet is a 6-bit differentiated services code point
-            with two reserved bits below it, so only the code point is carried into
-            the data model.
+            with two reserved bits below it, which the receiver ignores
+            [:rfc:`7222#section-4.1`]; both are carried into the data model, so
+            that the octet rebuilds as captured.
 
         Args:
             schema: Parsed option schema.
@@ -5849,6 +5905,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Constructed option data.
+
+        .. versionchanged:: 1.6.0
+
+           The two reserved bits of the traffic class are kept, as
+           ``tc_reserved``, rather than dropped (:issue:`2684`).
 
         """
         if schema.length < 6:
@@ -5859,6 +5920,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             sr_id=schema.sr_id,
             dscp=schema.tc >> 2,
+            tc_reserved=schema.tc & 0b11,
             oc=schema.oc,
             reserved=schema.reserved,
             attributes=self._read_qos_attributes(schema.attributes),
@@ -6034,6 +6096,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed sub-option data.
 
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``LCMP Length`` declares [:rfc:`8127#section-3.1`].
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
         """
         suboptions = OrderedMultiDict()  # type: LMAControlledMAGSuboption
 
@@ -6068,6 +6139,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     data=unknown.data,
                 )
 
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [LCMP SubOpt {code}] invalid sub-option length: {schema.length}')
             suboptions.add(code, data)
 
         return suboptions
@@ -6535,6 +6608,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Parsed CGA extensions data.
 
+        Raises:
+            ProtocolError: If an extension read by a ``_read_ext_*`` method has
+                fields that do not take exactly the octets its ``Extension Data
+                Length`` declares [:rfc:`4581#section-2`]; a parser registered as
+                a callable is not checked.
+
+        .. versionchanged:: 1.6.0
+
+           Such an extension is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
         """
         extensions = OrderedMultiDict()  # type: Extension
 
@@ -6549,6 +6633,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 meth = name[0]
             data = meth(schema, extensions=extensions)
+            if isinstance(name, str) and len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [CGA Ext {type}] invalid extension length: {schema.length}')
 
             # record extension data
             extensions.add(type, data)
@@ -8291,6 +8377,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 Also if ``subtype`` does not fit in one octet, or the option is too long
                 for its one-octet ``Option Length``.
 
+        .. versionchanged:: 1.6.0
+
+           An ``NAI`` identifier's length counts the octets it packs as, rather
+           than its characters (:issue:`2684`).
+
         """
         if option is not None:
             subtype_val = option.subtype
@@ -8417,7 +8508,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI '
                     f'identifier must be str, not {identifier!r}')
-            id_len = len(identifier)
+            # NOTE: The field packs UTF-8 octets, or a DecodedString's ``raw``
+            # ones, so the length counts those rather than characters (#2684).
+            id_len = len(getattr(identifier, 'raw', None) or identifier.encode())
         else:
             # NOTE: every other subtype's field is a
             # BytesField(length=pkt['length'] - 1) (see mn_id_selector),
@@ -8952,11 +9045,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If the option is too long for its one-octet
                 ``Option Length``.
 
+        .. versionchanged:: 1.6.0
+
+           The length counts the octets a
+           :class:`~pcapkit.corekit.fields.strings.DecodedString` identifier
+           packs back as, rather than its text re-encoded (:issue:`2684`).
+
         """
         if option is not None:
             identifier = option.identifier
 
-        encoded = identifier.encode()
+        # NOTE: An identifier that is not UTF-8 parses as a DecodedString, whose
+        # ``raw`` octets are what packs back, so the length counts those (#2684).
+        encoded = getattr(identifier, 'raw', None) or identifier.encode()
         if not encoded:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] service identifier must not be empty')
 
@@ -9294,10 +9395,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``reserved`` does not fit
-                its field.
+            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
+                :obj:`bool`, or does not fit its field.
                 Also if ``status`` does not fit in one octet.
+
+        Note:
+            The prefix length is checked against its 6-bit field alone, as
+            :rfc:`5555#section-3.2.1` does not have the receiver discard one longer
+            than the address, so whatever the reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, so that every one the reader keeps rebuilds (:issue:`2684`).
 
         """
         if option is not None:
@@ -9310,8 +9420,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                           reversed=status_reversed, pack=False)
 
         prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
-        if prefix_length > 32:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4AddressAcknowledgementOption(
@@ -9524,9 +9632,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``reserved`` does not fit
-                its field.
+            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
+                :obj:`bool`, or does not fit its field.
+
+        Note:
+            The prefix length is checked against its 6-bit field alone, as
+            :rfc:`5844#section-3.3.1` does not have the receiver discard one longer
+            than the address, so whatever the reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, so that every one the reader keeps rebuilds (:issue:`2684`).
 
         """
         if option is not None:
@@ -9535,8 +9652,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address = option.address
 
         prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
-        if prefix_length > 32:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_IPv4HomeAddressRequestOption(
             type=type,
@@ -9573,10 +9688,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``reserved`` does not fit
-                its field.
+            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
+                :obj:`bool`, or does not fit its field.
                 Also if ``status`` does not fit in one octet.
+
+        Note:
+            The prefix length is checked against its 6-bit field alone, as
+            :rfc:`5844#section-3.3.2` does not have the receiver discard one longer
+            than the address, so whatever the reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, so that every one the reader keeps rebuilds (:issue:`2684`).
 
         """
         if option is not None:
@@ -9589,8 +9713,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                           reversed=status_reversed, pack=False)
 
         prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
-        if prefix_length > 32:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4HomeAddressReplyOption(
@@ -10625,12 +10747,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             The ``V`` flag is derived from the prefix's own family rather than
             taken as an argument, so that the flag and the emitted width cannot
-            disagree.
+            disagree. The prefix length is checked against its 8-bit field alone,
+            as :rfc:`7148#section-4.1` does not have the receiver discard one
+            longer than the address, so whatever the reader keeps is written back.
 
         Raises:
-            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``reserved`` does not fit
-                its field.
+            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
+                :obj:`bool`, or does not fit its field.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, so that every one the reader keeps rebuilds (:issue:`2684`).
 
         """
         if option is not None:
@@ -10649,8 +10777,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         ipv4 = addr.version == 4
 
         prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
-        if prefix_length > (32 if ipv4 else 128):
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_DelegatedMNPOption(
             type=type,
@@ -10881,6 +11007,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       oc: 'int' = 0,
                       attributes: 'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]]' = None,
                       reserved: 'bytes' = b'\x00\x00\x00',
+                      tc_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_QualityOfServiceOption':
         """Make MH quality-of-service option.
 
@@ -10893,26 +11020,35 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             attributes: Quality-of-service attributes.
             reserved: The three reserved octets as captured, truncated or zero-
                 filled to 3 octets.
+            tc_reserved: The 2 reserved bits of the traffic class, after ``dscp``.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``sr_id``, ``dscp`` or ``oc`` does not fit its field.
+            ProtocolError: If ``sr_id``, ``dscp``, ``tc_reserved`` or ``oc`` does
+                not fit its field.
                 Also if the option is too long for its one-octet ``Option Length``.
+
+        .. versionchanged:: 1.6.0
+
+           Takes ``tc_reserved``, which a data model passed as ``option`` carries
+           as well (:issue:`2684`).
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00\x00')
             sr_id = option.sr_id
             dscp = option.dscp
+            tc_reserved = getattr(option, 'tc_reserved', 0)
             oc = option.oc
             attributes = option.attributes
         else:
             attributes = attributes or []
 
         dscp = self._make_uint(dscp, bits=6, name='DSCP')
+        tc_reserved = self._make_uint(tc_reserved, bits=2, name='traffic class reserved bits')
 
         entries = self._make_qos_attributes(attributes)
         length = 6 + sum(len(entry) if isinstance(entry, bytes) else len(entry.pack())
@@ -10922,7 +11058,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=self._make_uint(length, bits=8, name='Option Length'),
             sr_id=self._make_uint(sr_id, bits=8, name='service request identifier'),
-            tc=dscp << 2,
+            tc=dscp << 2 | tc_reserved,
             oc=self._make_uint(oc, bits=8, name='operational code'),
             reserved=reserved,
             attributes=entries,
