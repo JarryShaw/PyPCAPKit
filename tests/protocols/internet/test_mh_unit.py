@@ -2935,19 +2935,13 @@ class MHUnitTests(unittest.TestCase):
                 code=True, seq=1).pack(),
             bytes.fromhex('010100010000'))
 
-    def test_mh_dmnp_prefix_length_range_check_survives_the_bool_guard(self) -> None:
-        """The prefix-length range check needs a test that does not depend on #508.
+    def test_mh_dmnp_prefix_length_is_checked_against_its_field(self) -> None:
+        """The prefix length is held to its 8-bit field, whatever the family.
 
-        Without #508's fix, the only thing reaching this check with an IPv4
-        address is ``prefix=True`` at the default ``prefix_length=64``: the bool
-        is laundered into ``0.0.0.1``, and ``64 > 32`` then raises -- which is
-        exactly why #508's own sweep read this site as already guarded. It was
-        not; the ``ProtocolError`` was about the *prefix length*, not the prefix.
-
-        With the bool refused earlier, that accident does not exercise the range
-        check at all, so this test reaches it with a real address instead.
-        Without this test, the branch would be covered only by the defect #508
-        removes.
+        :rfc:`7148#section-4.1` has no prefix length past the address discarded,
+        and the reader keeps one as captured, so the maker writes it too rather
+        than refusing what parses (#2684). A :obj:`bool` prefix is still refused
+        before it can pick a family (#508).
         """
         from pcapkit.const.mh.option import Option
         from pcapkit.protocols.internet.mh import MH
@@ -2955,26 +2949,25 @@ class MHUnitTests(unittest.TestCase):
 
         proto = object.__new__(MH)
 
-        # an IPv4 prefix caps at /32 and an IPv6 one at /128
-        for prefix, prefix_length in (('198.51.100.0', 33), ('198.51.100.0', 64),
-                                      ('2001:db8:3::', 129)):
-            with self.subTest(prefix=prefix, prefix_length=prefix_length):
-                with self.assertRaises(ProtocolError) as context:
-                    proto._make_opt_dmnp(  # type: ignore[arg-type]
-                        Option.Delegated_Mobile_Network_Prefix,
-                        prefix_length=prefix_length, prefix=prefix)
-                self.assertIsInstance(context.exception, BaseError)
-                self.assertIn(f'invalid prefix length: {prefix_length}',
-                              str(context.exception))
-
-        # and the boundary values either side are accepted
-        for prefix, prefix_length, length in (('198.51.100.0', 32, 6),
-                                              ('2001:db8:3::', 128, 18)):
+        # past the address but inside the field: written, the length by family
+        for prefix, prefix_length, length in (('198.51.100.0', 33, 6), ('198.51.100.0', 255, 6),
+                                              ('2001:db8:3::', 129, 18)):
             with self.subTest(prefix=prefix, prefix_length=prefix_length):
                 schema = proto._make_opt_dmnp(  # type: ignore[arg-type]
                     Option.Delegated_Mobile_Network_Prefix,
                     prefix_length=prefix_length, prefix=prefix)
-                self.assertEqual(schema.length, length)
+                self.assertEqual((schema.length, schema.prefix_length), (length, prefix_length))
+
+        # past the field: refused, naming the prefix length
+        for prefix in ('198.51.100.0', '2001:db8:3::'):
+            with self.subTest(prefix=prefix, prefix_length=256):
+                with self.assertRaisesRegex(ProtocolError, 'invalid prefix length: 256'):
+                    proto._make_opt_dmnp(  # type: ignore[arg-type]
+                        Option.Delegated_Mobile_Network_Prefix, prefix_length=256, prefix=prefix)
+
+        with self.assertRaisesRegex(BaseError, 'invalid mobile network prefix'):
+            proto._make_opt_dmnp(  # type: ignore[arg-type]
+                Option.Delegated_Mobile_Network_Prefix, prefix_length=24, prefix=True)
 
     def test_mh_bid_rejects_an_out_of_range_binding_priority(self) -> None:
         """``BID-PRI`` is a 7-bit field, so ``0x80`` cannot be packed.

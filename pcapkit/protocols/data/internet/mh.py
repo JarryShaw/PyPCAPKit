@@ -2168,13 +2168,22 @@ class QoSVendorSpecificAttribute(QoSAttribute):
 
 @info_final
 class QualityOfServiceOption(Option):
-    """Data model for MH Quality-of-Service option."""
+    """Data model for MH Quality-of-Service option.
+
+    .. versionchanged:: 1.6.0
+
+       New required field ``tc_reserved`` (:issue:`2684`).
+
+    """
 
     #: Service request identifier.
     sr_id: 'int'
     #: Differentiated services code point, the significant 6 bits of the traffic
     #: class octet.
     dscp: 'int'
+    #: The 2 reserved bits of the traffic class octet, after the code point, as
+    #: captured [:rfc:`7222#section-4.1`].
+    tc_reserved: 'int'
     #: Operational code -- ``0`` response, ``1`` allocate, ``2`` de-allocate,
     #: ``3`` modify, ``4`` query, ``5`` negotiate.
     oc: 'int'
@@ -2185,7 +2194,7 @@ class QualityOfServiceOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', sr_id: 'int', dscp: 'int',
-                     oc: 'int',
+                     tc_reserved: 'int', oc: 'int',
                      reserved: 'bytes', attributes: 'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]') -> 'None': ...
 
 

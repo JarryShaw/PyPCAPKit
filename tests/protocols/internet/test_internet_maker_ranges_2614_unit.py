@@ -440,8 +440,8 @@ class MHMakerTests(_Case):
     }
 
     #: Options by maker suffix: ``{suffix: (option, base arguments, {argument: (maximum, name)})}``.
-    #: A prefix length's maximum is the address width, which the maker checks
-    #: past the field width.
+    #: A prefix length's maximum is the address width where the maker checks it
+    #: past the field width, and the field width where it does not (#2684).
     OPTIONS = {
         'pad': ('PadN', {}, {'length': (0xFF, 'Option Length')}),
         'bra': ('Binding_Refresh_Advice', {}, {'interval': (0xFFFF, 'refresh interval')}),
@@ -461,16 +461,16 @@ class MHMakerTests(_Case):
         'restart': ('Restart_Counter', {}, {'counter': (0xFFFFFFFF, 'restart counter')}),
         'ipv4_hoa': ('IPv4_Home_Address', {}, {'prefix_length': (32, 'prefix length'),
                                                'reserved': (0x1FF, 'reserved bits')}),
-        'ipv4_ack': ('IPv4_Address_Acknowledgement', {}, {'prefix_length': (32, 'prefix length'),
+        'ipv4_ack': ('IPv4_Address_Acknowledgement', {}, {'prefix_length': (0x3F, 'prefix length'),
                                                           'reserved': (0x3, 'reserved bits')}),
         'nat': ('NAT_Detection', {}, {'refresh': (0xFFFFFFFF, 'refresh interval'),
                                       'reserved': (0x7FFF, 'reserved bits')}),
         'gre': ('GRE_Key_Option', {}, {'key': (0xFFFFFFFF, 'GRE key')}),
         'bid': ('Binding_Identifier', {}, {'bid': (0xFFFF, 'binding identifier'),
                                            'bid_pri': (0x7F, 'binding priority')}),
-        'ipv4_hoa_req': ('IPv4_Home_Address_Request', {}, {'prefix_length': (32, 'prefix length'),
+        'ipv4_hoa_req': ('IPv4_Home_Address_Request', {}, {'prefix_length': (0x3F, 'prefix length'),
                                                            'reserved': (0x3FF, 'reserved bits')}),
-        'ipv4_hoa_rep': ('IPv4_Home_Address_Reply', {}, {'prefix_length': (32, 'prefix length'),
+        'ipv4_hoa_rep': ('IPv4_Home_Address_Reply', {}, {'prefix_length': (0x3F, 'prefix length'),
                                                          'reserved': (0x3, 'reserved bits')}),
         'ipv4_dhcp': ('IPv4_DHCP_Support_Mode', {}, {'reserved': (0x7FFF, 'reserved bits')}),
         'transient': ('Transient_Binding', {}, {'lifetime': (0xFF, 'lifetime'),
@@ -491,12 +491,13 @@ class MHMakerTests(_Case):
         'mcast_sel': ('Dynamic_IP_Multicast_Selector', {}, {'protocol': (0xFF, 'protocol'),
                                                             'records': (0xFFFF, 'number of records'),
                                                             'reserved': (0x7F, 'reserved bits')}),
-        'dmnp': ('Delegated_Mobile_Network_Prefix', {}, {'prefix_length': (128, 'prefix length'),
+        'dmnp': ('Delegated_Mobile_Network_Prefix', {}, {'prefix_length': (0xFF, 'prefix length'),
                                                          'reserved': (0x7F, 'reserved bits')}),
         'ams4': ('Active_Multicast_Subscription_IPv4', {}, {'igmp_type': (0xFF, 'IGMP type')}),
         'ams6': ('Active_Multicast_Subscription_IPv6', {}, {'mld_type': (0xFF, 'MLD type')}),
         'qos': ('Quality_of_Service', {}, {'sr_id': (0xFF, 'service request identifier'),
                                            'dscp': (0x3F, 'DSCP'),
+                                           'tc_reserved': (0x3, 'traffic class reserved bits'),
                                            'oc': (0xFF, 'operational code')}),
         'mcast': ('Multicast_Mobility_Option', {}, {'code': (0xFF, 'code')}),
         'mcast_ack': ('Multicast_Acknowledgement_Option', {}, {'code': (0xFF, 'code'),

@@ -62,6 +62,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.datetime import fromtimestamp
+from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -137,13 +138,24 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
-    from typing_extensions import TypedDict
+    from typing_extensions import NotRequired, TypedDict
 
     class ANSIKeyLengthTest(TypedDict):
         """Length test for ASN.1 encoded data, see
-        :attr:`CGAParameter.public_key_test`."""
+        :attr:`CGAParameter.public_key_test`.
 
+        .. versionchanged:: 1.6.0
+
+           New key ``long`` (:issue:`2684`).
+
+        """
+
+        #: First length octet: the length itself, or ``0x80`` plus the number of
+        #: length octets that follow.
         len: int
+        #: The two octets after it, which hold a long-form length; absent from a
+        #: test the maker sets.
+        long: 'NotRequired[int]'
 
     class MultiPrefixExtensionFlags(TypedDict):
         """Flags for :attr:`MultiPrefixExtension.flags`."""
@@ -592,6 +604,50 @@ def fb_code_selector(pkt: 'dict[str, Any]') -> 'Field':
     return EnumField(length=1, namespace=Enum_FlowBindingIndicationTrigger)
 
 
+def cga_public_key_length(pkt: 'dict[str, Any]') -> 'int':
+    """Return the length of :attr:`CGAParameter.public_key`.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        The octets of the key's ASN.1 type, length and value. The key is a DER
+        ``SubjectPublicKeyInfo`` [:rfc:`3972#section-3`], whose length octet is
+        either the length or, from ``0x80``, the count of length octets after it
+        [ITU-T X.690 section 8.1.3]; a key of more than 127 octets takes the
+        latter.
+
+    Raises:
+        ProtocolError: If the key runs past the CGA Parameters option it is read
+            from, or its length is indefinite or wider than an option can hold.
+            :rfc:`4866#section-5.1` lets the parameters span several options,
+            which are not joined here, so such a key is refused rather than read
+            from the octets after the option (:issue:`2684`).
+
+    Note:
+        The check is skipped when ``__length__`` is absent or negative, which is
+        what :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+        leaves it as. A key test set by
+        :meth:`MH._make_opt_cga_param <pcapkit.protocols.internet.mh.MH._make_opt_cga_param>`
+        carries no ``long``, and its ``len`` is the key's length less two.
+
+    """
+    test = pkt['public_key_test']
+    size = test['len']
+    if 'long' not in test or size < 0x80:
+        length = size + 2
+    elif size in (0x81, 0x82):
+        length = 2 + (size & 0x7F) + (test['long'] >> 8 if size == 0x81 else test['long'])
+    else:
+        raise ProtocolError(f'MH: [OptNo {Enum_Option.CGA_Parameters}] invalid CGA public key '
+                            f'length octet: {size:#04x}')
+    remaining = pkt.get('__length__')
+    if isinstance(remaining, int) and 0 <= remaining < length:
+        raise ProtocolError(f'MH: [OptNo {Enum_Option.CGA_Parameters}] CGA public key of '
+                            f'{length} octet(s) runs past the option, with {remaining} left')
+    return length
+
+
 @schema_final
 class MH(Schema):
     """Header schema for MH packets.
@@ -938,7 +994,15 @@ class ExperimentalExtension(CGAExtension, code=[Enum_CGAExtension.Exp_FFFD,
 
 @schema_final
 class CGAParameter(Schema):
-    """Header schema for CGA Parameters."""
+    """Header schema for CGA Parameters.
+
+    .. versionchanged:: 1.6.0
+
+       The public key takes the long form of a DER length, and parameters whose
+       fixed fields or public key run past the CGA Parameters option are refused,
+       rather than read from the octets after it (:issue:`2684`).
+
+    """
 
     #: Modifier.
     modifier: 'Enum_CGAType' = EnumField(length=16, namespace=Enum_CGAType)
@@ -947,11 +1011,12 @@ class CGAParameter(Schema):
     #: Collision count.
     collision_count: 'int' = UInt8Field()
     #: Public key length test.
-    public_key_test: 'ANSIKeyLengthTest' = ForwardMatchField(BitField(length=2, namespace={
+    public_key_test: 'ANSIKeyLengthTest' = ForwardMatchField(BitField(length=4, namespace={
         'len': (8, 8),
+        'long': (16, 16),
     }))
     #: Public key (ASN.1 encoded).
-    public_key: 'bytes' = BytesField(length=lambda pkt: pkt['public_key_test']['len'] + 2)  # 2 bytes for type & length
+    public_key: 'bytes' = BytesField(length=cga_public_key_length)
     #: Extension fields.
     extensions: 'list[CGAExtension]' = OptionField(
         length=lambda pkt: pkt['length'] - 25 - len(pkt['public_key']),
@@ -960,6 +1025,24 @@ class CGAParameter(Schema):
         registry=CGAExtension.registry,
         eool=None,
     )
+
+    @classmethod
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+        """Refuse parameters whose fixed fields do not fit in what is left.
+
+        Args:
+            packet: Packet data.
+
+        Raises:
+            ProtocolError: If fewer octets are left than the 25 of the modifier,
+                subnet prefix and collision count [:rfc:`3972#section-3`], which
+                :func:`cga_public_key_length` gives its reason for refusing.
+
+        """
+        remaining = packet.get('__length__')
+        if isinstance(remaining, int) and 0 <= remaining < 25:
+            raise ProtocolError(f'MH: [OptNo {Enum_Option.CGA_Parameters}] CGA parameters of '
+                                f'{remaining} octet(s) cannot hold their fixed fields')
 
     if TYPE_CHECKING:
         def __init__(self, modifier: 'Enum_CGAType', prefix: 'int', collision_count: 'int', public_key: 'bytes',
