@@ -286,6 +286,18 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   classmethods the IPX and Loopback wrappers call (:issue:`2511`,
   :pr:`2521`).
 
+* **Added** -- :func:`pcapkit.corekit.fields.strings.pad_length`, the octets of
+  padding that take a length to an ``align``-octet boundary, and a
+  :class:`~pcapkit.corekit.fields.strings.PaddingField` sized by it, given
+  ``align`` and ``after`` -- the boundary, and the field or callable whose
+  length the padding follows -- in place of ``length`` (:issue:`2614`,
+  :pr:`2624`).
+
+* **Added** -- :mod:`pcapkit.utilities.contextvars`, holding the context
+  variables more than one module sets or reads -- ``beholding``,
+  ``frame_depth``, ``in_fragment`` and ``rebuilding`` -- and importing nothing
+  from :mod:`pcapkit` (:issue:`2616`, :pr:`2623`).
+
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
   known extension header whose dedicated parser raises is now the upper layer,
   parsed once as :class:`~pcapkit.protocols.misc.raw.Raw`, and the walk stops
@@ -408,7 +420,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   once per class (:issue:`2562`, :pr:`2611`). Where a registry's primary source
   is paywalled, the const-vendor pairing accepts a pinned secondary revision as
   a crawler's ``DATA`` once its values are cross-checked against independent
-  implementations (:issue:`2575`, :pr:`2607`).
+  implementations (:issue:`2575`, :pr:`2607`). A context variable more than one
+  module uses lives in :mod:`pcapkit.utilities.contextvars`, and one that only
+  its own module uses stays private there (:issue:`2616`, :pr:`2623`). Each
+  ``:issue:`` and ``:pr:`` role in the documentation names a number of its own
+  kind, a ruling given in a pull request's review cited by the issue that pull
+  request closes, and a project test checks each role's kind against a
+  snapshot of the tracker (:issue:`2561`, :pr:`2626`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -434,6 +452,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   open release milestone above it, compared as numbers so ``v1.10`` follows
   ``v1.9``, and a backfill starts above the closed milestone's items
   (:issue:`2548`, :pr:`2591`).
+
+* **Changed** -- a weekly Issue and PR Kinds workflow regenerates, with
+  ``util/issue_pr_kinds.py``, the snapshot of the tracker that the project test
+  of each role's kind reads, and opens or updates a pull request from
+  ``bot/issue-pr-kinds`` when it changes, never pushing ``main``
+  (:issue:`2561`, :pr:`2626`).
 
 * **Changed** -- a pull request no longer adds its own changelog bullet: an
   unreleased version's entries are written centrally by the maintainer, and
