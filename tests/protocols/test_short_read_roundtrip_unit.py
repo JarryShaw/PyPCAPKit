@@ -58,6 +58,13 @@ CASES = (
     ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
     ('radiotap', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
      + bytes.fromhex('aabbccddeeff')),
+    ('radiotap-ieee802_11', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
+     + bytes.fromhex('d4000000' '010203040506' 'aabbccdd')),
+    ('ieee802_11-qos', 'link.ieee802_11:IEEE802_11', {}, bytes.fromhex(
+        '8883' '2c00' '010101010101' '020202020202' '030303030303' '5134' '040404040404' 'b57e'
+        '01000080') + b'body'),
+    ('ieee802_11-rts', 'link.ieee802_11:IEEE802_11', {}, bytes.fromhex(
+        'b4002c01' '010101010101' '020202020202' '11223344')),
     ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
         '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
     ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(

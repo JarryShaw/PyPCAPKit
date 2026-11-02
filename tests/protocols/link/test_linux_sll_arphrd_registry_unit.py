@@ -30,7 +30,8 @@ CASES = {
     'FRAD': (bytes.fromhex('0c21') + b'\x03\xcc' + IPV4, 'FRAD:IPv4:UDP'),
     'IPGRE': (bytes.fromhex('00000800') + IPV4, 'GRE:IPv4:UDP'),
     'IP6GRE': (bytes.fromhex('00000800') + IPV4, 'GRE:IPv4:UDP'),
-    'IEEE80211_RADIOTAP': (bytes.fromhex('00' '00' '0800' '00000000') + b'\xaa' * 10, 'Radiotap:Raw'),
+    'IEEE80211_RADIOTAP': (bytes.fromhex('00' '00' '0800' '00000000' 'd4000000' 'aaaaaaaaaaaa' '11223344'),
+                           'Radiotap:802.11:Raw'),
     'NETLINK': (struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd', 'Netlink:Raw'),
 }
 

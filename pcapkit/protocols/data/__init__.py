@@ -68,6 +68,10 @@ __all__ = [
     # Generic Routing Encapsulation
     'GRE',
 
+    # IEEE 802.11 MAC Header
+    'IEEE802_11', 'IEEE802_11_FrameControl', 'IEEE802_11_SequenceControl',
+    'IEEE802_11_QoSControl', 'IEEE802_11_HTControl',
+
     # Layer Two Tunnelling Protocol
     'L2TP', 'L2TP_Flags',
 

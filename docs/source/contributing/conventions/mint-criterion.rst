@@ -67,11 +67,15 @@ Measured against the tree, by class:
   ``cls._value2member_map_.setdefault(value, pseudo_member)``.
 * **Raise for any unknown value**: :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
-  :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` and
-  :class:`~pcapkit.const.hip.transport.Transport`.
-  :class:`~pcapkit.const.hip.transport.Transport` raises from its own range check: its
-  declared range ``0..3`` is exactly its member set, so no unassigned value is left for
-  ``super()._missing_`` (the line after the check is unreachable).
+  :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`,
+  :class:`~pcapkit.const.hip.transport.Transport`,
+  :class:`~pcapkit.const.ieee802_11.type.Type` and
+  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype`.
+  :class:`~pcapkit.const.hip.transport.Transport`,
+  :class:`~pcapkit.const.ieee802_11.type.Type` and
+  :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype` raise from their
+  own range checks: each declared range is exactly its member set, so no unassigned value
+  is left for ``super()._missing_`` (the line after the check is unreachable).
 
 Note that these are |aenum|_ classes: ``issubclass(Flags, enum.IntFlag)`` is ``False``
 against the standard library and ``True`` against ``aenum.IntFlag``, so a probe against
@@ -209,8 +213,11 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
 
    The walk reads each file's own ``_missing_``, so it reports
    :class:`~pcapkit.const.reg.apptype.apptype.AppType` as an unmint although it raises,
-   prints nothing for the flag registries and
-   :class:`~pcapkit.const.hip.transport.Transport` (they call neither function) nor for
+   prints nothing for the flag registries,
+   :class:`~pcapkit.const.hip.transport.Transport`,
+   :class:`~pcapkit.const.ieee802_11.type.Type` and
+   :class:`~pcapkit.const.ieee802_11.management_subtype.ManagementSubtype` (they call
+   neither function) nor for
    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` and
    :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (they define no
    ``_missing_``), and does not see the transport subclasses, which inherit theirs.

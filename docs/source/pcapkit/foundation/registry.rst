@@ -91,6 +91,8 @@ Link Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_netlink
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_radiotap
+
 Internet Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

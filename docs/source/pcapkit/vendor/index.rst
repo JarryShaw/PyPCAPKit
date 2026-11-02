@@ -44,6 +44,7 @@ Link Layer
    :maxdepth: 2
 
    arp
+   ieee802_11
    l2tp
    linux
    vlan

@@ -44,8 +44,6 @@ __tier__ = 'LATEST'
 #: ``map path -> why it has no wrapper``. Each reason names where the gap is
 #: owned, so that closing it deletes the entry here.
 EXCUSED = {
-    'pcapkit.protocols.link.radiotap.Radiotap.__proto__':
-        'nothing dispatches by it yet; wrapper and classmethod owned by #2575',
     'pcapkit.protocols.protocol.ProtocolBase.__proto__':
         'the empty default a class without a map of its own inherits; nothing dispatches by it',
 }

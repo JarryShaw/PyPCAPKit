@@ -40,6 +40,12 @@ module docstring and comments, alongside the ``DATA`` literal it documents; the
 generated ``const`` module carries only the plain, templated docstring every
 other generated module does.
 
+Where the primary source is paywalled, a pinned secondary revision is an acceptable
+``DATA`` source once its values are cross-checked against independent implementations,
+ruled in review of :pr:`2607` (:issue:`2575`). :mod:`pcapkit.vendor.ipx` is the earlier
+example, and the :mod:`pcapkit.vendor.ieee802_11` crawlers check theirs against the
+Linux kernel's header and Wireshark.
+
 ``LINK``-and-Scrape Pairing: TLS Content Types and HandshakeType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

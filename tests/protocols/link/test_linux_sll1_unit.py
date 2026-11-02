@@ -102,13 +102,13 @@ class TestLinuxSLL1(unittest.TestCase):
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
 
-        radiotap = bytes.fromhex('00' '00' '0800' '00000000') + b'\xaa' * 10
+        radiotap = bytes.fromhex('00' '00' '0800' '00000000' 'd4000000' 'aaaaaaaaaaaa' '11223344')
         raw = _header(2, ARPHRD.IEEE80211_RADIOTAP, b'', 0, 0x0800) + radiotap
         parsed = LinuxSLL1(raw, len(raw))
         self.assertEqual(parsed.info.arphrd_type, ARPHRD.IEEE80211_RADIOTAP)
         self.assertEqual(type(parsed.payload).__name__, 'Radiotap')
         self.assertEqual(parsed.payload.info.it_len, 8)
-        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Radiotap:Raw')
+        self.assertEqual(parsed.protochain.chain, 'LINUX_SLL1:Radiotap:802.11:Raw')
         self.assertEqual(parsed.data, raw)
         self._assert_rebuilds(parsed)
 

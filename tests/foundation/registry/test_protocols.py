@@ -479,6 +479,7 @@ class ProtocolRegistryTests(unittest.TestCase):
             (registry.register_arphrd, ARPHRD.FRAD, [(registry.LinuxSLL, 'register')]),
             (registry.register_frad, 0xCC, [(registry.FRAD, 'register')]),
             (registry.register_netlink, 16, [(registry.Netlink, 'register')]),
+            (registry.register_radiotap, LinkType.IEEE802_11, [(registry.Radiotap, 'register')]),
             (registry.register_transtype, TransType.TCP, [(registry.Internet, 'register')]),
             (registry.register_ipx, IPXPacket.NCP, [(registry.IPX, 'register')]),
         ]

@@ -471,6 +471,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.link.radiotap import Radiotap
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.protocols.transport.sctp import SCTP
@@ -479,7 +480,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import RegistryError
 
         tables = {klass.__name__: klass.__proto__
-                  for klass in (Link, Internet, IPX, Frame, PCAPNG, TCP, UDP, SCTP)}
+                  for klass in (Link, Radiotap, Internet, IPX, Frame, PCAPNG, TCP, UDP, SCTP)}
         tables['pcapkit.protocols'] = protocol_registry
         before = {name: dict(table) for name, table in tables.items()}
         try:
@@ -599,6 +600,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.radiotap import Radiotap
         from pcapkit.protocols.misc.pcap.frame import Frame
         from pcapkit.protocols.misc.pcapng import PCAPNG
         from pcapkit.protocols.misc.raw import Raw
@@ -614,6 +616,9 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
             # 770 is ARPHRD.FRAD, where LinuxSLL ships FRAD; the EtherType is the
             # key of Link's registry, which LinuxSLL's own refuses (#2510).
             LinuxSLL: (ARPHRD, False, EtherType.Internet_Protocol_version_4, 770),
+            # 105 is LinkType.IEEE802_11, where Radiotap ships IEEE802_11, and
+            # TransType(105) compares equal to it (#2575).
+            Radiotap: (LinkType, False, TransType(105), 105),
             # 6 is TransType.TCP, where Internet ships TCP.
             Internet: (TransType, False, EtherType.XEROX_NS_IDP, 6),
             # TransType.UDP is 17, Packet.NCP: IPX's registry of its own exists so

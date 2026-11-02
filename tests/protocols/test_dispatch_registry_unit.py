@@ -231,14 +231,14 @@ class DispatchRegistryTests(unittest.TestCase):
         # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
         # pcap and pcapng frame tables, #2439's IGMP, #2436's
         # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], #2489's
-        # Internet.__proto__[TransType.DCCP], and #2560's two NLPIDs of
-        # FRAD.__proto__.
-        self.assertEqual(len(cases), 59,
-                         'expected exactly 59 entries across the seven __proto__ '
+        # Internet.__proto__[TransType.DCCP], #2560's two NLPIDs of
+        # FRAD.__proto__, and #2575's Radiotap.__proto__[LinkType.IEEE802_11].
+        self.assertEqual(len(cases), 60,
+                         'expected exactly 60 entries across the seven __proto__ '
                          'tables named in GitHub issue #496, the loopback table '
-                         'of #1574 and the FRAD table of #2560; a different count '
-                         'means a registry changed shape and this module was not '
-                         'updated to match')
+                         'of #1574, the FRAD table of #2560 and the radiotap table '
+                         'of #2575; a different count means a registry changed '
+                         'shape and this module was not updated to match')
 
         by_family = {}  # type: dict[str, int]
         for case in cases:
@@ -246,6 +246,7 @@ class DispatchRegistryTests(unittest.TestCase):
         self.assertEqual(by_family, {
             'link': 7, 'internet': 21, 'tcp': 5, 'udp': 4, 'sctp': 2,
             'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4, 'frad': 2,
+            'radiotap': 1,
         })
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:
