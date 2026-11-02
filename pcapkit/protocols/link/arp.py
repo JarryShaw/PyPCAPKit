@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-"""ARP/InARP - (Inverse) Address Resolution Protocol
-=======================================================
+"""ARP - Address Resolution Protocol
+=======================================
 
 .. module:: pcapkit.protocols.link.arp
 
 :mod:`pcapkit.protocols.link.arp` contains
-:class:`~pcapkit.protocols.link.arp.ARP` and
-:class:`~pcapkit.protocols.link.arp.InARP`,
-which implement extractors for (Inverse) Address Resolution
-Protocol (ARP/InARP) [*]_, whose structure is described as
+:class:`~pcapkit.protocols.link.arp.ARP` only,
+which implements an extractor for Address Resolution
+Protocol (ARP) [*]_, whose structure is described as
 below:
 
 .. table::
@@ -36,6 +35,12 @@ below:
    ====== ==== ============= =======================
 
 .. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.link.arp.InARP``, with no alias. The class moved to
+   :mod:`pcapkit.protocols.link.inarp`, since a module holds one protocol
+   class, named after it (:issue:`2529`).
 
 """
 import ipaddress
@@ -65,7 +70,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['ARP', 'InARP']
+__all__ = ['ARP']
 
 # Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}(?:[:-][0-9a-f]{2})*)?')
@@ -78,7 +83,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
     - Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.application.rarp.RARP`) [:rfc:`903`]
     - Dynamic Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.application.drarp.DRARP`) [:rfc:`1931`]
-    - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.InARP`) [:rfc:`2390`]
+    - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.inarp.InARP`) [:rfc:`2390`]
 
     .. versionchanged:: 1.5.0
 
@@ -516,23 +521,3 @@ class ARP(Link[Data_ARP, Schema_ARP],
         if isinstance(addr, (bytes, bytearray)):
             return bytes(addr)
         raise ProtocolError(f'{self.__class__.__name__}: invalid protocol address: {addr!r}')
-
-
-class InARP(ARP, schema=Schema_ARP, data=Data_ARP):
-    """This class implements Inverse Address Resolution Protocol.
-
-    .. versionchanged:: 1.5.0
-
-       Parses with the ARP schema rather than falling back to the raw one
-       (:issue:`1204`).
-
-    """
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    @classmethod
-    def id(cls) -> 'tuple[Literal["InARP"]]':  # type: ignore[override]
-        """Index ID of the protocol."""
-        return ('InARP',)

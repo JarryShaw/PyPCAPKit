@@ -62,7 +62,7 @@ carries ``0x0303`` and reads ``TLS 1.2``; and a TLS 1.2 ``ClientHello`` sent
 at record version ``0x0301`` reads ``TLS 1.0``.
 
 :class:`~pcapkit.protocols.application.tls.SSLv3` is for explicit
-construction only, mirroring :class:`~pcapkit.protocols.link.arp.InARP`: it
+construction only, mirroring :class:`~pcapkit.protocols.link.inarp.InARP`: it
 narrows :meth:`~pcapkit.protocols.application.tls.SSLv3.id` to ``('SSLv3',)``
 and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read` unchanged,
 so the alias still follows the wire. Dispatch never constructs one.

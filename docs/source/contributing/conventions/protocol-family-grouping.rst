@@ -107,7 +107,7 @@ Member Shapes
        code and reports ARP, RARP, DRARP or InARP through
        :attr:`~pcapkit.protocols.protocol.Protocol.alias`
 
-Nothing dispatches to :class:`~pcapkit.protocols.link.arp.InARP` ``('InARP',)``:
+Nothing dispatches to :class:`~pcapkit.protocols.link.inarp.InARP` ``('InARP',)``:
 under EtherType ``0x0806``, operation 8 parses as ARP with alias ``InARP``.
 Only :class:`~pcapkit.protocols.application.rarp.RARP` ``('RARP', 'DRARP')`` is bound
 to EtherType ``0x8035``
@@ -241,6 +241,5 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
 :issue:`2529`, where the classes that do not match yet are pending:
-:class:`arp.InARP <pcapkit.protocols.link.arp.InARP>`,
 :class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
 :class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

@@ -3,7 +3,7 @@
 
 GitHub issues:
 
-* #1204: :class:`~pcapkit.protocols.link.arp.InARP` and
+* #1204: :class:`~pcapkit.protocols.link.inarp.InARP` and
   :class:`~pcapkit.protocols.application.drarp.DRARP` did not pass
   ``schema=``/``data=``, so they fell back to the ``Raw`` schema and could not
   parse any input.
@@ -34,7 +34,7 @@ __tier__ = 'ALL'
 #: ``(module, class)`` for every ARP-family class.
 CLASSES = (
     ('pcapkit.protocols.link.arp', 'ARP'),
-    ('pcapkit.protocols.link.arp', 'InARP'),
+    ('pcapkit.protocols.link.inarp', 'InARP'),
     ('pcapkit.protocols.application.rarp', 'RARP'),
     ('pcapkit.protocols.application.drarp', 'DRARP'),
 )
@@ -72,7 +72,7 @@ class TestARPRoundTrip(unittest.TestCase):
 
     def test_subclasses_round_trip(self) -> None:
         """#1204: the issue's repro parses and rebuilds for InARP and DRARP."""
-        for module, name, oper in (('pcapkit.protocols.link.arp', 'InARP', '0008'),
+        for module, name, oper in (('pcapkit.protocols.link.inarp', 'InARP', '0008'),
                                    ('pcapkit.protocols.application.drarp', 'DRARP', '0005')):
             with self.subTest(cls=name):
                 cls = self._cls(module, name)

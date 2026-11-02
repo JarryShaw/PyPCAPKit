@@ -533,7 +533,7 @@ class SSLv3(TLS, schema=Schema_TLS, data=Data_TLS):
     """This class implements Secure Sockets Layer version 3.
 
     Dispatch never constructs it: an SSLv3 record parses as :class:`TLS` with
-    :attr:`~TLS.alias` ``'SSLv3'``. Like :class:`~pcapkit.protocols.link.arp.InARP`
+    :attr:`~TLS.alias` ``'SSLv3'``. Like :class:`~pcapkit.protocols.link.inarp.InARP`
     to :class:`~pcapkit.protocols.link.arp.ARP`, it narrows :meth:`id` only.
 
     """
