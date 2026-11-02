@@ -70,42 +70,44 @@ callers take element zero as canonical.
 Selecting a Version
 -------------------
 
-Nothing *dispatches* on the version nibble, because L2TPv2 is the only version
-implemented -- but
-:meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` does **check**
-it, and refuses anything other than ``2``. That is the half of the mechanism
-which is useful with no other version implemented: it keeps v3 traffic on port
-1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture
+Constructing the base gives the member its ``version`` field names, from octets
+or from fields; without it, octets give the one their version nibble names, and
+fields are refused, since no field picks a member (:issue:`2574`).
+:meth:`L2TP._member_of_version <pcapkit.protocols.link.l2tp.L2TP._member_of_version>`
+maps ``2`` to :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` and refuses any
+other version, for that field, for the nibble and for the data
+:meth:`L2TP.from_data <pcapkit.protocols.link.l2tp.L2TP.from_data>` is handed.
+:meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` **checks** the
+nibble as well and refuses anything other than ``2``. That keeps v3 traffic on
+port 1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture
 traffic rather than a corner case) from being reported as v2 with a tunnel and
 session ID read out of v3's Control Connection ID.
 
-When another version lands, the remaining half -- delegation rather than refusal
--- already has a precedent in
-:class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and
-delegates to a per-version class. L2TP is the easier case:
+UDP port 1701 binds L2TPv2 itself, the only member.
+:meth:`~pcapkit.protocols.link.l2tp.L2TP._member_of_version` is where a further
+member goes, and binding the port to this base through a hook making the same
+switch, as :meth:`IGMP._dispatch <pcapkit.protocols.internet.igmp.IGMP._dispatch>`
+does for IP protocol 2, needs no new registry. L2TP is the easier case beside
+:class:`~pcapkit.protocols.application.http.HTTP`, whose
 :meth:`~pcapkit.protocols.application.http.HTTP._guess_version` has to *infer*
-the version -- recognising the HTTP/2 preface or an HTTP/1 start line, else
-trial-parsing each candidate -- because HTTP's wire format carries no version
-field, whereas L2TP states its version explicitly in those four bits. So a
-deterministic switch on ``Ver`` is enough, and no new registry is needed -- the
-class bound at UDP 1701 reads two octets, masks out the nibble, and hands the
-datagram to the matching class. Note the switch belongs on
-the **UDP** path only: over IP protocol 115 there is no nibble to switch on, per
-the §4.1.1.1 note above.
+the version because HTTP's wire format carries no version field, whereas L2TP
+states its version explicitly in those four bits. The switch belongs on the
+**UDP** path only: over IP protocol 115 there is no nibble to switch on, per the
+§4.1.1.1 note above.
 
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol
 
 """
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import NoReturn
+    from typing import IO, Any, NoReturn, Optional, Type
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['L2TP']
 
@@ -121,13 +123,25 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
     :attr:`~pcapkit.protocols.protocol.Protocol.name` and
     :meth:`~pcapkit.protocols.protocol.Protocol.read` are both declared
     abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and neither is
-    defined here, so the class cannot be instantiated. Bind a version, never this
-    class.
+    defined here, so no instance of it exists. Bind a version, never this class.
+
+    It dispatches on both paths, never giving an instance of this class
+    (:issue:`2574`). The ``version`` field names the member; without it, octets
+    give the one their version nibble names, and fields are refused.
+    :meth:`from_data` reads the ``version`` of its data. See :meth:`__new__`.
 
     .. versionchanged:: 1.5.0
 
        Became an abstract base for the family; its version-2 parsing moved to
        :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`.
+
+    .. versionchanged:: 1.6.0
+
+       Constructing it and :meth:`from_data` give
+       :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, where they raised
+       :exc:`TypeError`. The ``version`` field names the member; without it,
+       octets give the one their version nibble names, and fields are refused
+       (:issue:`2574`).
 
     """
 
@@ -163,6 +177,28 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
         """
         return ('L2TP', 'L2TPv2')
 
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: As :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance; on this class, an instance of the member the
+            ``version`` of ``data`` names.
+
+        Raises:
+            ProtocolError: If no member reads that ``version``, on this class.
+
+        """
+        if cls is not L2TP:
+            return super().from_data(data, **kwargs)
+        member = cls._member_of_version(data.get('version'))
+        return cast('Self', member.from_data(data, **kwargs))
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -180,3 +216,72 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
+                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'L2TP':
+        """Create the member a construction of this class describes.
+
+        The ``version`` field names the member, on either path. Without it,
+        parsing octets gives the member the version nibble, bits 12 to 15 of
+        their first word, names, and building from fields is refused, since no
+        field picks a member. That member's ``__init__`` then runs with the same
+        arguments. A subclass of this class is created as itself.
+
+        Args:
+            file: Source packet stream, read here without being consumed.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            An uninitialised instance of the member.
+
+        Raises:
+            ProtocolError: If no member reads ``version``; or, without it, if
+                building from fields, or if the octets are shorter than the first
+                word or no member reads their version.
+
+        """
+        if cls is not L2TP:
+            return super().__new__(cls, file, length, **kwargs)
+        version = kwargs.get('version')
+        if version is None:
+            if file is None:
+                raise ProtocolError('L2TP: no version to build with; pass version=2')
+            if isinstance(file, bytes):
+                head = file[:2]
+            else:
+                offset = file.tell()
+                head = file.read(2)
+                file.seek(offset)
+            if len(head) < 2:
+                raise ProtocolError('L2TP: no version in a packet shorter than 2 octets')
+            version = head[1] & 0x0F
+        member = cls._member_of_version(version)
+        return member.__new__(member, file, length, **kwargs)
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @staticmethod
+    def _member_of_version(version: 'Any') -> 'Type[L2TP]':
+        """The member that reads a ``version`` of the version nibble.
+
+        Args:
+            version: Version of L2TP.
+
+        Returns:
+            :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` for ``2``.
+
+        Raises:
+            ProtocolError: For any other ``version``, or one that is no
+                :obj:`int`, as a :obj:`bool` or a :obj:`float` is even where it
+                equals ``2``: ``1`` is L2F and ``3`` is L2TPv3, neither
+                implemented.
+
+        """
+        from pcapkit.protocols.link.l2tpv2 import L2TPv2  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if isinstance(version, int) and not isinstance(version, bool) and version == 2:
+            return cast('Type[L2TP]', L2TPv2)
+        raise ProtocolError(f'L2TP: invalid version: {version!r}')
