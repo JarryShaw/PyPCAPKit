@@ -182,7 +182,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         from :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
         at port 5684 (``coaps``, :rfc:`7252`) only, though IANA registers
         other DTLS-borne services; bind more with
-        :func:`pcapkit.foundation.registry.protocols.register_udp`.
+        :func:`pcapkit.foundation.registry.protocols.transport.register_udp`.
 
     """
 

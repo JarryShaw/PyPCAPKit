@@ -1023,7 +1023,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Note:
             The guard matches :func:`register_protocol
-            <pcapkit.foundation.registry.protocols.register_protocol>`'s: it
+            <pcapkit.foundation.registry.protocols.protocol.register_protocol>`'s: it
             fires only when the incumbent differs from the replacement, so
             handing back the entry already stored under ``code`` -- the same
             class object, or a :class:`~pcapkit.corekit.module.ModuleDescriptor`
@@ -1432,7 +1432,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         nothing or picking an arbitrary registry.
 
         See Also:
-            :func:`pcapkit.foundation.registry.protocols.register_protocol_code`
+            :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
             implements the resolution described above.
 
         """
@@ -2702,7 +2702,7 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
 
         See Also:
             For more information on the registry, please refer to
-            :func:`pcapkit.foundation.registry.protocols.register_protocol`.
+            :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`.
 
         """
         from pcapkit.foundation.registry.protocols import register_protocol

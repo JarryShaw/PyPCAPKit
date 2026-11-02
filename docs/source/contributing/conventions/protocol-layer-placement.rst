@@ -217,7 +217,7 @@ resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. The strict differ
 :class:`~pcapkit.protocols.link.link.Link` declares, as asked for on :pr:`2392` (no
 issue holds the ruling), and neither of the others does, so it does **not** resolve on
 :class:`~pcapkit.protocols.application.ospf.OSPF`. Nothing turns on that:
-:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` reads the pairing
+:func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` reads the pairing
 out of the registry owner's own namespace rather than off the class, and reads its
 absence as *declares no pairing* rather than as an error. What changes is which
 registry it resolves *to*: ``OSPF.__proto__`` is

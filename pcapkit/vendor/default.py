@@ -105,7 +105,7 @@ def render_proto_dest(descriptors: 'tuple[ModuleDescriptor[Any], ...]') -> 'str'
                       for module, name in descriptors)
     return ('    #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by\n'
             '    #: this enumeration, read by\n'
-            '    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`\n'
+            '    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`\n'
             '    #: to resolve a bare member of it into its destination(s). The classes are\n'
             '    #: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`\n'
             '    #: references rather than imported, because :mod:`pcapkit.const` sits below\n'
@@ -322,7 +322,7 @@ class Vendor(metaclass=VendorMeta):
     #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by
     #: the generated enumeration, rendered into its class body as
     #: ``__proto_dest__`` -- the declaration
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
     #: reads to resolve a bare member of that enumeration into its
     #: destination(s). Asked for in review of :pr:`2392`; no issue holds the
     #: ruling.

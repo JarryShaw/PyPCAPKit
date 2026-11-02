@@ -91,12 +91,13 @@ class TestRegistryNameRestore(unittest.TestCase):
     def test_a_new_name_records_the_shared_missing_sentinel(self) -> None:
         """A lease on a new name displaced ``MISSING``, not a module-local ``object()`` (#2555)."""
         from pcapkit.corekit.sentinels import MISSING
-        from pcapkit.foundation.registry import protocols, register_tcp
+        from pcapkit.foundation.registry import register_tcp
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.transport.tcp import TCP
 
         shipped = TCP.__proto__[80]
         self._call(register_tcp, 80, self._custom('Custom'))
-        self.assertIs(protocols._CODE_LEASES[TCP, 80].displaced, MISSING)  # pylint: disable=protected-access
+        self.assertIs(reg_protocol._CODE_LEASES[TCP, 80].displaced, MISSING)  # pylint: disable=protected-access
         self._call(register_tcp, 80, shipped)
         self.assert_names_as_found()
 

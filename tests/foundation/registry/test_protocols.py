@@ -102,11 +102,12 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.application import http
         from pcapkit.protocols.application.application import Application
         from pcapkit.utilities.warnings import RegistryWarning
 
-        self._guard_registry(registry.protocol_registry, 'HTTP')
+        self._guard_registry(reg_protocol.protocol_registry, 'HTTP')
 
         # Defining a Protocol subclass registers it, so this displaces the base.
         with warnings.catch_warnings():
@@ -118,7 +119,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertEqual(len(set(colliding)), 2)
         self.assertEqual({cls.__name__.upper() for cls in colliding}, {'HTTP'})
 
-        registry.protocol_registry['HTTP'] = http.HTTP
+        reg_protocol.protocol_registry['HTTP'] = http.HTTP
 
         # Both directions, so the test is not pinned to one registration order.
         for incumbent, replacement in ((http.HTTP, custom), (custom, http.HTTP)):
@@ -130,7 +131,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                 # The overwrite still happens. The warning reports the
                 # collision, it does not resolve it -- resolving it is #514's
                 # business.
-                self.assertIs(registry.protocol_registry['HTTP'], replacement)
+                self.assertIs(reg_protocol.protocol_registry['HTTP'], replacement)
 
                 messages = self._registry_warnings(caught, RegistryWarning)
                 self.assertEqual(len(messages), 1)
@@ -158,11 +159,12 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.protocol import Protocol
         from pcapkit.utilities.warnings import RegistryWarning
 
-        incumbent = registry.protocol_registry['HTTP']
-        self._guard_registry(registry.protocol_registry, 'HTTP')
+        incumbent = reg_protocol.protocol_registry['HTTP']
+        self._guard_registry(reg_protocol.protocol_registry, 'HTTP')
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -170,8 +172,8 @@ class ProtocolRegistryTests(unittest.TestCase):
             class HTTP(Protocol):
                 """A user protocol that happens to be named like the built-in."""
 
-        self.assertIs(registry.protocol_registry['HTTP'], HTTP)
-        self.assertIsNot(registry.protocol_registry['HTTP'], incumbent)
+        self.assertIs(reg_protocol.protocol_registry['HTTP'], HTTP)
+        self.assertIsNot(reg_protocol.protocol_registry['HTTP'], incumbent)
 
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
@@ -195,12 +197,13 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.protocols.transport.udp import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
 
         for label in ('fresh-key', 'identical-repeat'):
             with self.subTest(case=label):
@@ -208,7 +211,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                     warnings.simplefilter('always')
                     registry.register_protocol(UnitProtocol)
 
-                self.assertIs(registry.protocol_registry['UNITPROTOCOL'], UnitProtocol)
+                self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], UnitProtocol)
                 self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
         # ... and the real call shape, through two wrapper registrars. Each ends
@@ -378,6 +381,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.utilities.warnings import RegistryWarning
 
         first = self._unit_protocol()
@@ -387,8 +391,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIsNot(first, second)
         self.assertEqual(repr(first), repr(second))
 
-        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
-        registry.protocol_registry['UNITPROTOCOL'] = first
+        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
+        reg_protocol.protocol_registry['UNITPROTOCOL'] = first
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -396,7 +400,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # The guard's firing condition: the overwrite happens and is
         # reported exactly once.
-        self.assertIs(registry.protocol_registry['UNITPROTOCOL'], second)
+        self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], second)
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
 
@@ -414,12 +418,13 @@ class ProtocolRegistryTests(unittest.TestCase):
 
     def test_register_protocol_validates_and_updates_registry(self) -> None:
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.utilities.exceptions import RegistryError
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
         registry.register_protocol(UnitProtocol)
-        self.assertIs(registry.protocol_registry['UNITPROTOCOL'], UnitProtocol)
+        self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], UnitProtocol)
 
         with self.assertRaises(RegistryError):
             registry.register_protocol(object)  # type: ignore[arg-type]
@@ -462,33 +467,39 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.foundation.registry.protocols import internet as reg_internet
+        from pcapkit.foundation.registry.protocols import link as reg_link
+        from pcapkit.foundation.registry.protocols import misc as reg_misc
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
         raw_module = ('pcapkit.protocols.misc.raw', 'Raw')
 
         class_routes = [
             (registry.register_linktype, LinkType.ETHERNET,
-             [(registry.Frame, 'register'), (registry.PCAPNG, 'register')]),
-            (registry.register_pcap, LinkType.ETHERNET, [(registry.Frame, 'register')]),
-            (registry.register_pcapng, LinkType.ETHERNET, [(registry.PCAPNG, 'register')]),
+             [(reg_misc.Frame, 'register'), (reg_misc.PCAPNG, 'register')]),
+            (registry.register_pcap, LinkType.ETHERNET, [(reg_misc.Frame, 'register')]),
+            (registry.register_pcapng, LinkType.ETHERNET, [(reg_misc.PCAPNG, 'register')]),
             (registry.register_ethertype, EtherType.Internet_Protocol_version_4,
-             [(registry.Link, 'register')]),
-            (registry.register_loopback, 2, [(registry.Loopback, 'register')]),
-            (registry.register_arphrd, ARPHRD.FRAD, [(registry.LinuxSLL, 'register')]),
-            (registry.register_frad, 0xCC, [(registry.FRAD, 'register')]),
-            (registry.register_netlink, 16, [(registry.Netlink, 'register')]),
-            (registry.register_radiotap, LinkType.IEEE802_11, [(registry.Radiotap, 'register')]),
-            (registry.register_transtype, TransType.TCP, [(registry.Internet, 'register')]),
-            (registry.register_ipx, IPXPacket.NCP, [(registry.IPX, 'register')]),
+             [(reg_link.Link, 'register')]),
+            (registry.register_loopback, 2, [(reg_link.Loopback, 'register')]),
+            (registry.register_arphrd, ARPHRD.FRAD, [(reg_link.LinuxSLL, 'register')]),
+            (registry.register_frad, 0xCC, [(reg_link.FRAD, 'register')]),
+            (registry.register_netlink, 16, [(reg_link.Netlink, 'register')]),
+            (registry.register_radiotap, LinkType.IEEE802_11, [(reg_link.Radiotap, 'register')]),
+            (registry.register_transtype, TransType.TCP, [(reg_internet.Internet, 'register')]),
+            (registry.register_ipx, IPXPacket.NCP, [(reg_internet.IPX, 'register')]),
         ]
         for func, code, targets in class_routes:
             with self.subTest(func=f'{func.__name__}-class'):
                 patches = [mock.patch.object(target, method) for target, method in targets]
                 active = [patch.start() for patch in patches]
                 self.addCleanup(lambda patches=patches: [patch.stop() for patch in patches])
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     func(code, UnitProtocol)
                 for register in active:
                     register.assert_called()
@@ -501,10 +512,10 @@ class ProtocolRegistryTests(unittest.TestCase):
                 patches = [mock.patch.object(target, method) for target, method in targets]
                 active = [patch.start() for patch in patches]
                 self.addCleanup(lambda patches=patches: [patch.stop() for patch in patches])
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     func(code, *raw_module)
                 for register in active:
-                    self.assertIsInstance(register.call_args.args[1], registry.ModuleDescriptor)
+                    self.assertIsInstance(register.call_args.args[1], ModuleDescriptor)
                 self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
                 for patch in patches:
                     patch.stop()
@@ -513,17 +524,17 @@ class ProtocolRegistryTests(unittest.TestCase):
         # own ``proto``, which names exactly the registry it lives in -- so a TCP
         # member reaches TCP alone, since ``proto`` names one transport rather
         # than the whole IANA set (GitHub issue #806).
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol)
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol,
                                               TransportProtocol.udp)
         tcp_register.assert_not_called()
@@ -533,9 +544,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: naming both transport protocols is the explicit way to reach both,
         # one argument each, and it is the only way, since no member's ``proto``
         # carries a composite to fan out from.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol,
                                               TransportProtocol.tcp, TransportProtocol.udp)
         tcp_register.assert_called_once()
@@ -547,9 +558,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         # fit in the same call: the class name third, since ``module``
         # here is a ``str``, and the transport from the fourth position
         # onward.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65000, raw_module[0], raw_module[1],
                                               TransportProtocol.tcp)
         tcp_register.assert_called_once()
@@ -574,9 +585,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: a ``str`` transport is coerced to the member with that name --
         # GitHub pull request #815 ruling -- so a single string reaches the same
         # registry the equivalent member would.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65006, UnitProtocol, 'udp')
         tcp_register.assert_not_called()
         udp_register.assert_called_once()
@@ -584,18 +595,18 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: several ``str`` transports in one variadic call reach both
         # registries, exactly like naming both members would.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65007, UnitProtocol, 'tcp', 'udp')
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
         # NOTE: a ``str`` and a member mix freely in the same call.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65008, UnitProtocol, 'tcp', TransportProtocol.udp)
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
@@ -618,17 +629,17 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: resolution is case-insensitive -- maintainer ruling on #815 --
         # so ``'TCP'`` and ``'Tcp'`` reach the same registry ``'tcp'`` does.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65013, UnitProtocol, 'TCP')
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65014, UnitProtocol, 'Tcp')
         tcp_register.assert_called_once()
         udp_register.assert_not_called()
@@ -636,9 +647,9 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: a mixed-case string mixes freely with a member, exactly as the
         # all-lowercase string does above.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry.UDP, 'register') as udp_register:
-                with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                     registry.register_apptype(65015, UnitProtocol, 'TCP', TransportProtocol.udp)
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
@@ -655,11 +666,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: a ``str`` and its equivalent member reach the registry
         # identically -- same code, same module -- so a caller cannot tell
         # which form was passed from the resulting registry state.
-        with mock.patch.object(registry.TCP, 'register') as tcp_register_str:
-            with mock.patch.object(registry, 'register_protocol'):
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register_str:
+            with mock.patch.object(reg_protocol, 'register_protocol'):
                 registry.register_apptype(65011, UnitProtocol, 'tcp')
-        with mock.patch.object(registry.TCP, 'register') as tcp_register_member:
-            with mock.patch.object(registry, 'register_protocol'):
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register_member:
+            with mock.patch.object(reg_protocol, 'register_protocol'):
                 registry.register_apptype(65011, UnitProtocol, TransportProtocol.tcp)
         self.assertEqual(tcp_register_str.call_args, tcp_register_member.call_args)
 
@@ -673,9 +684,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         # because it is an ``int`` subclass and so takes the same path as ``1``.
         for bad_transport in (1, True, None):
             with self.subTest(transport=bad_transport):
-                with mock.patch.object(registry.TCP, 'register') as tcp_register:
-                    with mock.patch.object(registry.UDP, 'register') as udp_register:
-                        with mock.patch.object(registry, 'register_protocol') as register_protocol:
+                with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+                    with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+                        with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                             with self.assertRaises(RegistryError):
                                 registry.register_apptype(65012, UnitProtocol, bad_transport)
                 tcp_register.assert_not_called()
@@ -690,53 +701,53 @@ class ProtocolRegistryTests(unittest.TestCase):
         # ``call_args`` cannot distinguish "landed in ``transport`` and got
         # registered" from "landed in ``class_`` and was silently dropped" as
         # cleanly as the registry contents can.
-        self._guard_registry(registry.TCP.__proto__, 65200)
-        self._guard_registry(registry.UDP.__proto__, 65200)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, 65200)
+        self._guard_registry(reg_transport.UDP.__proto__, 65200)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(65200, UnitProtocol, TransportProtocol.udp)
-        self.assertNotIn(65200, registry.TCP.__proto__)
-        self.assertIs(registry.UDP.__proto__[65200], UnitProtocol)
+        self.assertNotIn(65200, reg_transport.TCP.__proto__)
+        self.assertIs(reg_transport.UDP.__proto__[65200], UnitProtocol)
 
         # NOTE: two members after a class module preserve call order --
         # prepended, not appended -- so naming ``udp`` then ``tcp`` still
         # reaches ``udp`` first and ``tcp`` second, exactly as naming only
         # members would.
-        self._guard_registry(registry.TCP.__proto__, 65201)
-        self._guard_registry(registry.UDP.__proto__, 65201)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, 65201)
+        self._guard_registry(reg_transport.UDP.__proto__, 65201)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(65201, UnitProtocol, TransportProtocol.udp, TransportProtocol.tcp)
-        self.assertIs(registry.TCP.__proto__[65201], UnitProtocol)
-        self.assertIs(registry.UDP.__proto__[65201], UnitProtocol)
+        self.assertIs(reg_transport.TCP.__proto__[65201], UnitProtocol)
+        self.assertIs(reg_transport.UDP.__proto__[65201], UnitProtocol)
 
         # NOTE: a ``str`` transport after a class module reaches ``transport``
         # the same way a member does, then goes through the ``str``-coercion
         # path.
-        self._guard_registry(registry.TCP.__proto__, 65202)
-        self._guard_registry(registry.UDP.__proto__, 65202)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, 65202)
+        self._guard_registry(reg_transport.UDP.__proto__, 65202)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(65202, UnitProtocol, 'udp')
-        self.assertNotIn(65202, registry.TCP.__proto__)
-        self.assertIs(registry.UDP.__proto__[65202], UnitProtocol)
+        self.assertNotIn(65202, reg_transport.TCP.__proto__)
+        self.assertIs(reg_transport.UDP.__proto__[65202], UnitProtocol)
 
         # NOTE: with a ``str`` module, the third positional is ``class_`` --
         # a real class name, resolved through ``ModuleDescriptor`` -- and,
         # with no transport named, the port's own ``AppType`` member supplies
         # one, exactly as it would with no ``class_`` involved at all.
-        self._guard_registry(registry.TCP.__proto__, AppType_TCP.TCP_3exmp.port)
-        self._guard_registry(registry.UDP.__proto__, AppType_TCP.TCP_3exmp.port)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, AppType_TCP.TCP_3exmp.port)
+        self._guard_registry(reg_transport.UDP.__proto__, AppType_TCP.TCP_3exmp.port)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module[0], raw_module[1])
-        self.assertEqual(registry.TCP.__proto__[AppType_TCP.TCP_3exmp.port].__name__, 'Raw')
+        self.assertEqual(reg_transport.TCP.__proto__[AppType_TCP.TCP_3exmp.port].__name__, 'Raw')
 
         # NOTE: ``class_`` and a further transport combine: the class name
         # stays in ``class_``, and the transport reaches ``transport`` from
         # the fourth position onward.
-        self._guard_registry(registry.TCP.__proto__, 65203)
-        self._guard_registry(registry.UDP.__proto__, 65203)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, 65203)
+        self._guard_registry(reg_transport.UDP.__proto__, 65203)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(65203, raw_module[0], raw_module[1], TransportProtocol.udp)
-        self.assertNotIn(65203, registry.TCP.__proto__)
-        self.assertEqual(registry.UDP.__proto__[65203].__name__, 'Raw')
+        self.assertNotIn(65203, reg_transport.TCP.__proto__)
+        self.assertEqual(reg_transport.UDP.__proto__[65203].__name__, 'Raw')
 
         # NOTE: this is not a heuristic on the value -- with a ``str`` module,
         # a ``str`` third argument is *always* a class name, even one that
@@ -748,35 +759,35 @@ class ProtocolRegistryTests(unittest.TestCase):
         # than a bare stdlib ``AttributeError`` is GitHub issue #832's; the
         # property that a ``str`` third positional is resolved as a class
         # name, never sniffed as a transport, is what this pins.
-        with mock.patch.object(registry, 'register_protocol'):
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(65204, raw_module[0], 'tcp', TransportProtocol.udp)
         self.assertIn("'tcp'", str(caught.exception))
-        self.assertNotIn(65204, registry.TCP.__proto__)
-        self.assertNotIn(65204, registry.UDP.__proto__)
+        self.assertNotIn(65204, reg_transport.TCP.__proto__)
+        self.assertNotIn(65204, reg_transport.UDP.__proto__)
 
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                 registry.register_tcp(AppType_TCP.TCP_3exmp, UnitProtocol)
         tcp_register.assert_called_once_with(AppType_TCP.TCP_3exmp.port, UnitProtocol)
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        with mock.patch.object(registry.TCP, 'register') as tcp_register:
-            with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
+            with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                 registry.register_tcp(65002, *raw_module)
-        self.assertIsInstance(tcp_register.call_args.args[1], registry.ModuleDescriptor)
+        self.assertIsInstance(tcp_register.call_args.args[1], ModuleDescriptor)
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
 
-        with mock.patch.object(registry.UDP, 'register') as udp_register:
-            with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+            with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                 registry.register_udp(AppType_UDP.UDP_2ping, UnitProtocol)
         udp_register.assert_called_once_with(AppType_UDP.UDP_2ping.port, UnitProtocol)
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        with mock.patch.object(registry.UDP, 'register') as udp_register:
-            with mock.patch.object(registry, 'register_protocol') as register_protocol:
+        with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
+            with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
                 registry.register_udp(65003, *raw_module)
-        self.assertIsInstance(udp_register.call_args.args[1], registry.ModuleDescriptor)
+        self.assertIsInstance(udp_register.call_args.args[1], ModuleDescriptor)
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
 
     def test_register_apptype_omitted_class_name_reports_missing_argument(self) -> None:
@@ -792,13 +803,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         """
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw_module_name = 'pcapkit.protocols.misc.raw'
         port = AppType_TCP.TCP_3exmp.port
 
-        self._guard_registry(registry.TCP.__proto__, port)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, port)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module_name)
         message = str(caught.exception)
@@ -819,13 +832,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         """
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw_module_name = 'pcapkit.protocols.misc.raw'
         port = 65213
 
-        self._guard_registry(registry.TCP.__proto__, port)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, port)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(port, raw_module_name, '(null)', TransportProtocol.tcp)
         self.assertIn(raw_module_name, str(caught.exception))
@@ -844,12 +859,13 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.corekit.sentinels import NULL
         from pcapkit.utilities.exceptions import RegistryError
 
         UnitProtocol = self._unit_protocol()
 
         with self.assertRaises(RegistryError) as caught_absent:
-            registry.register_apptype(65210, UnitProtocol, class_=registry.NULL)
+            registry.register_apptype(65210, UnitProtocol, class_=NULL)
         self.assertIn('no transport protocol given', str(caught_absent.exception))
 
         with self.assertRaises(RegistryError) as caught_present:
@@ -867,13 +883,15 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw_module_name = 'pcapkit.protocols.misc.raw'
         port = 65212
 
-        self._guard_registry(registry.TCP.__proto__, port)
-        with mock.patch.object(registry, 'register_protocol'):
+        self._guard_registry(reg_transport.TCP.__proto__, port)
+        with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_tcp(port, raw_module_name, 'NotAClass')
         message = str(caught.exception)
@@ -899,46 +917,50 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option as TCPOption
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import application as reg_application
+        from pcapkit.foundation.registry.protocols import internet as reg_internet
+        from pcapkit.foundation.registry.protocols import misc as reg_misc
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import RegistryError
 
         cases = [
-            (registry.register_ipv4_option, registry.IPv4, '_read_opt_unit',
-             registry.Schema_IPv4_Option, 'register_option', OptionNumber.NOP),
-            (registry.register_hip_parameter, registry.HIP, '_read_param_unit',
-             registry.Schema_HIP_Parameter, 'register_parameter', Parameter.HIP_TRANSFORM),
-            (registry.register_hopopt_option, registry.HOPOPT, '_read_opt_unit',
-             registry.Schema_HOPOPT_Option, 'register_option', IPv6Option.Pad1),
-            (registry.register_ipv6_opts_option, registry.IPv6_Opts, '_read_opt_unit',
-             registry.Schema_IPv6_Opts_Option, 'register_option', IPv6Option.Pad1),
-            (registry.register_ipv6_route_routing, registry.IPv6_Route, '_read_data_type_unit',
-             registry.Schema_IPv6_Route_RoutingType, 'register_routing', Routing.Source_Route),
-            (registry.register_mh_message, registry.MH, '_read_msg_unit',
-             registry.Schema_MH_Packet, 'register_message', MHPacket.Binding_Refresh_Request),
-            (registry.register_mh_option, registry.MH, '_read_opt_unit',
-             registry.Schema_MH_Option, 'register_option', MHOption.Pad1),
-            (registry.register_mh_extension, registry.MH, '_read_ext_unit',
-             registry.Schema_MH_CGAExtension, 'register_extension', CGAExtension.Multi_Prefix),
-            (registry.register_tcp_option, registry.TCP, '_read_mode_unit',
-             registry.Schema_TCP_Option, 'register_option', TCPOption.No_Operation),
-            (registry.register_tcp_mp_option, registry.TCP, '_read_mptcp_unit',
-             registry.Schema_TCP_MPTCP, 'register_mp_option', MPTCPOption.MP_CAPABLE),
-            (registry.register_sctp_chunk, registry.SCTP, '_read_chunk_unit',
-             registry.Schema_SCTP_Chunk, 'register_chunk', Chunk.Payload_Data),
-            (registry.register_sctp_parameter, registry.SCTP, '_read_param_unit',
-             registry.Schema_SCTP_Parameter, 'register_parameter', SCTPParameter.Heartbeat_Info),
-            (registry.register_sctp_cause, registry.SCTP, '_read_cause_unit',
-             registry.Schema_SCTP_ErrorCause, 'register_cause', CauseCode.Stale_Cookie),
-            (registry.register_http_frame, registry.HTTPv2, '_read_http_unit',
-             registry.Schema_HTTP_FrameType, 'register_frame', HTTPFrame.DATA),
-            (registry.register_pcapng_block, registry.PCAPNG, '_read_block_unit',
-             registry.Schema_PCAPNG_BlockType, 'register_block', BlockType.Section_Header_Block),
-            (registry.register_pcapng_option, registry.PCAPNG, '_read_option_unit',
-             registry.Schema_PCAPNG_Option, 'register_option', OptionType.opt_endofopt),
-            (registry.register_pcapng_record, registry.PCAPNG, '_read_record_unit',
-             registry.Schema_PCAPNG_NameResolutionRecord, 'register_record',
+            (registry.register_ipv4_option, reg_internet.IPv4, '_read_opt_unit',
+             reg_internet.Schema_IPv4_Option, 'register_option', OptionNumber.NOP),
+            (registry.register_hip_parameter, reg_internet.HIP, '_read_param_unit',
+             reg_internet.Schema_HIP_Parameter, 'register_parameter', Parameter.HIP_TRANSFORM),
+            (registry.register_hopopt_option, reg_internet.HOPOPT, '_read_opt_unit',
+             reg_internet.Schema_HOPOPT_Option, 'register_option', IPv6Option.Pad1),
+            (registry.register_ipv6_opts_option, reg_internet.IPv6_Opts, '_read_opt_unit',
+             reg_internet.Schema_IPv6_Opts_Option, 'register_option', IPv6Option.Pad1),
+            (registry.register_ipv6_route_routing, reg_internet.IPv6_Route, '_read_data_type_unit',
+             reg_internet.Schema_IPv6_Route_RoutingType, 'register_routing', Routing.Source_Route),
+            (registry.register_mh_message, reg_internet.MH, '_read_msg_unit',
+             reg_internet.Schema_MH_Packet, 'register_message', MHPacket.Binding_Refresh_Request),
+            (registry.register_mh_option, reg_internet.MH, '_read_opt_unit',
+             reg_internet.Schema_MH_Option, 'register_option', MHOption.Pad1),
+            (registry.register_mh_extension, reg_internet.MH, '_read_ext_unit',
+             reg_internet.Schema_MH_CGAExtension, 'register_extension', CGAExtension.Multi_Prefix),
+            (registry.register_tcp_option, reg_transport.TCP, '_read_mode_unit',
+             reg_transport.Schema_TCP_Option, 'register_option', TCPOption.No_Operation),
+            (registry.register_tcp_mp_option, reg_transport.TCP, '_read_mptcp_unit',
+             reg_transport.Schema_TCP_MPTCP, 'register_mp_option', MPTCPOption.MP_CAPABLE),
+            (registry.register_sctp_chunk, reg_transport.SCTP, '_read_chunk_unit',
+             reg_transport.Schema_SCTP_Chunk, 'register_chunk', Chunk.Payload_Data),
+            (registry.register_sctp_parameter, reg_transport.SCTP, '_read_param_unit',
+             reg_transport.Schema_SCTP_Parameter, 'register_parameter', SCTPParameter.Heartbeat_Info),
+            (registry.register_sctp_cause, reg_transport.SCTP, '_read_cause_unit',
+             reg_transport.Schema_SCTP_ErrorCause, 'register_cause', CauseCode.Stale_Cookie),
+            (registry.register_http_frame, reg_application.HTTPv2, '_read_http_unit',
+             reg_application.Schema_HTTP_FrameType, 'register_frame', HTTPFrame.DATA),
+            (registry.register_pcapng_block, reg_misc.PCAPNG, '_read_block_unit',
+             reg_misc.Schema_PCAPNG_BlockType, 'register_block', BlockType.Section_Header_Block),
+            (registry.register_pcapng_option, reg_misc.PCAPNG, '_read_option_unit',
+             reg_misc.Schema_PCAPNG_Option, 'register_option', OptionType.opt_endofopt),
+            (registry.register_pcapng_record, reg_misc.PCAPNG, '_read_record_unit',
+             reg_misc.Schema_PCAPNG_NameResolutionRecord, 'register_record',
              RecordType.nrb_record_ipv4),
-            (registry.register_pcapng_secrets, registry.PCAPNG, '_read_secrets_unit',
-             registry.Schema_PCAPNG_DSBSecrets, 'register_secrets', SecretsType.TLS_Key_Log),
+            (registry.register_pcapng_secrets, reg_misc.PCAPNG, '_read_secrets_unit',
+             reg_misc.Schema_PCAPNG_DSBSecrets, 'register_secrets', SecretsType.TLS_Key_Log),
         ]
 
         schema = object

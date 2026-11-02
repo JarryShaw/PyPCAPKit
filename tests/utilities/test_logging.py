@@ -242,7 +242,13 @@ class LoggerHierarchyTests(unittest.TestCase):
     def test_modules_log_through_their_own_child_logger(self) -> None:
         cases = {
             'pcapkit.foundation.extraction': 'pcapkit.foundation.extraction',
-            'pcapkit.foundation.registry.protocols': 'pcapkit.foundation.registry.protocols',
+            'pcapkit.foundation.registry.protocols.protocol': 'pcapkit.foundation.registry.protocols.protocol',
+            'pcapkit.foundation.registry.protocols.link': 'pcapkit.foundation.registry.protocols.link',
+            'pcapkit.foundation.registry.protocols.internet': 'pcapkit.foundation.registry.protocols.internet',
+            'pcapkit.foundation.registry.protocols.transport': 'pcapkit.foundation.registry.protocols.transport',
+            'pcapkit.foundation.registry.protocols.application':
+                'pcapkit.foundation.registry.protocols.application',
+            'pcapkit.foundation.registry.protocols.misc': 'pcapkit.foundation.registry.protocols.misc',
             'pcapkit.foundation.registry.foundation': 'pcapkit.foundation.registry.foundation',
             'pcapkit.foundation.reassembly.reassembly': 'pcapkit.foundation.reassembly.reassembly',
             'pcapkit.foundation.traceflow.traceflow': 'pcapkit.foundation.traceflow.traceflow',
@@ -446,14 +452,19 @@ class RegistryLogLevelTests(unittest.TestCase):
         self.assertIn('registered IPv4 reassembly callback', record.getMessage())
 
     def test_no_registry_module_still_logs_at_info(self) -> None:
-        import pcapkit.foundation.registry.foundation  # noqa: F401
-        import pcapkit.foundation.registry.protocols  # noqa: F401
+        import pkgutil
 
-        root = os.path.dirname(os.path.dirname(os.path.abspath(
-            pcapkit.foundation.registry.protocols.__file__)))
-        for name in ('registry/protocols.py', 'registry/foundation.py'):
+        import pcapkit.foundation.registry.foundation
+        import pcapkit.foundation.registry.protocols
+
+        # #2578: the protocol registries are a package, one module per layer.
+        package = pcapkit.foundation.registry.protocols
+        names = ['pcapkit.foundation.registry.foundation']
+        names.extend(info.name for info in pkgutil.iter_modules(package.__path__, f'{package.__name__}.'))
+        self.assertIn('pcapkit.foundation.registry.protocols.transport', names)
+        for name in names:
             with self.subTest(module=name):
-                with open(os.path.join(root, name), encoding='utf-8') as file:
+                with open(importlib.import_module(name).__file__, encoding='utf-8') as file:
                     source = file.read()
                 self.assertNotIn('logger.info(', source)
                 self.assertIn('logger.debug(', source)

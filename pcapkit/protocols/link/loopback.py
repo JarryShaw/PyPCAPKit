@@ -126,7 +126,7 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
     #: address family rather than by EtherType, so this class keeps a registry
     #: of its own instead of sharing :attr:`Link.__proto__
     #: <pcapkit.protocols.link.link.Link.__proto__>`; an entry is registered with
-    #: :func:`~pcapkit.foundation.registry.protocols.register_loopback`.
+    #: :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {

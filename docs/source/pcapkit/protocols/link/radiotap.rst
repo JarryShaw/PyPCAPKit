@@ -51,7 +51,7 @@ Decoding every optional field radiotap.org defines is tracked on
   so the frame is looked up in
   :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
   under :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`;
-  :func:`~pcapkit.foundation.registry.protocols.register_radiotap` replaces
+  :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap` replaces
   the entry.
 
 .. autoclass:: pcapkit.protocols.link.radiotap.Radiotap
