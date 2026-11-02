@@ -23,6 +23,25 @@ Octets      Bits        Name                    Description
 
 .. [*] https://en.wikipedia.org/wiki/HTTP/2
 
+Frames in One Segment
+---------------------
+
+A whole frame after the first in a TCP segment is dissected as a further
+:class:`HTTPv2` layer, the previous frame's payload (:issue:`2536`), as
+:class:`~pcapkit.protocols.application.tls.TLS` chains records: a ``SETTINGS``
+frame followed by a ``WINDOW_UPDATE`` reads ``TCP:HTTP/2:HTTP/2``. The
+exceptions:
+
+* A whole frame that fails to decode becomes
+  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  with the parser's ``error``.
+* A frame the segment ends inside, its header or its payload cut short, stays
+  raw, with no error.
+* A parse told to stop at HTTP/2 (``protocol='HTTP/2'`` or
+  ``layer='Application'``) keeps the rest of the segment raw.
+* Each frame is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
+  bounds how many are dissected.
+
 .. versionchanged:: 1.5.0
 
    A frame's Length counts its payload alone, not the 9-octet frame header,
@@ -47,6 +66,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
 from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
+from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.application.http import _HTTP2_PREFACE
 from pcapkit.protocols.application.http import HTTP as HTTPBase
@@ -115,6 +135,24 @@ if TYPE_CHECKING:
 __all__ = ['HTTPv2']
 
 
+def _opens_whole_frame(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with a whole HTTP/2 frame.
+
+    Only the 9-octet frame header is read: the frame is whole when its Length,
+    which counts the frame payload alone (:rfc:`9113#section-4.1`), ends inside
+    ``data``. The type, flags and stream are left to :meth:`HTTPv2.read`, so a
+    whole frame it refuses is kept with its error.
+
+    Args:
+        data: Octets after a frame.
+
+    Returns:
+        Whether a further frame opens ``data`` and ends inside it.
+
+    """
+    return len(data) >= 9 and 9 + int.from_bytes(data[:3], 'big') <= len(data)
+
+
 class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
            schema=Schema_HTTP, data=Data_HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
@@ -162,10 +200,14 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
     .. versionchanged:: 1.6.0
 
-       A payload opening with the connection preface parses, with the preface
-       kept as ``preface`` and counted in :attr:`length`, and :meth:`make` takes
-       ``preface``, since a dispatched HTTP/2 payload reaches this class rather
-       than :class:`~pcapkit.protocols.application.http.HTTP` (:issue:`2524`).
+       * A payload opening with the connection preface parses, with the preface
+         kept as ``preface`` and counted in :attr:`length`, and :meth:`make`
+         takes ``preface``, since a dispatched HTTP/2 payload reaches this class
+         rather than :class:`~pcapkit.protocols.application.http.HTTP`
+         (:issue:`2524`).
+       * A whole frame after the first in a segment is a further layer of this
+         class, where it was kept as :class:`~pcapkit.protocols.misc.raw.Raw`
+         (:issue:`2536`).
 
     """
 
@@ -361,8 +403,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
                 'preface': _HTTP2_PREFACE,
             })
 
-        # The frame ends at its declared Length; whatever follows it in the
-        # buffer (e.g. the next frame) is the undissected remainder.
+        # The frame ends at its declared Length; what follows it is a further
+        # whole frame, dissected as one, or else the undissected remainder (#2536).
         return self._decode_next_layer(http, -1, length - 9 - schema.length)
 
     def make(self,  # type: ignore[override]
@@ -1622,3 +1664,55 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         return Schema_ContinuationFrame(
             fragment=fragment,
         ), flags
+
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import next layer extractor: a further whole frame, or the rest undissected.
+
+        A TCP segment may carry several frames (:issue:`2536`). So the ``-1``
+        remainder is dissected as this class when :func:`_opens_whole_frame`
+        finds a whole frame opening it, and is otherwise kept as
+        :class:`~pcapkit.protocols.misc.raw.Raw`, as
+        :meth:`Application._import_next_layer
+        <pcapkit.protocols.application.application.Application._import_next_layer>`
+        keeps it. A frame the segment ends inside is the reassembly limit, and
+        stays raw.
+
+        Arguments:
+            proto: next layer protocol index; only the ``-1`` sentinel
+                (the rest of the segment) is accepted
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class for a further frame, or as
+            :meth:`Application._import_next_layer
+            <pcapkit.protocols.application.application.Application._import_next_layer>`
+            returns otherwise.
+
+        """
+        if proto == -1 and _opens_whole_frame(self._get_payload()[:length]) and not self._sigterm:
+            return self._import_next_frame(proto, length, packet=packet)  # type: ignore[misc,call-arg]
+        return super()._import_next_layer(proto, length, packet=packet)
+
+    @beholder  # type: ignore[arg-type]
+    def _import_next_frame(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[misc]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':
+        """Import the further frame :meth:`_import_next_layer` found.
+
+        Arguments:
+            proto: next layer protocol index, the ``-1`` sentinel
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Instance of this class, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            carrying the parser's ``error`` when
+            :func:`~pcapkit.corekit.decorators.beholder` replaces a frame that
+            fails to parse.
+
+        """
+        file_ = self._get_payload()
+        return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
+                                      alias=proto, packet=packet, layer=self._exlayer,
+                                      protocol=self._exproto, __context__=self._exctx)
