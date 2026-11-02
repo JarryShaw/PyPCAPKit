@@ -9,6 +9,10 @@ other leg runs pytest once. :class:`TestTheRunsCoverTheTier` runs the step's
 own script with a stub ``python``, as
 :mod:`tests.project.test_sweeps_on_latest_only_1732` does.
 
+#2600: run whole, ``tests/protocols`` outgrew the runner too, so its
+``internet``, ``application`` and ``misc`` subpackages are shards of their own
+ahead of it, and it takes the remainder.
+
 """
 
 from __future__ import annotations
@@ -33,8 +37,9 @@ __tier__ = 'LATEST'
 
 #: The ``test`` job's KTLO twin, which runs its steps by YAML alias.
 KTLO = ('unit-tests.yml', 'test-ktlo')
-#: The directories a PyPy leg runs on their own, in order.
-SHARDS = ['tests/protocols', 'tests/corekit']
+#: The directories a PyPy leg runs on their own, in order; #2600 split ``tests/protocols``.
+SHARDS = ['tests/protocols/internet', 'tests/protocols/application', 'tests/protocols/misc', 'tests/protocols',
+          'tests/corekit']
 #: The page that says how the legs run.
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
 
@@ -61,10 +66,13 @@ class TestOnlyPyPyShards(unittest.TestCase):
         self.assertEqual(job(*KTLO)['steps'], job(*JOB)['steps'])
 
     def test_each_shard_is_a_directory_the_tier_keeps(self) -> None:
-        for shard in SHARDS:
+        """#2600: and each keeps unit-tier modules no earlier shard took, so its run collects a test."""
+        for index, shard in enumerate(SHARDS):
             with self.subTest(shard=shard):
                 self.assertTrue((ROOT / shard).is_dir())
-                self.assertTrue([module for module in _tiers.all_tier_paths() if module.startswith(shard + '/')])
+                earlier = tuple(taken + '/' for taken in SHARDS[:index])
+                self.assertTrue([module for module in _tiers.all_tier_paths() if module.startswith(shard + '/')
+                                 and not module.startswith(earlier) and _tiers.is_unit_tier(module)])
 
 
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
