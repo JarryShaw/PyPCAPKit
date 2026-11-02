@@ -128,7 +128,8 @@ Known Limitations
 and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
 kept as raw octets. ``Extractor(reassembly=True, dtls=True)`` reassembles the
 message, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it
-with :meth:`~pcapkit.protocols.application.dtls.DTLS.read_handshake`.
+with :meth:`~pcapkit.protocols.application.dtls.DTLS.analyze_handshake`, which
+reads it with :meth:`~pcapkit.protocols.application.dtls.DTLS.read_handshake`.
 
 **A unified-header record with a connection ID is not decoded**
 (:rfc:`9147#section-4.1`, :issue:`2467`). Its length is negotiated, not carried
@@ -161,6 +162,7 @@ ones on the wire.
    .. automethod:: make
    .. automethod:: unpack
    .. automethod:: read_handshake
+   .. automethod:: analyze_handshake
 
    .. automethod:: __length_hint__
 
