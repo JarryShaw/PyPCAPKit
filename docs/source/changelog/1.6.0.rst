@@ -204,17 +204,24 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :mod:`pcapkit.protocols.application.sslv3` (:issue:`2529`, :pr:`2602`),
   exists for explicit construction only. A record split across TCP segments is
   not reassembled and stays :class:`~pcapkit.protocols.misc.raw.Raw`. DTLS also
-  reads and builds DTLS 1.3's unified-header records
-  (:rfc:`9147#section-4.1`), except one carrying a connection ID, which stays
-  Raw (:issue:`2467`, :pr:`2494`), and :rfc:`9146` ``tls12_cid`` records. A
+  reads and builds the DTLS 1.3 unified-header records of
+  :rfc:`9147#section-4.1` (:issue:`2467`, :pr:`2494`) and :rfc:`9146`
+  ``tls12_cid`` records. A
   :class:`~pcapkit.protocols.application.dtls.DTLSContext`, given to
-  ``extract()`` as its ``context``, resolves a ``tls12_cid`` record's
-  connection ID from those the capture's hellos negotiate in their
-  ``connection_id`` extension, which TLS and DTLS both decode, or from the
-  ``cid_length`` the caller gives it, and one it cannot resolve stays Raw;
-  :mod:`pcapkit.protocols.data` and :mod:`pcapkit.protocols.schema` export the
-  record's classes as ``DTLS_CIDCiphertext`` and the extension's data model as
-  ``TLS_ConnectionId`` (:issue:`2515`, :pr:`2631`, :pr:`2641`). Each whole DTLS
+  ``extract()`` as its ``context``, resolves the connection ID of a
+  ``tls12_cid`` record, or of a unified-header record with its ``C`` bit set
+  (:issue:`2625`, :pr:`2643`), from those the capture's hellos negotiate in
+  their ``connection_id`` extension, which TLS and DTLS both decode, or from
+  the ``cid_length`` the caller gives it, and one it cannot resolve stays Raw.
+  An ID a DTLS 1.3 ``NewConnectionId`` issues is encrypted, so only the caller
+  can give it. A unified-header record's ``info`` carries its ID as ``cid``,
+  :data:`None` when the ``C`` bit is clear, as ``length`` is when the ``L`` bit
+  is, so that the one header keeps one data model, as settled on
+  :issue:`2625`; its ``make()`` takes a ``cid`` and sets the ``C`` bit.
+  :mod:`pcapkit.protocols.data` and :mod:`pcapkit.protocols.schema` export a
+  ``tls12_cid`` record's classes as ``DTLS_CIDCiphertext`` and the extension's
+  data model as ``TLS_ConnectionId`` (:issue:`2515`, :pr:`2631`, :pr:`2641`).
+  Each whole DTLS
   record in a UDP datagram is likewise a layer of
   its own -- a DTLS 1.2 record then a DTLS 1.3 unified-header record read
   ``DTLS 1.2:DTLS 1.3`` -- a unified-header record with no length running to

@@ -2272,7 +2272,7 @@ Fixed
   ``code=129``) was deleted once that registry defect was fixed as :issue:`690`.
   ``HIP_COPIES`` dropped to one as :issue:`689`, once :issue:`672` and :issue:`679` left
   it routing around nothing.
-* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` raised a bare
+* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTPv1>` raised a bare
   exception for any payload that is not an HTTP/1 message, at these sites: the
   header/body split in ``read``, the header's CRLF split and the start-line split in
   ``_read_http_header``, and ``item[1]`` on a field line with no colon.
@@ -2280,13 +2280,13 @@ Fixed
   HTTP/1 attempt aborted the guess and the HTTP/2 arm below was dead code for each of
   those inputs. Each site now raises :exc:`.ProtocolError`, which each method's
   ``Raises:`` section documented, and a test pins the invariant (nothing escapes
-  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` that is not a
+  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTPv1>` that is not a
   :exc:`.ProtocolError`), so any further bare-raising site would fail there. An obs-fold
   continuation line [:rfc:`9112#section-5.2`] is legal HTTP/1 and is now unfolded, the
   RFC's remedy, rather than read as a field of its own (with no colon it raised that
   ``IndexError``; with one it parsed into a spurious extra field). Reaching the HTTP/2
   arm exposed a payload under nine octets to
-  :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`, where it usually
+  :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTPv2>`, where it usually
   fails inside the schema with a bare ``struct.error`` (not a ``ValueError``,
   :exc:`.ProtocolError` or pcapkit :exc:`.StructError`, so uncatchable); ``read``
   converts it and ``_guess_version`` suppresses it on the last arm only, since an arm
@@ -2311,8 +2311,8 @@ Fixed
   ``examples/generators/pcapng.py``'s ``_journal_entry`` cited a bare line number for
   the defect its alignment workaround avoids and mis-attributed the fix; it now names
   :issue:`678`'s ``not line.strip(b'\x00')`` guard and the mechanism (:issue:`791`).
-* :meth:`.httpv2.HTTP.read` tested only the 24-bit declared length off the wire
-  (``schema.length < 9``), never how many octets the buffer held, so a frame backed by
+* :meth:`httpv2.HTTP.read() <pcapkit.protocols.application.httpv2.HTTPv2.read>`
+  tested only the 24-bit declared length off the wire (``schema.length < 9``), never how many octets the buffer held, so a frame backed by
   far fewer real octets than declared parsed and reported the declared,
   attacker-controlled length. Sweeping the declared length against a four-octet buffer
   gave non-monotone accept/reject (9, 15, 65535 and 16777215 parsed, 10 and 100 did
@@ -2375,7 +2375,7 @@ Fixed
   safe heuristic, since a ``type <= 9`` guess misfires on binary HTTP/1 bodies).
   Protochain over the sample captures is unchanged (:issue:`800`).
 * :attr:`.TCP.__proto__` bound
-  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` directly for ports 80
+  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTPv1>` directly for ports 80
   and 8080, so a segment on either port was HTTP/1 by assertion of the port alone; both
   versions share those ports, so the payload has to decide. Repointed to the generic
   :class:`pcapkit.protocols.application.http.HTTP` proxy, whose identification became
@@ -2474,7 +2474,7 @@ Fixed
   ``[if_rxspeed]`` rather than ``[if_txspeed]``, and ``_read_option_epb_queue``'s length
   guard says ``[epb_queue]`` rather than ``[epb_packetid]``. Only message text changes;
   the exception and warning types are unchanged (:issue:`1038`).
-* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` refused every HTTP/1
+* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTPv1>` refused every HTTP/1
   message with no header fields, which [:rfc:`9112#section-2.1`] allows
   (``*( field-line CRLF )``): ``b'GET / HTTP/1.0\r\n\r\n'`` raised
   ``ProtocolError: HTTP: invalid format``, because ``_read_http_header`` treated a
