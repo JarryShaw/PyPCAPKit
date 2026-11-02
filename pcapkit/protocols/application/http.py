@@ -23,18 +23,19 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2` rather than an instance
    of it, so the data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`).
+   (:issue:`2524`). Building it from fields takes ``version`` and is refused
+   without it, where it built HTTP/1.*, and its
+   :meth:`~pcapkit.protocols.application.http.HTTP.from_data` refuses a
+   :obj:`dict`, where it read the ``receipt`` or ``sid`` key (:issue:`2628`).
 
 """
 import contextlib
-import inspect
 import re
 import struct
 from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
@@ -146,21 +147,6 @@ _RE_STATUS = re.compile(rb'\d{3}\Z')
 _HTTP2_PREFACE_HEADER = _HTTP2_PREFACE.split(b'\r\n\r\n', maxsplit=1)[0]
 
 
-def _make_fields(klass: 'Type[HTTP]') -> 'frozenset[str]':
-    """Names of the fields ``klass.make`` takes, as keywords.
-
-    Args:
-        klass: An HTTP member class.
-
-    Returns:
-        Every named parameter of its ``make`` but ``self``.
-
-    """
-    kinds = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
-    return frozenset(name for name, param in inspect.signature(klass.make).parameters.items()
-                     if name != 'self' and param.kind in kinds)
-
-
 def test_start_line(data: 'bytes') -> 'bool':
     """Whether ``data`` opens with an HTTP/1.* start line.
 
@@ -237,7 +223,11 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     and :meth:`from_data` give
     :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
     :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, never an instance of
-    this class (:issue:`2524`); see :meth:`__new__`.
+    this class (:issue:`2524`). ``version`` names the member; without it, octets
+    give the one :meth:`_dispatch_version` identifies, and fields are refused,
+    since no field picks a member (:issue:`2574`). :meth:`from_data` gives the
+    member whose data model it is handed, and refuses a :obj:`dict`. See
+    :meth:`__new__`.
 
     """
 
@@ -383,13 +373,14 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         return info
 
     def make(self,
-             version: 'Literal[1, 2]' = 1, *,
+             version: 'Optional[Literal[1, 2]]' = None, *,
              preface: 'bool' = False,
              **kwargs: 'Any') -> '_ST':
         """Make (construct) packet data.
 
         Args:
-            version: Version of HTTP.
+            version: Version of HTTP, ``1`` or ``2``. There is no default: no
+                field picks a member (:issue:`2574`).
             preface: Whether the HTTP/2 connection preface goes ahead of the
                 frame; :meth:`pack` writes it.
             **kwargs: Arbitrary keyword arguments.
@@ -398,19 +389,15 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             The header schema the versioned ``make`` constructs.
 
         Raises:
-            ProtocolError: If ``version`` is unknown, or if ``preface`` is
-                requested for a version other than HTTP/2.
+            ProtocolError: If ``version`` is missing or names neither member, or
+                if ``preface`` is requested for a version other than HTTP/2.
 
         """
+        if version is None:
+            raise ProtocolError('HTTP: no version to build with; pass version=1 or version=2')
+        protocol = self._member_of_version(version)
         if preface and version != 2:
             raise ProtocolError(f'HTTP/{version}: connection preface is HTTP/2 only')
-
-        if version == 1:
-            from pcapkit.protocols.application.httpv1 import HTTPv1 as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTPv2 as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        else:
-            raise ProtocolError(f'HTTP: invalid version: {version!r}')
 
         # NOTE: ``protocol.make`` is an ordinary instance method (the abstract
         # declaration at ``ProtocolBase.make`` takes ``self``, and the
@@ -447,56 +434,87 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         """Create protocol instance from data.
 
         Args:
-            data: Protocol data. A :obj:`dict`, as :meth:`Info.to_dict
-                <pcapkit.corekit.infoclass.Info.to_dict>` returns it, is rebuilt
-                into the versioned data model its keys belong to -- ``receipt``
-                is HTTP/1.*'s and ``sid`` HTTP/2's -- since this class's own data
-                model carries no version.
+            data: Protocol data.
             **kwargs: As :meth:`Protocol.from_data
                 <pcapkit.protocols.protocol.Protocol.from_data>`.
 
         Returns:
-            Protocol instance; on this class, an instance of the member the data
-            model belongs to (:issue:`2524`).
+            Protocol instance; on this class, an instance of the member whose data
+            model ``data`` is (:issue:`2524`).
 
         Raises:
-            ProtocolError: If ``data`` is neither HTTP/1.* nor HTTP/2 data, on
-                this class.
+            ProtocolError: If ``data`` is neither member's data model, on this
+                class. A :obj:`dict` is refused: it carries no version, and no
+                key picks a member (:issue:`2574`).
 
         """
+        if cls is not HTTP:
+            return super().from_data(data, **kwargs)
+
         from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         from pcapkit.protocols.data.application.httpv1 import HTTPv1 as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         from pcapkit.protocols.data.application.httpv2 import HTTPv2 as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
 
-        if not isinstance(data, Data) and not issubclass(cls.__data__, (Data_HTTPv1, Data_HTTPv2)):
-            if 'receipt' in data:
-                data = cast('_PT', Data_HTTPv1.from_dict(data))
-            elif 'sid' in data:
-                data = cast('_PT', Data_HTTPv2.from_dict(data))
-        if cls is not HTTP:
-            return super().from_data(data, **kwargs)
         if isinstance(data, Data_HTTPv1):
             return cast('Self', HTTPv1.from_data(data, **kwargs))
         if isinstance(data, Data_HTTPv2):
             return cast('Self', HTTPv2.from_data(data, **kwargs))
-        raise ProtocolError(f'HTTP: invalid data: must be HTTP/1.* or HTTP/2 data, '
-                            f'not {type(data).__name__}')
+        raise ProtocolError('HTTP: invalid data: must be an HTTPv1 or HTTPv2 data model')
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
+    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                 length: 'Optional[int]' = None, *,
+                 version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'None':
+        """Initialisation.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            version: Version of HTTP, ``1`` or ``2``: the member :meth:`__new__`
+                picks. Building from fields, it must be this class's own. Parsing,
+                it is handed on unread.
+            **kwargs: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        Raises:
+            ProtocolError: If, building from fields, ``version`` names neither
+                member, or is not this class's own version: that of the member
+                it is or derives from, which a subclass outside the members
+                does not have; or if ``preface`` is asked of HTTP/1.
+
+        """
+        if file is not None:
+            if version is not None:
+                kwargs['version'] = version
+        else:
+            from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
+
+            if version is not None and not isinstance(self, self._member_of_version(version)):
+                if not isinstance(self, (HTTPv1, HTTPv2)):
+                    raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
+                                        f'version={version!r}')
+                raise ProtocolError(f'{type(self).__name__}: version={version!r} '
+                                    'names another member')
+            # NOTE: ``pack`` writes the preface for any member, so HTTP/1 refuses it here.
+            if kwargs.get('preface') and isinstance(self, HTTPv1):
+                raise ProtocolError('HTTP/1: connection preface is HTTP/2 only')
+        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+
     def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,  # type: ignore[misc]
                 length: 'Optional[int]' = None, **kwargs: 'Any') -> 'HTTP':
         """Create the member a construction of this class describes.
 
-        Parsing octets gives the member an explicit ``version`` names, or else
-        the one :meth:`_dispatch_version` identifies; building from fields gives
-        the one :meth:`_dispatch_fields` picks. That member's ``__init__`` then
-        runs with the same arguments, which it accepts, since a member inherits
-        this class's ``version`` and ``preface`` keywords. A subclass of this
-        class is created as itself.
+        The ``version`` keyword names the member, on either path. Without it,
+        parsing octets gives the member :meth:`_dispatch_version` identifies,
+        since HTTP octets carry their own version, and building from fields is
+        refused, since no field picks a member (:issue:`2574`). That member's
+        ``__init__`` then runs with the same arguments. A subclass of this class
+        is created as itself.
 
         Args:
             file: Source packet stream, read here without being consumed.
@@ -507,17 +525,17 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             An uninitialised instance of the member.
 
         Raises:
-            ProtocolError: If the octets are neither version's, including an
-                HTTP/2 connection preface with no frame after it, or if
-                :meth:`_dispatch_fields` refuses the fields.
+            ProtocolError: If ``version`` names neither member; or, without it,
+                if building from fields, or if the octets are neither version's,
+                including an HTTP/2 connection preface with no frame after it.
 
         """
         if cls is not HTTP:
             return super().__new__(cls, file, length, **kwargs)  # type: ignore[call-arg]
-        if file is None:
-            member = cls._dispatch_fields(kwargs)
-        elif kwargs.get('version') is not None:
+        if kwargs.get('version') is not None:
             member = cls._member_of_version(kwargs['version'])
+        elif file is None:
+            raise ProtocolError('HTTP: no version to build with; pass version=1 or version=2')
         else:
             if isinstance(file, bytes):
                 data = file
@@ -815,53 +833,6 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             return HTTPv2
         return Raw
 
-    @classmethod
-    def _dispatch_fields(cls, fields: 'dict[str, Any]') -> 'Type[HTTP]':
-        """Pick the member that builds a packet from the keyword ``fields``.
-
-        An explicit ``version`` names the member. Otherwise a field that only
-        :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>`
-        takes picks :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, and a
-        field that only :meth:`HTTPv1.make
-        <pcapkit.protocols.application.httpv1.HTTPv1.make>` takes, or no field
-        of either, picks :class:`~pcapkit.protocols.application.httpv1.HTTPv1`,
-        the version :meth:`make` defaults to. ``preface`` counts only when true,
-        as in the ``version`` check, since its default is :data:`False`.
-
-        Args:
-            fields: Construction keywords.
-
-        Returns:
-            :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
-            :class:`~pcapkit.protocols.application.httpv2.HTTPv2`.
-
-        Raises:
-            ProtocolError: If ``version`` is neither ``1`` nor ``2``, if
-                ``preface`` is asked of HTTP/1, or if ``fields`` holds fields
-                only HTTP/1 takes and fields only HTTP/2 takes.
-
-        """
-        from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
-
-        version = fields.get('version')
-        if version is not None:
-            member = cls._member_of_version(version)
-            if fields.get('preface') and member is not HTTPv2:
-                raise ProtocolError(f'HTTP/{version}: connection preface is HTTP/2 only')
-            return member
-
-        # NOTE: ``preface=False`` is the default, not a request for HTTP/2.
-        names = {name for name, value in fields.items() if name != 'preface' or value}
-        own1, own2 = _make_fields(HTTPv1), _make_fields(HTTPv2)
-        only1, only2 = names & (own1 - own2), names & (own2 - own1)
-        if only1 and only2:
-            if only2 == {'preface'}:
-                raise ProtocolError('HTTP/1: connection preface is HTTP/2 only')
-            raise ProtocolError(f'HTTP: fields of both HTTP/1 ({", ".join(sorted(only1))}) '
-                                f'and HTTP/2 ({", ".join(sorted(only2))})')
-        return HTTPv2 if only2 else HTTPv1
-
     @staticmethod
     def _member_of_version(version: 'Any') -> 'Type[HTTP]':
         """The member a ``version`` of ``1`` or ``2`` names.
@@ -874,14 +845,16 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             :class:`~pcapkit.protocols.application.httpv2.HTTPv2`.
 
         Raises:
-            ProtocolError: If ``version`` is neither.
+            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a
+                :obj:`bool` or a :obj:`float` is refused even where it equals one.
 
         """
         from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
 
-        if version == 1:
-            return HTTPv1
-        if version == 2:
-            return HTTPv2
+        if isinstance(version, int) and not isinstance(version, bool):
+            if version == 1:
+                return HTTPv1
+            if version == 2:
+                return HTTPv2
         raise ProtocolError(f'HTTP: invalid version: {version!r}')
