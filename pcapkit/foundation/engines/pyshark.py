@@ -20,7 +20,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from typing import Optional, Protocol, Type
+    from typing import Any, Optional, Protocol, Type
 
     from pyshark.capture.file_capture import FileCapture as PySharkFileCapture
     from pyshark.packet.layers.base import BaseLayer
@@ -72,6 +72,27 @@ def _is_packet(packet: 'PySharkPacket') -> 'bool':
     """
     frame = _frame_layer(packet)
     return frame is not None and 'encap_type' in frame.field_names
+
+
+def _lost_tsharks(capture: 'PySharkFileCapture', error: 'Exception') -> 'Optional[set[Any]]':
+    """The :program:`tshark` processes of ``capture`` whose exit status asyncio lost.
+
+    :data:`None` unless ``error`` is the crash `PyShark`_ reported for them. See
+    :meth:`PyShark.close` for the condition, and why it is enough.
+
+    """
+    from pyshark.capture.capture import TSharkCrashException  # isort:skip
+
+    running = getattr(capture, '_running_processes', None)
+    if not (isinstance(error, TSharkCrashException) and isinstance(running, set) and running
+            and getattr(capture, '_eof_reached', None) is True):
+        return None
+    for process in running:
+        extra = getattr(getattr(process, '_transport', None), 'get_extra_info', None)
+        popen = None if extra is None else extra('subprocess')
+        if process.returncode != 255 or getattr(popen, 'returncode', None) != 0:
+            return None
+    return running
 
 
 class PyShark(EngineBase['PySharkPacket']):
@@ -331,6 +352,37 @@ class PyShark(EngineBase['PySharkPacket']):
         the :class:`~pcapkit.foundation.extraction.Extractor` constructor raises
         before it (:issue:`2107`).
 
+        `PyShark`_ can raise ``TSharkCrashException`` with ``retcode: 255`` here
+        for a :program:`tshark` that exited cleanly (:issue:`2633`). When a
+        :meth:`subprocess.Popen.poll` reaps a :program:`tshark` that exited before
+        the event loop handled its ``SIGCHLD``, the child watcher then finds no
+        child and reports ``255``. Its cleanup kills :program:`tshark` through
+        :mod:`asyncio`, whose ``kill`` on CPython 3.9 to 3.12 goes through
+        :meth:`subprocess.Popen.send_signal`, which polls first (CPython gh-87744).
+        That is background, not a gate: the check below reads the evidence the
+        loss leaves, on every Python.
+
+        The ``Popen`` keeps the status its poll read, so that crash is logged at
+        :data:`logging.DEBUG` instead of raised, but only when the capture was read
+        to its end and every :program:`tshark` it still lists reports ``255`` to
+        :mod:`asyncio` and ``0`` to its ``Popen``. A :program:`tshark` that failed,
+        or exited ``255`` itself, keeps that status there and still raises, as
+        does any other error. The one case this cannot tell apart is a
+        :program:`tshark` exiting ``255`` that the child watcher reaps just before
+        the poll, which then finds no child and records ``0``.
+
         """
         if self._extmp is not None:
-            self._extmp.close()
+            try:
+                self._extmp.close()
+            except Exception as error:  # pylint: disable=broad-except
+                lost = _lost_tsharks(self._extmp, error)
+                if lost is None:
+                    raise
+                logger.debug('pyshark: not raising %s for tshark (pid %s) at end of file: asyncio '
+                             'reports 255, but its Popen read 0, so asyncio lost the exit status',
+                             type(error).__name__, ', '.join(str(process.pid) for process in lost))
+                # NOTE: still listed, the reaped tshark makes the capture's ``__del__`` raise
+                # this again; closing once more runs the rest of pyshark's own close
+                lost.clear()
+                self._extmp.close()
