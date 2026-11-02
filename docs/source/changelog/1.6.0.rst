@@ -144,9 +144,16 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   operation, telling 1.3 apart by its ``supported_versions`` extension;
   ``id()`` stays ``('TLS',)`` or ``('DTLS',)``. A cleartext handshake record is
   decoded -- ClientHello and ServerHello down to their cipher suites,
-  compression methods and extension types, any other message at type and
-  length -- as are an alert and ChangeCipherSpec, while encrypted records stay
-  opaque octets. Each whole TLS record in a TCP segment is a layer of its own,
+  compression methods and extensions, EncryptedExtensions down to its
+  extensions, any other message at type and length -- as are an alert and
+  ChangeCipherSpec, while encrypted records stay opaque octets. An extension's
+  body is read and built for ``server_name``, ``supported_groups``,
+  ``signature_algorithms``, ALPN, ``supported_versions`` and ``key_share``, a
+  HelloRetryRequest's included, and kept as octets for any other type or for a
+  body its parser rejects, which logs nothing;
+  :func:`~pcapkit.foundation.registry.protocols.register_tls_extension`
+  registers a parser and constructor for a further type (:issue:`2514`,
+  :pr:`2595`). Each whole TLS record in a TCP segment is a layer of its own,
   the previous record's payload, so each alias names its own version --
   ``TCP:TLS 1.3:TLS 1.2`` -- and one that fails to decode is
   :class:`~pcapkit.protocols.misc.raw.Raw` with the rest of the segment
@@ -158,8 +165,14 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   reads and builds DTLS 1.3's unified-header records
   (:rfc:`9147#section-4.1`), except one carrying a connection ID, which stays
   Raw as an :rfc:`9146` ``tls12_cid`` record does (:issue:`2467`,
-  :pr:`2494`). The content and handshake types are :mod:`pcapkit.const.tls`,
-  crawled from IANA (:issue:`2495`, :pr:`2503`).
+  :pr:`2494`). Each whole DTLS record in a UDP datagram is likewise a layer of
+  its own -- a DTLS 1.2 record then a DTLS 1.3 unified-header record read
+  ``DTLS 1.2:DTLS 1.3`` -- a unified-header record with no length running to
+  the end of the datagram, and one that fails to decode is
+  :class:`~pcapkit.protocols.misc.raw.Raw` with the rest of the datagram
+  (:issue:`2535`, :pr:`2603`). The content, handshake and extension types are
+  :mod:`pcapkit.const.tls`, crawled from IANA (:issue:`2495`, :issue:`2514`,
+  :pr:`2503`, :pr:`2595`).
 
 * **Added** -- :class:`~pcapkit.protocols.application.sslv2.SSLv2`, a dissector
   for SSL version 2 (draft-hickman-netscape-ssl-00), whose record layer shares
@@ -339,8 +352,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 
 * **Changed** -- protocol class bodies are reordered to the member-order
   convention, with no change in behaviour, and a project test guards the
-  order (:issue:`2490`, :pr:`2522`, :pr:`2523`, :pr:`2538`, :pr:`2539`,
-  :pr:`2541`, :pr:`2613`).
+  order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
+  :pr:`2539`, :pr:`2541`, :pr:`2613`).
 
 * **Changed** -- the house conventions record that a protocol class takes its
   module's name, one to a module (:issue:`2529`, :pr:`2542`); that a
@@ -365,7 +378,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   protocol belongs in :mod:`pcapkit.protocols.misc`; that
   :mod:`pcapkit.utilities.compat` holds compatibility implementations and
   re-exports only, behind version gates; and how a ruling given in a pull
-  request's review is cited (:issue:`2557`, :issue:`2563`, :pr:`2599`).
+  request's review is cited (:issue:`2557`, :issue:`2563`, :pr:`2599`). The
+  test conventions record that a test class whose tests each need a fresh
+  import purges in ``setUp``, with a comment saying why, rather than importing
+  once per class (:issue:`2562`, :pr:`2611`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
