@@ -179,7 +179,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             ``.port`` unconditionally would have made the :obj:`int` case an
             :exc:`AttributeError`, and unwrapping unconditionally would have
             changed what anything *else* does here: :func:`int` of :obj:`None`
-            raises where the lookup used to fall back to
+            raises where the lookup falls back to
             :class:`~pcapkit.protocols.misc.raw.Raw`, and :func:`int` of
             ``'80'`` would dispatch a :class:`str` nobody registered.
 
@@ -324,7 +324,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             The :class:`~pcapkit.const.reg.apptype.apptype.AppType` for ``port``.
 
         Raises:
-            ProtocolError: If ``port`` is a :obj:`bool` (:issue:`2287`).
+            ProtocolError: If ``port`` is a :obj:`bool` (:issue:`2287`), or is
+                neither an :class:`int` that fits in 16 bits nor an
+                :class:`~pcapkit.const.reg.apptype.apptype.AppType`.
 
         Important:
             :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` accepts
@@ -337,14 +339,24 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` as a parsed one, so
             reading ``.port`` off it works on both paths.
 
+        .. versionchanged:: 1.6.0
+
+           A port past 16 bits, a negative one, or one that is not an
+           :class:`int` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+           rather than a bare :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+           (:issue:`2594`).
+
         """
         if isinstance(port, Enum_AppType):
             return port
         # NOTE: ``bool`` is an ``int`` subclass, so ``AppType.get`` would look
         # ``True``/``False`` up as port 1/0 rather than refuse them (#2287).
-        if isinstance(port, bool):
+        if isinstance(port, bool) or not isinstance(port, int):
             raise ProtocolError(f'{cls.__name__}: invalid port: {port!r}')
-        return Enum_AppType.get(port, proto=proto)
+        try:
+            return Enum_AppType.get(port, proto=proto)
+        except ValueError as error:  # the registry's own range, quiet as get raises it
+            raise ProtocolError(f'{cls.__name__}: invalid port: {port!r}') from error
 
     def _decode_next_layer(self, dict_: '_PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':  # pylint: disable=arguments-renamed

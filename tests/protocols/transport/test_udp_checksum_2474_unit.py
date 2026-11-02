@@ -62,6 +62,7 @@ class UDPChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -71,6 +72,7 @@ class UDPChecksumTests(unittest.TestCase):
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.IPv4, self.IPv6, self.UDP, self.IP_Pseudo = IPv4, IPv6, UDP, IP_Pseudo
+        self.TransType = TransType
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
@@ -94,7 +96,7 @@ class UDPChecksumTests(unittest.TestCase):
     def make6(self, **kwargs: object) -> bytes:
         """The octets of an IPv6 packet carrying a UDP datagram made with ``kwargs``."""
         udp = self.UDP(srcport=40000, dstport=9, payload=b'hello', **kwargs)
-        return self.IPv6(src='2001:db8::1', dst='2001:db8::2', next='UDP', payload=udp).data
+        return self.IPv6(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.UDP, payload=udp).data
 
     def test_the_captured_checksum_verifies(self) -> None:
         self.assertEqual(expected(pseudo4(CAPTURED[12:16], CAPTURED[16:20], 125), CAPTURED[20:]), CAPTURED[26:28])
@@ -135,7 +137,7 @@ class UDPChecksumTests(unittest.TestCase):
                     self.assertEqual(self.IPv4.from_data(layer.info).data, packet)
 
     def test_the_ip_layer_computes_it(self) -> None:
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='UDP',
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP,
                            payload=self.UDP(srcport=40000, dstport=9, payload=b'hello')).data
         self.assertEqual(octets[26:28], expected(pseudo4(wire.IPV4_A, wire.IPV4_B, 13), octets[20:]))
         self.assertEqual(self.status(octets), (self.Status.VALID, []))
@@ -151,14 +153,14 @@ class UDPChecksumTests(unittest.TestCase):
         for kwargs in ({'mf': True}, {'offset': 185}):
             with self.subTest(**kwargs):
                 udp = self.UDP(srcport=40000, dstport=9, payload=b'hello')
-                octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='UDP', payload=udp, **kwargs).data
+                octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP, payload=udp, **kwargs).data
                 self.assertEqual(octets[20:], udp.data)
                 self.assertEqual(octets[26:28], b'\x00\x00')
 
     def test_the_length_field_bounds_it(self) -> None:
         # The trailer past the Length field is neither summed nor in the pseudo-header.
         udp = self.UDP(srcport=40000, dstport=9, payload=b'hello', trailer=b'pad')
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='UDP', payload=udp).data
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP, payload=udp).data
         self.assertEqual(octets[26:28], expected(pseudo4(wire.IPV4_A, wire.IPV4_B, 13), octets[20:33]))
         self.assertEqual(self.status(octets), (self.Status.VALID, []))
 
@@ -167,19 +169,19 @@ class UDPChecksumTests(unittest.TestCase):
         prefix = pseudo4(wire.IPV4_A, wire.IPV4_B, 10)
         rest = ~wire.checksum(prefix + b'\x9c\x40\x00\x09\x00\x0a\x00\x00') & 0xFFFF
         word = (0xFFFF - rest).to_bytes(2, 'big')
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='UDP',
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP,
                            payload=self.UDP(srcport=40000, dstport=9, payload=word)).data
         self.assertEqual(wire.checksum(prefix + octets[20:26] + b'\x00\x00' + octets[28:]), 0)
         self.assertEqual(octets[26:28], b'\xff\xff')
         self.assertEqual(self.status(octets), (self.Status.VALID, []))
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol='UDP', upper_length=0)
+        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP, upper_length=0)
         datagram = self.UDP(srcport=40000, dstport=9, payload=b'alone', pseudo=pseudo).data
         self.assertEqual(datagram[6:8], expected(pseudo4(wire.IPV4_A, wire.IPV4_B, 13), datagram))
 
         # A jumbogram's zero Length (RFC 2675): the datagram is all but the trailer.
-        pseudo = self.IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol='UDP', upper_length=0)
+        pseudo = self.IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol=self.TransType.UDP, upper_length=0)
         datagram = self.UDP(srcport=40000, dstport=9, payload=b'alone', total_length=0,
                             trailer=b'pad', pseudo=pseudo).data
         self.assertEqual(datagram[6:8], expected(pseudo6(wire.IPV6_A, wire.IPV6_B, 13), datagram[:13]))
@@ -189,7 +191,7 @@ class UDPChecksumTests(unittest.TestCase):
         from scapy.layers.inet import IP
         from scapy.layers.inet import UDP as ScapyUDP
 
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='UDP',
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.UDP,
                            payload=self.UDP(srcport=40000, dstport=9, payload=b'hello')).data
         packet = IP(octets)
         del packet[ScapyUDP].chksum

@@ -1,28 +1,23 @@
 # -*- coding: utf-8 -*-
-"""A HIP list argument resolves a :obj:`str` enumeration member name.
+"""A HIP list argument refuses a :obj:`str` enumeration member name.
 
-GitHub issue #2394, the third of the family #2356 and #2393 opened.
-:meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` infers the
-enumeration a bare member name belongs to from the *default value* of the
-``make()`` argument the name arrived as -- so an argument whose default is an
-enumeration member resolves a name on its own, and one whose default is
-:data:`None` has nothing to read.
+GitHub issue #2394, the third of the family #2356 and #2393 opened, and settled
+by #2594. Some HIP parameters carry a *list* of enumeration values rather than
+one, and build it item by item. A list item is no ``make()`` argument, so no
+enumeration can be inferred for a name in one from an argument's default (#2394).
 
-Some HIP parameters carry a *list* of enumeration values rather than one, and
-build it in a loop. The value handed to ``_make_index`` is therefore the loop
-variable, which is no argument of the maker at all, so the inference cannot
-reach the list argument's annotation and a name goes unresolved however the
-list argument is declared. Measured before the fix: the member and integer
-forms of every one of them built the correct octets, and the member-name
-form raised ``ProtocolNotImplemented: protocol 'RENDEZVOUS' not implemented``.
-Each maker now names its own enumeration, which is what #2393 did for the
-scalar case -- just ahead of the loop rather than at the call, so that the
-decision is taken once per parameter instead of once per item.
+Under #2594 nothing is inferred: every item of these lists is a member or an
+:class:`int` code, resolved with the enumeration's ``get``, and a name is
+refused with :exc:`~pcapkit.utilities.exceptions.ProtocolError` wherever it sits
+in the list. A caller holding a name resolves it first, with
+:meth:`~pcapkit.protocols.protocol.Protocol.resolve_index`, which takes the
+name, default, namespace and reversed group explicitly; resolved one item at a
+time, it builds the octets the member does.
 
 :meth:`HIPListArgumentStrNameTests.test_every_list_argument_maker_has_a_case`
-reads the loop-variable sites off ``hip.py`` itself rather than trusting the
-list below, so a further parameter added with the same shape cannot land
-without a case here.
+reads the list-item sites off ``hip.py`` itself rather than trusting the table
+below, so a further parameter added with the same shape cannot land without a
+case here.
 
 Every case builds its own packet in memory and reads no capture. :class:`HIP`
 and the enumerations are imported inside each test, after
@@ -37,8 +32,12 @@ import importlib.util
 import inspect
 import textwrap
 import unittest
+from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
+
+if TYPE_CHECKING:
+    from typing import Any
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -60,8 +59,8 @@ HIP_VERSION = {577: 1}
 #: One case per maker: ``{maker: (parameter name, list keyword, enum module and
 #: class, member name, the other keywords the parameter needs)}``. Each member is
 #: a non-zero one the maker would not arrive at on its own, so an octet string
-#: carrying it is evidence the name resolved rather than that a default survived.
-#: Keyed by maker rather than by parameter because
+#: carrying it is evidence the item reached the wire rather than that a default
+#: survived. Keyed by maker rather than by parameter because
 #: :meth:`HIPListArgumentStrNameTests.test_every_list_argument_maker_has_a_case`
 #: compares these keys against the makers it finds in ``hip.py``.
 CASES = {
@@ -90,9 +89,8 @@ CASES = {
         'REG_RESPONSE', 'reg_response', 'pcapkit.const.hip.registration.Registration',
         'RELAY_UDP_HIP', {'lifetime': 42}),
     # ``reg_failed`` takes registration types, not failure types (#2309); the
-    # sibling ``failure_type`` is a scalar whose own default is a member, so it
-    # resolved a name all along and is pinned by
-    # :meth:`test_a_scalar_sibling_still_resolves_by_inference`.
+    # scalar sibling ``failure_type`` is covered by
+    # :meth:`test_a_scalar_sibling_takes_a_resolved_name_too`.
     '_make_param_reg_failed': (
         'REG_FAILED', 'reg_failed', 'pcapkit.const.hip.registration.Registration',
         'RENDEZVOUS', {'failure_type': 1}),
@@ -112,7 +110,7 @@ CASES = {
 }
 
 
-def _attr(path: 'str') -> 'object':
+def _attr(path: 'str') -> 'Any':
     """Import ``path`` and return the attribute it names.
 
     Args:
@@ -131,7 +129,7 @@ def _attr(path: 'str') -> 'object':
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HIPListArgumentStrNameTests(unittest.TestCase):
-    """A member name in a list argument resolves against its enumeration."""
+    """A member name in a list argument is refused; a resolved one builds."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -155,42 +153,64 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         # ``__post_init__`` assigns only once ``read`` has returned (#1184).
         base['version'] = HIP_VERSION.get(int(code), 2)  # type: ignore[call-overload]
         return HIP(parameters=[(code, value)], extension=True,
-                   **base).data  # type: ignore[arg-type]
+                   **base).data
 
-    def test_a_member_name_in_a_list_builds_what_the_member_builds(self) -> None:
-        """#2394: the three forms of a list item agree, octet for octet.
+    def test_a_member_name_in_a_list_is_refused(self) -> None:
+        """#2594: a name in a list raises ``ProtocolError``, for every maker.
 
-        The member-name form raised ``ProtocolNotImplemented`` for every maker
-        in ``CASES`` before the fix, while the member and integer forms built
-        these very octets, so this is the fail-without-fix assertion and the
-        no-regression one at once.
+        Each maker names its enumeration at the call (#2394), and resolves a
+        list item against it as a member or a code, never as a name.
 
         """
+        error = _attr('pcapkit.utilities.exceptions.ProtocolError')
+        parameter = _attr('pcapkit.const.hip.parameter.Parameter')
+
+        for maker, (name, keyword, _, member, extra) in CASES.items():
+            with self.subTest(maker=maker):
+                with self.assertRaises(error):
+                    self._build(getattr(parameter, name), {**extra, keyword: [member]})
+
+    def test_resolve_index_builds_what_the_member_builds(self) -> None:
+        """#2594: a name resolved first builds the member's octets, item by item.
+
+        The member, its :class:`int` code and the name passed through
+        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` agree octet for
+        octet, and none of them is what an absent list builds.
+
+        """
+        from pcapkit.protocols.protocol import Protocol
+
         parameter = _attr('pcapkit.const.hip.parameter.Parameter')
 
         for maker, (name, keyword, enum_path, member, extra) in CASES.items():
             with self.subTest(maker=maker):
                 code = getattr(parameter, name)
-                value = getattr(_attr(enum_path), member)
+                namespace = _attr(enum_path)
+                value = getattr(namespace, member)
 
                 expected = self._build(code, {**extra, keyword: [value]})
-                self.assertEqual(self._build(code, {**extra, keyword: [member]}).hex(),
+                resolved = Protocol.resolve_index(member, namespace=namespace)
+                self.assertIs(resolved, value)
+                self.assertEqual(self._build(code, {**extra, keyword: [resolved]}).hex(),
                                  expected.hex())
                 self.assertEqual(self._build(code, {**extra, keyword: [int(value)]}).hex(),
                                  expected.hex())
 
                 # the member is not what an absent list produces, so an item
-                # that never arrived cannot pass as one that resolved
+                # that never arrived cannot pass as one that was written
                 self.assertNotEqual(self._build(code, dict(extra)).hex(), expected.hex())
 
-    def test_a_list_resolves_every_item_it_holds(self) -> None:
-        """#2394: a name resolves wherever it sits, mixed in with other forms.
+    def test_a_list_is_checked_item_by_item(self) -> None:
+        """#2594: a name is refused wherever it sits, mixed in with other forms.
 
-        The fix is inside the loop rather than ahead of it, so a list is not
-        resolved as a whole: a name in the second position has to resolve as
-        readily as one in the first, and alongside the member and integer forms.
+        A list is not checked as a whole: a name in the second position is
+        refused as readily as one in the first, and the same list with that item
+        resolved builds what the members build.
 
         """
+        from pcapkit.protocols.protocol import Protocol
+
+        error = _attr('pcapkit.utilities.exceptions.ProtocolError')
         parameter = _attr('pcapkit.const.hip.parameter.Parameter')
         transport = _attr('pcapkit.const.hip.transport.Transport')
 
@@ -198,45 +218,59 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         expected = self._build(code, {'port': 1234, 'modes': [
             transport.DEFAULT, transport.ESP, transport.ESP_TCP]})
 
-        self.assertEqual(
-            self._build(code, {'port': 1234, 'modes': [1, 'ESP', transport.ESP_TCP]}).hex(),
-            expected.hex())
-        self.assertEqual(
-            self._build(code, {'port': 1234, 'modes': ['DEFAULT', 'ESP', 'ESP_TCP']}).hex(),
-            expected.hex())
+        with self.assertRaises(error):
+            self._build(code, {'port': 1234, 'modes': [1, 'ESP', transport.ESP_TCP]})
 
-    def test_an_explicit_namespace_still_wins(self) -> None:
-        """A ``*_namespace`` keyword overrides the enumeration the maker names.
+        resolved = [Protocol.resolve_index(item, namespace=transport)
+                    for item in (1, 'ESP', transport.ESP_TCP)]
+        self.assertEqual(self._build(code, {'port': 1234, 'modes': resolved}).hex(),
+                         expected.hex())
 
-        The fix names an enumeration only where the caller named none, so that
-        the documented ``*_namespace`` keyword keeps resolving a name the
-        parameter's own enumeration does not carry.
+    def test_resolve_index_takes_the_group_explicitly(self) -> None:
+        """#2594: ``resolve_index`` takes the name, default, namespace and reversed group.
+
+        Each case builds the octets the member builds: a name looked up in
+        another enumeration, a ``str -> int`` mapping with ``reversed``, and a
+        ``default`` for a name the namespace lacks. A name with neither a match
+        nor a ``default`` raises ``ProtocolNotImplemented``.
 
         """
+        from pcapkit.protocols.protocol import Protocol
+
+        missing = _attr('pcapkit.utilities.exceptions.ProtocolNotImplemented')
         parameter = _attr('pcapkit.const.hip.parameter.Parameter')
+        group = _attr('pcapkit.const.hip.group.Group')
         registration = _attr('pcapkit.const.hip.registration.Registration')
 
+        def build(item: 'object') -> 'str':
+            return self._build(parameter.DH_GROUP_LIST, {'groups': [item]})[40:].hex()
+
         # ``RENDEZVOUS`` is a registration type, not a Diffie-Hellman group
-        octets = self._build(parameter.DH_GROUP_LIST,
-                             {'groups': ['RENDEZVOUS'], 'group_namespace': registration})
-        self.assertEqual(octets[40:].hex(), '01ff000101000000')
+        self.assertEqual(build(Protocol.resolve_index('RENDEZVOUS', namespace=registration)),
+                         '01ff000101000000')
+        self.assertEqual(build(Protocol.resolve_index('mine', namespace={'mine': 9},
+                                                      reversed=True)),
+                         '01ff000109000000')
+        self.assertEqual(build(Protocol.resolve_index('No_Such_Group', 4, namespace=group)),
+                         '01ff000104000000')
 
-        # a ``str -> int`` mapping needs ``*_reversed``, and still resolves
-        octets = self._build(parameter.DH_GROUP_LIST,
-                             {'groups': ['mine'], 'group_namespace': {'mine': 9},
-                              'group_reversed': True})
-        self.assertEqual(octets[40:].hex(), '01ff000109000000')
+        with self.assertRaises(missing):
+            Protocol.resolve_index('No_Such_Group', namespace=group)
 
-    def test_a_scalar_sibling_still_resolves_by_inference(self) -> None:
-        """``REG_FAILED``'s ``failure_type`` resolves from its own default.
+    def test_a_scalar_sibling_takes_a_resolved_name_too(self) -> None:
+        """``REG_FAILED``'s ``failure_type`` refuses a name, as its list does.
 
         It is a scalar whose default is a
         :class:`~pcapkit.const.hip.registration_failure.RegistrationFailure`
-        member, so the inference #2394 cannot perform for a list item works for
-        it, and the two arguments resolve against *different* enumerations in
+        member, a shape an inference from argument defaults would resolve; #2594
+        refuses the name there as well. Resolved against their own
+        enumerations, the two arguments build the octets their members build in
         the same call.
 
         """
+        from pcapkit.protocols.protocol import Protocol
+
+        error = _attr('pcapkit.utilities.exceptions.ProtocolError')
         parameter = _attr('pcapkit.const.hip.parameter.Parameter')
         failure = _attr('pcapkit.const.hip.registration_failure.RegistrationFailure')
         registration = _attr('pcapkit.const.hip.registration.Registration')
@@ -245,39 +279,25 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
             'failure_type': failure.Registration_type_unavailable,
             'reg_failed': [registration.RENDEZVOUS],
         })
+        with self.assertRaises(error):
+            self._build(parameter.REG_FAILED, {
+                'failure_type': 'Registration_type_unavailable',
+                'reg_failed': [registration.RENDEZVOUS],
+            })
         self.assertEqual(self._build(parameter.REG_FAILED, {
-            'failure_type': 'Registration_type_unavailable',
-            'reg_failed': ['RENDEZVOUS'],
+            'failure_type': Protocol.resolve_index('Registration_type_unavailable',
+                                                   namespace=failure),
+            'reg_failed': [Protocol.resolve_index('RENDEZVOUS', namespace=registration)],
         }).hex(), expected.hex())
         self.assertEqual(expected[40:].hex(), '03a8000201010000')
 
-    def test_an_unresolvable_name_still_raises_or_falls_back(self) -> None:
-        """Naming the enumeration does not make every string resolve.
-
-        The enumeration is named, not bypassed, so a string that is no member
-        of it still raises -- or takes the ``*_default`` the caller gave, which
-        is the documented escape.
-
-        """
-        exc = _attr('pcapkit.utilities.exceptions.ProtocolNotImplemented')
-        parameter = _attr('pcapkit.const.hip.parameter.Parameter')
-
-        with self.assertRaises(exc):
-            self._build(parameter.DH_GROUP_LIST, {'groups': ['No_Such_Group']})
-
-        octets = self._build(parameter.DH_GROUP_LIST,
-                             {'groups': ['No_Such_Group'], 'group_default': 4})
-        self.assertEqual(octets[40:].hex(), '01ff000104000000')
-
     def test_every_list_argument_maker_has_a_case(self) -> None:
-        """Every loop-variable ``_make_index`` site in ``hip.py`` has a case.
+        """Every list-item ``_make_index`` site in ``hip.py`` has a case.
 
-        The set is read off the makers rather than listed, because the bug is a
-        property of the *shape* of the call: the value handed to
-        :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` is a name
-        that is not an argument of the maker, so nothing is there for the
-        namespace to be inferred from. A further parameter of that shape
-        would be broken in exactly the same way and is caught here.
+        The set is read off the makers rather than listed: a site is a call to
+        :meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` whose value
+        is a name that is not an argument of the maker, the item of a list
+        argument. A further parameter of that shape gets a case here.
 
         """
         from pcapkit.protocols.internet.hip import HIP
@@ -300,20 +320,17 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
                     found.add(name)
 
         self.assertEqual(found, set(CASES),
-                         'a HIP maker resolves a name that is not one of its own '
-                         'arguments and has no case in CASES (#2394)')
+                         'a HIP maker resolves a list item and has no case in CASES (#2394)')
 
     def test_the_named_enumerations_are_imported_at_runtime(self) -> None:
-        """#2394: the enumerations the fix needs are no longer type-only.
+        """#2394: the enumerations the list makers resolve against are runtime names.
 
         ``Suite``, ``NATTraversal``, ``Registration``, ``ESPTransformSuite`` and
-        ``Transport`` were imported under ``TYPE_CHECKING`` alone, which is why
-        the fix is not a one-line patch. They sit in
-        :mod:`pcapkit.const.hip`, which imports nothing from
-        :mod:`pcapkit.protocols`, so naming them at runtime closes no cycle --
-        their sibling
-        :class:`~pcapkit.const.hip.registration_failure.RegistrationFailure` was
-        imported at runtime all along.
+        ``Transport`` are imported at module level rather than under
+        ``TYPE_CHECKING`` alone (#2394), since each list maker passes its
+        enumeration to ``_make_index`` at run time.
+        They sit in :mod:`pcapkit.const.hip`, which imports nothing from
+        :mod:`pcapkit.protocols`, so naming them at runtime closes no cycle.
 
         """
         from pcapkit.protocols.internet import hip

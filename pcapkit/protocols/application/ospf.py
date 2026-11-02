@@ -85,11 +85,9 @@ from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.schema.schema import Schema
@@ -116,6 +114,23 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         <pcapkit.protocols.internet.internet.Internet.__proto__>` at
         :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol
         number 89), since IP is what carries it.
+
+    .. versionchanged:: 1.6.0
+
+       Each enumeration field of :meth:`make` takes a member or an
+       :class:`int` code, resolved with the enumeration's ``get``; a name, a
+       :obj:`bool` for a field wider than one bit, or a code the field cannot
+       carry raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather
+       than resolving against an enumeration inferred from the caller's frame
+       or writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace``, ``type_reversed``,
+       ``auth_type_default``, ``auth_type_namespace`` and
+       ``auth_type_reversed`` arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
     #: Version number of corresponding protocol, as read off the header. Held on
@@ -245,18 +260,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
     def make(self,
              version: 'int' = 2,
-             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Hello,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Packet | int' = Enum_Packet.Hello,
              packet_length: 'Optional[int]' = None,
              router_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              area_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              checksum: 'Optional[bytes]' = None,
-             auth_type: 'Enum_Authentication | StdlibEnum | AenumEnum | str | int' = Enum_Authentication.No_Authentication,
-             auth_type_default: 'Optional[int]' = None,
-             auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             auth_type_reversed: 'bool' = False,
+             auth_type: 'Enum_Authentication | int' = Enum_Authentication.No_Authentication,
              auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]' = b'\x00\x00\x00\x00\x00\x00\x00\x00',  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              trailer: 'bytes' = b'',
@@ -266,9 +275,6 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         Args:
             version: OSPF version number.
             type: OSPF packet type.
-            type_default: Default value for ``type`` if not specified.
-            type_namespace: Namespace for ``type``.
-            type_reversed: Reverse namespace for ``type``.
             packet_length: Packet length (header included). If not given, it is
                 computed as 24 plus the length of ``payload``. Give it
                 explicitly when ``payload`` carries octets outside the OSPF
@@ -281,9 +287,6 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 (:rfc:`2328#appendix-A.3.1`); zero otherwise, as cryptographic
                 authentication leaves it (:rfc:`2328#appendix-D.4.3`).
             auth_type: Authentication type.
-            auth_type_default: Default value for ``auth_type`` if not specified.
-            auth_type_namespace: Namespace for ``auth_type``.
-            auth_type_reversed: Reverse namespace for ``auth_type``.
             auth_data: Authentication data: 8 octets, or, under cryptographic
                 authentication, also a schema, a data model, or the
                 :obj:`dict` form of a data model.
@@ -299,8 +302,10 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         Raises:
             ProtocolError: If ``auth_data`` is of an invalid type, is
                 :obj:`bytes` that are not exactly 8 octets long, or is a
-                :obj:`dict` missing a required key; or if ``packet_length``
-                is not an :obj:`int` in ``0..65535``.
+                :obj:`dict` missing a required key; if ``packet_length``
+                is not an :obj:`int` in ``0..65535``; or if ``type`` (8 bits)
+                or ``auth_type`` (16 bits) is a name, a :obj:`bool`, or a
+                member or code its field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -309,10 +314,10 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
            parameter lands one parameter early (:issue:`1249`).
 
         """
-        type_ = self._make_index(type, type_default, namespace=type_namespace,
-                                 reversed=type_reversed, pack=False)
-        auth_type_ = self._make_index(auth_type, auth_type_default, namespace=auth_type_namespace,
-                                      reversed=auth_type_reversed, pack=False)
+        # NOTE: ``alias`` reads ``_version``, which only ``read()`` sets.
+        type_ = self._make_index(type, Enum_Packet, bits=8, name='type', alias='OSPF')
+        auth_type_ = self._make_index(auth_type, Enum_Authentication, bits=16,
+                                      name='authentication type', alias='OSPF')
 
         data: 'bytes | Schema_CryptographicAuthentication'
         if auth_type_ == Enum_Authentication.Cryptographic_authentication:
@@ -332,12 +337,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         schema = Schema_OSPF(
             version=version,
-            type=type_,  # type: ignore[arg-type]
+            type=type_,
             length=packet_length,
             router_id=router_id,
             area_id=area_id,
             checksum=b'\x00\x00' if checksum is None else checksum,
-            auth_type=auth_type_,  # type: ignore[arg-type]
+            auth_type=auth_type_,
             auth_data=data,
             payload=payload,
             trailer=trailer,

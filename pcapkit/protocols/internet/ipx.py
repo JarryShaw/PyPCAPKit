@@ -39,10 +39,8 @@ from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from typing import Any, ClassVar, DefaultDict, Optional, Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.enum import EnumRegistry
@@ -68,6 +66,22 @@ class IPX(Internet[Data_IPX, Schema_IPX],
        The payload is dissected by IPX Packet Type from a registry of its own,
        :attr:`__proto__`, rather than looked up as an IP protocol number
        (:issue:`2169`).
+
+    .. versionchanged:: 1.6.0
+
+       The ``type`` of :meth:`make` takes a member or an :class:`int` code,
+       resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+       code the field cannot carry raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace`` and ``type_reversed``
+       arguments that went with the ``type`` of :meth:`make`; resolve a name
+       with :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -170,10 +184,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     def make(self,
              chksum: 'bytes' = b'\x00\x00',
              count: 'int' = 0,
-             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Unknown,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Packet | int' = Enum_Packet.Unknown,
              total_length: 'Optional[int]' = None,
              dst: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              src: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -186,9 +197,6 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             chksum: Checksum.
             count: Transport Control (hop count).
             type: Packet Type.
-            type_default: Default value for undefined packet type.
-            type_namespace: Namespace for packet type.
-            type_reversed: Reverse namespace for packet type.
             total_length: Packet length (header included); computed as ``30`` plus
                 the payload length when not given.
             dst: Destination Address.
@@ -201,14 +209,17 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet.
+
         .. versionchanged:: 1.5.0
 
            Takes ``total_length`` ahead of ``dst`` (:issue:`1315`), which
            shifts every later positional argument.
 
         """
-        type_val = self._make_index(type, type_default, namespace=type_namespace,
-                                    reversed=type_reversed, pack=False)
+        type_val = self._make_index(type, Enum_Packet, bits=8, name='packet type')
         if total_length is None:
             total_length = 30 + len(payload)
 
@@ -216,7 +227,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             chksum=chksum,
             len=total_length,
             count=count,
-            type=type_val,  # type: ignore[arg-type]
+            type=type_val,
             dst=dst,
             src=src,
             payload=payload,

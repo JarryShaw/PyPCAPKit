@@ -59,11 +59,9 @@ from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -89,6 +87,23 @@ class ARP(Link[Data_ARP, Schema_ARP],
        Ethernet ``hlen`` other than 6 rebuilds (:issue:`1205`), and
        :meth:`read` takes an IPv4 or IPv6 protocol address only when both
        ``ptype`` and the address length agree (:issue:`1206`).
+
+    .. versionchanged:: 1.6.0
+
+       ``htype``, ``ptype`` and ``oper`` of :meth:`make` each take a member or
+       an :class:`int` code, resolved with the enumeration's ``get``; a name, a
+       :obj:`bool`, or a code the field cannot carry raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``_default``, ``_namespace`` and ``_reversed`` arguments that went
+       with each of ``htype``, ``ptype`` and ``oper`` of :meth:`make`, such as
+       ``htype_default``; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
     #: Name of corresponding protocol.
@@ -212,20 +227,11 @@ class ARP(Link[Data_ARP, Schema_ARP],
         return self._decode_next_layer(arp, -1, length - arp.len)
 
     def make(self, *,
-             htype: 'Enum_Hardware | StdlibEnum | AenumEnum | str | int' = Enum_Hardware.Ethernet,
-             htype_default: 'Optional[int]' = None,
-             htype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             htype_reversed: 'bool' = False,
-             ptype: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
-             ptype_default: 'Optional[int]' = None,
-             ptype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             ptype_reversed: 'bool' = False,
+             htype: 'Enum_Hardware | int' = Enum_Hardware.Ethernet,
+             ptype: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,
              hlen: 'Optional[int]' = None,
              plen: 'Optional[int]' = None,
-             oper: 'Enum_Operation | StdlibEnum | AenumEnum | str | int' = Enum_Operation.REQUEST,
-             oper_default: 'Optional[int]' = None,
-             oper_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             oper_reversed: 'bool' = False,
+             oper: 'Enum_Operation | int' = Enum_Operation.REQUEST,
              sha: 'str | bytes | bytearray' = '00:00:00:00:00:00',
              spa: 'IPv4Address | IPv6Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              tha: 'str | bytes | bytearray' = '00:00:00:00:00:00',
@@ -236,21 +242,12 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         Args:
             htype: Hardware type.
-            htype_default: Default value of hardware type.
-            htype_namespace: Namespace of hardware type.
-            htype_reversed: Reversed flag of hardware type.
             ptype: Protocol type.
-            ptype_default: Default value of protocol type.
-            ptype_namespace: Namespace of protocol type.
-            ptype_reversed: Reversed flag of protocol type.
             hlen: Hardware address length; if not given, ``6`` when ``htype``
                 is Ethernet, otherwise derived from the packed ``sha``.
             plen: Protocol address length; derived from the packed ``spa`` if
                 not given.
             oper: Operation.
-            oper_default: Default value of operation.
-            oper_namespace: Namespace of operation.
-            oper_reversed: Reversed flag of operation.
             sha: Sender hardware address.
             spa: Sender protocol address.
             tha: Target hardware address.
@@ -264,7 +261,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
         Raises:
             FieldValueError: If ``spa`` or ``tpa`` is rejected by
                 :meth:`_make_proto_resolve`, e.g. a :obj:`bool`.
-            ProtocolError: If ``sha`` or ``tha`` is rejected by
+            ProtocolError: If ``htype``, ``ptype`` or ``oper`` is a name, a
+                :obj:`bool`, or a member or code its field cannot carry; if
+                ``sha`` or ``tha`` is rejected by
                 :meth:`_make_addr_resolve`, or ``spa`` or ``tpa`` by
                 :meth:`_make_proto_resolve`; if a packed hardware address is
                 not ``hlen`` octets long (with ``hlen`` not given and
@@ -272,12 +271,14 @@ class ARP(Link[Data_ARP, Schema_ARP],
                 address is not ``plen`` octets long.
 
         """
-        _htype = self._make_index(htype, htype_default, namespace=htype_namespace,
-                                  reversed=htype_reversed, pack=False)
-        _ptype = self._make_index(ptype, ptype_default, namespace=ptype_namespace,
-                                  reversed=ptype_reversed, pack=False)
-        _oper = self._make_index(oper, oper_default, namespace=oper_namespace,
-                                 reversed=oper_reversed, pack=False)
+        # NOTE: prefixed with the class name, for the reason
+        # ``_make_proto_resolve`` gives: ``alias`` is unset before ``read()``.
+        _htype = self._make_index(htype, Enum_Hardware, bits=16, name='hardware type',
+                                  alias=self.__class__.__name__)
+        _ptype = self._make_index(ptype, Enum_EtherType, bits=16, name='protocol type',
+                                  alias=self.__class__.__name__)
+        _oper = self._make_index(oper, Enum_Operation, bits=16, name='operation',
+                                 alias=self.__class__.__name__)
 
         _sha = self._make_addr_resolve(sha, _htype)
         _spa = self._make_proto_resolve(spa, _ptype, plen)

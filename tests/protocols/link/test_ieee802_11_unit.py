@@ -320,9 +320,11 @@ class TestIEEE802_11(unittest.TestCase):
     def test_make_zero_fills_what_the_frame_carries(self) -> None:
         """Sequence Control, QoS Control and HT Control left out of ``make()``
         are written as zeros where the header carries them."""
+        from pcapkit.const.ieee802_11.data_subtype import DataSubtype
+        from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11 import IEEE802_11
 
-        made = IEEE802_11(type='Data', subtype='QoS_Data', order=True)
+        made = IEEE802_11(type=Type.Data, subtype=DataSubtype.QoS_Data, order=True)
         self.assertEqual(made.data, bytes.fromhex('8880') + bytes(2 + 18 + 2 + 2 + 4))
         info = made.info
         self.assertEqual((info.seq_ctrl.fragment_number, info.seq_ctrl.sequence_number), (0, 0))
@@ -405,6 +407,7 @@ class TestIEEE802_11(unittest.TestCase):
     def test_make_then_parse(self) -> None:
         """``make()`` lays out the fields Frame Control declares, zero-filling
         those not given, and parses back to the same octets."""
+        from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.data_subtype import DataSubtype
         from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11 import IEEE802_11
@@ -420,7 +423,7 @@ class TestIEEE802_11(unittest.TestCase):
         self.assertEqual(made.data.hex(), expected.hex())
         self._parse(made.data)
 
-        self.assertEqual(IEEE802_11(type='Control', subtype='ACK', addr1=_mac(1)).data,
+        self.assertEqual(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1=_mac(1)).data,
                          bytes.fromhex('d4000000') + ADDR[0])
         self.assertEqual(IEEE802_11(type=0, subtype=8).data,
                          bytes.fromhex('80000000') + bytes(20))

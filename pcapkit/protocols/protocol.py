@@ -21,7 +21,6 @@ from which the built-in protocol families derive, with its metaclass
 
 """
 import abc
-import ast
 import collections
 import collections.abc
 import contextlib
@@ -74,6 +73,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.context import ProtocolContext
+    from pcapkit.corekit.enum import EnumLookup
 
 __all__ = ['Protocol', 'ProtocolBase']
 
@@ -81,38 +81,10 @@ _PT = TypeVar('_PT', bound='Data')
 _ST = TypeVar('_ST', bound='Schema')
 _CTX = TypeVar('_CTX', bound='ProtocolContext')
 _VT = TypeVar('_VT')
+_ET = TypeVar('_ET', bound='EnumLookup')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
-
-
-@functools.lru_cache(maxsize=None)
-def _make_index_calls(func: 'Callable[..., Any]') -> 'tuple[tuple[int, int, str], ...]':
-    """Locate the ``_make_index`` calls in the source of ``func``.
-
-    Args:
-        func: method calling ``_make_index``
-
-    Returns:
-        One ``(first_line, last_line, argument)`` triple per call whose first
-        argument is a plain name, with absolute line numbers. Empty if the
-        source of ``func`` is unavailable.
-
-    """
-    try:
-        lines, start = inspect.getsourcelines(func)
-        tree = ast.parse(textwrap.dedent(''.join(lines)))
-    except (OSError, TypeError, SyntaxError):
-        return ()
-    # NOTE: ``ast.parse`` always sets ``end_lineno`` on a call.
-    return tuple(
-        (node.lineno + start - 1,
-         cast('int', node.end_lineno) + start - 1,
-         node.args[0].id)
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-        and node.func.attr == '_make_index' and node.args and isinstance(node.args[0], ast.Name)
-    )
 
 
 def _passes_raw(value: 'Any', nested: 'bool' = False) -> 'bool':
@@ -927,6 +899,62 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
             return url.replace('%', r'\x').encode().decode('unicode_escape', errors='replace')
+
+    @staticmethod
+    def resolve_index(name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = None, *,
+                      namespace: 'dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]',
+                      reversed: 'bool' = False) -> 'int | StdlibEnum | AenumEnum':  # pylint: disable=redefined-builtin
+        """Resolve a name for an enumeration field of :meth:`make`.
+
+        A field of :meth:`make` that holds an enumeration takes a member or an
+        :class:`int` code, and refuses a name (:issue:`2594`). This resolves a
+        name against a ``namespace`` given explicitly, so that its result can
+        be passed on::
+
+           >>> from pcapkit.const.reg.ethertype import EtherType
+           >>> from pcapkit.protocols.link.ethernet import Ethernet
+           >>> code = Ethernet.resolve_index('Address_Resolution_Protocol',
+           ...                               namespace=EtherType)
+           >>> Ethernet(type=code).info.type
+           <EtherType.Address_Resolution_Protocol: 2054>
+
+        Args:
+            name: a member name; a member or an :class:`int` is returned as
+                it is, for :meth:`make` to resolve
+            default: the code to return when ``name`` is not in ``namespace``
+            namespace: the enumeration ``name`` names a member of, or a
+                :obj:`dict` of codes and names
+            reversed: if ``namespace`` is a :obj:`dict` of names to codes,
+                rather than of codes to names
+
+        Returns:
+            The member ``name`` names, for an enumeration ``namespace``; the
+            code it names, for a :obj:`dict`; else ``default``.
+
+        Raises:
+            ProtocolNotImplemented: If ``name`` is a :obj:`str` that is not in
+                ``namespace`` and ``default`` is :data:`None`.
+
+        .. versionadded:: 1.6.0
+
+           Takes over the ``<field>_default``, ``<field>_namespace`` and
+           ``<field>_reversed`` arguments of :meth:`make` (:issue:`2594`).
+
+        """
+        if not isinstance(name, str):
+            return name
+        try:
+            if isinstance(namespace, type) and issubclass(namespace, (enum.Enum, aenum.Enum)):
+                return namespace[name]
+            if isinstance(namespace, dict):
+                if reversed:
+                    return cast('dict[str, int]', namespace)[name]
+                return {value: key for key, value in cast('dict[int, str]', namespace).items()}[name]
+            raise KeyError(name)  # caught below, so a non-mapping misses as an unknown name does
+        except KeyError as error:
+            if default is None:
+                raise ProtocolNotImplemented(f'{name!r} is not a name in {namespace!r}') from error
+            return default
 
     @staticmethod
     def expand_comp(value: 'str | ProtocolBase | Type[ProtocolBase]') -> 'tuple':
@@ -2356,211 +2384,57 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             return bytes.fromhex(b''.join(octets).decode())
         raise ProtocolError(f'{prefix}: invalid {name}: {addr!r}')
 
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[True]',
-                    size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
-                    namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
-                    namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[True]',
-                    size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
-                    reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
-                    pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
-                    reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
-                    pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
-                    lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
-                    reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
-                    pack: 'Literal[False]' = ...) -> 'int': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
-                    reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
-                    pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
-                    lilendian: 'bool' = ...) -> 'bytes': ...
-    @overload  # pragma: no cover
-    @classmethod
-    def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = ..., *,
-                    namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = ...,
-                    reversed: 'bool' = ..., pack: 'Literal[False]' = ...) -> 'int': ...
+    def _make_index(self, value: 'Any', namespace: 'Type[_ET]', *, bits: 'int', name: 'str',
+                    alias: 'Optional[str]' = None) -> '_ET':
+        """Resolve the code given for an enumeration field of ``make()``.
 
-    @classmethod
-    def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = None, *,
-                    namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
-                    reversed: 'bool' = False,  # pylint: disable=redefined-builtin
-                    pack: 'bool' = False, size: 'int' = 4, signed: 'bool' = False,
-                    lilendian: 'bool' = False) -> 'int | bytes':
-        """Return first index of ``name`` from a :obj:`dict` or enumeration.
-
-        Arguments:
-            name: item to be indexed
-            default: default value
-            namespace: namespace for item
-            reversed: if namespace is ``str -> int`` pairs
-            pack: if need :func:`struct.pack` to pack the result
-            size: buffer size
-            signed: signed flag
-            lilendian: little-endian flag
-
-        Returns:
-            Index of ``name`` from a dict or enumeration. If ``pack`` is
-            :data:`True`, returns :obj:`bytes`; otherwise, returns :obj:`int`.
-
-        Raises:
-            ProtocolNotImplemented: If ``name`` is **NOT** in ``namespace``
-                and ``default`` is :data:`None`.
-            StructError: If ``pack`` is :data:`True` and the index could not be
-                packed into ``size`` octets.
-
-        Note:
-            If ``name`` is a :obj:`str` and ``namespace`` is :data:`None`,
-            the namespace is inferred from the calling ``make`` method: it
-            is the enumeration class of the default value of the argument
-            that ``name`` was passed as, found from the call in the
-            caller's source (see ``_make_index_namespace()``).
-
-        """
-        if isinstance(name, (enum.Enum, aenum.Enum)):
-            index = cast('int', name.value)
-        elif isinstance(name, int):
-            index = name
-        else:  # name is str
-            if namespace is None:
-                namespace = cls._make_index_namespace(name, inspect.currentframe())
-            try:
-                if isinstance(namespace, type) and issubclass(namespace, (enum.IntEnum, aenum.IntEnum)):
-                    index = cast('int', namespace[name].value)
-                elif isinstance(namespace, dict):
-                    if reversed:
-                        if TYPE_CHECKING:
-                            namespace = cast('dict[str, int]', namespace)
-                        index = namespace[name]
-                    else:
-                        if TYPE_CHECKING:
-                            namespace = cast('dict[int, str]', namespace)
-                        index = {v: k for k, v in namespace.items()}[name]
-                else:
-                    # Caught by the handler below, so this never escapes: it jumps
-                    # to the shared "name is not in namespace" path. A pcapkit
-                    # exception here would log at CRITICAL for something the
-                    # ``except`` below handles.
-                    raise KeyError(name)
-            except KeyError as error:
-                if default is None:
-                    raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from error
-                index = default
-
-        if pack:
-            return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
-        return index
-
-    @classmethod
-    def _make_index_namespace(cls, name: 'str',
-                              frame: 'Optional[FrameType]') -> 'Optional[Type[StdlibEnum] | Type[AenumEnum]]':
-        """Infer the enumeration namespace of ``name`` for :meth:`_make_index`.
-
-        The caller of :meth:`_make_index` (``frame.f_back``) is looked up
-        among the methods of ``cls``. An argument ``arg`` of that method
-        matches if it is accompanied by an ``arg_namespace`` argument that
-        is :data:`None`, its current value is a :obj:`str` equal to
-        ``name``, and its default
-        value is an :class:`~enum.IntEnum` (or ``aenum.IntEnum``)
-        member. The candidate namespace of a match is the class of that
-        default value.
-
-        Only the argument the call passes as ``name`` is considered: the
-        caller's source is parsed (by ``_make_index_calls``) for the
-        :meth:`_make_index` call spanning the current line, and its first
-        argument names the method argument, so two arguments holding the
-        same member name each resolve against their own enumeration. Every
-        argument is considered when that call cannot be located (e.g. the
-        source is unavailable) or its first argument is not an argument of
-        the method (e.g. ``value = arg; self._make_index(value)``).
+        The field takes a member of ``namespace`` or an :class:`int` code,
+        and either resolves with ``namespace``'s
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get`. A name is refused rather
+        than looked up, so a caller holding one resolves it first, with
+        :meth:`resolve_index` (:issue:`2594`). The code is checked as
+        :meth:`_make_uint` checks an integer, so a :obj:`bool` passes only for
+        a one-bit field (:issue:`2617`): the field's width decides what is
+        refused, not the enumeration's range.
 
         Args:
-            name: member name given to :meth:`_make_index`
-            frame: frame of :meth:`_make_index`
+            value: the value given for the field
+            namespace: the enumeration the field holds
+            bits: width of the field, in bits
+            name: name of the field, for the error message
+            alias: prefix of the error message, for a caller whose
+                :attr:`alias` raises before ``read()`` sets it; :attr:`alias`
+                by default
 
         Returns:
-            The candidate namespace if exactly one argument matches. If
-            several match, any candidate, provided every candidate has
-            ``name`` as a member and maps it to the same value.
-            :data:`None` if the caller is not found, nothing matches, or no
-            candidate has ``name`` as a member.
+            What ``namespace``'s :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+            resolves ``value`` to. For most registries that includes an
+            unassigned code, as the ``Unassigned`` or ``Reserved`` member their
+            ``_missing_`` builds. Where ``get`` raises :exc:`ValueError` for a
+            code the field carries, as a closed enumeration does, the code
+            itself comes back as an :class:`int`, so that the field is rebuilt
+            as captured.
 
         Raises:
-            ProtocolNotImplemented: If every argument is considered, several
-                arguments match and their candidates disagree on ``name``:
-                some lack it, or they map it to different values.
+            ProtocolError: If ``value`` is not an :class:`int` (a name among
+                them), is a :obj:`bool` for a field wider than one bit, is
+                negative, or does not fit in ``bits`` bits. The message names
+                ``alias``.
+
+        .. versionchanged:: 1.6.0
+
+           Takes the enumeration and the width of the field, in place of the
+           ``default``, ``namespace``, ``reversed`` and ``pack`` arguments,
+           refuses a code the field cannot carry, and refuses a name rather
+           than resolving it against an enumeration inferred from the calling
+           method's frame (:issue:`2594`).
 
         """
-        caller = frame.f_back if frame is not None else None
-        if caller is None:
-            return None
+        code = self._make_uint(value, bits=bits, name=name, alias=alias)
         try:
-            code = caller.f_code
-            values = caller.f_locals
-
-            func = None
-            for klass in cls.__mro__:
-                for attr in vars(klass).values():
-                    attr = getattr(attr, '__func__', attr)
-                    if getattr(attr, '__code__', None) is code:
-                        func = attr
-                        break
-                if func is not None:
-                    break
-            if func is None:
-                return None
-
-            params = inspect.signature(func).parameters
-            lineno = caller.f_lineno
-            located = {arg for first, last, arg in _make_index_calls(func) if first <= lineno <= last}
-            found = {}  # type: dict[str, Type[StdlibEnum] | Type[AenumEnum]]
-            for arg, param in params.items():
-                # once the call is located, only its own argument is a candidate
-                if len(located) == 1 and located <= params.keys() and arg not in located:
-                    continue
-                value = values.get(arg)
-                if f'{arg}_namespace' not in params or not isinstance(value, str) or value != name:
-                    continue
-                # an explicit namespace resolves that argument by itself
-                if values.get(f'{arg}_namespace') is not None:
-                    continue
-                if isinstance(param.default, (enum.IntEnum, aenum.IntEnum)):
-                    found[arg] = type(param.default)
-        finally:
-            del caller, frame
-
-        if len(found) == 1:
-            return next(iter(found.values()))
-
-        known = {arg: int(space[name]) for arg, space in found.items() if name in space.__members__}
-        if not known:
-            return None
-        if len(known) < len(found) or len(set(known.values())) > 1:
-            matches = ', '.join(f'{space.__name__}.{name} = {known[arg]}' if arg in known
-                                else f'{space.__name__} has no {name!r}' for arg, space in found.items())
-            hint = ' or '.join(f'{arg}_namespace=' for arg in found)
-            raise ProtocolNotImplemented(f'{cls.__name__}: ambiguous member name {name!r} given to '
-                                         f'{", ".join(found)} ({matches}); pass {hint} explicitly')
-        return next(iter(found.values()))
+            return namespace.get(code)
+        except ValueError:
+            return cast('_ET', code)
 
     @classmethod
     def _make_payload(cls, data: 'Data') -> 'ProtocolBase':

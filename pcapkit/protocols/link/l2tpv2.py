@@ -61,10 +61,8 @@ from pcapkit.protocols.schema.link.l2tp import L2TP as Schema_L2TP
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -98,6 +96,22 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
        Takes over the version-2 parsing that
        :class:`~pcapkit.protocols.link.l2tp.L2TP` carried, and refuses a version
        nibble other than ``2`` (:issue:`548`).
+
+    .. versionchanged:: 1.6.0
+
+       ``type`` of :meth:`make` takes a member or an :class:`int` code,
+       resolved with the enumeration's ``get``; a name, or a code the
+       one-bit field cannot carry, raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame
+       (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace`` and ``type_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     Note:
         IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
@@ -258,10 +272,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
     def make(self,
              version: 'Literal[2]' = 2,
-             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.Data,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Type | int' = Enum_Type.Data,
              priority: 'bool' = False,
              reserved: 'int' = 0,
              total_length: 'Optional[int]' = None,
@@ -280,9 +291,6 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         Args:
             version: L2TP version.
             type: L2TP type.
-            type_default: Default value of type.
-            type_namespace: Namespace of type.
-            type_reversed: Reversed namespace of type.
             priority: Priority flag.
             reserved: Reserved bits of the flags word, in their on-wire
                 positions (bits 2, 3, 5 and 8-11, i.e. within ``0x34F0``).
@@ -309,13 +317,14 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``total_length`` is given with ``length_flag``
-                set to :data:`False`, if only one of ``ns`` and ``nr`` is
-                given, or if ``reserved`` sets a bit outside ``0x34F0``.
+            ProtocolError: If ``type`` is a name, or a member or code its
+                one-bit field cannot carry; if ``total_length`` is given with
+                ``length_flag`` set to :data:`False`; if only one of ``ns``
+                and ``nr`` is given; or if ``reserved`` sets a bit outside
+                ``0x34F0``.
 
         """
-        type_ = self._make_index(type, type_default, namespace=type_namespace,
-                                 reversed=type_reversed, pack=False)
+        type_ = self._make_index(type, Enum_Type, bits=1, name='type')
         # NOTE: :rfc:`2661` §3.1 makes ``S`` mark the presence of *both* Ns and
         # Nr, so a header cannot carry one without the other. Refuse a lone
         # value rather than drop it, or invent the other on the wire.

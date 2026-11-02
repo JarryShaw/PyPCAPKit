@@ -60,11 +60,8 @@ from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from typing import Any, Optional, Sequence
-    from typing import Type as _Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.application.httpv1 import Header as Data_Header
@@ -94,7 +91,27 @@ class Type(EnumLookup, StrEnum):
 
 class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
            data=Data_HTTP, schema=Schema_HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
+    """This class implements Hypertext Transfer Protocol (HTTP/1.*).
+
+    .. versionchanged:: 1.6.0
+
+       ``status`` of :meth:`make` takes a
+       :class:`~pcapkit.const.http.status_code.StatusCode` member or an
+       :class:`int` code, resolved with its ``get``, so a code given with no
+       ``message`` writes its member's message, as the member does; a name, a
+       :obj:`bool`, or a code past ``999`` raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against the enumeration or writing more than three digits
+       (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``status_default``, ``status_namespace`` and ``status_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -184,10 +201,7 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
              http_version: 'Literal["0.9", "1.0", "1.1", b"0.9", b"1.0", b"1.1"]' = '1.1',
              method: 'Optional[Enum_Method | str | bytes]' = None,
              uri: 'Optional[str | bytes]' = None,
-             status: 'Optional[Enum_StatusCode | str | bytes | int]' = None,
-             status_default: 'Optional[int]' = None,
-             status_namespace: 'Optional[dict[str, int] | dict[int, str] | _Type[StdlibEnum] | _Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             status_reversed: 'bool' = False,
+             status: 'Optional[Enum_StatusCode | int]' = None,
              message: 'Optional[str | bytes]' = None,
              headers: 'Optional[OrderedMultiDict[str, str]]' = None,
              body: 'bytes' = b'',
@@ -212,10 +226,9 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             method: HTTP method.
             uri: HTTP request URI.
             status: HTTP status code.
-            status_default: Default HTTP status code.
-            status_namespace: Namespace of HTTP status code.
-            status_reversed: Whether to reverse the namespace.
-            message: HTTP status message.
+            message: HTTP status message; if not given, the message
+                :class:`~pcapkit.const.http.status_code.StatusCode` gives
+                ``status``.
             headers: HTTP headers.
             body: HTTP body.
             charset: Encoding for a :obj:`str` request URI or status message,
@@ -233,13 +246,12 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
                 response's, if they are a request's and ``uri`` is
                 :obj:`None`, or if ``raw_line`` or a ``raw_header`` entry that
                 reads back as the given values carries a CR or LF that the
-                values do not (other than the CRLF of an ``obs-fold``).
+                values do not (other than the CRLF of an ``obs-fold``), or if
+                ``status`` is a name, a :obj:`bool`, or a member or code that
+                is not three decimal digits.
 
         """
         header_line = self._make_start_line(http_version, method=method, uri=uri, status=status,
-                                            status_default=status_default,
-                                            status_namespace=status_namespace,
-                                            status_reversed=status_reversed,
                                             message=message, charset=charset)
         if raw_line is not None:
             try:
@@ -507,10 +519,7 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
     def _make_start_line(self, http_version: 'str | bytes', *,
                          method: 'Optional[Enum_Method | str | bytes]' = None,
                          uri: 'Optional[str | bytes]' = None,
-                         status: 'Optional[Enum_StatusCode | str | bytes | int]' = None,
-                         status_default: 'Optional[int]' = None,
-                         status_namespace: 'Optional[dict[str, int] | dict[int, str] | _Type[StdlibEnum] | _Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         status_reversed: 'bool' = False,
+                         status: 'Optional[Enum_StatusCode | int]' = None,
                          message: 'Optional[str | bytes]' = None,
                          charset: 'Optional[str]' = None) -> 'bytes':
         """Make an HTTP/1.* start line from its values.
@@ -520,10 +529,9 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             method: HTTP method.
             uri: HTTP request URI.
             status: HTTP status code.
-            status_default: Default HTTP status code.
-            status_namespace: Namespace of HTTP status code.
-            status_reversed: Whether to reverse the namespace.
-            message: HTTP status message.
+            message: HTTP status message; if not given, the message
+                :class:`~pcapkit.const.http.status_code.StatusCode` gives
+                ``status``.
             charset: Encoding for a :obj:`str` request URI or status message,
                 **UTF-8** if not given.
 
@@ -532,8 +540,9 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Raises:
             ProtocolError: If the values are neither a request's nor a
-                response's, or if they are a request's and ``uri`` is
-                :obj:`None`.
+                response's, if they are a request's and ``uri`` is
+                :obj:`None`, or if ``status`` is a name, a :obj:`bool`, or a
+                member or code that is not three decimal digits.
 
         """
         version = http_version.encode() if isinstance(http_version, str) else http_version
@@ -553,24 +562,20 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
 
             header_line = b'%s %s HTTP/%s\r\n' % (meth, uri_val, version)
         elif method is None and status is not None:
-            # NOTE: ``status`` defaults to :data:`None`, so ``_make_index`` has no
-            # enum default to infer the namespace of a :obj:`str` member name from;
-            # name it here rather than leave the name unresolvable (#2356).
-            status_code = self._make_index(
-                status, status_default,
-                namespace=status_namespace if status_namespace is not None else Enum_StatusCode,
-                reversed=status_reversed, pack=False)
-            status_code_val = int(status_code)
+            # NOTE: 10 bits cover the three decimal digits of a status code (RFC
+            # 9112, section 4); 1000 to 1023 are past them, so refused here.
+            status_code = self._make_index(status, Enum_StatusCode, bits=10, name='status code',
+                                           alias='HTTP')
+            if int(status_code) > 999:
+                raise ProtocolError(f'HTTP: invalid status code: {status!r}')
 
             if message is None:
-                msg = getattr(status, 'message', None) or getattr(status_code, 'message', b'') or b''
+                msg = getattr(status_code, 'message', '').encode()
             else:
                 msg = message.encode(charset or 'utf-8') if isinstance(message, str) else message
-            if isinstance(msg, str):
-                msg = msg.encode()
 
             # status-code is 3DIGIT (RFC 9112, section 4), so keep a leading zero
-            header_line = b'HTTP/%s %03d %s\r\n' % (version, status_code_val, msg)
+            header_line = b'HTTP/%s %03d %s\r\n' % (version, int(status_code), msg)
         else:
             raise ProtocolError('HTTP: invalid start line: must have either a method or a status, '
                                 f'not method={method!r} and status={status!r}')

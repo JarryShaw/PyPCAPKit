@@ -50,10 +50,8 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from typing import Any, Callable, DefaultDict, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -216,10 +214,7 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         return icmp
 
     def make(self,
-             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.Echo,  # pylint: disable=redefined-builtin
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Type | int' = Enum_Type.Echo,  # pylint: disable=redefined-builtin
              code: 'int' = 0,
              checksum: 'Optional[bytes]' = None,
              # Echo identifier and sequence number, the shortest body.
@@ -229,9 +224,6 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
         Args:
             type: ICMP type.
-            type_default: Default value of ICMP type.
-            type_namespace: Namespace of ICMP type.
-            type_reversed: If the namespace of ICMP type is reversed.
             code: ICMP code; meaning is entirely ``type``-dependent.
             checksum: Checksum; if :data:`None`, computed over the message
                 (:rfc:`792`) when :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`
@@ -248,14 +240,13 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``body`` is :obj:`bytes` that do not parse as
-                the message body of ``type``, or is of none of the accepted
-                types.
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet; or if ``body`` is
+                :obj:`bytes` that do not parse as the message body of
+                ``type``, or is of none of the accepted types.
 
         """
-        type_val = cast('Enum_Type',
-                        self._make_index(type, type_default, namespace=type_namespace,
-                                         reversed=type_reversed, pack=False))
+        type_val = self._make_index(type, Enum_Type, bits=8, name='type')
 
         if isinstance(body, bytes):
             try:

@@ -14,7 +14,8 @@ House Conventions
      questions have mostly arisen;
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
    * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, the registration
-     wrappers of :mod:`pcapkit.foundation.registry`, and the value a protocol's
+     wrappers of :mod:`pcapkit.foundation.registry`, how a ``make()`` field holding
+     an enumeration resolves, and the value a protocol's
      :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns;
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members

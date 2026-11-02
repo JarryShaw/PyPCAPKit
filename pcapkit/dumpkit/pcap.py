@@ -14,6 +14,7 @@ import struct
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.dumpkit.common import DumperBase
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.misc.pcap.header import Header
@@ -26,7 +27,6 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumIntEnum
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.corekit.version import VersionInfo
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
     from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
@@ -178,7 +178,9 @@ class PCAPIO(DumperBase):
 
         """
         header = Header(
-            network=protocol,
+            # NOTE: Header.make takes a member or a code (#2594); this method's
+            # protocol also takes a name, so it is resolved here.
+            network=Header.resolve_index(protocol, namespace=Enum_LinkType),
             byteorder=byteorder,
             nanosecond=nanosecond,
             version=version,
