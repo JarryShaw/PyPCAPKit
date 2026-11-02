@@ -1143,8 +1143,8 @@ Fixed
   ``register_reassembly`` and ``register_traceflow`` on :class:`.Extractor`,
   :meth:`.TraceFlow.register_dumper` (reached
   through ``register_traceflow_dumper``), and
-  :func:`pcapkit.foundation.registry.protocols.register_protocol`. Each guard gains an
-  explicit ``isinstance(x, type)`` test ahead of its ``issubclass``; in those that
+  :func:`pcapkit.foundation.registry.protocols.register_protocol <pcapkit.foundation.registry.protocols.protocol.register_protocol>`.
+  Each guard gains an explicit ``isinstance(x, type)`` test ahead of its ``issubclass``; in those that
   accept a :class:`.ModuleDescriptor` it runs after the descriptor is unwrapped, so a
   descriptor naming a non-class attribute is rejected too, while ``register_protocol``
   takes no descriptor. No guard's target class changes, and a wrong class still raises
@@ -1239,8 +1239,8 @@ Fixed
   and ``register_transtype`` refuse a ``code`` that is not an enum member with
   :exc:`.RegistryError` before touching a registry, where they registered it and then
   raised ``AttributeError``, leaving the entry behind (:issue:`2186`, :pr:`2193`).
-* :func:`pcapkit.foundation.registry.protocols.register_protocol_code`, and the
-  ``code=`` class keyword, check every destination's key before registering any of
+* :func:`pcapkit.foundation.registry.protocols.register_protocol_code <pcapkit.foundation.registry.protocols.protocol.register_protocol_code>`,
+  and the ``code=`` class keyword, check every destination's key before registering any of
   them. A key belonging to another enum, such as ``{Frame: TransType.ICMP}``, is
   refused with :exc:`.RegistryError` where it replaced the shipped
   ``LinkType.ETHERNET`` entry, and a bad target late in the list no longer leaves
@@ -1382,8 +1382,8 @@ Added
   Inference refuses rather than guesses: an enum member whose type names no known
   destination raises :exc:`.RegistryError`, and an unrecognised class keyword raises
   :exc:`.UnsupportedCall`, matching the other registrar families. Backed by
-  :func:`pcapkit.foundation.registry.protocols.register_protocol_code`, also callable
-  directly for a class that declined at definition time. It was written up as the
+  :func:`pcapkit.foundation.registry.protocols.register_protocol_code <pcapkit.foundation.registry.protocols.protocol.register_protocol_code>`,
+  also callable directly for a class that declined at definition time. It was written up as the
   mechanism :issue:`548` needs; :issue:`548` turned out to need a missing class instead
   (115 is :rfc:`3931` L2TPv3 over IP, not :rfc:`2661`; see the corresponding **Fixed**
   entry below), so its worked example names ``L2TPv3`` (:pr:`570`).

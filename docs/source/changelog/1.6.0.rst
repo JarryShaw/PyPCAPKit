@@ -21,7 +21,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``FRAD``, ``NETLINK``, ``IPGRE``/``IP6GRE`` and ``IEEE80211_RADIOTAP`` --
   each of which has a dissector of its own, below (:issue:`2460`), reached
   through ``LinuxSLL``'s own registry keyed by ``arphrd_type``, which
-  :func:`~pcapkit.foundation.registry.protocols.register_arphrd` extends
+  :func:`~pcapkit.foundation.registry.protocols.link.register_arphrd` extends
   (:issue:`2510`, :pr:`2527`), as does a protocol class declaring
   ``code=ARPHRD.X``, since ``ARPHRD`` names ``LinuxSLL`` as its
   ``__proto_dest__`` (:issue:`2533`, :pr:`2598`). A parse told to stop there -- at ``LinuxSLL``,
@@ -41,7 +41,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   both dispatch onward, to IPv4/IPv6 and (via the EtherType registry every
   Ethernet/VLAN/LinuxSLL frame shares) ARP among others; any other NLPID or
   SNAP OUI is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, and
-  :func:`~pcapkit.foundation.registry.protocols.register_frad` registers a
+  :func:`~pcapkit.foundation.registry.protocols.link.register_frad` registers a
   dissector for a further NLPID (:pr:`2527`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.netlink.Netlink`, a dissector for
@@ -55,7 +55,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   Wireshark's netlink dissector does. Only the first message's header is
   dissected: what follows it, its per-family payload and any further message
   in the same capture, is kept as :class:`~pcapkit.protocols.misc.raw.Raw`
-  unless :func:`~pcapkit.foundation.registry.protocols.register_netlink`
+  unless :func:`~pcapkit.foundation.registry.protocols.link.register_netlink`
   registers a dissector for its ``nlmsg_type`` (:pr:`2527`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.gre.GRE`, a dissector for the
@@ -74,21 +74,23 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Added** -- :class:`~pcapkit.protocols.link.radiotap.Radiotap`, a dissector
   for the radiotap header (<https://www.radiotap.org/>) capture tools prepend to
   an 802.11 frame, which :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`
-  dispatches to for ``ARPHRD_IEEE80211_RADIOTAP`` (:issue:`2502`, :pr:`2509`).
-  It decodes the fixed 8-octet start (``it_version``, ``it_pad``, ``it_len``)
+  dispatches to for ``ARPHRD_IEEE80211_RADIOTAP`` (:issue:`2502`, :pr:`2509`),
+  as do PCAP and PCAP-NG frames of ``LINKTYPE_IEEE802_11_RADIOTAP`` (127)
+  (:issue:`2608`, :pr:`2632`). It decodes the fixed 8-octet start (``it_version``, ``it_pad``, ``it_len``)
   and records every present-flags word, following bit 31 from one word to the
   next. The optional fields those words select are kept whole rather than
   decoded. The 802.11 MAC frame behind them is dissected as
   :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, below, looked up in
   ``Radiotap``'s own registry under
   :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`,
-  and :func:`~pcapkit.foundation.registry.protocols.register_radiotap`
+  and :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap`
   replaces that dissector (:issue:`2575`, :pr:`2607`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, a
   dissector for the IEEE 802.11 MAC header of a protocol version 0 frame,
   which :class:`~pcapkit.protocols.link.radiotap.Radiotap` dispatches to
-  (:issue:`2575`, :pr:`2607`). It reads Frame Control, the Control Frame
+  (:issue:`2575`, :pr:`2607`), as do PCAP and PCAP-NG frames of
+  ``LINKTYPE_IEEE802_11`` (105) (:issue:`2608`, :pr:`2632`). It reads Frame Control, the Control Frame
   Extension and S1G Beacon layouts included, and the address, sequence, QoS
   Control and HT Control fields each frame type carries; a Control frame of a
   subtype it does not model, and an Extension frame, are read as the minimal
@@ -108,7 +110,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ICMPv6's Packet Too Big; every other type, Neighbor Discovery and MLD
   included, keeps its body raw. ICMPv4 takes the plain ``ICMP`` of :rfc:`792`
   as its ``id()`` and alias.
-  :func:`~pcapkit.foundation.registry.protocols.register_icmp_type` registers a
+  :func:`~pcapkit.foundation.registry.protocols.internet.register_icmp_type` registers a
   message-body parser. The type and code registries are
   :mod:`pcapkit.const.icmp` and :mod:`pcapkit.const.icmpv6`, crawled from IANA.
 
@@ -146,9 +148,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   gives (:rfc:`4340#section-9.2`): a coverage running past the packet is
   ``INVALID`` and warns, and a ``make()`` that computes the checksum writes a
   coverage reaching the end of the packet as 0, as Linux did.
-  :func:`~pcapkit.foundation.registry.protocols.register_dccp` registers a
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp` registers a
   port's dissector, and
-  :func:`~pcapkit.foundation.registry.protocols.register_dccp_option` an
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp_option` an
   option parser. The registries are :mod:`pcapkit.const.dccp`, crawled from
   IANA.
 
@@ -168,7 +170,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``signature_algorithms``, ALPN, ``supported_versions`` and ``key_share``, a
   HelloRetryRequest's included, and kept as octets for any other type or for a
   body its parser rejects, which logs nothing;
-  :func:`~pcapkit.foundation.registry.protocols.register_tls_extension`
+  :func:`~pcapkit.foundation.registry.protocols.application.register_tls_extension`
   registers a parser and constructor for a further type (:issue:`2514`,
   :pr:`2595`). Each whole TLS record in a TCP segment is a layer of its own,
   the previous record's payload, so each alias names its own version --
@@ -181,8 +183,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   not reassembled and stays :class:`~pcapkit.protocols.misc.raw.Raw`. DTLS also
   reads and builds DTLS 1.3's unified-header records
   (:rfc:`9147#section-4.1`), except one carrying a connection ID, which stays
-  Raw as an :rfc:`9146` ``tls12_cid`` record does (:issue:`2467`,
-  :pr:`2494`). Each whole DTLS record in a UDP datagram is likewise a layer of
+  Raw (:issue:`2467`, :pr:`2494`), and :rfc:`9146` ``tls12_cid`` records. A
+  :class:`~pcapkit.protocols.application.dtls.DTLSContext`, given to
+  ``extract()`` as its ``context``, resolves a ``tls12_cid`` record's
+  connection ID from those the capture's hellos negotiate in their
+  ``connection_id`` extension, which TLS and DTLS both decode, or from the
+  ``cid_length`` the caller gives it, and one it cannot resolve stays Raw
+  (:issue:`2515`, :pr:`2631`). Each whole DTLS record in a UDP datagram is likewise a layer of
   its own -- a DTLS 1.2 record then a DTLS 1.3 unified-header record read
   ``DTLS 1.2:DTLS 1.3`` -- a unified-header record with no length running to
   the end of the datagram, and one that fails to decode is
@@ -234,6 +241,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`Datagram <pcapkit.foundation.reassembly.data.dtls.Datagram>` holds
   that decode as ``packet``, run on its first read as an IP or TCP datagram's
   is, and :data:`None` for an incomplete message (:issue:`2531`, :pr:`2605`).
+  Both run the classmethod
+  :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+  -- ``packet`` through the reassembly class's own ``__protocol_type__`` --
+  which keeps a body that does not decode as raw octets, logging nothing
+  (:issue:`2622`, :pr:`2634`).
 
 * **Added** -- :func:`~pcapkit.foundation.analysis.ip.ip_datagram` and
   :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`, siblings of
@@ -273,11 +285,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   mismatch; a fragment's TCP, UDP, ICMP or ICMPv6 checksum, which covers
   octets the fragment lacks, is ``NO_PSEUDO_HEADER``.
 
-* **Added** -- :func:`~pcapkit.foundation.registry.protocols.register_ipx`,
-  :func:`~pcapkit.foundation.registry.protocols.register_loopback`,
-  :func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk`,
-  :func:`~pcapkit.foundation.registry.protocols.register_sctp_parameter` and
-  :func:`~pcapkit.foundation.registry.protocols.register_sctp_cause`, wrapping
+* **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
+  :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk`,
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_parameter` and
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_cause`, wrapping
   IPX's packet-type map, Loopback's address-family map and SCTP's chunk,
   chunk-parameter and error-cause parser maps with the validation the other
   wrappers carry, and the
@@ -321,6 +333,21 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.application.ospf.OSPF` that of an OSPFv2 packet.
   A checksum given is written as given, and turning
   ``PCAPKIT_CHECKSUM_COMPUTE`` off restores zero.
+
+* **Changed** -- **a breaking change to** building a Quick-Start option in
+  :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` and
+  :class:`~pcapkit.protocols.transport.tcp.TCP`: a value its field cannot
+  carry raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, where 1.5.x
+  built it (:issue:`2617`, :pr:`2630`). That is a negative or non-integer
+  rate, a TCP rate from 1 to 79 kbps, a Request TTL outside 0 to 255, an
+  IPv4 reserved value of 4 or more, and ``True`` as a TTL, nonce or
+  reserved value. Refusing a TCP rate under 80 kbps reverses 1.5.0's
+  rounding of one down to zero (:issue:`1119`); a rate between two codes still
+  rounds down to the lower. HOPOPT's and IPv6_Opts' Quick-Start maker builds an
+  unassigned function code as the unassigned option their reader keeps it as,
+  as IPv4's does.
 
 * **Changed** -- **a breaking change to**
   :class:`~pcapkit.protocols.application.drarp.DRARP` and
@@ -386,6 +413,19 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   place along, and :class:`~pcapkit.foundation.reassembly.ReassemblyManager`
   takes a required ``dtls`` (:issue:`2496`, :pr:`2528`).
 
+* **Changed** -- :mod:`pcapkit.foundation.registry.protocols` is a package with
+  a submodule per layer -- :mod:`~pcapkit.foundation.registry.protocols.link`,
+  :mod:`~pcapkit.foundation.registry.protocols.internet`,
+  :mod:`~pcapkit.foundation.registry.protocols.transport`,
+  :mod:`~pcapkit.foundation.registry.protocols.application` and
+  :mod:`~pcapkit.foundation.registry.protocols.misc`, with the shared
+  registrars in :mod:`~pcapkit.foundation.registry.protocols.protocol` -- and
+  exports every public function they define, so each ``register_*`` imports
+  from it and from :mod:`pcapkit.foundation.registry` as before
+  (:issue:`2578`, :pr:`2635`). A registrar's ``__module__`` names its
+  submodule, and its log records carry that submodule's logger name, a child
+  of the package's, so configuring the package's logger still applies.
+
 * **Changed** -- protocol class bodies are reordered to the member-order
   convention, with no change in behaviour, and a project test guards the
   order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
@@ -426,7 +466,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``:issue:`` and ``:pr:`` role in the documentation names a number of its own
   kind, a ruling given in a pull request's review cited by the issue that pull
   request closes, and a project test checks each role's kind against a
-  snapshot of the tracker (:issue:`2561`, :pr:`2626`).
+  snapshot of the tracker (:issue:`2561`, :pr:`2626`). A registry wrapper goes
+  in the submodule of :mod:`pcapkit.foundation.registry.protocols` for the
+  layer of the class owning its map (:issue:`2578`, :pr:`2635`). A protocol
+  class owns the parse of a reassembled outcome, which each
+  :mod:`pcapkit.foundation.analysis` function wraps without parsing of its
+  own, and a project test fails on a module under :mod:`pcapkit.protocols`
+  importing :mod:`pcapkit.foundation` outside ``TYPE_CHECKING``,
+  :mod:`pcapkit.foundation.registry.protocols` aside (:issue:`2622`,
+  :pr:`2634`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
