@@ -12,7 +12,6 @@
 
 import collections
 import enum
-import io
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
@@ -36,7 +35,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Optional
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
@@ -344,46 +343,6 @@ class SettingPair(Schema):
         def __init__(self, id: 'Enum_Setting', value: 'int') -> 'None': ...
 
 
-class SettingPairListField(ListField):
-    """Setting list that ends with the data.
-
-    :attr:`SettingsFrame.settings` is sized by the frame's Length, which exceeds
-    the octets present once the capture cuts the frame short. A setting read
-    past them consumes nothing, which :meth:`ListField.unpack
-    <pcapkit.corekit.fields.collections.ListField.unpack>` refuses to loop on,
-    so the list is sized by the octets present instead: the setting the data
-    ends inside is kept as far as it goes, and :meth:`Schema.unpack
-    <pcapkit.protocols.schema.schema.Schema.unpack>` records the short read
-    (:issue:`2659`).
-
-    """
-
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[SettingPair]':
-        """Unpack field value from :obj:`bytes`.
-
-        Args:
-            buffer: Field buffer.
-            packet: Packet data.
-
-        Returns:
-            Unpacked settings.
-
-        """
-        if isinstance(buffer, bytes):
-            present = len(buffer)
-        else:
-            start = buffer.tell()
-            present = buffer.seek(0, io.SEEK_END) - start
-            buffer.seek(start, io.SEEK_SET)
-
-        declared = self._length
-        self._length = min(declared, present)
-        try:
-            return cast('list[SettingPair]', super().unpack(buffer, packet))
-        finally:
-            self._length = declared
-
-
 @schema_final
 class SettingsFrame(FrameType, code=Enum_Frame.SETTINGS):
     """Header schema for HTTP/2 ``SETTINGS`` frames."""
@@ -393,9 +352,8 @@ class SettingsFrame(FrameType, code=Enum_Frame.SETTINGS):
 
         ACK = BIT_0 = 0x1
 
-    #: Settings, read no further than the data goes (see
-    #: :class:`SettingPairListField`).
-    settings: 'list[SettingPair]' = SettingPairListField(
+    #: Settings.
+    settings: 'list[SettingPair]' = ListField(
         length=lambda pkt: pkt['__length__'],
         item_type=SchemaField(length=6, schema=SettingPair),
     )

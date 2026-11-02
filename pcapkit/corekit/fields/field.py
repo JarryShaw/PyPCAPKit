@@ -83,7 +83,8 @@ _T = TypeVar('_T')
 #: *not* weighed against it: a shortfall within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`
 #: neither consults this ledger nor is charged to it, which is what keeps every
 #: legitimate short read answering the same however much preceded it. Only the
-#: 32-bit band above reads and writes ``[1]``.
+#: 32-bit band above reads and writes ``[1]``, and :func:`_zero_fill_items`, whose
+#: fill of a list of schema items has no free band (:issue:`2686`).
 _zero_pad_ledger = contextvars.ContextVar(
     'pcapkit.corekit.fields.field._zero_pad_ledger',
     default=cast('Optional[list[int]]', None),
@@ -116,6 +117,65 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
         yield ledger
     finally:
         _zero_pad_ledger.reset(token)
+
+
+def _zero_fill_items(name: 'str', length: 'int', data: 'bytes') -> 'bytes':
+    """Zero-fill the octets of a list of schema items to its declared width.
+
+    :meth:`FieldBase.unpack` reads a field the data ends inside as though its
+    missing octets were zeros, and :meth:`ListField.unpack
+    <pcapkit.corekit.fields.collections.ListField.unpack>` gives a list of
+    schema items the same reading here, so its items cover the width it
+    declares (:issue:`2686`).
+
+    Args:
+        name: Field name.
+        length: Octets the field declares.
+        data: Octets actually present, fewer than ``length``.
+
+    Returns:
+        ``data``, zero-filled to ``length``.
+
+    Raises:
+        FieldValueError: If ``length`` is past
+            :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, or if the
+            fill takes this parse's padding past
+            :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` times the
+            octets it has actually read.
+
+    """
+    ceiling = config.MAX_ZERO_PAD_LENGTH
+    if ceiling != -1 and length > ceiling:
+        raise FieldValueError(
+            f'Field {name} declares a length of {length} octet(s), '
+            f'but only {len(data)} octet(s) are available.'
+        )
+
+    ledger = _zero_pad_ledger.get()
+    if ledger is None:
+        ledger = [0, 0]
+        _zero_pad_ledger.set(ledger)
+
+    # NOTE: The fill is made-up schema objects, not zeros, so it gets no free band or one-off
+    # allowance: a 15-octet SETTINGS frame declaring 65,532 octets made 10,922 pairs in 7.5 MB.
+    padding = length - len(data)
+    shortfall, ratio = config.MAX_ZERO_PAD_SHORTFALL, config.ZERO_PAD_BUDGET_RATIO
+    if shortfall != -1:
+        if ceiling != -1 and ratio != -1:
+            allowance = ratio * (ledger[0] + len(data))
+            if ledger[1] + padding > allowance:
+                raise FieldValueError(
+                    f'Field {name} would zero-fill {padding} octet(s) of items, '
+                    f'taking this parse to {ledger[1] + padding} octet(s) of padding '
+                    f'against {ledger[0] + len(data)} octet(s) actually read, past the '
+                    f'{allowance} octet(s) allowed.'
+                )
+        ledger[1] += padding
+
+    # NOTE: The items credit the zeros they read as octets supplied, so they are
+    # taken off in advance and the fill earns no allowance of its own.
+    ledger[0] -= padding
+    return data + bytes(padding)
 
 
 #: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative

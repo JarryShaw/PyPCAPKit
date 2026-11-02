@@ -86,10 +86,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField
-   :members:
-   :show-inheritance:
-
 Data Models
 -----------
 
