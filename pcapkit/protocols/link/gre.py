@@ -74,6 +74,7 @@ from pcapkit.protocols.data.link.gre import GRE as Data_GRE
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.gre import GRE as Schema_GRE
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import frame_length
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -104,9 +105,11 @@ class GRE(Link[Data_GRE, Schema_GRE],
     :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, and computed by
     :meth:`make` when ``checksum_present`` asks for one without giving it.
     Neither this header nor the Linux cooked-capture header before it states
-    a length, so the octets verified are the ones captured: a frame the
-    capture cut short reads as
-    :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`.
+    a length, so the message runs to the end of its frame. A frame the
+    capture cut short, holding fewer octets than its original length, reads
+    as :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`,
+    as :data:`~pcapkit.utilities.contextvars.frame_length` tells it
+    (:issue:`2653`).
 
     """
 
@@ -217,7 +220,13 @@ class GRE(Link[Data_GRE, Schema_GRE],
             if _checksum is None:
                 status = ChecksumStatus.NOT_COMPUTED
             else:
-                status = verify_message(self.alias, self._data, _checksum.to_bytes(2, 'big'), length=length)
+                # NOTE: Behind LinuxSLL the message runs to the end of its frame, so
+                # what the capture cut off is covered too. Behind IP the value is None:
+                # Internet clears it, as the length IP declares bounds GRE (#2653).
+                lengths = frame_length.get()
+                missing = 0 if lengths is None else max(lengths[1] - lengths[0], 0)
+                status = verify_message(self.alias, self._data, _checksum.to_bytes(2, 'big'),
+                                        length=length + missing)
             gre.__update__([
                 ('checksum_status', status),
             ])

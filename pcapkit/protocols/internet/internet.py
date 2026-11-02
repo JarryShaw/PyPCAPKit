@@ -24,7 +24,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities import config
-from pcapkit.utilities.contextvars import rebuilding
+from pcapkit.utilities.contextvars import frame_length, rebuilding
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -466,10 +466,21 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
             carries and the dumpers leave out.
 
+            The next layer is parsed with
+            :data:`~pcapkit.utilities.contextvars.frame_length` cleared, since
+            this layer, not the frame, bounds its payload (:issue:`2653`).
+
         """
-        next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]
-                     self._import_next_layer(proto, length, packet=packet, version=version,
-                                             payload=payload))  # type: ignore[misc,call-arg]
+        # NOTE: The length this layer hands on bounds the payload, so octets the
+        # capture cut off the frame past it are none of the next layer's (#2653).
+        # An IPv4 Total Length of 0, read as the rest of the frame, loses the cut.
+        token = frame_length.set(None)
+        try:
+            next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]
+                         self._import_next_layer(proto, length, packet=packet, version=version,
+                                                 payload=payload))  # type: ignore[misc,call-arg]
+        finally:
+            frame_length.reset(token)
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

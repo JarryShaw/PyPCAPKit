@@ -211,6 +211,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNW
 from pcapkit.protocols.schema.misc.pcapng import zigbee_key_held
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
+from pcapkit.utilities.contextvars import frame_length
 from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
                                           StreamEOFError, UnsupportedCall, stacklevel)
@@ -2663,8 +2664,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_len} runs past '
                  f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
-        return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
-                                       schema.captured_len)  # type: ignore[return-value]
+        # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
+        token = frame_length.set((data.captured_len, data.original_len))
+        try:
+            return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
+                                           schema.captured_len)  # type: ignore[return-value]
+        finally:
+            frame_length.reset(token)
 
     def _read_block_spb(self, schema: 'Schema_SimplePacketBlock', *,
                         header: 'Schema_PCAPNG') -> 'Data_SimplePacketBlock':
@@ -2725,7 +2731,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             warn(f'PCAP-NG: [Block {header.type}] packet data of {data.captured_len} octet(s) '
                  f'exceeds the original length of {data.original_len}; kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
-        return self._decode_next_layer(data, self._get_linktype(0), data.captured_len)  # type: ignore[return-value]
+        # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
+        token = frame_length.set((data.captured_len, data.original_len))
+        try:
+            return self._decode_next_layer(data, self._get_linktype(0), data.captured_len)  # type: ignore[return-value]
+        finally:
+            frame_length.reset(token)
 
     def _read_block_nrb(self, schema: 'Schema_NameResolutionBlock', *,
                         header: 'Schema_PCAPNG') -> 'Data_NameResolutionBlock':
@@ -3062,8 +3073,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_length} runs past '
                  f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
-        return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
-                                       schema.captured_length)  # type: ignore[return-value]
+        # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
+        token = frame_length.set((data.captured_len, data.original_len))
+        try:
+            return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
+                                           schema.captured_length)  # type: ignore[return-value]
+        finally:
+            frame_length.reset(token)
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.

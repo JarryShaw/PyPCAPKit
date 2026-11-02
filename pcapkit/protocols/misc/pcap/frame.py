@@ -48,6 +48,7 @@ from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.utilities.compat import localcontext
+from pcapkit.utilities.contextvars import frame_length
 from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import StreamEOFError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
@@ -416,7 +417,14 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         # (#2308). As the dissection does not tell the two apart,
         # ``test_truncated_ipv4_header_is_raw_with_its_error`` pins the argument
         # where it is passed (#2236).
-        return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
+        #
+        # NOTE: A layer that states no length cannot see the cut, so the layers
+        # below are told both lengths (#2653).
+        token = frame_length.set((_ilen, _olen))
+        try:
+            return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
+        finally:
+            frame_length.reset(token)
 
     def make(self,
              timestamp: 'Optional[float | Decimal | int | dt_type]' = None,
