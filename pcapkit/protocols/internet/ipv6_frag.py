@@ -62,6 +62,10 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
        resolving against an enumeration inferred from the caller's frame or
        writing a different value (:issue:`2594`).
 
+       :meth:`make` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+       for a ``reserved_octet`` that is not one octet, rather than padding or
+       cutting it (:issue:`2676`).
+
     .. versionremoved:: 1.6.0
 
        The ``next_default``, ``next_namespace`` and ``next_reversed``
@@ -192,8 +196,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         Args:
             next: Next header.
-            reserved_octet: The reserved octet after the next header, truncated or
-                zero-filled to one octet.
+            reserved_octet: The reserved octet after the next header.
             offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).
                 Note that the data model's :attr:`offset
                 <pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset>` is in
@@ -209,7 +212,8 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         Raises:
             ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in one octet.
+                or code that does not fit in one octet, or ``reserved_octet``
+                is not one octet.
 
         .. versionchanged:: 1.5.0
 
@@ -222,7 +226,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         return Schema_IPv6_Frag(
             next=next_val,
-            reserved=reserved_octet,
+            reserved=self._make_octets(reserved_octet, size=1, name='reserved octet'),
             flags={
                 'offset': offset,
                 'reserved': reserved,
@@ -304,12 +308,15 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: A capture cut before the octet read none of it (#1458).
+        reserved_octet = cls._fill_short_read(getattr(data, 'reserved_octet', b'\x00'),
+                                              size=1, model=data, field='reserved')
         # NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while
         # ``data.offset`` is in octets (see :meth:`read`), so scale back down to
         # keep the data-to-schema round trip exact.
         return {
             'next': data.next,
-            'reserved_octet': getattr(data, 'reserved_octet', b'\x00'),
+            'reserved_octet': reserved_octet,
             'offset': data.offset // 8,
             'reserved': data.reserved,
             'mf': data.mf,

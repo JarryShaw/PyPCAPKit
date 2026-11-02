@@ -2251,6 +2251,52 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                                 f'must be {size} {unit}, not {value!r}')
         return bytes(value)
 
+    @classmethod
+    def _fill_short_read(cls, value: 'Any', *, size: 'int', model: 'Any', field: 'str',
+                         offset: 'int' = 0) -> 'Any':
+        """Zero-fill the octets of ``value`` that a capture cut short.
+
+        A model parsed from a capture cut short records, in its
+        ``__short_read__``, the field of :attr:`__schema__` the capture ended
+        inside and the octets of it present. A padding field keeps only those
+        octets, where the other fields read the rest as zeros, so a value
+        read at or past the cut comes back short. Zero-filled, it rebuilds as
+        the rest of the header does, and the rebuild is cut back to what was
+        captured. A value of any other width is handed back for
+        :meth:`_make_octets` to refuse.
+
+        Args:
+            value: the value taken from ``model``
+            size: octets in the value's field
+            model: the data model ``value`` was taken from
+            field: the field of :attr:`__schema__` that holds ``value``
+            offset: where ``value`` starts in ``field``
+
+        Returns:
+            ``value`` zero-filled to ``size`` where it is exactly the octets
+            the cut kept of it; otherwise ``value`` itself.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if not isinstance(value, (bytes, bytearray)) or len(value) >= size:
+            return value
+        get = getattr(model, 'get', None)
+        record = get('__short_read__') if callable(get) else None
+        if record is None:
+            return value
+        name, count = record
+        fields = list(cls.__schema__.__fields__)
+        if name == field:
+            kept = min(max(count - offset, 0), size)
+        elif name in fields and field in fields and fields.index(name) < fields.index(field):
+            kept = 0
+        else:
+            return value
+        if len(value) == kept:
+            return bytes(value).ljust(size, b'\x00')
+        return value
+
     def _make_uint(self, value: 'Any', *, bits: 'int', name: 'str', alias: 'Optional[str]' = None) -> 'int':
         """Check that ``value`` is an unsigned integer that fits in ``bits`` bits.
 

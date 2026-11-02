@@ -85,6 +85,23 @@ Internal Definitions below.
    .. automethod:: _make_payload
    .. automethod:: _packing_target
 
+   .. automethod:: _read_unpack
+   .. automethod:: _read_octets
+   .. automethod:: _read_uint
+   .. automethod:: _read_sint
+   .. automethod:: _read_vector
+   .. automethod:: _read_whole_vector
+   .. automethod:: _read_uints
+
+   .. automethod:: _make_pack
+   .. automethod:: _make_octets
+   .. automethod:: _fill_short_read
+   .. automethod:: _make_uint
+   .. automethod:: _make_sint
+   .. automethod:: _uint_size
+   .. automethod:: _make_vector
+   .. automethod:: _make_uints
+
    .. automethod:: _read_mac_addr
    .. automethod:: _make_mac_addr
 
@@ -139,6 +156,29 @@ its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
 ``dpkt`` toolkit reads what |dpkt|_ decodes, which applies neither bound.
+
+Value Helpers
+-------------
+
+A protocol reads and makes its field values through the helpers
+:class:`~pcapkit.protocols.protocol.Protocol` carries, rather than through
+copies of its own (:issue:`2614`). A maker checks a caller's values through them
+before packing, and raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for
+one its field cannot carry rather than masking it (:issue:`2617`):
+
+* an unsigned integer through :meth:`~Protocol._make_uint`, which takes a
+  :obj:`bool` for a one-bit field only;
+* a two's-complement integer through :meth:`~Protocol._make_sint`, the inverse of
+  :meth:`~Protocol._read_sint`;
+* the octets of a fixed-size field through :meth:`~Protocol._make_octets`, which
+  refuses any other width rather than padding or cutting it (:issue:`2676`). A
+  value taken from a model of a cut capture goes through
+  :meth:`~Protocol._fill_short_read` first, which zero-fills just the octets the
+  cut left out, for the rebuild to cut back.
+
+:meth:`~Protocol._uint_size` counts the octets a variable-width integer needs,
+and :func:`~pcapkit.corekit.fields.strings.pad_length` the padding that takes a
+length to an alignment boundary.
 
 Data Models
 -----------
@@ -205,6 +245,21 @@ Internal Definitions
                   _make_index
                   _make_payload
                   _packing_target
+                  _read_unpack
+                  _read_octets
+                  _read_uint
+                  _read_sint
+                  _read_vector
+                  _read_whole_vector
+                  _read_uints
+                  _make_pack
+                  _make_octets
+                  _fill_short_read
+                  _make_uint
+                  _make_sint
+                  _uint_size
+                  _make_vector
+                  _make_uints
                   _read_mac_addr
                   _make_mac_addr
                   _lookup_registry
@@ -233,7 +288,15 @@ Internal Definitions
       :meth:`~Protocol._read_packet`, :meth:`~Protocol._get_payload`,
       :meth:`~Protocol._make_data`, :meth:`~Protocol._make_uint`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
-      :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_mac_addr`,
+      :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_unpack`,
+      :meth:`~Protocol._read_octets`, :meth:`~Protocol._read_uint`,
+      :meth:`~Protocol._read_sint`, :meth:`~Protocol._read_vector`,
+      :meth:`~Protocol._read_whole_vector`, :meth:`~Protocol._read_uints`,
+      :meth:`~Protocol._make_pack`, :meth:`~Protocol._make_octets`,
+      :meth:`~Protocol._fill_short_read`,
+      :meth:`~Protocol._make_uint`, :meth:`~Protocol._make_sint`,
+      :meth:`~Protocol._uint_size`, :meth:`~Protocol._make_vector`,
+      :meth:`~Protocol._make_uints`, :meth:`~Protocol._read_mac_addr`,
       :meth:`~Protocol._make_mac_addr`,
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,

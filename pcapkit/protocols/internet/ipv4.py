@@ -238,6 +238,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          writing a different value or raising a bare
          :exc:`~pcapkit.utilities.exceptions.FieldValueError`
          (:issue:`2594`).
+       * The timestamp option's maker raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a slot count
+         the option has no room for, rather than cutting it to nine or four,
+         and :meth:`make` for a checksum that is not two octets, rather than
+         padding or cutting it (:issue:`2676`).
 
     .. versionremoved:: 1.6.0
 
@@ -529,11 +534,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Raises:
             ProtocolError: If ``id``, ``reserved``, ``offset``, ``ttl`` or the
-                total length does not fit its field; if a ToS field,
-                ``protocol`` or the type of an option is a name, a :obj:`bool`
-                for a field wider than one bit, or a member or code its field
-                cannot carry; or if the options make a header too long for its
-                four-bit IHL.
+                total length does not fit its field; if ``checksum`` is not
+                two octets; if a ToS field, ``protocol`` or the type of an
+                option is a name, a :obj:`bool` for a field wider than one bit,
+                or a member or code its field cannot carry; or if the options
+                make a header too long for its four-bit IHL.
 
         .. versionchanged:: 1.5.0
 
@@ -593,7 +598,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             },
             ttl=ttl_val,
             proto=proto,
-            chksum=b'\x00\x00' if checksum is None else checksum,
+            chksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             src=src,
             dst=dst,
             options=options_value,
@@ -1801,7 +1806,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
 
     def _make_opt_ts(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TSOption]' = None, *,
-                     counts: 'int' = 5,
+                     counts: 'Optional[int]' = None,
                      overflow: 'int' = 0,
                      timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address | str | int, int | timedelta]]' = None,
                      remaining: 'Optional[list[int]]' = None,
@@ -1811,7 +1816,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Args:
             kind: option type code
             option: option data
-            counts: maximum number of timestamps to record
+            counts: maximum number of timestamps to record, at most nine for
+                a :obj:`list` of timestamps and four for a :obj:`dict`, which
+                fill the option's 40 octets (:rfc:`791#section-3.1`);
+                :data:`None` is five, or four for a :obj:`dict`
             overflow: overflow count, i.e. the number of modules that could not
                 register a timestamp (:rfc:`791#section-3.1`)
             timestamp: list of timestamps, i.e. the slots before the pointer, or
@@ -1828,9 +1836,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Raises:
             ProtocolError: If ``option`` is not given and ``timestamp`` is
                 neither :data:`None`, a :obj:`list`, nor a :obj:`dict`, or
-                ``counts`` is not a non-negative :obj:`int`; or if ``overflow``
-                does not fit in four bits, or a timestamp or a word of
-                ``remaining`` in 32 bits.
+                ``counts`` is not a non-negative :obj:`int` the option has
+                room for; or if ``overflow`` does not fit in four bits, or a
+                timestamp or a word of ``remaining`` in 32 bits.
             FieldValueError: If an address is a :obj:`bool` or is not a valid
                 IPv4 address.
 
@@ -1867,15 +1875,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             ts_list = []
             remainder = b''
-            # NOTE: Not _make_uint: a count past what the header holds is
-            # clamped to it below rather than refused, so it has no width.
-            if isinstance(counts, bool) or not isinstance(counts, int) or counts < 0:
-                raise ProtocolError(f'{self.alias}: invalid timestamp count: {counts!r}')
             if timestamp is None:
                 timestamp = []
+            # NOTE: The option is 40 octets at most (RFC 791): nine timestamps or
+            # four address pairs. Not _make_uint, as that bound is no field width.
+            room = 4 if isinstance(timestamp, dict) else 9
+            if counts is None:
+                counts = min(5, room)
+            if isinstance(counts, bool) or not isinstance(counts, int) or not 0 <= counts <= room:
+                raise ProtocolError(f'{self.alias}: invalid timestamp count: {counts!r}')
             if isinstance(timestamp, list):
                 flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
-                counts = min(9, counts)  # 9 is the maximum number of timestamps
                 length = 4 + counts * 4
 
                 for index, ts in enumerate(timestamp):
@@ -1891,7 +1901,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     ts_list.append(ts)
             elif isinstance(timestamp, dict):
                 flag = Enum_TSFlag.IP_with_Timestamp  # type: ignore[assignment]
-                counts = min(4, counts)  # 4 is the maximum number of timestamps
                 length = 4 + counts * 8
 
                 for index, (addr, ts) in enumerate(timestamp.items()):

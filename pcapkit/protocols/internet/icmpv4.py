@@ -241,9 +241,10 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
         Raises:
             ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in one octet; or if ``body`` is
+                or code that does not fit in one octet; if ``body`` is
                 :obj:`bytes` that do not parse as the message body of
-                ``type``, or is of none of the accepted types.
+                ``type``, or is of none of the accepted types; or if
+                ``checksum`` is not two octets.
 
         """
         type_val = self._make_index(type, Enum_Type, bits=8, name='type')
@@ -276,7 +277,7 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         schema = Schema_ICMPv4(
             type=type_val,
             code=code,
-            checksum=b'\x00\x00' if checksum is None else checksum,
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             data=data_val,
         )
 
@@ -562,8 +563,7 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         Args:
             type: ICMP type.
             message: message data.
-            unused: the four unused octets, truncated or zero-filled to four
-                octets.
+            unused: the four unused octets.
             data: internet header plus the first eight octets of the
                 original datagram's payload.
             **kwargs: arbitrary keyword arguments.
@@ -571,11 +571,15 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         Returns:
             Constructed message body schema.
 
+        Raises:
+            ProtocolError: If ``unused`` is not four octets.
+
         """
         if message is not None:
             unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
             data = message.data
-        return Schema_DestinationUnreachable(unused=unused, data=data)
+        return Schema_DestinationUnreachable(unused=self._make_octets(unused, size=4, name='unused octets'),
+                                             data=data)
 
     def _make_data_type_time_exceeded(self, type: 'Enum_Type',  # pylint: disable=redefined-builtin,unused-argument
                                       message: 'Optional[Data_TimeExceeded]' = None, *,
@@ -586,8 +590,7 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         Args:
             type: ICMP type.
             message: message data.
-            unused: the four unused octets, truncated or zero-filled to four
-                octets.
+            unused: the four unused octets.
             data: internet header plus the first eight octets of the
                 original datagram's payload.
             **kwargs: arbitrary keyword arguments.
@@ -595,11 +598,15 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         Returns:
             Constructed message body schema.
 
+        Raises:
+            ProtocolError: If ``unused`` is not four octets.
+
         """
         if message is not None:
             unused = getattr(message, 'unused', b'\x00\x00\x00\x00')
             data = message.data
-        return Schema_TimeExceeded(unused=unused, data=data)
+        return Schema_TimeExceeded(unused=self._make_octets(unused, size=4, name='unused octets'),
+                                   data=data)
 
     def _make_data_type_parameter_problem(self, type: 'Enum_Type',  # pylint: disable=redefined-builtin,unused-argument
                                           message: 'Optional[Data_ParameterProblem]' = None, *,
@@ -612,8 +619,7 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
             message: message data.
             pointer: pointer to the octet of the original datagram that
                 caused the error.
-            unused: the three unused octets, truncated or zero-filled to
-                three octets.
+            unused: the three unused octets.
             data: internet header plus the first eight octets of the
                 original datagram's payload.
             **kwargs: arbitrary keyword arguments.
@@ -621,9 +627,14 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         Returns:
             Constructed message body schema.
 
+        Raises:
+            ProtocolError: If ``unused`` is not three octets.
+
         """
         if message is not None:
             pointer = message.pointer
             unused = getattr(message, 'unused', b'\x00\x00\x00')
             data = message.data
-        return Schema_ParameterProblem(pointer=pointer, unused=unused, data=data)
+        return Schema_ParameterProblem(pointer=pointer,
+                                       unused=self._make_octets(unused, size=3, name='unused octets'),
+                                       data=data)

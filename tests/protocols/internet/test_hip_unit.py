@@ -1208,7 +1208,7 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.PAYLOAD_MIC,
             version=2,
             next=TransType.TCP,
-            payload=b'payload',
+            payload=b'payl',
             mic=b'mic',
         ).next, TransType.TCP)
         self.assertEqual(proto._make_param_transaction_id(
@@ -1701,9 +1701,9 @@ class HIPUnitTests(unittest.TestCase):
             hip_data.PayloadMICParameter(type=Parameter.PAYLOAD_MIC,
                                          critical=False, reserved=bytes(3), length=16,
                                          next=TransType.TCP,
-                                         payload=b'payload', mic=b'mic'),
+                                         payload=b'payl', mic=b'mic'),
             version=2,
-        ).payload, b'payload')
+        ).payload, b'payl')
         self.assertEqual(proto._make_param_transaction_id(
             Parameter.TRANSACTION_ID,
             hip_data.TransactionIDParameter(type=Parameter.TRANSACTION_ID,

@@ -226,7 +226,8 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             dst: Destination address, of the same IP version as ``src``.
             protocol: Upper-layer protocol number.
             upper_length: Upper-layer packet length, header included.
-            zero: Reserved octets, truncated or zero-filled to the layout's width.
+            zero: Reserved octets, one for IPv4 and three for IPv6; empty for
+                zeros.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -235,9 +236,10 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         Raises:
             ProtocolError: If ``ip`` is neither IPv4 nor IPv6, a value is given
                 by neither the arguments nor ``ip``, a header of ``ip`` is
-                malformed or not parsed, or ``protocol`` is a name, a
+                malformed or not parsed, ``protocol`` is a name, a
                 :obj:`bool`, or a member or code the 8-bit protocol field
-                cannot carry.
+                cannot carry, or ``zero`` is neither empty nor the layout's
+                width.
             FieldValueError: If ``src`` or ``dst`` is not a valid address,
                 they differ in IP version, or ``upper_length`` does not fit
                 the layout's length field.
@@ -270,10 +272,9 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                                   f'out of range 0 to {limit:#x}')
         proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol')
 
-        # NOTE: Kept at the layout's width, so that a constructed data model
-        # matches the parsed one.
+        # NOTE: Empty is zeros at the layout's width; any other width is refused.
         width = 3 if is_v6 else 1
-        zero = zero[:width].ljust(width, b'\x00')
+        zero = bytes(width) if zero == b'' else self._make_octets(zero, size=width, name='zero octets')
 
         if is_v6:
             return Schema_IP_Pseudo(
