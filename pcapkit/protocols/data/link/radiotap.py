@@ -13,6 +13,10 @@ if TYPE_CHECKING:
     from pcapkit.const.radiotap.eht_known import EHTKnown
     from pcapkit.const.radiotap.field_type import FieldType
     from pcapkit.const.radiotap.flags import Flags as Radiotap_Flags
+    from pcapkit.const.radiotap.he_data1_known import HEData1Known
+    from pcapkit.const.radiotap.he_data2_known import HEData2Known
+    from pcapkit.const.radiotap.he_mu_flags1_known import HEMUFlags1Known
+    from pcapkit.const.radiotap.he_mu_flags2_known import HEMUFlags2Known
     from pcapkit.const.radiotap.he_mu_other_user_known import HEMUOtherUserKnown
     from pcapkit.const.radiotap.lsig_data1 import LSIGData1
     from pcapkit.const.radiotap.mcs_known import MCSKnown
@@ -20,6 +24,7 @@ if TYPE_CHECKING:
     from pcapkit.const.radiotap.s1g_known import S1GKnown
     from pcapkit.const.radiotap.timestamp_flags import TimestampFlags
     from pcapkit.const.radiotap.tx_flags import TXFlags as Radiotap_TXFlags
+    from pcapkit.const.radiotap.usig_common_known import USIGCommonKnown
     from pcapkit.const.radiotap.vht_coding import VHTCoding
     from pcapkit.const.radiotap.vht_flags import VHTFlags
     from pcapkit.const.radiotap.vht_known import VHTKnown
@@ -33,9 +38,10 @@ __all__ = [
     'TSFT', 'Flags', 'Rate', 'Channel', 'FHSS', 'AntennaSignal', 'AntennaNoise',
     'LockQuality', 'TXAttenuation', 'DBTXAttenuation', 'DBmTXPower', 'Antenna',
     'DBAntennaSignal', 'DBAntennaNoise', 'RXFlags', 'TXFlags', 'RTSRetries', 'DataRetries',
-    'MCS', 'AMPDUStatus',
-    'VHT', 'Timestamp', 'HE', 'HEMU', 'HEMUOtherUser', 'ZeroLengthPSDU', 'LSIG',
-    'TLVFields', 'RadiotapNamespace', 'VendorNamespace', 'S1G', 'USIG', 'EHT',
+    'MCS', 'MCSFlags', 'AMPDUStatus',
+    'VHT', 'Timestamp', 'HE', 'HEData1', 'HEData2', 'HEMU', 'HEMUFlags1', 'HEMUFlags2', 'HEMUOtherUser',
+    'ZeroLengthPSDU', 'LSIG',
+    'TLVFields', 'RadiotapNamespace', 'VendorNamespace', 'S1G', 'USIG', 'USIGCommon', 'EHT',
     'TLV', 'VendorTLV',
 ]
 
@@ -281,18 +287,44 @@ class DataRetries(RadiotapField):
 
 
 @info_final
+class MCSFlags(Data):
+    """Data model for the MCS field's ``flags``, each a value subfield.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: Bandwidth, ``0`` for 20, ``1`` for 40, ``2`` for 20L and ``3`` for 20U.
+    bandwidth: 'int'
+    #: Guard interval, ``0`` for long and ``1`` for short.
+    guard_interval: 'int'
+    #: HT format, ``0`` for mixed and ``1`` for greenfield.
+    ht_format: 'int'
+    #: FEC type, ``0`` for BCC and ``1`` for LDPC.
+    fec_type: 'int'
+    #: Number of STBC streams.
+    stbc_streams: 'int'
+    #: Bit 0, the least significant, of the number of extension spatial streams.
+    ness_bit0: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, bandwidth: 'int', guard_interval: 'int', ht_format: 'int', fec_type: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     stbc_streams: 'int', ness_bit0: 'int') -> 'None': ...  # pylint: disable=unused-argument
+
+
+@info_final
 class MCS(RadiotapField):
     """Data model for the MCS field, bit 19."""
 
     #: Which of :attr:`flags` and :attr:`mcs` are known.
     known: 'MCSKnown'
-    #: Bandwidth, guard interval, HT format, FEC type, STBC and Ness, a bitmap.
-    flags: 'int'
+    #: Bandwidth, guard interval, HT format, FEC type, STBC and Ness.
+    flags: 'MCSFlags'
     #: MCS rate index, as in IEEE Std 802.11n-2009.
     mcs: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'FieldType', known: 'MCSKnown', flags: 'int', mcs: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, type: 'FieldType', known: 'MCSKnown', flags: 'MCSFlags', mcs: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
 
 
 @info_final
@@ -358,13 +390,50 @@ class Timestamp(RadiotapField):
 
 
 @info_final
+class HEData1(Data):
+    """Data model for the HE field's ``data1``, a value subfield and known bits.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: HE PPDU format, ``0`` for HE_SU, ``1`` for HE_EXT_SU, ``2`` for HE_MU and
+    #: ``3`` for HE_TRIG.
+    ppdu_format: 'int'
+    #: Which of the other subfields are known.
+    known: 'HEData1Known'
+
+    if TYPE_CHECKING:
+        def __init__(self, ppdu_format: 'int', known: 'HEData1Known') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+
+
+@info_final
+class HEData2(Data):
+    """Data model for the HE field's ``data2``, value subfields and known bits.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: RU allocation offset, within the 80 MHz channel.
+    ru_offset: 'int'
+    #: The 80 MHz channel, ``0`` for the primary and ``1`` for the secondary.
+    pri_sec_80mhz: 'int'
+    #: Which of the other subfields are known.
+    known: 'HEData2Known'
+
+    if TYPE_CHECKING:
+        def __init__(self, ru_offset: 'int', pri_sec_80mhz: 'int', known: 'HEData2Known') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+
+
+@info_final
 class HE(RadiotapField):
     """Data model for the HE field, bit 23, mostly the common part of HE-SIG-A."""
 
     #: PPDU format and which of the subfields are known.
-    data1: 'int'
-    #: Which of the subfields are known, and the primary 80 MHz channel.
-    data2: 'int'
+    data1: 'HEData1'
+    #: RU allocation offset, the 80 MHz channel, and which subfields are known.
+    data2: 'HEData2'
     #: BSS color, beam change, UL/DL, MCS, DCM, coding, LDPC and STBC.
     data3: 'int'
     #: Spatial reuse, or STA-ID in an HE MU PPDU.
@@ -375,25 +444,77 @@ class HE(RadiotapField):
     data6: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'FieldType', data1: 'int', data2: 'int', data3: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, type: 'FieldType', data1: 'HEData1', data2: 'HEData2', data3: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
                      data4: 'int', data5: 'int', data6: 'int') -> 'None': ...  # pylint: disable=unused-argument
+
+
+@info_final
+class HEMUFlags1(Data):
+    """Data model for the HE-MU field's ``flags1``, value subfields and known bits.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: SIG-B MCS, from HE-SIG-A.
+    sig_b_mcs: 'int'
+    #: SIG-B DCM, from HE-SIG-A.
+    sig_b_dcm: 'int'
+    #: Channel 1 center 26-tone RU value.
+    ch1_center_26_tone_ru: 'int'
+    #: Which of the subfields of this word and of ``flags2`` are known.
+    known: 'HEMUFlags1Known'
+
+    if TYPE_CHECKING:
+        def __init__(self, sig_b_mcs: 'int', sig_b_dcm: 'int', ch1_center_26_tone_ru: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     known: 'HEMUFlags1Known') -> 'None': ...  # pylint: disable=unused-argument
+
+
+@info_final
+class HEMUFlags2(Data):
+    """Data model for the HE-MU field's ``flags2``, value subfields and known bits.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: Bandwidth from the Bandwidth field of HE-SIG-A, ``0`` for 20 MHz up to
+    #: ``3`` for 160 or 80+80 MHz.
+    bandwidth: 'int'
+    #: SIG-B compression, from HE-SIG-A.
+    sig_b_compression: 'int'
+    #: Number of HE-SIG-B symbols or MU-MIMO users, less one, from HE-SIG-A.
+    sig_b_symbols_users: 'int'
+    #: Preamble puncturing, from the Bandwidth field of HE-SIG-A.
+    preamble_puncturing: 'int'
+    #: Channel 2 center 26-tone RU value.
+    ch2_center_26_tone_ru: 'int'
+    #: Which of the bandwidth and preamble puncturing are known.
+    known: 'HEMUFlags2Known'
+
+    if TYPE_CHECKING:
+        def __init__(self, bandwidth: 'int', sig_b_compression: 'int', sig_b_symbols_users: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     preamble_puncturing: 'int', ch2_center_26_tone_ru: 'int',  # pylint: disable=unused-argument
+                     known: 'HEMUFlags2Known') -> 'None': ...  # pylint: disable=unused-argument
 
 
 @info_final
 class HEMU(RadiotapField):
     """Data model for the HE-MU field, bit 24, from HE-SIG-A and HE-SIG-B."""
 
-    #: SIG-B MCS, DCM, compression and which of the subfields are known.
-    flags1: 'int'
-    #: Bandwidth, SIG-B symbols or MU-MIMO users, and punctured preamble.
-    flags2: 'int'
+    #: SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields
+    #: are known.
+    flags1: 'HEMUFlags1'
+    #: Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble
+    #: puncturing and the channel 2 center 26-tone RU.
+    flags2: 'HEMUFlags2'
     #: RU_channel1, one octet per RU.
     ru_channel1: 'tuple[int, int, int, int]'
     #: RU_channel2, one octet per RU.
     ru_channel2: 'tuple[int, int, int, int]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'FieldType', flags1: 'int', flags2: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, type: 'FieldType', flags1: 'HEMUFlags1', flags2: 'HEMUFlags2',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
                      ru_channel1: 'tuple[int, int, int, int]',  # pylint: disable=unused-argument
                      ru_channel2: 'tuple[int, int, int, int]') -> 'None': ...  # pylint: disable=unused-argument
 
@@ -528,18 +649,46 @@ class S1G(RadiotapField):
 
 
 @info_final
+class USIGCommon(Data):
+    """Data model for the U-SIG field's ``common``, value subfields and known bits.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: PHY version identifier.
+    phy_version: 'int'
+    #: Bandwidth, ``0`` for 20 MHz up to ``3`` for 160 MHz, and ``4`` and ``5`` for
+    #: the two 320 MHz channelizations.
+    bandwidth: 'int'
+    #: UL/DL.
+    ul_dl: 'int'
+    #: BSS color.
+    bss_color: 'int'
+    #: TXOP.
+    txop: 'int'
+    #: Which of the subfields are known, and whether the U-SIG CRC failed and its
+    #: validate bits were checked and found right.
+    known: 'USIGCommonKnown'
+
+    if TYPE_CHECKING:
+        def __init__(self, phy_version: 'int', bandwidth: 'int', ul_dl: 'int', bss_color: 'int', txop: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     known: 'USIGCommonKnown') -> 'None': ...  # pylint: disable=unused-argument
+
+
+@info_final
 class USIG(RadiotapField):
     """Data model for the U-SIG field, TLV type 33."""
 
-    #: Which of the common subfields are known, and their values.
-    common: 'int'
+    #: The common subfields, and which are known.
+    common: 'USIGCommon'
     #: Version-dependent subfields.
     value: 'int'
     #: Which bits of :attr:`value` are known.
     mask: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'FieldType', common: 'int', value: 'int', mask: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, type: 'FieldType', common: 'USIGCommon', value: 'int', mask: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
 
 
 @info_final

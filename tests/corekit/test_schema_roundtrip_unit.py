@@ -318,7 +318,7 @@ def minimal(field: 'Any', cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> '
     from pcapkit.corekit.sentinels import NO_VALUE
     from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                              PayloadField, SchemaField, SwitchField)
-    from pcapkit.corekit.fields.numbers import EnumField, NumberField
+    from pcapkit.corekit.fields.numbers import BitmapField, EnumField, NumberField
     from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 
     if isinstance(field, (ConditionalField, ForwardMatchField)):
@@ -334,6 +334,9 @@ def minimal(field: 'Any', cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> '
         return field.default
     if hasattr(field, '_flags'):
         return {name: 0 for name in field._flags}  # pylint: disable=protected-access
+    if isinstance(field, BitmapField):
+        return {**dict.fromkeys(field.subfields, 0),
+                **({} if field.remainder is None else {field.remainder: 0})}
     if isinstance(field, EnumField):
         namespace = field._namespace  # pylint: disable=protected-access
         code, kind = own_code(cls), _code_type(cls)
@@ -553,7 +556,7 @@ def patterned(cls: 'type', schema: 'Any', ctx: 'dict[str, Any]') -> 'Outcome':
 
     """
     from pcapkit.corekit.fields import ipaddress as fip
-    from pcapkit.corekit.fields.numbers import EnumField, NumberField
+    from pcapkit.corekit.fields.numbers import BitmapField, EnumField, NumberField
     from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 
     names = _referenced(cls)
@@ -564,7 +567,10 @@ def patterned(cls: 'type', schema: 'Any', ctx: 'dict[str, Any]') -> 'Outcome':
             continue
         if isinstance(field, EnumField) or hasattr(field, '_flags'):
             continue
-        if isinstance(field, NumberField):
+        if isinstance(field, BitmapField):
+            values[name] = {**dict.fromkeys(field.subfields, 1),
+                            **({} if field.remainder is None else {field.remainder: 0})}
+        elif isinstance(field, NumberField):
             values[name] = 1
         elif isinstance(field, BitField):
             values[name] = {sub: 1 for sub in field._namespace}  # pylint: disable=protected-access

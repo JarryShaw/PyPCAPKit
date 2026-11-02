@@ -337,6 +337,12 @@ NOT_A_COPY = {
         "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
         'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
         'table',
+    ('pcapkit/protocols/schema/link/radiotap.py', "{'bss_color': (19, 6)}"):
+        "the 6-bit BSS color at bit 19 of the U-SIG field's common word, not the IPv6 Next Header offset",
+    ('pcapkit/protocols/schema/link/radiotap.py', "{'phy_version': (12, 3)}"):
+        "the PHY version at bit 12 of the U-SIG field's common word, not the TCP Data Offset octet",
+    ('pcapkit/protocols/schema/link/radiotap.py', "{'ru_offset': (8, 6)}"):
+        "the 6-bit RU allocation offset of the HE field's data2, not the IPv6 Next Header offset",
     ('pcapkit/protocols/schema/misc/pcapng.py', 'BytesField(length=16)'):
         'an IPv6 address is 16 octets',
     ('pcapkit/protocols/schema/misc/pcapng.py', 'BytesField(length=6)'):

@@ -9,6 +9,10 @@ from pcapkit.const.radiotap.channel_flags import ChannelFlags as Enum_ChannelFla
 from pcapkit.const.radiotap.eht_known import EHTKnown as Enum_EHTKnown
 from pcapkit.const.radiotap.field_type import FieldType as Enum_FieldType
 from pcapkit.const.radiotap.flags import Flags as Enum_Flags
+from pcapkit.const.radiotap.he_data1_known import HEData1Known as Enum_HEData1Known
+from pcapkit.const.radiotap.he_data2_known import HEData2Known as Enum_HEData2Known
+from pcapkit.const.radiotap.he_mu_flags1_known import HEMUFlags1Known as Enum_HEMUFlags1Known
+from pcapkit.const.radiotap.he_mu_flags2_known import HEMUFlags2Known as Enum_HEMUFlags2Known
 from pcapkit.const.radiotap.he_mu_other_user_known import \
     HEMUOtherUserKnown as Enum_HEMUOtherUserKnown
 from pcapkit.const.radiotap.lsig_data1 import LSIGData1 as Enum_LSIGData1
@@ -17,13 +21,14 @@ from pcapkit.const.radiotap.rx_flags import RXFlags as Enum_RXFlags
 from pcapkit.const.radiotap.s1g_known import S1GKnown as Enum_S1GKnown
 from pcapkit.const.radiotap.timestamp_flags import TimestampFlags as Enum_TimestampFlags
 from pcapkit.const.radiotap.tx_flags import TXFlags as Enum_TXFlags
+from pcapkit.const.radiotap.usig_common_known import USIGCommonKnown as Enum_USIGCommonKnown
 from pcapkit.const.radiotap.vht_coding import VHTCoding as Enum_VHTCoding
 from pcapkit.const.radiotap.vht_flags import VHTFlags as Enum_VHTFlags
 from pcapkit.const.radiotap.vht_known import VHTKnown as Enum_VHTKnown
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.corekit.fields.numbers import (EnumField, Int8Field, UInt8Field, UInt16Field,
-                                            UInt32Field, UInt64Field)
+from pcapkit.corekit.fields.numbers import (BitmapField, EnumField, Int8Field, UInt8Field,
+                                            UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 
@@ -41,9 +46,10 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import ClassVar
+    from typing import Any, ClassVar
 
     from pcapkit.protocols.protocol import ProtocolBase
+
 
 
 @schema_final
@@ -337,13 +343,21 @@ class MCS(RadiotapField, code=Enum_FieldType.MCS):
 
     #: Which of :attr:`flags` and :attr:`mcs` are known.
     known: 'Enum_MCSKnown' = EnumField(length=1, namespace=Enum_MCSKnown)
-    #: Flags, which hold value subfields.
-    flags: 'int' = UInt8Field()
+    #: Bandwidth, guard interval, HT format, FEC type, STBC streams and the
+    #: low bit of the extension spatial streams.
+    flags: 'dict[str, Any]' = BitmapField(length=1, namespace={
+        'bandwidth': (0, 2),
+        'guard_interval': (2, 1),
+        'ht_format': (3, 1),
+        'fec_type': (4, 1),
+        'stbc_streams': (5, 2),
+        'ness_bit0': (7, 1),
+    })
     #: MCS rate index.
     mcs: 'int' = UInt8Field()
 
     if TYPE_CHECKING:
-        def __init__(self, known: 'Enum_MCSKnown | int', flags: 'int', mcs: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, known: 'Enum_MCSKnown | int', flags: 'dict[str, Any]', mcs: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
 @schema_final
@@ -419,10 +433,16 @@ class HE(RadiotapField, code=Enum_FieldType.HE):
 
     __align__ = 2
 
-    #: Format and which other subfields are known.
-    data1: 'int' = UInt16Field(byteorder='little')
-    #: Second data word.
-    data2: 'int' = UInt16Field(byteorder='little')
+    #: PPDU format, and which other subfields are known.
+    data1: 'dict[str, Any]' = BitmapField(length=2, byteorder='little', namespace={
+        'ppdu_format': (0, 2),
+    }, remainder='known', flags=Enum_HEData1Known)
+    #: RU allocation offset, primary or secondary 80 MHz, and which other
+    #: subfields are known.
+    data2: 'dict[str, Any]' = BitmapField(length=2, byteorder='little', namespace={
+        'ru_offset': (8, 6),
+        'pri_sec_80mhz': (15, 1),
+    }, remainder='known', flags=Enum_HEData2Known)
     #: Third data word.
     data3: 'int' = UInt16Field(byteorder='little')
     #: Fourth data word.
@@ -433,7 +453,7 @@ class HE(RadiotapField, code=Enum_FieldType.HE):
     data6: 'int' = UInt16Field(byteorder='little')
 
     if TYPE_CHECKING:
-        def __init__(self, data1: 'int', data2: 'int', data3: 'int', data4: 'int', data5: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, data1: 'dict[str, Any]', data2: 'dict[str, Any]', data3: 'int', data4: 'int', data5: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
                      data6: 'int') -> 'None': ...  # pylint: disable=unused-argument
 
 
@@ -443,17 +463,30 @@ class HEMU(RadiotapField, code=Enum_FieldType.HE_MU):
 
     __align__ = 2
 
-    #: First flags word.
-    flags1: 'int' = UInt16Field(byteorder='little')
-    #: Second flags word.
-    flags2: 'int' = UInt16Field(byteorder='little')
+    #: SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields
+    #: are known.
+    flags1: 'dict[str, Any]' = BitmapField(length=2, byteorder='little', namespace={
+        'sig_b_mcs': (0, 4),
+        'sig_b_dcm': (5, 1),
+        'ch1_center_26_tone_ru': (13, 1),
+    }, remainder='known', flags=Enum_HEMUFlags1Known)
+    #: Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble
+    #: puncturing, the channel 2 center 26-tone RU, and which are known.
+    flags2: 'dict[str, Any]' = BitmapField(length=2, byteorder='little', namespace={
+        'bandwidth': (0, 2),
+        'sig_b_compression': (3, 1),
+        'sig_b_symbols_users': (4, 4),
+        'preamble_puncturing': (8, 2),
+        'ch2_center_26_tone_ru': (11, 1),
+    }, remainder='known', flags=Enum_HEMUFlags2Known)
     #: RU allocation of channel 1.
     ru_channel1: 'list[int]' = ListField(length=4, item_type=UInt8Field())
     #: RU allocation of channel 2.
     ru_channel2: 'list[int]' = ListField(length=4, item_type=UInt8Field())
 
     if TYPE_CHECKING:
-        def __init__(self, flags1: 'int', flags2: 'int', ru_channel1: 'list[int] | tuple[int, ...]',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, flags1: 'dict[str, Any]', flags2: 'dict[str, Any]',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     ru_channel1: 'list[int] | tuple[int, ...]',  # pylint: disable=unused-argument
                      ru_channel2: 'list[int] | tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument
 
 
@@ -549,15 +582,21 @@ class USIG(RadiotapField, code=Enum_FieldType.U_SIG):
 
     __align__ = 4
 
-    #: Common subfields, which hold value subfields.
-    common: 'int' = UInt32Field(byteorder='little')
+    #: PHY version, bandwidth, UL/DL, BSS color and TXOP, and which are known.
+    common: 'dict[str, Any]' = BitmapField(length=4, byteorder='little', namespace={
+        'phy_version': (12, 3),
+        'bandwidth': (15, 3),
+        'ul_dl': (18, 1),
+        'bss_color': (19, 6),
+        'txop': (25, 7),
+    }, remainder='known', flags=Enum_USIGCommonKnown)
     #: Value of the U-SIG bits.
     value: 'int' = UInt32Field(byteorder='little')
     #: Which of :attr:`value`'s bits are known.
     mask: 'int' = UInt32Field(byteorder='little')
 
     if TYPE_CHECKING:
-        def __init__(self, common: 'int', value: 'int', mask: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, common: 'dict[str, Any]', value: 'int', mask: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
 @schema_final

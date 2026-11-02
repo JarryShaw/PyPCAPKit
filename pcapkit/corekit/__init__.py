@@ -43,6 +43,7 @@ __all__ = [
     'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field',
     'EnumField', 'PortEnumField',
+    'BitmapField',
 
     'BytesField',
     'StringField',
