@@ -49,7 +49,7 @@ def l2tp_data(version: 'int' = 2) -> bytes:
     """An L2TPv2 data message with every optional field absent.
 
     Matches :func:`tests.protocols.test_dispatch_bindings_unit.l2tp_data` and
-    :data:`examples.generators.dispatch._L2TP_DATA` at ``version=2``; the
+    :data:`examples.generators.dispatch_families.udp._L2TP_DATA` at ``version=2``; the
     parameter exists so a case can put a *different* nibble in bits 12-15
     while holding every other octet identical.
 

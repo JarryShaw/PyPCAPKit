@@ -53,7 +53,7 @@ HIP_BASE = {
 }
 
 #: HIP version each version-bound parameter demands: ``HIP_TRANSFORM`` (577) is
-#: :rfc:`5201` only, as :data:`examples.generators.options.HIP_VERSION` records,
+#: :rfc:`5201` only, as :data:`examples.generators.option_families.hip.HIP_VERSION` records,
 #: and the rest are refused at version 1 or indifferent to it.
 HIP_VERSION = {577: 1}
 

@@ -24,7 +24,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: Header fields shared by every HIP packet built here, as in
-#: :data:`examples.generators.options.HIP_BASE`.
+#: :data:`examples.generators.option_families.hip.HIP_BASE`.
 HIP_BASE = {
     'next': 6, 'packet': 1, 'checksum': b'\x00\x00',
     'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b'',

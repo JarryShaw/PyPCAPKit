@@ -85,7 +85,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
 #: Header fields shared by every constructed TCP segment in this module, matching
-#: :data:`examples.generators.options.TCP_BASE` so these cases build through exactly the
+#: :data:`examples.generators.option_families.tcp.TCP_BASE` so these cases build through exactly the
 #: keyword shape the fixture generator uses.
 TCP_BASE = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,

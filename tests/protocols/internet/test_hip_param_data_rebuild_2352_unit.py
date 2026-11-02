@@ -70,7 +70,7 @@ HIP_BASE = {
 
 #: HIP version each version-bound parameter demands: ``HIP_TRANSFORM`` (577)
 #: and ``R1_Counter`` (128) are :rfc:`5201` only, as
-#: :data:`examples.generators.options.HIP_VERSION` records.
+#: :data:`examples.generators.option_families.hip.HIP_VERSION` records.
 HIP_VERSION = {128: 1, 577: 1}
 
 #: Fields a constructor derives rather than accepting, so that a data model

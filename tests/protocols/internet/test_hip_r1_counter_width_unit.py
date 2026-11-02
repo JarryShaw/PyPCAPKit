@@ -68,7 +68,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: Header fields shared by every HIP packet built here. The same set
-#: :data:`examples.generators.options.HIP_BASE` uses, so a failure here is not a
+#: :data:`examples.generators.option_families.hip.HIP_BASE` uses, so a failure here is not a
 #: failure to drive the constructor.
 HIP_BASE = {
     'next': 6, 'packet': 1, 'checksum': b'\x00\x00',
@@ -224,7 +224,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
 
         from tests.protocols.test_option_roundtrip_unit import _load_generator
 
-        overrides = _load_generator()._hip_overrides()
+        overrides = _load_generator().FAMILY_MODULES['hip']._hip_overrides()
         for code in (Parameter.R1_Counter, Parameter.R1_COUNTER):
             with self.subTest(code=int(code), name=code.name):
                 self.assertIn(code, overrides)

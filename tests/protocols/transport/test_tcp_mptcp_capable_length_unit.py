@@ -229,7 +229,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
     """Both RFC 8684 forms round-trip through the public ``TCP`` convenience constructor."""
 
     #: Header fields shared by every constructed TCP segment in this class, matching
-    #: :data:`examples.generators.options.TCP_BASE`.
+    #: :data:`examples.generators.option_families.tcp.TCP_BASE`.
     TCP_BASE = {
         'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
         'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,

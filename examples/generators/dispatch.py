@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Enumerate the ``__proto__`` dispatch registries, and probe every entry.
 
-:file:`pcapkit/foundation/registry/protocols.py` documents the registries that
+:file:`pcapkit/foundation/registry/protocols/` documents the registries that
 decide *which* :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the
 next layer. No other module enumerates them: several
 test modules reference ``__proto__``, and
@@ -20,7 +20,10 @@ This module is the ``__proto__`` counterpart to
 :file:`examples/generators/options.py` and deliberately mirrors its shape: a
 :data:`FAMILIES` table drives :func:`cases`, which walks each registry rather
 than a hardcoded list, so a code registered tomorrow gets a case -- or fails the
-harness -- tomorrow. What differs is the *check* itself. The option harness
+harness -- tomorrow. Each family lives in a module of its own under
+:file:`examples/generators/dispatch_families/`, beside its entries of
+:data:`PINNED_TARGETS`, so that an added family is an added file (#2615).
+What differs is the *check* itself. The option harness
 round-trips construct -> parse -> construct and compares octets; dispatch has no
 such symmetry to exploit, so :func:`probe` instead builds one minimal envelope
 per code, decodes it the way the library itself would (through
@@ -40,9 +43,9 @@ The expected class is deliberately **not** read out of the registry under
 test. Read from there (``target=_resolve(entry)``), the check would be
 self-referential: dispatch would always "reach" whatever the table said,
 because that is the very value being checked against. Deleting an entry would
-still be caught, by the exact per-family counts in
+still be caught, as a pinned target no case reaches, by
 :meth:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests
-.test_cases_cover_every_table_named_in_the_issue`, but *retargeting* one --
+.test_cases_match_the_pinned_targets`, but *retargeting* one --
 entry present, registry size unchanged, class wrong -- would pass silently,
 since nothing independent of the table would say what the table should hold.
 :data:`PINNED_TARGETS` is that independent record, and :attr:`Case.registered`
@@ -71,6 +74,7 @@ tier and runs on a fresh checkout with nothing generated.
 """
 from __future__ import annotations
 
+import importlib.util
 import inspect
 import os
 import pathlib
@@ -80,6 +84,7 @@ import tempfile
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Any, Callable, Optional
 
 __all__ = ['cases', 'probe', 'outcomes', 'Case', 'Outcome', 'Family', 'FAMILIES',
@@ -191,7 +196,7 @@ def _pcapng_bytes(linktype: 'Any', packet_data: 'bytes') -> 'bytes':
 
     Built through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`
     construction API rather than hand-rolled :mod:`struct` packing, the same way
-    :func:`examples.generators.options._pcapng_context` does -- GitHub issue
+    :func:`examples.generators.option_families.pcapng._pcapng_context` does -- GitHub issue
     #496 judged hand-building a valid SHB+IDB+EPB stream riskier than
     the check was worth, and this sidesteps that by reusing the library's own
     ``make`` path, which is exactly what is under test one layer further down
@@ -291,407 +296,6 @@ def _linux_sll2(payload: 'bytes') -> 'bytes':
     return bytes(LinuxSLL2(payload=payload))
 
 
-def _wlan_ack() -> 'bytes':
-    """An 802.11 Ack frame, which carries no body."""
-    from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-    return bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
-
-
-def _radiotap(payload: 'bytes') -> 'bytes':
-    """A minimal radiotap header carrying ``payload``."""
-    from pcapkit.protocols.link.radiotap import Radiotap
-    return bytes(Radiotap(payload=payload))
-
-
-###############################################################################
-# Link -- EtherType.
-###############################################################################
-
-
-def _link_registry() -> 'Any':
-    from pcapkit.protocols.link.link import Link
-    return Link.__proto__
-
-
-def _link_payload(code: 'int') -> 'bytes':
-    """The registered target's own wire bytes for ``code``, as an Ethernet payload."""
-    from pcapkit.const.reg.ethertype import EtherType
-
-    if code == EtherType.Address_Resolution_Protocol:
-        from pcapkit.protocols.link.arp import ARP
-        return bytes(ARP(oper=1))
-    if code == EtherType.Reverse_Address_Resolution_Protocol:
-        from pcapkit.protocols.application.rarp import RARP
-
-        # ARP/RARP/InARP/DRARP all report their alias from the wire ``oper``
-        # field rather than from the dispatching EtherType (``ARP.read`` in
-        # pcapkit/protocols/link/arp.py, per #496), so ``oper`` has to land in
-        # the RARP range (3, 4) or this would silently probe ARP instead while
-        # still "passing".
-        return bytes(RARP(oper=3))
-    if code == EtherType.Customer_VLAN_Tag_Type:
-        from pcapkit.protocols.link.c_tag import C_Tag
-        return bytes(C_Tag(vid=200, type=0x0800, payload=_ip4(6, _tcp(9999))))
-    if code == EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
-        from pcapkit.protocols.link.s_tag import S_Tag
-        return bytes(S_Tag(vid=100, type=0x0800, payload=_ip4(6, _tcp(9999))))
-    if code == EtherType.Internet_Protocol_version_4:
-        return _ip4(6, _tcp(9999))
-    if code == EtherType.Internet_Protocol_version_6:
-        return _ip6(6, _tcp(9999))
-    if code == 0x8137:  # Novell IPX.
-        from pcapkit.protocols.internet.ipx import IPX
-        return bytes(IPX())
-    raise LookupError(f'link: no payload builder for {code!r}')  # pragma: no cover
-
-
-def _link_build(code: 'int') -> 'Any':
-    frame = _ethernet(int(code), _link_payload(code))
-    return _extract_first(_pcap_bytes((frame,), linktype=1), '.pcap')
-
-
-###############################################################################
-# Internet -- TransType.
-###############################################################################
-
-#: Codes dispatched over an IPv4 outer header. ICMP (1) is canonically
-#: IPv4-only -- its IPv6 equivalent is ICMPv6 (58), dispatched separately
-#: below. IGMP (2) is likewise IPv4-only -- multicast's IPv6 equivalent is
-#: MLD, which rides in ICMPv6 rather than as its own IP protocol number
-#: (#2439).
-_INTERNET_OVER_IPV4 = frozenset({1, 2, 4, 6, 17, 50, 51, 89, 111, 132})
-
-
-def _internet_registry() -> 'Any':
-    from pcapkit.protocols.internet.internet import Internet
-    return Internet.__proto__
-
-
-def _internet_payload(code: 'int') -> 'bytes':
-    """The registered target's own wire bytes for ``code``."""
-    from pcapkit.const.reg.transtype import TransType
-
-    if code == TransType.HOPOPT:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
-    if code == TransType.IPv4:  # IP-in-IP.
-        return _ip4(6, _tcp(9999))
-    if code == TransType.ICMP:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-
-        # NOTE: the checksum is left uncomputed (#2470).
-        return bytes(ICMPv4(type=8, code=0,
-                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
-    if code == TransType.IPv6_ICMP:
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
-
-        # NOTE: the checksum is left uncomputed (#2470).
-        return bytes(ICMPv6(type=128, code=0,
-                            body={'id': 1, 'seq': 1, 'data': b'ping'}))
-    if code == TransType.TCP:
-        return _tcp(9999)
-    if code == TransType.UDP:
-        return _udp(9999)
-    if code == TransType.DCCP:
-        from pcapkit.protocols.transport.dccp import DCCP
-        return bytes(DCCP(srcport=50000, dstport=9999, seq=1, payload=b'\x01\x02\x03'))
-    if code == TransType.IPv6:
-        return _ip6(6, _tcp(9999))
-    if code == TransType.IPv6_Route:
-        from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        return bytes(IPv6_Route(type=Routing.Type_2_Routing_Header, data={'ip': '2001:db8::2'},
-                                next=6, seg_left=0, payload=_tcp(9999)))
-    if code == TransType.IPv6_Frag:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        return bytes(IPv6_Frag(next=17, id=1, offset=0, mf=False, payload=_udp(9999)))
-    if code == TransType.ESP:
-        from pcapkit.protocols.internet.esp import ESP
-        return bytes(ESP(spi=0x1234, seq=1, payload=b'\x01\x02\x03\x04'))
-    if code == TransType.AH:
-        from pcapkit.protocols.internet.ah import AH
-        return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
-                        payload=_tcp(9999)))
-    if code == TransType.IGMP:
-        from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-
-        # A General Query: an IGMPv1/v2 message is the 8-octet header and
-        # nothing else, so there is no further payload to wrap. A nonzero
-        # max_resp_time makes it IGMPv2, the class IGMP dispatches it to.
-        return bytes(IGMPv2(type=Type.IGMP_Membership_Query, max_resp_time=100, group='0.0.0.0'))
-    if code == TransType.IPv6_NoNxt:
-        # The registered target for this code *is* Raw -- there is no
-        # dissector to hand it, "no next header" is the whole point -- so any
-        # non-empty payload demonstrates the same thing an empty one would.
-        return b'\x01\x02\x03'
-    if code == TransType.IPv6_Opts:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        return bytes(IPv6_Opts(options=[], next=6, payload=_tcp(9999)))
-    if code == TransType.IPX_in_IP:
-        from pcapkit.protocols.internet.ipx import IPX
-        return bytes(IPX())
-    if code == TransType.SCTP:
-        from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
-        return bytes(SCTP(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
-                          chunks=[(Chunk.Payload_Data, {'data': b'\x01\x02\x03'})]))
-    if code == TransType.Mobility_Header:
-        from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
-        return bytes(MH(next=6, chksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
-                        data={'options': []}, payload=_tcp(9999)))
-    if code == TransType.HIP:
-        from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-
-        # Only the dispatch into HIP is under test here, so which parameter
-        # travels inside it does not matter.
-        return bytes(HIP(parameters=[(Parameter.SEQ, {})], extension=True,
-                         next=6, packet=1, version=2, checksum=b'\x00\x00',
-                         controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
-    if code == TransType.OSPFIGP:
-        from pcapkit.protocols.application.ospf import OSPF
-        return bytes(OSPF())
-    if code == TransType.Shim6:
-        # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
-        # parses only the two octets RFC 6564 §4 guarantees (next header,
-        # Hdr Ext Len), so this is hand-built rather than constructed
-        # through a class: next=TCP(6), Hdr Ext Len=0 -> an 8-octet header,
-        # six of them padding.
-        return bytes([int(TransType.TCP), 0]) + b'\x00' * 6 + _tcp(9999)
-    raise LookupError(f'internet: no payload builder for {code!r}')  # pragma: no cover
-
-
-def _internet_build(code: 'int') -> 'Any':
-    payload = _internet_payload(code)
-    if int(code) in _INTERNET_OVER_IPV4:
-        frame = _ethernet(0x0800, _ip4(int(code), payload))
-    else:
-        frame = _ethernet(0x86DD, _ip6(int(code), payload))
-    return _extract_first(_pcap_bytes((frame,), linktype=1), '.pcap')
-
-
-###############################################################################
-# TCP / UDP -- port.
-###############################################################################
-
-#: A minimal, genuine TLS record: ``application_data`` (23), legacy version
-#: 3.3, and a zero-length fragment -- content type and legacy version both in
-#: range, and the (zero) declared length fits the (zero) remaining buffer, so
-#: :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
-#: accepts it rather than degrading it to :class:`Raw`.
-_TLS_RECORD = b'\x17\x03\x03\x00\x00'
-
-#: The DTLS equivalent of :data:`_TLS_RECORD`: ``application_data``, legacy
-#: version 0xFEFD, epoch 0, sequence number 1, zero-length fragment.
-_DTLS_RECORD = b'\x17\xfe\xfd\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
-
-_TCP_PORT_PAYLOAD = {
-    20: b'binary-file-contents',
-    21: b'USER anonymous\r\n',
-    80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
-    443: _TLS_RECORD,
-    8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
-}
-
-#: An L2TPv2 data message with every optional field absent, matching
-#: :func:`tests.protocols.test_dispatch_bindings_unit.l2tp_data`.
-_L2TP_DATA = struct.pack('!HHH', 0x0002, 0x1234, 0x5678) + b'\xff\x03\x00\x21PPP'
-
-_UDP_PORT_PAYLOAD = {
-    80: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
-    1701: _L2TP_DATA,
-    5684: _DTLS_RECORD,
-    8080: b'GET / HTTP/1.1\r\nHost: probe.invalid\r\n\r\n',
-}
-
-
-def _tcp_registry() -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
-    return TCP.__proto__
-
-
-def _tcp_build(port: 'int') -> 'Any':
-    payload = _TCP_PORT_PAYLOAD.get(port)
-    if payload is None:
-        raise LookupError(f'tcp: no payload builder for port {port!r}')
-    frame = _ethernet(0x0800, _ip4(6, _tcp(port, payload)))
-    return _extract_first(_pcap_bytes((frame,), linktype=1), '.pcap')
-
-
-def _udp_registry() -> 'Any':
-    from pcapkit.protocols.transport.udp import UDP
-    return UDP.__proto__
-
-
-def _udp_build(port: 'int') -> 'Any':
-    payload = _UDP_PORT_PAYLOAD.get(port)
-    if payload is None:
-        raise LookupError(f'udp: no payload builder for port {port!r}')
-    frame = _ethernet(0x0800, _ip4(17, _udp(port, payload)))
-    return _extract_first(_pcap_bytes((frame,), linktype=1), '.pcap')
-
-
-###############################################################################
-# SCTP -- payload protocol identifier.
-###############################################################################
-
-
-def _sctp_registry() -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
-    return SCTP.__proto__
-
-
-def _sctp_build(ppid: 'Any') -> 'Any':
-    from pcapkit.const.sctp.chunk import Chunk
-    from pcapkit.protocols.transport.sctp import SCTP
-
-    sctp = bytes(SCTP(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
-                      chunks=[(Chunk.Payload_Data, {'ppid': ppid, 'data': b'ngap-pdu'})]))
-    frame = _ethernet(0x0800, _ip4(132, sctp))
-    return _extract_first(_pcap_bytes((frame,), linktype=1), '.pcap')
-
-
-###############################################################################
-# Frame (PCAP) / PCAPNG -- LinkType.
-###############################################################################
-
-
-def _pcap_frame_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcap.frame import Frame
-    return Frame.__proto__
-
-
-def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
-    """The bytes to put in one capture record for LinkType ``code``.
-
-    Args:
-        code: The ``LinkType`` under test.
-
-    Returns:
-        The record's octets, and whether they still need an Ethernet wrapper
-        (true for :attr:`~pcapkit.const.reg.linktype.LinkType.ETHERNET`, false
-        for the raw-IP link types, which carry no link layer at all, and
-        for the loopback link types, whose header is built here).
-
-    """
-    from pcapkit.const.reg.linktype import LinkType
-
-    if code == LinkType.ETHERNET:
-        return _ip4(6, _tcp(9999)), True
-    if code == LinkType.IPV4:
-        return _ip4(6, _tcp(9999)), False
-    if code == LinkType.IPV6:
-        return _ip6(6, _tcp(9999)), False
-    if code == LinkType.NULL:  # in the capturing host's byte order (#1574)
-        return _loopback(2, _ip4(6, _tcp(9999))), False
-    if code == LinkType.LOOP:  # in network byte order (#1574)
-        return _loopback(2, _ip4(6, _tcp(9999)), byteorder='big'), False
-    if code == LinkType.LINUX_SLL:
-        return _linux_sll(_ip4(6, _tcp(9999))), False
-    if code == LinkType.LINUX_SLL2:
-        return _linux_sll2(_ip4(6, _tcp(9999))), False
-    if code == LinkType.IEEE802_11:
-        return _wlan_ack(), False
-    if code == LinkType.IEEE802_11_RADIOTAP:
-        return _radiotap(_wlan_ack()), False
-    raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
-
-
-def _pcap_frame_build(code: 'Any') -> 'Any':
-    payload, wrap = _linktype_payload(code)
-    record = _ethernet(0x0800, payload) if wrap else payload
-    return _extract_first(_pcap_bytes((record,), linktype=int(code)), '.pcap')
-
-
-def _pcapng_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcapng import PCAPNG
-    return PCAPNG.__proto__
-
-
-def _pcapng_build(code: 'Any') -> 'Any':
-    payload, wrap = _linktype_payload(code)
-    record = _ethernet(0x0800, payload) if wrap else payload
-    return _extract_first(_pcapng_bytes(code, record), '.pcapng')
-
-
-###############################################################################
-# Loopback -- address family.
-###############################################################################
-
-
-def _loopback_registry() -> 'Any':
-    from pcapkit.protocols.link.loopback import Loopback
-    return Loopback.__proto__
-
-
-def _loopback_build(family: 'int') -> 'Any':
-    payload = _ip4(6, _tcp(9999)) if family == 2 else _ip6(6, _tcp(9999))
-    return _extract_first(_pcap_bytes((_loopback(family, payload),), linktype=0), '.pcap')
-
-
-###############################################################################
-# FRAD -- NLPID.
-###############################################################################
-
-
-def _frad_registry() -> 'Any':
-    from pcapkit.protocols.link.frad import FRAD
-    return FRAD.__proto__
-
-
-def _frad_payload(nlpid: 'int') -> 'bytes':
-    """The registered target's own wire bytes for ``nlpid``."""
-    if nlpid == 0xCC:
-        return _ip4(6, _tcp(9999))
-    if nlpid == 0x8E:
-        return _ip6(6, _tcp(9999))
-    raise LookupError(f'frad: no payload builder for NLPID {nlpid!r}')  # pragma: no cover
-
-
-def _frad_build(nlpid: 'int') -> 'Any':
-    """A direct-NLPID FRAD frame, reached as LinuxSLL dispatches it in a capture."""
-    from pcapkit.const.linux.arphrd import ARPHRD
-    from pcapkit.protocols.link.frad import FRAD
-    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-
-    frad = bytes(FRAD(nlpid=int(nlpid), payload=_frad_payload(nlpid)))
-    record = bytes(LinuxSLL1(arphrd_type=ARPHRD.FRAD, protocol_type=0, payload=frad))
-    return _extract_first(_pcap_bytes((record,), linktype=113), '.pcap')
-
-
-###############################################################################
-# Radiotap -- link type of the frame behind the header.
-###############################################################################
-
-
-def _radiotap_registry() -> 'Any':
-    from pcapkit.protocols.link.radiotap import Radiotap
-    return Radiotap.__proto__
-
-
-def _radiotap_build(code: 'Any') -> 'Any':
-    """An 802.11 Ack behind radiotap, on a ``LINUX_SLL`` capture.
-
-    :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.Radiotap.read>`
-    consults ``LinkType.IEEE802_11`` alone, so that is the only code with a
-    case.
-
-    """
-    from pcapkit.const.linux.arphrd import ARPHRD
-    from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-    from pcapkit.protocols.link.radiotap import Radiotap
-
-    if code != LinkType.IEEE802_11:
-        raise ValueError(f'no radiotap case for link type {code!r}')
-    ack = bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
-    frame = bytes(LinuxSLL1(arphrd_type=ARPHRD.IEEE80211_RADIOTAP, payload=bytes(Radiotap(payload=ack))))
-    return _extract_first(_pcap_bytes((frame,), linktype=int(LinkType.LINUX_SLL)), '.pcap')
-
-
 ###############################################################################
 # The families, the cases, and the probe.
 ###############################################################################
@@ -713,26 +317,56 @@ class Family(NamedTuple):
     enum: 'Optional[Any]' = None
 
 
-def _link_enum() -> 'Any':
-    from pcapkit.const.reg.ethertype import EtherType
-    return EtherType
+#: The directory holding the family modules: one file per ``__proto__`` table,
+#: or per tables registered together, so that a family added in one change and
+#: a family added in another touch different files (#2615).
+FAMILY_DIR = ROOT / 'examples' / 'generators' / 'dispatch_families'
 
 
-#: Every family this module exercises, one per ``__proto__`` table named in
-#: GitHub issue #496, the loopback table #1574 added, FRAD's NLPID table
-#: (#2560), and the radiotap table of #2575.
-FAMILIES = (
-    Family('link', _link_registry, _link_build, _link_enum),
-    Family('internet', _internet_registry, _internet_build),
-    Family('tcp', _tcp_registry, _tcp_build),
-    Family('udp', _udp_registry, _udp_build),
-    Family('sctp', _sctp_registry, _sctp_build),
-    Family('pcap-frame', _pcap_frame_registry, _pcap_frame_build),
-    Family('pcapng-frame', _pcapng_registry, _pcapng_build),
-    Family('loopback', _loopback_registry, _loopback_build),
-    Family('frad', _frad_registry, _frad_build),
-    Family('radiotap', _radiotap_registry, _radiotap_build),
-)
+class _Generator:
+    """This module as its family modules read it: its globals, looked up live."""
+
+    def __getattr__(self, name: 'str') -> 'Any':
+        try:
+            return globals()[name]
+        except KeyError:
+            raise AttributeError(f'{__name__!r} has no attribute {name!r}') from None
+
+
+def _family_modules() -> 'dict[str, ModuleType]':
+    """Load every module of :data:`FAMILY_DIR`, in file name order, keyed by stem.
+
+    Each is loaded by path, as this module is, with ``generator`` bound before
+    its body runs, so that it builds its :class:`Family` entries and reaches
+    the shared plumbing above as ``generator.<name>``. Each declares
+    ``FAMILIES``, the families it adds, and ``PINNED_TARGETS``, their entries
+    of :data:`PINNED_TARGETS`.
+
+    Returns:
+        The loaded modules.
+
+    Raises:
+        RuntimeError: If a module cannot be loaded.
+
+    """
+    modules = {}  # type: dict[str, ModuleType]
+    for path in sorted(FAMILY_DIR.glob('*.py')):
+        spec = importlib.util.spec_from_file_location(f'{__name__}_{path.stem}', path)
+        if spec is None or spec.loader is None:  # pragma: no cover
+            raise RuntimeError(f'cannot load the dispatch family module {path}')
+        module = importlib.util.module_from_spec(spec)
+        setattr(module, 'generator', _Generator())
+        spec.loader.exec_module(module)
+        modules[path.stem] = module
+    return modules
+
+
+#: Each family module, keyed by its file stem.
+FAMILY_MODULES = _family_modules()
+
+#: Every family this module exercises: those of each family module, in file
+#: name order. Each module's docstring names the issue its table came from.
+FAMILIES = tuple(family for module in FAMILY_MODULES.values() for family in module.FAMILIES)
 
 #: The families keyed by label, for a caller -- :func:`probe` -- that wants
 #: just one.
@@ -740,15 +374,16 @@ FAMILY_MAP = {family.label: family for family in FAMILIES}
 
 
 #: The class each case is *supposed* to dispatch to, pinned independently of
-#: whatever the live registry currently holds.
+#: whatever the live registry holds: the ``PINNED_TARGETS`` of each family
+#: module, merged.
 #:
 #: With the expected target read straight out of the table under test
 #: (``target=_resolve(entry)``), a *mis-pointed* entry would pass silently --
 #: dispatch would always "reach" whatever the corrupted table said, because
 #: that is the very value being checked against. Deleting an entry would still
-#: be caught, by the count guard in
+#: be caught, as a pinned target no case reaches, by
 #: :meth:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests
-#: .test_cases_cover_every_table_named_in_the_issue`, but retargeting one --
+#: .test_cases_match_the_pinned_targets`, but retargeting one --
 #: entry present, registry size unchanged, class wrong -- would not be caught
 #: by anything. Recording the expected ``(module, name)`` here, by hand, the
 #: same way :data:`KNOWN_DEGRADED` records degraded cases by hand, means a
@@ -762,98 +397,8 @@ FAMILY_MAP = {family.label: family for family in FAMILIES}
 #: unpinned" guard this table gives for free, the same way
 #: :data:`examples.generators.options.FAMILIES` gives
 #: ``test_every_registered_code_has_a_case``.
-PINNED_TARGETS = {
-    # -- Link.__proto__ (EtherType) -------------------------------------------
-    'link/Address_Resolution_Protocol': ('pcapkit.protocols.link.arp', 'ARP'),
-    'link/Reverse_Address_Resolution_Protocol': ('pcapkit.protocols.application.rarp', 'RARP'),
-    'link/Customer_VLAN_Tag_Type': ('pcapkit.protocols.link.c_tag', 'C_Tag'),
-    'link/IEEE_Std_802_1Q_Service_VLAN_tag_identifier': ('pcapkit.protocols.link.s_tag', 'S_Tag'),
-    'link/Internet_Protocol_version_4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    'link/Internet_Protocol_version_6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'link/Novell_Inc_0x8137': ('pcapkit.protocols.internet.ipx', 'IPX'),
-
-    # -- Internet.__proto__ (TransType) ---------------------------------------
-    'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    'internet/IPv4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
-    'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
-    'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
-    'internet/DCCP': ('pcapkit.protocols.transport.dccp', 'DCCP'),
-    'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
-    'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
-    'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
-    'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
-    'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
-    'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
-    'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw', 'Raw'),
-    'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
-    'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx', 'IPX'),
-    'internet/Mobility_Header': ('pcapkit.protocols.internet.mh', 'MH'),
-    'internet/HIP': ('pcapkit.protocols.internet.hip', 'HIP'),
-    'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
-    'internet/OSPFIGP': ('pcapkit.protocols.application.ospf', 'OSPF'),
-    # #904: Shim6 (140) is registered directly at IPv6_Ext, which parses
-    # the RFC 6564 §4 generic layout, as Shim6 has no dedicated dissector.
-    # Without the entry the default factory would resolve it to Raw.
-    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext', 'IPv6_Ext'),
-
-    # -- TCP.__proto__ (port) --------------------------------------------------
-    'tcp/20': ('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
-    'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
-    # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
-    # below; it dispatches to HTTPv1 or HTTPv2 (#2524).
-    'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
-    'tcp/443': ('pcapkit.protocols.application.tls', 'TLS'),
-    'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
-
-    # -- UDP.__proto__ (port) --------------------------------------------------
-    'udp/80': ('pcapkit.protocols.application.http', 'HTTP'),
-    'udp/1701': ('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
-    'udp/5684': ('pcapkit.protocols.application.dtls', 'DTLS'),
-    'udp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
-
-    # -- SCTP.__proto__ (payload protocol identifier) --------------------------
-    'sctp/PayloadProtocolIdentifier_3GPP_NG_Application_Protocol':
-        ('pcapkit.protocols.application.ngap', 'NGAP'),
-    'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP':
-        ('pcapkit.protocols.application.ngap', 'NGAP'),
-
-    # -- Frame.__proto__ (pcap LinkType) ---------------------------------------
-    'pcap-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
-    'pcap-frame/ETHERNET': ('pcapkit.protocols.link', 'Ethernet'),
-    'pcap-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
-    'pcap-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
-    'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
-    'pcap-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
-    'pcap-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
-    'pcap-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
-    'pcap-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
-
-    # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
-    'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
-    'pcapng-frame/ETHERNET': ('pcapkit.protocols.link', 'Ethernet'),
-    'pcapng-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
-    'pcapng-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
-    'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
-    'pcapng-frame/LINUX_SLL': ('pcapkit.protocols.link', 'LinuxSLL1'),
-    'pcapng-frame/LINUX_SLL2': ('pcapkit.protocols.link', 'LinuxSLL2'),
-    'pcapng-frame/IEEE802_11': ('pcapkit.protocols.link', 'IEEE802_11'),
-    'pcapng-frame/IEEE802_11_RADIOTAP': ('pcapkit.protocols.link', 'Radiotap'),
-
-    # -- Loopback.__proto__ (address family) ------------------------------------
-    'loopback/2': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    'loopback/24': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'loopback/28': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'loopback/30': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-
-    # -- FRAD.__proto__ (NLPID, keyed in decimal: 0x8E, 0xCC) ------------------
-    'frad/142': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'frad/204': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-
-    # -- Radiotap.__proto__ (LinkType of the frame behind it) --------------------
-    'radiotap/IEEE802_11': ('pcapkit.protocols.link.ieee802_11', 'IEEE802_11'),
-}
+PINNED_TARGETS = {label: target for module in FAMILY_MODULES.values()
+                  for label, target in module.PINNED_TARGETS.items()}
 
 
 def _pinned_class(label: 'str') -> 'Optional[Any]':

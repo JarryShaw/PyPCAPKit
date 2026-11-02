@@ -32,24 +32,42 @@ known-failure table keep their cases in a generator, beside the captures it also
      - Cases from
      - Asserts
    * - :file:`tests/protocols/test_option_roundtrip_unit.py`
-     - :file:`examples/generators/options.py`
+     - :file:`examples/generators/options.py`, from its family modules under
+       :file:`examples/generators/option_families/`, one per protocol
      - every option, chunk, parameter, message, frame and block code survives construct
        -> parse -> construct with identical octets; known failures in
        ``EXPECTED_FAILURES``
    * - :file:`tests/protocols/test_dispatch_registry_unit.py`
-     - :file:`examples/generators/dispatch.py`
-     - every ``__proto__`` entry dispatches to the class ``PINNED_TARGETS`` names;
-       known degrades in ``DispatchRegistryTests.KNOWN_DEGRADED``, which the
-       generator's own ``KNOWN_DEGRADED`` mirrors for its command-line report
-       (:issue:`496`)
+     - :file:`examples/generators/dispatch.py`, from its family modules under
+       :file:`examples/generators/dispatch_families/`, one per ``__proto__`` table
+       or per tables registered together
+     - every ``__proto__`` entry dispatches to the class its family module's
+       ``PINNED_TARGETS`` names; known degrades in
+       ``DispatchRegistryTests.KNOWN_DEGRADED``, which the generator's own
+       ``KNOWN_DEGRADED`` mirrors for its command-line report (:issue:`496`)
+
+What an unrelated change adds to these suites lands in a file of its own or on a line
+of its own, so that concurrent changes do not edit the same lines: a family goes in a
+module of its generator's family directory, and a :mod:`pcapkit.const` registry is a
+line in its package's module under :file:`tests/const/census/`. Where a table stays one
+file, as ``NOT_A_COPY`` and ``UNRELATED`` in
+:file:`tests/project/test_rfc_constants_one_home_1739_unit.py` and
+``CRAWLERS_WITH_CONSTANT_MISS_LINES`` in
+:file:`tests/vendor/test_vendor_missing_body_unit.py` do, it is sorted. A sweep holds
+what it finds to these records by name rather than to a pinned count -- split under
+:issue:`2615`.
 
 The rules those tables carry:
 
 *  **Every registered code has a case.** ``test_every_registered_code_has_a_case``
-   fails otherwise. The option suite's ``SKIP`` table is the only exit, and each of its
-   entries states why a case would assert nothing: ``Multipath_TCP`` is the
-   envelope of the ``tcp-mptcp`` family and would duplicate one of its subtypes, and
-   ``PadN`` under HOPOPT and IPv6-Opts emits the same option-less header as ``Pad1``.
+   fails otherwise, and so does ``test_every_option_registry_has_a_family`` or
+   ``test_every_dispatch_table_has_a_family`` on a registry map no family exercises,
+   found from the tree's own maps rather than from the family modules. The option
+   suite's ``SKIP`` table, the merge of each family module's own ``SKIP``, is the only
+   exit, and each of its entries states why a case would assert nothing:
+   ``Multipath_TCP`` is the envelope of the ``tcp-mptcp`` family and would duplicate
+   one of its subtypes, and ``PadN`` under HOPOPT and IPv6-Opts emits the same
+   option-less header as ``Pad1``.
    A code that fails is never skipped.
 *  **A failing case is an entry, never a changed argument.** An ``EXPECTED_FAILURES``
    entry records the status, a failure-detail fragment narrow enough to match one
@@ -184,16 +202,25 @@ above:
    * - Adding
      - Must bring
    * - an option-like code
-     - Registering it gives it a case automatically. Add arguments to the generator's
-       tables in :file:`examples/generators/options.py` where the ``_make_*`` defaults
-       are degenerate, and a ``Family`` to ``FAMILIES`` for a new registry. Its cycle
-       closes before it merges.
+     - Registering it gives it a case automatically. Add arguments where the
+       ``_make_*`` defaults are degenerate to the tables of its protocol's module under
+       :file:`examples/generators/option_families/`. A registry map no family exercises
+       takes a ``Family`` in that module's ``FAMILIES``, or a module of its own for a
+       protocol without one, which ``test_every_option_registry_has_a_family``
+       enforces. Its cycle closes before it merges.
    * - a protocol
      - A unit-tier :file:`tests/protocols/<layer>/test_<name>_unit.py` that builds its
        own octets, asserts construct -> parse -> construct identity, and checks a parse
        against the specification's field values. A ``__proto__`` registration also
-       needs its ``PINNED_TARGETS`` entry in :file:`examples/generators/dispatch.py`,
-       which ``test_every_case_has_a_pinned_target`` enforces.
+       needs its ``PINNED_TARGETS`` entry in its family's module under
+       :file:`examples/generators/dispatch_families/`, which
+       ``test_every_case_has_a_pinned_target`` enforces, and a ``__proto__`` table no
+       family probes takes a module of its own there, which
+       ``test_every_dispatch_table_has_a_family`` enforces. A :mod:`pcapkit.const`
+       registry it adds is a line in its package's module under
+       :file:`tests/const/census/`, in sorted order, or a module of its own there for a
+       package without one; every const sweep compares what it finds against the
+       census, and names a registry it lacks.
    * - a dumper
      - Unit tests under :file:`tests/dumpkit/` asserting the output exactly, and a case
        in :file:`tests/integration/test_output_formats.py` for the file that lands on
