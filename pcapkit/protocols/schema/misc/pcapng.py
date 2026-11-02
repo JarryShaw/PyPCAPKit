@@ -1294,6 +1294,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     major: 'int' = UInt16Field(callback=shb_byteorder_callback, default=1)
     #: Minor version number.
     minor: 'int' = UInt16Field(callback=shb_byteorder_callback, default=0)
+    # NOTE: -1, "not specified", is spelled 0xFFFFFFFFFFFFFFFF too: ``_make_sint`` accepts both, refuses the rest (#2617).
     #: Section length.
     section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFF_FFFF_FFFF_FFFF)
     #: Options.
@@ -1520,6 +1521,8 @@ class IF_TSResolOption(_IF_Option, code=Enum_OptionType.if_tsresol):
 class IF_TZoneOption(_IF_Option, code=Enum_OptionType.if_tzone):
     """Header schema for PCAP-NG file ``if_tzone`` options."""
 
+    # NOTE: range-checked by ``_make_sint`` rather than masked, pcapkit's choice so it round-trips
+    # (#2617). The spec fixes only its length; it is signed as this field reads it (#1340).
     #: Interface time zone (as in seconds difference from GMT).
     tzone: 'int' = Int32Field(callback=byteorder_callback)
     #: Padding.
@@ -1574,6 +1577,7 @@ class IF_FCSLenOption(_IF_Option, code=Enum_OptionType.if_fcslen):
 class IF_TSOffsetOption(_IF_Option, code=Enum_OptionType.if_tsoffset):
     """Header schema for PCAP-NG file ``if_tsoffset`` options."""
 
+    # NOTE: range-checked by ``_make_sint`` rather than masked: a signed 64-bit count, no sentinel.
     #: Timestamp offset (in seconds).
     tsoffset: 'int' = Int64Field(callback=byteorder_callback)
     #: Padding.
@@ -1632,6 +1636,7 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
     linktype: 'Enum_LinkType' = EnumField(length=2, namespace=Enum_LinkType, callback=byteorder_callback)
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
+    # NOTE: range-checked by ``_make_uint`` rather than masked: its sentinel, 0 for no limit, is in range.
     #: Snap length.
     snaplen: 'int' = UInt32Field(default=0, callback=byteorder_callback)
     #: Options.
@@ -2762,6 +2767,7 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Interface ID.
     interface_id: 'int' = UInt16Field(callback=byteorder_callback)
+    # NOTE: range-checked by ``_make_uint`` rather than masked: its "not available" 0xFFFF is in range, not -1.
     #: Drops count.
     drop_count: 'int' = UInt16Field(callback=byteorder_callback, default=0xFFFF)
     #: Timestamp (high).

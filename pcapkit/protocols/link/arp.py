@@ -44,7 +44,6 @@ below:
 
 """
 import ipaddress
-import re
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.arp.hardware import Hardware as Enum_Hardware
@@ -71,9 +70,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['ARP']
-
-# Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)
-PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}(?:[:-][0-9a-f]{2})*)?')
 
 
 class ARP(Link[Data_ARP, Schema_ARP],
@@ -374,10 +370,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         """
         if htype == Enum_Hardware.Ethernet:  # Ethernet
-            _addr = addr.hex(':')
-        else:
-            _addr = addr.hex()
-        return _addr
+            return self._read_mac_addr(addr)
+        return addr.hex()
 
     def _make_addr_resolve(self, addr: 'str | bytes | bytearray', htype: 'int') -> 'bytes':
         """Resolve hardware address according to protocol.
@@ -389,8 +383,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
         Returns:
             Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.
             MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address
-            is validated and packed, one octet per group (an empty string packs
-            as no octets); otherwise, a :class:`str` is
+            is packed by :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr`,
+            one octet per group, of any number since ``hlen`` is not fixed at 6
+            (an empty string packs as no octets); otherwise, a :class:`str` is
             taken as the *hex* encoded address that :meth:`_read_addr_resolve`
             returns, and :class:`bytes`/:class:`bytearray` are returned as
             :class:`bytes`.
@@ -409,20 +404,16 @@ class ARP(Link[Data_ARP, Schema_ARP],
             :meth:`_make_proto_resolve` gives.
 
         """
-        name = 'MAC address' if htype == Enum_Hardware.Ethernet else 'hardware address'
-        if not isinstance(addr, (str, bytes, bytearray)):
-            raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: must be a str, '
-                                f'bytes or bytearray, not {addr!r}')
         if htype == Enum_Hardware.Ethernet:
-            _addr = addr.encode() if isinstance(addr, str) else addr
-            if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-                return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-            raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: {addr!r}')
+            return self._make_mac_addr(addr, size=None, alias=self.__class__.__name__)
+        if not isinstance(addr, (str, bytes, bytearray)):
+            raise ProtocolError(f'{self.__class__.__name__}: invalid hardware address: must be a str, '
+                                f'bytes or bytearray, not {addr!r}')
         if isinstance(addr, str):
             try:
                 return bytes.fromhex(addr.replace(':', '').replace('-', ''))
             except ValueError:
-                raise ProtocolError(f'{self.__class__.__name__}: invalid {name}: '
+                raise ProtocolError(f'{self.__class__.__name__}: invalid hardware address: '
                                     f'{addr!r}') from None
         return bytes(addr)
 

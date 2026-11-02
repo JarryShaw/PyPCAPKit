@@ -2,12 +2,13 @@
 """ARP and PCAP-NG pack hardware addresses as raw octets.
 
 GitHub issue #1134: :meth:`ARP._make_addr_resolve
-<pcapkit.protocols.link.arp.ARP._make_addr_resolve>`, :meth:`PCAPNG._make_mac_addr
-<pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>` and :meth:`PCAPNG._make_eui_addr
-<pcapkit.protocols.misc.pcapng.PCAPNG._make_eui_addr>` stripped the separators
-from a ``aa:bb:cc:dd:ee:ff`` string and returned the remaining *hex text*, so
-``make()`` wrote the ASCII digits of the address onto the wire. ARP did the
-same for the plain hex string it parses a non-Ethernet hardware address into.
+<pcapkit.protocols.link.arp.ARP._make_addr_resolve>` and PCAP-NG's MAC and EUI
+address makers stripped the separators from a ``aa:bb:cc:dd:ee:ff`` string and
+returned the remaining *hex text*, so ``make()`` wrote the ASCII digits of the
+address onto the wire. ARP did the same for the plain hex string it parses a
+non-Ethernet hardware address into. PCAP-NG makes both addresses with
+:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>`,
+the EUI one with ``size=8`` (#2614).
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -90,7 +91,7 @@ class TestPCAPNGHardwareAddressOctets(unittest.TestCase):
                 schema = self.pcapng._make_option_if_eui(OptionType.if_EUIaddr, interface=addr)
                 self.assertEqual(bytes(schema), bytes.fromhex('0700' '0800' '023456fffe789abc'))
                 unpacked = IF_EUIAddrOption.unpack(bytes(schema))
-                self.assertEqual(self.pcapng._read_eui_addr(unpacked.interface),
+                self.assertEqual(self.pcapng._read_mac_addr(unpacked.interface),
                                  '02:34:56:ff:fe:78:9a:bc')
 
 

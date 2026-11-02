@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2222: PCAP-NG rejects a non-string MAC or EUI address.
 
-:meth:`PCAPNG._make_mac_addr
-<pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>` and
-:meth:`PCAPNG._make_eui_addr
-<pcapkit.protocols.misc.pcapng.PCAPNG._make_eui_addr>` passed a :obj:`bool`,
-:class:`int`, :obj:`None` or :class:`float` straight to the address pattern,
-which raised a bare :class:`TypeError`. Anything not a :class:`str`,
-:class:`bytes` or :class:`bytearray`, a :obj:`bool` included, raises
-:class:`~pcapkit.utilities.exceptions.ProtocolError`.
+PCAP-NG's MAC and EUI address makers passed a :obj:`bool`, :class:`int`,
+:obj:`None` or :class:`float` straight to the address pattern, which raised a
+bare :class:`TypeError`. Anything not a :class:`str`, :class:`bytes` or
+:class:`bytearray`, a :obj:`bool` included, raises
+:class:`~pcapkit.utilities.exceptions.ProtocolError`. Both addresses go through
+:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>`,
+the EUI one with ``size=8`` (#2614).
 Each case reaches the maker through the ``if_MACaddr`` or ``if_EUIaddr``
 option of an Interface Description Block.
 

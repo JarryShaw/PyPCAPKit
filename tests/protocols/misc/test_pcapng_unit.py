@@ -451,16 +451,16 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._make_timestamp(ts_decimal), (0, 2000))
 
         self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
-        self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
+        self.assertEqual(pcapng._read_mac_addr(bytes.fromhex('023456fffe789abc')),
                          '02:34:56:ff:fe:78:9a:bc')
         self.assertEqual(pcapng._make_mac_addr('00:01:02:03:04:05'), b'\x00\x01\x02\x03\x04\x05')
         self.assertEqual(pcapng._make_mac_addr(b'00-01-02-03-04-05'), b'\x00\x01\x02\x03\x04\x05')
-        self.assertEqual(pcapng._make_eui_addr('02:34:56:ff:fe:78:9a:bc'),
+        self.assertEqual(pcapng._make_mac_addr('02:34:56:ff:fe:78:9a:bc', size=8, name='EUI address'),
                          bytes.fromhex('023456fffe789abc'))
         with self.assertRaises(ProtocolError):
             pcapng._make_mac_addr('bad')
         with self.assertRaises(ProtocolError):
-            pcapng._make_eui_addr('bad')
+            pcapng._make_mac_addr('bad', size=8, name='EUI address')
 
     def test_pcapng_top_level_properties_registry_and_dispatch_paths(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
@@ -582,7 +582,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._make_timestamp(instant, interface_id=0), (0, 4_000_000))
 
         self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
-        self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
+        self.assertEqual(pcapng._read_mac_addr(bytes.fromhex('023456fffe789abc')),
                          '02:34:56:ff:fe:78:9a:bc')
 
         proto_map = PCAPNG.__dict__['__proto__']
