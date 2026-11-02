@@ -29,7 +29,7 @@ instance (:issue:`1842`). The instance reprs as its own name, neither it nor
 its type can be changed, and its type cannot be subclassed.
 
 ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol`, and ``MISSING`` to
-:mod:`pcapkit.foundation.registry.protocols` -- nothing outside its module ever
+:mod:`pcapkit.foundation.registry.protocols.protocol` -- nothing outside its module ever
 reads either. Neither carries a leading underscore; :class:`AbsentType`'s
 docstring says what marks them private instead.
 
@@ -587,7 +587,7 @@ class MissingType(Sentinel):
     A sibling of :class:`AbsentType` rather than a reuse, since that one is
     documented as never leaving :mod:`pcapkit.protocols.protocol`. Private in
     the same way, by documentation: nothing outside
-    :mod:`pcapkit.foundation.registry.protocols` reads :data:`MISSING`, and no
+    :mod:`pcapkit.foundation.registry.protocols.protocol` reads :data:`MISSING`, and no
     module's :attr:`__all__` names either one (:issue:`2555`).
 
     """
@@ -602,7 +602,7 @@ class MissingType(Sentinel):
 
 
 #: MissingType: Default for reading :data:`pcapkit.protocols.__proto__` in
-#: :mod:`pcapkit.foundation.registry.protocols`, recorded as what a code
+#: :mod:`pcapkit.foundation.registry.protocols.protocol`, recorded as what a code
 #: registration displaced when the name was new, so that handing the code back
 #: removes the name rather than restoring an entry. Private by documentation
 #: rather than by a leading underscore -- see :class:`MissingType`.

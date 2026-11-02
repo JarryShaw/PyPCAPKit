@@ -164,11 +164,11 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
     def _registries(self, classes: 'tuple[type, ...]') -> 'dict[tuple[str, str], dict]':
         """Every dict-valued class attribute of ``classes``, plus the module-wide registries."""
-        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols import __proto__ as protocol_registry
 
         found = {('pcapkit.protocols', '__proto__'): protocol_registry,
-                 ('registrars', '_CODE_LEASES'): registrars._CODE_LEASES}
+                 ('registrars', '_CODE_LEASES'): reg_protocol._CODE_LEASES}
         for cls in classes:
             for attr, value in vars(cls).items():
                 if isinstance(value, dict):
@@ -268,7 +268,8 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
     def test_number_registrars_reject_a_bool(self) -> None:
         """A :class:`bool` is an :class:`int` subclass, but never a port or PPID (#2269)."""
-        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.utilities.exceptions import RegistryError
@@ -277,7 +278,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
                                             codes=(True, False))
         with self.assertRaisesRegex(RegistryError, r'^TCP: code must be an int or a member of AppType, not True$'):
-            registrars._check_code(True, registrars.Enum_AppType, TCP, number=True)
+            reg_protocol._check_code(True, reg_transport.Enum_AppType, TCP, number=True)
 
     def test_int_only_registrars_reject_anything_but_an_int(self) -> None:
         """No enum keys Loopback's, FRAD's or Netlink's registry, so only a plain
@@ -288,7 +289,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.foundation.registry import protocols as registrars
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols.link.frad import FRAD
         from pcapkit.protocols.link.loopback import Loopback
         from pcapkit.protocols.misc.raw import Raw
@@ -302,13 +303,13 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                               (TransType.IPv4, 'a member of TransType: ')):
             with self.subTest(code=code):
                 with self.assertRaisesRegex(RegistryError, rf'^Loopback: code must be an int, not {message}'):
-                    registrars._check_code(code, None, Loopback)
-        registrars._check_code(2, None, Loopback)
+                    reg_protocol._check_code(code, None, Loopback)
+        reg_protocol._check_code(2, None, Loopback)
         with self.assertRaisesRegex(RegistryError, r'^FRAD: code must be an int, not None$'):
-            registrars._check_code(None, None, FRAD)
+            reg_protocol._check_code(None, None, FRAD)
         with self.assertRaisesRegex(RegistryError,
                                     r'^FRAD: code must be an int, not a member of ARPHRD: '):
-            registrars._check_code(ARPHRD.FRAD, None, FRAD)
+            reg_protocol._check_code(ARPHRD.FRAD, None, FRAD)
 
     def test_every_rejection_names_the_destination_registry(self) -> None:
         """The message says *whose* registry rejected the key (#2268).

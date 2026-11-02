@@ -790,9 +790,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key there too. Declared by the
     #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
     #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.register_pcapng` checks its own --
+    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` checks its own --
     #: :class:`~pcapkit.protocols.misc.pcap.frame.Frame` keeps a registry of its own,
     #: keyed by the same enum, and so declares the same pairing rather than
     #: sharing this one (:issue:`2268`).
@@ -1120,7 +1120,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 an unresolved module descriptor counts as different from the
                 class it names; handing back the stored entry, or a descriptor
                 equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
-                :func:`~pcapkit.foundation.registry.protocols.register_linktype`
+                :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`
                 writing to both cannot make either warn about the other. See
                 :meth:`Protocol.register
                 <pcapkit.protocols.protocol.Protocol.register>` for the

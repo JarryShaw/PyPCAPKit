@@ -46,7 +46,7 @@ subclassed (:issue:`1842`).
 
    :class:`AbsentType` and :data:`ABSENT` are **private** to
    :mod:`pcapkit.protocols.protocol`, and :class:`MissingType` and :data:`MISSING` to
-   :mod:`pcapkit.foundation.registry.protocols`: never imported outside it, and named
+   :mod:`pcapkit.foundation.registry.protocols.protocol`: never imported outside it, and named
    in no module's ``__all__``. For SCREAMING_SNAKE consistency with the other
    sentinels (see :ref:`sentinel-convention`), none carries the leading underscore
    that would hide it from Sphinx, so each is documented below and marked private.

@@ -155,7 +155,7 @@ stack is quiet, at any depth, unless an inner
 * one reporting library state rather than the octets, such as a
   :class:`~pcapkit.corekit.module.ModuleDescriptor` entry whose class its module has
   since lost -- by a later removal, or by a write to ``__proto__`` directly, since
-  :func:`~pcapkit.foundation.registry.protocols.register_tcp` refuses such an entry --
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` refuses such an entry --
   which ends as the ``Raw`` layer's ``error``;
 * one raised by an inner fallback's recovery, since the block of the fallback around
   it is still active.

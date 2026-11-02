@@ -1117,7 +1117,7 @@ class AppTypeSplitTests(unittest.TestCase):
             'pcapkit/protocols/schema/transport/tcp.py',
             'pcapkit/protocols/schema/transport/udp.py',
             'pcapkit/protocols/schema/transport/sctp.py',
-            'pcapkit/foundation/registry/protocols.py',
+            'pcapkit/foundation/registry/protocols/transport.py',
             'pcapkit/corekit/fields/numbers.py',
         ]
         members = {'tcp', 'udp', 'sctp', 'dccp'}
@@ -1217,7 +1217,8 @@ class AppTypeSplitTests(unittest.TestCase):
         # change to the annotation (such as the ``| str`` the #815 ruling asks
         # for) even when the shape it exists to protect is the same at the
         # source-text level it reads.
-        source = (root / 'pcapkit' / 'foundation' / 'registry' / 'protocols.py').read_text(encoding='utf-8')
+        source = (root / 'pcapkit' / 'foundation' / 'registry' / 'protocols'
+                  / 'transport.py').read_text(encoding='utf-8')
         self.assertNotIn('proto = code.proto', source)
         self.assertNotIn('if test not in proto:', source)
         self.assertIn('transport = (code.proto,)', source)
@@ -1255,20 +1256,21 @@ class AppTypeSplitTests(unittest.TestCase):
         # its edge cases in full; this is the narrow claim that anchors it here.
         from unittest import mock
 
-        from pcapkit.foundation.registry import protocols as apptype_registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.protocols.misc.raw import Raw
 
         missing = object()
-        previous = apptype_registry.UDP.__proto__.get(65210, missing)
+        previous = reg_transport.UDP.__proto__.get(65210, missing)
         try:
-            with mock.patch.object(apptype_registry, 'register_protocol'):
+            with mock.patch.object(reg_protocol, 'register_protocol'):
                 register_apptype(65210, Raw, TransportProtocol.udp)
-            self.assertIs(apptype_registry.UDP.__proto__[65210], Raw)
+            self.assertIs(reg_transport.UDP.__proto__[65210], Raw)
         finally:
             if previous is missing:
-                apptype_registry.UDP.__proto__.pop(65210, None)
+                reg_transport.UDP.__proto__.pop(65210, None)
             else:
-                apptype_registry.UDP.__proto__[65210] = previous
+                reg_transport.UDP.__proto__[65210] = previous
 
     def test_the_new_dunders_are_byte_identical_to_the_percent_form(self) -> None:
         """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` format

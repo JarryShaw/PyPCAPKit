@@ -158,9 +158,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key there too. Declared by the
     #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
     #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.register_transtype` checks
+    #: :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype` checks
     #: its own -- a subclass sharing this registry is therefore checked as
     #: :class:`Internet` is (:issue:`2268`), while
     #: :class:`~pcapkit.protocols.internet.ipx.IPX`, which keeps one of its own,

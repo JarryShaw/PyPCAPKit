@@ -280,7 +280,7 @@ class PayloadField(FieldBase[_TP]):
             # NOTE: The registry is keyed on the upper-cased class name, both
             # when it is seeded (the loop over ``__all__`` in
             # :mod:`pcapkit.protocols`) and when
-            # ``pcapkit.foundation.registry.protocols.register_protocol`` adds to
+            # ``pcapkit.foundation.registry.protocols.protocol.register_protocol`` adds to
             # it, so a name looked up in any other case would miss every time --
             # and a miss leaves ``_protocol`` as :obj:`None`, which the property
             # above resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So

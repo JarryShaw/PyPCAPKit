@@ -34,8 +34,8 @@ subtree can be addressed on its own:
    # or follow just the extraction path
    logging.getLogger('pcapkit.foundation.extraction').setLevel(logging.DEBUG)
 
-Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``, ``pcapkit.foundation.registry.protocols``,
-``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
+Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``,
+``pcapkit.foundation.registry.protocols.transport``, ``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
 ``pcapkit.foundation.traceflow.tcp``, ``pcapkit.utilities.warnings``.
 
 .. autofunction:: pcapkit.utilities.logging.get_logger
