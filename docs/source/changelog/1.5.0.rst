@@ -1510,12 +1510,13 @@ Changed
   trailer bytes are not, so ``_decode_next_layer`` and ``_import_next_layer`` accept
   the ``-1`` sentinel -- the rest of the packet, resolving to
   :class:`~pcapkit.protocols.misc.raw.Raw`, or to
-  :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains -- and
-  ``__post_init__`` keeps a payload that ``read`` set instead of overwriting it with
-  :class:`~pcapkit.protocols.misc.null.NoPayload`. A real protocol number (any ``proto``
-  other than ``-1``) is still refused with :exc:`.UnsupportedCall`. A subclass that
-  calls either method with ``-1`` changes from raising to succeeding; no subclass in the
-  package does (:issue:`719`).
+  :class:`NoPayload <pcapkit.protocols.misc.no_payload.NoPayload>`
+  when nothing remains -- and ``__post_init__`` keeps a payload that ``read`` set
+  instead of overwriting it with
+  :class:`NoPayload <pcapkit.protocols.misc.no_payload.NoPayload>`.
+  A real protocol number (any ``proto`` other than ``-1``) is still refused with
+  :exc:`.UnsupportedCall`. A subclass that calls either method with ``-1`` changes
+  from raising to succeeding; no subclass in the package does (:issue:`719`).
 * the :class:`~pcapkit.protocols.protocol.Protocol` and :class:`.ProtocolMeta`
   docstrings. :class:`~pcapkit.protocols.protocol.Protocol` claimed to be the base of
   every protocol family, though nothing in the package subclasses it, and
@@ -2610,8 +2611,9 @@ Fixed
   the fabricated octets. :meth:`.IPv4.read` handed UDP the declared payload length when
   nothing past the IPv4 header was captured, so ``test.pcapng`` frame 3 rebuilt with
   8 invented UDP octets (:issue:`1167`). Every ``_import_next_layer`` now goes through
-  one guard: no captured octets gives :class:`~pcapkit.protocols.misc.null.NoPayload`,
-  and fewer than the next layer's ``__length_hint__`` gives
+  one guard: no captured octets gives
+  :class:`NoPayload <pcapkit.protocols.misc.no_payload.NoPayload>`, and fewer
+  than the next layer's ``__length_hint__`` gives
   :class:`~pcapkit.protocols.misc.raw.Raw` unless the parsed header fits anyway, as a
   12-octet L2TPv2 ZLB does. A header-only IPv6 packet is ``IPv6`` rather than
   ``IPv6:UDP:Raw``, and frame 3 is ``Ethernet:Raw``, rebuilt byte for byte

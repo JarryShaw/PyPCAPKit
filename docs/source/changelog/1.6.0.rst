@@ -137,6 +137,26 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :mod:`pcapkit.const.igmp`: the types crawled from IANA, the group record
   types from a hand-maintained table.
 
+* **Added** -- construction through a versioned family's base:
+  :class:`~pcapkit.protocols.internet.ip.IP` and
+  :class:`~pcapkit.protocols.link.l2tp.L2TP`, which raised :exc:`TypeError` in
+  1.5.x, and the :class:`~pcapkit.protocols.internet.icmp.ICMP`,
+  :class:`~pcapkit.protocols.internet.igmp.IGMP` and
+  :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` bases above give a member,
+  never an instance of the base, on parsing octets, building from fields and
+  ``from_data`` (:issue:`2574`, :pr:`2639`). The ``version`` keyword names the
+  member. Without it, IP's, IGMP's and L2TP's octets give the member they
+  describe, and ``from_data`` the one its data names, IGMP's data models
+  carrying a ``version`` for it. Building from fields without it raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`, whose message asks for
+  ``version``, and so do ICMP and Linux cooked-capture octets, which carry no
+  version; their ``from_data`` on a :class:`dict` raises it too, as does a
+  version a family has no member for, such as L2TP's ``3``. A member built
+  directly takes ``version`` as well, which must be its own. IPv4 and IPv6
+  check the Version field before the rest of the header, so octets of the other
+  version raise ``[IPv4] invalid version: 6`` say, where IPv4's error named
+  whichever field they broke first.
+
 * **Added** -- :class:`~pcapkit.protocols.transport.dccp.DCCP` (:rfc:`4340`)
   for IP protocol 33, which was kept as
   :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2489`, :pr:`2593`). It
@@ -172,7 +192,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   body its parser rejects, which logs nothing;
   :func:`~pcapkit.foundation.registry.protocols.application.register_tls_extension`
   registers a parser and constructor for a further type (:issue:`2514`,
-  :pr:`2595`). Each whole TLS record in a TCP segment is a layer of its own,
+  :pr:`2595`). ``make()`` refuses a value too wide for its field, in the record
+  header or in the content it builds, with
+  :exc:`~pcapkit.utilities.exceptions.StructError` (:issue:`2614`, :pr:`2638`).
+  Each whole TLS record in a TCP segment is a layer of its own,
   the previous record's payload, so each alias names its own version --
   ``TCP:TLS 1.3:TLS 1.2`` -- and one that fails to decode is
   :class:`~pcapkit.protocols.misc.raw.Raw` with the rest of the segment
@@ -188,8 +211,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``extract()`` as its ``context``, resolves a ``tls12_cid`` record's
   connection ID from those the capture's hellos negotiate in their
   ``connection_id`` extension, which TLS and DTLS both decode, or from the
-  ``cid_length`` the caller gives it, and one it cannot resolve stays Raw
-  (:issue:`2515`, :pr:`2631`). Each whole DTLS record in a UDP datagram is likewise a layer of
+  ``cid_length`` the caller gives it, and one it cannot resolve stays Raw;
+  :mod:`pcapkit.protocols.data` and :mod:`pcapkit.protocols.schema` export the
+  record's classes as ``DTLS_CIDCiphertext`` and the extension's data model as
+  ``TLS_ConnectionId`` (:issue:`2515`, :pr:`2631`, :pr:`2641`). Each whole DTLS
+  record in a UDP datagram is likewise a layer of
   its own -- a DTLS 1.2 record then a DTLS 1.3 unified-header record read
   ``DTLS 1.2:DTLS 1.3`` -- a unified-header record with no length running to
   the end of the datagram, and one that fails to decode is
@@ -360,6 +386,19 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``pcapkit.InARP``, their :mod:`pcapkit.protocols` exports and a parsed
   RARP's ``DRARP`` or ARP's ``InARP`` alias are unchanged.
 
+* **Changed** -- **a breaking change to**
+  :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, which moves from
+  ``pcapkit.protocols.misc.null`` to :mod:`pcapkit.protocols.misc.no_payload`,
+  and its data model and header schema from ``pcapkit.protocols.data.misc.null``
+  and ``pcapkit.protocols.schema.misc.null`` to
+  :mod:`pcapkit.protocols.data.misc.no_payload` and
+  :mod:`pcapkit.protocols.schema.misc.no_payload`, with no re-export at the old
+  paths, as a protocol class takes its module's name (:issue:`2529`,
+  :pr:`2636`). The class keeps its name, and ``pcapkit.NoPayload`` and the
+  package exports of that name are unchanged. A frame pickled by 1.5.x fails
+  to load, as the pickle names the old module, though its pickled ``info``
+  loads.
+
 * **Changed** -- **a breaking change to** HTTP: parsing octets through
   :class:`~pcapkit.protocols.application.http.HTTP`, building it from fields
   and its ``from_data`` give the
@@ -426,6 +465,16 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   submodule, and its log records carry that submodule's logger name, a child
   of the package's, so configuring the package's logger still applies.
 
+* **Changed** -- :class:`~pcapkit.protocols.transport.sctp.SCTP`'s chunk makers
+  refuse flags that are not one octet, and its Invalid Stream Identifier cause
+  maker reserved octets that are not two, as
+  ``SCTP: invalid [Chunk 132] flags: must be 1 octet, not b''`` and
+  ``SCTP: invalid [Cause 1] reserved: must be 2 octets, not b''``, where they
+  read ``SCTP: [Chunk 132] invalid flags: must be one octet, not b''`` and
+  ``SCTP: [Cause 1] invalid reserved: must be two octets, not b''``
+  (:issue:`2614`, :pr:`2638`). A one-character :class:`str` given as flags, which
+  passed the check and failed to pack, is refused the same way.
+
 * **Changed** -- protocol class bodies are reordered to the member-order
   convention, with no change in behaviour, and a project test guards the
   order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
@@ -474,7 +523,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   own, and a project test fails on a module under :mod:`pcapkit.protocols`
   importing :mod:`pcapkit.foundation` outside ``TYPE_CHECKING``,
   :mod:`pcapkit.foundation.registry.protocols` aside (:issue:`2622`,
-  :pr:`2634`).
+  :pr:`2634`). A versioned family's base takes its member from the ``version``
+  keyword, or else from the octets or the data model, never from a field, has no
+  default member, and refuses octets that carry no version unless ``version``
+  names one (:issue:`2574`, :pr:`2639`). The member-order convention's reference
+  class is :class:`~pcapkit.protocols.link.arp.ARP`, where it was
+  :class:`~pcapkit.protocols.link.ethernet.Ethernet`, whose MAC address helpers
+  moved to the base class (:issue:`2614`, :pr:`2638`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -547,7 +602,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Fixed** -- a membership test such as ``'ESP' in layer`` on an extension
   header parsed by the IPv6 header's walk -- AH, HOPOPT, IPv6_Route, IPv6_Frag,
   IPv6_Opts, MH, HIP or the generic IPv6_Ext -- raised :exc:`AttributeError`.
-  The layer now holds :class:`~pcapkit.protocols.misc.null.NoPayload`, the
+  The layer now holds :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the
   upper layer belonging to the enclosing IPv6 header (:issue:`2484`,
   :issue:`2487`, :pr:`2486`, :pr:`2488`).
 
