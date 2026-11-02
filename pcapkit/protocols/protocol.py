@@ -25,7 +25,6 @@ import ast
 import collections
 import collections.abc
 import contextlib
-import contextvars
 import copy
 import difflib
 import enum
@@ -43,9 +42,8 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 
 import aenum
 
-from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.context import ContextRegistry
-from pcapkit.corekit.decorators import _beholding, beholder, seekset
+from pcapkit.corekit.decorators import beholder, seekset
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
@@ -60,6 +58,7 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
+from pcapkit.utilities.contextvars import beholding, frame_depth, rebuilding
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
                                           UnsupportedCall, stacklevel)
@@ -424,13 +423,6 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
          UnknownFieldWarning)
-
-
-#: contextvars.ContextVar[int]: How many layers of the frame being dissected
-#: come before the next one :meth:`Protocol._parse_next_layer
-#: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` parses; see
-#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
-_frame_depth = contextvars.ContextVar('_frame_depth', default=0)
 
 
 def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
@@ -2207,12 +2199,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 NoPayload  # pylint: disable=import-outside-toplevel
             return NoPayload()
 
-        token, rebuilding = _frame_depth.set(_frame_depth.get() + 1), _rebuilding.set(True)
+        token, rebuilt = frame_depth.set(frame_depth.get() + 1), rebuilding.set(True)
         try:
             return proto.from_data(data[name])
         finally:
-            _rebuilding.reset(rebuilding)
-            _frame_depth.reset(token)
+            rebuilding.reset(rebuilt)
+            frame_depth.reset(token)
 
     @staticmethod
     def _lookup_registry(registry: 'DefaultDict[Any, _VT]', code: 'Any') -> '_VT':
@@ -2433,7 +2425,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             ProtocolWarning: If the next layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 
         """
-        depth = _frame_depth.get() + 1
+        depth = frame_depth.get() + 1
         limit = config.FRAME_LAYER_LIMIT
         if limit != -1 and depth > limit:
             from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
@@ -2445,32 +2437,32 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                            f'from {klass.__name__} on, is left undissected')
                 # NOTE: Inside a payload being rebuilt, the layer it is rebuilt
                 # for warns of the same octets once its own parse gets here.
-                if not _rebuilding.get():
+                if not rebuilding.get():
                     warn(message, ProtocolWarning, stacklevel=stacklevel())
                 raw = Raw(file_, length, **{**kwargs, 'error': message})
                 raw._past_layer_limit = True  # pylint: disable=protected-access
                 return raw
 
         captured = min(length, len(file_))
-        token = _frame_depth.set(depth)
+        token = frame_depth.set(depth)
         try:
             # NOTE: Under ``beholder`` a layer that raises is replaced at any length,
             # so its warnings are held however much was captured (#2516).
-            with hold_warnings(_beholding.get() or _short_of_hint(klass, captured)) as held:
+            with hold_warnings(beholding.get() or _short_of_hint(klass, captured)) as held:
                 try:
                     next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
                 except Exception:
                     # NOTE: Under ``beholder`` the layer that raised is replaced,
                     # so its warnings go with it; outside it, the error reaches
                     # the caller and they are reported as it leaves (#2308).
-                    held.discard = _beholding.get()
+                    held.discard = beholding.get()
                     raise
 
                 length_hint = getattr(next_, '__length_hint__', None)
                 hint = None if length_hint is None else length_hint()
                 held.discard = hint is not None and captured < hint and captured < next_.length
         finally:
-            _frame_depth.reset(token)
+            frame_depth.reset(token)
         if held.discard:
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             next_ = Raw(file_, length, **kwargs)

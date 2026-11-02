@@ -48,7 +48,6 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.decorators import _beholding
 from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
@@ -61,6 +60,7 @@ from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.protocols.schema.transport import tcp as Schema_TCP_Module
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, hold_warnings, warn
 
@@ -486,7 +486,7 @@ def _default_accepts(name: 'str', header: 'bytes') -> 'bool':
     protocol = Protocol_IPv4 if name == 'IPv4' else Protocol_TCP
     try:
         # NOTE: The parser reads its own header, outside ``_parse_next_layer``,
-        # so ``_beholding`` would hold nothing here (#2526).
+        # so ``beholding`` would hold nothing here (#2526).
         with hold_warnings() as held:
             try:
                 protocol(header, len(header), protocol=name)
@@ -521,14 +521,14 @@ def _default_extension_header(protocol: 'int', data: 'bytes') -> 'Optional[tuple
     """
     # pylint: disable-next=protected-access
     klass = Protocol_IPv4._lookup_next_layer(Protocol_IPv4.__proto__, protocol)
-    token = _beholding.set(True)
+    token = beholding.set(True)
     try:
         header = Protocol_IPv4._parse_next_layer(  # pylint: disable=protected-access
             klass, data, len(data), version=4, extension=False, alias=protocol, protocol=klass)
     except Exception:  # as beholder does
         return None
     finally:
-        _beholding.reset(token)
+        beholding.reset(token)
     nxt = getattr(header.info, 'next', None)  # none on a header cut short, read as raw octets
     if nxt is None:
         return None

@@ -205,8 +205,9 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         # an IP fragment carries only part of one.
         if config.CHECKSUM_VERIFY:
             from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
-                ChecksumStatus, _in_fragment, verify_checksum)
-            if _in_fragment.get():
+                ChecksumStatus, verify_checksum)
+            from pcapkit.utilities.contextvars import in_fragment  # isort: skip # pylint: disable=import-outside-toplevel
+            if in_fragment.get():
                 status = ChecksumStatus.NO_PSEUDO_HEADER
             else:
                 status = verify_checksum(self.alias, self._data, schema.checksum, length=length)
