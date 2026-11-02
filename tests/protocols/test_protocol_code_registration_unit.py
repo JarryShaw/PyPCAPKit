@@ -215,6 +215,19 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         reg_frame.assert_called_once_with(LinkType.RAW, FakeProtocol)
         reg_pcapng.assert_called_once_with(LinkType.RAW, FakeProtocol)
 
+    def test_bare_arphrd_member_infers_linux_sll(self) -> None:
+        """``ARPHRD`` names ``LinuxSLL``, the family base owning the registry (#2533)."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
+
+        class FakeProtocol:
+            pass
+
+        with mock.patch.object(LinuxSLL, 'register') as register:
+            register_protocol_code(FakeProtocol, ARPHRD.NETROM)
+        register.assert_called_once_with(ARPHRD.NETROM, FakeProtocol)
+
     def test_raw_int_without_explicit_destination_refuses(self) -> None:
         """A bare ``int`` cannot say whether it means TCP or UDP -- it must refuse.
 
@@ -358,6 +371,26 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
 
             self.assertIs(Internet.__proto__[TransType.GRE], MyGre)
         self.assertNotIn(TransType.GRE, Internet.__proto__)
+
+    def test_class_keyword_with_an_arphrd_member_reaches_linux_sll_dispatch(self) -> None:
+        """``code=ARPHRD.X`` registers where a cooked frame dispatches (#2533)."""
+        import struct
+
+        from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.misc.raw import Raw
+
+        self.assertNotIn(ARPHRD.NETROM, LinuxSLL.__proto__)
+        frame = struct.pack('>HHIHBB8s', 0x0800, 0, 0, ARPHRD.NETROM, 0, 0, b'') + b'\xaa\xbb'
+
+        with mock.patch.dict(LinuxSLL.__proto__, {}, clear=False):
+            class NetROM(Raw, code=ARPHRD.NETROM):
+                pass
+
+            self.assertIs(LinuxSLL.__proto__[ARPHRD.NETROM], NetROM)
+            self.assertEqual(LinuxSLL2(frame, len(frame)).protochain.chain, 'LINUX_SLL2:NetROM')
+        self.assertNotIn(ARPHRD.NETROM, LinuxSLL.__proto__)
 
     def test_subclass_without_code_does_not_inherit_parent_registration(self) -> None:
         """Opting in is per-subclass, not inherited from a registered parent.
@@ -726,6 +759,8 @@ class ProtoDestDeclarationTests(unittest.TestCase):
         ('pcapkit.const.reg.linktype', 'LinkType',
          (('pcapkit.protocols.misc.pcap.frame', 'Frame'),
           ('pcapkit.protocols.misc.pcapng', 'PCAPNG'))),
+        ('pcapkit.const.linux.arphrd', 'ARPHRD',
+         (('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),)),
     )
 
     def test_each_registry_declares_the_destinations_it_keys(self) -> None:

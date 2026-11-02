@@ -523,7 +523,9 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
       :class:`~pcapkit.const.reg.transtype.TransType` to
       :class:`~pcapkit.protocols.internet.internet.Internet`,
       :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-      to :class:`~pcapkit.protocols.transport.sctp.SCTP`, and
+      to :class:`~pcapkit.protocols.transport.sctp.SCTP`,
+      :class:`~pcapkit.const.linux.arphrd.ARPHRD` to
+      :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`, and
       :class:`~pcapkit.const.reg.linktype.LinkType` to *both*
       :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
       :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or

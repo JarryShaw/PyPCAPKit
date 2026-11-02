@@ -13,6 +13,7 @@ import collections
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.vendor.default import Vendor
 
 if TYPE_CHECKING:
@@ -58,6 +59,10 @@ class ARPHRD(Vendor):
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x0000 <= value <= 0xFFFF'
+
+    #: Destination of a bare ``ARPHRD`` member; see
+    #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),)
 
     def request(self) -> 'dict[int, tuple[str, str]]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
