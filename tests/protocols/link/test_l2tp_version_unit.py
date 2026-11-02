@@ -82,9 +82,11 @@ def ethernet(etype: 'int', payload: bytes) -> bytes:
             + struct.pack('!H', etype) + payload)
 
 
-def make_pcap(*frames: bytes) -> str:
-    """Write ``frames`` to a little-endian LINKTYPE_ETHERNET PCAP file."""
-    path = os.path.join(tempfile.mkdtemp(prefix='pcapkit-l2tp-'), 'l2tp.pcap')
+def make_pcap(case: 'unittest.TestCase', *frames: bytes) -> str:
+    """Write ``frames`` to a little-endian LINKTYPE_ETHERNET PCAP file ``case`` removes (#2664)."""
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-l2tp-')
+    case.addCleanup(tmpdir.cleanup)
+    path = os.path.join(tmpdir.name, 'l2tp.pcap')
     with open(path, 'wb') as file:
         # little endian, v2.4, LINKTYPE_ETHERNET
         file.write(struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 262144, 1))
@@ -112,7 +114,7 @@ class L2TPVersionTests(unittest.TestCase):
         """Extract synthesised ``frames`` and return the frame list."""
         import pcapkit
 
-        extraction = pcapkit.extract(fin=make_pcap(*frames), nofile=True,
+        extraction = pcapkit.extract(fin=make_pcap(self, *frames), nofile=True,
                                      store=True)
         self.addCleanup(close_extractor, extraction)
         return extraction.frame

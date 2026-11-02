@@ -66,9 +66,11 @@ def ipv4(proto: 'int', payload: bytes) -> bytes:
                        bytes((10, 0, 0, 1)), bytes((224, 0, 0, 5))) + payload
 
 
-def make_pcap(linktype: 'int', *frames: bytes) -> str:
-    """Write ``frames`` to a little-endian PCAP file with the given link type."""
-    path = os.path.join(tempfile.mkdtemp(prefix='pcapkit-placement-'), 'placement.pcap')
+def make_pcap(case: 'unittest.TestCase', linktype: 'int', *frames: bytes) -> str:
+    """Write ``frames`` to a little-endian PCAP file with the given link type, in a directory ``case`` removes (#2664)."""
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-placement-')
+    case.addCleanup(tmpdir.cleanup)
+    path = os.path.join(tmpdir.name, 'placement.pcap')
     with open(path, 'wb') as file:
         file.write(struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 262144, linktype))
         for index, frame in enumerate(frames):
@@ -320,7 +322,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         import pcapkit
         from pcapkit.const.reg.linktype import LinkType
 
-        extraction = pcapkit.extract(fin=make_pcap(LinkType.IPV4, ipv4(89, ospf_hello())),
+        extraction = pcapkit.extract(fin=make_pcap(self, LinkType.IPV4, ipv4(89, ospf_hello())),
                                      nofile=True, store=True, engine='pcapkit', **kwargs)
         self.addCleanup(extraction.__del__)
         return extraction.frame[0]
@@ -376,7 +378,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
             with self.subTest(layer=layer):
                 kwargs = {} if layer is None else {'layer': layer}
                 extraction = pcapkit.extract(
-                    fin=make_pcap(LinkType.ETHERNET, frame_bytes),
+                    fin=make_pcap(self, LinkType.ETHERNET, frame_bytes),
                     nofile=True, store=True, engine='pcapkit', **kwargs)
                 self.addCleanup(extraction.__del__)
                 self.assertEqual(str(extraction.frame[0].protochain), chain)
@@ -387,7 +389,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.application.ftp_data import FTP_DATA
 
-        path = make_pcap(LinkType.IPV4, ipv4(6, tcp(50000, 20, b'binary-file-contents')))
+        path = make_pcap(self, LinkType.IPV4, ipv4(6, tcp(50000, 20, b'binary-file-contents')))
         for layer in ('application', FTP_DATA):
             with self.subTest(layer=layer):
                 extraction = pcapkit.extract(fin=path, nofile=True, store=True,

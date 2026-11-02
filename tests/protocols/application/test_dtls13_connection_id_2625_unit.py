@@ -158,7 +158,7 @@ class CaptureTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extraction = pcapkit.extract(fin=_ethernet_pcap(WOLFSSL), nofile=True)
+            extraction = pcapkit.extract(fin=_ethernet_pcap(self, WOLFSSL), nofile=True)
         try:
             self.assertEqual([str(frame.protochain) for frame in extraction.frame],
                              [f'Ethernet:IPv4:{chain}' for chain, _ in TSHARK])
@@ -209,7 +209,7 @@ class CaptureTests(unittest.TestCase):
             with self.subTest(ids=name):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    extraction = pcapkit.extract(fin=_ethernet_pcap(datagrams), nofile=True, **kwargs)
+                    extraction = pcapkit.extract(fin=_ethernet_pcap(self, datagrams), nofile=True, **kwargs)
                 try:
                     self.assertEqual(str(extraction.frame[-1].protochain), chain)
                     if kwargs:
@@ -231,7 +231,7 @@ class InstanceMemoryTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extraction = pcapkit.extract(fin=_ethernet_pcap(datagrams), nofile=True, **kwargs)
+            extraction = pcapkit.extract(fin=_ethernet_pcap(self, datagrams), nofile=True, **kwargs)
         self.addCleanup(close_extractor, extraction)
         return extraction
 

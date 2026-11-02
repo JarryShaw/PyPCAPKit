@@ -110,9 +110,11 @@ INNER_TCP = hx('''
     00140050 00000000 00000000 50022000 00000000''')
 
 
-def make_pcap(frame: bytes) -> str:
-    """Write a one frame Ethernet PCAP file to a temporary directory."""
-    path = os.path.join(tempfile.mkdtemp(prefix='pcapkit-esp-'), 'esp.pcap')
+def make_pcap(case: 'unittest.TestCase', frame: bytes) -> str:
+    """Write a one frame Ethernet PCAP file to a temporary directory ``case`` removes (#2664)."""
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-esp-')
+    case.addCleanup(tmpdir.cleanup)
+    path = os.path.join(tmpdir.name, 'esp.pcap')
     with open(path, 'wb') as file:
         # little endian, v2.4, LINKTYPE_ETHERNET
         file.write(struct.pack('<IHHiIII', 0xa1b2c3d4, 2, 4, 0, 0, 262144, 1))
@@ -972,7 +974,7 @@ class ESPProtocolTests(unittest.TestCase):
                                                     SecurityAssociation)
 
         ethernet = hx('001122334455 66778899aabb 0800')
-        path = make_pcap(ethernet + CASE7_IP + CASE7_ESP)
+        path = make_pcap(self, ethernet + CASE7_IP + CASE7_ESP)
         output = os.path.join(os.path.dirname(path), 'out.txt')
 
         sa = SecurityAssociation(spi=0x8765, encryption=Cipher.AES_CBC,
