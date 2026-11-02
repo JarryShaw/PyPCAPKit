@@ -290,25 +290,23 @@ class Netlink(Link[Data_Netlink, Schema_Netlink],
         """
         if byteorder not in ('big', 'little'):
             raise ProtocolError(f'{self.alias}: invalid byte order: {byteorder!r}')
-        for name, value in (('nlmsg_type', nlmsg_type), ('nlmsg_flags', nlmsg_flags)):
-            if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 0xFFFF:
-                raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
-        for name, value in (('nlmsg_seq', nlmsg_seq), ('nlmsg_pid', nlmsg_pid)):
-            if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 0xFFFF_FFFF:
-                raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        nlmsg_type = self._make_uint(nlmsg_type, bits=16, name='nlmsg_type')
+        nlmsg_flags = self._make_uint(nlmsg_flags, bits=16, name='nlmsg_flags')
+        nlmsg_seq = self._make_uint(nlmsg_seq, bits=32, name='nlmsg_seq')
+        nlmsg_pid = self._make_uint(nlmsg_pid, bits=32, name='nlmsg_pid')
 
         if nlmsg_len is None:
             nlmsg_len = 16 + len(payload)
-        elif (not isinstance(nlmsg_len, int) or isinstance(nlmsg_len, bool)
-              or not 0 <= nlmsg_len <= 0xFFFF_FFFF):
-            raise ProtocolError(f'{self.alias}: invalid nlmsg_len: {nlmsg_len!r}')
+        else:
+            nlmsg_len = self._make_uint(nlmsg_len, bits=32, name='nlmsg_len')
 
+        lilendian = byteorder == 'little'
         return Schema_Netlink(
-            nlmsg_len=nlmsg_len.to_bytes(4, byteorder),
-            nlmsg_type=nlmsg_type.to_bytes(2, byteorder),
-            nlmsg_flags=nlmsg_flags.to_bytes(2, byteorder),
-            nlmsg_seq=nlmsg_seq.to_bytes(4, byteorder),
-            nlmsg_pid=nlmsg_pid.to_bytes(4, byteorder),
+            nlmsg_len=self._make_pack(nlmsg_len, size=4, lilendian=lilendian),
+            nlmsg_type=self._make_pack(nlmsg_type, size=2, lilendian=lilendian),
+            nlmsg_flags=self._make_pack(nlmsg_flags, size=2, lilendian=lilendian),
+            nlmsg_seq=self._make_pack(nlmsg_seq, size=4, lilendian=lilendian),
+            nlmsg_pid=self._make_pack(nlmsg_pid, size=4, lilendian=lilendian),
             payload=payload,
         )
 

@@ -212,9 +212,15 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
     .. versionchanged:: 1.6.0
 
-       The header checksum is computed when :meth:`make` is given none, and
-       verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-       (:issue:`2472`).
+       * The header checksum is computed when :meth:`make` is given none, and
+         verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+         (:issue:`2472`).
+       * A Quick-Start rate the four-bit rate code cannot carry, or a TTL,
+         nonce or reserved value outside its field, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than a bare
+         :exc:`ValueError`, an :exc:`OverflowError` or a
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError`, or a different
+         value written in its place (:issue:`2617`).
 
     """
 
@@ -1517,13 +1523,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         if func == Enum_QSFunction.Quick_Start_Request:
             schema_req = cast('Schema_QuickStartRequestOption', schema)
 
-            rate = schema_req.flags['rate']
             opt = Data_QuickStartRequestOption(
                 code=schema.type,
                 type=self._read_ipv4_opt_type(schema.type),
                 length=schema_req.length,
                 func=func,
-                rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
+                rate=self._read_qs_rate(schema_req.flags['rate']),
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
                 nonce=schema_req.nonce['nonce'],
                 reserved=schema_req.nonce['reserved'],
@@ -1531,13 +1536,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = cast('Schema_QuickStartReportOption', schema)
 
-            rate = schema_rep.flags['rate']
             opt = Data_QuickStartReportOption(
                 code=schema.type,
                 type=self._read_ipv4_opt_type(schema.type),
                 length=schema_rep.length,
                 func=func,
-                rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
+                rate=self._read_qs_rate(schema_rep.flags['rate']),
                 unused=schema_rep.reserved,
                 nonce=schema_rep.nonce['nonce'],
                 reserved=schema_rep.nonce['reserved'],
@@ -2170,7 +2174,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             func_default: default value for QS function type
             func_namespace: namespace for QS function type
             func_reversed: reversed flag for QS function type
-            rate: rate (in kbps)
+            rate: rate (in kbps), rounded down to the nearest rate the
+                four-bit rate code carries (:rfc:`4782#section-3.1`)
             ttl: time to live (in seconds)
             unused: the not-used fourth octet of a Report of Approved Rate
             nonce: nonce value
@@ -2184,7 +2189,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             the option takes the eight-octet layout of a Quick-Start Request.
 
         Raises:
-            ProtocolError: If ``func`` does not fit in four bits.
+            ProtocolError: If ``func`` does not fit in four bits, the rate code
+                cannot carry ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does
+                not fit its field.
 
         """
         if isinstance(option, Data_UnassignedOption):
@@ -2199,8 +2206,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
-        rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
+        rate_val = self._make_qs_rate(rate)
         ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+        nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
+        reserved = self._make_uint(reserved, bits=2, name='Quick-Start reserved')
 
         if func_enum == Enum_QSFunction.Quick_Start_Request:
             return Schema_QuickStartRequestOption(
@@ -2210,7 +2219,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                ttl=ttl_value,
+                ttl=self._make_uint(ttl_value, bits=8, name='Quick-Start TTL'),
                 nonce={
                     'nonce': nonce,
                     'reserved': reserved,
@@ -2232,5 +2241,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             )
         if not 0 <= func_enum < 16:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid QS function: {func_enum}')
+        ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
         data = bytes([(func_enum << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
         return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, data=data))

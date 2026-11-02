@@ -7,6 +7,7 @@ Radiotap - IEEE 802.11 Radiotap Header
 :class:`~pcapkit.protocols.link.radiotap.Radiotap`
 only, which implements the extractor for the radiotap header [*]_ capture
 tools prepend to an 802.11 frame, as seen on a
+``LINKTYPE_IEEE802_11_RADIOTAP`` capture, or on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
 is ``ARPHRD_IEEE80211_RADIOTAP``. Radiotap is not part of the 802.11
 standard itself -- it is a prefix written by the capturing tool, in front of
@@ -51,7 +52,7 @@ Decoding every optional field radiotap.org defines is tracked on
   so the frame is looked up in
   :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
   under :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`;
-  :func:`~pcapkit.foundation.registry.protocols.register_radiotap` replaces
+  :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap` replaces
   the entry.
 
 .. autoclass:: pcapkit.protocols.link.radiotap.Radiotap

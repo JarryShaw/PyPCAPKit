@@ -127,6 +127,15 @@ class TestLoopback(unittest.TestCase):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
                 Loopback(**kwargs)
 
+    def test_make_names_an_unknown_byteorder(self) -> None:
+        """The byte-order check is inline, not ``_make_uint``'s, with this prefix (#2614)."""
+        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError) as ctx:
+            Loopback(byteorder='native')
+        self.assertEqual(str(ctx.exception), "Loopback: invalid byte order: 'native'")
+
     def test_make_rejects_a_family_that_is_not_an_int(self) -> None:
         # #2289: a bool is an int and packs as family 1; a non-int fails the
         # range comparison or ``to_bytes`` with a bare ``TypeError`` or
@@ -254,8 +263,9 @@ class TestLoopback(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw = _header(2, 'little') + IPV4
-        with self.assertRaises(ProtocolError):
+        with self.assertRaises(ProtocolError) as ctx:
             Loopback(raw, len(raw), byteorder='native')
+        self.assertEqual(str(ctx.exception), "Loopback: invalid byte order: 'native'")
 
     def test_family_byteorder(self) -> None:
         from pcapkit.const.reg.linktype import LinkType

@@ -217,9 +217,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         elif isinstance(body_schema, Schema_ServerHello):
             # NOTE: wire bytes always fit; this refuses a programmatically built
             # schema, e.g. ``make(body=Schema_ServerHello(session_id_hit=256))``.
-            if not 0 <= body_schema.session_id_hit <= 255:
-                raise ProtocolError(f'SSLv2: SESSION-ID-HIT ({body_schema.session_id_hit}) out '
-                                    f'of range for a single octet (0-255)')
+            self._make_uint(int(body_schema.session_id_hit), bits=8, name='session_id_hit')
             body = Data_ServerHello(
                 # NOTE: kept as the raw octet, not normalised to a strict
                 # bool -- see ``Data_ServerHello.session_id_hit``.
@@ -297,8 +295,9 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
                 for the former, ``SERVER_HELLO`` for the latter); if ``body``
                 is of a type this maker does not recognise; if the
                 resulting record is longer than the chosen header form
-                allows; or if ``padding`` does not fit the 3-octet header
-                form's single padding octet (``0``-``255``).
+                allows; or if ``padding`` is not an :class:`int` (a
+                :obj:`bool` included) that fits the 3-octet header form's
+                single padding octet (``0``-``255``).
 
         """
         msg_type_val = cast('Enum_HandshakeType',
@@ -363,11 +362,8 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
             if not 0 <= record_length <= 0x3FFF:
                 raise ProtocolError(f'SSLv2: record ({record_length} octet(s)) too long for '
                                     f"the 3-octet header form's 16383-octet limit")
-            if not 0 <= padding <= 0xFF:
-                raise ProtocolError(f'SSLv2: padding ({padding}) out of range for the '
-                                    f"3-octet header form's single padding octet (0-255)")
             indicator = (0x40 if is_escape else 0x00) | (record_length >> 8)
-            padding_val = padding
+            padding_val = self._make_uint(padding, bits=8, name='padding')
         length_low = record_length & 0xFF
 
         return Schema_SSLv2(
@@ -498,12 +494,9 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
                                   self._make_index(server_version, server_version_default,
                                                    namespace=server_version_namespace,
                                                    reversed=server_version_reversed, pack=False))
-        session_id_hit_val = int(session_id_hit)
-        if not 0 <= session_id_hit_val <= 255:
-            # NOTE: ``UInt8Field`` packs mod 256, so ``256`` would silently
-            # write as ``0x00``, turning a hit into a miss.
-            raise ProtocolError(f'SSLv2: SESSION-ID-HIT ({session_id_hit_val}) out of range '
-                                f'for a single octet (0-255)')
+        # NOTE: ``int()`` first, so the documented ``True``/``False`` pass;
+        # ``UInt8Field`` packs mod 256, so ``256`` would turn a hit into a miss.
+        session_id_hit_val = self._make_uint(int(session_id_hit), bits=8, name='session_id_hit')
         return Schema_ServerHello(
             # NOTE: preserved as given, not collapsed to a strict 0/1 --
             # see ``Data_ServerHello.session_id_hit``.

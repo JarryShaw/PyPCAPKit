@@ -7,6 +7,8 @@ DTLS Handshake-Message Analysis
 :mod:`pcapkit.foundation.analysis.dtls` contains
 :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` only, which decodes a
 DTLS handshake message that :class:`~pcapkit.foundation.reassembly.dtls.DTLS`
-reassembled (:rfc:`6347#section-4.2.3`).
+reassembled (:rfc:`6347#section-4.2.3`). The decode itself is
+:meth:`DTLS.analyze_handshake
+<pcapkit.protocols.application.dtls.DTLS.analyze_handshake>` (:issue:`2622`).
 
 .. autofunction:: pcapkit.foundation.analysis.dtls.dtls_handshake

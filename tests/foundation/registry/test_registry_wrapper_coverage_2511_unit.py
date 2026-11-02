@@ -113,12 +113,15 @@ def _resolve(path: 'str') -> 'object':
 
 
 def _tags() -> 'dict[str, list[str]]':
-    """``wrapper name -> the map paths its tag names``."""
+    """``wrapper name -> the map paths its tag names``, across every submodule (#2578)."""
     from pcapkit.foundation.registry import protocols
 
-    source = inspect.getsource(protocols)
-    return {match['name']: [path.strip() for path in match['paths'].split(',')]
-            for match in TAG.finditer(source)}
+    tags = {}  # type: dict[str, list[str]]
+    for info in pkgutil.iter_modules(protocols.__path__, f'{protocols.__name__}.'):
+        source = inspect.getsource(importlib.import_module(info.name))
+        tags.update({match['name']: [path.strip() for path in match['paths'].split(',')]
+                     for match in TAG.finditer(source)})
+    return tags
 
 
 class RegistryWrapperCoverageTests(unittest.TestCase):
@@ -228,6 +231,7 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
     def test_register_ipx_and_register_loopback_dispatch_the_payload(self) -> None:
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.internet.ipx import IPX
         from pcapkit.protocols.link.loopback import Loopback
@@ -241,8 +245,8 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
                  (registry.register_loopback, Loopback, 99, loopback))
         for func, owner, code, packet in cases:
             with self.subTest(func=func.__name__), mock.patch.dict(owner.__proto__), \
-                    mock.patch.dict(names), mock.patch.dict(registry._CODE_LEASES), \
-                    mock.patch.dict(registry._NAME_LEASES), warnings.catch_warnings():
+                    mock.patch.dict(names), mock.patch.dict(reg_protocol._CODE_LEASES), \
+                    mock.patch.dict(reg_protocol._NAME_LEASES), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 func(code, 'pcapkit.protocols.transport.udp', 'UDP')
                 parsed = owner(io.BytesIO(packet), len(packet))

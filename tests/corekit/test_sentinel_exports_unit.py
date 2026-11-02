@@ -288,11 +288,14 @@ class SentinelExportTests(_ReimportCase):
 
     def test_the_registry_sentinel_is_exported_neither_way(self) -> 'None':
         """``MISSING`` is private to the protocol registry, as ``ABSENT`` is to its module (#2555)."""
-        import pcapkit.foundation.registry.protocols as registry
-
-        self.assertNotIn('MISSING', registry.__all__)
-        self.assertNotIn('MissingType', registry.__all__)
-        self.assertNotIn('MISSING', _star_import('pcapkit.foundation.registry.protocols'))
+        # #2578: the module reading it, and the package exporting that module's names.
+        for name in ('pcapkit.foundation.registry.protocols.protocol',
+                     'pcapkit.foundation.registry.protocols'):
+            with self.subTest(module=name):
+                registry = importlib.import_module(name)
+                self.assertNotIn('MISSING', registry.__all__)
+                self.assertNotIn('MissingType', registry.__all__)
+                self.assertNotIn('MISSING', _star_import(name))
 
 
 class SentinelPopulationTests(_ReimportCase):

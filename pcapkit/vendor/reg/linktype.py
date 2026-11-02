@@ -38,7 +38,7 @@ class LinkType(Vendor):
     #: Destinations of a bare ``LinkType`` member; see
     #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`. One per capture file
     #: format, because a link-layer header type keys the next-layer registry of
-    #: each, and :func:`~pcapkit.foundation.registry.protocols.register_linktype`
+    #: each, and :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`
     #: already registers into every one of them by hand.
     PROTO_DEST = (
         ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),

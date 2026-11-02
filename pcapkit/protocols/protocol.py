@@ -1023,7 +1023,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Note:
             The guard matches :func:`register_protocol
-            <pcapkit.foundation.registry.protocols.register_protocol>`'s: it
+            <pcapkit.foundation.registry.protocols.protocol.register_protocol>`'s: it
             fires only when the incumbent differs from the replacement, so
             handing back the entry already stored under ``code`` -- the same
             class object, or a :class:`~pcapkit.corekit.module.ModuleDescriptor`
@@ -1432,7 +1432,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         nothing or picking an arbitrary registry.
 
         See Also:
-            :func:`pcapkit.foundation.registry.protocols.register_protocol_code`
+            :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
             implements the resolution described above.
 
         """
@@ -2646,6 +2646,55 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         return layer_match or protocol_match
 
+    def _read_qs_rate(self, code: 'int') -> 'int':
+        """Read a Quick-Start rate code as a rate in kbps.
+
+        :rfc:`4782#section-3.1` encodes the Rate Request, and the Rate Report
+        formatted exactly as it, as a four-bit ``N`` that stands for
+        ``K * 2 ** N`` bps with ``K`` set to 40,000, and ``N = 0`` for a rate of
+        zero. The IPv6 option keeps the IPv4 format (:rfc:`4782#section-3.2`),
+        and the TCP Quick-Start Response formats its Rate Request the same way
+        (:rfc:`4782#section-4.2`).
+
+        Args:
+            code: the four-bit rate field, ``N``
+
+        Returns:
+            The rate in kbps: ``0`` for ``N = 0``, else ``40 * 2 ** N``.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return 40 * 2 ** code if code else 0
+
+    def _make_qs_rate(self, rate: 'Any') -> 'int':
+        """Make the Quick-Start rate code for a rate in kbps.
+
+        The inverse of :meth:`_read_qs_rate`. A rate between two codes is
+        rounded down to the lower one, so the option never carries more than
+        the rate given.
+
+        Args:
+            rate: the rate, in kbps
+
+        Returns:
+            The four-bit rate field, ``N``.
+
+        Raises:
+            ProtocolError: If ``rate`` is not an :class:`int`, is a
+                :obj:`bool`, or is one the field cannot carry: negative, above
+                zero but below the 80 kbps of ``N = 1``, or at or above the
+                ``40 * 2 ** 16`` kbps that needs a fifth bit. The message names
+                :attr:`alias`.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if (not isinstance(rate, int) or isinstance(rate, bool)
+                or (rate and not 80 <= rate < 40 * 2 ** 16)):
+            raise ProtocolError(f'{self.alias}: invalid Quick-Start rate: {rate!r}')
+        return (rate // 40).bit_length() - 1 if rate else 0
+
 
 class Protocol(ProtocolBase, Generic[_PT, _ST]):
     """User-facing abstract base class for third-party protocols.
@@ -2702,7 +2751,7 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
 
         See Also:
             For more information on the registry, please refer to
-            :func:`pcapkit.foundation.registry.protocols.register_protocol`.
+            :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`.
 
         """
         from pcapkit.foundation.registry.protocols import register_protocol

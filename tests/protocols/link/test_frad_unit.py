@@ -199,6 +199,19 @@ class TestFRAD(unittest.TestCase):
             with self.subTest(**kwargs), self.assertRaises(ProtocolError):
                 FRAD(**kwargs)
 
+    def test_make_rejects_a_float_flag_bit(self) -> None:
+        """``1.0`` equals ``1`` but is no bit, so it raises ``ProtocolError``
+        rather than reaching the bit-field packer's ``ValueError`` (#2614)."""
+        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for name in ('cr', 'fecn', 'becn', 'de'):
+            for bit in (0.0, 1.0):
+                with self.subTest(name=name, bit=bit):
+                    with self.assertRaises(ProtocolError) as ctx:
+                        FRAD(**{name: bit})
+                    self.assertEqual(str(ctx.exception), f'FRAD: invalid {name}: {bit!r}')
+
     def test_make_tolerates_nlpid_zero_for_short_read_replay(self) -> None:
         """``0x00`` is the SNAP pad marker, never a value of its own on the
         wire, but :meth:`make` must not refuse it: see the ``Note`` on

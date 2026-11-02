@@ -29,7 +29,7 @@ class ARPHRD(EnumRegistry, IntEnum):
 
     #: Protocol class(es) owning the ``__proto__`` dispatch registry keyed by
     #: this enumeration, read by
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
     #: to resolve a bare member of it into its destination(s). The classes are
     #: named as lazy :class:`~pcapkit.corekit.module.ModuleDescriptor`
     #: references rather than imported, because :mod:`pcapkit.const` sits below

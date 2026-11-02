@@ -149,7 +149,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         The subpackage does not track the dispatch tier: TLS is dispatched
         from :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
         at port 443, the ``https`` service name IANA assigns there. See
-        :func:`pcapkit.foundation.registry.protocols.register_tcp`.
+        :func:`pcapkit.foundation.registry.protocols.transport.register_tcp`.
 
     """
 

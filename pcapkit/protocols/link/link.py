@@ -107,9 +107,9 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key there too. Declared by the
     #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
     #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.register_ethertype` checks
+    #: :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype` checks
     #: its own -- :class:`~pcapkit.protocols.link.ethernet.Ethernet`, which shares
     #: this registry, is therefore checked as :class:`Link` is, while
     #: :class:`~pcapkit.protocols.link.loopback.Loopback`, which keeps one of its

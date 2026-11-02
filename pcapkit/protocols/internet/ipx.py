@@ -86,7 +86,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     #: <pcapkit.protocols.internet.internet.Internet.__proto__>` (:issue:`2169`).
     #: No IPX-native protocol is shipped, so the payload is
     #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered with
-    #: :func:`~pcapkit.foundation.registry.protocols.register_ipx`.
+    #: :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
@@ -94,7 +94,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     #: What :attr:`__proto__` is keyed by, declared as
     #: :attr:`Internet.__proto_key__ <pcapkit.protocols.internet.internet.Internet.__proto_key__>`
     #: is, so a ``code=`` key is checked as
-    #: :func:`~pcapkit.foundation.registry.protocols.register_ipx` checks its own.
+    #: :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx` checks its own.
     #: A bare :class:`int` is a valid key too, because the IPX Packet Type is a
     #: number in its own right (:issue:`2268`, :issue:`2511`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_Packet, True)

@@ -242,26 +242,20 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             this package keeps (:issue:`1458`).
 
         """
-        if not isinstance(dlci, int) or isinstance(dlci, bool) or not 0 <= dlci <= 0x3FF:
-            raise ProtocolError(f'{self.alias}: invalid DLCI: {dlci!r}')
-        for name, bit in (('cr', cr), ('fecn', fecn), ('becn', becn), ('de', de)):
-            if bit not in (0, 1):
-                raise ProtocolError(f'{self.alias}: invalid {name}: {bit!r}, must be 0 or 1')
-        if not isinstance(control, int) or isinstance(control, bool) or not 0 <= control <= 0xFF:
-            raise ProtocolError(f'{self.alias}: invalid control: {control!r}')
-        if not isinstance(nlpid, int) or isinstance(nlpid, bool) or not 0 <= nlpid <= 0xFF:
-            raise ProtocolError(f'{self.alias}: invalid nlpid: {nlpid!r}')
+        dlci = self._make_uint(dlci, bits=10, name='DLCI')
+        cr = self._make_uint(cr, bits=1, name='cr')
+        fecn = self._make_uint(fecn, bits=1, name='fecn')
+        becn = self._make_uint(becn, bits=1, name='becn')
+        de = self._make_uint(de, bits=1, name='de')
+        control = self._make_uint(control, bits=8, name='control')
+        nlpid = self._make_uint(nlpid, bits=8, name='nlpid')
 
         if nlpid == 0x80:
             if not isinstance(snap_oui, (bytes, bytearray)) or len(snap_oui) != 3:
                 raise ProtocolError(f'{self.alias}: invalid snap_oui: {snap_oui!r}, '
                                     f'must be exactly 3 octets when nlpid is 0x80')
-            if (not isinstance(snap_pid, int) or isinstance(snap_pid, bool)
-                    or not 0 <= snap_pid <= 0xFFFF):
-                raise ProtocolError(f'{self.alias}: invalid snap_pid: {snap_pid!r}, '
-                                    f'must fit in 16 bits when nlpid is 0x80')
             _schema_nlpid, _ext_nlpid = 0, 0x80
-            _oui, _pid = bytes(snap_oui), snap_pid
+            _oui, _pid = bytes(snap_oui), self._make_uint(snap_pid, bits=16, name='snap_pid')
         else:
             if snap_oui is not None or snap_pid is not None:
                 raise ProtocolError(f'{self.alias}: snap_oui and snap_pid are only meaningful '

@@ -360,15 +360,17 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_make_rejects_out_of_range_padding(self) -> None:
         """``padding`` is written as a single octet for the 3-octet header
-        form, so an out-of-range value is refused rather than wrapped mod 256."""
+        form, so an out-of-range value is refused rather than wrapped mod 256;
+        a ``bool``, which would pack as ``0x00``/``0x01``, and a non-``int``,
+        which would reach a bare ``TypeError``, are refused too (#2614)."""
         from pcapkit.protocols.application.sslv2 import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        for padding in (256, 300, -1):
+        for padding in (256, 300, -1, True, False, '1', 1.0, None):
             with self.subTest(padding=padding):
-                with self.assertRaisesRegex(ProtocolError,
-                                            rf'SSLv2: padding \({padding}\) out of range'):
+                with self.assertRaises(ProtocolError) as ctx:
                     SSLv2(msg_type=1, two_byte_header=False, padding=padding, body=b'')
+                self.assertEqual(str(ctx.exception), f'SSLv2: invalid padding: {padding!r}')
         self.assertEqual(SSLv2(msg_type=1, two_byte_header=False, padding=255, body=b'').data[2],
                          255)
 
@@ -454,7 +456,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         for bad in (256, 300, -1):
-            with self.assertRaisesRegex(ProtocolError, r'SSLv2: SESSION-ID-HIT \(' + str(bad) + r'\) out of range'):
+            with self.assertRaisesRegex(ProtocolError, rf'^SSLv2: invalid session_id_hit: {bad}$'):
                 SSLv2(msg_type=HandshakeType.SERVER_HELLO, body={
                     'session_id_hit': bad, 'certificate_type': 0, 'certificate': b'',
                     'cipher_specs': b'', 'connection_id': b'\x00' * 16,
@@ -700,7 +702,8 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A prebuilt :class:`~pcapkit.protocols.schema.application.sslv2.ServerHello`
         bypasses ``make()``'s own ``SESSION-ID-HIT`` range check; ``read()``'s
         guard is what refuses it, where it would otherwise pack as ``0x00``
-        and silently turn a HIT into a MISS."""
+        and silently turn a HIT into a MISS. The guard takes ``int()`` first,
+        so a ``bool``, a documented spelling, passes it (#2614)."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.protocols.application.sslv2 import SSLv2
         from pcapkit.protocols.schema.application.sslv2 import ServerHello as Schema_ServerHello
@@ -711,8 +714,13 @@ class TestSSLv2RoundTrip(unittest.TestCase):
             cipher_specs_length=0, connection_id_length=16, certificate=b'', cipher_specs=b'',
             connection_id=b'\x00' * 16,
         )
-        with self.assertRaisesRegex(ProtocolError, r'SSLv2: SESSION-ID-HIT \(256\) out of range'):
+        with self.assertRaisesRegex(ProtocolError, r'^SSLv2: invalid session_id_hit: 256$'):
             SSLv2(msg_type=HandshakeType.SERVER_HELLO, body=schema)
+        for hit in (False, True):
+            with self.subTest(hit=hit):
+                schema.session_id_hit = hit
+                proto = SSLv2(msg_type=HandshakeType.SERVER_HELLO, body=schema)
+                self.assertEqual(proto.data[3], int(hit))  # 2-octet header, MSG-TYPE, the hit
 
     def test_client_hello_length_mismatch_falls_back_to_raw_body(self) -> None:
         """A ``CLIENT-HELLO``-tagged body whose declared sub-field lengths
@@ -743,7 +751,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
-        with self.assertRaisesRegex(ProtocolError, r'SSLv2: SESSION-ID-HIT \(256\) out of range'):
+        with self.assertRaisesRegex(ProtocolError, r'^SSLv2: invalid session_id_hit: 256$'):
             proto.make(msg_type=HandshakeType.SERVER_HELLO, body={'session_id_hit': 256})
 
 

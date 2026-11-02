@@ -203,7 +203,7 @@ Protocol Registry
 
    .. seealso::
 
-      Please refer to :func:`pcapkit.foundation.registry.protocols.register_protocol`
+      Please refer to :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`
       for more information.
 
 Header Schema

@@ -658,7 +658,7 @@ Each is recorded here with its basis, or the lack of one:
   upper-cases a name before handing it on. :rfc:`7296` states no comparison rule for
   IKEv2 transform names -- checked, it does not discuss case at all -- so these are
   conveniences with no citation behind them.
-* :func:`~pcapkit.foundation.registry.protocols.register_apptype` lower-cases a
+* :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype` lower-cases a
   :class:`str` transport before matching it against
   :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s member names, so
   ``'TCP'`` names ``TransportProtocol.tcp``. Its basis is that class's row above,
@@ -778,47 +778,71 @@ established ones carry. A map's registration comes in two parts:
    NLPIDs and ``nlmsg_type`` values rather than the
    :class:`~pcapkit.const.reg.ethertype.EtherType`
    :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` takes.
-2. **A** ``register_<name>`` **function** in
-   :mod:`pcapkit.foundation.registry.protocols`, tagged ``# NOTE: <map path>`` on the
-   line above its ``def``. It calls the classmethod and logs, and a bad argument
-   writes nothing: ``_check_code`` checks the code against the map's enum, or, with
-   ``kind=None``, as a bare :class:`int` where no enum keys the map; a parser named
-   by string has to exist as a ``_read_*`` method; and a ``__proto__`` entry has to
-   be a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass or a descriptor
-   naming one. A wrapper writing a ``__proto__`` map also records the class's name
-   with ``_register_name``, and one whose entries have a schema registry takes a
+2. **A** ``register_<name>`` **function** in the submodule of
+   :mod:`pcapkit.foundation.registry.protocols` for the layer of the class owning
+   the map, tagged ``# NOTE: <map path>`` on the line above its ``def``. It calls the
+   classmethod and logs, and a bad argument writes nothing: ``_check_code`` checks
+   the code against the map's enum, or, with ``kind=None``, as a bare :class:`int`
+   where no enum keys the map; a parser named by string has to exist as a
+   ``_read_*`` method; and a ``__proto__`` entry has to be a
+   :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass or a descriptor naming
+   one. A wrapper writing a ``__proto__`` map also records the class's name with
+   ``_register_name``, and one whose entries have a schema registry takes a
    keyword-only ``schema``.
+
+**The wrappers are split by layer**, one submodule of
+:mod:`pcapkit.foundation.registry.protocols` per subpackage of
+:mod:`pcapkit.protocols` -- :mod:`~pcapkit.foundation.registry.protocols.link`,
+:mod:`~pcapkit.foundation.registry.protocols.internet`,
+:mod:`~pcapkit.foundation.registry.protocols.transport`,
+:mod:`~pcapkit.foundation.registry.protocols.application` and
+:mod:`~pcapkit.foundation.registry.protocols.misc` -- which the owner chose over one
+module per protocol, since a per-layer file is a size a reader can scan
+(:issue:`2578`). A wrapper goes in the submodule matching the subpackage of the
+class owning its map, so the PCAP and PCAP-NG frames' registrars are in
+:mod:`~pcapkit.foundation.registry.protocols.misc`. What they share -- ``_check_code``,
+``_register_name``,
+:func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol` and
+:func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` -- is
+in :mod:`~pcapkit.foundation.registry.protocols.protocol`, named after
+:mod:`pcapkit.protocols.protocol`. The package exports every public function its
+submodules define, so ``pcapkit.foundation.registry.protocols.register_tcp`` and
+``pcapkit.foundation.registry.register_tcp`` both resolve, and each wrapper is named
+in its submodule's ``__all__``, the package's and :mod:`pcapkit.foundation.registry`'s.
+:file:`tests/foundation/registry/test_registry_protocols_layout_2578_unit.py` fails on
+a wrapper in the wrong submodule or missing from one of those lists.
 
 **A** ``__proto__`` **wrapper is named after its keys.** One taking only an enum's
 members takes the enum's name, as
-:func:`~pcapkit.foundation.registry.protocols.register_ethertype` does; one taking
-bare :class:`int` keys, with or without an enum beside them, takes the owning
-protocol's name, as :func:`~pcapkit.foundation.registry.protocols.register_tcp` and
-:func:`~pcapkit.foundation.registry.protocols.register_loopback` do. These depart
-from it:
+:func:`~pcapkit.foundation.registry.protocols.link.register_ethertype` does; one
+taking bare :class:`int` keys, with or without an enum beside them, takes the owning
+protocol's name, as
+:func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` and
+:func:`~pcapkit.foundation.registry.protocols.link.register_loopback` do. These
+depart from it:
 
-* :func:`~pcapkit.foundation.registry.protocols.register_pcap` and
-  :func:`~pcapkit.foundation.registry.protocols.register_pcapng` take only
+* :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` and
+  :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` take only
   :class:`~pcapkit.const.reg.linktype.LinkType` members, but
-  :func:`~pcapkit.foundation.registry.protocols.register_linktype` holds that name
-  for writing both their maps at once, so each takes its capture format's name.
-* :func:`~pcapkit.foundation.registry.protocols.register_radiotap` takes only
+  :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype` holds that
+  name for writing both their maps at once, so each takes its capture format's name.
+* :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap` takes only
   :class:`~pcapkit.const.reg.linktype.LinkType` members too, keyed by the link type
   of the frame behind a radiotap header, and takes its owning protocol's name for the
   same reason.
-* :func:`~pcapkit.foundation.registry.protocols.register_apptype` takes bare
-  :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s map,
-  :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no one
-  owner's name fits and it takes
+* :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype` takes
+  bare :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s
+  map, :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no
+  one owner's name fits and it takes
   :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s.
 
-:func:`~pcapkit.foundation.registry.protocols.register_protocol` and
-:func:`~pcapkit.foundation.registry.protocols.register_protocol_code` are outside the
-rule: the first writes :data:`pcapkit.protocols.__proto__`, keyed by class name, and
-the second whichever maps its ``code`` names.
+:func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol` and
+:func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` are
+outside the rule: the first writes :data:`pcapkit.protocols.__proto__`, keyed by
+class name, and the second whichever maps its ``code`` names.
 
-:func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk` is the shape for a
-parser map:
+:func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk` is the
+shape for a parser map:
 
 .. code-block:: python
 

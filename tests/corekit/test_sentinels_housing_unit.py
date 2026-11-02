@@ -67,7 +67,7 @@ import pcapkit.corekit.enum as enum_module
 import pcapkit.corekit.fields.field as field_module
 import pcapkit.corekit.module as module_module
 import pcapkit.corekit.sentinels as sentinels
-import pcapkit.foundation.registry.protocols as registry_module
+import pcapkit.foundation.registry.protocols.protocol as registry_module
 import pcapkit.protocols.protocol as protocol_module
 from pcapkit.corekit.sentinels import (ABSENT, MISSING, NO_DEFAULT, NO_VALUE, NULL, AbsentType,
                                        MissingType, NoDefaultType, NoValueType, NullType)

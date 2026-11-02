@@ -177,7 +177,9 @@ class Deferred(Generic[_KT]):
       ``Deferred[tuple[HandshakeType, int, int]]`` for a complete message. It
       passes the message's ``(msg_type, length, message_seq)``, its handshake
       header as if unfragmented (:rfc:`6347#section-4.2.3`), to the decoder
-      :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs, which reads
+      :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs,
+      :meth:`DTLS.analyze_handshake
+      <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`, which reads
       the body by its :class:`~pcapkit.const.tls.handshake_type.HandshakeType`.
 
     Those are the cases the type parameter is constrained to. IP's and TCP's are
@@ -215,7 +217,7 @@ class Deferred(Generic[_KT]):
         analyze: The analyser to call: the parse
             :mod:`pcapkit.foundation.analysis` runs for the engine, bound to
             the reassembly object's protocol for IP and TCP, whose ``analyze``
-            it calls, and the handshake decoder for DTLS.
+            it calls, and that protocol's ``analyze_handshake`` for DTLS.
         proto: What the analyser dispatches the payload on -- the payload
             protocol type for IP, the port pair for TCP, the handshake header
             for DTLS, as above.

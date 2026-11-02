@@ -84,8 +84,8 @@ verification.
 
 One note on how it differs from its siblings. The next layer is dispatched
 on the DATA chunk's *payload protocol identifier* through
-:func:`~pcapkit.foundation.registry.protocols.register_sctp`, not on port
-numbers, so :func:`~pcapkit.foundation.registry.protocols.register_apptype`
+:func:`~pcapkit.foundation.registry.protocols.transport.register_sctp`, not on port
+numbers, so :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype`
 deliberately does not fan out to it.
 
 What is still wanted is the registered-but-unimplemented type codes. IANA
@@ -320,7 +320,7 @@ complaint and yields nothing useful.
   <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to
   :class:`~pcapkit.protocols.application.ngap.NGAP`. Every other DATA chunk
   payload is :class:`~pcapkit.protocols.misc.raw.Raw` until something calls
-  :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
+  :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp`.
 
 How much of each registry is bound is measurable, so measure it rather than
 trust a figure written down here:

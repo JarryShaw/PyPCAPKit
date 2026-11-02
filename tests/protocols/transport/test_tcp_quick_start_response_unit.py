@@ -12,9 +12,11 @@ GitHub issue #1119 found two defects in this option:
   ``0 < rate < 40`` kbps, and a negative code cannot pack into the 4-bit field.
 
 :rfc:`4782` Section 4.2 gives the option layout, and Section 3.1 the rate
-encoding: ``40 kbps * 2 ** N``, where ``N = 0`` means a rate of zero. Section 4.3
-lets a response report a lower rate than the one requested, so a rate below the
-smallest non-zero code (80 kbps) is rounded down to ``N = 0`` rather than refused.
+encoding: ``40 kbps * 2 ** N``, where ``N = 0`` means a rate of zero. A rate
+between two codes rounds down to the lower one. The owner ruled on #2617 that a
+rate the field cannot carry -- above zero but under the 80 kbps of ``N = 1``, or
+past ``N = 15`` -- raises ``ProtocolError`` rather than being written as zero,
+which is what #1119's fix had done.
 
 Every case builds its own octets in memory, so this belongs to the unit tier.
 
@@ -104,13 +106,44 @@ class QuickStartResponseTests(unittest.TestCase):
                 self.assertEqual(req_rate, rate)
 
     def test_rate_rounds_down_to_a_representable_code(self) -> 'None':
-        """A rate is floored to ``40 * 2 ** N``, and below 80 kbps to ``N = 0``."""
+        """A rate is floored to ``40 * 2 ** N``."""
         QS = qs()
-        for rate, code in ((1, 0), (20, 0), (39, 0), (40, 0), (79, 0), (80, 1), (159, 1), (160, 2)):
+        for rate, code in ((0, 0), (80, 1), (159, 1), (160, 2), (2_621_439, 15)):
             with self.subTest(rate=rate):
                 raw = build(rate)
                 self.assertEqual(raw[20:24], bytes([27, 8, code, 3]))
                 self.assertEqual(parse(raw).info.options[QS].req_rate, 40 * 2 ** code if code else 0)
+
+    def test_a_rate_the_field_cannot_carry_is_refused(self) -> 'None':
+        """Under 80 kbps but not zero, negative, or past ``N = 15``: refused, not zeroed (#2617)."""
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for rate in (-1, 1, 20, 39, 40, 79, 2_621_440):
+            with self.subTest(rate=rate):
+                with self.assertRaisesRegex(ProtocolError, rf'^TCP: invalid Quick-Start rate: {rate}$'):
+                    build(rate)
+
+    def test_a_field_value_outside_its_bits_is_refused(self) -> 'None':
+        """The nonce (30 bits), ``Resv.`` (4) and ``R`` (2): refused, not wrapped or leaked (#2617)."""
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for keyword, what, values in (('nonce', 'nonce', (-1, 1 << 30, True)),
+                                      ('reserved', 'reserved', (-1, 16, True)),
+                                      ('nonce_reserved', 'nonce reserved', (-1, 4, True))):
+            for value in values:
+                with self.subTest(field=keyword, value=value):
+                    with self.assertRaisesRegex(ProtocolError, rf'^TCP: invalid Quick-Start {what}: {value!r}$'):
+                        TCP(srcport=1, dstport=2, options=[(qs(), {'rate': 80, keyword: value})])
+
+    def test_ttl_diff_is_taken_modulo_256(self) -> 'None':
+        """:rfc:`4782` Section 3.1 defines TTL Diff modulo 256, so its octet wraps."""
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for diff, octet in ((255, 0xff), (256, 0x00), (300, 0x2c), (-1, 0xff)):
+            with self.subTest(diff=diff):
+                raw = TCP(srcport=1, dstport=2, options=[(qs(), {'rate': 80, 'diff': diff})]).data
+                self.assertEqual(raw[23], octet)
 
 
 if __name__ == '__main__':

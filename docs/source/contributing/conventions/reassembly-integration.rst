@@ -38,6 +38,30 @@ zero-fills to merge a segment. It bounds the memory a capture can have zero-fill
 :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` does for a field, and ``-1``
 lifts it to give the uncapped reassembly point 4 asks for. Ruled on :issue:`2546`.
 
+Parse Ownership
+~~~~~~~~~~~~~~~
+
+**The protocol class owns the parse of a reassembled outcome**, and
+:mod:`pcapkit.foundation.analysis` is a public layer over it. Ruled on :issue:`2622`:
+
+* The parse is a method of the protocol class:
+  :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` for IPv4 and
+  IPv6, :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
+  for TCP, and
+  :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+  for a DTLS handshake message.
+* Each :mod:`pcapkit.foundation.analysis` function is a public wrapper that calls that
+  method and holds no parsing of its own.
+* The reassembly :class:`~pcapkit.foundation.reassembly.data.data.Deferred` calls the
+  same method, on the reassembly's own ``__protocol_type__``.
+* Protocol code never imports :mod:`pcapkit.foundation` to do its own work: the
+  dependency runs from ``foundation`` to the protocols. What the protocol base does
+  import from :mod:`pcapkit.foundation.registry.protocols` registers a class rather
+  than parsing. :file:`tests/project/test_protocols_import_boundary_2622_unit.py` fails
+  on any other import of :mod:`pcapkit.foundation` under :file:`pcapkit/protocols/`
+  made outside a ``TYPE_CHECKING`` block, the rest of
+  :mod:`pcapkit.foundation.registry` included.
+
 Compliance, Measured
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -52,7 +76,8 @@ function on an already-parsed frame, feeding the result to the reassembly instan
 :class:`~pcapkit.foundation.extraction.Extractor` holds; for DTLS that function is
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`).
 :meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
-is the parser method the rule allows.
+and :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+are the parser methods the rule allows.
 
 **No engine meets point 2.** No single :mod:`pcapkit.toolkit` helper enumerates which
 output engines support a given reassembly engine. Support is established ad hoc, per
@@ -69,21 +94,22 @@ datagram's payload by its payload protocol type, through
 datagram's by its ports, through
 :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`;
 and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a reassembled
-DTLS handshake message (:issue:`2496`). The owner chose on :issue:`2581` to give IP
-and TCP modules of their own, each function named for the datagram its engine
-reassembles, rather than leave their outcomes to those dispatchers with no analysis
-method, which kept the rule true for DTLS alone.
+DTLS handshake message (:issue:`2496`), through
+:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+(:issue:`2622`). The owner chose on :issue:`2581` to give IP and TCP modules of their
+own, each function named for the datagram its engine reassembles, rather than leave
+their outcomes to those dispatchers with no analysis method, which kept the rule true
+for DTLS alone.
 
 **Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`). IPv4, IPv6,
 TCP and DTLS reassembly each set ``__protocol_type__``, and each reports its parsed
 outcome as a datagram's ``packet``, deferred to first read by
 :class:`~pcapkit.foundation.reassembly.data.data.Deferred`. Each ``Deferred`` runs the
 parse behind its engine's analysis function, so a ``packet`` is what that function
-returns. IP and TCP bind that parse to ``__protocol_type__`` and call its ``analyze``,
-so a subclass naming another protocol has its ``packet`` parsed by that one
-(:issue:`2581`); DTLS decodes with
-:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
-whatever ``__protocol_type__`` names. The engines differ in what an incomplete outcome
-holds. IP and TCP parse a contiguous payload whether or not it is complete, as
-``strict=False`` reports one, and hold :data:`None` only for the received runs
-``strict=True`` reports; DTLS holds :data:`None` for any incomplete message.
+returns. Each binds that parse to ``__protocol_type__``, calling its ``analyze`` for
+IP and TCP (:issue:`2581`) and its ``analyze_handshake`` for DTLS (:issue:`2622`), so a
+subclass naming another protocol has its ``packet`` parsed by that one. The engines
+differ in what an incomplete outcome holds. IP and TCP parse a contiguous payload
+whether or not it is complete, as ``strict=False`` reports one, and hold :data:`None`
+only for the received runs ``strict=True`` reports; DTLS holds :data:`None` for any
+incomplete message.

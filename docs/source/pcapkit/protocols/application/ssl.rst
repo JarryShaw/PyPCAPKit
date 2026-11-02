@@ -50,6 +50,7 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _read_ext_alpn
    .. automethod:: _read_ext_supported_versions
    .. automethod:: _read_ext_key_share
+   .. automethod:: _read_ext_connection_id
 
    .. automethod:: _make_ext_unknown
    .. automethod:: _make_ext_server_name
@@ -58,6 +59,7 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _make_ext_alpn
    .. automethod:: _make_ext_supported_versions
    .. automethod:: _make_ext_key_share
+   .. automethod:: _make_ext_connection_id
 
    .. automethod:: _validate_tls_record
 
@@ -154,6 +156,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.application.tls.KeyShareEntry
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.tls.ConnectionId
    :members:
    :show-inheritance:
 

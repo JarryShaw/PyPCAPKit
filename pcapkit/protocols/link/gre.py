@@ -257,30 +257,23 @@ class GRE(Link[Data_GRE, Schema_GRE],
         if reserved1 is not None and not checksum_present:
             raise ProtocolError(f'{self.alias}: reserved1 given without checksum')
         if checksum_present:
-            if (not isinstance(checksum, int) or isinstance(checksum, bool)
-                    or not 0 <= checksum <= 0xFFFF):
-                raise ProtocolError(f'{self.alias}: invalid checksum: {checksum!r}')
+            checksum = self._make_uint(checksum, bits=16, name='checksum')
             if reserved1 is None:
                 reserved1 = 0
-            elif (not isinstance(reserved1, int) or isinstance(reserved1, bool)
-                    or not 0 <= reserved1 <= 0xFFFF):
-                raise ProtocolError(f'{self.alias}: invalid reserved1: {reserved1!r}')
+            else:
+                reserved1 = self._make_uint(reserved1, bits=16, name='reserved1')
 
         key_present = key is not None
-        if key_present and (not isinstance(key, int) or isinstance(key, bool)
-                            or not 0 <= key <= 0xFFFF_FFFF):
-            raise ProtocolError(f'{self.alias}: invalid key: {key!r}')
+        if key_present:
+            key = self._make_uint(key, bits=32, name='key')
 
         sequence_present = sequence_number is not None
-        if sequence_present and (not isinstance(sequence_number, int)
-                                 or isinstance(sequence_number, bool)
-                                 or not 0 <= sequence_number <= 0xFFFF_FFFF):
-            raise ProtocolError(f'{self.alias}: invalid sequence_number: {sequence_number!r}')
+        if sequence_present:
+            sequence_number = self._make_uint(sequence_number, bits=32, name='sequence_number')
 
         if reserved & ~0x4FF8:
             raise ProtocolError(f'{self.alias}: reserved bits outside 0x4FF8: {reserved:#06x}')
-        if not isinstance(version, int) or isinstance(version, bool) or not 0 <= version <= 7:
-            raise ProtocolError(f'{self.alias}: invalid version: {version!r}')
+        self._make_uint(version, bits=3, name='version')
 
         return Schema_GRE(
             flags={

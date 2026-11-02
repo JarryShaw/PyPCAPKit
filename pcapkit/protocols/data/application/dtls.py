@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 __all__ = [
     'DTLS',
     'DTLSCiphertext',
+    'DTLSCIDCiphertext',
 
     'DTLSHandshake',
 ]
@@ -118,3 +119,31 @@ class DTLSCiphertext(Protocol):
 
     if TYPE_CHECKING:
         def __init__(self, epoch: 'int', sequence_number: 'int', sequence_long: 'bool', length: 'Optional[int]', content: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+
+
+@info_final
+class DTLSCIDCiphertext(Protocol):
+    """Data model for a DTLS 1.2 record with a connection ID (:rfc:`9146#section-4`).
+
+    The record is always encrypted, so its real content type is inside
+    :attr:`content` and :attr:`content_type` is ``tls12_cid``.
+
+    """
+
+    #: Outer content type, always ``tls12_cid``.
+    content_type: 'Enum_ContentType'
+    #: Legacy record version (``major << 8 | minor``), DTLS 1.2's.
+    version: 'int'
+    #: Epoch -- incremented on every change of cipher state.
+    epoch: 'int'
+    #: Sequence number within :attr:`epoch` (48-bit).
+    sequence_number: 'int'
+    #: Connection ID, as long as the handshake or the caller says.
+    cid: 'bytes'
+    #: Length of :attr:`content`.
+    length: 'int'
+    #: Encrypted record content, undecoded.
+    content: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, content_type: 'Enum_ContentType', version: 'int', epoch: 'int', sequence_number: 'int', cid: 'bytes', length: 'int', content: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

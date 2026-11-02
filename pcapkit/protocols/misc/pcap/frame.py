@@ -83,10 +83,14 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
          - :class:`pcapkit.protocols.link.loopback.Loopback`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.ETHERNET`
          - :class:`pcapkit.protocols.link.ethernet.Ethernet`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.IEEE802_11`
+         - :class:`pcapkit.protocols.link.ieee802_11.IEEE802_11`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.LOOP`
          - :class:`pcapkit.protocols.link.loopback.Loopback`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.LINUX_SLL`
          - :class:`pcapkit.protocols.link.linux_sll1.LinuxSLL1`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.IEEE802_11_RADIOTAP`
+         - :class:`pcapkit.protocols.link.radiotap.Radiotap`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`
@@ -112,22 +116,24 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            Enum_LinkType.NULL:       ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
-            Enum_LinkType.ETHERNET:   ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
-            Enum_LinkType.LOOP:       ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
-            Enum_LinkType.LINUX_SLL:  ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL1'),
-            Enum_LinkType.IPV4:       ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
-            Enum_LinkType.IPV6:       ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
-            Enum_LinkType.LINUX_SLL2: ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL2'),
+            Enum_LinkType.NULL:                ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
+            Enum_LinkType.ETHERNET:            ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.IEEE802_11:          ModuleDescriptor('pcapkit.protocols.link', 'IEEE802_11'),
+            Enum_LinkType.LOOP:                ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
+            Enum_LinkType.LINUX_SLL:           ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL1'),
+            Enum_LinkType.IEEE802_11_RADIOTAP: ModuleDescriptor('pcapkit.protocols.link', 'Radiotap'),
+            Enum_LinkType.IPV4:                ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
+            Enum_LinkType.IPV6:                ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
+            Enum_LinkType.LINUX_SLL2:          ModuleDescriptor('pcapkit.protocols.link', 'LinuxSLL2'),
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key there too. Declared by the
     #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` so a
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
     #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.register_pcap` checks its own --
+    #: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` checks its own --
     #: :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` keeps a registry of its own,
     #: keyed by the same enum, and so declares the same pairing rather than
     #: sharing this one (:issue:`2268`).
