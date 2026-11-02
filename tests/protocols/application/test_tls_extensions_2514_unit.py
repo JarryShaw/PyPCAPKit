@@ -361,6 +361,125 @@ class ExtensionConstructionTests(unittest.TestCase):
             with self.subTest(case=name), self.assertRaises(ProtocolError):
                 self._hello(extensions, server=server)
 
+    def test_a_value_too_wide_for_its_field_raises_struct_error(self) -> None:
+        """Every field ``make`` packs refuses an oversize value the same way, as ``Protocol._make_pack`` does."""
+        from pcapkit.const.tls.extension_type import ExtensionType
+        from pcapkit.protocols.data.application.tls import Extension, KeyShareEntry, ServerName
+        from pcapkit.utilities.exceptions import StructError
+
+        share = KeyShareEntry(group=0x10000, key_exchange=b'\x00')
+        for name, extensions, kwargs in (
+                ('client_shares group', ((ExtensionType.key_share, {'client_shares': (share,)}),), {}),
+                ('server_share group', ((ExtensionType.key_share, {'server_share': share}),), {'server': True}),
+                ('selected_group', ((ExtensionType.key_share, {'selected_group': 0x10000}),),
+                 {'server': True, 'random': HRR_RANDOM}),
+                ('selected_version', ((ExtensionType.supported_versions, {'selected_version': 0x10000}),),
+                 {'server': True}),
+                ('name_type', ((ExtensionType.server_name,
+                                {'server_name_list': (ServerName(name_type=0x100, name=b'x'),)}),), {}),
+                ('extension type', (Extension(type=0x10000, data=b''),), {}),
+                ('extension body', (Extension(type=ExtensionType.padding, data=bytes(0x10000)),), {}),
+                ('hello extensions', (Extension(type=ExtensionType.padding, data=bytes(0x8000)),) * 2, {}),
+        ):
+            with self.subTest(case=name), self.assertRaisesRegex(StructError, r'^TLS: pack failed$'):
+                self._hello(extensions, **kwargs)
+
+        for name, alias, content_type, content in self._oversize_contents():
+            with self.subTest(case=name), self.assertRaisesRegex(StructError, rf'^{alias}: pack failed$'):
+                self._content(alias, content_type, content)
+
+        # The record header, which the schema would otherwise mask to its width.
+        for name, alias, kwargs in (
+                ('record content_type', 'TLS', {'content_type': 0x100}),
+                ('record version', 'TLS', {'version': 0x10000}),
+                ('record negative version', 'TLS', {'version': -1}),
+                ('record length', 'TLS', {'data': bytes(0x10000)}),
+                ('DTLS record content_type', 'DTLS', {'content_type': 0x100}),
+                ('DTLS record version', 'DTLS', {'version': 0x10000}),
+                ('DTLS record epoch', 'DTLS', {'epoch': 0x10000}),
+                ('DTLS record sequence_number', 'DTLS', {'sequence_number': 1 << 48}),
+                ('DTLS record length', 'DTLS', {'data': bytes(0x10000)}),
+                ('tls12_cid record sequence_number', 'DTLS',
+                 {'content_type': 25, 'cid': b'\x01', 'sequence_number': 1 << 48, 'data': b'x'}),
+                ('unified header short sequence_number', 'DTLS',
+                 {'ciphertext': True, 'sequence_number': 0x100, 'content': b'x'}),
+                ('unified header long sequence_number', 'DTLS',
+                 {'ciphertext': True, 'sequence_long': True, 'sequence_number': 0x10000, 'content': b'x'}),
+                ('unified header length', 'DTLS', {'ciphertext': True, 'content': bytes(0x10000)}),
+        ):
+            with self.subTest(case=name), self.assertRaisesRegex(StructError, rf'^{alias}: pack failed$'):
+                self._record(alias, **kwargs)
+
+    @staticmethod
+    def _record(alias: str, **kwargs: object) -> bytes:
+        """``make`` a TLS or DTLS record from ``kwargs``."""
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.tls import TLS
+
+        maker = object.__new__(TLS if alias == 'TLS' else DTLS)
+        return bytes(maker.make(**kwargs))
+
+    @classmethod
+    def _content(cls, alias: str, content_type: int, content: object) -> bytes:
+        """``make`` a TLS or DTLS record carrying ``content``."""
+        return cls._record(alias, content_type=content_type, version=0x0303 if alias == 'TLS' else 0xFEFD,
+                           content=content)
+
+    @staticmethod
+    def _oversize_contents() -> 'tuple':
+        """One ``(case, maker, content type, content)`` per field the hello, handshake and content makers pack."""
+        from pcapkit.const.tls.content_type import ContentType
+        from pcapkit.const.tls.handshake_type import HandshakeType
+        from pcapkit.protocols.data.application.dtls import DTLSHandshake
+        from pcapkit.protocols.data.application.tls import (Alert, ChangeCipherSpec, ClientHello, Handshake,
+                                                            ServerHello)
+
+        def client(**fields: object) -> 'ClientHello':
+            values = {'version': 0x0303, 'random': bytes(32), 'session_id': b'', 'cookie': None,
+                      'cipher_suites': (0x1301,), 'compression_methods': (0,), 'extensions': None}
+            return ClientHello(**{**values, **fields})
+
+        def server(**fields: object) -> 'ServerHello':
+            values = {'version': 0x0303, 'random': bytes(32), 'session_id': b'', 'cipher_suite': 0x1301,
+                      'compression_method': 0, 'extensions': None}
+            return ServerHello(**{**values, **fields})
+
+        def dtls(msg_type: int = HandshakeType.client_hello, body: object = b'', **fields: object) -> 'tuple':
+            values = {'length': 0, 'message_seq': 0, 'fragment_offset': 0, 'fragment_length': 0,
+                      'is_fragmented': False}
+            return (DTLSHandshake(msg_type=msg_type, body=body, **{**values, **fields}),)
+
+        handshake, alert, ccs = ContentType.handshake, ContentType.alert, ContentType.change_cipher_spec
+        return (
+            ('client_hello.version', 'TLS', handshake,
+             (Handshake(msg_type=1, length=0, body=client(version=0x10000)),)),
+            ('client_hello.session_id', 'TLS', handshake,
+             (Handshake(msg_type=1, length=0, body=client(session_id=bytes(0x100))),)),
+            ('client_hello.cookie', 'DTLS', handshake, dtls(body=client(cookie=bytes(0x100)))),
+            ('client_hello.cipher_suites', 'TLS', handshake,
+             (Handshake(msg_type=1, length=0, body=client(cipher_suites=(0x10000,))),)),
+            ('client_hello.compression_methods', 'TLS', handshake,
+             (Handshake(msg_type=1, length=0, body=client(compression_methods=(0x100,))),)),
+            ('client_hello.compression_methods length', 'TLS', handshake,
+             (Handshake(msg_type=1, length=0, body=client(compression_methods=(0,) * 0x100)),)),
+            ('server_hello.version', 'TLS', handshake,
+             (Handshake(msg_type=2, length=0, body=server(version=0x10000)),)),
+            ('server_hello.session_id', 'TLS', handshake,
+             (Handshake(msg_type=2, length=0, body=server(session_id=bytes(0x100))),)),
+            ('server_hello.cipher_suite', 'TLS', handshake,
+             (Handshake(msg_type=2, length=0, body=server(cipher_suite=0x10000)),)),
+            ('server_hello.compression_method', 'TLS', handshake,
+             (Handshake(msg_type=2, length=0, body=server(compression_method=0x100)),)),
+            ('handshake msg_type', 'TLS', handshake, (Handshake(msg_type=0x100, length=0, body=b''),)),
+            ('handshake length', 'DTLS', handshake,
+             dtls(body=b'\x00', length=0x1000000, fragment_length=1, is_fragmented=True)),
+            ('message_seq', 'DTLS', handshake, dtls(message_seq=0x10000)),
+            ('fragment_offset', 'DTLS', handshake, dtls(fragment_offset=0x1000000)),
+            ('alert level', 'TLS', alert, Alert(level=0x100, description=0)),
+            ('alert description', 'TLS', alert, Alert(level=2, description=0x100)),
+            ('change_cipher_spec', 'TLS', ccs, ChangeCipherSpec(msg=0x100)),
+        )
+
 
 class ExtensionRegistryTests(unittest.TestCase):
     """``register_tls_extension`` writes ``SSL.__extension__``, which TLS and DTLS read."""

@@ -1913,9 +1913,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             value = chunk.value
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         return Schema_UnknownChunk(
             type=code,
@@ -2037,9 +2035,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             init_tsn = chunk.init_tsn
             parameters = chunk.parameters
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2099,9 +2095,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             init_tsn = chunk.init_tsn
             parameters = chunk.parameters
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2161,9 +2155,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             gap_blocks = list(chunk.gap_blocks)
             dup_tsn = list(chunk.dup_tsn)
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         blocks = []  # type: list[Schema_GapAckBlock]
         for block in gap_blocks or []:
@@ -2212,9 +2204,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             parameters = chunk.parameters
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2254,9 +2244,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             parameters = chunk.parameters
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         if parameters is not None:
             parameters_value = self._make_sctp_parameters(parameters)
@@ -2337,9 +2325,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             cum_tsn_ack = chunk.cum_tsn_ack
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         return Schema_ShutdownChunk(
             type=code,
@@ -2369,9 +2355,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         if chunk is not None:
             flags = chunk.flags
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         return Schema_ShutdownACKChunk(
             type=code,
@@ -2403,9 +2387,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             error = chunk.error
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         if error is not None:
             error_value = self._make_sctp_causes(error)
@@ -2446,9 +2428,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             flags = chunk.flags
             cookie = chunk.cookie
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         return Schema_CookieEchoChunk(
             type=code,
@@ -2478,9 +2458,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         if chunk is not None:
             flags = chunk.flags
 
-        if len(flags) != 1:
-            raise ProtocolError(f'{self.alias}: [Chunk {code}] invalid flags: '
-                                f'must be one octet, not {flags!r}')
+        flags = self._make_octets(flags, size=1, name=f'[Chunk {code}] flags')
 
         return Schema_CookieACKChunk(
             type=code,
@@ -3603,9 +3581,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             stream_id = cause.stream_id
             reserved = cause.reserved
 
-        if len(reserved) != 2:
-            raise ProtocolError(f'{self.alias}: [Cause {code}] invalid reserved: '
-                                f'must be two octets, not {reserved!r}')
+        reserved = self._make_octets(reserved, size=2, name=f'[Cause {code}] reserved')
 
         return Schema_InvalidStreamIdentifierCause(
             code=code,

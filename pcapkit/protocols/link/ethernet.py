@@ -25,7 +25,6 @@ below:
 .. [*] https://en.wikipedia.org/wiki/Ethernet
 
 """
-import re
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -33,7 +32,6 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.link.ethernet import Ethernet as Data_Ethernet
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ethernet import Ethernet as Schema_Ethernet
-from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -46,9 +44,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Ethernet']
-
-# Ethernet address pattern
-PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
 class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
@@ -158,7 +153,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
 
         Raises:
             ProtocolError: If ``dst`` or ``src`` is rejected by
-                :meth:`_make_mac_addr`.
+                :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr`.
 
         """
         _type = self._make_index(type, type_default, namespace=type_namespace,
@@ -213,39 +208,3 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             'type': data.type,
             'payload': cls._make_payload(data),
         }
-
-    def _read_mac_addr(self, addr: 'bytes') -> 'str':
-        """Read MAC address.
-
-        Args:
-            addr: MAC address.
-
-        Returns:
-            Colon (``:``) separated *hex* encoded MAC address.
-
-        """
-        return addr.hex(':')
-
-    def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
-        """Make MAC address.
-
-        Args:
-            addr: MAC address.
-
-        Returns:
-            MAC address packed as 6 octets.
-
-        Raises:
-            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
-                or :class:`bytearray` (a :obj:`bool` included), or is not a
-                ``:``- or ``-``-separated *hex* encoded MAC address.
-
-        """
-        if not isinstance(addr, (str, bytes, bytearray)):
-            raise ProtocolError(f'{self.alias}: invalid MAC address: must be a str, bytes or '
-                                f'bytearray, not {addr!r}')
-        _addr = addr.encode() if isinstance(addr, str) else addr
-
-        if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'{self.alias}: invalid MAC address: {addr!r}')

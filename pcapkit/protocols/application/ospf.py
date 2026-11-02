@@ -326,9 +326,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         if packet_length is None:
             packet_length = 24 + len(payload)
-        elif (not isinstance(packet_length, int) or isinstance(packet_length, bool)
-              or not 0 <= packet_length <= 0xFFFF):
-            raise ProtocolError(f'OSPF: invalid packet length: {packet_length!r}')
+        else:
+            # NOTE: ``alias`` reads ``_version``, which only ``read()`` sets.
+            packet_length = self._make_uint(packet_length, bits=16, name='packet length', alias='OSPF')
 
         schema = Schema_OSPF(
             version=version,
