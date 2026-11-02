@@ -19,7 +19,8 @@ Constructing the base gives the class its ``version`` keyword names; without it,
 octets give the class ``_dispatch`` picks, and fields are refused.
 :meth:`~pcapkit.protocols.internet.igmp.IGMP.from_data` gives the class the
 ``version`` of its data names, which each data model carries and no octet does
-(:issue:`2574`).
+(:issue:`2574`). Every version's checksum covers the whole message, with no
+pseudo-header, so the base verifies it for each of them (:issue:`2618`).
 
 .. versionadded:: 1.6.0
 
@@ -34,6 +35,7 @@ from pcapkit.protocols.data.internet.igmp import IGMP as Data_IGMP
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.protocols.schema.internet.igmp import IGMP as Schema_IGMP
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -63,6 +65,11 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     give the one :meth:`_dispatch` picks, and fields are refused, since no field
     picks a class. :meth:`from_data` reads the ``version`` of its data. See
     :meth:`__new__`.
+
+    The checksum of every version is verified on read under
+    :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, unless the enclosing IP
+    layer is a fragment, see :meth:`_verify_checksum`; :meth:`make` computes
+    one it is not given.
 
     """
 
@@ -139,16 +146,17 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             raise ProtocolError(f'{self.alias}: {schema.type!r} is not an IGMPv{self.version} '
                                 f'message ({length} octets)')
 
-        igmp = Data_IGMP(
+        igmp = cast('_PT', Data_IGMP(
             version=self.version,  # type: ignore[arg-type]
             type=schema.type,
             max_resp_time=schema.max_resp_time,
             checksum=schema.checksum,
             group=schema.group,
-        )
+        ))
+        self._verify_checksum(igmp, schema.checksum, length)
         # NOTE: IGMPv1/v2 has no next-protocol field, so trailing octets stay
         # as ``Raw``.
-        return self._decode_next_layer(cast('_PT', igmp), None, length - self.length)
+        return self._decode_next_layer(igmp, None, length - self.length)
 
     def make(self,
              type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.IGMP_Membership_Query,
@@ -156,7 +164,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              max_resp_time: 'int' = 0,
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              group: 'IPv4Address | str | bytes | int' = '0.0.0.0',  # nosec: B104
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> '_ST':
@@ -174,7 +182,10 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             max_resp_time: Max response time, in tenths of a second; zero for
                 an IGMPv1 message.
             checksum: Checksum over the message with this field zeroed, no
-                pseudo-header (:rfc:`2236#section-2.3`).
+                pseudo-header (:rfc:`2236#section-2.3`); if :data:`None`,
+                computed over the message, ``payload`` included, when
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, zero
+                when it is off.
             group: Group address; ``0.0.0.0`` for a General Query.
             payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
@@ -193,13 +204,18 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 255:
                 raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
 
-        return Schema_IGMP(
+        schema = Schema_IGMP(
             type=type_value,  # type: ignore[arg-type]
             max_resp_time=max_resp_time,
-            checksum=checksum,
+            checksum=b'\x00\x00' if checksum is None else checksum,
             group=group,
             payload=payload,
-        )  # type: ignore[return-value]
+        )
+
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            schema.checksum = compute_checksum(schema.pack())
+        return schema  # type: ignore[return-value]
 
     @classmethod
     def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
@@ -386,6 +402,29 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                 return 3
             return 0
         return 0
+
+    def _verify_checksum(self, igmp: '_PT', checksum: 'bytes', length: 'int') -> 'None':
+        """Record on ``igmp`` the outcome of verifying the message's checksum.
+
+        Only under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, as
+        ``checksum_status``. Every version's checksum covers the whole message,
+        the entire IP payload, with no pseudo-header (:rfc:`2236#section-2.3`,
+        :rfc:`3376#section-4.1.2`, :rfc:`3376#section-4.2.2`). That holds for
+        IGMPv1 as well: :rfc:`1112` defines an 8-octet message, and :rfc:`2236`,
+        which updates it, sums a longer one whole (:rfc:`2236#section-2.5`). See
+        :func:`~pcapkit.corekit.checksum.internet.verify_message`.
+
+        Args:
+            igmp: Parsed message data.
+            checksum: The checksum field, as on the wire.
+            length: The whole message's length, in octets.
+
+        """
+        if config.CHECKSUM_VERIFY:
+            from pcapkit.corekit.checksum.internet import verify_message  # isort: skip # pylint: disable=import-outside-toplevel
+            igmp.__update__([
+                ('checksum_status', verify_message(self.alias, self._data, checksum, length=length)),
+            ])
 
     @classmethod
     def _dispatch(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase] | Type[Raw]':

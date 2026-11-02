@@ -197,7 +197,8 @@ class TestGRE(unittest.TestCase):
         """As :meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.L2TPv2.make>`
         infers ``S`` from whether ``ns``/``nr`` are given, ``C``/``K``/``S``
         here are inferred from whether ``checksum``/``key``/``sequence_number``
-        are given, not from a separate flag argument.
+        are given; only ``C`` also has a flag argument, ``checksum_present``,
+        to ask for a computed checksum (#2618).
         """
         from pcapkit.protocols.link.gre import GRE
 

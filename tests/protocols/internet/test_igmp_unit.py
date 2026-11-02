@@ -41,7 +41,8 @@ __tier__ = 'ALL'
 def internet_checksum(data: 'bytes') -> 'bytes':
     """Compute the IP-style ones'-complement checksum (:rfc:`1071#section-4.1`).
 
-    Fixture builder only: pcapkit does not compute or validate IGMP checksums.
+    Fixture builder, independent of the sum pcapkit computes and verifies the
+    IGMP checksum with (#2618).
 
     Args:
         data: Message octets, with the checksum field zeroed.
@@ -692,7 +693,8 @@ class IGMPUnitTests(unittest.TestCase):
 
         self.assertEqual(schema.type, Type.IGMPv1_Membership_Report)
         self.assertEqual(schema.max_resp_time, 0)
-        self.assertEqual(schema.checksum, b'\x00\x00')
+        # A checksum left out is computed (#2618).
+        self.assertEqual(schema.checksum, internet_checksum(b'\x12\x00\x00\x00' + bytes(schema)[4:8]))
         self.assertEqual(bytes(schema)[4:8], ipaddress.ip_address('224.0.0.1').packed)
 
     def test_make_rejects_out_of_range_octets(self) -> None:

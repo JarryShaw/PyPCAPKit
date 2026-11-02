@@ -124,6 +124,28 @@ class VerifyChecksumTests(unittest.TestCase):
                          ['VALID', 'INVALID', 'NOT_COMPUTED', 'TRUNCATED', 'NO_PSEUDO_HEADER'])
         self.assertIs(self.Status.get('NOT_COMPUTED'), self.Status.NOT_COMPUTED)
 
+    def test_a_message_is_verified_outside_a_fragment_only(self) -> None:
+        # GitHub issue #2618: ICMP, IGMP and GRE share verify_message.
+        def verify(data: bytes, field: bytes, **kwargs: object) -> 'tuple[object, list[tuple[type, str]]]':
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                status = self.checksum.verify_message('TEST', data, field, **kwargs)
+            return status, [(item.category, str(item.message))
+                            for item in caught if issubclass(item.category, self.ProtocolWarning)]
+
+        bad = self.corrupt(b'\xbe\xef')
+        self.assertEqual(verify(self.data, self.field), (self.Status.VALID, []))
+        self.assertEqual(verify(self.data, self.field, length=len(self.data) + 1), (self.Status.TRUNCATED, []))
+        self.assertEqual(verify(bad, b'\xbe\xef'), self.verify(bad, b'\xbe\xef'))
+        with self.checksum.fragment_payload(True):
+            # Not verified, so a wrong checksum does not warn.
+            self.assertEqual(verify(bad, b'\xbe\xef'), (self.Status.NO_PSEUDO_HEADER, []))
+            # An IP layer inside the fragment that is no fragment itself decides for its payload.
+            with self.checksum.fragment_payload(False):
+                self.assertEqual(verify(self.data, self.field), (self.Status.VALID, []))
+            self.assertEqual(verify(self.data, self.field), (self.Status.NO_PSEUDO_HEADER, []))
+        self.assertEqual(verify(self.data, self.field), (self.Status.VALID, []))
+
 
 if __name__ == '__main__':
     unittest.main()

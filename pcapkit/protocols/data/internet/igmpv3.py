@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
     from pcapkit.const.igmp.type import Type as Enum_Type
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = ['IGMPv3', 'Query', 'Report', 'GroupRecord']
 
@@ -42,6 +43,11 @@ class IGMPv3(Protocol):
     #: <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` actually consumed, the
     #: same way :attr:`~pcapkit.protocols.data.internet.esp.ESP.length` is.
     length: 'int'
+
+    if TYPE_CHECKING:
+        #: Outcome of verifying the message's ``checksum``, present only when
+        #: :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on.
+        checksum_status: 'ChecksumStatus'
 
 
 @info_final

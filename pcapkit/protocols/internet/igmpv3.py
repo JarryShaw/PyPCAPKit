@@ -64,6 +64,7 @@ from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3 as Schema_IGMPv3
 from pcapkit.protocols.schema.internet.igmpv3 import Query as Schema_Query
 from pcapkit.protocols.schema.internet.igmpv3 import QueryExtension as Schema_QueryExtension
 from pcapkit.protocols.schema.internet.igmpv3 import Report as Schema_Report
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -277,6 +278,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         else:  # pragma: no cover
             raise ProtocolError(f'{self.alias}: unsupported message type: {schema.type!r}')
 
+        self._verify_checksum(igmp, body.checksum, length)
         return self._decode_next_layer(igmp, None, len(trailing))
 
     def make(self,
@@ -286,7 +288,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
              type_reversed: 'bool' = False,
              max_resp_code: 'Optional[int]' = None,
              max_resp_time: 'int' = 0,
-             checksum: 'bytes' = b'\x00\x00',
+             checksum: 'Optional[bytes]' = None,
              group: 'IPv4Address | str | bytes | int' = '0.0.0.0',  # nosec: B104
              resv: 'int' = 0,
              s_flag: 'bool' = False,
@@ -321,7 +323,10 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             checksum: Checksum; the one's complement of the one's complement
                 sum of the message, with this field taken as zero and no
                 pseudo-header -- the whole IP payload (:rfc:`3376#section-4.1.2`,
-                :rfc:`3376#section-4.2.2`).
+                :rfc:`3376#section-4.2.2`). If :data:`None`, computed so, over
+                ``payload`` as well, when
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, zero
+                when it is off.
             group: Group address; ``0.0.0.0`` for a General Query; only
                 meaningful for a Query.
             resv: The 4 reserved high-order bits of the flags octet
@@ -364,24 +369,24 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 or not 0 <= max_resp_time <= 255:
             raise ProtocolError(f'{self.alias}: invalid max_resp_time: {max_resp_time!r}')
 
+        field = b'\x00\x00' if checksum is None else checksum
         if type_value == Enum_Type.IGMPv3_Membership_Report:
             record_list = [] if records is None else [
                 self._make_group_record(record) if not isinstance(record, dict) else
                 self._make_group_record(**record) for record in records
             ]
-            return Schema_IGMPv3(
+            schema = Schema_IGMPv3(
                 type=type_value,
                 body=Schema_Report(
                     reserved_1=reserved_1,
-                    checksum=checksum,
+                    checksum=field,
                     reserved_2=reserved_2,
                     num_group_records=len(record_list),
                     records=record_list,
                     payload=payload,
                 ),
-            )  # type: ignore[return-value]
-
-        if type_value == Enum_Type.IGMP_Membership_Query:
+            )
+        elif type_value == Enum_Type.IGMP_Membership_Query:
             if qqic is None:
                 qqic = _encode_resp_code(0 if qqi is None else qqi)
             source_list = [] if sources is None else list(sources)
@@ -396,18 +401,23 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             if max_resp_code is None:
                 max_resp_code = _encode_resp_code(max_resp_time)
 
-            return Schema_IGMPv3(
+            schema = Schema_IGMPv3(
                 type=type_value,
                 body=Schema_Query(
                     max_resp_code=max_resp_code,
-                    checksum=checksum,
+                    checksum=field,
                     group=group,
                     ext=ext,
                     payload=payload,
                 ),
-            )  # type: ignore[return-value]
+            )
+        else:
+            raise ProtocolError(f'{self.alias}: unsupported message type: {type_value!r}')
 
-        raise ProtocolError(f'{self.alias}: unsupported message type: {type_value!r}')
+        if checksum is None and config.CHECKSUM_COMPUTE:
+            from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            schema.body.checksum = compute_checksum(schema.pack())
+        return schema
 
     ##########################################################################
     # Utilities.
