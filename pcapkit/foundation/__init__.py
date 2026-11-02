@@ -25,7 +25,7 @@ __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly', 'DTLS_Reassembly',
     'ReassemblyManager',
 
-    'dtls_handshake',
+    'ip_datagram', 'tcp_datagram', 'dtls_handshake',
 
     'TCP_TraceFlow',
     'TraceFlowManager',

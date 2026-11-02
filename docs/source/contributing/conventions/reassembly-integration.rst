@@ -61,17 +61,29 @@ engine backend, by defining the extraction functions, by defining them raising
 engine level, as :mod:`pcapkit.foundation.engines.pyshark` does. DTLS defines them for
 the default engine and is disabled at the engine level on every other.
 
-**Point 3 holds for DTLS alone.**
-:func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` parses a reassembled DTLS
-handshake message (:issue:`2496`). IP and TCP have no such method: what parses their
-outcome is the general-purpose
-:meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` dispatcher,
-not a method written for reassembly specifically.
+**Point 3 holds for every engine.**
+:func:`~pcapkit.foundation.analysis.ip.ip_datagram` parses a reassembled IPv4 or IPv6
+datagram's payload by its payload protocol type, through
+:meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>`;
+:func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` parses a reassembled TCP
+datagram's by its ports, through
+:meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`;
+and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a reassembled
+DTLS handshake message (:issue:`2496`). The owner chose on :issue:`2581` to give IP
+and TCP modules of their own, each function named for the datagram its engine
+reassembles, rather than leave their outcomes to those dispatchers with no analysis
+method, which kept the rule true for DTLS alone.
 
 **Where the rule is silent, DTLS takes the IP/TCP shape** (:issue:`2531`). IPv4, IPv6,
 TCP and DTLS reassembly each set ``__protocol_type__``, and each reports its parsed
 outcome as a datagram's ``packet``, deferred to first read by
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred`. IP and TCP run
-``__protocol_type__``'s ``analyze``. DTLS runs the decoder behind ``dtls_handshake``
-instead, where point 3 places it, so its ``packet`` is what ``dtls_handshake`` returns:
-:data:`None` for an incomplete message.
+:class:`~pcapkit.foundation.reassembly.data.data.Deferred`. Each ``Deferred`` runs the
+parse behind its engine's analysis function, so a ``packet`` is what that function
+returns. IP and TCP bind that parse to ``__protocol_type__`` and call its ``analyze``,
+so a subclass naming another protocol has its ``packet`` parsed by that one
+(:issue:`2581`); DTLS decodes with
+:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
+whatever ``__protocol_type__`` names. The engines differ in what an incomplete outcome
+holds. IP and TCP parse a contiguous payload whether or not it is complete, as
+``strict=False`` reports one, and hold :data:`None` only for the received runs
+``strict=True`` reports; DTLS holds :data:`None` for any incomplete message.

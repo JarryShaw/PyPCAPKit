@@ -145,9 +145,12 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     header: 'bytes'
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
-    #: Parsed TCP payload. Analysed on first read rather than at construction;
-    #: a :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in
-    #: its place, and reading this attribute then runs it and keeps the result.
+    #: Parsed TCP payload, as :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`
+    #: returns it unless the reassembly's ``__protocol_type__`` names another
+    #: protocol, which then parses it. Analysed on first read rather than at
+    #: construction; a :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
+    #: may be passed in its place, and reading this attribute then runs it and
+    #: keeps the result.
     packet: 'Optional[ProtocolBase]'
     #: Sequence ranges on which two segments disagreed, i.e. where an arriving
     #: segment overlapped bytes already buffered but did not repeat them.

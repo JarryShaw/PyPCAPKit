@@ -16,8 +16,10 @@ uses the elder one.
 """
 import bisect
 import sys
+from functools import partial
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.foundation.analysis.ip import _analyze_payload
 from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
@@ -510,7 +512,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 and never as complete
 
         Returns:
-            Reassembled packets.
+            Reassembled packets. Where the payload is one contiguous run, its
+            ``packet`` is the parse
+            :func:`~pcapkit.foundation.analysis.ip.ip_datagram` runs, by this
+            reassembly's own
+            :attr:`protocol <pcapkit.foundation.reassembly.reassembly.Reassembly.protocol>`,
+            deferred to its first read.
 
         """
         TDL = buf.TDL
@@ -626,7 +633,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 # charges every caller for a result most of them never read.
                 # ``Deferred`` postpones it to the first read of
                 # ``Datagram.packet``.
-                packet=Deferred(self.protocol.analyze, bufid[3], payload),
+                packet=Deferred(partial(_analyze_payload, self.protocol), bufid[3], payload),
                 conflict=conflict,
             )
             ret.append(packet)
