@@ -31,7 +31,7 @@ import struct
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.utilities.contextvars import rebuilding
+from pcapkit.utilities.contextvars import frame_length, rebuilding
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ChecksumWarning, warn
 
@@ -204,6 +204,11 @@ def verify_message(alias: 'str', data: 'bytes', field: 'bytes', *,
     verified as the message is parsed, unless an IP fragment carries it; see
     :func:`fragment_payload`.
 
+    Where no layer before the message declares its length, the message runs to
+    the end of its frame, and the octets the capture cut off the frame, as
+    :data:`~pcapkit.utilities.contextvars.frame_length` gives them, are
+    covered too (:issue:`2653`, :issue:`2689`).
+
     Args:
         alias: Protocol alias, to name in the warning.
         data: Octets the checksum covers, the checksum field included.
@@ -221,6 +226,9 @@ def verify_message(alias: 'str', data: 'bytes', field: 'bytes', *,
     """
     if _in_fragment.get():
         return ChecksumStatus.NO_PSEUDO_HEADER
+    lengths = frame_length.get()
+    if lengths is not None:
+        length = (len(data) if length is None else length) + max(lengths[1] - lengths[0], 0)
     return verify_checksum(alias, data, field, length=length)
 
 
