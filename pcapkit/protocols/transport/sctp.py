@@ -443,13 +443,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     .. versionchanged:: 1.6.0
 
-       :meth:`make` and the chunk, parameter and error cause makers raise
-       :exc:`~pcapkit.utilities.exceptions.ProtocolError` for an integer field
-       given a value its width cannot hold, a length included, rather than
-       writing its low bits or raising a
-       :exc:`~pcapkit.utilities.exceptions.FieldValueError` or a bare
-       :exc:`ValueError`, and for a checksum that is not four octets, rather
-       than padding or cutting it (:issue:`2614`).
+       * :meth:`make` and the chunk, parameter and error cause makers raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` for an integer field
+         given a value its width cannot hold, a length included, rather than
+         writing its low bits or raising a
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError` or a bare
+         :exc:`ValueError`, and for a checksum that is not four octets, rather
+         than padding or cutting it (:issue:`2614`).
+       * A packet the capture cut short of the length an enclosing layer
+         declares, such as an IPv4 Total Length, rebuilds through
+         :meth:`~pcapkit.protocols.transport.transport.Transport.from_data` as
+         captured, where it lost the octets after its last whole chunk
+         (:issue:`2673`).
 
     """
 
