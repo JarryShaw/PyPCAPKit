@@ -113,9 +113,12 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     header: 'bytes'
     #: Reassembled IP payload.
     payload: 'bytes | tuple[bytes, ...]'
-    #: Parsed IP payload. Analysed on first read, not at construction time; a
-    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in its
-    #: place, and reading this attribute then runs it and keeps the result.
+    #: Parsed IP payload, as :func:`~pcapkit.foundation.analysis.ip.ip_datagram`
+    #: returns it unless the reassembly's ``__protocol_type__`` names another
+    #: protocol, which then parses it. Analysed on first read, not at
+    #: construction time; a :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
+    #: may be passed in its place, and reading this attribute then runs it and
+    #: keeps the result.
     packet: 'Optional[ProtocolBase]'
     #: Octet ranges, absolute into the reassembled payload and both
     #: **inclusive** -- the same convention as :attr:`Packet.fo` combined with

@@ -10,9 +10,11 @@ which reconstructs fragmented TCP packets back to origin.
 
 """
 import math
+from functools import partial
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
+from pcapkit.foundation.analysis.tcp import _analyze_payload
 from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
                                                     DatagramID, Fragment, HoleDescriptor, Packet)
@@ -746,7 +748,12 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 abandoned it under the reassembly timeout
 
         Returns:
-            Reassembled :term:`packets <reasm.tcp.datagram>`.
+            Reassembled :term:`packets <reasm.tcp.datagram>`. Where the payload
+            is one contiguous run, its ``packet`` is the parse
+            :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram` runs, by this
+            reassembly's own
+            :attr:`protocol <pcapkit.foundation.reassembly.reassembly.Reassembly.protocol>`,
+            deferred to its first read.
 
         Important:
             The ``(source, destination)`` pair handed to
@@ -860,7 +867,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=bytes(payload),
-                        packet=Deferred(self.protocol.analyze,
+                        packet=Deferred(partial(_analyze_payload, self.protocol),
                                         self._make_ports(bufid), bytes(payload)),
                         conflict=conflict,
                     )

@@ -85,6 +85,8 @@ __all__ = [
     'DTLS_Reassembly',                                      # DTLS Reassembly
 
     # pcapkit.foundation.analysis
+    'ip_datagram',                                          # IP Analysis
+    'tcp_datagram',                                         # TCP Analysis
     'dtls_handshake',                                       # DTLS Analysis
 
     # pcapkit.foundation.registry

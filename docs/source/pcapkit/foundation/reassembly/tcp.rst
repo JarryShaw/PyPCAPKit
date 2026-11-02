@@ -259,6 +259,10 @@ Terminology
            |     |                  |--> ...
            |--> (Info) data ...
 
+       ``packet`` is what :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`
+       parses ``payload`` to, on its first read, unless ``__protocol_type__``
+       names another protocol.
+
        ``completed`` and ``conflict`` are independent signals: a datagram can
        be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
        and still carry a non-empty ``conflict`` -- the resolution of a
