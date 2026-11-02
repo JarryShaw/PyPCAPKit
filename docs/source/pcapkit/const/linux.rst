@@ -10,7 +10,7 @@ Available enumerations include:
 
 .. list-table::
 
-   * - :class:`ARPHRD <pcapkit.const.linux.arphrd.ARPHRD>`
+   * - :class:`Linux_ARPHRD <pcapkit.const.linux.arphrd.ARPHRD>`
      - Linux ARP Hardware Types [*]_
 
 ARP Hardware Types

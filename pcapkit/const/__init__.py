@@ -29,6 +29,7 @@ from pcapkit.const.ipv4 import *
 from pcapkit.const.ipv6 import *
 from pcapkit.const.ipx import *
 from pcapkit.const.l2tp import *
+from pcapkit.const.linux import *
 from pcapkit.const.mh import *
 from pcapkit.const.ngap import *
 from pcapkit.const.ospf import *
@@ -78,6 +79,8 @@ __all__ = [
     'IPX_Packet', 'IPX_Socket',
     # L2TP
     'L2TP_Type',
+    # Linux
+    'Linux_ARPHRD',
     # MH
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
     'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
