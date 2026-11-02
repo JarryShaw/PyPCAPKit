@@ -31,15 +31,17 @@ The subpackages, functionally rather than by carrier:
    * - :mod:`~pcapkit.protocols.link`
      - frames, and link-address or tagging protocols
    * - :mod:`~pcapkit.protocols.internet`
-     - layer-3 addressing and the forwarding path itself --
-       :rfc:`1812#section-4.1` confines it to IP, ICMP and IGMP
+     - layer-3 addressing and the forwarding path itself: IP, ICMP and IGMP, the
+       Internet Layer protocols :rfc:`1812#section-4.1` names, and with them IPX and
+       the IPsec and IPv6 extension headers (:ref:`extension-header-subclassing`)
    * - :mod:`~pcapkit.protocols.transport`
      - IANA transport protocols
    * - :mod:`~pcapkit.protocols.application`
      - protocols that are **users of the stack rather than part of its forwarding
        path**
    * - :mod:`~pcapkit.protocols.misc`
-     - file formats and layerless sentinels
+     - file formats, layerless sentinels, and the checksum pseudo-headers in
+       :mod:`~pcapkit.protocols.misc.checksum`
 
 .. important::
 
@@ -86,8 +88,8 @@ Routing Protocols: Control Plane, Not Data Plane
 :rfc:`1812` is Standards Track and organises itself by layer. Its §7 is titled
 **"APPLICATION LAYER - ROUTING PROTOCOLS"**, with OSPF at §7.2.2, while
 :rfc:`1812#section-4.1` reads *"This chapter and chapter 5 discuss the protocols used
-at the Internet Layer: IP, ICMP, and IGMP."* So a routing protocol is application-layer
-and the internet layer holds only IP, ICMP and IGMP.
+at the Internet Layer: IP, ICMP, and IGMP."* So a routing protocol is application-layer,
+not one of the Internet Layer protocols §4.1 names.
 
 **X.200 does not contradict this, and must not be cited as though it did.** X.200
 §7.5.2.1 says the Network Layer provides transport *"independence of routing and relay
@@ -159,6 +161,13 @@ Each is deliberate. Do not "fix" any of them.
 :class:`~pcapkit.protocols.link.arp.ARP` from :mod:`pcapkit.protocols.link.arp`. That
 ``application/ → link/`` dependency is the honest consequence of letting layer and
 parser disagree.
+
+**A pseudo-header protocol is in** :mod:`~pcapkit.protocols.misc`, **not beside the
+layer it is built from.** :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
+is built from an IPv4 or IPv6 layer but is no layer on the wire, and its ``__layer__``
+is :obj:`None`. Pseudo-header protocols share :mod:`pcapkit.protocols.misc.checksum`,
+ruled in review of the IP pseudo-header for :issue:`2471`, whose thread does not hold
+it.
 
 **The dispatch tier is decoupled from the subpackage.** A protocol's subpackage says
 nothing about which registry reaches it, and no dispatch key depends on it:

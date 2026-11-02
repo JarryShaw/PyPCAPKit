@@ -204,6 +204,11 @@ was asked for and given -- and it survives the work that implemented it. So cite
 issue a rule was settled on, and describe a change by what it did rather than by its
 number. Ruled on :issue:`719`.
 
+**Cite a ruling given in a pull request's review by the issue that pull request
+closes**, as ``ruled in review of <PR> (:issue:`N`)``. Where it closes none, cite the
+pull request with ``:pr:`` and say that no issue holds the ruling. Ruled in review of
+:pr:`2599` (:issue:`2557`).
+
 **The changelog and** :file:`tests/` **are both exempt, for related reasons.** A
 changelog entry exists so a reader can find the change, and the pull-request number *is*
 that pointer; converting it would delete the thing the entry is for --

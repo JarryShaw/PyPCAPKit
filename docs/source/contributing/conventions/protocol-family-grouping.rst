@@ -5,8 +5,8 @@ Protocol Family Grouping
 
 A protocol family is a base class named after the family plus its member classes.
 What each class returns from :meth:`~pcapkit.protocols.protocol.Protocol.id` is what
-the selectors on :class:`~pcapkit.protocols.protocol.Protocol` match against. The
-rulings were set on :pr:`2441`, :pr:`2443`, :pr:`2446`, :issue:`2462` and :issue:`2517`.
+the selectors on :class:`~pcapkit.protocols.protocol.Protocol` match against. Each
+ruling below names the thread it was set on.
 
 The ``id()`` Criterion
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -43,17 +43,56 @@ Grouping by Name
 
 **Members share a base because they share a name, not a wire format.** HTTP/1 and
 HTTP/2 share :class:`~pcapkit.protocols.application.http.HTTP`, IPv4 and IPv6 share
-:class:`~pcapkit.protocols.internet.ip.IP`, and AH and ESP share
-:class:`~pcapkit.protocols.internet.ipsec.IPsec`. :pr:`2441`.
+:class:`~pcapkit.protocols.internet.ip.IP`, AH and ESP share
+:class:`~pcapkit.protocols.internet.ipsec.IPsec`, and SSLv2 and SSLv3 share
+:class:`~pcapkit.protocols.application.ssl.SSL` (:ref:`below <protocol-family-ssl>`).
+:pr:`2441`.
 
-:class:`~pcapkit.protocols.internet.ip.IP` and
-:class:`~pcapkit.protocols.internet.ipsec.IPsec` define no ``read()``. The HTTP class
-does, but yields no instance of itself (:ref:`below <protocol-family-dispatch>`).
+.. _protocol-family-ssl:
+
+The SSL Family
+~~~~~~~~~~~~~~
+
+**SSLv2 and SSLv3 share a base by name, though only SSLv3 shares TLS's record
+layer.** The owner asked on :pr:`2441` for this grouping to be recorded here; no issue
+holds the ruling. By the ``id()`` criterion,
+:meth:`SSL.id() <pcapkit.protocols.application.ssl.SSL.id>` is
+``('SSLv2', 'TLS', 'DTLS')``, without SSLv3, which subclasses TLS.
+
+**One** :class:`~pcapkit.protocols.application.tls.TLS` **class reads SSLv3 through
+TLS 1.3**, in the ARP shape (:ref:`protocol-family-shapes`): ``id()`` stays
+``('TLS',)`` and ``alias`` names the version read. Only record version ``0x0300`` is
+branded SSLv3, in ``name`` as well as ``alias``; every later version is TLS.
+:class:`~pcapkit.protocols.application.tls.SSLv3` ``('SSLv3',)`` narrows ``id()`` and
+nothing else, as :class:`~pcapkit.protocols.link.arp.InARP` does under ARP, and nothing
+dispatches to it: an SSLv3 record on TCP port 443 parses as TLS with alias ``SSLv3``.
+:class:`~pcapkit.protocols.application.dtls.DTLS` ``('DTLS',)`` reads DTLS 1.0, 1.2 and
+1.3 the same way.
+
+TCP port 443 binds TLS and UDP port 5684 binds DTLS.
+:class:`~pcapkit.protocols.application.sslv2.SSLv2` ``('SSLv2',)`` is bound to no port:
+on 443, TLS offers SSLv2 a segment whose first record it rejects, and a record SSLv2
+takes stays a TLS layer with alias ``SSLv2``. So ``'SSL' in`` selects both TLS and
+DTLS layers, while ``'SSLv3' in`` and ``'SSLv2' in`` select no layer port 443 parsed;
+only ``frame.protochain`` matches those two, by alias.
 
 .. _protocol-family-dispatch:
 
 Dispatching Bases
 ~~~~~~~~~~~~~~~~~
+
+**A registry binds a family's base only where its code cannot tell the members apart,
+and there the base picks the member.** IP protocol number 2 is IGMP's in every version,
+and the TCP and UDP ports bound to HTTP are the family's, so
+:class:`~pcapkit.protocols.internet.igmp.IGMP`'s ``_dispatch`` and
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` read the octets to
+choose. Every registry that reaches IPv4, IPv6, AH, ESP, TLS or DTLS has a code for
+that member alone, so no registry binds :class:`~pcapkit.protocols.internet.ip.IP`,
+:class:`~pcapkit.protocols.internet.ipsec.IPsec` or
+:class:`~pcapkit.protocols.application.ssl.SSL`, and none of the three defines
+``read()``: none needs a dispatcher there. Ruled for IGMP on :pr:`2444` and for SSL on
+:pr:`2441`; no issue holds either ruling. The asymmetry is deliberate, and it concerns
+the registry only; parsing or building through a base directly is the rule below.
 
 **A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
 octets through it, constructing it from fields and its ``from_data`` give the member
@@ -153,7 +192,8 @@ Member Shapes
        (:ref:`protocol-family-canonical-names`);
        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` ``('HTTP/1',)``
        and :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>`
-       ``('HTTP/2',)``
+       ``('HTTP/2',)``; :class:`~pcapkit.protocols.application.sslv2.SSLv2`
+       ``('SSLv2',)``
    * - Family-inclusive
      - the member's label plus the family name
      - :class:`~pcapkit.protocols.link.c_tag.C_Tag` ``('C_Tag', 'VLAN')``,
@@ -163,7 +203,10 @@ Member Shapes
      - fixed, whichever protocol was read
      - :class:`~pcapkit.protocols.link.arp.ARP` ``('ARP',)`` reads the operation
        code and reports ARP, RARP, DRARP or InARP through
-       :attr:`~pcapkit.protocols.protocol.Protocol.alias`
+       :attr:`~pcapkit.protocols.protocol.Protocol.alias`;
+       :class:`~pcapkit.protocols.application.tls.TLS` ``('TLS',)`` reports SSLv3 or a
+       TLS version, and :class:`~pcapkit.protocols.application.dtls.DTLS`
+       ``('DTLS',)`` a DTLS version (:ref:`protocol-family-ssl`)
 
 Nothing dispatches to :class:`~pcapkit.protocols.link.inarp.InARP` ``('InARP',)``:
 under EtherType ``0x0806``, operation 8 parses as ARP with alias ``InARP``.
@@ -177,8 +220,12 @@ A parsed RARP takes ``DRARP`` as its alias for operation 5, and
 A family-inclusive member is selected by any sibling's registry key (a key of
 ``pcapkit.protocols.__proto__``), because each expands to the shared family name
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name
-and by the key of each family whose ``id()`` lists it: ``AH`` and ``ESP`` by ``IPsec``
-and by ``IPv6_Ext``, ``HTTPv1`` and ``HTTPv2`` by ``HTTP``.
+and by the key of each family whose ``id()`` lists it: ``HTTPv1`` and ``HTTPv2`` by
+``HTTP``, and ``AH`` and ``ESP`` by ``IPsec`` and by ``IPv6_Ext`` where IPv4 carries
+them. Under IPv6 they are no layer of their own but entries of
+:attr:`IPv6.extension_headers <pcapkit.protocols.internet.ipv6.IPv6.extension_headers>`,
+so on an ``Ethernet:IPv6:AH`` frame ``'AH' in``, ``'IPsec' in`` and ``'IPv6_Ext' in``
+are all ``False``; only ``frame.protochain`` matches them.
 
 Chained Records
 ~~~~~~~~~~~~~~~

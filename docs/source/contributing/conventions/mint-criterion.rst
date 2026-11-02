@@ -59,11 +59,11 @@ Measured against the tree, by class:
   :mod:`l2tp.type <pcapkit.const.l2tp.type>`,
   :mod:`mh.dhcp_support_mode <pcapkit.const.mh.dhcp_support_mode>` and
   :mod:`vlan.priority_level <pcapkit.const.vlan.priority_level>`.
-* **Cache in the value table only**: :class:`~pcapkit.const.tcp.flags.Flags` and the
-  Mobility Header flag registries, such as
-  :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`. They range-check and hand
-  back to ``super()._missing_``, which for an ``aenum.IntFlag`` reaches
-  ``_create_pseudo_member_`` and ends in
+* **Cache in the value table only**: :class:`~pcapkit.const.tcp.flags.Flags`,
+  :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header flag
+  registries, such as :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`. They
+  range-check and hand back to ``super()._missing_``, which for an ``aenum.IntFlag``
+  reaches ``_create_pseudo_member_`` and ends in
   ``cls._value2member_map_.setdefault(value, pseudo_member)``.
 * **Raise for any unknown value**: :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
@@ -214,7 +214,9 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` and
    :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (they define no
    ``_missing_``), and does not see the transport subclasses, which inherit theirs.
-   Reconcile it against a runtime probe for the split in the list above.
+   :class:`~pcapkit.const.ftp.command.CommandType` is one of those flag registries, and
+   the ``UNMINT`` lines for :file:`pcapkit/const/ftp/command.py` are the file's other
+   registries. Reconcile it against a runtime probe for the split in the list above.
 
 .. warning::
 
@@ -222,8 +224,10 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
    **mutates the class**. A probe is not a read: it installs something that every later
    lookup then finds. :class:`~pcapkit.const.mh.cga_type.CGAType`
    grows ``__members__``, ``_member_map_`` and ``_value2member_map_``;
-   :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header flag registries
-   grow ``_value2member_map_`` only. Snapshot ``{member.value for member in Cls}``
-   before any lookup regardless -- that snapshot cannot see the flag registries' cache,
-   so compare ``len(Cls._value2member_map_)`` too -- and use a throwaway process per
-   registry when comparing behaviour across revisions.
+   :class:`~pcapkit.const.tcp.flags.Flags`,
+   :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header flag
+   registries grow ``_value2member_map_`` only. Snapshot
+   ``{member.value for member in Cls}`` before any lookup regardless -- that snapshot
+   cannot see the flag registries' cache, so compare ``len(Cls._value2member_map_)``
+   too -- and use a throwaway process per registry when comparing behaviour across
+   revisions.
