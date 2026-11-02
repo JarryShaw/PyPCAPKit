@@ -328,6 +328,18 @@ NOT_A_COPY = {
         'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',
     ('pcapkit/protocols/transport/tcp.py', 'schema.length not in (8, 10, 16, 18, 20, 22, 28, 30)'):
         'the MP_ADD_ADDR option lengths, :rfc:`8684#section-3.4.1`',
+    ('pcapkit/protocols/protocol.py', '40 * 2 ** code'):
+        "the Quick-Start rate unit, K = 40 kbps (:rfc:`4782#section-3.1`), not the IPv6 "
+        'header length',
+    ('pcapkit/protocols/protocol.py', '40 * 2 ** 16'):
+        "the first rate the Quick-Start rate code's four bits cannot carry, K * 2 ** 16 "
+        '(:rfc:`4782#section-3.1`), not the IPv6 header length',
+    ('pcapkit/protocols/protocol.py', '2 ** 16'):
+        "the exponent past the Quick-Start rate code's four bits, N = 16 "
+        '(:rfc:`4782#section-3.1`), not a PCAP record header length',
+    ('pcapkit/protocols/protocol.py', 'rate // 40'):
+        "the Quick-Start rate unit, K = 40 kbps (:rfc:`4782#section-3.1`), not the IPv6 "
+        'header length',
     ('pcapkit/foundation/engines/dpkt.py', 'pkt.ts_high << 32'):
         'a bit width: the high half of a 64-bit timestamp',
     ('pcapkit/foundation/engines/dpkt.py', 'version == 6'):
