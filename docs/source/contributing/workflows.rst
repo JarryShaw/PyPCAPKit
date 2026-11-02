@@ -135,6 +135,13 @@ At a Glance
      - Mon 05:41
      - --
      - ``workflow_dispatch``
+   * - Issue and PR Kinds
+     - :file:`cron-issue-pr-kinds.yml`
+     - --
+     - --
+     - Mon 06:17
+     - --
+     - ``workflow_dispatch``
    * - Engine Benchmark
      - :file:`benchmark.yml`
      - --
@@ -187,6 +194,7 @@ than starting a new one.
        LT["Lint<br/>lint.yml"]
        VU["Vendor Update<br/>cron-vendor.yml"]
        PV["Python Versions<br/>cron-python-versions.yml"]
+       IK["Issue and PR Kinds<br/>cron-issue-pr-kinds.yml"]
        CT["CI Timing<br/>ci-timing.yml"]
        BM["Engine Benchmark<br/>benchmark.yml"]
        PS["Project Status<br/>project-status.yml"]
@@ -223,6 +231,9 @@ than starting a new one.
 
        MON -->|05:41| PV
        DISPATCH --> PV
+
+       MON -->|06:17| IK
+       DISPATCH --> IK
 
        MON -->|07:23| CT
        DISPATCH --> CT
@@ -1057,7 +1068,7 @@ Each run starts its workers afresh. Measured on PyPy 8.0.1 at ``-n 4``, one run
 over the whole ``ALL`` tier took each worker to 5.4-5.9 GB and the workers together
 past 20 GB, beyond the runner's 16 GB; split, the largest run peaked at 2.6 GB a
 worker and 8.5 GB in all, and the tier took 383 s rather than 493 s. With
-:issue:`2543`'s checksum tests, ``tests/protocols`` run whole outgrew the runner as
+:issue:`2470`'s checksum tests, ``tests/protocols`` run whole outgrew the runner as
 well, and on CI the tests at its tail stalled past ``tests._support.time_limit``'s
 30-second deadline, which counts wall-clock time, so it is split (:issue:`2600`).
 Measured on PyPy 7.3.19 at ``-n 4``, its one run peaked at 17.7 GiB and took 267 s,
@@ -1632,7 +1643,8 @@ is to 3.11 for ``tomllib``, is left out, and
 the tests' differ.
 
 The scripts a person runs as well, or alone, sit beside the CI-only ones in
-:file:`util/` rather than in a directory of their own (:pr:`2050`).
+:file:`util/` rather than in a directory of their own, as ruled in review of
+:pr:`2050`; no issue holds the ruling.
 Every :file:`util/`
 script not listed here is CI-only.
 
@@ -1675,6 +1687,14 @@ script not listed here is CI-only.
      - ``python util/pyshark_encap_map.py`` regenerates the tables in
        :file:`pcapkit/toolkit/pyshark.py`; ``--check`` exits non-zero if they have
        drifted.
+   * - :file:`util/issue_pr_kinds.py`
+     - ``Regenerate the kinds`` in ``cron-issue-pr-kinds.yml``'s ``detect``, as
+       ``issue_pr_kinds.py --github-output``, and ``Push the kinds and open or
+       update their pull request`` in its ``pr``, as ``--publish``.
+     - ``python util/issue_pr_kinds.py``, with :program:`gh` signed in, regenerates
+       :file:`tests/project/issue_pr_roles_fixtures/kinds.json`, the issue and pull
+       request kinds :file:`tests/project/test_docs_issue_pr_roles_1103_unit.py`
+       checks each role against.
 
 .. _CI Reports:
 
@@ -1902,7 +1922,7 @@ it. Dependabot does not read this pin, so a bump changes both. The workflows use
 
 actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
 other steps, this one blocks: a finding fails the job, as the owner ruled on :issue:`1967`
-once :pr:`2023`, :pr:`2037` and :pr:`2038` had fixed every finding it reported. It runs last and
+once every finding it reported had been fixed. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
 Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
 (:issue:`1967`), so a red Lint
@@ -2009,18 +2029,40 @@ experimental entries are hand-maintained: no source it reads rates them, so
 every run keeps their lines as written, and a hand edit to one changes no
 proposal.
 
+Issue and PR Kinds (:issue:`2561`)
+-----------------------------------
+
+**Issue and PR Kinds** (:file:`cron-issue-pr-kinds.yml`) keeps
+:file:`tests/project/issue_pr_roles_fixtures/kinds.json` current, the snapshot of
+issue and pull request numbers :file:`tests/project/test_docs_issue_pr_roles_1103_unit.py`
+checks each ``:issue:`` and ``:pr:`` role against (:doc:`conventions/documentation`).
+Every Monday, or on dispatch, its ``detect`` job runs
+``python3 util/issue_pr_kinds.py --github-output`` with a read-only token and no
+secret. It proposes nothing when the file is unchanged, or when the open pull
+request from ``bot/issue-pr-kinds`` already holds it, so an unmerged proposal is
+not re-pushed every week. Otherwise ``pr`` enters ``github-release``, mints a
+release App token with contents and pull requests write, as `Python Versions`_'s
+``pr`` does, and runs the script with ``--publish``: it commits the file on top of
+the commit ``detect`` read, force-pushes ``bot/issue-pr-kinds``, and opens that
+branch's one pull request if none is open. It never pushes ``main``, and a hand
+edit to the branch is replaced by the next proposal, so edit ``main`` instead.
+Where moving the branch would change a workflow file ``main`` changed since, which
+that token cannot push, it deletes the branch and pushes it afresh, which closes
+the old pull request and opens a new one.
+
 Deployment ``environment:``
 ----------------------------
 
 These jobs declare a deployment ``environment:`` and can therefore pause for an
-approval, in ``create-release.yml`` and ``cron-python-versions.yml``:
+approval, in ``create-release.yml``, ``cron-python-versions.yml`` and
+``cron-issue-pr-kinds.yml``:
 
 * ``github`` -- ``environment: github-release``
 * ``tag`` -- ``environment: conda-tag``
 * ``pypi`` -- ``environment: pypi``
 * ``conda`` -- ``environment: anaconda``
 * ``pr`` -- ``environment: github-release``, for the release App's key (see
-  `Python Versions`_)
+  `Python Versions`_ and `Issue and PR Kinds (#2561)`_)
 
 ``ANACONDA_TOKEN`` is a secret of the ``anaconda`` environment, and the
 ``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of

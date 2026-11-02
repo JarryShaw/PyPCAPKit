@@ -432,7 +432,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         Returns:
             The code the walk stopped on, and the octets of the headers ahead of
             it. The code is an extension header's if ``ip`` did not parse that
-            header: a malformed one (:issue:`2480`), one past the header limit,
+            header: a malformed one (:issue:`2477`), one past the header limit,
             or one not captured.
 
         """

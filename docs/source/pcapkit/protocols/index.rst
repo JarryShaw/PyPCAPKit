@@ -127,7 +127,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click A "protocol.html#pcapkit.protocols.protocol.ProtocolMeta"
        click B "protocol.html#pcapkit.protocols.protocol.ProtocolBase"
        click C "protocol.html#pcapkit.protocols.protocol.Protocol"
-       click D "../../ext.html#what-s-in-for-protocols"
+       click D "../../ext.html#customising-protocols"
 
        click Link "link/link.html#pcapkit.protocols.link.link.Link"
        click Ethernet "link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"

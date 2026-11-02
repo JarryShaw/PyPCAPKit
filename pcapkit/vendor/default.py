@@ -119,8 +119,7 @@ def render_proto_dest(descriptors: 'tuple[ModuleDescriptor[Any], ...]') -> 'str'
 #: Default constant template of enumeration registry from IANA CSV.
 #:
 #: ``DEST`` is the crawler's :attr:`Vendor.PROTO_DEST` and defaults to empty, so
-#: a caller that renders an enumeration keying no ``__proto__`` -- every one
-#: outside the handful :issue:`2392` names -- passes six arguments as before.
+#: a caller that renders an enumeration keying no ``__proto__`` leaves it out.
 #:
 #: NOTE: the type comment says ``Callable[..., str]`` rather than spelling the
 #: parameters out, because mypy cannot infer a lambda's type against an explicit
@@ -325,7 +324,8 @@ class Vendor(metaclass=VendorMeta):
     #: ``__proto_dest__`` -- the declaration
     #: :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
     #: reads to resolve a bare member of that enumeration into its
-    #: destination(s), per :issue:`2392`.
+    #: destination(s). Asked for in review of :pr:`2392`; no issue holds the
+    #: ruling.
     #:
     #: Only the registries that key a ``__proto__`` declare one, and the
     #: template renders nothing for a crawler that leaves this empty, so every

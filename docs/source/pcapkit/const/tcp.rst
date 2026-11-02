@@ -32,7 +32,7 @@ which is automatically generated from :class:`pcapkit.vendor.tcp.checksum.Checks
    :undoc-members:
    :show-inheritance:
 
-Multipath TCP options
+Multipath TCP Options
 =====================
 
 .. module:: pcapkit.const.tcp.mp_tcp_option

@@ -1,4 +1,4 @@
-SSLv2 - Secure Sockets Layer version 2
+SSLv2 - Secure Sockets Layer Version 2
 =======================================
 
 .. module:: pcapkit.protocols.application.sslv2

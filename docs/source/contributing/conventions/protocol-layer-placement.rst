@@ -151,8 +151,8 @@ So :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, declared
 Ordering layer-first is correct in both cases, which is the point: a contributor does
 not have to work out which case they are in.
 
-Things That Will Look Like Mistakes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Apparent Mistakes
+~~~~~~~~~~~~~~~~~
 
 Each is deliberate. Do not "fix" any of them.
 
@@ -166,8 +166,8 @@ parser disagree.
 layer it is built from.** :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
 is built from an IPv4 or IPv6 layer but is no layer on the wire, and its ``__layer__``
 is :obj:`None`. Pseudo-header protocols share :mod:`pcapkit.protocols.misc.checksum`,
-ruled in review of the IP pseudo-header for :issue:`2471`, whose thread does not hold
-it.
+ruled in review of the IP pseudo-header, :pr:`2479` (:issue:`2471`); the issue's
+thread does not hold it.
 
 **The dispatch tier is decoupled from the subpackage.** A protocol's subpackage says
 nothing about which registry reaches it, and no dispatch key depends on it:
@@ -213,9 +213,9 @@ those also exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so each 
 resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. The strict difference
 :class:`~pcapkit.protocols.link.link.Link` minus
 :class:`~pcapkit.protocols.application.application.Application` minus
-:class:`~pcapkit.protocols.protocol.ProtocolBase` is ``__proto_key__`` alone
-(:issue:`2343`), which :class:`~pcapkit.protocols.link.link.Link` declares and neither of
-the others does, so it does **not** resolve on
+:class:`~pcapkit.protocols.protocol.ProtocolBase` is ``__proto_key__`` alone, which
+:class:`~pcapkit.protocols.link.link.Link` declares, as asked for on :pr:`2392` (no
+issue holds the ruling), and neither of the others does, so it does **not** resolve on
 :class:`~pcapkit.protocols.application.ospf.OSPF`. Nothing turns on that:
 :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` reads the pairing
 out of the registry owner's own namespace rather than off the class, and reads its

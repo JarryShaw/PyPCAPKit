@@ -443,7 +443,7 @@ which is automatically generating :class:`pcapkit.const.mh.option.Option`.
    :members: FLAG, LINK
    :show-inheritance:
 
-Mobility Header Types - for the MH Type field in the Mobility Header
+Mobility Header Types - for the MH Type Field in the Mobility Header
 ====================================================================
 
 .. module:: pcapkit.vendor.mh.packet

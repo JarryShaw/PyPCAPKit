@@ -1,4 +1,4 @@
-IGMPv3 - Internet Group Management Protocol version 3
+IGMPv3 - Internet Group Management Protocol Version 3
 ==============================================================
 
 .. module:: pcapkit.protocols.internet.igmpv3

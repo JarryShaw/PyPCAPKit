@@ -1016,7 +1016,7 @@ constructor's keyword set once, when
 :func:`~pcapkit.protocols.schema.schema.schema_final` is applied at
 class-definition time, rather than inferring it afresh at every call --
 :attr:`~pcapkit.protocols.protocol.Protocol.__own_make_keywords__`
-(:issue:`2358`) settles the same kind of question explicitly rather than
+(:issue:`2286`) settles the same kind of question explicitly rather than
 inferring it, though for a different question: which keywords a ``make()``
 override owns, not what the names passed to it resolve against.
 
