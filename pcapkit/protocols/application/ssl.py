@@ -42,6 +42,7 @@ from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.tls import Alert as Data_Alert
 from pcapkit.protocols.data.application.tls import ChangeCipherSpec as Data_ChangeCipherSpec
 from pcapkit.protocols.data.application.tls import ClientHello as Data_ClientHello
+from pcapkit.protocols.data.application.tls import ConnectionId as Data_ConnectionId
 from pcapkit.protocols.data.application.tls import EncryptedExtensions as Data_EncryptedExtensions
 from pcapkit.protocols.data.application.tls import Extension as Data_Extension
 from pcapkit.protocols.data.application.tls import Handshake as Data_Handshake
@@ -282,6 +283,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
        * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.key_share`
          - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_key_share`
          - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_key_share`
+       * - :attr:`~pcapkit.const.tls.extension_type.ExtensionType.connection_id`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._read_ext_connection_id`
+         - :meth:`~pcapkit.protocols.application.ssl.SSL._make_ext_connection_id`
 
     """
 
@@ -304,6 +308,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             Enum_ExtensionType.application_layer_protocol_negotiation: 'alpn',     # [RFC 7301]
             Enum_ExtensionType.supported_versions: 'supported_versions',           # [RFC 9846]
             Enum_ExtensionType.key_share: 'key_share',                             # [RFC 9846]
+            Enum_ExtensionType.connection_id: 'connection_id',                     # [RFC 9146]
         },
     )  # type: DefaultDict[Enum_ExtensionType | int, str | tuple[ExtensionParser, ExtensionConstructor]]
 
@@ -615,6 +620,35 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             return Data_KeyShareServerHello(server_share=entry)
         return data
 
+    def _read_ext_connection_id(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
+                                msg_type: 'Enum_HandshakeType') -> 'Data_ConnectionId':  # pylint: disable=unused-argument
+        """Read a ``connection_id`` extension.
+
+        Structure of ``ConnectionId`` [:rfc:`9146#section-3`]:
+
+        .. code-block:: text
+
+           struct {
+               opaque cid<0..2^8-1>;
+           } ConnectionId;
+
+        The extension is DTLS-only (:rfc:`9146#section-10.2`). A TLS hello
+        carrying it does not conform, and it decodes all the same.
+
+        Args:
+            ext_type: Extension type.
+            data: ``extension_data`` octets.
+            msg_type: Handshake message carrying the extension.
+
+        Returns:
+            The decoded connection ID.
+
+        Raises:
+            ProtocolError: If ``data`` is malformed.
+
+        """
+        return Data_ConnectionId(cid=self._read_whole_vector(data, size=1, what='connection_id.cid'))
+
     def _make_ext_unknown(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_ExtensionData]' = None, *,  # pylint: disable=unused-argument
                           msg_type: 'Enum_HandshakeType', **kwargs: 'Any') -> 'bytes':  # pylint: disable=unused-argument
         """Make an extension with no constructor registered.
@@ -802,6 +836,24 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if isinstance(data, Data_KeyShareServerHello):
             return _make_key_share_entry(self, data.server_share)
         raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no key_share structure for {msg_type!r}')
+
+    def _make_ext_connection_id(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_ConnectionId]' = None, *,  # pylint: disable=unused-argument
+                                msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
+                                cid: 'bytes' = b'', **kwargs: 'Any') -> 'bytes':
+        """Make a ``connection_id`` extension.
+
+        Args:
+            ext_type: Extension type.
+            data: Decoded ``extension_data``.
+            msg_type: Handshake message carrying the extension.
+            cid: Connection ID, if ``data`` is not given.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed ``extension_data``.
+
+        """
+        return self._make_vector(data.cid if data is not None else cid, size=1)
 
     def _adopt_dispatched(self, obj: 'Any') -> 'Any':
         """Adopt the parse of a sibling tier this dispatcher delegated to.

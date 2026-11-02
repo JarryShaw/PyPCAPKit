@@ -23,6 +23,7 @@ __all__ = [
     'ServerName', 'ServerNameList', 'NamedGroupList', 'SignatureSchemeList',
     'ProtocolNameList', 'SupportedVersionsClientHello', 'SupportedVersionsServerHello',
     'KeyShareEntry', 'KeyShareClientHello', 'KeyShareHelloRetryRequest', 'KeyShareServerHello',
+    'ConnectionId',
 
     'Alert', 'ChangeCipherSpec',
 ]
@@ -190,6 +191,22 @@ class KeyShareServerHello(ExtensionData):
 
     if TYPE_CHECKING:
         def __init__(self, server_share: 'KeyShareEntry') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+
+
+@info_final
+class ConnectionId(ExtensionData):
+    """Data model for the ``connection_id`` extension (:rfc:`9146#section-3`).
+
+    The extension is DTLS-only (:rfc:`9146#section-10.2`); a TLS hello that
+    carries it, which does not conform, decodes to this model all the same.
+
+    """
+
+    #: The connection ID its sender wants to receive; empty when it wants none.
+    cid: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, cid: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
 @info_final
