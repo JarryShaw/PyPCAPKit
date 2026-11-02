@@ -623,6 +623,30 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             schema.payload = upper.from_data(upper.info, checksum=None, pseudo=pseudo).data
         return schema
 
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv4':
+        """Unpack (parse) packet data.
+
+        The Version field is checked before the header schema is parsed, so
+        octets of another version are refused as such, rather than by whichever
+        field of this header they break first, as an IPv6 header does with the IHL of ``0`` to ``4`` it reads (:issue:`2574`).
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If the Version field is not ``4``.
+
+        """
+        if cast('Optional[Schema_IPv4]', self.__header__) is None and self._data:
+            version = self._data[0] >> 4
+            if version != 4:
+                raise ProtocolError(f'[IPv4] invalid version: {version}')
+        return super().unpack(length, **kwargs)
+
     @classmethod
     def id(cls) -> 'tuple[Literal["IPv4"]]':  # type: ignore[override]
         """Index ID of the protocol.

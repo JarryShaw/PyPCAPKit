@@ -236,6 +236,10 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', "{'version': 6}"):
         'the IP version number, not the Next Header offset',
+    ('pcapkit/protocols/internet/ipv6.py', 'version != 6'):
+        'the IP version number, not the Next Header offset',
+    ('pcapkit/protocols/internet/ip.py', 'version == 6'):
+        'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
     ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
