@@ -16,13 +16,17 @@ remains.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.foundation.reassembly.data.data import Completion
+from pcapkit.foundation.analysis.dtls import _read_handshake
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.dtls import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                      Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
+from pcapkit.protocols.application.dtls import DTLS as DTLS_Protocol
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Optional, Type
+
+    from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
 
 __all__ = ['DTLS']
 
@@ -47,7 +51,9 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         :class:`~pcapkit.foundation.extraction.Extractor` feeds it through
         :func:`pcapkit.toolkit.pcap.dtls_reassembly`, which reads the 4-tuple
         off the frame, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
-        decodes what it reassembles.
+        decodes what it reassembles; a complete message's
+        :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.packet` holds
+        that decode, run on first read.
 
     Example:
         >>> from pcapkit.foundation.reassembly.dtls import DTLS
@@ -59,17 +65,17 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         >>> result = dtls_reassembly.datagram
 
     """
+    if TYPE_CHECKING:
+        protocol: 'Type[DTLS_Protocol]'
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: Protocol name of current reassembly object. Not set via
-    #: ``__protocol_type__``, which would import
-    #: :class:`~pcapkit.protocols.application.dtls.DTLS` at class-definition
-    #: time; :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta`
-    #: looks :attr:`name` up in the protocol registry instead.
+    #: Protocol name of current reassembly object.
     __protocol_name__ = 'DTLS'
+    #: Protocol of current reassembly object.
+    __protocol_type__ = DTLS_Protocol
 
     # No ``__timeout__``: RFC 6347 section 4.2.3 and RFC 9147 section 5.5 give
     # DTLS handshake reassembly no timeout, so it inherits the base default,
@@ -236,11 +242,17 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             completion: how completely it was reassembled
 
         Returns:
-            The reassembled (or partially reassembled) message.
+            The reassembled (or partially reassembled) message. Its ``packet``
+            is a deferred :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
+            decode if the message is complete, and :data:`None` otherwise, as
+            that function returns.
 
         """
+        packet = None  # type: Optional[Deferred[tuple[Enum_HandshakeType, int, int]]]
         if completion:
-            payload = bytes(frag.raw)  # type: 'bytes | tuple[bytes, ...]'
+            body = bytes(frag.raw)
+            payload = body  # type: 'bytes | tuple[bytes, ...]'
+            packet = Deferred(_read_handshake, (frag.msg_type, frag.length, message_seq), body)
         elif self._flag_s:
             payload = self._received_runs(frag)
         else:
@@ -260,6 +272,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
             msg_type=frag.msg_type,
             length=frag.length,
             body=payload,
+            packet=packet,
         )
 
     @staticmethod

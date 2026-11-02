@@ -5,9 +5,8 @@
 .. module:: pcapkit.protocols.application.tls
 
 :mod:`pcapkit.protocols.application.tls` contains
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.tls.SSLv3`,
-which implement an extractor for the TLS/SSLv3+ record-layer family --
+:class:`~pcapkit.protocols.application.tls.TLS` only,
+which implements an extractor for the TLS/SSLv3+ record-layer family --
 SSLv3, TLS 1.0, TLS 1.1, TLS 1.2 (:rfc:`5246`) and TLS 1.3 (:rfc:`9846`,
 which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`, :rfc:`7627`,
 :rfc:`8422` and :rfc:`8446`). :attr:`TCP.__proto__
@@ -88,7 +87,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['TLS', 'SSLv3']
+__all__ = ['TLS']
 
 #: Length of the record header: content type, legacy version and length
 #: (:rfc:`9846#section-5.1`).
@@ -136,7 +135,7 @@ def _opens_whole_record(data: 'bytes') -> 'bool':
 class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
     """This class implements all protocols in the TLS/SSLv3+ record-layer family.
 
-    - Secure Sockets Layer version 3 (:class:`SSLv3`)
+    - Secure Sockets Layer version 3 (:class:`~pcapkit.protocols.application.sslv3.SSLv3`)
     - Transport Layer Security 1.0 [:rfc:`2246`]
     - Transport Layer Security 1.1 [:rfc:`4346`]
     - Transport Layer Security 1.2 [:rfc:`5246`]
@@ -526,23 +525,3 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         return self._parse_next_layer(type(self), file_, len(file_) if length is None else length,
                                       alias=proto, packet=packet, layer=self._exlayer,
                                       protocol=self._exproto, __context__=self._exctx, chained=True)
-
-
-
-class SSLv3(TLS, schema=Schema_TLS, data=Data_TLS):
-    """This class implements Secure Sockets Layer version 3.
-
-    Dispatch never constructs it: an SSLv3 record parses as :class:`TLS` with
-    :attr:`~TLS.alias` ``'SSLv3'``. Like :class:`~pcapkit.protocols.link.inarp.InARP`
-    to :class:`~pcapkit.protocols.link.arp.ARP`, it narrows :meth:`id` only.
-
-    """
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    @classmethod
-    def id(cls) -> 'tuple[Literal["SSLv3"]]':  # type: ignore[override]
-        """Index ID of the protocol."""
-        return ('SSLv3',)

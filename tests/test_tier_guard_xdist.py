@@ -3,7 +3,7 @@
 
 :func:`tests.conftest.pytest_collection_modifyitems` raises :exc:`pytest.UsageError`
 with a detailed diagnostic when a unit-tier module reads a generated capture. Under
-``-n auto --dist load`` that message can be lost entirely: each xdist worker
+xdist that message can be lost entirely: each xdist worker
 runs this hook inside its own nested :program:`pytest` session
 (:mod:`xdist.remote`), and that session's ``pytest_collection_finish`` fires from a
 ``finally:`` regardless of the ``UsageError``, so the controller sees what looks
@@ -20,14 +20,14 @@ a no-op outside a worker so the serial path is untouched.
 
 :class:`CollectionModifyItemsXdistTests` pins the hook's own logic directly and
 runs unconditionally. :class:`XdistSubprocessTests` reproduces the bug
-end-to-end with a real violation and a real ``pytest -n auto --dist load``
+end-to-end with a real violation and a real ``pytest -n 2 --dist load``
 invocation, and skips when :mod:`xdist` is not importable -- the repository venv
 this suite normally runs under deliberately has no xdist installed.
 
 A second, independent race lives at the same address. :mod:`tests.test_tier_guard`'s
 ``SuiteIsCleanTests`` walks the whole :file:`tests/` tree looking for exactly the
 kind of violation :class:`XdistSubprocessTests` deliberately writes to disk; under
-``-n auto --dist load`` pytest-xdist may run the two in different worker processes
+``--dist load`` pytest-xdist may run the two in different worker processes
 at the same moment, and the scan then reports a violation nobody committed --
 measured on a real CI run, ``Integration Python 3.13``, one leg in five, 466s in.
 :func:`tests.conftest._tier_guard_lock` closes it with a readers-writer mutex:
@@ -210,7 +210,7 @@ class XdistSubprocessTests(unittest.TestCase):
 
         # Exclusive for as long as the probe sits on disk: see
         # tests.conftest._tier_guard_lock for the SuiteIsCleanTests race this
-        # closes under -n auto --dist load. Entered manually, rather than with
+        # closes under --dist load. Entered manually, rather than with
         # a `with` block around the rest of setUp, because the hold has to
         # outlive this method and span the test body and cleanup too; released
         # only after the probe is gone -- addCleanup runs LIFO, so registering

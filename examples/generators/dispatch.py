@@ -616,6 +616,36 @@ def _loopback_build(family: 'int') -> 'Any':
 
 
 ###############################################################################
+# FRAD -- NLPID.
+###############################################################################
+
+
+def _frad_registry() -> 'Any':
+    from pcapkit.protocols.link.frad import FRAD
+    return FRAD.__proto__
+
+
+def _frad_payload(nlpid: 'int') -> 'bytes':
+    """The registered target's own wire bytes for ``nlpid``."""
+    if nlpid == 0xCC:
+        return _ip4(6, _tcp(9999))
+    if nlpid == 0x8E:
+        return _ip6(6, _tcp(9999))
+    raise LookupError(f'frad: no payload builder for NLPID {nlpid!r}')  # pragma: no cover
+
+
+def _frad_build(nlpid: 'int') -> 'Any':
+    """A direct-NLPID FRAD frame, reached as LinuxSLL dispatches it in a capture."""
+    from pcapkit.const.linux.arphrd import ARPHRD
+    from pcapkit.protocols.link.frad import FRAD
+    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+
+    frad = bytes(FRAD(nlpid=int(nlpid), payload=_frad_payload(nlpid)))
+    record = bytes(LinuxSLL1(arphrd_type=ARPHRD.FRAD, protocol_type=0, payload=frad))
+    return _extract_first(_pcap_bytes((record,), linktype=113), '.pcap')
+
+
+###############################################################################
 # The families, the cases, and the probe.
 ###############################################################################
 
@@ -642,7 +672,8 @@ def _link_enum() -> 'Any':
 
 
 #: Every family this module exercises, one per ``__proto__`` table named in
-#: GitHub issue #496, and the loopback table #1574 added.
+#: GitHub issue #496, the loopback table #1574 added, and FRAD's NLPID table
+#: (#2560).
 FAMILIES = (
     Family('link', _link_registry, _link_build, _link_enum),
     Family('internet', _internet_registry, _internet_build),
@@ -652,6 +683,7 @@ FAMILIES = (
     Family('pcap-frame', _pcap_frame_registry, _pcap_frame_build),
     Family('pcapng-frame', _pcapng_registry, _pcapng_build),
     Family('loopback', _loopback_registry, _loopback_build),
+    Family('frad', _frad_registry, _frad_build),
 )
 
 #: The families keyed by label, for a caller -- :func:`probe` -- that wants
@@ -762,6 +794,10 @@ PINNED_TARGETS = {
     'loopback/24': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
     'loopback/28': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
     'loopback/30': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+
+    # -- FRAD.__proto__ (NLPID, keyed in decimal: 0x8E, 0xCC) ------------------
+    'frad/142': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'frad/204': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
 }
 
 

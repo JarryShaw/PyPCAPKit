@@ -22,6 +22,7 @@ DTLS handshake message split across several records back to origin
    .. automethod:: _update_hole_descriptors
 
    .. autoattribute:: __protocol_name__
+   .. autoattribute:: __protocol_type__
 
 Algorithm
 =========
@@ -63,10 +64,12 @@ Terminology
        :attr:`DTLS.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`)
        is :class:`~pcapkit.foundation.reassembly.data.dtls.Datagram` --
        ``completed``, the original packet identifier, the packet numbers
-       that built it, and ``body``, the reassembled payload (a contiguous
+       that built it, ``body``, the reassembled payload (a contiguous
        :obj:`bytes`, or -- under ``strict=True`` and an incomplete message --
-       a :obj:`tuple` of the octet runs actually received), which
-       :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes.
+       a :obj:`tuple` of the octet runs actually received), and ``packet``,
+       what :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes
+       ``body`` to. ``packet`` is decoded on first read, as an IP or TCP
+       datagram's is, and is :data:`None` for an incomplete message.
 
    reasm.dtls.buffer
        Data structure for internal buffering

@@ -30,7 +30,8 @@ from pcapkit.protocols.application.ospf import OSPF
 from pcapkit.protocols.application.rarp import RARP
 from pcapkit.protocols.application.drarp import DRARP
 from pcapkit.protocols.application.sslv2 import SSLv2
-from pcapkit.protocols.application.tls import TLS, SSLv3
+from pcapkit.protocols.application.tls import TLS
+from pcapkit.protocols.application.sslv3 import SSLv3
 from pcapkit.protocols.application.dtls import DTLS
 
 # Base Classes

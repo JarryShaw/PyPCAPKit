@@ -62,6 +62,7 @@ TYPES = (
     ('NoValueType', 'NO_VALUE'),
     ('NoDefaultType', 'NO_DEFAULT'),
     ('AbsentType', 'ABSENT'),
+    ('MissingType', 'MISSING'),
 )
 
 #: Run in the child. It prints one JSON object: whether the fallback was taken,

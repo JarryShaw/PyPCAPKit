@@ -407,6 +407,55 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
 
         raise ProtocolError(f'{self.alias}: unsupported message type: {type_value!r}')
 
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IGMPv3') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        Note:
+            Dispatches on ``data.type`` rather than on
+            :func:`isinstance(data, Data_Report) <isinstance>`, so that a
+            hand-built :obj:`dict` carrying the right ``type`` but not
+            actually one of the two concrete data classes -- as a test double
+            legitimately might -- still rebuilds correctly, the same way
+            :meth:`make` itself dispatches on the ``type`` it is given rather
+            than requiring a particular input class.
+
+        """
+        if data.type == Enum_Type.IGMPv3_Membership_Report:
+            report = cast('Data_Report', data)
+            return {
+                'type': report.type,
+                'reserved_1': report.reserved_1,
+                'checksum': report.checksum,
+                'reserved_2': report.reserved_2,
+                'records': report.records,
+                'payload': cls._make_payload(data),
+            }
+
+        query = cast('Data_Query', data)
+        return {
+            'type': query.type,
+            'max_resp_code': query.max_resp_code,
+            'checksum': query.checksum,
+            'group': query.group,
+            'resv': query.resv,
+            's_flag': query.s_flag,
+            'qrv': query.qrv,
+            'qqic': query.qqic,
+            'sources': query.sources,
+            'payload': cls._make_payload(data),
+        }
+
     @staticmethod
     def _make_group_record(record: 'Optional[Data_GroupRecord]' = None, *,
                            record_type: 'Enum_RecordType | int' = Enum_RecordType.MODE_IS_INCLUDE,
@@ -458,52 +507,3 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             sources=source_list,
             aux_data=aux_data,
         )
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    @classmethod
-    def _make_data(cls, data: 'Data_IGMPv3') -> 'dict[str, Any]':  # type: ignore[override]
-        """Create key-value pairs from ``data`` for protocol construction.
-
-        Args:
-            data: protocol data
-
-        Returns:
-            Key-value pairs for protocol construction.
-
-        Note:
-            Dispatches on ``data.type`` rather than on
-            :func:`isinstance(data, Data_Report) <isinstance>`, so that a
-            hand-built :obj:`dict` carrying the right ``type`` but not
-            actually one of the two concrete data classes -- as a test double
-            legitimately might -- still rebuilds correctly, the same way
-            :meth:`make` itself dispatches on the ``type`` it is given rather
-            than requiring a particular input class.
-
-        """
-        if data.type == Enum_Type.IGMPv3_Membership_Report:
-            report = cast('Data_Report', data)
-            return {
-                'type': report.type,
-                'reserved_1': report.reserved_1,
-                'checksum': report.checksum,
-                'reserved_2': report.reserved_2,
-                'records': report.records,
-                'payload': cls._make_payload(data),
-            }
-
-        query = cast('Data_Query', data)
-        return {
-            'type': query.type,
-            'max_resp_code': query.max_resp_code,
-            'checksum': query.checksum,
-            'group': query.group,
-            'resv': query.resv,
-            's_flag': query.s_flag,
-            'qrv': query.qrv,
-            'qqic': query.qqic,
-            'sources': query.sources,
-            'payload': cls._make_payload(data),
-        }

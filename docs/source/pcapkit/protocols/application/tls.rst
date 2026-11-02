@@ -4,8 +4,7 @@ TLS/SSL - Transport Layer Security
 .. module:: pcapkit.protocols.application.tls
 
 :mod:`pcapkit.protocols.application.tls` contains
-:class:`~pcapkit.protocols.application.tls.TLS` and
-:class:`~pcapkit.protocols.application.tls.SSLv3`, which implement an
+:class:`~pcapkit.protocols.application.tls.TLS` only, which implements an
 extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
 TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
 1.3 (:rfc:`9846`, which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`,
@@ -61,9 +60,9 @@ negotiated one. So in a TLS 1.3 connection, every record after the hellos
 carries ``0x0303`` and reads ``TLS 1.2``; and a TLS 1.2 ``ClientHello`` sent
 at record version ``0x0301`` reads ``TLS 1.0``.
 
-:class:`~pcapkit.protocols.application.tls.SSLv3` is for explicit
+:class:`~pcapkit.protocols.application.sslv3.SSLv3` is for explicit
 construction only, mirroring :class:`~pcapkit.protocols.link.inarp.InARP`: it
-narrows :meth:`~pcapkit.protocols.application.tls.SSLv3.id` to ``('SSLv3',)``
+narrows :meth:`~pcapkit.protocols.application.sslv3.SSLv3.id` to ``('SSLv3',)``
 and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read` unchanged,
 so the alias still follows the wire. Dispatch never constructs one.
 
@@ -132,12 +131,6 @@ this is routine.
    .. automethod:: __length_hint__
 
    .. automethod:: _make_data
-
-.. autoclass:: pcapkit.protocols.application.tls.SSLv3
-   :no-members:
-   :show-inheritance:
-
-   .. automethod:: id
 
 Header Schema
 -------------

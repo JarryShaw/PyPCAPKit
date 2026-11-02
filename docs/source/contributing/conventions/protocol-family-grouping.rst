@@ -63,8 +63,8 @@ holds the ruling. By the ``id()`` criterion,
 TLS 1.3**, in the ARP shape (:ref:`protocol-family-shapes`): ``id()`` stays
 ``('TLS',)`` and ``alias`` names the version read. Only record version ``0x0300`` is
 branded SSLv3, in ``name`` as well as ``alias``; every later version is TLS.
-:class:`~pcapkit.protocols.application.tls.SSLv3` ``('SSLv3',)`` narrows ``id()`` and
-nothing else, as :class:`~pcapkit.protocols.link.arp.InARP` does under ARP, and nothing
+:class:`~pcapkit.protocols.application.sslv3.SSLv3` ``('SSLv3',)`` narrows ``id()`` and
+nothing else, as :class:`~pcapkit.protocols.link.inarp.InARP` does under ARP, and nothing
 dispatches to it: an SSLv3 record on TCP port 443 parses as TLS with alias ``SSLv3``.
 :class:`~pcapkit.protocols.application.dtls.DTLS` ``('DTLS',)`` reads DTLS 1.0, 1.2 and
 1.3 the same way.
@@ -237,6 +237,13 @@ previous record's payload, so a TLS record's dynamic alias names its own version
 ``CLIENT-HELLO`` then a ``CLIENT-MASTER-KEY`` read ``TCP:SSLv2:SSLv2``. DTLS does not
 chain: two DTLS records in one datagram read ``DTLS 1.2:Raw`` (:issue:`2535`).
 
+**HTTP/2 frames chain the same way** (:issue:`2536`): a ``SETTINGS`` frame then a
+``WINDOW_UPDATE`` read ``TCP:HTTP/2:HTTP/2``. A later whole frame that fails to decode
+is :class:`~pcapkit.protocols.misc.raw.Raw` with the rest of the segment and the
+parser's ``error``, a frame the segment ends inside stays
+:class:`~pcapkit.protocols.misc.raw.Raw` with none, and ``protocol=``, ``layer=`` and
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` stop the chain, as for TLS.
+
 .. _protocol-family-canonical-names:
 
 Canonical Names
@@ -345,6 +352,5 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 ``data/`` **modules follow the same layout**: the top-level class takes the module's
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
-:issue:`2529`, where the classes that do not match yet are pending:
-:class:`tls.SSLv3 <pcapkit.protocols.application.tls.SSLv3>` and
+:issue:`2529`, where the class that does not match yet is pending:
 :class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.

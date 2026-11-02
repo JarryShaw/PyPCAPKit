@@ -110,6 +110,7 @@ def _sentinels() -> 'tuple[tuple[str, object, type], ...]':
         ('NO_VALUE', canonical.NO_VALUE, canonical.NoValueType),
         ('NO_DEFAULT', canonical.NO_DEFAULT, canonical.NoDefaultType),
         ('ABSENT', canonical.ABSENT, canonical.AbsentType),
+        ('MISSING', canonical.MISSING, canonical.MissingType),
     )
 
 
@@ -285,6 +286,14 @@ class SentinelExportTests(_ReimportCase):
         self.assertNotIn('AbsentType', protocol.__all__)
         self.assertNotIn('ABSENT', _star_import('pcapkit.protocols.protocol'))
 
+    def test_the_registry_sentinel_is_exported_neither_way(self) -> 'None':
+        """``MISSING`` is private to the protocol registry, as ``ABSENT`` is to its module (#2555)."""
+        import pcapkit.foundation.registry.protocols as registry
+
+        self.assertNotIn('MISSING', registry.__all__)
+        self.assertNotIn('MissingType', registry.__all__)
+        self.assertNotIn('MISSING', _star_import('pcapkit.foundation.registry.protocols'))
+
 
 class SentinelPopulationTests(_ReimportCase):
     """They follow the naming rule, and the docs say so."""
@@ -439,9 +448,9 @@ class SentinelBehaviourTests(_ReimportCase):
     """
 
     def test_the_absent_value_sentinels_are_falsy(self) -> 'None':
-        """``NULL``, ``NO_VALUE`` and ``ABSENT`` each stand for an absent value."""
+        """``NULL``, ``NO_VALUE``, ``ABSENT`` and ``MISSING`` each stand for an absent value."""
         live = {name: obj for name, obj, _ in _sentinels()}
-        for sentinel in (live['NULL'], live['NO_VALUE'], live['ABSENT']):
+        for sentinel in (live['NULL'], live['NO_VALUE'], live['ABSENT'], live['MISSING']):
             with self.subTest(sentinel=repr(sentinel)):
                 self.assertFalse(sentinel)
 

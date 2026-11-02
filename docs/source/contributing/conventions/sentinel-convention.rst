@@ -35,6 +35,9 @@ derives from it mechanically -- title-case each underscore-separated word and ap
    * - ``ABSENT``
      - :class:`~pcapkit.corekit.sentinels.AbsentType`
      - :mod:`pcapkit.corekit.sentinels`
+   * - ``MISSING``
+     - :class:`~pcapkit.corekit.sentinels.MissingType`
+     - :mod:`pcapkit.corekit.sentinels`
 
 GitHub issue :issue:`911`'s housing ruling -- one module for all of them -- is why the table
 names a single defining module, and it is the only import path. The modules that *use* a
@@ -129,13 +132,13 @@ Where the sentinels differ, the differences are **needs, not inconsistencies**:
    of the modules that imports a sentinel from there has no effect on it.
 
 ``__bool__`` returning :obj:`False`
-   ``NULL``, ``NO_VALUE`` and ``ABSENT`` have it, because each stands for an *absent
-   value* and reads naturally in a boolean test. ``NO_DEFAULT`` deliberately does
-   **not**: it is a marker meaning *no default was supplied*, it is only ever tested
-   with ``is``, and making it falsy would invite ``if not default:`` -- which would
-   then treat a caller's genuine falsy default (``0``, ``''``, :obj:`None`,
-   :obj:`False`) the same as the sentinel, the very confusion the sentinel exists to
-   prevent.
+   ``NULL``, ``NO_VALUE``, ``ABSENT`` and ``MISSING`` have it, because each stands for
+   an *absent value* and reads naturally in a boolean test. ``NO_DEFAULT``
+   deliberately does **not**: it is a marker meaning *no default was supplied*, it is
+   only ever tested with ``is``, and making it falsy would invite
+   ``if not default:`` -- which would then treat a caller's genuine falsy default
+   (``0``, ``''``, :obj:`None`, :obj:`False`) the same as the sentinel, the very
+   confusion the sentinel exists to prevent.
 
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
    Every sentinel has them, from the base. The owner ruled on :issue:`1842` that every
@@ -152,9 +155,9 @@ Where the sentinels differ, the differences are **needs, not inconsistencies**:
 
 ``__repr__``
    Every sentinel has it, from the base. It is the object's own name -- ``NULL``,
-   ``NO_VALUE``, ``NO_DEFAULT``, ``ABSENT`` -- as ``repr(None)`` is ``'None'``, and
-   :class:`str` gives the same. That is what a signature, :func:`help` and a traceback
-   show.
+   ``NO_VALUE``, ``NO_DEFAULT``, ``ABSENT``, ``MISSING`` -- as ``repr(None)`` is
+   ``'None'``, and :class:`str` gives the same. That is what a signature, :func:`help`
+   and a traceback show.
 
 ``__setattr__`` / ``__delattr__``
    Every sentinel has them, from the base, and they raise :exc:`AttributeError` for any
