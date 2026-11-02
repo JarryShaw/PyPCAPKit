@@ -85,8 +85,34 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   as do PCAP and PCAP-NG frames of ``LINKTYPE_IEEE802_11_RADIOTAP`` (127)
   (:issue:`2608`, :pr:`2632`). It decodes the fixed 8-octet start (``it_version``, ``it_pad``, ``it_len``)
   and records every present-flags word, following bit 31 from one word to the
-  next. The optional fields those words select are kept whole rather than
-  decoded. The 802.11 MAC frame behind them is dissected as
+  next. The optional fields those words select are kept whole as ``fields``,
+  which a rebuild writes, and decoded as ``decoded``, an entry in wire order
+  for each bit that selects a radiotap field or switches namespace, each field
+  aligned from the start of the header as radiotap.org lays it out
+  (:issue:`2576`, :pr:`2657`). That covers radiotap.org's defined
+  fields, the RTS and data retries of bits 16 and 17, the radiotap and vendor
+  namespace switches, a vendor namespace's data kept raw, and the items of TLV
+  mode, a vendor item split into its header and raw data. An item a producer
+  cut short of its layout, as radiotap.org allows, decodes with the octets it
+  lacks as zeros and rebuilds as captured (:issue:`2655`, :pr:`2690`). A bit
+  no field is defined for, or a field running past the region, ends the walk
+  as an :class:`~pcapkit.protocols.data.link.radiotap.Unknown` entry holding
+  the rest, and ``make()`` takes the fields decoded as well as raw. Each field
+  type has a concrete
+  :class:`~pcapkit.protocols.schema.link.radiotap.RadiotapField` schema, and
+  is read and made through
+  :attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.Radiotap.__field__>`,
+  which
+  :meth:`Radiotap.register_field <pcapkit.protocols.link.radiotap.Radiotap.register_field>`
+  and :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field`
+  extend; :mod:`pcapkit.protocols.schema` and :mod:`pcapkit.protocols.data`
+  export the schemas and data models with a ``Radiotap_`` prefix. A bitmap
+  radiotap.org defines bit by bit is a member of its flag registry, which
+  keeps the bits it does not name. The field types and those registries are
+  :mod:`pcapkit.const.radiotap`, crawled from radiotap.org's pages; a flag
+  takes the name of its macro in Linux's ``ieee80211_radiotap.h``, or in
+  Wireshark where Linux defines none, and radiotap.org's wording where neither
+  does. The 802.11 MAC frame behind the header is dissected as
   :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, below, looked up in
   ``Radiotap``'s own registry under
   :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`,
@@ -102,10 +128,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   Control and HT Control fields each frame type carries; a Control frame of a
   subtype it does not model, and an Extension frame, are read as the minimal
   header. The frame body is kept as :class:`~pcapkit.protocols.misc.raw.Raw`,
-  with the FCS and radiotap's pad octets where captured, as ``Radiotap`` does
-  not decode the Flags that mark them, and any other protocol version is
-  refused. The frame types and subtypes are :mod:`pcapkit.const.ieee802_11`,
-  from hand-maintained tables of IEEE Std 802.11-2020's Table 9-1.
+  with the FCS and radiotap's pad octets where captured, as ``Radiotap``
+  decodes the Flags that mark them but does not pass them on, and any other
+  protocol version is refused. The frame types and subtypes are
+  :mod:`pcapkit.const.ieee802_11`, from hand-maintained tables of IEEE Std
+  802.11-2020's Table 9-1.
 
 * **Added** -- :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` (:rfc:`792`)
   and :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` (:rfc:`4443`), on an
@@ -386,6 +413,28 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   is :data:`None` unless a caller supplies one; the ``Raw`` layer's
   ``info.error`` holds the failure instead.
 
+* **Changed** -- **a breaking change to** parsing a Mobility Header or a
+  Multipath TCP DSS option whose length does not fit its fields: it raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`, where 1.5.x read the
+  fields it lacked as zeros, or dropped the octets past them, and rebuilt it
+  longer than captured (:issue:`2669`, :pr:`2683`).
+  :class:`~pcapkit.protocols.internet.mh.MH` refuses a whole message whose
+  Header Len is short of its type's fixed fields, a message
+  :rfc:`6275#section-9.2` has discarded, so a Home Test with Header Len 1
+  raises ``MH: [Type 3] invalid header length: 1``, where its 24 octets
+  rebuilt as 32. Inside IPv6 it is the upper layer, kept as ``Raw`` by the
+  walk above, and the packet rebuilds as captured, where its 64 octets
+  rebuilt as 72. :class:`~pcapkit.protocols.transport.tcp.TCP` refuses a DSS
+  Length other than the one :rfc:`8684` gives its ``A``, ``a``, ``M`` and
+  ``m`` flags, or that plus the 2-octet checksum with ``M`` set, so a DSS of
+  Length 6 carrying a 4-octet Data ACK, which takes 8, raises
+  ``TCP: [OptNo 30] invalid format``, where its 40-octet segment rebuilt as
+  44; inside IPv4 the segment is kept as
+  :class:`~pcapkit.protocols.misc.raw.Raw` and the packet rebuilds as
+  captured. A capture cut inside an MH message whose Header Len is short of
+  it rebuilds with the Header Len it declared, where 1.5.x wrote the one its
+  type takes.
+
 * **Changed** -- **a breaking change to** construction: a checksum left out of
   ``make()`` is computed rather than zero, so the octets built change
   (:issue:`2471`, :pr:`2543`). :class:`~pcapkit.protocols.internet.ipv4.IPv4`
@@ -658,7 +707,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   address helpers moved to the base class (:issue:`2614`, :pr:`2638`). A
   protocol's ``__index__`` returns its LinkType, EtherType, TransType or
   AppType value ahead of any other registry's code, an AppType value as its
-  port (:issue:`2627`, :pr:`2652`).
+  port (:issue:`2627`, :pr:`2652`). A protocol's table from a code to the
+  layout read under it is a class-level registry map, with its
+  ``register_<kind>`` classmethod and wrapper, never a module-level
+  dictionary, and each layout is a concrete schema with typed fields, never
+  built inside the map (:issue:`2576`, :pr:`2657`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -677,7 +730,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``tests/protocols/internet``, ``tests/protocols/application`` and
   ``tests/protocols/misc`` as shards of their own ahead of the rest of
   ``tests/protocols``, which run whole outgrew the runner's memory and
-  stalled at its tail (:issue:`2600`, :pr:`2604`).
+  stalled at its tail (:issue:`2600`, :pr:`2604`). The experimental
+  workflow's Windows leg passes pytest the modules it ignores as an
+  ``@``-prefixed argument file, where they went on its command line and had
+  outgrown Windows' limit, so the leg failed before pytest started
+  (:issue:`2678`, :pr:`2681`).
 
 * **Changed** -- once a release's milestone is closed while ``__version__``
   still names that release, the milestone workflow gives an item the lowest
