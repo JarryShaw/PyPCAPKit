@@ -49,7 +49,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.arp.hardware import Hardware as Enum_Hardware
 from pcapkit.const.arp.operation import Operation as Enum_Operation
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.protocols.data.link.arp import ARP as Data_ARP
 from pcapkit.protocols.data.link.arp import Address as Data_Address
 from pcapkit.protocols.data.link.arp import Type as Data_Type
@@ -460,14 +460,14 @@ class ARP(Link[Data_ARP, Schema_ARP],
             FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``ptype``
                 is, or is packed as an IPv4 or IPv6 address and is not a
                 valid address or not of that version (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
             ProtocolError: If the address is not packed as IPv4 or IPv6, and
                 ``addr`` is either a :class:`str` that is not *hex* encoded or
                 none of :class:`str`, an IP address, :class:`bytes` and
                 :class:`bytearray`.
 
         Notes:
-            Through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` rather than
+            Through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address` rather than
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`
             directly, because :obj:`bool` is an :class:`int` subclass that
             either constructor accepts without complaint: ``addr=True`` would
@@ -486,7 +486,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         """
         # NOTE: checked before the ``ptype`` dispatch, for the placement reason
-        # ``_reject_bool`` in ``pcapkit.corekit.fields.ipaddress`` gives: the
+        # ``_reject_bool`` in ``pcapkit.corekit.schema.ipaddress`` gives: the
         # non-IP branches below never reach ``parse_ip_address``, so without it
         # a ``bool`` gets their generic ``ProtocolError`` rather than the
         # ``FieldValueError`` the IP branches raise for it (#2166).

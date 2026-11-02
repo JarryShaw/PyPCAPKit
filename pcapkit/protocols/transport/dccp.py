@@ -47,9 +47,9 @@ from pcapkit.const.dccp.reset_code import ResetCode as Enum_ResetCode
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.transport.dccp import DCCP as Data_DCCP
 from pcapkit.protocols.data.transport.dccp import AckVector as Data_AckVector
 from pcapkit.protocols.data.transport.dccp import AckVectorRun as Data_AckVectorRun

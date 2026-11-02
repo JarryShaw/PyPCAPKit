@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
-from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import ProtocolError, StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn

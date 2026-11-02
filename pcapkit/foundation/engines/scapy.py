@@ -38,7 +38,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import struct
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.corekit.fields.strings import pad_length
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN

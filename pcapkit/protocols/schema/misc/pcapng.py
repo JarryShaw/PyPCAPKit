@@ -17,7 +17,6 @@ from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.corekit.fields.byteorder import byteorder_callback, packet_byteorder
 from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
@@ -26,8 +25,10 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
 from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, NumberField,
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString, PaddingField,
-                                            StringField, pad_length)
+                                            StringField)
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.corekit.schema.byteorder import byteorder_callback, packet_byteorder
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -227,7 +228,7 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     one would otherwise inherit the *previous* section's byte order. The magic
     is therefore also written back as ``packet['byteorder']``, which is what the
     SHB's own options -- read by
-    :func:`~pcapkit.corekit.fields.byteorder.byteorder_callback`, after this field --
+    :func:`~pcapkit.corekit.schema.byteorder.byteorder_callback`, after this field --
     resolve their byte order from.
 
     A Section Header Block of 12 octets has no room for the magic, and its

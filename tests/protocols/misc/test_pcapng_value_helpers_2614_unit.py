@@ -37,7 +37,7 @@ value (#2617).
 The EUI-64 address of ``if_EUIaddr`` goes through the base MAC address pair with
 ``size=8``, so the module keeps no address pattern of its own.
 
-The padding sites on :func:`~pcapkit.corekit.fields.strings.pad_length` that no
+The padding sites on :func:`~pcapkit.corekit.schema.padding.pad_length` that no
 other test reaches are pinned too: a custom block's data before its options, its
 option area, and a Simple Packet Block whose data ends exactly at the padding of
 its original length.

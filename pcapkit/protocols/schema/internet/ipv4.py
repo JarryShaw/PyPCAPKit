@@ -13,12 +13,13 @@ from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4AddressField, parse_ip_address
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import EnumValueError, FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -372,7 +373,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             FieldValueError: If an entry of :attr:`ts_data` that the timestamp
                 flag makes an address is a :obj:`bool`, is not a valid IP
                 address, or is not IPv4 -- see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`.
 
         Notes:
             This runs on the **packing** path as well as the unpacking one --
@@ -380,7 +381,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
             calls it once the buffer is filled -- so the ``ts_data`` entries it
             converts below are whatever the caller passed to the constructor,
             not octets read off the wire. That is why those conversions go
-            through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
+            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
             rather than :func:`ipaddress.ip_address`: this schema is reachable
             from public :meth:`IPv4.make
             <pcapkit.protocols.internet.ipv4.IPv4.make>`, which accepts a

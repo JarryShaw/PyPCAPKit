@@ -5,7 +5,7 @@
 has a non-seekable input read ahead to a block's Total Length, and a Decryption
 Secrets Block further when its Secrets Length runs past it: to the block's fixed
 fields plus the secrets padded to 32 bits by
-:func:`~pcapkit.corekit.fields.strings.pad_length`, the span the block is
+:func:`~pcapkit.corekit.schema.padding.pad_length`, the span the block is
 parsed over (#1586, #2614). Every value is built here, so the module is in the
 unit tier.
 

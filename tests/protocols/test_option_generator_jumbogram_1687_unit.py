@@ -104,7 +104,7 @@ class JumbogramCaseTests(unittest.TestCase):
 
     def test_the_case_carries_a_legal_jumbo_payload_length(self) -> None:
         """It round-trips, names UDP next, and its option says 65,536."""
-        from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+        from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 
         self.assertEqual(self.outcome.status, 'OK', self.outcome.detail)
         self.assertEqual(self.octets[0], 17)

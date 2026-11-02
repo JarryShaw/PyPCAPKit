@@ -56,9 +56,9 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as Data_ESECOption
 from pcapkit.protocols.data.internet.ipv4 import Flags as Data_Flags
@@ -1837,7 +1837,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 register a timestamp (:rfc:`791#section-3.1`)
             timestamp: list of timestamps, i.e. the slots before the pointer, or
                 a mapping of the addresses to their timestamps; an address may
-                be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
+                be anything :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
                 accepts for IPv4; :data:`None` is an empty list
             remaining: raw 32-bit words for the slots at or beyond the pointer;
                 the slots left over up to ``counts`` are zero

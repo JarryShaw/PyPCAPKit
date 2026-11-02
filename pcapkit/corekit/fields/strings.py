@@ -6,10 +6,11 @@ import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import Dict, unquote
-from pcapkit.utilities.exceptions import FieldValueError, IntError
+from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     '_TextField',
@@ -18,7 +19,6 @@ __all__ = [
     'DecodedString',
     'BitField',
     'PaddingField',
-    'pad_length',
 ]
 
 if TYPE_CHECKING:
@@ -386,7 +386,7 @@ class PaddingField(BytesField):
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
         align: Boundary, in octets, that the padding reaches, given with
             ``after`` in place of ``length``. The field is then
-            :func:`pad_length` octets long.
+            :func:`~pcapkit.corekit.schema.padding.pad_length` octets long.
         after: What the padding follows: the name of an earlier field whose
             value is its length in octets, or a callable that accepts the
             current packet and returns that length.
@@ -458,32 +458,3 @@ class PaddingField(BytesField):
         if isinstance(value, (bytes, bytearray)) and value:
             return bytes(value[:length]).ljust(length, b'\x00')
         return bytes(length)
-
-
-def pad_length(length: 'int', align: 'int') -> 'int':
-    """Octets of padding that take ``length`` octets to an ``align``-octet boundary.
-
-    Args:
-        length: Octets to be padded.
-        align: Boundary, in octets.
-
-    Returns:
-        ``-length % align``: from ``0``, where ``length`` is already a multiple
-        of ``align``, to ``align - 1``.
-
-    Raises:
-        IntError: If ``align`` is not an :obj:`int`, or is a :obj:`bool`.
-        FieldValueError: If ``align`` is not positive.
-
-    A schema's ``length`` callbacks are handed the packet data, not a
-    protocol, so this is a plain function and not a protocol method.
-    :class:`PaddingField` sizes itself by it when given ``align``.
-
-    .. versionadded:: 1.6.0
-
-    """
-    if isinstance(align, bool) or not isinstance(align, int):
-        raise IntError(f'align must be an int, not {align!r}')
-    if align < 1:
-        raise FieldValueError(f'align must be positive, not {align!r}')
-    return -length % align

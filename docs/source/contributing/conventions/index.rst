@@ -28,8 +28,9 @@ House Conventions
      reference, rather than any code at all;
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
-     :mod:`pcapkit.corekit` a support module belongs in, and where a context
-     variable lives;
+     :mod:`pcapkit.corekit` a support module belongs in, where a context
+     variable lives, and where a schema helper used outside the schema layer or
+     outside its own protocol lives;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`;

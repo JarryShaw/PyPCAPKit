@@ -23,9 +23,9 @@ which is a base class for application layer protocols, e.g.
 from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
-from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:

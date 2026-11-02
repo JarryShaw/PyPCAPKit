@@ -3,7 +3,7 @@
 
 GitHub issue #2614 found the octets that reach the next ``N``-octet boundary
 spelled several ways, ``-n % 4``, ``(4 - n % 4) % 4`` and ``(n + 3) // 4 * 4``
-among them. :func:`~pcapkit.corekit.fields.strings.pad_length` states it once, and
+among them. :func:`~pcapkit.corekit.schema.padding.pad_length` states it once, and
 :class:`~pcapkit.corekit.fields.strings.PaddingField` takes ``align`` and
 ``after`` so a schema says what it aligns rather than how.
 
@@ -48,12 +48,12 @@ def spec_pad(length: int, align: int) -> int:
 
 
 class PadLengthTests(unittest.TestCase):
-    """:func:`~pcapkit.corekit.fields.strings.pad_length` itself."""
+    """:func:`~pcapkit.corekit.schema.padding.pad_length` itself."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-        from pcapkit.corekit.fields.strings import pad_length
+        from pcapkit.corekit.schema.padding import pad_length
 
         self.pad_length = pad_length
 
