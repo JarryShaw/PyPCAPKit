@@ -17,6 +17,22 @@ import, one inside a function and one under ``TYPE_CHECKING`` alike.
 :file:`tests/project/test_utilities_import_boundary_1735_unit.py` checks every module
 under :file:`pcapkit/utilities/` for it.
 
+:mod:`pcapkit.utilities.compat` **holds compatibility implementations and re-exports
+only.** Where a name or behaviour differs by interpreter version, ``compat`` re-exports
+the right one behind a :data:`sys.version_info` gate rather than a ``getattr`` or
+``hasattr`` probe. That was ruled in review of the threading excepthook and
+``AppType`` union fixes for :issue:`1691` and :issue:`1694`, neither of whose threads
+holds it, and applied to the package's other probes on :issue:`1709`.
+:file:`tests/project/test_stdlib_feature_probes_1709_unit.py` fails on a ``getattr``
+or ``hasattr`` call naming its attribute in a string literal, where the receiver is a
+builtin class or a module the file binds with an ``import`` statement, or where the
+attribute is one the test lists with the interpreter version that added it; the calls
+it exempts pass. A helper that has to behave the same on every platform is
+neither a compatibility implementation nor a re-export, so it gets a module of its
+own: that is why :func:`~pcapkit.utilities.datetime.fromtimestamp` is in
+:mod:`pcapkit.utilities.datetime`, ruled in review of the timestamp fix for
+:issue:`2099`, whose thread does not hold it.
+
 :mod:`pcapkit.corekit` **is for the types the packet model is built from**: what
 :mod:`pcapkit.protocols`, :mod:`pcapkit.const` and :mod:`pcapkit.foundation`
 subclass, instantiate or decorate with. The question is *is this part of what a
@@ -25,3 +41,15 @@ question belongs here instead. :mod:`pcapkit.corekit.decorators` is the worked e
 protocol's file and falls back to protocol classes, so it moved out of ``utilities``
 on :issue:`1735`. ``corekit`` may import ``utilities``; the reverse is what the rule
 forbids.
+
+A second worked example is :mod:`pcapkit.corekit.checksum`, settled on :issue:`2580`.
+It fails the ``utilities`` question because
+:class:`~pcapkit.corekit.checksum.internet.ChecksumStatus` subclasses
+:class:`~pcapkit.corekit.enum.EnumLookup`. The protocols compute and verify their
+checksums through it, so it imports
+:mod:`pcapkit` only from ``corekit`` and ``utilities``, never from
+:mod:`pcapkit.protocols`; :file:`tests/corekit/test_checksum_import_boundary_2580_unit.py`
+checks that. What needs IPv4 and IPv6 stays beside
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`. The package holds one
+module per checksum family, so a new family sits beside
+:mod:`~pcapkit.corekit.checksum.internet`.

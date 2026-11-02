@@ -56,6 +56,7 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
@@ -82,7 +83,6 @@ from pcapkit.protocols.data.internet.ipv4 import TROption as Data_TROption
 from pcapkit.protocols.data.internet.ipv4 import TSOption as Data_TSOption
 from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ip import IP
-from pcapkit.protocols.protocol import _rebuilding
 from pcapkit.protocols.schema.internet.ipv4 import IPV4_HEADER_LEN
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as Schema_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as Schema_ESECOption
@@ -371,7 +371,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # NOTE: The checksum covers the header alone (RFC 791 section 3.1); a zero
         # one is what header checksum offload leaves on the sending host.
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.checksum import verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
             ipv4.__update__([
                 ('checksum_status', verify_checksum(self.alias, self._data[:ipv4.hdr_len], schema.chksum,
                                                     offload=(b'\x00\x00',))),
@@ -427,8 +427,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         proto = None if ipv4.offset else ipv4.protocol
         if config.CHECKSUM_VERIFY:
             # NOTE: An upper layer checksummed alone, as ICMP is, is not verified
-            # in a fragment; see pcapkit.protocols.misc.checksum.checksum (#2470).
-            from pcapkit.protocols.misc.checksum.checksum import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
+            # in a fragment; see pcapkit.corekit.checksum.internet (#2470).
+            from pcapkit.corekit.checksum.internet import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
             with fragment_payload(bool(ipv4.offset or ipv4.flags.mf)):
                 return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
         return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
@@ -595,7 +595,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
 
         if checksum is None and config.CHECKSUM_COMPUTE:
-            from pcapkit.protocols.misc.checksum.checksum import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
             schema.chksum = compute_checksum(schema.pack()[:ihl * 4])
 
         # NOTE: A payload that left its checksum out gets it over this header's
@@ -678,7 +678,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Once parsed, the checksum of the upper layer is verified over this
         layer's pseudo-header if :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-        is on, see :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`.
+        is on, see :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper`.
 
         Args:
             file: Source packet stream.
@@ -691,7 +691,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         """
         super().__post_init__(file, length, **kwargs)
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.checksum import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.checksum.ip_pseudo import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
             verify_upper(self)
 
     ##########################################################################

@@ -5,10 +5,11 @@
 .. module:: pcapkit.protocols.misc.checksum.ip_pseudo
 
 :mod:`pcapkit.protocols.misc.checksum.ip_pseudo` contains
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` only,
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`,
 which implements the pseudo-header of the IP protocol family
-that the upper-layer checksums cover, whose structure is
-described as below:
+that the upper-layer checksums cover, and :func:`pseudo_header` and
+:func:`verify_upper`, through which the IP layers use it. The
+pseudo-header's structure is described as below:
 
 IPv4 (:rfc:`793#section-3.1`, :rfc:`768`):
 
@@ -33,6 +34,24 @@ Octets      Bits        Name                    Description
   36        288   ``ip_pseudo.zero``          Reserved
   39        312   ``ip_pseudo.protocol``      Next Header
 ======= ========= ========================= ===============================
+
+A checksum over the IP pseudo-header is left to the enclosing IP layer, which
+alone knows the pseudo-header, and builds it as an
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, rather than the
+upper layer reaching back to its parent. The upper layer takes part through
+these members:
+
+* ``_verify_pseudo_checksum(pseudo)`` verifies the checksum against
+  ``pseudo``, or records
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER`
+  for :data:`None`; the IP layer calls it once parsed, see :func:`verify_upper`;
+* ``make()`` takes the ``pseudo`` it computes the checksum over, and replaces
+  the length it carries with the upper layer's own, see :func:`pseudo_header`;
+* ``_checksum_pending`` is :data:`True` once ``make()`` left out a checksum it
+  had no ``pseudo`` for. An IP layer constructed with that upper layer as its
+  payload then rebuilds it with its own pseudo-header.
+
+The sum itself is in :mod:`pcapkit.corekit.checksum.internet`.
 
 """
 import ipaddress
@@ -62,7 +81,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-__all__ = ['IP_Pseudo']
+__all__ = ['IP_Pseudo', 'pseudo_header', 'verify_upper']
 
 #: Extension headers that end the chain, as the upper layer: the Mobility Header
 #: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).
@@ -616,3 +635,55 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         if len(octets) < 2:
             return length
         return int.from_bytes(octets, 'big') or length
+
+
+def pseudo_header(pseudo: 'IP_Pseudo', length: 'int') -> 'bytes':
+    """Octets of ``pseudo`` with ``length`` as its upper-layer length.
+
+    Args:
+        pseudo: Pseudo-header of the enclosing IP layer.
+        length: Upper-layer length the checksum is computed for.
+
+    Returns:
+        :attr:`pseudo.data <pcapkit.protocols.protocol.Protocol.data>`, made
+        anew if it carries another length.
+
+    Raises:
+        FieldValueError: If ``length`` does not fit the length field.
+
+    """
+    if pseudo.info.len == length:
+        return pseudo.data
+    return type(pseudo)(src=pseudo.src, dst=pseudo.dst, protocol=pseudo.protocol,
+                        upper_length=length, zero=pseudo.info.zero).data
+
+
+def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
+    """Verify the checksum of the upper layer ``ip`` carries over its pseudo-header.
+
+    The upper layer is the payload of ``ip``, past any Authentication Header
+    of IPv4. It is verified if it defines ``_verify_pseudo_checksum``, against
+    the :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` of ``ip``,
+    or against :data:`None` if that cannot be derived or names another protocol.
+
+    Args:
+        ip: Parsed IPv4 or IPv6 layer.
+
+    """
+    from pcapkit.protocols.internet.ah import AH  # isort: skip # pylint: disable=import-outside-toplevel
+
+    upper = ip.payload
+    # NOTE: IPv6 walks an AH as an extension header; IPv4 carries it as its payload.
+    while isinstance(upper, AH):
+        upper = upper.payload
+    verify = getattr(upper, '_verify_pseudo_checksum', None)
+    if verify is None:
+        return
+
+    try:
+        pseudo = IP_Pseudo(ip=ip)  # type: Optional[IP_Pseudo]
+    except (ProtocolError, FieldValueError):
+        pseudo = None
+    if pseudo is not None and pseudo.protocol != upper.__index__():
+        pseudo = None
+    verify(pseudo)

@@ -28,13 +28,12 @@ import sys
 # :mod:`pcapkit.vendor.__main__` builds, so this module-level temporary must not
 # read as a public name of the package.
 _path = sys.path.pop(0)
-###############################################################################
-
-from pcapkit.vendor.ipx.packet import Packet as IPX_Packet
-from pcapkit.vendor.ipx.socket import Socket as IPX_Socket
-
-###############################################################################
-sys.path.insert(0, _path)
+# NOTE: restored in ``finally``, so a failed import does not lose the entry (#2589).
+try:
+    from pcapkit.vendor.ipx.packet import Packet as IPX_Packet
+    from pcapkit.vendor.ipx.socket import Socket as IPX_Socket
+finally:
+    sys.path.insert(0, _path)
 ###############################################################################
 
 __all__ = ['IPX_Packet', 'IPX_Socket']

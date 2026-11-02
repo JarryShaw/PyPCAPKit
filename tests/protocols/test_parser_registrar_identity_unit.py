@@ -37,6 +37,7 @@ SITES = (
     ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_chunk', '__chunk__'),
     ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_parameter', '__parameter__'),
     ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_cause', '__cause__'),
+    ('pcapkit.protocols.transport.dccp', 'DCCP', 'register_option', '__option__'),
     ('pcapkit.protocols.application.httpv2', 'HTTPv2', 'register_frame', '__frame__'),
 )
 

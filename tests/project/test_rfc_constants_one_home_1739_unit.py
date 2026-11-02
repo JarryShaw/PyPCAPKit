@@ -58,6 +58,7 @@ HOMES = (
     ('pcapkit.protocols.schema.internet.ah', 'AH_HEADER_LEN', 12),
     ('pcapkit.protocols.schema.transport.tcp', 'TCP_MIN_HEADER_LEN', 20),
     ('pcapkit.protocols.schema.transport.tcp', 'TCP_DATA_OFFSET_OCTET', 12),
+    ('pcapkit.protocols.schema.transport.dccp', 'DCCP_MIN_HEADER_LEN', 12),
     ('pcapkit.protocols.schema.misc.pcap.header', 'GLOBAL_HEADER_LEN', 24),
     ('pcapkit.protocols.schema.misc.pcap.frame', 'RECORD_HEADER_LEN', 16),
     ('pcapkit.protocols.schema.misc.pcap.header', 'MAGIC_NUMBER', {
@@ -178,6 +179,8 @@ READERS = (
     ('pcapkit/protocols/internet/ah.py', 'pcapkit.protocols.schema.internet.ah', 'AH_HEADER_LEN'),
     ('pcapkit/protocols/transport/tcp.py', 'pcapkit.protocols.schema.transport.tcp',
      'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/protocols/transport/dccp.py', 'pcapkit.protocols.schema.transport.dccp',
+     'DCCP_MIN_HEADER_LEN'),
 )
 
 #: Readers that reach a home as a module attribute, ``Module.NAME``, rather than
@@ -460,16 +463,18 @@ UNRELATED = {
     'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
                                              'version bit-field'),
     'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),
-    'pcapkit/protocols/misc/checksum/checksum.py': ((16, 65535),
-                                                    "the one's-complement sum's 16-bit word mask "
-                                                    'and carry shift (RFC 1071), not an IP total '
-                                                    'length or a PCAP record header'),
     'pcapkit/protocols/misc/pcapng.py': ((65535,), 'a 16-bit mask'),
     'pcapkit/protocols/schema/misc/pcapng.py': ((9, 65535), 'an epb_flags bit offset, and a '
                                                '16-bit field default'),
     'pcapkit/protocols/transport/sctp.py': ((12, 16, 20), 'SCTP chunk and parameter sizes'),
     'pcapkit/protocols/schema/transport/sctp.py': ((6, 16, 20), 'SCTP chunk and parameter sizes, '
                                                   'and a flag bit'),
+    'pcapkit/protocols/transport/dccp.py': ((6, 65535), 'DCCP option lengths, the 2-bit shift of '
+                                            'an Ack Vector state, and the largest 2-octet '
+                                            'Elapsed Time'),
+    'pcapkit/protocols/schema/transport/dccp.py': ((6,), 'a 48-bit DCCP sequence or '
+                                                   'acknowledgement number, and a Timestamp Echo '
+                                                   'option without its Elapsed Time'),
     'pcapkit/protocols/transport/tcp.py': ((6, 16, 24, 32, 65535), 'TCP and MPTCP option sizes, '
                                            'and the 16-bit window and MSS defaults'),
     'pcapkit/protocols/schema/transport/tcp.py': ((6, 16, 28), 'TCP and MPTCP option sizes, and '

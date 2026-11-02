@@ -24,6 +24,7 @@ link layer, with detailed implementation and methods.
    link
    ethernet
    arp
+   inarp
    frad
    gre
    l2tp

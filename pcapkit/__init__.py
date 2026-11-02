@@ -122,7 +122,7 @@ __all__ = [
                                                             # IPv6 Extension Header
     'IP_Pseudo',                                            # IP Pseudo-Header
 
-    'TCP', 'UDP', 'SCTP',                                   # Transport Layer
+    'DCCP', 'TCP', 'UDP', 'SCTP',                           # Transport Layer
 
     'FTP', 'FTP_DATA',                                      # Application Layer
     'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP', 'OSPF',

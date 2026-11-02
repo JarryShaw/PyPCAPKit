@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.ospf.authentication import Authentication
     from pcapkit.const.ospf.packet import Packet
-    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = ['OSPF', 'CryptographicAuthentication']
 

@@ -17,8 +17,8 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.flags import Flags as TCP_Flags
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
     from pcapkit.corekit.infoclass import OrderedMultiInfo
-    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
 
     IPAddress = Union[IPv4Address, IPv6Address]
 

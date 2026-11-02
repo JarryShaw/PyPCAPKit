@@ -111,7 +111,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph transport [Transport Layer]
-           Transport --> TCP & UDP & SCTP
+           Transport --> TCP & UDP & SCTP & DCCP
        end
 
        B --> Link & Internet & Transport & Application
@@ -141,7 +141,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
        click ARP "link/arp.html#pcapkit.protocols.link.arp.ARP"
-       click InARP "link/arp.html#pcapkit.protocols.link.arp.InARP"
+       click InARP "link/inarp.html#pcapkit.protocols.link.inarp.InARP"
 
        click Internet "internet/internet.html#pcapkit.protocols.internet.internet.Internet"
        click AH "internet/ah.html#pcapkit.protocols.internet.ah.AH"
@@ -171,6 +171,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click TCP "transport/tcp.html#pcapkit.protocols.transport.tcp.TCP"
        click UDP "transport/udp.html#pcapkit.protocols.transport.udp.UDP"
        click SCTP "transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
+       click DCCP "transport/dccp.html#pcapkit.protocols.transport.dccp.DCCP"
 
        click Application "application/application.html#pcapkit.protocols.application.application.Application"
        click HTTP "application/http.html#pcapkit.protocols.application.http.HTTP"

@@ -8,10 +8,10 @@ Checksums
 
 :mod:`pcapkit.protocols.misc.checksum` contains the pseudo-header that
 upper-layer checksums cover,
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, and in
-:mod:`~pcapkit.protocols.misc.checksum.checksum` what the one's-complement
-checksums share, such as
-:class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus`.
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`. What the
+one's-complement checksums share, such as
+:class:`~pcapkit.corekit.checksum.internet.ChecksumStatus`, is in
+:mod:`pcapkit.corekit.checksum.internet`.
 
 IP Pseudo-Header
 ================
@@ -19,10 +19,11 @@ IP Pseudo-Header
 .. module:: pcapkit.protocols.misc.checksum.ip_pseudo
 
 :mod:`pcapkit.protocols.misc.checksum.ip_pseudo` contains
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo` only,
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`,
 which implements the pseudo-header of the IP protocol family
-that the upper-layer checksums cover, whose structure is
-described as below:
+that the upper-layer checksums cover, and :func:`pseudo_header` and
+:func:`verify_upper`, through which the IP layers use it. The
+pseudo-header's structure is described as below:
 
 IPv4 (:rfc:`793#section-3.1`, :rfc:`768`):
 
@@ -48,6 +49,16 @@ Octets      Bits        Name                    Description
   39        312   ``ip_pseudo.protocol``      Next Header
 ======= ========= ========================= ===============================
 
+A checksum over the IP pseudo-header is verified and computed by the enclosing
+:class:`~pcapkit.protocols.internet.ipv4.IPv4` or
+:class:`~pcapkit.protocols.internet.ipv6.IPv6` layer, which builds the
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, rather than by
+the upper layer reaching back to its parent. So an upper layer constructed
+alone, or behind another header such as an IPv6 extension header or an
+Authentication Header, has its checksum computed only if given the ``pseudo``
+to compute it over, and one parsed alone records no outcome. The sum itself is
+in :mod:`pcapkit.corekit.checksum.internet`.
+
 .. autoclass:: pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo
    :no-members:
    :show-inheritance:
@@ -70,6 +81,9 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+.. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.pseudo_header
+.. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper
 
 Header Schemas
 --------------
@@ -98,40 +112,3 @@ Data Models
 .. autoclass:: pcapkit.protocols.data.misc.checksum.ip_pseudo.IP_Pseudo
    :members:
    :show-inheritance:
-
-Internet Checksum
-=================
-
-.. module:: pcapkit.protocols.misc.checksum.checksum
-
-:mod:`pcapkit.protocols.misc.checksum.checksum` contains what the
-one's-complement Internet checksum (:rfc:`1071`) of the IPv4 header, TCP, UDP,
-ICMP, ICMPv6 and OSPF shares. Parsing verifies a checksum only if
-:data:`~pcapkit.utilities.config.CHECKSUM_VERIFY` is on, and records the
-outcome as ``checksum_status``; construction computes one left out unless
-:data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is off (:issue:`2471`).
-A mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
-which a filter can silence alone (:issue:`2470`).
-
-A checksum over the IP pseudo-header is verified and computed by the enclosing
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` or
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` layer, which builds the
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, rather than by
-the upper layer reaching back to its parent. So an upper layer constructed
-alone, or behind another header such as an IPv6 extension header or an
-Authentication Header, has its checksum computed only if given the ``pseudo``
-to compute it over, and one parsed alone records no outcome. ICMP's checksum,
-over the message alone, is verified as it is parsed, unless the IP layer it is
-parsed from is a fragment.
-
-.. autoclass:: pcapkit.protocols.misc.checksum.checksum.ChecksumStatus
-   :members:
-   :show-inheritance:
-
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.internet_checksum
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.compute_checksum
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.partial_checksum
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.verify_checksum
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.pseudo_header
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.verify_upper
-.. autofunction:: pcapkit.protocols.misc.checksum.checksum.fragment_payload

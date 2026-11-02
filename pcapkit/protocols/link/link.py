@@ -8,7 +8,7 @@
 :mod:`pcapkit.protocols.link.link` contains
 :class:`~pcapkit.protocols.link.link.Link`,
 which is a base class for link layer protocols, e.g.
-:class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.arp.InARP`,
+:class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.inarp.InARP`,
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`,
 :class:`~pcapkit.protocols.link.frad.FRAD`,
 :class:`~pcapkit.protocols.link.l2tp.L2TP`,

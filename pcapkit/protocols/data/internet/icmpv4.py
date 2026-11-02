@@ -8,7 +8,7 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.icmp.type import Type as Enum_Type
-    from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
+    from pcapkit.corekit.checksum.internet import ChecksumStatus
 
 __all__ = [
     'ICMPv4',

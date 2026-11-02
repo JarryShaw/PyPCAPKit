@@ -132,11 +132,13 @@ walk asserting that each block's total length is 4-octet aligned, repeated
 identically at both ends, and that the block chain covers the file exactly. So
 the complaints above are pcapkit's readings, not malformed fixtures.
 
-The complaints about one packet are expected rather than a defect:
-``test.pcapng`` carries a deliberately truncated packet (``captured_len`` below
-``original_len``, to exercise snapshot-length handling), and dissecting it
-reports ``packet length < 0: -2`` and an IPv4 header that runs past the end of
-the data, which is simply what a snapped frame looks like to a dissector.
+One packet is cut short on purpose rather than by a defect: ``test.pcapng``
+carries a deliberately truncated packet (``captured_len`` below
+``original_len``, to exercise snapshot-length handling), whose IPv4 header runs
+past the end of the data, which is simply what a snapped frame looks like to a
+dissector. The frame keeps that header as ``Raw``, whose ``error`` says so, and
+logs nothing for it (GitHub issue #2588), so verifying the fixture notes only
+the ``EOF reached`` its extraction ends on.
 
 Usage
 -----
@@ -979,11 +981,14 @@ class _LogCapture(logging.Handler):
 
     pcapkit reports a parse complaint on its ``pcapkit`` logger, and a
     complaint raised as a warning goes through :mod:`warnings` as well, where
-    the application's filters decide its fate. Only the logger sees all of
-    them: :func:`~pcapkit.corekit.decorators.beholder` logs a dissector
-    failure it recovers from without issuing a warning at all. So the logger
-    is what this listens to. Duplicates are dropped, because one complaint per block in a capture
-    with many packets is not that many pieces of information.
+    the application's filters decide its fate. The logger sees more of them:
+    :func:`~pcapkit.corekit.decorators.beholder` logs a dissector failure it
+    recovers from without issuing a warning at all -- other than a
+    :exc:`~pcapkit.utilities.exceptions.ProtocolError`, a refusal it keeps
+    quiet and records only on the replacing ``Raw`` layer's ``error`` (GitHub
+    issue #2588). So the logger is what this listens to. Duplicates are
+    dropped, because one complaint per block in a capture with many packets is
+    not that many pieces of information.
 
     """
 

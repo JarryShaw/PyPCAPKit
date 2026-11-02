@@ -106,6 +106,7 @@ else:
 
     # per protocol
     from pcapkit.vendor.arp import *
+    from pcapkit.vendor.dccp import *
     from pcapkit.vendor.esp import *
     from pcapkit.vendor.ftp import *
     from pcapkit.vendor.hip import *
@@ -137,6 +138,9 @@ __all__ = [
     'AppType_TCP', 'AppType_UDP', 'AppType_SCTP', 'AppType_DCCP',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
+    # DCCP
+    'DCCP_PacketType', 'DCCP_ResetCode', 'DCCP_Option', 'DCCP_Feature',
+    'DCCP_AckVectorState', 'DCCP_DropCode',
     # ESP
     'ESP_Cipher', 'ESP_Integrity',
     # FTP

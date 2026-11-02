@@ -6,9 +6,10 @@ name: Milestone
 # that have none. The rule is util/milestone.py's action_for, documented under
 # "Milestone" in docs/source/contributing/workflows.rst: an open item, a merged
 # pull request or an issue closed as completed gets the open milestone named
-# after the checked-out `pcapkit.__version__`, unless it already holds another;
-# an unmerged pull request or an issue closed as not planned or as a duplicate
-# loses whichever milestone it holds. A missing milestone is a warning, never created.
+# after the checked-out `pcapkit.__version__`, or the lowest open one above it
+# once that one is closed (#2548), unless it already holds another; an unmerged
+# pull request or an issue closed as not planned or as a duplicate loses
+# whichever milestone it holds. A missing milestone is a warning, never created.
 #
 # SECURITY. `pull_request_target` gives this run a write token on events a
 # stranger can cause, so it must never execute anything the pull request

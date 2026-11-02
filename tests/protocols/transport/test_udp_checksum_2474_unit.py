@@ -62,9 +62,9 @@ class UDPChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
         from pcapkit.protocols.transport.udp import UDP
         from pcapkit.utilities import config

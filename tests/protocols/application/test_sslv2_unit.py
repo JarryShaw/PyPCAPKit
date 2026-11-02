@@ -12,6 +12,8 @@ capture.
 Round trips are checked as ``bytes(SSLv2.from_data(parsed.info)) == raw``,
 which routes through ``_make_data`` and ``make``; ``parsed.data`` is the
 constructor's input echoed back, so comparing it to ``raw`` checks nothing.
+Segments of several records are checked both ways too, each record a layer of
+its own (#2567).
 
 """
 from __future__ import annotations
@@ -31,6 +33,68 @@ __tier__ = 'ALL'
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: A 20-octet TCP header, 50000 to 443, ACK.
+TCP_TO_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
+
+#: CLIENT-HELLO, 2-octet header, RECORD-LENGTH 28: CLIENT-VERSION 0x0002, one
+#: cipher spec, no session id, a 16-octet challenge.
+CLIENT_HELLO = bytes.fromhex('801c' '01' '0002' '0003' '0000' '0010' '010080') + bytes(16)
+#: CLIENT-MASTER-KEY, 2-octet header, RECORD-LENGTH 14: CIPHER-KIND, then
+#: CLEAR-KEY-LENGTH 0, ENCRYPTED-KEY-LENGTH 4, KEY-ARG-LENGTH 0 and the key.
+CLIENT_MASTER_KEY = bytes.fromhex('800e' '02' '010080' '0000' '0004' '0000' 'deadbeef')
+#: SERVER-HELLO, 2-octet header, RECORD-LENGTH 34 (as in ``test_ssl_tls_dtls_unit``).
+SERVER_HELLO = bytes.fromhex('80220400010002000400030010aaaaaaaa010080') + b'\xbb' * 16
+#: SERVER-VERIFY, 3-octet header (no escape), RECORD-LENGTH 17, PADDING 7.
+SERVER_VERIFY = bytes.fromhex('001107' '05') + bytes(range(16))
+#: SERVER-FINISHED, 2-octet header, RECORD-LENGTH 17.
+SERVER_FINISHED = bytes.fromhex('8011' '06') + bytes(range(16, 32))
+#: A 2-octet header declaring RECORD-LENGTH 0, which leaves no MSG-TYPE.
+ZERO_LENGTH = b'\x80\x00'
+
+#: Segments of several records each, every one dissected as an SSLv2 layer (#2567).
+SEGMENTS = {
+    'CLIENT-HELLO + CLIENT-MASTER-KEY': CLIENT_HELLO + CLIENT_MASTER_KEY,
+    'SERVER-HELLO + SERVER-VERIFY (3-octet header) + SERVER-FINISHED': (
+        SERVER_HELLO + SERVER_VERIFY + SERVER_FINISHED),
+}
+
+
+def _split_records(wire: bytes) -> 'list[tuple[int, bytes]]':
+    """``wire`` cut at each record's RECORD-LENGTH, with its header length, per the draft's §4.1."""
+    records = []
+    while wire:
+        if wire[0] & 0x80:
+            header_len, record_length = 2, ((wire[0] & 0x7F) << 8) | wire[1]
+        else:
+            header_len, record_length = 3, ((wire[0] & 0x3F) << 8) | wire[1]
+        records.append((header_len, wire[:header_len + record_length]))
+        wire = wire[header_len + record_length:]
+    return records
+
+
+def _layers(proto: 'Any') -> 'tuple[list[Any], Any]':
+    """Each SSLv2 layer of ``proto``'s chain, in order, and the layer that ends it."""
+    from pcapkit.protocols.application.sslv2 import SSLv2
+
+    layers = []
+    while isinstance(proto, SSLv2):
+        layers.append(proto)
+        proto = proto.payload
+    return layers, proto
+
+
+def _behind_tcp_443(wire: bytes, **stop: 'Any') -> 'tuple[Any, Any]':
+    """``wire`` parsed behind TLS's SSLv2 fallback on TCP 443, and the layer ending its SSLv2 chain."""
+    from pcapkit.protocols.transport.tcp import TCP
+
+    segment = TCP_TO_443 + wire
+    tcp = TCP(segment, len(segment), **stop)
+    # NOTE: The first record is a TLS layer that adopted the SSLv2 parse, so walk by alias.
+    proto = tcp.payload
+    while proto.alias == 'SSLv2':
+        proto = proto.payload
+    return tcp, proto
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -681,6 +745,248 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         proto = SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
         with self.assertRaisesRegex(ProtocolError, r'SSLv2: SESSION-ID-HIT \(256\) out of range'):
             proto.make(msg_type=HandshakeType.SERVER_HELLO, body={'session_id_hit': 256})
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class TestSSLv2SegmentRecords(unittest.TestCase):
+    """A whole record after the first in a TCP segment is a further SSLv2 layer (#2567)."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_every_record_is_an_sslv2_layer(self) -> None:
+        """Each record's header form and RECORD-LENGTH, per the draft's §4.1."""
+        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.misc.null import NoPayload
+
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                records = _split_records(wire)
+                parsed = SSLv2(wire, len(wire))
+                layers, rest = _layers(parsed)
+                self.assertEqual(str(parsed.protochain), ':'.join(['SSLv2'] * len(records)))
+                self.assertIsInstance(rest, NoPayload)
+                for layer, (header_len, record) in zip(layers, records):
+                    self.assertEqual(layer.length, header_len)
+                    self.assertEqual(layer.info.two_byte_header, header_len == 2)
+                    self.assertEqual(layer.info.record_length, len(record) - header_len)
+                    self.assertEqual(int(layer.info.msg_type), record[header_len])
+
+    def test_records_match_the_draft(self) -> None:
+        """Each record's own message type and body, decoded as a direct parse would."""
+        from pcapkit.const.sslv2.handshake_type import HandshakeType
+        from pcapkit.protocols.application.sslv2 import SSLv2
+
+        wire = SEGMENTS['SERVER-HELLO + SERVER-VERIFY (3-octet header) + SERVER-FINISHED']
+        layers, _ = _layers(SSLv2(wire, len(wire)))
+        self.assertEqual([layer.info.msg_type for layer in layers],
+                         [HandshakeType.SERVER_HELLO, HandshakeType.SERVER_VERIFY,
+                          HandshakeType.SERVER_FINISHED])
+        self.assertEqual(layers[0].info.body.connection_id, b'\xbb' * 16)
+        self.assertEqual((layers[1].info.padding, layers[1].info.is_escape), (7, False))
+        self.assertEqual([layer.info.body for layer in layers[1:]],
+                         [bytes(range(16)), bytes(range(16, 32))])
+
+        wire = SEGMENTS['CLIENT-HELLO + CLIENT-MASTER-KEY']
+        layers, _ = _layers(SSLv2(wire, len(wire)))
+        self.assertEqual(layers[0].info.body.cipher_specs, b'\x01\x00\x80')
+        self.assertEqual(layers[1].info.msg_type, HandshakeType.CLIENT_MASTER_KEY)
+        self.assertEqual(layers[1].info.body, CLIENT_MASTER_KEY[3:])
+
+    def test_parse_then_rebuild_is_byte_exact(self) -> None:
+        """Parsed directly and behind TLS's SSLv2 fallback on TCP 443."""
+        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = SSLv2(wire, len(wire))
+                rebuilt = SSLv2.from_data(parsed.info)
+                self.assertEqual(bytes(rebuilt).hex(), wire.hex())
+                self.assertEqual(len(_layers(rebuilt)[0]), len(_split_records(wire)))
+
+                segment = TCP_TO_443 + wire
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    tcp = TCP(segment, len(segment))
+                    rebuilt_tcp = TCP.from_data(tcp.info)
+                self.assertEqual(str(tcp.protochain), f'TCP:{parsed.protochain}')
+                self.assertEqual(bytes(rebuilt_tcp).hex(), segment.hex())
+                self.assertEqual(str(rebuilt_tcp.protochain), str(tcp.protochain))
+
+    def test_make_then_parse_is_byte_exact(self) -> None:
+        """Each record made from its parsed fields, carrying the next as ``payload``."""
+        from pcapkit.protocols.application.sslv2 import SSLv2
+
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                parsed = SSLv2(wire, len(wire))
+                layers, _ = _layers(parsed)
+                maker = object.__new__(SSLv2)
+                schema = b''  # type: Any
+                for layer in reversed(layers):
+                    info = layer.info
+                    schema = maker.make(msg_type=info.msg_type, two_byte_header=info.two_byte_header,
+                                        is_escape=info.is_escape, padding=info.padding,
+                                        body=info.body, payload=schema)
+                made = bytes(schema)
+                self.assertEqual(made.hex(), wire.hex())
+                self.assertEqual(str(SSLv2(made, len(made)).protochain), str(parsed.protochain))
+
+    def test_a_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
+        """A RECORD-LENGTH of 0 ends the chain as ``Raw`` carrying ``read()``'s error."""
+        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, segment, chain in (
+                ('second record', CLIENT_HELLO + ZERO_LENGTH + CLIENT_MASTER_KEY, 'SSLv2:Raw'),
+                ('third record', CLIENT_HELLO + CLIENT_MASTER_KEY + ZERO_LENGTH + CLIENT_MASTER_KEY,
+                 'SSLv2:SSLv2:Raw')):
+            with self.subTest(record=name):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    parsed = SSLv2(segment, len(segment))
+                    rebuilt = bytes(SSLv2.from_data(parsed.info))
+                _, rest = _layers(parsed)
+                self.assertEqual(str(parsed.protochain), chain)
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(rest.info.error,
+                                 'SSLv2: record length (0) is too short to include a MSG-TYPE octet')
+                self.assertEqual(bytes(rest), ZERO_LENGTH + CLIENT_MASTER_KEY)
+                self.assertEqual(caught, [])
+                self.assertEqual(rebuilt, segment)
+
+    def test_octets_opening_no_record_stay_raw_without_an_error(self) -> None:
+        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, tail in (('a 2-octet header cut short', b'\x80'),
+                           ('a 3-octet header cut short', b'\x00\x05'),
+                           ('a record the segment ends inside', CLIENT_MASTER_KEY[:-1])):
+            with self.subTest(tail=name):
+                wire = CLIENT_HELLO + CLIENT_MASTER_KEY + tail
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    parsed = SSLv2(wire, len(wire))
+                _, rest = _layers(parsed)
+                self.assertEqual(str(parsed.protochain), 'SSLv2:SSLv2:Raw')
+                self.assertIs(type(rest), Raw)
+                self.assertIsNone(rest.info.error)
+                self.assertEqual(bytes(rest), tail)
+                self.assertEqual(caught, [])
+                self.assertEqual(bytes(SSLv2.from_data(parsed.info)), wire)
+
+    def test_a_parse_stopping_at_sslv2_keeps_the_rest_raw(self) -> None:
+        from pcapkit.protocols.application.sslv2 import SSLv2
+
+        wire = SEGMENTS['CLIENT-HELLO + CLIENT-MASTER-KEY']
+        self.assertEqual(str(SSLv2(wire, len(wire)).protochain), 'SSLv2:SSLv2')
+        for stop in ({'protocol': 'SSLv2'}, {'protocol': 'SSL'}, {'layer': 'Application'}):
+            with self.subTest(stop=stop):
+                parsed = SSLv2(wire, len(wire), **stop)
+                self.assertEqual(str(parsed.protochain), 'SSLv2:Raw')
+                self.assertEqual(bytes(parsed.payload), CLIENT_MASTER_KEY)
+
+    def test_a_tcp_443_parse_stopping_at_sslv2_keeps_the_rest_raw(self) -> None:
+        """Behind TLS's SSLv2 fallback too, whether TLS or the SSLv2 trial matches the stop."""
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
+
+        wire = SEGMENTS['CLIENT-HELLO + CLIENT-MASTER-KEY']
+        self.assertEqual(str(_behind_tcp_443(wire)[0].protochain), 'TCP:SSLv2:SSLv2')
+        for stop in ({'layer': 'Application'}, {'protocol': 'SSLv2'}, {'protocol': 'TLS'}, {'protocol': 'SSL'}):
+            with self.subTest(stop=stop):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    tcp, rest = _behind_tcp_443(wire, **stop)
+                    rebuilt = bytes(TCP.from_data(tcp.info))
+                self.assertEqual(str(tcp.protochain), 'TCP:SSLv2:Raw')
+                self.assertIs(type(rest), Raw)
+                self.assertIsNone(rest.info.error)
+                self.assertEqual(bytes(rest), CLIENT_MASTER_KEY)
+                self.assertEqual(caught, [])
+                self.assertEqual(rebuilt, TCP_TO_443 + wire)
+
+    def test_a_tcp_443_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
+        """Behind TLS's SSLv2 fallback, as in a direct parse."""
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, wire, chain in (
+                ('second record', CLIENT_HELLO + ZERO_LENGTH + CLIENT_MASTER_KEY, 'TCP:SSLv2:Raw'),
+                ('third record', CLIENT_HELLO + CLIENT_MASTER_KEY + ZERO_LENGTH + CLIENT_MASTER_KEY,
+                 'TCP:SSLv2:SSLv2:Raw')):
+            with self.subTest(record=name):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    tcp, rest = _behind_tcp_443(wire)
+                    rebuilt = bytes(TCP.from_data(tcp.info))
+                self.assertEqual(str(tcp.protochain), chain)
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(rest.info.error,
+                                 'SSLv2: record length (0) is too short to include a MSG-TYPE octet')
+                self.assertEqual(bytes(rest), ZERO_LENGTH + CLIENT_MASTER_KEY)
+                self.assertEqual(caught, [])
+                self.assertEqual(rebuilt, TCP_TO_443 + wire)
+
+    def test_a_tcp_443_record_cut_short_stays_raw_without_an_error(self) -> None:
+        """Behind TLS's SSLv2 fallback, as in a direct parse."""
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.tcp import TCP
+
+        for name, tail in (('a 2-octet header cut short', b'\x80'),
+                           ('a 3-octet header cut short', b'\x00\x05'),
+                           ('a record the segment ends inside', CLIENT_MASTER_KEY[:-1])):
+            with self.subTest(tail=name):
+                wire = CLIENT_HELLO + CLIENT_MASTER_KEY + tail
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    tcp, rest = _behind_tcp_443(wire)
+                    rebuilt = bytes(TCP.from_data(tcp.info))
+                self.assertEqual(str(tcp.protochain), 'TCP:SSLv2:SSLv2:Raw')
+                self.assertIs(type(rest), Raw)
+                self.assertIsNone(rest.info.error)
+                self.assertEqual(bytes(rest), tail)
+                self.assertEqual(caught, [])
+                self.assertEqual(rebuilt, TCP_TO_443 + wire)
+
+    def test_a_tcp_443_parse_hands_the_caller_context_to_every_record(self) -> None:
+        """Each record after the first behind TLS's SSLv2 fallback carries the caller's registry."""
+        from pcapkit.corekit.context import ContextRegistry, ProtocolContext
+
+        class SSLv2Context(ProtocolContext):
+            @classmethod
+            def protocol(cls) -> 'tuple[str, ...]':
+                return ('SSLv2',)
+
+        context = SSLv2Context()
+        registry = ContextRegistry(context)
+        for name, wire in SEGMENTS.items():
+            with self.subTest(segment=name):
+                tcp, _ = _behind_tcp_443(wire, __context__=registry)
+                layers, _ = _layers(tcp.payload.payload)
+                self.assertEqual(len(layers), len(_split_records(wire)) - 1)
+                for layer in layers:
+                    self.assertEqual(dict(layer.context), dict(registry))
+                    self.assertIs(layer._get_context(SSLv2Context), context)  # pylint: disable=protected-access
+
+    def test_frame_layer_limit_bounds_the_records(self) -> None:
+        """Each record is a layer, so the limit stops the walk with one warning."""
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities import config
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        raw = TCP_TO_443 + CLIENT_HELLO + CLIENT_MASTER_KEY * (config.FRAME_LAYER_LIMIT + 6)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            proto = TCP(raw, len(raw))
+        self.assertEqual(str(proto.protochain),
+                         ':'.join(['TCP'] + ['SSLv2'] * config.FRAME_LAYER_LIMIT + ['Raw']))
+        self.assertEqual([item.category for item in caught], [ProtocolWarning])
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertEqual(bytes(TCP.from_data(proto.info)), raw)
+
 
 if __name__ == '__main__':
     unittest.main()

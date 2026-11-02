@@ -4,6 +4,7 @@ through a registry of its own.
 
 Covers :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
 as shipped, dispatch through it and through the EtherType path from both versions,
+a parse stopping at either version on either path (#2532),
 the ``__index__`` of the classes it reaches, and the registrars of it and of
 :class:`~pcapkit.protocols.link.frad.FRAD`'s and
 :class:`~pcapkit.protocols.link.netlink.Netlink`'s registries.
@@ -138,25 +139,73 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                     raw = header(0x0800, arphrd)
                     self.assertIsInstance(version(raw, len(raw)).payload, NoPayload)
 
-    def test_a_stop_at_this_layer_still_parses_a_registered_arphrd_type(self) -> None:
-        """The order the NOTE in ``LinuxSLL._import_next_layer`` records.
+    def _stops(self, version):  # type: ignore[no-untyped-def]
+        """Each spelling of a stop at ``version``: its layer, family and own name or class."""
+        from pcapkit.protocols.link.linux_sll import LinuxSLL
 
-        Stopping at the link layer or at the version keeps an EtherType payload
-        :class:`~pcapkit.protocols.misc.raw.Raw`, while a registered
-        ``arphrd_type`` is still dispatched.
-        """
+        return ({'layer': 'Link'}, {'layer': 'link'}, {'protocol': 'LinuxSLL'},
+                {'protocol': version.__name__}, {'protocol': LinuxSLL}, {'protocol': version})
+
+    def test_a_stop_at_this_layer_keeps_a_registered_arphrd_type_raw(self) -> None:
+        """The registry path stops as the EtherType path does (#2532)."""
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.protocols.misc.raw import Raw
 
         for version, header, alias in self._versions():
-            for stop in ({'layer': 'Link'}, {'protocol': version.__name__}):
+            for name, (payload, _) in CASES.items():
+                for stop in self._stops(version):
+                    with self.subTest(version=version.__name__, arphrd=name, stop=stop):
+                        raw = header(0x0800, getattr(ARPHRD, name)) + payload
+                        parsed = version(raw, len(raw), **stop)
+                        self.assertEqual(parsed.protochain.chain, f'{alias}:Raw')
+                        self.assertIsInstance(parsed.payload, Raw)
+                        self.assertEqual(parsed.payload.data, payload)
+                        self.assertEqual(parsed.payload.info.protocol, 0x0800)
+                        self.assertEqual(parsed.data, raw)
+                        self.assertEqual(version.from_data(parsed.info).data, raw)
+
+                        # Without a length, the whole payload is the next layer's.
+                        again = parsed._import_next_layer(parsed.protocol)
+                        self.assertIsInstance(again, Raw)
+                        self.assertEqual(again.data, payload)
+
+    def test_a_stop_at_this_layer_keeps_an_ethertype_raw(self) -> None:
+        """The Raw is named after the EtherType it would have dispatched on."""
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.protocols.misc.raw import Raw
+
+        for version, header, alias in self._versions():
+            for stop in self._stops(version):
                 with self.subTest(version=version.__name__, stop=stop):
                     raw = header(0x0800, 1) + IPV4
-                    self.assertEqual(version(raw, len(raw), **stop).protochain.chain,
+                    parsed = version(raw, len(raw), **stop)
+                    self.assertEqual(parsed.protochain.chain,
                                      f'{alias}:Internet_Protocol_version_4')
+                    self.assertIsInstance(parsed.payload, Raw)
+                    self.assertEqual(parsed.payload.data, IPV4)
+                    self.assertIs(parsed.payload.info.protocol,
+                                  EtherType.Internet_Protocol_version_4)
+                    self.assertEqual(parsed.data, raw)
+                    self.assertEqual(version.from_data(parsed.info).data, raw)
 
-                    raw = header(0x0800, ARPHRD.NETLINK) + CASES['NETLINK'][0]
+    def test_a_stop_at_another_protocol_still_dispatches_here(self) -> None:
+        """The other version's name and a protocol further in do not stop this layer."""
+        from pcapkit.const.linux.arphrd import ARPHRD
+
+        frad = CASES['FRAD'][0]
+        for version, header, alias in self._versions():
+            other = 'LinuxSLL2' if version.__name__ == 'LinuxSLL1' else 'LinuxSLL1'
+            for stop, chain in (({'protocol': other}, 'FRAD:IPv4:UDP'),
+                                ({'protocol': 'FRAD'}, 'FRAD:Raw')):
+                with self.subTest(version=version.__name__, stop=stop):
+                    raw = header(0x0800, ARPHRD.FRAD) + frad
+                    parsed = version(raw, len(raw), **stop)
+                    self.assertEqual(parsed.protochain.chain, f'{alias}:{chain}')
+                    self.assertEqual(version.from_data(parsed.info).data, raw)
+
+                    raw = header(0x0800, 1) + IPV4
                     self.assertEqual(version(raw, len(raw), **stop).protochain.chain,
-                                     f'{alias}:Netlink:Raw')
+                                     f'{alias}:IPv4:UDP')
 
     def test_index_is_the_arphrd_type_that_dispatches_here(self) -> None:
         from pcapkit.const.linux.arphrd import ARPHRD

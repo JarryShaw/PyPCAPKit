@@ -15,7 +15,8 @@ the link layer, with detailed implementation and methods.
 from pcapkit.protocols.link.link import Link
 
 # Link Layer Protocols
-from pcapkit.protocols.link.arp import ARP, InARP
+from pcapkit.protocols.link.arp import ARP
+from pcapkit.protocols.link.inarp import InARP
 from pcapkit.protocols.link.ethernet import Ethernet
 from pcapkit.protocols.link.frad import FRAD
 from pcapkit.protocols.link.gre import GRE

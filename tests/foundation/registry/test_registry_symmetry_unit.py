@@ -139,6 +139,9 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP', '__cause__',
                     'pcapkit.protocols.schema.transport.sctp:ErrorCause',
                     ('pcapkit.const.sctp.cause_code:CauseCode.Stale_Cookie',)),
+    MethodRegistrar('register_dccp_option', 'pcapkit.protocols.transport.dccp:DCCP', '__option__',
+                    'pcapkit.protocols.schema.transport.dccp:Option',
+                    ('pcapkit.const.dccp.option:Option.Timestamp',)),
     MethodRegistrar('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTPv2', '__frame__',
                     'pcapkit.protocols.schema.application.httpv2:FrameType',
                     ('pcapkit.const.http.frame:Frame.HEADERS',)),
@@ -453,6 +456,7 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             'register_icmp_type': 'no schema argument; override and restore are in test_icmp_type_registrar_unit',
             'register_ipx': 'IPX.__proto__ ships no entry, so an override has nothing to be restored to',
             'register_netlink': 'Netlink.__proto__ ships no entry, so there is none to restore',
+            'register_dccp': 'DCCP.__proto__ ships no entry, so there is none to restore',
         }
         self.assertEqual(sorted(set(registry.__all__) - covered - set(excused)), [])
         self.assertEqual(sorted((covered | set(excused)) - set(registry.__all__)), [])

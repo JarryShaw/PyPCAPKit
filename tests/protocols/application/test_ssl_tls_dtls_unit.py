@@ -792,7 +792,7 @@ class VersionDispatchTests(unittest.TestCase):
 
     def test_sslv3_is_constructible_directly_and_narrows_id(self) -> None:
         """:class:`SSLv3` -- explicit/manual construction only, mirroring
-        :class:`~pcapkit.protocols.link.arp.InARP`'s relationship to
+        :class:`~pcapkit.protocols.link.inarp.InARP`'s relationship to
         :class:`~pcapkit.protocols.link.arp.ARP`: it narrows :meth:`id` only
         and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read`
         unchanged, so parsing SSLv3-shaped data through it sets
@@ -809,7 +809,7 @@ class VersionDispatchTests(unittest.TestCase):
         self.assertEqual(SSLv3.id(), ('SSLv3',))
 
     def test_sslv3_class_does_not_force_its_own_alias(self) -> None:
-        """The same nuance :class:`~pcapkit.protocols.link.arp.InARP` has:
+        """The same nuance :class:`~pcapkit.protocols.link.inarp.InARP` has:
         constructing :class:`SSLv3` directly over data that is not actually
         SSLv3-shaped still reports the *real* tier, since :meth:`read` is
         inherited unmodified and dispatches off the wire, not off the class

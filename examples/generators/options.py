@@ -16,7 +16,7 @@ Capture                         Codes
 :file:`options-ipv4.pcap`       IPv4 options
 :file:`options-ipv6.pcap`       HOPOPT, IPv6-Opts and IPv6-Route
 :file:`options-transport.pcap`  SCTP chunks, parameters and error causes,
-                                and HTTP/2 frames
+                                HTTP/2 frames, and DCCP options
 :file:`options-internet.pcap`   Mobility Header messages, options and
                                 extensions, and HIP parameters
 =============================== =============================================
@@ -1104,6 +1104,68 @@ def _hip_rebuild(parameters: 'Any') -> 'Any':
 
 
 ###############################################################################
+# DCCP -- options
+###############################################################################
+
+#: Header fields shared by every constructed DCCP packet: a DCCP-Ack (type 3),
+#: whose Acknowledgement Number the Ack Vector and Data Dropped options read
+#: against (RFC 4340 sections 11.4 and 11.7). ``checksum`` is pinned, so a
+#: mismatch points at the option under test and not at a recomputed checksum.
+DCCP_BASE = {
+    'srcport': 50000, 'dstport': 5001, 'type': 3, 'x': True, 'seq': 1, 'ack': 1,
+    'checksum': b'\x00\x00', 'payload': b'',
+}
+
+
+def _dccp_registry() -> 'Any':
+    from pcapkit.protocols.transport.dccp import DCCP
+    return DCCP.__option__
+
+
+def _dccp_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.dccp.feature import Feature as Enum_Feature
+    from pcapkit.const.dccp.option import Option as Enum_Option
+
+    # Each default is an empty or zero field; these give every variable part
+    # at least one octet, and the Elapsed Time its four-octet form.
+    vector = [(0, 3), (1, 0), (3, 63)]
+    return {
+        Enum_Option.Change_L: {'feature': Enum_Feature.Congestion_Control_ID, 'value': b'\x02\x03'},
+        Enum_Option.Confirm_L: {'feature': Enum_Feature.Congestion_Control_ID, 'value': b'\x02\x02\x03'},
+        Enum_Option.Change_R: {'feature': Enum_Feature.Send_Ack_Vector, 'value': b'\x01'},
+        Enum_Option.Confirm_R: {'feature': Enum_Feature.Send_Ack_Vector, 'value': b'\x01'},
+        Enum_Option.Init_Cookie: {'cookie': b'\x01\x02\x03'},
+        Enum_Option.NDP_Count: {'count': 0x0102},
+        Enum_Option.Ack_Vector_Nonce_0: {'vector': vector},
+        Enum_Option.Ack_Vector_Nonce_1: {'vector': vector},
+        Enum_Option.Data_Dropped: {'vector': [(None, 5), (3, 2)]},
+        Enum_Option.Timestamp: {'timestamp': 0x11223344},
+        Enum_Option.Timestamp_Echo: {'timestamp': 0x11223344, 'elapsed': 0x1234},
+        Enum_Option.Elapsed_Time: {'elapsed': 0x123456},
+        Enum_Option.Data_Checksum: {'checksum': b'\x01\x02\x03\x04'},
+    }
+
+
+def _dccp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
+    from pcapkit.protocols.transport.dccp import DCCP
+    return DCCP(options=[(code, kwargs)], **DCCP_BASE)
+
+
+def _dccp_parse(octets: 'bytes') -> 'Any':
+    from pcapkit.protocols.transport.dccp import DCCP
+    return DCCP(octets, len(octets))
+
+
+def _dccp_extract(parsed: 'Any') -> 'Any':
+    return parsed.info.options
+
+
+def _dccp_rebuild(options: 'Any') -> 'Any':
+    from pcapkit.protocols.transport.dccp import DCCP
+    return DCCP(options=options, **DCCP_BASE)
+
+
+###############################################################################
 # HTTP/2 -- frames
 ###############################################################################
 
@@ -1583,6 +1645,9 @@ FAMILIES = (
     Family('httpv2-frame', _httpv2_registry, _httpv2_overrides,
            _httpv2_build, _httpv2_parse, _httpv2_extract, _httpv2_rebuild,
            capture='options-transport.pcap', envelope='tcp'),
+    Family('dccp-option', _dccp_registry, _dccp_overrides,
+           _dccp_build, _dccp_parse, _dccp_extract, _dccp_rebuild,
+           capture='options-transport.pcap', envelope='ipv4', proto=33),
     Family('mh-message', _mh_message_registry, _mh_message_overrides,
            _mh_message_build, _mh_parse, _mh_message_extract, _mh_message_rebuild,
            capture='options-internet.pcap', envelope='ipv6', proto=135),

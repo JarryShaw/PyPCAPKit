@@ -9,12 +9,13 @@
 the transport layer, with detailed implementation and methods.
 
 """
-# TODO: Implement DCCP, RSVP.
+# TODO: Implement RSVP.
 
 # Base Class for Transport Layer
 from pcapkit.protocols.transport.transport import Transport
 
 # Transport Layer Protocols
+from pcapkit.protocols.transport.dccp import DCCP
 from pcapkit.protocols.transport.sctp import SCTP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
@@ -24,5 +25,5 @@ from pcapkit.const.reg.transtype import TransType as TRANSTYPE
 
 __all__ = [
     'TRANSTYPE',   # Protocol Numbers
-    'TCP', 'UDP', 'SCTP',  # Transport Layer Protocols
+    'DCCP', 'TCP', 'UDP', 'SCTP',  # Transport Layer Protocols
 ]

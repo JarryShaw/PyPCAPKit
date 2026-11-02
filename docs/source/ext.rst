@@ -22,7 +22,7 @@ The protocol classes :mod:`pcapkit` ships:
 +==================================================================+================+==============+======================================================================+
 |                                                                  |                | :class:`pcapkit.protocols.link.arp.ARP`                                             |
 +                                                                  + ARP Family     +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.link.arp.InARP`                                           |
+|                                                                  |                | :class:`pcapkit.protocols.link.inarp.InARP`                                         |
 + Link Layer                                                       +----------------+-----------------------+-------------------------------------------------------------+
 | (:class:`~pcapkit.protocols.link.link.Link` subclasses)          | :class:`pcapkit.protocols.link.ethernet.Ethernet`                                                    |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
@@ -91,6 +91,8 @@ The protocol classes :mod:`pcapkit` ships:
 | subclasses)                                                      | :class:`pcapkit.protocols.transport.udp.UDP`                                                         |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.transport.sctp.SCTP`                                                       |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.transport.dccp.DCCP`                                                       |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp.FTP`                                      |
 +                                                                  + FTP Family     +-----------------------+-------------------------------------------------------------+
@@ -194,6 +196,8 @@ The registry function per protocol type:
 |                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_udp`    | new protocols.     |
 +                   +-------------------------------------------------------------------+----------------------------------------------------------------+                    +
 |                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_sctp`   |                    |
++                   +-------------------------------------------------------------------+----------------------------------------------------------------+                    +
+|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_dccp`   |                    |
 +-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
 
 A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
@@ -405,6 +409,8 @@ writes them:
 |                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :func:`~pcapkit.foundation.registry.protocols.register_sctp_parameter`     |
 +                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 |                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_cause`         |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.transport.dccp.DCCP`            | :attr:`DCCP.__option__ <pcapkit.protocols.transport.dccp.DCCP.__option__>`                    | :func:`~pcapkit.foundation.registry.protocols.register_dccp_option`        |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
 | Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTPv2`      | :attr:`HTTPv2.__frame__ <pcapkit.protocols.application.httpv2.HTTPv2.__frame__>`              | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
 +-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+

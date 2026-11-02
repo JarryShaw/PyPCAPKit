@@ -150,7 +150,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 
     #: Whether :meth:`make` left the checksum for the enclosing IP layer to
-    #: compute, see :mod:`pcapkit.protocols.misc.checksum.checksum`.
+    #: compute, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo`.
     _checksum_pending = False
 
     ##########################################################################
@@ -294,7 +294,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             if pseudo is None:
                 self._checksum_pending = True
             else:
-                from pcapkit.protocols.misc.checksum.checksum import compute_checksum, pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.checksum.ip_pseudo import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
 
                 # NOTE: Over the datagram the Length field gives, or all but the trailer
                 # for a jumbogram's zero one (RFC 2675); a computed zero is all ones.
@@ -356,11 +357,11 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         """Verify the checksum over the pseudo-header of the enclosing IP layer.
 
         That layer calls this once parsed, see
-        :func:`~pcapkit.protocols.misc.checksum.checksum.verify_upper`. A zero
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper`. A zero
         checksum over IPv4, which means none (:rfc:`768`), and the
         pseudo-header's sum alone, which checksum offload leaves on the sending
         host, are
-        :attr:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus.NOT_COMPUTED`.
+        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`.
         A zero one over IPv6 is wrong, as one is mandatory there
         (:rfc:`8200#section-8.1`).
 
@@ -368,7 +369,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
 
         """
-        from pcapkit.protocols.misc.checksum.checksum import (  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
             ChecksumStatus, partial_checksum, verify_checksum)
 
         if pseudo is None:

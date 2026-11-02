@@ -31,7 +31,8 @@ import os
 import traceback
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.exceptions import StreamEOFError, StructError, stacklevel
+from pcapkit.utilities.exceptions import (CaughtByCaller, ProtocolError, StreamEOFError,
+                                          StructError, stacklevel)
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
@@ -113,10 +114,30 @@ def beholder(
         This decorator function is designed for decorating *instance methods*.
 
     This decorator calls the decorated function. Should any exception be
-    raised, it logs the error and re-parses the current layer's payload as
+    raised, it re-parses the current layer's payload as
     :class:`~pcapkit.protocols.misc.raw.Raw` -- or as
     :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an
-    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
+    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError` -- whose
+    ``error`` is the exception's message.
+
+    The decorated call runs inside a
+    :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block naming
+    :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2588`). The
+    block spans the whole call, so every such error built while it runs is
+    quiet, at any depth and whether or not the code that built it catches it,
+    unless an inner :class:`~pcapkit.utilities.exceptions.CaughtByCaller` says
+    otherwise: the next layer refusing its octets, a parser's own trial, a
+    registry entry whose class its module has since lost. One that reaches
+    here is recorded on ``error`` and is not logged here either. Any other
+    exception is logged here at :data:`logging.WARNING`, and is as loud as it
+    was constructed.
+
+    The recovery runs after the block has ended. Under the outermost
+    :func:`beholder` of a parse, a
+    :exc:`~pcapkit.utilities.exceptions.ProtocolError` it raises therefore
+    reaches the caller loud; under any other, the block of the
+    :func:`beholder` around it is still active, so that error is quiet, and
+    becomes the enclosing replacement's ``error``.
 
     When :meth:`Protocol._parse_next_layer
     <pcapkit.protocols.protocol.Protocol._parse_next_layer>` held the
@@ -138,6 +159,12 @@ def beholder(
 
        Logs the exception it absorbs, and prints its traceback in verbose mode.
 
+    .. versionchanged:: 1.6.0
+
+       A :exc:`~pcapkit.utilities.exceptions.ProtocolError` the decorated
+       function builds is quiet, and one this decorator absorbs is not logged
+       here either (:issue:`2588`).
+
     :param func: decorated function
     :meta decorator:
     """
@@ -158,7 +185,10 @@ def beholder(
             # call method
             token = _beholding.set(True)
             try:
-                return func(*args, **kwargs)
+                # NOTE: The whole call is quiet for a ProtocolError, which the ``except`` below
+                # records; the recovery runs after it, loud unless an outer block is active (#2588).
+                with CaughtByCaller(ProtocolError):
+                    return func(*args, **kwargs)
             finally:
                 _beholding.reset(token)
         except Exception as exc:
@@ -168,12 +198,14 @@ def beholder(
                 from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
-            # log error
-            logger.warning(str(exc), stack_info=DEVMODE, stacklevel=stacklevel())
+            # NOTE: Keyed on the class, not on quietness: a quiet end-of-file StructError is still
+            # logged here, and a ProtocolError built loud has logged at CRITICAL already (#2588).
+            if not isinstance(exc, ProtocolError):
+                logger.warning(str(exc), stack_info=DEVMODE, stacklevel=stacklevel())
 
-            if VERBOSE:
-                logger.error('The following error occurred while parsing the packet:')
-                traceback.print_exc()
+                if VERBOSE:
+                    logger.error('The following error occurred while parsing the packet:')
+                    traceback.print_exc()
 
             # NOTE: ``self._get_payload()`` rather than
             # ``self.__header__.get_payload()``, which it wraps. The two agree

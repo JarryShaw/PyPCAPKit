@@ -135,7 +135,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_arp_id_index_and_length_hint_are_stable(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP, InARP
+        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.inarp import InARP
 
         proto = object.__new__(ARP)
 

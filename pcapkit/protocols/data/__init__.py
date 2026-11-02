@@ -229,6 +229,13 @@ __all__ = [
     'MH_CGAExtension',
     'MH_UnknownExtension', 'MH_MultiPrefixExtension', 'MH_ExperimentalExtension',
 
+    # Datagram Congestion Control Protocol
+    'DCCP', 'DCCP_AckVectorRun', 'DCCP_DataDroppedBlock',
+    'DCCP_Option',
+    'DCCP_UnassignedOption', 'DCCP_Padding', 'DCCP_Mandatory', 'DCCP_SlowReceiver', 'DCCP_Change',
+    'DCCP_Confirm', 'DCCP_InitCookie', 'DCCP_NDPCount', 'DCCP_AckVector', 'DCCP_DataDropped',
+    'DCCP_Timestamp', 'DCCP_TimestampEcho', 'DCCP_ElapsedTime', 'DCCP_DataChecksum',
+
     # Transmission Control Protocol
     'TCP',
     'TCP_Flags', 'TCP_SACKBlock',

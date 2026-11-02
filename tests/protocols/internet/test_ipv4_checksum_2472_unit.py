@@ -43,7 +43,7 @@ class IPv4ChecksumTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.checksum.checksum import ChecksumStatus
+        from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

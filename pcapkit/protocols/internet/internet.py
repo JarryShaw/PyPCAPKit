@@ -18,10 +18,11 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase, _rebuilding
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import stacklevel
@@ -66,6 +67,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.transport.tcp.TCP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.UDP`
          - :class:`pcapkit.protocols.transport.udp.UDP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.DCCP`
+         - :class:`pcapkit.protocols.transport.dccp.DCCP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_ICMP`
@@ -126,6 +129,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.ICMP:            ModuleDescriptor('pcapkit.protocols.internet.icmpv4',     'ICMPv4'),
             Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp',       'TCP'),
             Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp',       'UDP'),
+            Enum_TransType.DCCP:            ModuleDescriptor('pcapkit.protocols.transport.dccp',      'DCCP'),
             Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6',       'IPv6'),
             Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6',     'ICMPv6'),
             Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),

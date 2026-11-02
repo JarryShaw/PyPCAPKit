@@ -33,6 +33,10 @@ An error is also quiet when it is constructed inside a
 classes. That is how :mod:`pcapkit` marks as control flow an error raised by
 code it calls but does not own, such as a generated ``_validate_value``
 override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
+:func:`~pcapkit.corekit.decorators.beholder` runs the whole call to a next layer in
+such a block for :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so a refusal it
+keeps as :class:`~pcapkit.protocols.misc.raw.Raw` is recorded on that layer's ``error``
+alone (:issue:`2588`).
 
 .. versionchanged:: 1.5.0
 

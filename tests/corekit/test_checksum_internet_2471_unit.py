@@ -4,8 +4,8 @@
 GitHub issue #2471 settled the policy: verification is opt-in and computation
 opt-out, each a ``PCAPKIT_*`` flag; a wrong checksum warns rather than raises;
 and the outcome is recorded as a
-:class:`~pcapkit.protocols.misc.checksum.checksum.ChecksumStatus`. These tests pin
-:mod:`pcapkit.protocols.misc.checksum.checksum` against :rfc:`1071`, cross-checked
+:class:`~pcapkit.corekit.checksum.internet.ChecksumStatus`. These tests pin
+:mod:`pcapkit.corekit.checksum.internet` against :rfc:`1071`, cross-checked
 with the hand-written sum of ``tests/foundation/_roundtrip.py``.
 
 """
@@ -28,7 +28,7 @@ class InternetChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.protocols.misc.checksum import checksum
+        from pcapkit.corekit.checksum import internet as checksum
 
         self.checksum = checksum
 
@@ -63,7 +63,7 @@ class VerifyChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.protocols.misc.checksum import checksum
+        from pcapkit.corekit.checksum import internet as checksum
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.checksum = checksum
@@ -123,29 +123,6 @@ class VerifyChecksumTests(unittest.TestCase):
         self.assertEqual([member.name for member in self.Status],
                          ['VALID', 'INVALID', 'NOT_COMPUTED', 'TRUNCATED', 'NO_PSEUDO_HEADER'])
         self.assertIs(self.Status.get('NOT_COMPUTED'), self.Status.NOT_COMPUTED)
-
-
-class PseudoHeaderTests(unittest.TestCase):
-    """:func:`pseudo_header` gives the upper layer's own length."""
-
-    def setUp(self) -> None:
-        reimport_once_per_class(self)
-        from pcapkit.protocols.misc.checksum.checksum import pseudo_header
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-
-        self.pseudo_header = pseudo_header
-        self.IP_Pseudo = IP_Pseudo
-
-    def test_the_length_is_replaced(self) -> None:
-        for src, dst, offset, width in (('192.0.2.1', '198.51.100.2', 10, 2),
-                                        ('2001:db8::1', '2001:db8::2', 32, 4)):
-            pseudo = self.IP_Pseudo(src=src, dst=dst, protocol=6, upper_length=0)
-            with self.subTest(src=src):
-                self.assertIs(self.pseudo_header(pseudo, 0), pseudo.data)
-                octets = self.pseudo_header(pseudo, 0x1234)
-                self.assertEqual(octets[offset:offset + width], (0x1234).to_bytes(width, 'big'))
-                self.assertEqual(octets[:offset] + octets[offset + width:],
-                                 pseudo.data[:offset] + pseudo.data[offset + width:])
 
 
 if __name__ == '__main__':

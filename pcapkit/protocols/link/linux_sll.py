@@ -238,8 +238,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             <LinuxSLL.__proto__>` registers for ``arphrd_type`` when it has a key
             for it, and otherwise the class :attr:`Link.__proto__
             <pcapkit.protocols.link.link.Link.__proto__>` registers for ``proto``
-            as an EtherType. A :class:`~pcapkit.protocols.misc.raw.Raw` fallback
-            records ``proto`` either way.
+            as an EtherType. Where parsing stops at this layer, either path
+            keeps the payload :class:`~pcapkit.protocols.misc.raw.Raw`, and a
+            :class:`~pcapkit.protocols.misc.raw.Raw` records ``proto`` either way.
 
         Note:
             :attr:`self.__proto__ <LinuxSLL.__proto__>` holds the
@@ -261,13 +262,11 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         if not min(length, len(file_)):
             from pcapkit.protocols.misc.null import \
                 NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        # NOTE: ahead of ``_sigterm``, so a registered ``arphrd_type`` is parsed
-        # even where parsing stops at this layer (#2510).
-        elif arphrd_type in self.__proto__:
-            protocol = self._lookup_next_layer(self.__proto__, arphrd_type)
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import \
                 Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        elif arphrd_type in self.__proto__:
+            protocol = self._lookup_next_layer(self.__proto__, arphrd_type)
         else:
             protocol = self._lookup_next_layer(Link.__proto__, proto)
 
