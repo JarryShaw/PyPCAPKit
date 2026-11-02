@@ -76,6 +76,13 @@ CASES = (
     ('igmpv3-report', 'internet.ipv4:IPv4', {}, bytes.fromhex(
         '45000040123400000102bd710a000001e0000016' '2200c7e100000002'
         '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
+    ('igmpv3-query', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '45000028123400000102bd9e0a000001e0000001' '1164df14ef0102030a7d0002' '0a0000010a000002')),
+    # #2660: parsed on its own, with no IPv4 length to run past
+    ('igmpv3-report-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+        '2200c7e100000002' '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
+    ('igmpv3-query-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+        '1164df14ef0102030a7d0002' '0a0000010a000002')),
     ('ipv6', IPV6, {}, _ipv6(59, b'')),
     ('ipv6-chain', IPV6, {}, bytes.fromhex(
         '600000000020004000000000000000000000000000000001000000000000000000000000000000023c'

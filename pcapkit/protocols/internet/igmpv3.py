@@ -142,6 +142,28 @@ def _encode_resp_code(value: 'int') -> 'int':
     return 0x80 | (exp << 4) | mant
 
 
+def _keep_body_short_read(schema: 'Schema_IGMPv3') -> 'None':
+    """Record on ``schema`` a short read only the schemas in its body recorded (:issue:`2660`).
+
+    Every schema in the body reads to the end of the data, so a field there that
+    reads short has reached it. Elsewhere a nested record need not mean that:
+    hoisting one in :func:`~pcapkit.protocols.schema.schema.keep_short_read` marks
+    a complete TCP segment with a malformed MPTCP DSS option as cut.
+
+    Args:
+        schema: The header just parsed.
+
+    """
+    body = schema.body
+    if isinstance(body, Schema_Query):
+        parts = (body, body.ext)  # type: tuple[Optional[Schema], ...]
+    else:
+        parts = (body, *body.records)
+    if '__short_read__' not in schema.__dict__ and any(
+            part is not None and '__short_read__' in part.__dict__ for part in parts):
+        schema.__dict__['__short_read__'] = ('body', len(schema.__buffer__['body']))
+
+
 class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
              schema=Schema_IGMPv3, data=Data_IGMPv3):
     """This class implements Internet Group Management Protocol version 3.
@@ -214,6 +236,10 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 :attr:`version` 3 -- an IGMPv1/v2-shaped Query, or a type
                 neither version of IGMP defines.
 
+        Note:
+            A message the data ends inside records the cut on its ``body``, with or
+            without an enclosing length, so ``from_data(info)`` rebuilds it as captured.
+
         """
         if length is None:
             length = len(self)
@@ -278,6 +304,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         else:  # pragma: no cover
             raise ProtocolError(f'{self.alias}: unsupported message type: {schema.type!r}')
 
+        _keep_body_short_read(schema)
         self._verify_checksum(igmp, body.checksum, length)
         return self._decode_next_layer(igmp, None, len(trailing))
 
