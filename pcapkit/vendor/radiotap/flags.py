@@ -16,8 +16,9 @@ one bitmap, the subfield.
 A table row whose mask sets one bit is a member. A row that sets more bits, or
 that radiotap.org marks reserved or unused, is not: its bits stay undefined,
 which an ``aenum.IntFlag`` keeps in a value rather than dropping, so they
-round-trip. The Flags page lists its last bit in a table of its own, which the
-member's comment names.
+round-trip. Nor is a row of :attr:`~Flags.VALUES`, a value subfield of a bitmap
+that mixes them with flags, which its schema splits off. The Flags page lists
+its last bit in a table of its own, which the member's comment names.
 
 A member's value and comment come from radiotap.org, and its name from the
 crawler's :attr:`~Flags.NAMES`: the macro the Linux kernel's
@@ -146,6 +147,9 @@ class Flags(Vendor):
     #: Subfield whose table is scraped, as the page names it before the table;
     #: :obj:`None` for every table on the page.
     SUBFIELD = None  # type: Optional[str]
+    #: Masks of the value subfields the bitmap mixes with its flags, whose rows
+    #: are no members.
+    VALUES = ()  # type: tuple[int, ...]
     #: The source macro of each bit, keyed by mask, which is Linux's for ``0x01``
     #: to ``0x40``, and Wireshark's ``packet-ieee80211-radiotap.c`` for ``0x80``,
     #: which Linux leaves unnamed.
@@ -270,7 +274,7 @@ class Flags(Vendor):
                 if not MASK.fullmatch(row[0]):
                     continue
                 mask = int(row[0], 16)
-                if mask & (mask - 1):
+                if mask & (mask - 1) or mask in self.VALUES:
                     continue
                 meanings = [(column, text) for column, text in zip(header[1:], row[1:])
                             if column.lower() != 'notes']

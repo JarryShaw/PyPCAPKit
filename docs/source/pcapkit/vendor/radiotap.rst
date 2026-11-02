@@ -32,12 +32,22 @@ radiotap.org [*]_. Available vendor crawlers include:
      - VHT Coding Flags
    * - :class:`Radiotap_TimestampFlags <pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags>`
      - Timestamp Flags
+   * - :class:`Radiotap_HEData1Known <pcapkit.vendor.radiotap.he_data1_known.HEData1Known>`
+     - HE Data1 Known Flags
+   * - :class:`Radiotap_HEData2Known <pcapkit.vendor.radiotap.he_data2_known.HEData2Known>`
+     - HE Data2 Known Flags
+   * - :class:`Radiotap_HEMUFlags1Known <pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known>`
+     - HE-MU Flags1 Known Flags
+   * - :class:`Radiotap_HEMUFlags2Known <pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known>`
+     - HE-MU Flags2 Known Flags
    * - :class:`Radiotap_HEMUOtherUserKnown <pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown>`
      - HE-MU-other-user Known Flags
    * - :class:`Radiotap_LSIGData1 <pcapkit.vendor.radiotap.lsig_data1.LSIGData1>`
      - L-SIG Data1 Flags
    * - :class:`Radiotap_S1GKnown <pcapkit.vendor.radiotap.s1g_known.S1GKnown>`
      - S1G Known Flags
+   * - :class:`Radiotap_USIGCommonKnown <pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown>`
+     - U-SIG Common Known Flags
    * - :class:`Radiotap_EHTKnown <pcapkit.vendor.radiotap.eht_known.EHTKnown>`
      - EHT Known Flags
 
@@ -78,7 +88,9 @@ which is automatically generating :class:`pcapkit.const.radiotap.flags.Flags`.
 
 Each flag crawler scrapes the table on its field's page, and subclasses this one.
 A row whose mask sets one bit is a member; a row that sets more bits, or that
-radiotap.org marks reserved or unused, is not, and its bits stay undefined. A
+radiotap.org marks reserved or unused, is not, and its bits stay undefined; nor
+is a row of a crawler's ``VALUES``, a value subfield of a bitmap that mixes them
+with flags, which its schema splits off. A
 member's name is the macro the crawler's ``NAMES`` gives its bit, less the
 ``IEEE80211_RADIOTAP_`` or ``IEEE80211_`` prefix: the Linux kernel's, from
 ``include/net/ieee80211_radiotap.h``, or Wireshark's where Linux names none.
@@ -196,6 +208,54 @@ which is automatically generating :class:`pcapkit.const.radiotap.timestamp_flags
    :members: FLAG, LINK, SUBFIELD, NAMES
    :show-inheritance:
 
+HE Data1 Known Flags
+====================
+
+.. module:: pcapkit.vendor.radiotap.he_data1_known
+
+This module contains the vendor crawler for **Radiotap HE Data1 Known Flags**,
+which is automatically generating :class:`pcapkit.const.radiotap.he_data1_known.HEData1Known`.
+
+.. autoclass:: pcapkit.vendor.radiotap.he_data1_known.HEData1Known
+   :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
+   :show-inheritance:
+
+HE Data2 Known Flags
+====================
+
+.. module:: pcapkit.vendor.radiotap.he_data2_known
+
+This module contains the vendor crawler for **Radiotap HE Data2 Known Flags**,
+which is automatically generating :class:`pcapkit.const.radiotap.he_data2_known.HEData2Known`.
+
+.. autoclass:: pcapkit.vendor.radiotap.he_data2_known.HEData2Known
+   :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
+   :show-inheritance:
+
+HE-MU Flags1 Known Flags
+========================
+
+.. module:: pcapkit.vendor.radiotap.he_mu_flags1_known
+
+This module contains the vendor crawler for **Radiotap HE-MU Flags1 Known Flags**,
+which is automatically generating :class:`pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
+
+.. autoclass:: pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known
+   :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
+   :show-inheritance:
+
+HE-MU Flags2 Known Flags
+========================
+
+.. module:: pcapkit.vendor.radiotap.he_mu_flags2_known
+
+This module contains the vendor crawler for **Radiotap HE-MU Flags2 Known Flags**,
+which is automatically generating :class:`pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
+
+.. autoclass:: pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known
+   :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
+   :show-inheritance:
+
 HE-MU-other-user Known Flags
 ============================
 
@@ -230,6 +290,18 @@ which is automatically generating :class:`pcapkit.const.radiotap.s1g_known.S1GKn
 
 .. autoclass:: pcapkit.vendor.radiotap.s1g_known.S1GKnown
    :members: FLAG, LINK, SUBFIELD, NAMES
+   :show-inheritance:
+
+U-SIG Common Known Flags
+========================
+
+.. module:: pcapkit.vendor.radiotap.usig_common_known
+
+This module contains the vendor crawler for **Radiotap U-SIG Common Known Flags**,
+which is automatically generating :class:`pcapkit.const.radiotap.usig_common_known.USIGCommonKnown`.
+
+.. autoclass:: pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown
+   :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
    :show-inheritance:
 
 EHT Known Flags

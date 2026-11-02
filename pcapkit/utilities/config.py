@@ -399,12 +399,21 @@ MAX_ZERO_PAD_SHORTFALL = read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
 #: leaves any real file an allowance orders of magnitude past the one event it
 #: can want, while bounding the sum for a file whose blocks all lie.
 #:
+#: It bounds the zero-fill of a cut list of schema items as well, from its first
+#: octet and with no one-off allowance, since each item filled is a schema object
+#: rather than a zero octet; see :meth:`ListField.unpack
+#: <pcapkit.corekit.fields.collections.ListField.unpack>`.
+#:
 #: Set with :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`. ``-1`` lifts the running
 #: budget; :data:`MAX_ZERO_PAD_LENGTH` still bounds each field.
 #:
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO`` (:issue:`1726`).
+#:
+#: .. versionchanged:: 1.6.0
+#:
+#:    Bounds the zero-fill of a cut list of schema items too (:issue:`2686`).
 ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
     'a capture whose blocks all lie about their lengths can amplify each octet read '
     'into that many zero octets in memory'))

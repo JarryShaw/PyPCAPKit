@@ -449,7 +449,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     def _decode_next_layer(self, dict_: '_PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None,
                            version: 'Literal[4, 6]' = 4, ipv6_exthdr: 'Optional[ProtoChain]' = None,
-                           payload: 'Optional[bytes]' = None) -> '_PT':
+                           payload: 'Optional[bytes]' = None, declared: 'bool' = True) -> '_PT':
         r"""Decode next layer extractor.
 
         Arguments:
@@ -461,6 +461,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             ipv6_exthdr: protocol chain of IPv6 extension headers
             payload: payload from packet. If not provided, will extract from
                 :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
+            declared: whether this layer declares the length of its payload
 
         Returns:
             Current protocol with next layer extracted.
@@ -474,18 +475,22 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             The next layer is parsed with
             :data:`~pcapkit.utilities.contextvars.frame_length` cleared, since
             this layer, not the frame, bounds its payload (:issue:`2653`).
+            With ``declared`` false it is left as it is, for a payload that
+            runs to the end of the frame, as behind an IPv4 Total Length of 0,
+            or to the end of the parent's (:issue:`2689`).
 
         """
         # NOTE: The length this layer hands on bounds the payload, so octets the
         # capture cut off the frame past it are none of the next layer's (#2653).
-        # An IPv4 Total Length of 0, read as the rest of the frame, loses the cut.
-        token = frame_length.set(None)
+        # A layer declaring none hands the frame's cut on instead (#2689).
+        token = frame_length.set(None) if declared else None
         try:
             next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]
                          self._import_next_layer(proto, length, packet=packet, version=version,
                                                  payload=payload))  # type: ignore[misc,call-arg]
         finally:
-            frame_length.reset(token)
+            if token is not None:
+                frame_length.reset(token)
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

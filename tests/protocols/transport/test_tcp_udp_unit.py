@@ -1349,11 +1349,11 @@ class TCPUDPUnitTests(unittest.TestCase):
         from the wire, with a
         :class:`~pcapkit.corekit.fields.misc.SchemaField` item type -- and that
         loop subtracts each item's *parsed* size from its budget. A ``Length``
-        larger than the option area leaves it reading ``SACKBlock`` off an
-        exhausted stream, where every field reads ``b''``, the item parses to
-        nothing, and the budget never falls. This is the same defect as #431, in
-        ``OptionField``'s base class rather than in ``OptionField`` itself, and it
-        is reachable from a single TCP segment.
+        larger than the option area once left it reading ``SACKBlock`` off an
+        exhausted stream, where the item parsed to nothing and the budget never
+        fell (the same defect as #431, in ``OptionField``'s base class). The list
+        now reads the blocks zero-filled to the ``Length`` (#2686), and
+        ``OptionField`` refuses the option for running past the data (#1325).
 
         The segment below is 24 octets: a data offset of 6, so a four-octet option
         area, holding a ``SACK`` option that declares 22. The well-formed segment
@@ -1365,7 +1365,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         from pcapkit.const.tcp.option import Option
         from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
         def segment(data_offset: 'int', options: 'bytes') -> 'bytes':
@@ -1388,7 +1388,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(bytes(proto.__header__), good)
 
         bad = segment(6, bytes([Option.SACK, 22]) + b'\x36\xcc')
-        with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
+        with self.assertRaisesRegex(ProtocolError, r'runs past the end of the data: <Option\.SACK: 5>'):
             with time_limit():
                 TCP(bad, len(bad))
 

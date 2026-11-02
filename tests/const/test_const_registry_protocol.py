@@ -78,6 +78,11 @@ CONVERTED = (
     ('pcapkit.const.radiotap.vht_known', 'VHTKnown', 'pcapkit/const/radiotap/vht_known.py'),
     ('pcapkit.const.radiotap.vht_flags', 'VHTFlags', 'pcapkit/const/radiotap/vht_flags.py'),
     ('pcapkit.const.radiotap.eht_known', 'EHTKnown', 'pcapkit/const/radiotap/eht_known.py'),
+    ('pcapkit.const.radiotap.he_data1_known', 'HEData1Known', 'pcapkit/const/radiotap/he_data1_known.py'),
+    ('pcapkit.const.radiotap.he_data2_known', 'HEData2Known', 'pcapkit/const/radiotap/he_data2_known.py'),
+    ('pcapkit.const.radiotap.he_mu_flags1_known', 'HEMUFlags1Known', 'pcapkit/const/radiotap/he_mu_flags1_known.py'),
+    ('pcapkit.const.radiotap.he_mu_flags2_known', 'HEMUFlags2Known', 'pcapkit/const/radiotap/he_mu_flags2_known.py'),
+    ('pcapkit.const.radiotap.usig_common_known', 'USIGCommonKnown', 'pcapkit/const/radiotap/usig_common_known.py'),
 )
 
 #: The crawlers whose bespoke templates are converted, and which must therefore

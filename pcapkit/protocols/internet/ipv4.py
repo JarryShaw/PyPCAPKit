@@ -442,13 +442,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # (#1553). Reassembly takes ``packet.payload``, the octets as
         # captured, which this leaves as they were.
         proto = None if ipv4.offset else ipv4.protocol
+        # NOTE: A Total Length of 0 declares none, so the frame's lengths are the
+        # only record of a cut and the payload keeps them (#2689).
+        declared = bool(ipv4.len)
         if config.CHECKSUM_VERIFY:
             # NOTE: An upper layer checksummed alone, as ICMP is, is not verified
             # in a fragment; see pcapkit.corekit.checksum.internet (#2470).
             from pcapkit.corekit.checksum.internet import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
             with fragment_payload(bool(ipv4.offset or ipv4.flags.mf)):
-                return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
-        return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__)
+                return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
+        return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
 
     def make(self,
              tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,

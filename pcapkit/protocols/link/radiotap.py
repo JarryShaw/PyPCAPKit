@@ -77,7 +77,11 @@ retries, bits 16 and 17, from its unofficially used ones, which those three
 size alike; OpenBSD writes a 2-octet RSSI field at bit 16 instead, which is not
 read. A bitmap radiotap.org defines bit by bit is a member of its flag registry
 under :mod:`pcapkit.const.radiotap`, which keeps the bits it does not name. A
-field type registered through
+bitmap that mixes value subfields with known bits -- the MCS ``flags``, the HE
+``data1`` and ``data2``, the HE-MU ``flags1`` and ``flags2`` and the U-SIG
+``common`` -- is split: each value subfield is an integer, and its other bits,
+the undefined ones among them, a member of its known-bits registry. A field
+type registered through
 :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field` is
 decoded the same way.
 
@@ -147,8 +151,13 @@ from pcapkit.protocols.data.link.radiotap import DBAntennaSignal as Data_DBAnten
 from pcapkit.protocols.data.link.radiotap import DBmTXPower as Data_DBmTXPower
 from pcapkit.protocols.data.link.radiotap import DBTXAttenuation as Data_DBTXAttenuation
 from pcapkit.protocols.data.link.radiotap import Flags as Data_Flags
+from pcapkit.protocols.data.link.radiotap import HEData1 as Data_HEData1
+from pcapkit.protocols.data.link.radiotap import HEData2 as Data_HEData2
+from pcapkit.protocols.data.link.radiotap import HEMUFlags1 as Data_HEMUFlags1
+from pcapkit.protocols.data.link.radiotap import HEMUFlags2 as Data_HEMUFlags2
 from pcapkit.protocols.data.link.radiotap import HEMUOtherUser as Data_HEMUOtherUser
 from pcapkit.protocols.data.link.radiotap import LockQuality as Data_LockQuality
+from pcapkit.protocols.data.link.radiotap import MCSFlags as Data_MCSFlags
 from pcapkit.protocols.data.link.radiotap import Radiotap as Data_Radiotap
 from pcapkit.protocols.data.link.radiotap import RadiotapNamespace as Data_RadiotapNamespace
 from pcapkit.protocols.data.link.radiotap import Rate as Data_Rate
@@ -159,6 +168,7 @@ from pcapkit.protocols.data.link.radiotap import TLVFields as Data_TLVFields
 from pcapkit.protocols.data.link.radiotap import TXAttenuation as Data_TXAttenuation
 from pcapkit.protocols.data.link.radiotap import TXFlags as Data_TXFlags
 from pcapkit.protocols.data.link.radiotap import Unknown as Data_Unknown
+from pcapkit.protocols.data.link.radiotap import USIGCommon as Data_USIGCommon
 from pcapkit.protocols.data.link.radiotap import VendorNamespace as Data_VendorNamespace
 from pcapkit.protocols.data.link.radiotap import VendorTLV as Data_VendorTLV
 from pcapkit.protocols.data.link.radiotap import ZeroLengthPSDU as Data_ZeroLengthPSDU
@@ -211,6 +221,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.enum import EnumRegistry
+    from pcapkit.corekit.fields.numbers import BitmapField
     from pcapkit.protocols.data.link.radiotap import RadiotapField as Data_Field
 
     #: A field given to :meth:`Radiotap.make`: a data model, or a ``(type, mapping)`` pair.
@@ -1067,7 +1078,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             Parsed field data.
 
         """
-        return Data_MCS(type=field_type, known=schema.known, flags=schema.flags, mcs=schema.mcs)
+        return Data_MCS(type=field_type, known=schema.known, flags=Data_MCSFlags(**schema.flags),
+                        mcs=schema.mcs)
 
     def _read_field_ampdu_status(self, field_type: 'Enum_FieldType',
                                  schema: 'Schema_AMPDUStatus') -> 'Data_AMPDUStatus':
@@ -1125,7 +1137,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             Parsed field data.
 
         """
-        return Data_HE(type=field_type, data1=schema.data1, data2=schema.data2, data3=schema.data3,
+        return Data_HE(type=field_type, data1=Data_HEData1(**schema.data1), data2=Data_HEData2(**schema.data2),
+                       data3=schema.data3,
                        data4=schema.data4, data5=schema.data5, data6=schema.data6)
 
     def _read_field_he_mu(self, field_type: 'Enum_FieldType', schema: 'Schema_HEMU') -> 'Data_HEMU':
@@ -1139,7 +1152,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             Parsed field data.
 
         """
-        return Data_HEMU(type=field_type, flags1=schema.flags1, flags2=schema.flags2,
+        return Data_HEMU(type=field_type, flags1=Data_HEMUFlags1(**schema.flags1),
+                         flags2=Data_HEMUFlags2(**schema.flags2),
                          ru_channel1=cast('tuple[int, int, int, int]', tuple(schema.ru_channel1)),
                          ru_channel2=cast('tuple[int, int, int, int]', tuple(schema.ru_channel2)))
 
@@ -1210,7 +1224,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             Parsed field data.
 
         """
-        return Data_USIG(type=field_type, common=schema.common, value=schema.value, mask=schema.mask)
+        return Data_USIG(type=field_type, common=Data_USIGCommon(**schema.common), value=schema.value,
+                         mask=schema.mask)
 
     def _read_field_eht(self, field_type: 'Enum_FieldType', schema: 'Schema_EHT') -> 'Data_EHT':
         """Read an EHT field.
@@ -1523,7 +1538,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         """
         return Schema_MCS(
             known=self._make_subfield(field_type, Schema_MCS, entry, 'known'),
-            flags=self._make_subfield(field_type, Schema_MCS, entry, 'flags'),
+            flags=self._make_subfield_bitmap(field_type, Schema_MCS, entry, 'flags'),
             mcs=self._make_subfield(field_type, Schema_MCS, entry, 'mcs'),
         )
 
@@ -1598,8 +1613,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         """
         return Schema_HE(
-            data1=self._make_subfield(field_type, Schema_HE, entry, 'data1'),
-            data2=self._make_subfield(field_type, Schema_HE, entry, 'data2'),
+            data1=self._make_subfield_bitmap(field_type, Schema_HE, entry, 'data1'),
+            data2=self._make_subfield_bitmap(field_type, Schema_HE, entry, 'data2'),
             data3=self._make_subfield(field_type, Schema_HE, entry, 'data3'),
             data4=self._make_subfield(field_type, Schema_HE, entry, 'data4'),
             data5=self._make_subfield(field_type, Schema_HE, entry, 'data5'),
@@ -1619,8 +1634,8 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         """
         return Schema_HEMU(
-            flags1=self._make_subfield(field_type, Schema_HEMU, entry, 'flags1'),
-            flags2=self._make_subfield(field_type, Schema_HEMU, entry, 'flags2'),
+            flags1=self._make_subfield_bitmap(field_type, Schema_HEMU, entry, 'flags1'),
+            flags2=self._make_subfield_bitmap(field_type, Schema_HEMU, entry, 'flags2'),
             ru_channel1=self._make_subfield_list(field_type, Schema_HEMU, entry, 'ru_channel1'),
             ru_channel2=self._make_subfield_list(field_type, Schema_HEMU, entry, 'ru_channel2'),
         )
@@ -1705,7 +1720,7 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         """
         return Schema_USIG(
-            common=self._make_subfield(field_type, Schema_USIG, entry, 'common'),
+            common=self._make_subfield_bitmap(field_type, Schema_USIG, entry, 'common'),
             value=self._make_subfield(field_type, Schema_USIG, entry, 'value'),
             mask=self._make_subfield(field_type, Schema_USIG, entry, 'mask'),
         )
@@ -1916,6 +1931,46 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
             raise ProtocolError(f'{self.alias}: invalid {what}: {value!r}, '
                                 f'must have {field.length // item.length} values')
         return tuple(self._make_uint(number, bits=8 * item.length, name=what) for number in value)
+
+    def _make_subfield_bitmap(self, field_type: 'Enum_FieldType', schema: 'Type[Schema]',
+                              entry: 'Mapping[str, Any]', name: 'str') -> 'Any':
+        """Check a bitmap subfield of ``entry`` against the field of ``schema`` that holds it.
+
+        Args:
+            field_type: type of the field, for the error message
+            schema: field schema
+            entry: a data model or a mapping holding the subfield
+            name: name of the subfield
+
+        Returns:
+            The value of each of the bitmap's subfields, and of its known bits,
+            as the schema's typed dictionary for the bitmap.
+
+        Raises:
+            ProtocolError: If the subfield is missing or is not a mapping, one of
+                its own is missing or does not fit in its bits, or its known bits
+                set a bit of another.
+
+        """
+        what = f'{field_type.name}.{name}'
+        if name not in entry:
+            raise ProtocolError(f'{self.alias}: invalid fields: {what} missing')
+        value = entry[name]
+        field = cast('BitmapField', schema.__fields__[name])
+        if not isinstance(value, collections.abc.Mapping):
+            raise ProtocolError(f'{self.alias}: invalid {what}: {value!r}, must be a mapping of its subfields')
+        names = dict(field.subfields)
+        if field.remainder is not None:
+            names[field.remainder] = (0, 8 * field.length)
+        out = {}  # type: dict[str, int]
+        for sub, (_, size) in names.items():
+            if sub not in value:
+                raise ProtocolError(f'{self.alias}: invalid fields: {what}.{sub} missing')
+            out[sub] = self._make_uint(value[sub], bits=size, name=f'{what}.{sub}')
+        if field.remainder is not None and out[field.remainder] & ~field.remainder_mask:
+            raise ProtocolError(f'{self.alias}: invalid {what}.{field.remainder}: {value[field.remainder]!r}, '
+                                'sets a bit of another subfield')
+        return out
 
     def _read_vendor_namespace(self, field_type: 'Enum_FieldType', fields: 'bytes', pos: 'int',
                                start: 'int') -> 'Optional[tuple[Data_VendorNamespace, int]]':

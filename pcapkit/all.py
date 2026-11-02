@@ -59,6 +59,7 @@ __all__ = [
     'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields
     'Int16Field', 'UInt16Field', 'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field', 'EnumField', 'PortEnumField',
+    'BitmapField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'PaddingField',
     'ConditionalField', 'PayloadField', 'SchemaField',      # misc protocol fields

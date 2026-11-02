@@ -525,32 +525,35 @@ class SchemaUnitTests(unittest.TestCase):
 
         :meth:`ListField.unpack
         <pcapkit.corekit.fields.collections.ListField.unpack>` sizes a schema item
-        by ``len(data)`` in the same way, so a budget larger than the octets behind
-        it leaves the item schema reading an exhausted stream, recording nothing,
-        and subtracting nothing. Reachable from a TCP segment whose ``SACK`` option
-        declares more octets than the option area holds, which
-        :file:`tests/protocols/transport/test_tcp_udp_unit.py` pins; this covers
-        the field on its own, and pins the offset as a count into the field rather
-        than into the stream -- the same reading as its ``OptionField`` subclass.
+        by ``len(data)`` in the same way, so an item schema that reads none of the
+        octets left records nothing and subtracts nothing. A list short of its
+        length is zero-filled to it (#2686), so the item here reads nothing by
+        its own shape: a zero marker ends it. This pins the offset as a count into
+        the field rather than into the stream -- the same reading as its
+        ``OptionField`` subclass.
 
-        Two items parse off the two octets below and the third finds the stream
-        exhausted, so the diagnostic's ``after 2 item(s)`` is a count of what was
+        Two items parse off the two octets below and the third reads none of the
+        rest, so the diagnostic's ``after 2 item(s)`` is a count of what was
         parsed rather than an ordinal naming the second item.
 
         """
         from pcapkit.corekit.fields.collections import ListField
-        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.misc import ForwardMatchField, SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.corekit.fields.strings import BytesField
         from pcapkit.protocols.schema.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import FieldValueError
 
         @schema_final
         class Marker(Schema):
-            type: int = UInt8Field(default=0)
+            #: The marker, peeked; a zero one reads nothing below.
+            peek: int = ForwardMatchField(UInt8Field(default=0))
+            #: The marker itself, unless it is zero.
+            type: bytes = BytesField(length=lambda pkt: 1 if pkt['peek'] else 0, default=b'')
 
         @schema_final
         class MarkerListSchema(Schema):
-            #: Eight octets of budget, however few are really there.
+            #: Eight octets of budget.
             markers: list[Marker] = ListField(
                 length=8,
                 item_type=SchemaField(length=2, schema=Marker),
@@ -558,7 +561,7 @@ class SchemaUnitTests(unittest.TestCase):
 
         field = MarkerListSchema.__fields__['markers']
 
-        stream = io.BytesIO(b'\xde\xad' + b'\x01\x02')
+        stream = io.BytesIO(b'\xde\xad' + b'\x01\x02' + bytes(6))
         stream.seek(2)
 
         with self.assertRaisesRegex(FieldValueError, r'after 2 item\(s\), at offset 2 of 8\b'):

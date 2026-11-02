@@ -49,6 +49,13 @@ Enumeration Fields
    :members:
    :show-inheritance:
 
+Bitmap Fields
+-------------
+
+.. autoclass:: pcapkit.corekit.fields.numbers.BitmapField
+   :members:
+   :show-inheritance:
+
 Internal Definitions
 --------------------
 

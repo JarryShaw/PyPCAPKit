@@ -1146,10 +1146,11 @@ IGMPV3_TWO_RECORD_REPORT = igmpv3_report((
 
 
 class IGMPv3TruncatedReportTests(unittest.TestCase):
-    """A Report the capture cuts inside its record list parses as far as its
-    octets go and records the cut, as a cut Query does, rather than falling
-    back to ``Raw`` (#2650). Each datagram's IPv4 header declares the whole
-    Report, so the IGMP layer is handed fewer octets than its length."""
+    """A Report the capture cuts inside its record list parses and records the
+    cut, as a cut Query does, rather than falling back to ``Raw`` (#2650); the
+    records past the data read as zeros (#2686). Each datagram's IPv4 header
+    declares the whole Report, so the IGMP layer is handed fewer octets than its
+    length."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -1224,8 +1225,9 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         self.assert_rebuilds(cut, parsed)
 
     def test_report_cut_inside_a_source_list(self) -> None:
-        """Cut inside the first record's second source: one record of the two
-        the count declares, which the rebuild still writes as two."""
+        """Cut inside the first record's second source: the source reads as far
+        as it was captured, and the second record the count declares reads as
+        zeros, as a zero-filled record of no sources (#2686)."""
         from pcapkit.protocols.internet.igmpv3 import IGMPv3
         from pcapkit.protocols.misc.no_payload import NoPayload
 
@@ -1237,11 +1239,11 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         self.assertEqual(igmp.info['__short_read__'], ('body', 21))
         self.assertEqual(igmp.info.length, 22)
         self.assertEqual(igmp.info.num_group_records, 2)
-        self.assertEqual(len(igmp.info.records), 1)
-        record = igmp.info.records[0]
-        self.assertEqual(str(record.multicast_address), '239.1.1.1')
-        self.assertEqual(record.num_sources, 2)
-        self.assertEqual(str(record.sources[0]), '10.0.0.1')
+        self.assertEqual(
+            [(int(record.record_type), str(record.multicast_address), tuple(map(str, record.sources)))
+             for record in igmp.info.records],
+            [(1, '239.1.1.1', ('10.0.0.1', '10.0.0.0')), (0, '0.0.0.0', ())],
+        )
         self.assertIsInstance(igmp.payload, NoPayload)
         self.assert_rebuilds(cut, parsed)
 
@@ -1263,8 +1265,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         self.assert_rebuilds(cut, parsed)
 
     def test_record_list_reads_bytes_and_a_live_stream_alike(self) -> None:
-        """The record list is sized by the octets present, from a buffer or a
-        stream part-way through, and keeps its declared length afterwards."""
+        """The record list reads the octets present zero-filled to its length,
+        from a buffer or a stream part-way through, and keeps that length (#2686)."""
         from pcapkit.protocols.schema.internet.igmpv3 import Report
 
         records = IGMPV3_TWO_RECORD_REPORT[8:28]
@@ -1280,6 +1282,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
                 self.assertEqual([str(record.multicast_address) for record in parsed],
                                  ['239.1.1.1', '0.0.0.0'])
                 self.assertEqual(parsed[1].num_sources, 3)
+                self.assertEqual([str(source) for source in parsed[1].sources], ['0.0.0.0'] * 3)
                 self.assertEqual(field.length, 36)
 
 

@@ -199,8 +199,10 @@ __all__ = [
     # Radiotap
     'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
     'Radiotap_TXFlags', 'Radiotap_MCSKnown', 'Radiotap_AMPDUFlags', 'Radiotap_VHTKnown',
-    'Radiotap_VHTFlags', 'Radiotap_VHTCoding', 'Radiotap_TimestampFlags',
-    'Radiotap_HEMUOtherUserKnown', 'Radiotap_LSIGData1', 'Radiotap_S1GKnown', 'Radiotap_EHTKnown',
+    'Radiotap_VHTFlags', 'Radiotap_VHTCoding', 'Radiotap_TimestampFlags', 'Radiotap_HEData1Known',
+    'Radiotap_HEData2Known', 'Radiotap_HEMUFlags1Known', 'Radiotap_HEMUFlags2Known',
+    'Radiotap_HEMUOtherUserKnown', 'Radiotap_LSIGData1', 'Radiotap_S1GKnown',
+    'Radiotap_USIGCommonKnown', 'Radiotap_EHTKnown',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
     'SCTP_PayloadProtocolIdentifier',

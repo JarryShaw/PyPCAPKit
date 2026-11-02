@@ -19,11 +19,12 @@ __all__ = [
     'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field',
     'EnumField', 'PortEnumField',
+    'BitmapField',
 ]
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, Mapping, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
@@ -1198,3 +1199,136 @@ class PortEnumField(EnumField):
                     owner, f'unknown [{value:d} - {transport.name}]',
                     svc='unknown', port=value, proto=transport)
         return self._namespace.get(value, proto=proto)
+
+
+class BitmapField(NumberField):
+    """Integer word for protocol fields, split into subfields numbered from its
+    least-significant bit.
+
+    The word is read as an integer in its byte order first, so
+    a subfield may cross an octet boundary of a little-endian word, which
+    :class:`~pcapkit.corekit.fields.strings.BitField`, numbering the bits of the
+    raw octets from the most-significant one, cannot express.
+
+    Args:
+        length: Field size (in bytes).
+        namespace: Field namespace (a dict mapping each subfield's name to a tuple
+            of its start bit, counted from the least-significant bit, and its
+            width in bits).
+        remainder: Name the bits no subfield names are kept under, in place; with
+            :obj:`None`, they are kept under ``__unnamed__`` where any is set, as
+            :class:`~pcapkit.corekit.fields.strings.BitField` keeps them.
+        flags: Flag enumeration :attr:`remainder` holds a member of; with
+            :obj:`None`, it holds an :class:`int`.
+        byteorder: Field byte order.
+        callback: Callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If a subfield reaches past the word, two subfields share
+            a bit, or ``flags`` is given without ``remainder``.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    #: Key of the unpacked value that carries the unnamed bits, as
+    #: :attr:`BitField.UNNAMED <pcapkit.corekit.fields.strings.BitField.UNNAMED>`.
+    UNNAMED = '__unnamed__'
+
+    @property
+    def subfields(self) -> 'dict[str, tuple[int, int]]':
+        """Each subfield's start bit and width."""
+        return dict(self._subfields)
+
+    @property
+    def remainder(self) -> 'Optional[str]':
+        """Name the bits no subfield names are kept under."""
+        return self._remainder
+
+    @property
+    def remainder_mask(self) -> 'int':
+        """Mask of the bits no subfield names."""
+        return self._remainder_mask
+
+    @property
+    def flags(self) -> 'Optional[type]':
+        """Flag enumeration :attr:`remainder` holds a member of."""
+        return self._registry
+
+    def __init__(self, length: 'int', namespace: 'dict[str, tuple[int, int]]', *,
+                 remainder: 'Optional[str]' = None, flags: 'Optional[Type[enum.Flag] | Type[aenum.Flag]]' = None,
+                 byteorder: 'Literal["little", "big"]' = 'big',
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, byteorder=byteorder, callback=callback)
+
+        if flags is not None and remainder is None:
+            raise FieldValueError(f'{type(self).__name__}: flags {flags.__name__} given without a remainder')
+        width = 8 * length
+        named = 0
+        for name, (start, size) in namespace.items():
+            bits = ((1 << size) - 1) << start
+            if start < 0 or size < 1 or start + size > width or named & bits:
+                raise FieldValueError(f'{type(self).__name__}: subfield {name!r} spans bits '
+                                      f'{start}-{start + size - 1} of a {width}-bit word, or another\'s')
+            named |= bits
+
+        self._subfields = dict(namespace)
+        self._remainder = remainder
+        self._registry = flags
+        self._remainder_mask = ((1 << width) - 1) & ~named
+
+    def pre_process(self, value: 'Mapping[str, Any]',  # type: ignore[override]
+                    packet: 'dict[str, Any]') -> 'int | bytes':
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        Raises:
+            FieldValueError: If a subfield is missing or its value does not fit
+                its bits, or the remainder is not an :class:`int` or sets a
+                subfield's bit.
+
+        """
+        word = 0
+        for name, (start, size) in self._subfields.items():
+            if name not in value:
+                raise FieldValueError(f'{type(self).__name__}: subfield {name!r} is missing')
+            part = value[name]
+            if isinstance(part, bool) or not isinstance(part, int) or not 0 <= part < 1 << size:
+                raise FieldValueError(f'{type(self).__name__}: subfield {name!r} value {part!r} '
+                                      f'does not fit in {size} bit(s)')
+            word |= part << start
+        rest = value.get(self.UNNAMED if self._remainder is None else self._remainder, 0)
+        if isinstance(rest, bool) or not isinstance(rest, int) or int(rest) & ~self._remainder_mask:
+            raise FieldValueError(f'{type(self).__name__}: remainder {rest!r} is not an int of the bits '
+                                  'no subfield names')
+        return super().pre_process(word | int(rest), packet)
+
+    def post_process(self, value: 'int | bytes',  # type: ignore[override]
+                     packet: 'dict[str, Any]') -> 'dict[str, Any]':
+        """Process field value after parsing (unpacked).
+
+        Args:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Each subfield's value, by name, then the remainder: a member of the
+            field's ``flags`` where it has them, else an :class:`int`.
+
+        """
+        word = int(super().post_process(value, packet))
+        out = {name: word >> start & ((1 << size) - 1)
+               for name, (start, size) in self._subfields.items()}  # type: dict[str, Any]
+        rest = word & self._remainder_mask
+        if self._remainder is not None:
+            out[self._remainder] = rest if self._registry is None else self._registry(rest)
+        elif rest:
+            out[self.UNNAMED] = rest
+        return out

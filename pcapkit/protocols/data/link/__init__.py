@@ -59,8 +59,13 @@ from pcapkit.protocols.data.link.radiotap import DBAntennaSignal as Radiotap_DBA
 from pcapkit.protocols.data.link.radiotap import DBmTXPower as Radiotap_DBmTXPower
 from pcapkit.protocols.data.link.radiotap import DBTXAttenuation as Radiotap_DBTXAttenuation
 from pcapkit.protocols.data.link.radiotap import Flags as Radiotap_Flags
+from pcapkit.protocols.data.link.radiotap import HEData1 as Radiotap_HEData1
+from pcapkit.protocols.data.link.radiotap import HEData2 as Radiotap_HEData2
+from pcapkit.protocols.data.link.radiotap import HEMUFlags1 as Radiotap_HEMUFlags1
+from pcapkit.protocols.data.link.radiotap import HEMUFlags2 as Radiotap_HEMUFlags2
 from pcapkit.protocols.data.link.radiotap import HEMUOtherUser as Radiotap_HEMUOtherUser
 from pcapkit.protocols.data.link.radiotap import LockQuality as Radiotap_LockQuality
+from pcapkit.protocols.data.link.radiotap import MCSFlags as Radiotap_MCSFlags
 from pcapkit.protocols.data.link.radiotap import Radiotap
 from pcapkit.protocols.data.link.radiotap import RadiotapField as Radiotap_Field
 from pcapkit.protocols.data.link.radiotap import RadiotapNamespace as Radiotap_RadiotapNamespace
@@ -72,6 +77,7 @@ from pcapkit.protocols.data.link.radiotap import TLVFields as Radiotap_TLVFields
 from pcapkit.protocols.data.link.radiotap import TXAttenuation as Radiotap_TXAttenuation
 from pcapkit.protocols.data.link.radiotap import TXFlags as Radiotap_TXFlags
 from pcapkit.protocols.data.link.radiotap import Unknown as Radiotap_Unknown
+from pcapkit.protocols.data.link.radiotap import USIGCommon as Radiotap_USIGCommon
 from pcapkit.protocols.data.link.radiotap import VendorNamespace as Radiotap_VendorNamespace
 from pcapkit.protocols.data.link.radiotap import VendorTLV as Radiotap_VendorTLV
 from pcapkit.protocols.data.link.radiotap import ZeroLengthPSDU as Radiotap_ZeroLengthPSDU
@@ -116,11 +122,12 @@ __all__ = [
     'Radiotap_DBTXAttenuation', 'Radiotap_DBmTXPower', 'Radiotap_Antenna',
     'Radiotap_DBAntennaSignal', 'Radiotap_DBAntennaNoise', 'Radiotap_RXFlags',
     'Radiotap_TXFlags', 'Radiotap_RTSRetries', 'Radiotap_DataRetries', 'Radiotap_MCS',
-    'Radiotap_AMPDUStatus', 'Radiotap_VHT',
-    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEMU', 'Radiotap_HEMUOtherUser',
+    'Radiotap_MCSFlags', 'Radiotap_AMPDUStatus', 'Radiotap_VHT',
+    'Radiotap_Timestamp', 'Radiotap_HE', 'Radiotap_HEData1', 'Radiotap_HEData2', 'Radiotap_HEMU',
+    'Radiotap_HEMUFlags1', 'Radiotap_HEMUFlags2', 'Radiotap_HEMUOtherUser',
     'Radiotap_ZeroLengthPSDU', 'Radiotap_LSIG', 'Radiotap_TLVFields',
     'Radiotap_RadiotapNamespace', 'Radiotap_VendorNamespace', 'Radiotap_S1G', 'Radiotap_USIG',
-    'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
+    'Radiotap_USIGCommon', 'Radiotap_EHT', 'Radiotap_TLV', 'Radiotap_VendorTLV',
 
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',

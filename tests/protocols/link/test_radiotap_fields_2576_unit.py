@@ -72,6 +72,13 @@ TCPDUMP = {
 NO_LAYOUT = 'no layout is defined for the field type'
 PAST = 'the field runs past the field-data region'
 
+#: The MCS ``flags`` the vectors carry, split into their value subfields (#2647).
+MCS_FLAGS = {
+    0x25: {'bandwidth': 1, 'guard_interval': 1, 'ht_format': 0, 'fec_type': 0, 'stbc_streams': 1, 'ness_bit0': 0},
+    0x41: {'bandwidth': 1, 'guard_interval': 0, 'ht_format': 0, 'fec_type': 0, 'stbc_streams': 2, 'ness_bit0': 0},
+    0x82: {'bandwidth': 2, 'guard_interval': 0, 'ht_format': 0, 'fec_type': 0, 'stbc_streams': 0, 'ness_bit0': 1},
+}
+
 #: Wire octets of each field below, from 0x81 up, so that a signed octet is negative.
 PATTERN = bytes(range(0x81, 0xA1))
 
@@ -95,16 +102,20 @@ EXPECTED = {
     'TX_flags': (1, {'flags': 0x8281}),
     'RTS_retries': (0, {'retries': 0x81}),
     'data_retries': (0, {'retries': 0x81}),
-    'MCS': (0, {'known': 0x81, 'flags': 0x82, 'mcs': 0x83}),
+    'MCS': (0, {'known': 0x81, 'flags': MCS_FLAGS[0x82], 'mcs': 0x83}),
     'A_MPDU_status': (3, {'reference': 0x84838281, 'flags': 0x8685, 'delimiter_crc': 0x87,
                           'reserved': 0x88}),
     'VHT': (1, {'known': 0x8281, 'flags': 0x83, 'bandwidth': 0x84, 'mcs_nss': (0x85, 0x86, 0x87, 0x88),
                 'coding': 0x89, 'group_id': 0x8A, 'partial_aid': 0x8C8B}),
     'timestamp': (7, {'timestamp': 0x8887868584838281, 'accuracy': 0x8A89, 'unit_position': 0x8B,
                       'flags': 0x8C}),
-    'HE': (1, {'data1': 0x8281, 'data2': 0x8483, 'data3': 0x8685, 'data4': 0x8887, 'data5': 0x8A89,
+    'HE': (1, {'data1': {'ppdu_format': 1, 'known': 0x8280},
+               'data2': {'ru_offset': 0x04, 'pri_sec_80mhz': 1, 'known': 0x0083}, 'data3': 0x8685, 'data4': 0x8887, 'data5': 0x8A89,
                'data6': 0x8C8B}),
-    'HE_MU': (1, {'flags1': 0x8281, 'flags2': 0x8483, 'ru_channel1': (0x85, 0x86, 0x87, 0x88),
+    'HE_MU': (1, {'flags1': {'sig_b_mcs': 1, 'sig_b_dcm': 0, 'ch1_center_26_tone_ru': 0, 'known': 0x8280},
+                  'flags2': {'bandwidth': 3, 'sig_b_compression': 0, 'sig_b_symbols_users': 8,
+                             'preamble_puncturing': 0, 'ch2_center_26_tone_ru': 0, 'known': 0x8400},
+                  'ru_channel1': (0x85, 0x86, 0x87, 0x88),
                   'ru_channel2': (0x89, 0x8A, 0x8B, 0x8C)}),
     'HE_MU_other_user': (1, {'per_user_1': 0x8281, 'per_user_2': 0x8483, 'per_user_position': 0x85,
                              'per_user_known': 0x86}),
@@ -263,17 +274,18 @@ class TestRadiotapFields(unittest.TestCase):
             'rx-stbc#1': [('TSFT', {'mactime': 7268}), ('Flags', {'flags': 0x10}),
                           ('Channel', {'frequency': 2462, 'flags': 0x0480}), (signal, {'signal': -51}),
                           ('Antenna', {'antenna': 1}), ('RX_flags', {'flags': 0}),
-                          ('MCS', {'known': 0x27, 'flags': 0x25, 'mcs': 7})],
+                          ('MCS', {'known': 0x27, 'flags': MCS_FLAGS[0x25], 'mcs': 7})],
             # 119738173us tsft 2462 MHz 11n -46dBm signal antenna 1 ... MCS 7 40 MHz long GI RX-STBC2
             'rx-stbc#2': [('TSFT', {'mactime': 119738173}), ('Flags', {'flags': 0x10}),
                           ('Channel', {'frequency': 2462, 'flags': 0x0480}), (signal, {'signal': -46}),
                           ('Antenna', {'antenna': 1}), ('RX_flags', {'flags': 0}),
-                          ('MCS', {'known': 0x27, 'flags': 0x41, 'mcs': 7})],
+                          ('MCS', {'known': 0x27, 'flags': MCS_FLAGS[0x41], 'mcs': 7})],
             # 967750278us tsft wep 5180 MHz 11a -45dBm signal -107dBm noise antenna 0 [bit 23]
             'htc#1': [('TSFT', {'mactime': 967750278}), ('Flags', {'flags': 0x04}),
                       ('Channel', {'frequency': 5180, 'flags': 0x0140}), (signal, {'signal': -45}),
                       ('Antenna_noise', {'noise': -107}), ('Antenna', {'antenna': 0}),
-                      ('HE', {'data1': 0xC3FC, 'data2': 0x00FE, 'data3': 0x69E5, 'data4': 0x000F,
+                      ('HE', {'data1': {'ppdu_format': 0, 'known': 0xC3FC},
+                              'data2': {'ru_offset': 0, 'pri_sec_80mhz': 0, 'known': 0x00FE}, 'data3': 0x69E5, 'data4': 0x000F,
                               'data5': 0x2180, 'data6': 0x7F02}),
                       ('Vendor_Namespace', {'oui': b'\x00\x03\x7f', 'sub_namespace': 0, 'skip_length': 16,
                                             'data': bytes.fromhex('cb050204feff000000000000e06e8e27')})],
@@ -335,7 +347,7 @@ class TestRadiotapFields(unittest.TestCase):
         parsed = self._parse(raw)
         self.assertEqual(self._entries(parsed), [
             ('TX_flags', {'flags': 0x0002}), ('RTS_retries', {'retries': 3}), ('data_retries', {'retries': 1}),
-            ('MCS', {'known': 0x27, 'flags': 0x25, 'mcs': 7}),
+            ('MCS', {'known': 0x27, 'flags': MCS_FLAGS[0x25], 'mcs': 7}),
         ])
         self._assert_round_trips(parsed, raw)
 
@@ -370,7 +382,9 @@ class TestRadiotapFields(unittest.TestCase):
         got = [(item.type.name, item.length, item.data) for item in entries[1][1]['tlvs']]
         self.assertEqual(got[:3], [
             ('S1G', 6, {'type': 32, 'known': 1, 'data1': 2, 'data2': 3}),
-            ('U_SIG', 12, {'type': 33, 'common': 0x11, 'value': 0x22, 'mask': 0x33}),
+            ('U_SIG', 12, {'type': 33, 'common': {'phy_version': 0, 'bandwidth': 0, 'ul_dl': 0, 'bss_color': 0,
+                                                  'txop': 0, 'known': 0x11},
+                           'value': 0x22, 'mask': 0x33}),
             ('EHT', 48, {'type': 34, 'known': 0xE0, 'data': tuple(range(1, 10)), 'user_info': (0xA1, 0xA2)}),
         ])
         self.assertEqual(got[3], ('Vendor_Namespace', 10, {'oui': bytes.fromhex('001374'), 'subtype': 1,
@@ -436,8 +450,8 @@ class TestRadiotapFields(unittest.TestCase):
         self._assert_flag(decoded[21].coding, VHTCoding, 0x15,
                           VHTCoding.CODING_LDPC_USER0 | VHTCoding.CODING_LDPC_USER2)
         self.assertEqual(int(decoded[3].flags) & ~0x00A0, 0x8008)
-        # the MCS flags hold value subfields, so they stay a plain integer
-        self.assertIs(type(decoded[19].flags), int)
+        # the MCS flags hold value subfields alone, which split off (#2647)
+        self.assertEqual(decoded[19].flags, MCS_FLAGS[0x25])
         self._assert_round_trips(parsed, raw)
 
         # A-MPDU status, timestamp, HE-MU-other-user and L-SIG; the reserved
@@ -691,7 +705,7 @@ class TestRadiotapFields(unittest.TestCase):
             self.assertEqual(self._entries(parsed), [
                 ('Flags', {'flags': 0x10}),
                 ('Unassigned', {'flags': 0x0140, 'frequency': 2412, 'channel': 1, 'maxpower': 20}),
-                ('MCS', {'known': 0x27, 'flags': 0x25, 'mcs': 7}),
+                ('MCS', {'known': 0x27, 'flags': MCS_FLAGS[0x25], 'mcs': 7}),
             ])
             self.assertIsInstance(parsed.info.decoded[18], XChannel)
             self._assert_round_trips(parsed, raw)

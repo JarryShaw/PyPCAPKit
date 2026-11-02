@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-"""An HTTP/2 ``SETTINGS`` frame cut inside its settings parses as far as it goes (#2659).
+"""An HTTP/2 ``SETTINGS`` frame cut inside its settings parses and rebuilds (#2659, #2686).
 
 A capture cut short hands the frame fewer octets than its Length, which the IPv4
-total length still backs. ``SettingsFrame.settings`` was sized by that Length, so past
+total length still backs. ``SettingsFrame.settings`` is sized by that Length, so past
 the octets present a ``SettingPair`` consumed nothing and ``ListField.unpack`` raised
-``FieldValueError``, leaving the segment ``Raw``. ``HTTPv2.make`` also recomputed the
-Length from the settings held, so a parsed cut frame could not rebuild as captured.
+``FieldValueError``, leaving the segment ``Raw``. The list now reads its settings
+zero-filled to the Length, as a cut ``DATA`` frame reads its data, so ``make`` keeps
+computing the Length from the frame it builds, and an edited whole frame rebuilds with
+the Length of its edited payload.
 
 Every case builds its own octets.
 
@@ -39,8 +41,8 @@ def _datagram(app: bytes) -> bytes:
 
 
 def _expected(present: bytes) -> 'list[tuple[int, int]]':
-    """The pairs ``present`` holds, the last one zero-filled as a short read is."""
-    padded = present + bytes(-len(present) % 6)
+    """The pairs ``present`` holds, zero-filled to the frame's Length as a short read is."""
+    padded = present + bytes(len(PAIRS) - len(present))
     return [(int.from_bytes(padded[i:i + 2], 'big'), int.from_bytes(padded[i + 2:i + 6], 'big'))
             for i in range(0, len(padded), 6)]
 
@@ -93,13 +95,20 @@ class SettingsCutTests(unittest.TestCase):
                     self.assert_cut(HTTPv2(SETTINGS[:9 + keep], len(SETTINGS)), keep)
                 self.assertEqual(caught, [])
 
-    def test_a_setting_cut_inside_its_value_keeps_its_identifier(self) -> None:
+    def test_the_settings_past_the_data_read_as_zeros(self) -> None:
+        """The setting the data ends inside keeps its identifier, and every setting
+        past the data reads as identifier and value zero, as a cut ``DATA`` frame
+        reads its data as zeros (#2686)."""
         from pcapkit.const.http.setting import Setting
         from pcapkit.protocols.application.httpv2 import HTTPv2
 
         http = HTTPv2(SETTINGS[:9 + 9], len(SETTINGS))
         self.assertEqual(list(http.info.settings.items(multi=True)),
-                         [(Setting.HEADER_TABLE_SIZE, 4096), (Setting.MAX_CONCURRENT_STREAMS, 0)])
+                         [(Setting.HEADER_TABLE_SIZE, 4096), (Setting.MAX_CONCURRENT_STREAMS, 0),
+                          (Setting.get(0), 0)])
+
+        data = HTTPv2(_frame(0x0, 0x1, 1, b'hello')[:9 + 2], 9 + 5)
+        self.assertEqual(data.info.data, b'he\x00\x00\x00')
 
     def test_whole_frame_is_the_control(self) -> None:
         from pcapkit.const.http.setting import Setting
@@ -140,9 +149,28 @@ class SettingsCutTests(unittest.TestCase):
                     self.assertIs(type(rest), Raw)
                     self.assertIsNone(rest.info.error)
 
+    def test_a_length_no_capture_backs_goes_raw(self) -> None:
+        """A Length the octets read cannot back is refused, as zero-filling it would
+        make a setting per six octets of it, and the segment stays ``Raw`` (#2686)."""
+        from pcapkit.corekit.fields.field import _zero_pad_budget
+        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.misc.raw import Raw
 
-class SettingPairListFieldTests(unittest.TestCase):
-    """The settings list is sized by the octets present, no further than its Length."""
+        # a multiple of 6, and the most an IPv4 datagram holds past the three headers
+        length = 65484
+        packet = _datagram(length.to_bytes(3, 'big') + SETTINGS[3:9 + 6] + bytes(length - 6))
+        raw = packet[:len(packet) - (length - 6)]
+        with _zero_pad_budget(), warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            ipv4 = IPv4(raw, len(raw))
+        self.assertEqual(str(ipv4.protochain), 'IPv4:TCP:Raw')
+        self.assertIs(type(ipv4.payload.payload), Raw)
+        self.assertNotIsInstance(ipv4.payload.payload, HTTPv2)
+
+
+class SettingsListTests(unittest.TestCase):
+    """The settings list reads a buffer and a stream alike, zero-filled to its length."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -159,8 +187,9 @@ class SettingPairListFieldTests(unittest.TestCase):
                     warnings.simplefilter('always')
                     parsed = field.unpack(buffer, {})
                 self.assertEqual(caught, [])
-                self.assertEqual([(int(pair.id), pair.value) for pair in parsed], [(1, 4096), (3, 0)])
+                self.assertEqual([(int(pair.id), pair.value) for pair in parsed], [(1, 4096), (3, 0), (0, 0)])
                 self.assertEqual(field.length, len(PAIRS))
+        self.assertEqual(stream.tell(), 2 + 9)
 
     def test_a_live_stream_is_read_no_further_than_the_length(self) -> None:
         from pcapkit.protocols.schema.application.httpv2 import SettingsFrame
@@ -172,83 +201,59 @@ class SettingPairListFieldTests(unittest.TestCase):
         self.assertEqual(stream.tell(), 12)
 
 
-class SettingsFrameLengthTests(unittest.TestCase):
-    """``HTTPv2.make`` writes the ``frame_length`` it is given only as an :obj:`int`
-    from the Length the frame packs to up to ``0xFFFFFF``, and above that Length
-    only with no payload after the frame; any other is refused (#2617, #2659)."""
+#: ``(case, frame octets, edit to its info, the frame octets the edit gives)``, a
+#: frame of every type; each fixed-size frame is edited in a value, keeping its Length.
+EDITS = (
+    ('DATA shrunk', _frame(0x0, 0x1, 1, b'hello'), {'data': b'hi'}, _frame(0x0, 0x1, 1, b'hi')),
+    ('DATA grown', _frame(0x0, 0x1, 1, b'hello'), {'data': b'hello, world'},
+     _frame(0x0, 0x1, 1, b'hello, world')),
+    ('DATA padded, shrunk', _frame(0x0, 0x8, 1, b'\x02hello\x00\x00'), {'data': b'hi'},
+     _frame(0x0, 0x8, 1, b'\x02hi\x00\x00')),
+    ('HEADERS shrunk', _frame(0x1, 0x4, 1, b'\x82\x86'), {'fragment': b'\x82'}, _frame(0x1, 0x4, 1, b'\x82')),
+    ('HEADERS padded with priority, grown', _frame(0x1, 0x2c, 1, b'\x01\x80\x00\x00\x03\x10\x82\x86\x00'),
+     {'fragment': b'\x82\x86\x84\x87'}, _frame(0x1, 0x2c, 1, b'\x01\x80\x00\x00\x03\x10\x82\x86\x84\x87\x00')),
+    # the weight is one more than its octet (RFC 9113, section 5.3.2)
+    ('PRIORITY', _frame(0x2, 0x0, 1, b'\x80\x00\x00\x03\x10'), {'weight': 32},
+     _frame(0x2, 0x0, 1, b'\x80\x00\x00\x03\x1f')),
+    ('RST_STREAM', _frame(0x3, 0x0, 1, b'\x00\x00\x00\x08'), {'error': 1}, _frame(0x3, 0x0, 1, b'\x00\x00\x00\x01')),
+    ('SETTINGS shrunk', SETTINGS, {'settings': [(0x1, 7)]}, _frame(0x4, 0x0, 0, bytes.fromhex('000100000007'))),
+    ('SETTINGS grown', SETTINGS, {'settings': [(0x1, 4096), (0x3, 100), (0x4, 65536), (0x5, 16384)]},
+     _frame(0x4, 0x0, 0, PAIRS + bytes.fromhex('000500004000'))),
+    ('PUSH_PROMISE grown', _frame(0x5, 0x4, 1, b'\x00\x00\x00\x02\x82'), {'fragment': b'\x82\x86'},
+     _frame(0x5, 0x4, 1, b'\x00\x00\x00\x02\x82\x86')),
+    ('PING', _frame(0x6, 0x0, 0, b'12345678'), {'data': b'87654321'}, _frame(0x6, 0x0, 0, b'87654321')),
+    ('GOAWAY shrunk', _frame(0x7, 0x0, 0, b'\x00\x00\x00\x01\x00\x00\x00\x00debug'), {'debug_data': b''},
+     _frame(0x7, 0x0, 0, b'\x00\x00\x00\x01\x00\x00\x00\x00')),
+    ('WINDOW_UPDATE', WINDOW_UPDATE, {'increment': 1}, _frame(0x8, 0x0, 0, b'\x00\x00\x00\x01')),
+    ('CONTINUATION grown', _frame(0x9, 0x4, 1, b'\x82\x86\x84'), {'fragment': b'\x82\x86\x84\x87'},
+     _frame(0x9, 0x4, 1, b'\x82\x86\x84\x87')),
+    ('unassigned shrunk', _frame(0x20, 0x0, 1, b'xyz'), {'data': b'x'}, _frame(0x20, 0x0, 1, b'x')),
+    ('DATA shrunk, before a frame', _frame(0x0, 0x1, 1, b'hello') + WINDOW_UPDATE, {'data': b'hi'},
+     _frame(0x0, 0x1, 1, b'hi') + WINDOW_UPDATE),
+)
 
-    #: One setting, so the frame packs to a Length of 6.
-    ONE_PAIR = {'settings': [(0x1, 4096)]}
+
+class EditedFrameTests(unittest.TestCase):
+    """A whole frame edited in its info rebuilds with the Length of the frame it
+    makes, through ``from_data(info.to_dict())``, as before the ``SETTINGS`` cut
+    carried the parsed Length into ``make`` (#2686)."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_a_length_the_frame_or_the_field_cannot_carry_is_refused(self) -> None:
-        import re
-
-        from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        cases = (
-            ('past the 24-bit field', Frame.SETTINGS, self.ONE_PAIR, 2 ** 24, b'', 6),
-            ('a bool', Frame.SETTINGS, self.ONE_PAIR, False, b'', 6),
-            # each in range as an int, so only the bool clause refuses it
-            ('True for one octet', Frame.DATA, {'data': b'a'}, True, b'', 1),
-            ('False for no octets', Frame.DATA, {'data': b''}, False, b'', 0),
-            ('a float', Frame.SETTINGS, self.ONE_PAIR, 2.0, b'', 6),
-            ('a str', Frame.SETTINGS, self.ONE_PAIR, '9', b'', 6),
-            ('negative', Frame.SETTINGS, self.ONE_PAIR, -1, b'', 6),
-            ('short of the settings', Frame.SETTINGS, self.ONE_PAIR, 0, b'', 6),
-            ('short of the data', Frame.DATA, {'data': b'abc'}, 2, b'', 3),
-            ('past the settings, before a frame', Frame.SETTINGS, self.ONE_PAIR, 18, WINDOW_UPDATE, 6),
-        )
-        for label, type_, frame, length, payload, built in cases:
-            with self.subTest(label), self.assertRaisesRegex(
-                    ProtocolError, rf'^HTTP/2: \[Type \d\] invalid frame_length: {re.escape(repr(length))} '
-                                   rf'for a frame payload of {built} octet'):
-                HTTPv2(type=type_, sid=0 if type_ is Frame.SETTINGS else 1, frame=frame,
-                       frame_length=length, payload=payload)
-
-    def test_a_length_from_the_frame_to_the_field_maximum_is_written(self) -> None:
-        from pcapkit.const.http.frame import Frame
+    def test_every_frame_type_rebuilds_its_edit(self) -> None:
         from pcapkit.protocols.application.httpv2 import HTTPv2
 
-        # A SETTINGS Length is a multiple of 6 (RFC 9113, section 6.5), which
-        # ``_read_http_settings`` holds it to, so the edge one past a frame is on DATA.
-        cases = (
-            ('the settings, before a frame', Frame.SETTINGS, self.ONE_PAIR, 6, WINDOW_UPDATE, PAIRS[:6]),
-            ('the data, before a frame', Frame.DATA, {'data': b'abc'}, 3, WINDOW_UPDATE, b'abc'),
-            ('one past the data', Frame.DATA, {'data': b'abc'}, 4, b'', b'abc'),
-            ('one past the data, payload None', Frame.DATA, {'data': b'abc'}, 4, None, b'abc'),
-        )
-        for label, type_, frame, length, payload, body in cases:
-            with self.subTest(label):
-                http = HTTPv2(type=type_, sid=0 if type_ is Frame.SETTINGS else 1, frame=frame,
-                              frame_length=length, payload=payload)
-                self.assertEqual(http.data[:3], length.to_bytes(3, 'big'))
-                self.assertEqual(http.data[9:], body + (payload or b''))
-                self.assertEqual(http.info.length, length)
-                if payload:
-                    self.assertEqual(http.payload.info.increment, 65535)
-
-        # Parsed back, a Length this far past the octets meets ``MAX_ZERO_PAD_LENGTH``,
-        # so the field maximum is checked on what ``make`` builds.
-        header = object.__new__(HTTPv2).make(type=Frame.SETTINGS, frame=self.ONE_PAIR, frame_length=0xFFFFFF)
-        self.assertEqual(header.length, 0xFFFFFF)
-        self.assertEqual(bytes(header)[:3], b'\xff\xff\xff')
-
-    def test_a_length_past_the_settings_is_kept(self) -> None:
-        from pcapkit.const.http.frame import Frame
-        from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-
-        http = HTTPv2(type=Frame.SETTINGS, frame={'settings': [(Setting.HEADER_TABLE_SIZE, 4096)]},
-                      frame_length=18)
-        self.assertEqual(http.data, SETTINGS[:15])
-        self.assertEqual(http.info.length, 18)
-        self.assertEqual(http.info['__short_read__'], ('frame', 6))
-        self.assertEqual(list(http.info.settings.items(multi=True)), [(Setting.HEADER_TABLE_SIZE, 4096)])
+        for case, raw, edit, expected in EDITS:
+            with self.subTest(case):
+                data = HTTPv2(raw, len(raw)).info.to_dict()
+                for key, value in edit.items():
+                    data[key] = value
+                built = HTTPv2.from_data(data)
+                self.assertEqual(built.data, expected)
+                self.assertEqual(built.info.length, int.from_bytes(expected[:3], 'big'))
+                self.assertNotIn('__short_read__', built.info)
+                self.assertEqual(HTTPv2(expected, len(expected)).data, expected)
 
     def test_the_length_is_computed_when_not_given(self) -> None:
         from pcapkit.const.http.frame import Frame
@@ -259,14 +264,6 @@ class SettingsFrameLengthTests(unittest.TestCase):
         self.assertEqual(http.data, _frame(0x4, 0x0, 0, PAIRS[:6]))
         self.assertEqual(http.info.length, 6)
         self.assertNotIn('__short_read__', http.info)
-
-    def test_an_explicit_parse_length_leaves_no_state_behind(self) -> None:
-        from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-
-        http = HTTPv2(type=Frame.SETTINGS, frame=self.ONE_PAIR, frame_length=18, length=27)
-        self.assertEqual(http.info.length, 18)
-        self.assertNotIn('_made_length', vars(http))
 
     def test_a_dict_with_no_length_computes_it(self) -> None:
         from pcapkit.const.http.frame import Frame
