@@ -820,6 +820,114 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             raise ProtocolError(f'IPv4: invalid format')
         return options
 
+    def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option',
+                           padding: 'Optional[bytes]' = None) -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for IPv4.
+
+        A :obj:`list` is a fresh option list, so any ``NOP`` and ``EOOL`` in it
+        are dropped and the padding is generated. A container is what
+        :meth:`read` hands back, so its ``NOP`` and ``EOOL`` options are written
+        in place, as parsed.
+
+        Either way, the options are concatenated and then padded once, after the
+        last one, to the 32-bit boundary: with ``NOP`` options and a closing
+        ``EOOL``, or with zero octets if an ``EOOL`` has already ended the list.
+        ``padding`` goes after that ``EOOL`` verbatim, before any alignment; it
+        is dropped if no ``EOOL`` ends the list, since the reader would take its
+        octets for options.
+
+        Args:
+            options: IPv4 options
+            padding: octets after the End of Option List
+
+        Returns:
+            Tuple of options and total length of options.
+
+        """
+        total_length = 0
+        terminated = False
+        options_list = []  # type: list[Schema_Option | bytes]
+        if isinstance(options, list):
+            for schema in options:
+                if isinstance(schema, bytes):
+                    code = Enum_OptionNumber.get(schema[0])
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    data = schema  # type: Schema_Option | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    code, args = cast('tuple[Enum_OptionNumber, dict[str, Any]]', schema)
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    name = self._lookup_registry(self.__option__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_opt_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_opt_unassigned))
+                    else:
+                        meth = name[1]
+
+                    data = meth(code, **args)
+                    data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+        else:
+            for code, option in options.items(multi=True):
+                name = self._lookup_registry(self.__option__, code)
+                if isinstance(name, str):
+                    meth_name = f'_make_opt_{name}'
+                    meth = cast('OptionConstructor',
+                                getattr(self, meth_name, self._make_opt_unassigned))
+                else:
+                    meth = name[1]
+
+                data = meth(code, option)
+                data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+                if code == Enum_OptionNumber.EOOL:
+                    terminated = True
+
+            # NOTE: Raw octets are safe here only after the EOOL: the reader
+            # stops there, and never looks at what follows as an option.
+            if terminated and padding:
+                options_list.append(bytes(padding))
+                total_length += len(padding)
+
+        # force alignment to 32-bit boundary
+        #
+        # NOTE: Once, after the last option. An EOOL after each unaligned
+        # option would end the list there, and every later option would be
+        # lost on parse. The terminator is an EOOL option *schema*, like the
+        # NOP padding: the ``options`` field takes only schemas and
+        # :obj:`bytes`, not the bare wire code.
+        if total_length % 4:
+            pad_len = 4 - (total_length % 4)
+            total_length += pad_len
+
+            # zero octets after an EOOL already in the list, as EOOL schemas
+            if terminated:
+                pad_opt = cast('Schema_Option', self._make_opt_eool(Enum_OptionNumber.EOOL))  # type: ignore[arg-type]
+            else:
+                pad_opt = cast('Schema_Option', self._make_opt_nop(Enum_OptionNumber.NOP))  # type: ignore[arg-type]
+            end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
+
+            for _ in range(pad_len - 1):
+                options_list.append(pad_opt)
+            options_list.append(end_opt)
+        return options_list, total_length
+
     def _read_opt_unassigned(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv4 unassigned options.
 
@@ -1437,114 +1545,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
-
-    def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option',
-                           padding: 'Optional[bytes]' = None) -> 'tuple[list[Schema_Option | bytes], int]':
-        """Make options for IPv4.
-
-        A :obj:`list` is a fresh option list, so any ``NOP`` and ``EOOL`` in it
-        are dropped and the padding is generated. A container is what
-        :meth:`read` hands back, so its ``NOP`` and ``EOOL`` options are written
-        in place, as parsed.
-
-        Either way, the options are concatenated and then padded once, after the
-        last one, to the 32-bit boundary: with ``NOP`` options and a closing
-        ``EOOL``, or with zero octets if an ``EOOL`` has already ended the list.
-        ``padding`` goes after that ``EOOL`` verbatim, before any alignment; it
-        is dropped if no ``EOOL`` ends the list, since the reader would take its
-        octets for options.
-
-        Args:
-            options: IPv4 options
-            padding: octets after the End of Option List
-
-        Returns:
-            Tuple of options and total length of options.
-
-        """
-        total_length = 0
-        terminated = False
-        options_list = []  # type: list[Schema_Option | bytes]
-        if isinstance(options, list):
-            for schema in options:
-                if isinstance(schema, bytes):
-                    code = Enum_OptionNumber.get(schema[0])
-                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
-                        continue
-
-                    data = schema  # type: Schema_Option | bytes
-                    data_len = len(data)
-                elif isinstance(schema, Schema):
-                    code = schema.type
-                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
-                        continue
-
-                    data = schema
-                    data_len = len(schema.pack())
-                else:
-                    code, args = cast('tuple[Enum_OptionNumber, dict[str, Any]]', schema)
-                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
-                        continue
-
-                    name = self._lookup_registry(self.__option__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_opt_{name}'
-                        meth = cast('OptionConstructor',
-                                    getattr(self, meth_name, self._make_opt_unassigned))
-                    else:
-                        meth = name[1]
-
-                    data = meth(code, **args)
-                    data_len = len(data.pack())
-
-                options_list.append(data)
-                total_length += data_len
-        else:
-            for code, option in options.items(multi=True):
-                name = self._lookup_registry(self.__option__, code)
-                if isinstance(name, str):
-                    meth_name = f'_make_opt_{name}'
-                    meth = cast('OptionConstructor',
-                                getattr(self, meth_name, self._make_opt_unassigned))
-                else:
-                    meth = name[1]
-
-                data = meth(code, option)
-                data_len = len(data.pack())
-
-                options_list.append(data)
-                total_length += data_len
-                if code == Enum_OptionNumber.EOOL:
-                    terminated = True
-
-            # NOTE: Raw octets are safe here only after the EOOL: the reader
-            # stops there, and never looks at what follows as an option.
-            if terminated and padding:
-                options_list.append(bytes(padding))
-                total_length += len(padding)
-
-        # force alignment to 32-bit boundary
-        #
-        # NOTE: Once, after the last option. An EOOL after each unaligned
-        # option would end the list there, and every later option would be
-        # lost on parse. The terminator is an EOOL option *schema*, like the
-        # NOP padding: the ``options`` field takes only schemas and
-        # :obj:`bytes`, not the bare wire code.
-        if total_length % 4:
-            pad_len = 4 - (total_length % 4)
-            total_length += pad_len
-
-            # zero octets after an EOOL already in the list, as EOOL schemas
-            if terminated:
-                pad_opt = cast('Schema_Option', self._make_opt_eool(Enum_OptionNumber.EOOL))  # type: ignore[arg-type]
-            else:
-                pad_opt = cast('Schema_Option', self._make_opt_nop(Enum_OptionNumber.NOP))  # type: ignore[arg-type]
-            end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
-
-            for _ in range(pad_len - 1):
-                options_list.append(pad_opt)
-            options_list.append(end_opt)
-        return options_list, total_length
 
     def _make_opt_unassigned(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_UnassignedOption]' = None, *,
                              data: 'bytes' = b'',

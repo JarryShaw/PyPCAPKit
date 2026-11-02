@@ -66,20 +66,8 @@ RULES = {
 
 #: Classes that break the order, as ``qualified name: (rules, remover)``: the
 #: :data:`RULES` kinds each breaks, and the issue or PR whose reorder removes the
-#: entry. ``#2490`` marks a file deferred from its reorder while another stream
-#: edits it; IPv4 and TCP wait for the rule c reorders (#2490).
-KNOWN_EXCEPTIONS = {
-    'pcapkit.protocols.application.ospf.OSPF': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.internet.igmpv3.IGMPv3': (frozenset({'data'}), '#2490'),
-    'pcapkit.protocols.internet.ipv4.IPv4': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.internet.ipx.IPX': (frozenset({'helpers', 'pair'}), '#2490'),
-    'pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.schema.internet.igmpv3.IGMPv3': (frozenset({'group'}), '#2490'),
-    'pcapkit.protocols.schema.internet.igmpv3.Query': (frozenset({'group'}), '#2490'),
-    'pcapkit.protocols.schema.internet.igmpv3.Report': (frozenset({'group'}), '#2490'),
-    'pcapkit.protocols.transport.sctp.SCTP': (frozenset({'helpers'}), '#2490'),
-    'pcapkit.protocols.transport.tcp.TCP': (frozenset({'helpers'}), '#2490'),
-}  # type: dict[str, tuple[frozenset[str], str]]
+#: entry.
+KNOWN_EXCEPTIONS = {}  # type: dict[str, tuple[frozenset[str], str]]
 
 _DEFS = (ast.FunctionDef, ast.AsyncFunctionDef)
 

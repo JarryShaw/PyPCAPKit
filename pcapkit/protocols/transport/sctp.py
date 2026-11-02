@@ -976,43 +976,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         """
         return self._payload
 
-    def _decode_next_layer(self, dict_: 'Data_SCTP', proto: 'Optional[int]' = None,  # type: ignore[override]
-                           length: 'Optional[int]' = None, *,
-                           packet: 'Optional[dict[str, Any]]' = None) -> 'Data_SCTP':
-        r"""Decode next layer protocol.
-
-        Arguments:
-            dict\_: info buffer
-            proto: payload protocol identifier of the DATA chunk carrying the
-                payload, if any
-            length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
-
-        Returns:
-            Current protocol with next layer extracted.
-
-        Important:
-            This deliberately bypasses :meth:`Transport._decode_next_layer
-            <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`,
-            which keys the lookup on port numbers, since SCTP keys it on the
-            DATA chunk's payload protocol identifier instead.
-
-            The PPID is passed through **unchanged**, registered or not, so that
-            an unregistered payload is still labelled with the identifier it
-            arrived with, as :meth:`Internet._import_next_layer
-            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
-            does for an unregistered transport type. Resolving it to
-            :class:`~pcapkit.protocols.misc.raw.Raw` is
-            :meth:`Protocol._import_next_layer
-            <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
-            through :meth:`Protocol._lookup_next_layer
-            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`, which
-            leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
-
-        """
-        return ProtocolBase._decode_next_layer(  # pylint: disable=protected-access
-            self, dict_, proto, length, packet=packet)  # type: ignore[arg-type]
-
     def _read_sctp_chunks(self) -> 'Chunks':
         """Read SCTP chunk list.
 
@@ -1081,6 +1044,43 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         for code, chunk in chunks.items(multi=True):
             chunks_list.append(self._make_sctp_chunk(code, chunk))
         return _last_item_only(chunks_list)
+
+    def _decode_next_layer(self, dict_: 'Data_SCTP', proto: 'Optional[int]' = None,  # type: ignore[override]
+                           length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'Data_SCTP':
+        r"""Decode next layer protocol.
+
+        Arguments:
+            dict\_: info buffer
+            proto: payload protocol identifier of the DATA chunk carrying the
+                payload, if any
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Current protocol with next layer extracted.
+
+        Important:
+            This deliberately bypasses :meth:`Transport._decode_next_layer
+            <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`,
+            which keys the lookup on port numbers, since SCTP keys it on the
+            DATA chunk's payload protocol identifier instead.
+
+            The PPID is passed through **unchanged**, registered or not, so that
+            an unregistered payload is still labelled with the identifier it
+            arrived with, as :meth:`Internet._import_next_layer
+            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
+            does for an unregistered transport type. Resolving it to
+            :class:`~pcapkit.protocols.misc.raw.Raw` is
+            :meth:`Protocol._import_next_layer
+            <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
+            through :meth:`Protocol._lookup_next_layer
+            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`, which
+            leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
+
+        """
+        return ProtocolBase._decode_next_layer(  # pylint: disable=protected-access
+            self, dict_, proto, length, packet=packet)  # type: ignore[arg-type]
 
     def _make_sctp_chunk(self, code: 'Enum_Chunk', chunk: 'Optional[Data_Chunk]' = None,
                          **kwargs: 'Any') -> 'Schema_Chunk':
