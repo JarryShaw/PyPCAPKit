@@ -78,8 +78,25 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   It decodes the fixed 8-octet start (``it_version``, ``it_pad``, ``it_len``)
   and records every present-flags word, following bit 31 from one word to the
   next. The optional fields those words select are kept whole rather than
-  decoded, and the 802.11 MAC frame behind them, which has no dissector in this
-  package yet, as :class:`~pcapkit.protocols.misc.raw.Raw`.
+  decoded. The 802.11 MAC frame behind them is dissected as
+  :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, below, looked up in
+  ``Radiotap``'s own registry under
+  :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`,
+  and :func:`~pcapkit.foundation.registry.protocols.register_radiotap`
+  replaces that dissector (:issue:`2575`, :pr:`2607`).
+
+* **Added** -- :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`, a
+  dissector for the IEEE 802.11 MAC header of a protocol version 0 frame,
+  which :class:`~pcapkit.protocols.link.radiotap.Radiotap` dispatches to
+  (:issue:`2575`, :pr:`2607`). It reads Frame Control, the Control Frame
+  Extension and S1G Beacon layouts included, and the address, sequence, QoS
+  Control and HT Control fields each frame type carries; a Control frame of a
+  subtype it does not model, and an Extension frame, are read as the minimal
+  header. The frame body is kept as :class:`~pcapkit.protocols.misc.raw.Raw`,
+  with the FCS and radiotap's pad octets where captured, as ``Radiotap`` does
+  not decode the Flags that mark them, and any other protocol version is
+  refused. The frame types and subtypes are :mod:`pcapkit.const.ieee802_11`,
+  from hand-maintained tables of IEEE Std 802.11-2020's Table 9-1.
 
 * **Added** -- :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` (:rfc:`792`)
   and :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` (:rfc:`4443`), on an
@@ -217,6 +234,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`Datagram <pcapkit.foundation.reassembly.data.dtls.Datagram>` holds
   that decode as ``packet``, run on its first read as an IP or TCP datagram's
   is, and :data:`None` for an incomplete message (:issue:`2531`, :pr:`2605`).
+
+* **Added** -- :func:`~pcapkit.foundation.analysis.ip.ip_datagram` and
+  :func:`~pcapkit.foundation.analysis.tcp.tcp_datagram`, siblings of
+  ``dtls_handshake``, above, which parse the payload of a datagram that IPv4,
+  IPv6 or TCP reassembly reports, by its payload protocol or by its port
+  pair, and return :data:`None` for the tuple of received runs ``strict=True``
+  reports for an incomplete one (:issue:`2581`, :pr:`2619`).
 
 * **Added** -- :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`,
   the IPv4 (:rfc:`793`) or IPv6 (:rfc:`8200#section-8.1`) pseudo-header an
@@ -381,7 +405,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   request's review is cited (:issue:`2557`, :issue:`2563`, :pr:`2599`). The
   test conventions record that a test class whose tests each need a fresh
   import purges in ``setUp``, with a comment saying why, rather than importing
-  once per class (:issue:`2562`, :pr:`2611`).
+  once per class (:issue:`2562`, :pr:`2611`). Where a registry's primary source
+  is paywalled, the const-vendor pairing accepts a pinned secondary revision as
+  a crawler's ``DATA`` once its values are cross-checked against independent
+  implementations (:issue:`2575`, :pr:`2607`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
