@@ -37,11 +37,11 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
-from pcapkit.protocols.protocol import _frame_depth
 from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import frame_depth
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -521,7 +521,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         _exthdr = []                # type: list[tuple[Type[ProtocolBase], Any]] # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
-        depth = _frame_depth.get()  # layers of the frame up to this one
+        depth = frame_depth.get()   # layers of the frame up to this one
 
         # traverse if next header is an extension header
         payload = self.__header__.get_payload()
@@ -555,12 +555,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # NOTE: Counted after every header walked, as it would be were each
             # dissected by the one before it. ESP dissects its decrypted
             # payload even when walked, and those layers count on from here.
-            token = _frame_depth.set(depth + len(_protos))
+            token = frame_depth.set(depth + len(_protos))
             try:
                 next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
                                                 payload=payload)  # type: ignore[misc,call-arg]
             finally:
-                _frame_depth.reset(token)
+                frame_depth.reset(token)
             info = next_.info
 
             # A layer with no ``next`` field ends the walk, as RFC 8200 section 4
@@ -656,14 +656,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             from pcapkit.corekit.checksum.internet import fragment_payload  # isort: skip # pylint: disable=import-outside-toplevel
             frags = self._exthdr.getlist(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[arg-type]
             scope = fragment_payload(any(frag.info.get('offset') or frag.info.get('mf') for frag in frags))
-        token = _frame_depth.set(depth + len(_protos))
+        token = frame_depth.set(depth + len(_protos))
         try:
             with scope:
                 return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
                                                   ipv6_exthdr=ProtoChain.from_list(_protos),  # type: ignore[arg-type]
                                                   payload=payload)
         finally:
-            _frame_depth.reset(token)
+            frame_depth.reset(token)
 
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ

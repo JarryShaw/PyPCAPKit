@@ -51,14 +51,14 @@ class TestExtensionHeaderTrial(unittest.TestCase):
         The trial must leave ``beholder``'s flag unset, whatever it answers.
 
         """
-        from pcapkit.corekit import decorators
         from pcapkit.toolkit.pypcapfile import _default_extension_header
+        from pcapkit.utilities.contextvars import beholding
 
         _default_extension_header.cache_clear()
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter(action)
             answer = _default_extension_header(protocol, data)
-        self.assertFalse(decorators._beholding.get())  # pylint: disable=protected-access
+        self.assertFalse(beholding.get())
         return answer, caught
 
     def test_raising_trial_warns_nothing(self) -> None:

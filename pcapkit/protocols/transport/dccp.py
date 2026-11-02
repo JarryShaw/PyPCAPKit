@@ -1427,7 +1427,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             ChecksumWarning: If the checksum or its coverage is invalid.
 
         """
-        from pcapkit.corekit.checksum.internet import ChecksumStatus, _rebuilding, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.utilities.contextvars import rebuilding  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.utilities.exceptions import stacklevel  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.utilities.warnings import ChecksumWarning  # isort: skip # pylint: disable=import-outside-toplevel
 
@@ -1440,7 +1441,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
                 status = verify_checksum(self.alias, self._data, self._info.checksum,
                                          length=coverage, prefix=pseudo.data)
             else:
-                if not _rebuilding.get():
+                if not rebuilding.get():
                     warn(f'{self.alias}: checksum coverage {self._info.cscov} runs past the '
                          f'{length} octets of the packet', ChecksumWarning, stacklevel=stacklevel())
                 status = ChecksumStatus.INVALID

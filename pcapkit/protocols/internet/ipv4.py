@@ -56,7 +56,6 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
@@ -106,6 +105,7 @@ from pcapkit.protocols.schema.internet.ipv4 import TSOption as Schema_TSOption
 from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import rebuilding
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -605,12 +605,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
 
             # NOTE: The header is parsed back for a source route's destination,
-            # quietly, as this layer parses it again (cf. _rebuilding).
-            token = _rebuilding.set(True)
+            # quietly, as this layer parses it again (cf. rebuilding).
+            token = rebuilding.set(True)
             try:
                 header = IPv4(schema.pack()[:ihl * 4])
             finally:
-                _rebuilding.reset(token)
+                rebuilding.reset(token)
             # NOTE: The payload puts its own length in the pseudo-header.
             pseudo = IP_Pseudo(ip=header, protocol=proto, upper_length=0)
             upper = cast('ProtocolBase', payload)

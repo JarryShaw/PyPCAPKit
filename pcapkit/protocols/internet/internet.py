@@ -18,13 +18,13 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.checksum.internet import _rebuilding
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import rebuilding
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -428,7 +428,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             # NOTE: Inside a payload being rebuilt, the layer it is rebuilt for
             # warns of the same octets once its own parse gets here, as for
             # :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
-            if not _rebuilding.get():
+            if not rebuilding.get():
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
 

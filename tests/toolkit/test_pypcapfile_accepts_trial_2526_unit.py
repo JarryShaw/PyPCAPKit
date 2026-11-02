@@ -9,7 +9,7 @@ warns ``packet length < 0`` twice before the answer. A header the parser accepts
 warns from the caller's line.
 
 The parser reads its own header rather than a next layer, so setting
-``_beholding`` around it holds nothing, and the trial holds its own warnings.
+``beholding`` around it holds nothing, and the trial holds its own warnings.
 
 The answers are cached by octets, so each test clears the cache before it asks.
 :mod:`pcapkit` is imported inside each test, after

@@ -67,7 +67,7 @@ this is routine.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
-from pcapkit.corekit.decorators import _beholding, beholder
+from pcapkit.corekit.decorators import beholder
 from pcapkit.protocols.application.ssl import (_TLS_VERSION_MAJOR, _WIRE_CONTENT_TYPES, SSL,
                                                TLS13_VERSION)
 from pcapkit.protocols.application.sslv2 import SSLv2
@@ -76,6 +76,7 @@ from pcapkit.protocols.data.application.sslv2 import ServerHello as SSLv2_Server
 from pcapkit.protocols.data.application.sslv2 import SSLv2 as SSLv2_Data
 from pcapkit.protocols.data.application.tls import TLS as Data_TLS
 from pcapkit.protocols.schema.application.tls import TLS as Schema_TLS
+from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import hold_warnings
 
@@ -314,7 +315,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
                         parsed = self._read_sslv2_fallback(len(self) if length is None else length, **kwargs)
                         fallback.discard = parsed is None
                 if parsed is None:
-                    trial.discard = _beholding.get()
+                    trial.discard = beholding.get()
                     raise
                 return parsed
 
