@@ -9,6 +9,8 @@ from pcapkit.protocols.data.protocol import Protocol
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
 
+    from typing_extensions import Literal
+
     from pcapkit.const.igmp.type import Type as Enum_Type
 
 __all__ = ['IGMP']
@@ -27,6 +29,13 @@ class IGMP(Protocol):
 
     """
 
+    #: Version of IGMP the message was read as, ``1`` or ``2``: the
+    #: :attr:`~pcapkit.protocols.internet.igmp.IGMP.version` of the class that
+    #: read or built it. It is on no octet, since the versions share this
+    #: layout, and :meth:`IGMP.from_data
+    #: <pcapkit.protocols.internet.igmp.IGMP.from_data>` dispatches on it
+    #: (:issue:`2574`).
+    version: 'Literal[1, 2]'
     #: Message type.
     type: 'Enum_Type'
     #: Max response time, in units of 1/10 second. Meaningful only for a
@@ -41,5 +50,5 @@ class IGMP(Protocol):
     group: 'IPv4Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Type', max_resp_time: 'int', checksum: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
-                     group: 'IPv4Address') -> 'None': ...
+        def __init__(self, version: 'Literal[1, 2]', type: 'Enum_Type', max_resp_time: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+                     checksum: 'bytes', group: 'IPv4Address') -> 'None': ...
