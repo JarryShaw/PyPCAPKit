@@ -372,8 +372,8 @@ class EnumLookup:
           ``default`` or raised: nothing is logged and no exception hook is
           installed. A raised miss still reaches the caller as an ordinary
           exception; left uncaught, it is printed by whichever hook is installed
-          -- the interpreter's own, unless an earlier loud error installed
-          :mod:`pcapkit`'s. The name miss is
+          -- the interpreter's own in development mode, ``tbtrim``'s otherwise,
+          unless a loud error has installed :mod:`pcapkit`'s. The name miss is
           :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with
           ``quiet=True``, because it is in-library control flow -- in the
           ``get`` override of :class:`~pcapkit.const.http.method.Method` it is

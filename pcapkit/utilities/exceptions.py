@@ -258,10 +258,14 @@ class BaseError(Exception):
           shortens the printing of a :class:`BaseError` only, and hands every
           other exception, unchanged, to whatever hook :mod:`pcapkit` found
           installed before it first needed its own.
-        * The hooks are installed lazily, from here, rather than at import
-          time, so a program that imports :mod:`pcapkit` but never raises one of
-          its errors never has :func:`sys.excepthook` or
-          :func:`threading.excepthook` touched.
+        * Outside development mode, importing :mod:`pcapkit` replaces both hooks
+          itself, through ``tbtrim.set_trim_rule``: its hooks cut the traceback
+          of every exception except a :class:`BaseError` at the first
+          :mod:`pcapkit` frame, and a hook the program installed before the
+          import is replaced. The hooks installed here go over those, the first
+          time a loud error needs them, and hand every other exception to what
+          they replaced. Under :envvar:`PCAPKIT_DEVMODE` neither pair is
+          installed.
         * The hooks still do not cover *every* path an exception can take.
           A traceback a caller formats itself with :mod:`traceback` -- rather
           than letting it reach the top level uncaught -- passes through
@@ -361,11 +365,11 @@ def _excepthook(etype: 'Type[BaseException]', value: 'BaseException',
     answer for a plain :class:`BaseError` and a chain without frames for a
     chained one.
 
-    Anything else is handed to ``_previous_excepthook`` exactly as received, so
-    a program with its own hook installed before :mod:`pcapkit` needed one --
-    or none, in which case that is :data:`sys.__excepthook__` -- keeps seeing
-    exactly what it would have seen without :mod:`pcapkit` in the process at
-    all.
+    Anything else is handed to ``_previous_excepthook`` exactly as received:
+    the hook :func:`sys.excepthook` held when :func:`_install_excepthook` ran --
+    outside development mode, ``tbtrim``'s from the import, unless the program
+    replaced it after the import -- or :data:`sys.__excepthook__` when none was
+    recorded.
 
     """
     global _excepthook_running  # pylint: disable=global-statement
@@ -472,10 +476,11 @@ _threading_excepthook.installed_by_pcapkit = True  # type: ignore[attr-defined]
 def _install_excepthook() -> 'None':
     """Install :func:`_excepthook` and :func:`_threading_excepthook`, once each.
 
-    Called from :class:`BaseError`'s constructor rather than at import time, so
-    that a program that never raises a :mod:`pcapkit` error never has
-    :func:`sys.excepthook` or :func:`threading.excepthook` touched merely for
-    having imported the package.
+    Called from :class:`BaseError`'s constructor, outside development mode, the
+    first time a loud error is raised -- not at import. What the import leaves in
+    both slots, outside development mode, is the pair ``tbtrim.set_trim_rule``
+    installs from :mod:`pcapkit`'s ``__init__``; this replaces that pair, and the
+    matching ``_previous_*`` records it.
 
     Idempotent for *this* module instance, independently for each hook: if a
     given hook slot already holds this instance's own function -- checked by
