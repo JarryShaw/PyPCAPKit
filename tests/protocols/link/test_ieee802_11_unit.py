@@ -7,8 +7,10 @@ of IEEE Std 802.11-2020 §9.2 and keeps the frame body as
 DS/From DS combination, management frames, the header length of every
 control subtype, Control Frame Extension and Extension frames, the QoS and HT
 Control fields, a refused protocol version, truncated input and ``make()``,
-each with byte-exact round trips both ways. The Radiotap side of the dispatch
-is covered in ``test_radiotap_unit.py``.
+each with byte-exact round trips both ways, and each multi-bit field
+``make()`` writes as given, at its widest value and one past it, inside a
+radiotap header. The Radiotap side of the dispatch is covered in
+``test_radiotap_unit.py``.
 
 Each test imports :mod:`pcapkit` itself, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -36,6 +38,53 @@ def _mac(n: int) -> str:
 
 #: Flag bits of the second Frame Control octet.
 TO_DS, FROM_DS, MORE_FRAG, RETRY, PWR_MGT, MORE_DATA, PROTECTED, ORDER = (1 << i for i in range(8))
+
+#: The radiotap header ``Radiotap()`` writes by default: an empty present
+#: bitmask and no fields.
+RADIOTAP = bytes.fromhex('0000080000000000')
+
+#: QoS Control with every subfield zero.
+QOS_ZERO = {'tid': 0, 'eosp': False, 'ack_policy': 0, 'amsdu_present': False, 'bits_8_15': 0}
+
+
+def _seq(**fields: int) -> dict:
+    """A Data frame whose Sequence Control is zero but for ``fields``."""
+    return {'type': 2, 'subtype': 0, 'seq_ctrl': {'fragment_number': 0, 'sequence_number': 0, **fields}}
+
+
+def _qos(**fields: int) -> dict:
+    """A QoS Data frame whose QoS Control is zero but for ``fields``."""
+    return {'type': 2, 'subtype': 8, 'qos_control': {**QOS_ZERO, **fields}}
+
+
+#: Each multi-bit field ``make()`` writes as given (Protocol Version builds
+#: only ``0``): its width in bits (IEEE Std 802.11-2020 §9.2.4), the
+#: arguments of a frame that carries it, where a parse reads it back, and
+#: that frame's octets with the field at its widest value and the rest zero.
+WIDEST = (
+    ('type', 2, lambda v: {'type': v, 'subtype': 0}, lambda i: i.frame_control.type,
+     bytes.fromhex('0c00') + bytes(8)),
+    ('subtype', 4, lambda v: {'type': 1, 'subtype': v}, lambda i: i.frame_control.subtype,
+     bytes.fromhex('f400') + bytes(14)),
+    ('duration_id', 16, lambda v: {'type': 2, 'subtype': 0, 'duration_id': v}, lambda i: i.duration_id,
+     bytes.fromhex('0800ffff') + bytes(20)),
+    ('control_frame_extension', 4, lambda v: {'type': 1, 'subtype': 6, 'control_frame_extension': v},
+     lambda i: i.frame_control.control_frame_extension, bytes.fromhex('640f') + bytes(14)),
+    ('s1g_beacon_flags', 8, lambda v: {'type': 3, 'subtype': 1, 's1g_beacon_flags': v},
+     lambda i: i.frame_control.s1g_beacon_flags, bytes.fromhex('1cff') + bytes(8)),
+    ('fragment_number', 4, lambda v: _seq(fragment_number=v), lambda i: i.seq_ctrl.fragment_number,
+     bytes.fromhex('0800') + bytes(20) + b'\x0f\x00'),
+    ('sequence_number', 12, lambda v: _seq(sequence_number=v), lambda i: i.seq_ctrl.sequence_number,
+     bytes.fromhex('0800') + bytes(20) + b'\xf0\xff'),
+    ('tid', 4, lambda v: _qos(tid=v), lambda i: i.qos_control.tid,
+     bytes.fromhex('8800') + bytes(22) + b'\x0f\x00'),
+    ('ack_policy', 2, lambda v: _qos(ack_policy=v), lambda i: i.qos_control.ack_policy,
+     bytes.fromhex('8800') + bytes(22) + b'\x60\x00'),
+    ('bits_8_15', 8, lambda v: _qos(bits_8_15=v), lambda i: i.qos_control.bits_8_15,
+     bytes.fromhex('8800') + bytes(22) + b'\x00\xff'),
+    ('ht_control', 32, lambda v: {'type': 2, 'subtype': 8, 'order': True, 'ht_control': v},
+     lambda i: i.ht_control.value, bytes.fromhex('8880') + bytes(24) + b'\xff' * 4),
+)
 
 
 class TestIEEE802_11(unittest.TestCase):
@@ -431,6 +480,44 @@ class TestIEEE802_11(unittest.TestCase):
         made = IEEE802_11()
         self.assertEqual((made.name, made.alias), ('IEEE 802.11 Wireless LAN', '802.11'))
         self.assertEqual(made.__length_hint__(), 36)
+
+
+class TestIEEE802_11WidestValues(unittest.TestCase):
+    """Each multi-bit field ``make()`` writes as given, built inside a
+    radiotap header at the widest value its width allows and at one past
+    it."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_widest_value_builds_and_parses_back(self) -> None:
+        """All ones lands on the field's own bits and reads back whole, and
+        both layers rebuild the octets from their info."""
+        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.radiotap import Radiotap
+
+        for name, bits, kwargs, read, octets in WIDEST:
+            with self.subTest(field=name):
+                widest = (1 << bits) - 1
+                raw = Radiotap(payload=IEEE802_11(**kwargs(widest))).data
+                self.assertEqual(raw.hex(), (RADIOTAP + octets).hex())
+
+                parsed = Radiotap(raw, len(raw))
+                self.assertEqual(parsed.protochain.chain, 'Radiotap:802.11')
+                frame = parsed.payload
+                self.assertEqual(int(read(frame.info)), widest)
+                self.assertEqual(IEEE802_11.from_data(frame.info).data.hex(), octets.hex())
+                self.assertEqual(Radiotap.from_data(parsed.info).data.hex(), raw.hex())
+
+    def test_one_past_the_widest_value_is_refused(self) -> None:
+        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for name, bits, kwargs, _, _ in WIDEST:
+            pattern = rf'^802\.11: invalid {name}: {1 << bits}$'
+            with self.subTest(field=name), self.assertRaisesRegex(ProtocolError, pattern):
+                Radiotap(payload=IEEE802_11(**kwargs(1 << bits)))
 
 
 class TestIEEE802_11Registries(unittest.TestCase):
