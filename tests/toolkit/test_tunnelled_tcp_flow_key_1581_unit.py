@@ -25,7 +25,7 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import close_extractor, reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class, retry_reaped_tshark
 from tests.foundation import _roundtrip as wire
 
 if TYPE_CHECKING:
@@ -111,7 +111,6 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', *,
     from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
     from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
-    seen = {'tcp': {}, 'trace': {}}  # type: dict[str, Any]
     reassemble, trace = ReassemblyBase.__call__, TraceFlowBase.__call__
     fields_only = engine in FIELDS_ONLY
     skip = ('frame', 'header', 'payload') if fields_only else ('frame',)
@@ -120,33 +119,39 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', *,
         return {key: bytes(value) if isinstance(value, bytearray) else value
                 for key, value in packet.items() if key not in skip}
 
-    def spy_reassembly(this: 'Any', packet: 'Any') -> 'Any':
-        seen['tcp'][packet.num] = fields(packet)
-        return reassemble(this, packet)
+    def attempt() -> 'dict[str, Any]':
+        seen = {'tcp': {}, 'trace': {}}  # type: dict[str, Any]
 
-    def spy_trace(this: 'Any', packet: 'Any') -> 'Any':
-        seen['trace'][packet.index] = fields(packet, skip)
-        return trace(this, packet)
+        def spy_reassembly(this: 'Any', packet: 'Any') -> 'Any':
+            seen['tcp'][packet.num] = fields(packet)
+            return reassemble(this, packet)
 
-    records =[(1, number, octets) for number, octets in enumerate(frames)]
-    with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(), \
-            mock.patch.object(ReassemblyBase, '__call__', spy_reassembly), \
-            mock.patch.object(TraceFlowBase, '__call__', spy_trace):
-        path = os.path.join(tmp, 'tunnels.pcapng' if pcapng else 'tunnels.pcap')
-        with open(path, 'wb') as file:
-            file.write(wire.pcapng(records) if pcapng else wire.pcap(records))
-        warnings.simplefilter('ignore')
-        extractor = extract(fin=path, nofile=True, engine=engine, reassembly=not fields_only,
-                            tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
-                            trace_format='json')
-        try:
-            if extractor._exnam != engine:  # pylint: disable=protected-access
-                test.skipTest(f'{engine} did not run')
-            seen['ids'] = None if fields_only else [datagram.id for datagram in extractor.reassembly.tcp]
-            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
-        finally:
-            close_extractor(extractor)
-    return seen
+        def spy_trace(this: 'Any', packet: 'Any') -> 'Any':
+            seen['trace'][packet.index] = fields(packet, skip)
+            return trace(this, packet)
+
+        records = [(1, number, octets) for number, octets in enumerate(frames)]
+        with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(), \
+                mock.patch.object(ReassemblyBase, '__call__', spy_reassembly), \
+                mock.patch.object(TraceFlowBase, '__call__', spy_trace):
+            path = os.path.join(tmp, 'tunnels.pcapng' if pcapng else 'tunnels.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcapng(records) if pcapng else wire.pcap(records))
+            warnings.simplefilter('ignore')
+            extractor = extract(fin=path, nofile=True, engine=engine, reassembly=not fields_only,
+                                tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
+                                trace_format='json')
+            try:
+                if extractor._exnam != engine:  # pylint: disable=protected-access
+                    test.skipTest(f'{engine} did not run')
+                seen['ids'] = None if fields_only else [datagram.id for datagram in extractor.reassembly.tcp]
+                seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+            finally:
+                close_extractor(extractor)
+        return seen
+
+    # outside the ignored warnings, so a rerun of a lost exit status is reported (#2620)
+    return retry_reaped_tshark(attempt)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

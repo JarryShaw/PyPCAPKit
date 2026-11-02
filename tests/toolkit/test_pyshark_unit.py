@@ -9,7 +9,7 @@ import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import close_extractor, reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class, retry_reaped_tshark
 from tests.foundation import _roundtrip as wire
 
 if TYPE_CHECKING:
@@ -897,28 +897,33 @@ def read_trace(test: unittest.TestCase, frames: 'list[bytes]') -> 'dict[str, Any
     if importlib.util.find_spec(engine) is None:
         test.skipTest(f'{engine} not installed')
     trace = TraceFlowBase.__call__  # type: Callable[..., Any]
-    seen = {}  # type: dict[int, dict[str, Any]]
 
-    def spy(this: 'Any', packet: 'Any') -> 'Any':
-        seen[packet.index] = {key: value for key, value in packet.items()
-                              if key not in ('frame', 'header', 'payload')}
-        return trace(this, packet)
+    def attempt() -> 'dict[str, Any]':
+        seen = {}  # type: dict[int, dict[str, Any]]
 
-    with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(), \
-            mock.patch.object(TraceFlowBase, '__call__', spy):
-        warnings.simplefilter('ignore')
-        path = os.path.join(tmp, 'capture.pcap')
-        with open(path, 'wb') as file:
-            file.write(wire.pcap([(1, number, octets) for number, octets in enumerate(frames)]))
-        extractor = extract(fin=path, nofile=True, engine=engine, tcp=True, trace=True,
-                            trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
-        try:
-            if extractor._exnam != engine:  # pylint: disable=protected-access
-                test.skipTest(f'{engine} did not run')
-            flows = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
-        finally:
-            close_extractor(extractor)
-    return {'trace': seen, 'flows': flows}
+        def spy(this: 'Any', packet: 'Any') -> 'Any':
+            seen[packet.index] = {key: value for key, value in packet.items()
+                                  if key not in ('frame', 'header', 'payload')}
+            return trace(this, packet)
+
+        with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(), \
+                mock.patch.object(TraceFlowBase, '__call__', spy):
+            warnings.simplefilter('ignore')
+            path = os.path.join(tmp, 'capture.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, octets) for number, octets in enumerate(frames)]))
+            extractor = extract(fin=path, nofile=True, engine=engine, tcp=True, trace=True,
+                                trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+            try:
+                if extractor._exnam != engine:  # pylint: disable=protected-access
+                    test.skipTest(f'{engine} did not run')
+                flows = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+            finally:
+                close_extractor(extractor)
+        return {'trace': seen, 'flows': flows}
+
+    # outside the ignored warnings, so a rerun of a lost exit status is reported (#2620)
+    return retry_reaped_tshark(attempt)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

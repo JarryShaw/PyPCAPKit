@@ -5,7 +5,8 @@ They are pinned here for one reason: they are *machinery* the rest of the
 suite leans on, so a fault in one reports itself as a failure in whichever test
 happened to be running rather than as a fault in the helper. The module opens
 with :func:`~tests._support.close_extractor`; :func:`~tests._support.time_limit`
-is covered by :class:`TimeLimitTests`, and :func:`~tests._support.stand_in_reason`
+is covered by :class:`TimeLimitTests`, :func:`~tests._support.retry_reaped_tshark`
+by :class:`RetryReapedTsharkTests`, and :func:`~tests._support.stand_in_reason`
 by :class:`StandInReasonTests` at the end.
 
 :func:`~tests._support.close_extractor` is teardown machinery: nearly every
@@ -58,10 +59,12 @@ import contextlib
 import hashlib
 import importlib
 import importlib.util
+import logging
 import os
 import pathlib
 import shutil
 import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -75,9 +78,10 @@ from unittest import mock
 from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
                             bootstrap_core_modules, close_extractor, ensure_package,
                             install_fake_protocol_module, isolate_modules, purge_modules,
-                            restore_modules, restore_modules_after, scale_timeout,
-                            skip_if_stand_in, snapshot_modules, stand_in_reason, time_limit,
-                            upstream_digests)
+                            restore_modules, restore_modules_after, retry_reaped_tshark,
+                            scale_timeout, skip_if_stand_in, snapshot_modules, stand_in_reason,
+                            time_limit, upstream_digests)
+from tests._tiers import ROOT
 
 if TYPE_CHECKING:
     from typing import Iterator
@@ -1163,6 +1167,169 @@ def _method_names(case_class: type) -> 'list[str]':
     """
     return [name for name in dir(case_class)
             if name.startswith('test') and callable(getattr(case_class, name))]
+
+
+class TSharkCrashException(Exception):
+    """A stand-in for pyshark's, which :func:`~tests._support.retry_reaped_tshark` matches by name."""
+
+
+#: The pid every stand-in crash names.
+CRASHED_PID = 4242
+
+
+def crash(pid: int = CRASHED_PID) -> TSharkCrashException:
+    """The error pyshark 0.6 raises for a tshark reported to have exited with ``255``."""
+    return TSharkCrashException(f'TShark (pid {pid}) seems to have crashed (retcode: 255).')
+
+
+def lose(pid: int = CRASHED_PID) -> None:
+    """Log what ``SafeChildWatcher`` logs for a child something else reaped first."""
+    logging.getLogger('asyncio').warning(
+        'Unknown child process pid %d, will report returncode 255', pid)
+
+
+class LostCapture:
+    """A stand-in pyshark capture whose close raises for a tshark asyncio lost."""
+
+    def __init__(self) -> None:
+        self._running_processes = {object()}
+
+    def close(self) -> None:
+        lose()
+        raise crash()
+
+
+#: A child interpreter that loses a real exit status to a competing ``waitpid``,
+#: under the ``SafeChildWatcher`` pyshark 0.6 installs, and then reruns clean.
+#: ``argv[1]`` is the checkout. It prints the result and the warnings raised.
+LOST_STATUS_CHILD = '''\
+import asyncio, os, sys, warnings
+sys.path.insert(0, sys.argv[1])
+from tests._support import retry_reaped_tshark
+
+class TSharkCrashException(Exception):
+    pass
+
+warnings.simplefilter('ignore', DeprecationWarning)
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+asyncio.set_child_watcher(asyncio.SafeChildWatcher())
+asyncio.get_child_watcher().attach_loop(loop)
+reapers = [os.waitpid]
+
+def attempt():
+    child = loop.run_until_complete(asyncio.create_subprocess_exec(sys.executable, '-c', 'pass'))
+    if reapers:
+        reapers.pop()(child.pid, 0)
+    code = loop.run_until_complete(child.wait())
+    if code:
+        raise TSharkCrashException(f'TShark (pid {child.pid}) seems to have crashed (retcode: {code}).')
+    return code
+
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter('always', RuntimeWarning)
+    print(retry_reaped_tshark(attempt), [str(item.message) for item in caught])
+'''
+
+
+class RetryReapedTsharkTests(unittest.TestCase):
+    """:func:`~tests._support.retry_reaped_tshark` reruns a lost exit status, once (#2620).
+
+    A ``TSharkCrashException`` is rerun only when asyncio logged its pid as lost
+    during the attempt; a second loss still raises, and a crash with no such record,
+    a record for another pid, or any other error is never rerun. The crashed
+    capture is left nothing to close, and CPython's own record is recognised.
+
+    """
+
+    def setUp(self) -> None:
+        watchers = logging.getLogger('asyncio')
+        handlers = list(watchers.handlers)
+        # the helper's handler is attached for one attempt only
+        self.addCleanup(lambda: self.assertEqual(watchers.handlers, handlers))
+        # keep the stand-in records out of real logs, where they would read as a real loss
+        self.addCleanup(setattr, watchers, 'propagate', watchers.propagate)
+        watchers.propagate = False
+
+    def test_a_lost_exit_status_is_rerun_once(self) -> None:
+        calls = []  # type: list[None]
+
+        def attempt() -> str:
+            calls.append(None)
+            if len(calls) == 1:
+                lose()
+                raise crash()
+            return 'rerun'
+
+        with self.assertWarnsRegex(RuntimeWarning, rf'pid {CRASHED_PID}\).*retrying once'):
+            self.assertEqual(retry_reaped_tshark(attempt), 'rerun')
+        self.assertEqual(len(calls), 2)
+
+    def test_a_second_loss_still_fails(self) -> None:
+        calls = []  # type: list[None]
+
+        def attempt() -> None:
+            calls.append(None)
+            lose()
+            raise crash()
+
+        with self.assertWarns(RuntimeWarning), self.assertRaises(TSharkCrashException):
+            retry_reaped_tshark(attempt)
+        self.assertEqual(len(calls), 2)
+
+    def test_a_crash_asyncio_did_not_lose_is_not_rerun(self) -> None:
+        # tshark's own crash leaves no record; a record for another pid is not this crash
+        for lost in (None, CRASHED_PID + 1):
+            with self.subTest(lost=lost):
+                calls = []  # type: list[None]
+
+                def attempt() -> None:
+                    calls.append(None)
+                    if lost is not None:
+                        lose(lost)
+                    raise crash()
+
+                with self.assertRaises(TSharkCrashException):
+                    retry_reaped_tshark(attempt)
+                self.assertEqual(len(calls), 1)
+
+    def test_another_error_is_not_rerun(self) -> None:
+        calls = []  # type: list[None]
+
+        def attempt() -> None:
+            calls.append(None)
+            lose()
+            raise ValueError(f'(pid {CRASHED_PID})')
+
+        with self.assertRaises(ValueError):
+            retry_reaped_tshark(attempt)
+        self.assertEqual(len(calls), 1)
+
+    def test_the_lost_capture_is_left_nothing_to_close(self) -> None:
+        captures = []  # type: list[LostCapture]
+
+        def attempt() -> None:
+            captures.append(LostCapture())
+            if len(captures) == 1:
+                captures[0].close()
+
+        with self.assertWarns(RuntimeWarning):
+            retry_reaped_tshark(attempt)
+        # so its __del__ does not raise the crash again in a later test
+        self.assertEqual(captures[0]._running_processes, set())
+        self.assertEqual(len(captures[1]._running_processes), 1)
+
+    @unittest.skipUnless(os.name == 'posix' and sys.version_info < (3, 14),
+                         "asyncio's SafeChildWatcher, which pyshark 0.6 installs, is POSIX-only "
+                         'and removed in Python 3.14')
+    def test_cpython_reporting_a_lost_exit_status_is_recognised(self) -> None:
+        """The record CPython itself logs is the one matched, under a real reaper."""
+        child = subprocess.run([sys.executable, '-c', LOST_STATUS_CHILD, str(ROOT)],
+                               capture_output=True, text=True, timeout=120, check=False)
+        self.assertEqual(child.returncode, 0, child.stderr)
+        result, _, raised = child.stdout.strip().partition(' ')
+        self.assertEqual(result, '0', child.stdout)
+        self.assertRegex(raised, r'pid \d+\).*retrying once', child.stdout)
 
 
 class StandInReasonTests(unittest.TestCase):

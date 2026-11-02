@@ -6,7 +6,8 @@ import sys
 import unittest
 from unittest import mock
 
-from tests._support import close_extractor, reimport_once_per_class, sample_path
+from tests._support import (close_extractor, reimport_once_per_class, retry_reaped_tshark,
+                            sample_path)
 
 #: Test tier (#1958): drives a third-party engine whose installable releases vary by
 #: interpreter.
@@ -112,8 +113,13 @@ class EngineRuntimeTests(unittest.TestCase):
             # below passes on the fallback's output -- a vacuous pass (#845).
             from pcapkit.foundation.engines.pyshark import PyShark
 
-            with mock.patch('pcapkit.foundation.extraction.warn') as warn:
-                extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
+            def attempt() -> 'tuple[object, mock.MagicMock]':
+                with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                    extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
+                return extractor, warn
+
+            # rerun once if asyncio lost tshark's exit status to another reaper (#2620)
+            extractor, warn = retry_reaped_tshark(attempt)
             self.addCleanup(close_extractor, extractor)
 
             engines = [call.args[0] for call in warn.call_args_list

@@ -8,15 +8,18 @@ import gc
 import hashlib
 import importlib.util
 import inspect
+import logging
 import math
 import os
 import pathlib
+import re
 import signal
 import sys
 import time
 import types
 import unittest
-from typing import Callable, Iterable, Iterator, Optional
+import warnings
+from typing import Callable, Iterable, Iterator, Optional, TypeVar
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
@@ -1169,6 +1172,87 @@ def close_extractor(extractor: object) -> None:
         _close_quietly(stream)
     finally:
         _close_quietly(engine)
+
+
+#: What CPython's child watchers log for a child whose exit status something else
+#: collected first, reporting ``255`` in its place (#2620).
+LOST_EXIT_STATUS = 'will report returncode 255'
+
+_T = TypeVar('_T')
+
+
+class _LostExitStatus(logging.Handler):
+    """Collects the pids asyncio logs as :data:`LOST_EXIT_STATUS`."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.pids = set()  # type: set[str]
+
+    def emit(self, record: 'logging.LogRecord') -> None:
+        message = record.getMessage()
+        if LOST_EXIT_STATUS in message:
+            self.pids.update(re.findall(r'\bpid (\d+)', message))
+
+
+def _forget_lost_tshark(error: BaseException) -> None:
+    """Empty ``_running_processes`` on the pyshark capture ``error`` came from.
+
+    Its tshark is reaped already, so nothing is left to stop. Left in place, the
+    capture's ``__del__`` closes it again and raises the same crash in whichever
+    test is running when it is collected.
+
+    """
+    trace = error.__traceback__
+    while trace is not None:
+        running = getattr(trace.tb_frame.f_locals.get('self'), '_running_processes', None)
+        if isinstance(running, set):
+            running.clear()
+        trace = trace.tb_next
+
+
+def retry_reaped_tshark(attempt: 'Callable[[], _T]') -> '_T':
+    """Run a PyShark extraction, and once more if asyncio lost its tshark's exit status.
+
+    pyshark 0.6 kills a tshark it has not seen exit when it cleans up. On Python 3.9
+    to 3.12, :meth:`asyncio.subprocess.Process.kill` goes through
+    :meth:`subprocess.Popen.send_signal`, which polls first, so a tshark that has
+    exited but whose ``SIGCHLD`` the event loop has not dispatched is reaped right
+    there. The child watcher then finds no child, logs :data:`LOST_EXIT_STATUS` and
+    reports ``255``, which pyshark raises as ``TSharkCrashException`` when the
+    capture closes. That race is CPython's gh-87744, fixed in 3.13 by signalling
+    with :func:`os.kill` (#2620).
+
+    Only that case is retried, and only once: a ``TSharkCrashException``, matched by
+    name, whose pid asyncio logged as lost during the attempt. A crash of tshark's
+    own raises at once, as does a second loss, so a fault that persists still fails.
+    The retry is reported as a :exc:`RuntimeWarning`.
+
+    Args:
+        attempt: Runs the extraction and returns its result. A retry calls it
+            again, so it must start from nothing rather than from what the lost
+            run left behind.
+
+    Returns:
+        What ``attempt`` returned.
+
+    """
+    lost = _LostExitStatus()
+    watchers = logging.getLogger('asyncio')
+    watchers.addHandler(lost)
+    try:
+        return attempt()
+    except Exception as error:  # pylint: disable=broad-except
+        crashed = re.search(r'\(pid (\d+)\)', str(error))
+        if (type(error).__name__ != 'TSharkCrashException' or crashed is None
+                or crashed.group(1) not in lost.pids):
+            raise
+        _forget_lost_tshark(error)
+        pid = crashed.group(1)
+    finally:
+        watchers.removeHandler(lost)
+    warnings.warn(f'asyncio lost the exit status of tshark (pid {pid}) to another reaper '
+                  '(#2620); retrying once', RuntimeWarning, stacklevel=2)
+    return attempt()
 
 
 #: Seconds, counted from the call, that :func:`collect_until` keeps collecting for a

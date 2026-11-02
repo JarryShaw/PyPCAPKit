@@ -14,21 +14,27 @@ extractor falls back to the default engine, with an
 requested, and that would pass the callback case vacuously. An engine that
 cannot run here is skipped, with the reason the extractor itself would give.
 
+Every extraction goes through :func:`~tests._support.retry_reaped_tshark`, which
+reruns a PyShark one whose tshark asyncio lost to another reaper (#2620).
+
 """
 from __future__ import annotations
 
 import contextlib
 import importlib.util
 import io
+import os
 import struct
 import unittest
 import warnings
 from typing import TYPE_CHECKING
+from unittest import mock
 
-from tests._support import close_extractor, reimport_once_per_class, sample_path
+from tests._support import (close_extractor, reimport_once_per_class, retry_reaped_tshark,
+                            sample_path)
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Callable, Optional, Type
 
     from pcapkit.foundation.engines.engine import EngineBase
     from pcapkit.foundation.extraction import Extractor
@@ -94,16 +100,27 @@ class _VerboseCases:
         """The protocol chain the engine's own printer reports for ``frame``."""
         raise NotImplementedError
 
-    def extract(self: 'Any', verbose: 'Any') -> 'tuple[Extractor, str]':
-        """Extract :data:`CAPTURE` on :attr:`ENGINE`; return it and its stdout."""
+    def extract(self: 'Any', verbose: 'Any',
+                reset: 'Optional[Callable[[], None]]' = None) -> 'tuple[Extractor, str]':
+        """Extract :data:`CAPTURE` on :attr:`ENGINE`; return it and its stdout.
+
+        ``reset`` runs before each attempt, so that a rerun starts from nothing.
+
+        """
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.utilities.warnings import EngineWarning
 
-        out = io.StringIO()
-        with warnings.catch_warnings(record=True) as caught, contextlib.redirect_stdout(out):
-            warnings.simplefilter('always')
-            extractor = Extractor(fin=sample_path(CAPTURE), engine=self.ENGINE,  # type: ignore[arg-type]
-                                  nofile=True, store=True, verbose=verbose)
+        def attempt() -> 'tuple[Extractor, str, list[warnings.WarningMessage]]':
+            if reset is not None:
+                reset()
+            out = io.StringIO()
+            with warnings.catch_warnings(record=True) as caught, contextlib.redirect_stdout(out):
+                warnings.simplefilter('always')
+                extractor = Extractor(fin=sample_path(CAPTURE), engine=self.ENGINE,  # type: ignore[arg-type]
+                                      nofile=True, store=True, verbose=verbose)
+            return extractor, out.getvalue(), caught
+
+        extractor, out, caught = retry_reaped_tshark(attempt)
         self.addCleanup(close_extractor, extractor)
 
         # the requested engine ran, not the default one it would fall back to
@@ -112,11 +129,11 @@ class _VerboseCases:
         self.assertEqual(extractor._exnam, self.ENGINE)
         self.assertIs(type(extractor._exeng), self.engine_class())
         self.assertEqual(len(extractor.frame), _record_count(sample_path(CAPTURE)))
-        return extractor, out.getvalue()
+        return extractor, out
 
     def test_a_verbose_callback_is_called_with_every_frame(self: 'Any') -> None:
         calls = []  # type: list[tuple[Extractor, Any]]
-        extractor, out = self.extract(lambda ext, frame: calls.append((ext, frame)))
+        extractor, out = self.extract(lambda ext, frame: calls.append((ext, frame)), calls.clear)
 
         frames = extractor.frame
         self.assertEqual(len(calls), len(frames))
@@ -181,6 +198,40 @@ class PySharkVerboseTests(_VerboseCases, unittest.TestCase):
         from pcapkit.foundation.engines.pyshark import _frame_layer
 
         return _frame_layer(frame).protocols  # type: ignore[union-attr]
+
+    @unittest.skipUnless(os.name == 'posix', 'Windows has no SIGCHLD child watcher to race')
+    def test_a_tshark_reaped_before_asyncio_costs_one_rerun(self) -> None:
+        """An extraction whose tshark another reaper collected first is rerun (#2620).
+
+        The first tshark's exit status is taken just before pyshark's
+        ``SafeChildWatcher`` asks for it, so asyncio reports ``255`` and pyshark
+        raises ``TSharkCrashException``. Signals go through :func:`os.kill`, as
+        gh-87744 sends them from Python 3.13, so that steal is the only reaper
+        racing asyncio and the rerun is clean.
+
+        """
+        import asyncio
+        import asyncio.base_subprocess
+        import signal
+
+        watch = asyncio.SafeChildWatcher._do_waitpid  # type: ignore[attr-defined]
+        stolen = []  # type: list[int]
+
+        def do_waitpid(watcher: 'Any', pid: 'int') -> None:
+            if not stolen and os.waitpid(pid, os.WNOHANG)[0]:
+                stolen.append(pid)
+            watch(watcher, pid)
+
+        def kill(transport: 'Any') -> None:
+            transport._check_proc()
+            with contextlib.suppress(ProcessLookupError):
+                os.kill(transport._proc.pid, signal.SIGKILL)
+
+        with mock.patch.object(asyncio.SafeChildWatcher, '_do_waitpid', do_waitpid), \
+                mock.patch.object(asyncio.base_subprocess.BaseSubprocessTransport, 'kill', kill), \
+                self.assertWarnsRegex(RuntimeWarning, 'retrying once'):
+            self.test_a_verbose_callback_is_called_with_every_frame()
+        self.assertEqual(len(stolen), 1)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
