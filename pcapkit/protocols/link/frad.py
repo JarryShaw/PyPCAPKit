@@ -7,6 +7,7 @@
 :mod:`pcapkit.protocols.link.frad` contains
 :class:`~pcapkit.protocols.link.frad.FRAD` only, which implements the
 extractor for Frame Relay's multiprotocol encapsulation [*]_, as seen on a
+``LINKTYPE_FRELAY`` capture, or on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
 is ``ARPHRD_FRAD`` -- :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`
 dispatches here instead of falling back to

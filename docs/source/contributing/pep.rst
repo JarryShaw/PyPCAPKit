@@ -298,8 +298,8 @@ small part of each is bound to a dissector; everything else resolves to
 complaint and yields nothing useful.
 
 * :class:`~pcapkit.const.reg.linktype.LinkType` --
-  ``NULL``, ``ETHERNET``, ``LOOP``, ``LINUX_SLL``, ``IPV4``, ``IPV6`` and
-  ``LINUX_SLL2``, declared identically
+  ``NULL``, ``ETHERNET``, ``IEEE802_11``, ``FRELAY``, ``LOOP``, ``LINUX_SLL``,
+  ``IEEE802_11_RADIOTAP``, ``IPV4``, ``IPV6`` and ``LINUX_SLL2``, declared identically
   in :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, which also read ``RAW`` as
   ``IPV4`` or ``IPV6`` by its version nibble.
@@ -961,9 +961,11 @@ offload heuristic on :issue:`2470`.
   clear is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`,
   and ``make()`` computes one when ``checksum_present`` asks without giving it.
   Neither GRE nor the Linux cooked-capture header carries a length, so a GRE frame
-  the capture cut short is
-  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`. Settled at
-  implementation (:issue:`2618`).
+  the capture cut short there is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`, settled at
+  implementation (:issue:`2618`); behind IPv4 or IPv6, which state the payload
+  length, it is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
+  (:issue:`2649`).
 * **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
   a pseudo-header that carries the whole packet's length, as TCP's does, so a
   fragment is

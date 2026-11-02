@@ -77,6 +77,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`
          - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.GRE`
+         - :class:`pcapkit.protocols.link.gre.GRE`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.ESP`
          - :class:`pcapkit.protocols.internet.esp.ESP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`
@@ -134,6 +136,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6',     'ICMPv6'),
             Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
             Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+            # NOTE: a tunnel is placed by its payload, so GRE lives under ``protocols.link``;
+            # see :doc:`/contributing/conventions/protocol-layer-placement`.
+            Enum_TransType.GRE:             ModuleDescriptor('pcapkit.protocols.link.gre',            'GRE'),
             Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp',        'ESP'),
             Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah',         'AH'),
             Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp',       'IGMP'),

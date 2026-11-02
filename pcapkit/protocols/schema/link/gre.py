@@ -43,9 +43,9 @@ class GRE(Schema):
     """Header schema for a Generic Routing Encapsulation (GRE) frame.
 
     The base header [:rfc:`2784`] plus the optional Key and Sequence Number
-    extensions [:rfc:`2890`], as presented to a ``LINKTYPE_LINUX_SLL``/
-    ``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type`` is ``ARPHRD_IPGRE``
-    or ``ARPHRD_IP6GRE``.
+    extensions [:rfc:`2890`], as carried under IP protocol number 47, or as
+    presented to a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture
+    whose ``arphrd_type`` is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE``.
 
     """
 

@@ -49,14 +49,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: Claims nothing reaches, as ``(protocol, destination, found)``: why. Binding
 #: one changes parsed output, and deletes its entry in the same change (#2649).
-UNBOUND = {
-    ('pcapkit.protocols.link.frad.FRAD', 'Frame', None):
-        'LINKTYPE_FRELAY (107) is the Q.922 frame FRAD reads; Frame.__proto__ binds no 107',
-    ('pcapkit.protocols.link.frad.FRAD', 'PCAPNG', None):
-        'LINKTYPE_FRELAY (107) is the Q.922 frame FRAD reads; PCAPNG.__proto__ binds no 107',
-    ('pcapkit.protocols.link.gre.GRE', 'Internet', None):
-        'IP protocol 47 is GRE; Internet.__proto__ binds no 47',
-}  # type: dict[tuple[str, str, Any], str]
+UNBOUND = {}  # type: dict[tuple[str, str, Any], str]
 
 
 class Gap(NamedTuple):

@@ -27,6 +27,7 @@ _OVER_IPV4 = frozenset({
     4,    # IPv4
     6,    # TCP
     17,   # UDP
+    47,   # GRE
     50,   # ESP
     51,   # AH
     89,   # OSPFIGP
@@ -79,6 +80,9 @@ def _payload(code: 'int') -> 'bytes':
     if code == TransType.IPv6_Frag:
         from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
         return bytes(IPv6_Frag(next=17, id=1, offset=0, mf=False, payload=_udp(9999)))
+    if code == TransType.GRE:
+        from pcapkit.protocols.link.gre import GRE
+        return bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if code == TransType.ESP:
         from pcapkit.protocols.internet.esp import ESP
         return bytes(ESP(spi=0x1234, seq=1, payload=b'\x01\x02\x03\x04'))
@@ -164,6 +168,7 @@ PINNED_TARGETS = {
     'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
     'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
     'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
+    'internet/GRE': ('pcapkit.protocols.link.gre', 'GRE'),
     'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
     'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
     'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
