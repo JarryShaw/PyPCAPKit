@@ -332,10 +332,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
     .. versionchanged:: 1.6.0
 
-       The checksum is computed when :meth:`make` is given none, over the
-       ``pseudo`` it is given or by the enclosing IP layer, and verified by that
-       layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
-       (:issue:`2473`).
+       * The checksum is computed when :meth:`make` is given none, over the
+         ``pseudo`` it is given or by the enclosing IP layer, and verified by
+         that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+         (:issue:`2473`).
+       * A Quick-Start rate the four-bit rate code cannot carry, or a nonce or
+         reserved value outside its field, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than a bare
+         :exc:`ValueError`, an :exc:`OverflowError` or a
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError`, or a rate of
+         zero written in its place (:issue:`2617`).
 
     """
 
@@ -1602,11 +1608,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if schema.length != 8:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
-        rate = schema.flags['rate']
         data = Data_QuickStartResponse(
             kind=schema.kind,
             length=schema.length,
-            req_rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
+            req_rate=self._read_qs_rate(schema.flags['rate']),
             ttl_diff=schema.diff,
             nonce=schema.nonce['nonce'],
             reserved=schema.flags['reserved'],
@@ -2765,7 +2770,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             code: option code
             opt: option data
-            rate: rate (in kbps)
+            rate: rate (in kbps), rounded down to the nearest rate the
+                four-bit rate code carries (:rfc:`4782#section-4.2`)
             diff: TTL Diff, the IP TTL minus the QS TTL, modulo 256 (:rfc:`4782`
                 Section 4.2); a :class:`~datetime.timedelta` is taken as its whole
                 seconds
@@ -2777,6 +2783,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the rate code cannot carry ``rate``, or ``nonce``,
+                ``reserved`` or ``nonce_reserved`` does not fit its field.
+
         """
         if opt is not None:
             rate = opt.req_rate
@@ -2785,11 +2795,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             reserved = opt.reserved
             nonce_reserved = opt.nonce_reserved
 
-        # :rfc:`4782` Section 3.1 encodes the rate as 40 kbps * 2 ** N, with
-        # N = 0 meaning a rate of zero; a response may report a lower rate than
-        # requested (Section 4.3), so a rate under 80 kbps rounds down to N = 0.
-        rate_val = max(math.floor(math.log2(rate * 1000 / 40000)), 0) if rate > 0 else 0
+        rate_val = self._make_qs_rate(rate)
         diff_val = diff if isinstance(diff, int) else math.floor(diff.total_seconds())
+        nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
+        reserved = self._make_uint(reserved, bits=4, name='Quick-Start reserved')
+        nonce_reserved = self._make_uint(nonce_reserved, bits=2, name='Quick-Start nonce reserved')
 
         return Schema_QuickStartResponse(
             kind=code,

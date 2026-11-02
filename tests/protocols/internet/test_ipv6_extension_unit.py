@@ -858,8 +858,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                                         unused=b'\x00',
                                         **base),
         ).nonce['nonce'], 4)
+        # An unassigned function builds (#2617); one past four bits does not.
         with self.assertRaises(ProtocolError):
-            proto._make_opt_qs(Option.Quick_Start, func=1)
+            proto._make_opt_qs(Option.Quick_Start, func=16)
 
         rpl = proto._make_opt_rpl(
             Option.RPL_Option_0x63,

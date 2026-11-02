@@ -203,6 +203,17 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
        * A PadN option's data and the "Not Used" octet of a Quick-Start report
          are kept as captured rather than zeroed (:issue:`1223`).
 
+    .. versionchanged:: 1.6.0
+
+       * A Quick-Start rate the four-bit rate code cannot carry, or a TTL,
+         nonce or reserved value outside its field, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than a bare
+         :exc:`ValueError`, an :exc:`OverflowError` or a
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError`, or a different
+         value written in its place (:issue:`2617`).
+       * The Quick-Start maker builds an unassigned function code as an
+         unassigned option, the form the reader keeps one in (:issue:`2617`).
+
     """
 
     ##########################################################################
@@ -1101,14 +1112,13 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         if func == Enum_QSFunction.Quick_Start_Request:
             schema_req = cast('Schema_QuickStartRequestOption', schema)
 
-            rate = schema_req.flags['rate']
             opt = Data_QuickStartRequestOption(
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
                 length=self._hopopt_option_length(schema_req.len),
                 func=func,
-                rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
+                rate=self._read_qs_rate(schema_req.flags['rate']),
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
                 nonce=schema_req.nonce['nonce'],
                 reserved=schema_req.nonce['reserved'],
@@ -1116,14 +1126,13 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = cast('Schema_QuickStartReportOption', schema)
 
-            rate = schema_rep.flags['rate']
             opt = Data_QuickStartReportOption(
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
                 length=self._hopopt_option_length(schema_rep.len),
                 func=func,
-                rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
+                rate=self._read_qs_rate(schema_rep.flags['rate']),
                 nonce=schema_rep.nonce['nonce'],
                 reserved=schema_rep.nonce['reserved'],
                 unused=schema_rep.reserved,
@@ -1909,7 +1918,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             func_default: default value for QS function type
             func_namespace: namespace for QS function type
             func_reversed: reversed flag for QS function type
-            rate: rate (in kbps)
+            rate: rate (in kbps), rounded down to the nearest rate the
+                four-bit rate code carries (:rfc:`4782#section-3.1`)
             ttl: time to live (in seconds)
             nonce: nonce value
             reserved: reserved bits (``R``) after the nonce
@@ -1917,12 +1927,15 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: arbitrary keyword arguments
 
         Returns:
-            Constructed option schema; an unassigned option schema if ``opt``
-            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`.
+            Constructed option schema. An unassigned option schema if ``opt``
+            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`,
+            or if ``func`` is neither of the assigned functions, in which case
+            the option data takes the layout of a Quick-Start Request.
 
         Raises:
-            ProtocolError: If the QS function is neither a Quick-Start Request
-                nor a Report of Approved Rate.
+            ProtocolError: If ``func`` does not fit in four bits, the rate code
+                cannot carry ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does
+                not fit its field.
 
         """
         if isinstance(opt, Data_UnassignedOption):
@@ -1937,11 +1950,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         else:
             func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
-        rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
+        rate_val = self._make_qs_rate(rate)
+        ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+        nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
+        reserved = self._make_uint(reserved, bits=2, name='Quick-Start reserved')
 
         if func_enum == Enum_QSFunction.Quick_Start_Request:
-            ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
-
             return Schema_QuickStartRequestOption(
                 type=code,
                 len=6,
@@ -1949,7 +1963,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                ttl=ttl_value,
+                ttl=self._make_uint(ttl_value, bits=8, name='Quick-Start TTL'),
                 nonce={
                     'nonce': nonce,
                     'reserved': reserved,
@@ -1969,7 +1983,11 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                     'reserved': reserved,
                 },
             )
-        raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
+        if not 0 <= func_enum < 16:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
+        ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
+        data = bytes([(func_enum << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
+        return self._make_opt_none(code, data=data)
 
     def _make_opt_rpl(self, code: 'Enum_Option', opt: 'Optional[Data_RPLOption]' = None, *,
                       down: 'bool' = False,
