@@ -52,16 +52,12 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 CASE_TIMEOUT = 30
 
 #: The non-empty ``__proto__`` tables no family probes, by ``module.Class``
-#: path, and why. Every other one is some family's registry (#2615).
-UNCOVERED = {
-    'pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__':
-        'its ARPHRD entries are pinned as shipped and probed one by one by '
-        'tests/protocols/link/test_linux_sll_arphrd_registry_unit.py (#2510)',
-}
+#: path, and why. Empty: every one is some family's registry (#2615, #2592).
+UNCOVERED = {}  # type: dict[str, str]
 
 
-def _proto_tables() -> 'dict[str, dict[Any, Any]]':
-    """Every non-empty ``__proto__`` table a protocol class defines itself, by path.
+def _proto_owners() -> 'dict[str, type]':
+    """Every protocol class defining a non-empty ``__proto__`` table itself, by the table's path.
 
     Found by walking every :class:`~pcapkit.protocols.protocol.ProtocolBase`
     descendant once every shipped protocol module is imported, as
@@ -75,7 +71,7 @@ def _proto_tables() -> 'dict[str, dict[Any, Any]]':
     for info in pkgutil.walk_packages(package.__path__, 'pcapkit.protocols.'):
         if 'NotImplemented' not in info.name:
             importlib.import_module(info.name)
-    found = {}  # type: dict[str, dict[Any, Any]]
+    found = {}  # type: dict[str, type]
     seen = set()  # type: set[type]
     pending = [ProtocolBase]  # type: list[type]
     while pending:
@@ -86,7 +82,7 @@ def _proto_tables() -> 'dict[str, dict[Any, Any]]':
         pending.extend(klass.__subclasses__())
         table = vars(klass).get('__proto__')
         if isinstance(table, dict) and table:
-            found[f'{klass.__module__}.{klass.__qualname__}.__proto__'] = table
+            found[f'{klass.__module__}.{klass.__qualname__}.__proto__'] = klass
     return found
 
 
@@ -312,12 +308,50 @@ class DispatchRegistryTests(unittest.TestCase):
 
         """
         covered = {id(family.registry()) for family in self.dispatch.FAMILIES}
-        uncovered = sorted(path for path, table in _proto_tables().items()
-                           if id(table) not in covered)
+        uncovered = sorted(path for path, owner in _proto_owners().items()
+                           if id(vars(owner)['__proto__']) not in covered)
         self.assertEqual(uncovered, sorted(UNCOVERED),
                          'a non-empty __proto__ table needs a family module under '
                          'examples/generators/dispatch_families/, or an UNCOVERED '
                          'entry saying what covers it instead')
+
+    def test_a_versioned_base_table_has_a_family_per_member(self) -> None:
+        """A table a versioned family base owns is probed through each of its members (#2592).
+
+        :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` owns the table that
+        :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
+        :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` both dispatch through,
+        each reading the key from a header of its own, so one family probing it
+        leaves the other member's dispatch unexercised. A base is versioned when it
+        defines ``_member_of_version``, and its members are its direct subclasses
+        under :mod:`pcapkit.protocols`, so that a subclass a test defines does not
+        count. A member is probed when a family's frame over the table parses
+        through it.
+
+        """
+        checked = []  # type: list[str]
+        for path, owner in sorted(_proto_owners().items()):
+            if '_member_of_version' not in vars(owner):
+                continue
+            checked.append(path)
+            members = {klass for klass in owner.__subclasses__()
+                       if klass.__module__.startswith('pcapkit.protocols.')}
+            through = set()  # type: set[type]
+            for family in self.dispatch.FAMILIES:
+                if family.registry() is not vars(owner)['__proto__']:
+                    continue
+                for case in self.dispatch.cases((family,)):
+                    with time_limit(CASE_TIMEOUT):
+                        frame = family.build(case.code)
+                    through.update(klass for klass in frame.protochain.protocols
+                                   if klass in members)
+            with self.subTest(table=path):
+                self.assertEqual(
+                    sorted(klass.__name__ for klass in members - through), [],
+                    f'{path}: no family under examples/generators/dispatch_families/ '
+                    f'probes it through these members')
+        self.assertTrue(checked, 'no __proto__ table is owned by a versioned family base, '
+                                 'so this test checks nothing')
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:
         """Every code either dispatches to its registered class, or degrades exactly as recorded.
