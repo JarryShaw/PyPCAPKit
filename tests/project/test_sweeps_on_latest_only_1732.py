@@ -20,7 +20,8 @@ of whose legs is ``latest``, asks for it on each, :class:`TestTheIntegrationSubs
 gives either job, with a ``python`` on ``PATH`` that records its arguments, so what
 is checked is the selection bash builds, not what the text appears to say.
 :class:`TestTheIgnoresAreTheLatestTier` asks pytest itself what those ignores leave
-out.
+out. :class:`TestEveryXdistRunCountsLogicalCPUs` holds every xdist run in the
+workflows but GraalPy's to ``-n logical`` (#2573).
 
 The owner's second ruling on #1732, option 2: nothing waits on the experimental
 legs, which with the caps GraalPy needs run for up to two hours. A job of
@@ -32,6 +33,7 @@ experimental.yml: :class:`TestTheExperimentalLegsAreAWorkflowOfTheirOwn`.
 
 from __future__ import annotations
 
+import copy
 import os
 import pathlib
 import re
@@ -46,11 +48,11 @@ from tests import _tiers
 from tests._support import bash_argv
 from tests.project.test_graalpy_shards_1963 import rest_ignores
 from tests.project.test_python_matrix_tiers_1633 import REQUIRED, is_experimental, job, legs, workflow
-from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose
+from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose, workflows
 from tests.project.test_release_gates import NULL, evaluate_expression
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Iterator, Optional
 
 #: Test tier (#1958): checks the workflows' tier selections.
 __tier__ = 'LATEST'
@@ -71,6 +73,12 @@ REPORTERS = ('ci-reports.yml',)
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
 #: The watcher's interpreter and its requests are capped too (#1938).
 CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
+#: A pytest-xdist worker count on a command line: ``-n X``, ``-nX``, ``--numprocesses X`` or
+#: ``--numprocesses=X``, with or without ``--dist`` after it.
+WORKERS_FLAG = re.compile(r'(?<![\w-])(?:--numprocesses(?:=|\s+)|-n\s*)(?P<value>[^\s;|&]+)')
+#: What ``-n auto`` and ``-n logical`` resolve to wherever it is set, as pytest-xdist's
+#: ``pytest_xdist_auto_num_workers`` reads it first.
+XDIST_ENV = 'PYTEST_XDIST_AUTO_NUM_WORKERS'
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
 #: A ``python`` that appends each argument on a line of ``$ARGS_FILE``, then an
@@ -284,7 +292,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 continue
             want = list(expected)
             if is_experimental(leg):
-                # #1740: the experimental step's own worker count, 3 on GraalPy and `auto` on the rest.
+                # #1740: the experimental step's own worker count, 3 on GraalPy and `logical` on the rest.
                 want[want.index('-n') + 1] = step_env(leg, EXPERIMENTAL)['WORKERS']
                 # #1753: and its replacements for crashed workers, after `--dist load`.
                 want.insert(want.index('--dist') + 2, '--max-worker-restart=30')
@@ -297,10 +305,11 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         """#2571: ``-n logical``, as ``auto`` counts physical cores wherever psutil is installed.
 
         PyPy's legs share the flag, and with no psutil there resolve it as ``auto`` would.
+        GraalPy's leg runs 3 workers (#1740).
 
         """
-        for version, (leg, argv) in self.runs.items():
-            if is_experimental(leg):
+        for version, (_, argv) in self.runs.items():
+            if version.startswith('graalpy'):
                 continue
             with self.subTest(python=version):
                 args = pytest_args(argv)
@@ -391,7 +400,7 @@ class TestTheIntegrationSubset(unittest.TestCase):
 
     @staticmethod
     def flags() -> 'list[str]':
-        return ['-q', '-n', 'auto', '--dist', 'load', '--durations=30', '--durations-min=1.0',
+        return ['-q', '-n', 'logical', '--dist', 'load', '--durations=30', '--durations-min=1.0',
                 f'--junitxml={RUNNER_TEMP}/junit.xml']
 
     def test_the_all_selection_leaves_out_the_latest_modules(self) -> None:
@@ -434,7 +443,98 @@ class TestTheIntegrationSubset(unittest.TestCase):
         self.assertNotIn(self.latest, [leg['python-version'] for leg in found])
         self.assertIn(_tiers.FIXTURE_ALL_TIER_SELECTOR, step(PARITY)['run'])
         self.assertEqual(pytest_args(run_step(legs(*PARITY)[0], PARITY)),
-                         ['-q', '-n', 'auto', '--dist', 'load'] + self.all)
+                         ['-q', '-n', 'logical', '--dist', 'load'] + self.all)
+
+
+def pytest_commands(run: 'str') -> 'Iterator[str]':
+    """Each command of a ``run:`` script that names pytest, or sets the positional arguments a later one passes.
+
+    A continued line is one command; a comment line is none.
+
+    """
+    for line in run.replace('\\\n', ' ').splitlines():
+        if line.lstrip().startswith('#'):
+            continue
+        for command in re.split(r';|&&|\|', line):
+            if 'pytest' in command.lower() or re.match(r'\s*set\s+--(?:\s|$)', command):
+                yield command
+
+
+def worker_counts(name: 'str', spec: 'dict[str, Any]') -> 'list[tuple[str, str]]':
+    """Each pytest-xdist worker count workflow ``name`` sets, with where it sets it.
+
+    A :data:`WORKERS_FLAG` in a pytest command or a ``PYTEST_ADDOPTS`` gives its value, and an
+    :data:`XDIST_ENV` anywhere in a job gives that name.
+
+    """
+    found = []  # type: list[tuple[str, str]]
+
+    def addopts(where: 'str', env: 'Any') -> None:
+        value = (env or {}).get('PYTEST_ADDOPTS')
+        if value is not None:
+            found.extend((where, match.group('value')) for match in WORKERS_FLAG.finditer(str(value)))
+
+    addopts(name, spec.get('env'))
+    if XDIST_ENV in repr(spec.get('env')):
+        found.append((name, XDIST_ENV))
+    for job_id, body in spec['jobs'].items():
+        if XDIST_ENV in repr(body):
+            found.append((f'{name} {job_id}', XDIST_ENV))
+        addopts(f'{name} {job_id}', body.get('env'))
+        for entry in body.get('steps') or ():
+            where = f"{name} {job_id}: {entry.get('name')}"
+            addopts(where, entry.get('env'))
+            for command in pytest_commands(str(entry.get('run', ''))):
+                found.extend((where, match.group('value')) for match in WORKERS_FLAG.finditer(command))
+    return found
+
+
+class TestEveryXdistRunCountsLogicalCPUs(unittest.TestCase):
+    """#2573: every pytest-xdist worker count in the workflows but ``experimental``'s is ``logical``, as ``test``'s is.
+
+    ``experimental``'s is its ``$WORKERS``, 3 on GraalPy, which :class:`TestTheStepSelectsByLeg` checks per leg.
+    Only the workflows are read, so the frozen copies under tests/project are left out.
+
+    """
+
+    #: ``experimental``'s count, the one that is not ``logical``.
+    OWN = (f'{EXPERIMENTAL[0]} {EXPERIMENTAL[1]}: {STEP}', '"$WORKERS"')
+    #: ``gate``'s step, which :meth:`test_each_spelling_of_another_count_is_caught` doctors.
+    GATE = ('unit-tests.yml', 'gate', INTEGRATION_STEP)
+
+    @classmethod
+    def stray(cls, found: 'list[tuple[str, str]]') -> 'list[tuple[str, str]]':
+        return [entry for entry in found if entry[1] != 'logical' and entry != cls.OWN]
+
+    def doctored(self, **change: 'Any') -> 'list[tuple[str, str]]':
+        """``gate``'s step with ``change`` applied, and what :func:`worker_counts` then finds astray."""
+        name, job_id, step_name = self.GATE
+        spec = copy.deepcopy(workflow(name))
+        entry = next(entry for entry in spec['jobs'][job_id]['steps'] if entry.get('name') == step_name)
+        self.assertIn('-n logical --dist load', entry['run'])
+        if 'flags' in change:
+            entry['run'] = entry['run'].replace('-n logical --dist load', change['flags'])
+        if 'env' in change:
+            entry['env'] = change['env']
+        return self.stray(worker_counts(name, spec))
+
+    def test_every_xdist_run_passes_n_logical(self) -> None:
+        found = [entry for name, spec in workflows() for entry in worker_counts(name, spec)]
+        self.assertEqual(self.stray(found), [])
+        self.assertIn(self.OWN, found)
+        self.assertIn((f'{self.GATE[0]} {self.GATE[1]}: {self.GATE[2]}', 'logical'), found)
+
+    def test_each_spelling_of_another_count_is_caught(self) -> None:
+        """A bare ``-n auto`` among them, with no ``--dist`` after it."""
+        where = f'{self.GATE[0]} {self.GATE[1]}: {self.GATE[2]}'
+        for flags, value in (('-n auto', 'auto'), ('-nauto', 'auto'), ('-n 2 --dist load', '2'),
+                             ('--numprocesses auto', 'auto'), ('--numprocesses=auto', 'auto')):
+            with self.subTest(flags=flags):
+                self.assertEqual(self.doctored(flags=flags), [(where, value)])
+        with self.subTest(env='PYTEST_ADDOPTS'):
+            self.assertEqual(self.doctored(env={'PYTEST_ADDOPTS': '-n auto'}), [(where, 'auto')])
+        with self.subTest(env=XDIST_ENV):
+            self.assertEqual(self.doctored(env={XDIST_ENV: '2'}), [(f'{self.GATE[0]} {self.GATE[1]}', XDIST_ENV)])
 
 
 def triggers(spec: 'dict[str, Any]') -> 'dict[str, Any]':

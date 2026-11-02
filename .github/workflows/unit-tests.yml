@@ -457,6 +457,8 @@ jobs:
       #
       # `read -ra` splits the selection on whitespace, as an unquoted
       # expansion would, but with no pathname expansion of a node ID.
+      #
+      # `-n logical` for the reason in `test`'s `Run unit tests` (#2571).
       - name: Run full test suite
         id: suite
         if: ${{ steps.install.outcome == 'success' }}
@@ -481,7 +483,7 @@ jobs:
           fi
           echo "Fixture-dependent selection: $selection"
           read -ra selection <<< "$selection"
-          python util/cap_file_size.py python -m pytest -q -n auto --dist load \
+          python util/cap_file_size.py python -m pytest -q -n logical --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${selection[@]}"
 
       # See the `test` job's step of the same name.
@@ -721,6 +723,8 @@ jobs:
       # that would otherwise skip it silently (#845 finding 2). `set +e` covers
       # only that install; the pip upgrade and the `test` extra run under
       # `set -eu`, as a broken base install would otherwise read as "expected" (#845).
+      #
+      # `-n logical` for the reason in `test`'s `Run unit tests` (#2571).
       - name: Write the per-cell script
         run: |
           cat > "$RUNNER_TEMP/engine-cell.sh" <<'CELL'
@@ -808,7 +812,7 @@ jobs:
           esac
           echo "Running: $TEST_PATHS"
           # shellcheck disable=SC2086
-          if ! python util/cap_file_size.py python -m pytest -q -n auto --dist load $TEST_PATHS; then
+          if ! python util/cap_file_size.py python -m pytest -q -n logical --dist load $TEST_PATHS; then
             echo "::${ANNOTATION_LEVEL} title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
             exit 1
           fi
@@ -1065,7 +1069,7 @@ jobs:
           fi
           echo "Fixture-dependent selection: $selection"
           read -ra selection <<< "$selection"
-          python util/cap_file_size.py python -m pytest -q -n auto --dist load "${selection[@]}"
+          python util/cap_file_size.py python -m pytest -q -n logical --dist load "${selection[@]}"
 
       # #1672: see the `test` job's step of the same name.
       - name: KTLO summary
@@ -1376,7 +1380,7 @@ jobs:
             exit 1
           fi
           read -ra pins <<< "$pins"
-          python util/cap_file_size.py python -m pytest -q -n auto --dist load \
+          python util/cap_file_size.py python -m pytest -q -n logical --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${pins[@]}"
 
       # #2164: the script's default stall dump sits under `unittest-ordering`'s
@@ -1448,9 +1452,9 @@ jobs:
       # Deliberately the whole suite, unlike `integration` (#715): `gate` runs
       # only under `gate-only: true`, never per PR push, and partitioning it
       # would trade away the "trust nothing, re-run everything" property this
-      # job exists for. `--dist load` as in the `test` job.
+      # job exists for. `-n logical --dist load` as in the `test` job.
       - name: Run full test suite
-        run: python util/cap_file_size.py python -m pytest -q -n auto --dist load
+        run: python util/cap_file_size.py python -m pytest -q -n logical --dist load
 
   # Ruleset 23497679's required_status_checks requires these contexts: this
   # job's `Required checks passed`, a `Compat Python` one per supported version,

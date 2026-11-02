@@ -44,7 +44,7 @@ class CoverageRcfileTests(unittest.TestCase):
                     self.assertEqual(self.rcfile.get(section, {}).get(key), value)
 
     def test_the_xdist_workers_are_measured(self) -> None:
-        """Without these two keys an ``-n auto`` run measures only the controller."""
+        """Without these two keys an ``-n logical`` run measures only the controller."""
         run = self.rcfile['run']
         self.assertIs(run.get('parallel'), True)
         self.assertIn('subprocess', run.get('patch', ()))
