@@ -122,7 +122,7 @@ import unittest
 #: Header fields shared by every constructed segment here, spelled with the parameter
 #: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` actually declares.
 #:
-#: Deliberately *not* a copy of :data:`examples.generators.options.TCP_BASE`, which
+#: Deliberately *not* a copy of :data:`examples.generators.option_families.tcp.TCP_BASE`, which
 #: sibling modules in this directory mirror -- and, unlike theirs, this dict omits
 #: ``syn``/``ack`` altogether, since every case here passes those two explicitly to
 #: select a layout, where a shared constant could not. The names matter: ``ack`` is the

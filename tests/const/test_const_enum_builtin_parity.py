@@ -62,6 +62,7 @@ import aenum
 
 from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
                             restore_modules, snapshot_modules)
+from tests.const import census
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -351,39 +352,43 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # pre-purge modules so the polluted ones are unreachable.
         cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
-    def test_the_sweep_size_is_pinned(self) -> None:
-        """A registry added or removed needs a fresh look, not a silent pass."""
+    def test_the_sweep_matches_the_census(self) -> None:
+        """A registry added, removed or re-kinded needs a fresh look, not a silent pass.
+
+        Each registry is held to its line in :mod:`tests.const.census` (#2615),
+        so a failure names it. The decomposition is asserted, not just the
+        whole, so this sweep stays in step with the narrower ones it overlaps:
+        the non-flag IntEnum and the IntFlag sweeps of
+        :mod:`tests.const.test_const_enum_lookup`, and their union in
+        :mod:`tests.const.test_const_enum_get`. ``TransportProtocol`` has no
+        ``IntFlag`` base (GitHub issue #808), so it is recorded as ``'int'``.
+
+        The application layer registry, which GitHub issue #732 split into a
+        package -- the memberless :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+        base plus one registry per transport protocol -- accounts for several of
+        the ``'str'`` registries. It is discovered exactly like a member-bearing
+        registry, since this sweep is structural and never looks at members.
+        Another is GitHub issue #886's
+        :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` -- it defines no
+        ``_missing_`` of its own, so it is not among the ``value.upper()``
+        outliers #647 fixed above, and it is outside the narrower
+        ``(IntEnum, IntFlag)``-only sweep of :mod:`tests.const.test_const_enum_get`.
+        GitHub issue #880's ``ngap.ProcedureCode`` and ``ngap.ProtocolIE`` are
+        on EnumRegistry, and so ``'int'``.
+
+        """
         flags = [obj for obj in self.enums if issubclass(obj, aenum.Flag)]
         strs = [obj for obj in self.enums
                 if issubclass(obj, str) and not issubclass(obj, aenum.Flag)]
         ints = [obj for obj in self.enums
                 if issubclass(obj, int) and not issubclass(obj, aenum.Flag)]
 
-        # The decomposition is asserted, not just the total, so this sweep stays
-        # in step with the three narrower ones it overlaps: the non-flag IntEnum
-        # and the IntFlag sweeps of tests.const.test_const_enum_lookup, and their
-        # sum in tests.const.test_const_enum_get. ``TransportProtocol`` has no
-        # ``IntFlag`` base (GitHub issue #808), so it is in the int count.
-        #
-        # The application layer registry, which GitHub issue #732 split into a
-        # package -- the memberless pcapkit.const.reg.apptype.apptype.AppType base
-        # plus one registry per transport protocol -- accounts for several of the
-        # string registries. It is discovered exactly like a member-bearing
-        # registry, since this sweep is structural and never looks at members.
-        # Another is GitHub issue #886's
-        # pcapkit.const.pcapng.tls_key_label.TLSKeyLabel -- it defines no
-        # ``_missing_`` of its own, so it is not among the ``value.upper()``
-        # outliers #647 fixed above, and it is outside
-        # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
-        # sweep. The int count includes GitHub issue #880's ngap.ProcedureCode
-        # and ngap.ProtocolIE, which are on EnumRegistry, as are the ICMP,
-        # ICMPv6, IGMP and DCCP registry families, and the IEEE 802.11 type
-        # and subtype registries of GitHub issue #2575.
-        self.assertEqual(len(ints), 141)
-        self.assertEqual(len(flags), 6)
-        self.assertEqual(len(strs), 10)
-        self.assertEqual(len(self.enums), 157)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 151)
+        self.assertEqual(census.compare(map(_qualname, self.enums), census.names(*census.KINDS)),
+                         census.AGREES, census.ADVICE)
+        for kind, found in (('int', ints), ('flag', flags), ('str', strs)):
+            with self.subTest(kind=kind):
+                self.assertEqual(census.compare(map(_qualname, found), census.names(kind)),
+                                 census.AGREES, census.ADVICE)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.

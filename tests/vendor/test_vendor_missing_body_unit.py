@@ -69,27 +69,61 @@ __tier__ = 'LATEST'
 #: ``pcapkit`` an editable install happens to resolve.
 VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 
-#: How many crawlers emit at least one *hard-coded* line into ``miss`` as a
-#: string-constant list literal. Pinned so a crawler that leaves this shape --
-#: switching to ``.append()``, or dropping its unassigned range -- is visible
-#: here rather than silently shrinking the sweep below. It does **not** catch
-#: the opposite drift: a brand-new crawler that starts in a shape this guard
-#: never covered joins invisibly, because nothing here shrinks when one is
-#: added.
-#:
-#: Only those crawlers are visible to this guard. Every other crawler that
-#: defines ``process()`` -- one that builds ``miss`` by ``.append()``, or never
-#: returns an ``(enum, miss)`` pair at all -- is invisible to it, not merely the
-#: crawlers named as examples in :func:`_constant_miss_lines`'s docstring
-#: below. A crawler that assigns ``miss`` from a comprehension, from a variable,
-#: or under a different variable name entirely is skipped by construction too,
-#: same as one built by ``.append()``. Those are covered behaviourally, not
-#: statically, by :file:`tests/const/test_const_enum_lookup.py`.
-#: The ICMP, ICMPv6 and IGMP ``type`` crawlers seed ``miss`` with an empty
-#: list or build their bodies dynamically, so they do not all count here. The
-#: constant-body crawlers still present in the merged tree are the updated count
-#: that the static sweep pins.
-EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 45
+#: Every crawler that emits at least one *hard-coded* line into ``miss`` as a
+#: string-constant list literal, sorted, one per line, so that unrelated
+#: additions land on different lines (#2615). Listed so a crawler that leaves
+#: this shape -- switching to ``.append()``, or dropping its unassigned range --
+#: or joins it fails by name, rather than shrinking or growing the sweep below
+#: silently. A crawler in any other shape is invisible to this guard; see
+#: :func:`_constant_miss_lines` for which, and
+#: :file:`tests/const/test_const_enum_lookup.py` for their behavioural cover.
+CRAWLERS_WITH_CONSTANT_MISS_LINES = (
+    'pcapkit/vendor/icmp/destination_unreachable_code.py',
+    'pcapkit/vendor/icmp/parameter_problem_code.py',
+    'pcapkit/vendor/icmp/time_exceeded_code.py',
+    'pcapkit/vendor/icmpv6/destination_unreachable_code.py',
+    'pcapkit/vendor/icmpv6/parameter_problem_code.py',
+    'pcapkit/vendor/icmpv6/time_exceeded_code.py',
+    'pcapkit/vendor/igmp/record_type.py',
+    'pcapkit/vendor/ipv4/classification_level.py',
+    'pcapkit/vendor/ipv4/option_class.py',
+    'pcapkit/vendor/ipv4/option_number.py',
+    'pcapkit/vendor/ipv4/protection_authority.py',
+    'pcapkit/vendor/ipv4/qs_function.py',
+    'pcapkit/vendor/ipv4/tos_del.py',
+    'pcapkit/vendor/ipv4/tos_ecn.py',
+    'pcapkit/vendor/ipv4/tos_pre.py',
+    'pcapkit/vendor/ipv4/tos_rel.py',
+    'pcapkit/vendor/ipv4/tos_thr.py',
+    'pcapkit/vendor/ipv4/ts_flag.py',
+    'pcapkit/vendor/ipv6/option.py',
+    'pcapkit/vendor/ipv6/option_action.py',
+    'pcapkit/vendor/ipv6/qs_function.py',
+    'pcapkit/vendor/ipv6/seed_id.py',
+    'pcapkit/vendor/ipv6/smf_dpd_mode.py',
+    'pcapkit/vendor/ipx/packet.py',
+    'pcapkit/vendor/l2tp/type.py',
+    'pcapkit/vendor/linux/arphrd.py',
+    'pcapkit/vendor/mh/auth_subtype.py',
+    'pcapkit/vendor/mh/binding_error.py',
+    'pcapkit/vendor/mh/cga_type.py',
+    'pcapkit/vendor/mh/dhcp_support_mode.py',
+    'pcapkit/vendor/mh/enumerating_algorithm.py',
+    'pcapkit/vendor/mh/lla_code.py',
+    'pcapkit/vendor/mh/option.py',
+    'pcapkit/vendor/mh/packet.py',
+    'pcapkit/vendor/pcapng/filter_type.py',
+    'pcapkit/vendor/pcapng/hash_algorithm.py',
+    'pcapkit/vendor/pcapng/option_type.py',
+    'pcapkit/vendor/pcapng/record_type.py',
+    'pcapkit/vendor/pcapng/secrets_type.py',
+    'pcapkit/vendor/pcapng/verdict_type.py',
+    'pcapkit/vendor/reg/linktype.py',
+    'pcapkit/vendor/sslv2/handshake_type.py',
+    'pcapkit/vendor/sslv2/version.py',
+    'pcapkit/vendor/tcp/checksum.py',
+    'pcapkit/vendor/vlan/priority_level.py',
+)
 
 
 def _constant_miss_lines() -> 'dict[str, list[str]]':
@@ -98,13 +132,13 @@ def _constant_miss_lines() -> 'dict[str, list[str]]':
     Returns a mapping of repository-relative crawler path to the list of
     string constants in its ``miss`` list literal. A crawler that builds
     ``miss`` by ``.append()``, assigns it from a comprehension or a variable,
-    or never returns an ``(enum, miss)`` pair at all, is absent from the
-    returned mapping entirely -- not present with an empty list. That is
-    every other crawler module defining ``process()``, not just the
+    names it otherwise, or never returns an ``(enum, miss)`` pair at all, is
+    absent from the returned mapping entirely -- not present with an empty
+    list. That is every other crawler module defining ``process()``, not just the
     examples this docstring names
     (:mod:`pcapkit.vendor.reg.ethertype`, :mod:`pcapkit.vendor.ipx.socket`);
-    see :data:`EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES` for the
-    breakdown. They are covered behaviourally, not statically, by
+    see :data:`CRAWLERS_WITH_CONSTANT_MISS_LINES` for the ones present.
+    They are covered behaviourally, not statically, by
     :file:`tests/const/test_const_enum_lookup.py`.
 
     """
@@ -132,13 +166,20 @@ class VendorMissingBodyTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.miss_lines = _constant_miss_lines()  # type: ignore[attr-defined]
 
-    def test_the_sweep_size_is_pinned(self) -> None:
+    def test_the_sweep_matches_the_list(self) -> None:
         """A crawler leaving or joining the sweep must be deliberate."""
-        self.assertEqual(len(self.miss_lines),  # type: ignore[attr-defined]
-                         EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES,
-                         'the set of crawlers emitting a constant ``_missing_`` body '
-                         'changed; update EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES '
-                         'once you have checked the new ones still return')
+        found = set(self.miss_lines)  # type: ignore[attr-defined]
+        listed = set(CRAWLERS_WITH_CONSTANT_MISS_LINES)
+        self.assertEqual({'joined': sorted(found - listed), 'left': sorted(listed - found)},
+                         {'joined': [], 'left': []},
+                         'the crawlers that emit a constant ``_missing_`` body differ '
+                         'from CRAWLERS_WITH_CONSTANT_MISS_LINES, which lists each one '
+                         'whose body has been checked to end in a return')
+
+    def test_the_list_is_sorted_and_unique(self) -> None:
+        """Sorted, so that unrelated additions land on different lines (#2615)."""
+        self.assertEqual(list(CRAWLERS_WITH_CONSTANT_MISS_LINES),
+                         sorted(set(CRAWLERS_WITH_CONSTANT_MISS_LINES)))
 
     def test_the_hard_coded_body_ends_in_a_return(self) -> None:
         """The invariant #866 is about, restated to the shape that is true.

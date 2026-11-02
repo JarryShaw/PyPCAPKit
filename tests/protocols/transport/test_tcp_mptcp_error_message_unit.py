@@ -49,7 +49,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Header fields for a segment built through the public constructor, spelled with
 #: the parameter names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`
 #: actually declares. The same mapping, and the same reason for not reusing
-#: :data:`examples.generators.options.TCP_BASE`, as
+#: :data:`examples.generators.option_families.tcp.TCP_BASE`, as
 #: :data:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit.TCP_HEADER`.
 TCP_HEADER = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,

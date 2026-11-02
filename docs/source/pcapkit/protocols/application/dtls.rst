@@ -56,19 +56,21 @@ Connection IDs
 --------------
 
 A ``tls12_cid`` record carries a connection ID between its sequence number
-and its length (:rfc:`9146#section-4`), and the ID's length is negotiated
-rather than carried.
-:class:`~pcapkit.protocols.application.dtls.DTLSContext` resolves it, in this
-order:
+and its length (:rfc:`9146#section-4`), and a DTLS 1.3 unified header with
+its ``C`` bit set carries one between its first octet and its sequence number
+(:rfc:`9147#section-4`). Either way the ID's length is negotiated rather than
+carried. :class:`~pcapkit.protocols.application.dtls.DTLSContext` resolves
+it for both, in this order:
 
-* a connection ID the record begins with that a ``ClientHello`` or
-  ``ServerHello`` ``connection_id`` extension negotiated earlier in the
-  capture, each peer naming the one it receives (:rfc:`9146#section-3`);
+* a connection ID that a ``ClientHello`` or ``ServerHello``
+  ``connection_id`` extension negotiated earlier in the capture, each peer
+  naming the one it receives (:rfc:`9146#section-3`,
+  :rfc:`9147#section-9.1`), and that the record's ID begins with;
 * the ``cid_length`` the caller gives
   :class:`~pcapkit.protocols.application.dtls.DTLSContext`.
 
 Without either the record stays :class:`~pcapkit.protocols.misc.raw.Raw`.
-A dissected one reports its epoch, sequence number, connection ID and length,
+A dissected one reports its connection ID alongside its other header fields,
 and keeps its encrypted content as octets. The context reaches DTLS through
 :mod:`pcapkit.corekit.context`:
 
@@ -93,7 +95,7 @@ Matching by value relies on IDs being self-delineating
 
 A rebuild parses each layer's octets again, so ``from_data`` takes the same
 ``__context__``. Without it the octets still rebuild exactly, and
-``DTLS.from_data`` keeps its chain, but a ``tls12_cid`` record under a
+``DTLS.from_data`` keeps its chain, but a record with a connection ID under a
 rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 Records in One Datagram
@@ -111,9 +113,8 @@ exceptions:
   :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it.
 * Octets that open no whole record stay raw, with no error: an unsupported
   content type, a legacy version outside ``0xFExx``, a header cut short, a
-  length past the end of the datagram, a unified header with a connection
-  ID, or a ``tls12_cid`` record whose connection ID is not known, either of
-  which leaves the record's end unknown.
+  length past the end of the datagram, or a connection ID whose length is
+  not known, which leaves the record's end unknown.
 * A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
   keeps the rest of the datagram raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
@@ -131,12 +132,13 @@ message, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it
 with :meth:`~pcapkit.protocols.application.dtls.DTLS.analyze_handshake`, which
 reads it with :meth:`~pcapkit.protocols.application.dtls.DTLS.read_handshake`.
 
-**A unified-header record with a connection ID is not decoded**
-(:rfc:`9147#section-4.1`, :issue:`2467`). Its length is negotiated, not carried
-in the record, so it degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
-
 **A connection ID negotiated in a fragmented hello is not learned**: the
 message is not decoded here, so its ``connection_id`` extension is not read.
+
+**A connection ID a DTLS 1.3** ``NewConnectionId`` **issues is not learned**
+(:rfc:`9147#section-9`, :issue:`2625`): the message is encrypted, so only the
+caller can give it to
+:class:`~pcapkit.protocols.application.dtls.DTLSContext`.
 
 **A unified-header record carries only the low two bits of the epoch**, and
 its sequence number is header-protected, so the values it reports are the

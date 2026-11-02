@@ -22,7 +22,8 @@ layer is supplied the same way, as packet context. Where none closes, the first
 instance that packed is the one reported. :data:`OVERRIDES` holds the few
 values no field type implies (a magic number, a NUL-terminated name), and
 :data:`PARSE_CONTEXT` the context only the parse reads, which packing derives
-for itself and so never reports missing.
+for itself and so never reports missing. A bit-field subfield an override sets
+is pinned rather than searched, so a condition it opens stays open.
 
 A *dispatcher* -- a schema whose ``post_process`` returns the schema it
 selected, such as TCP's ``_MPTCP`` -- is checked through its targets instead:
@@ -86,6 +87,12 @@ OVERRIDES = {
     'internet.igmpv3:IGMPv3': {'type': lambda module: module.Enum_Type.IGMP_Membership_Query},
     # The record does not carry the CID's length, so PARSE_CONTEXT gives it.
     'application.dtls:DTLSCIDCiphertext': {'cid': CID},
+    # A unified header carries a CID only with its C bit set, which the drivers
+    # would clear, so the flags are pinned: prefix 001, C set, S and L clear (#2625).
+    'application.dtls:DTLSCiphertext': {
+        'flags': {'fixed': 1, 'connection_id': 1, 'sequence_long': 0, 'length_present': 0, 'epoch': 0},
+        'cid': CID,
+    },
 }  # type: dict[str, dict[str, Any]]
 
 #: Packet context the enclosing layer gives a schema's parser and its packing does
@@ -95,6 +102,7 @@ OVERRIDES = {
 #: is agreed out of band, not carried [RFC 9146 section 4].
 PARSE_CONTEXT = {
     'application.dtls:DTLSCIDCiphertext': {'__cid_length__': len(CID)},
+    'application.dtls:DTLSCiphertext': {'__cid_length__': len(CID)},
 }  # type: dict[str, dict[str, Any]]
 
 #: Packet context a dispatch target needs from its enclosing layer.
@@ -142,6 +150,13 @@ class AutoZero(int):
 def label_of(cls: 'type') -> 'str':
     """``module:Qualname``, relative to :data:`PREFIX`."""
     return f'{cls.__module__.replace(PREFIX, "")}:{cls.__qualname__}'
+
+
+def overrides_of(cls: 'type') -> 'dict[str, Any]':
+    """``cls``'s :data:`OVERRIDES`, each callable resolved against its module."""
+    module = importlib.import_module(cls.__module__)
+    return {name: value(module) if callable(value) else value
+            for name, value in OVERRIDES.get(label_of(cls), {}).items()}
 
 
 def schema_classes() -> 'dict[str, type]':
@@ -219,6 +234,7 @@ def drivers(cls: 'type') -> 'list[tuple[str, Optional[str], int]]':
         for fn in _callbacks(field):
             names |= _strings(fn)
 
+    overrides = overrides_of(cls)
     found = []  # type: list[tuple[str, Optional[str], int]]
     for name, field in cls.__fields__.items():
         field = _unwrap(field)
@@ -228,8 +244,9 @@ def drivers(cls: 'type') -> 'list[tuple[str, Optional[str], int]]':
             width = field._bit_length if field._bit_length >= 0 else 8 * max(field._length, 1)  # pylint: disable=protected-access
             found.append((name, None, (1 << width) - 1))
         elif isinstance(field, BitField):
+            pinned = overrides.get(name) if isinstance(overrides.get(name), dict) else {}
             for sub, (_, size) in field._namespace.items():  # pylint: disable=protected-access
-                if sub in names:
+                if sub in names and sub not in pinned:
                     found.append((name, sub, (1 << size) - 1))
     return found
 
@@ -370,9 +387,7 @@ def _base_values(cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> 'dict[str,
     from pcapkit.corekit.fields.numbers import EnumField
     from pcapkit.corekit.fields.strings import BitField
 
-    module = importlib.import_module(cls.__module__)
-    overrides = {name: value(module) if callable(value) else value
-                 for name, value in OVERRIDES.get(label_of(cls), {}).items()}
+    overrides = overrides_of(cls)
     values = {}  # type: dict[str, Any]
     for name, field in cls.__fields__.items():
         # An override is visible to a selector that reads it, as it would be on the wire.
@@ -664,6 +679,23 @@ class SchemaRoundTripTests(KnownFailureTable, unittest.TestCase):
         for dispatcher in DISPATCHERS:
             self.assertTrue(any(label.startswith(f'dispatch/{dispatcher}/') for label in dispatch),
                             f'{dispatcher} has no targets')
+
+    def test_an_override_pins_the_bit_field_subfields_it_sets(self) -> None:
+        classes = schema_classes()
+        for label in OVERRIDES:
+            for name, value in overrides_of(classes[label]).items():
+                if isinstance(value, dict):
+                    searched = {sub for field, sub, _ in drivers(classes[label]) if field == name}
+                    self.assertEqual(sorted(searched & set(value)), [], f'{label}.{name} is overridden yet searched')
+
+    def test_each_parse_context_entry_is_read_by_its_case(self) -> None:
+        """Without its entry the case fails its reparse, so the case reaches the parse that reads it."""
+        classes = schema_classes()
+        for label in PARSE_CONTEXT:
+            with self.subTest(case=label):
+                out = build(classes[label])
+                self.assertEqual(len(out), 2, f'{label} closes without its PARSE_CONTEXT entry')
+                self.assertEqual(out[1].status, 'REPARSE')
 
     def test_the_census_is_the_whole_package(self) -> None:
         """Every schema with fields is a case, a dispatcher, or the base classes."""

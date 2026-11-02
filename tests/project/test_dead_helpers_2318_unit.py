@@ -4,7 +4,7 @@
 A helper nothing reads answers a question nobody asks. Each is held to the rule
 that makes it worth keeping rather than to its name.
 
-A ``Family`` in ``examples/generators/dispatch.py`` carries an ``enum`` only
+A ``Family`` under ``examples/generators/dispatch_families/`` carries an ``enum`` only
 where :func:`code_name` can fall back to one, i.e. where the family's registry
 holds a key with no ``.name`` of its own; every key of ``Internet.__proto__``
 carries one, so the ``internet`` family needs no ``enum``. A ``FAKE_GH`` arm

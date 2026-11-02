@@ -26,7 +26,10 @@ Every case builds its own octets in memory and reads no capture under
 """
 from __future__ import annotations
 
+import collections
+import importlib
 import importlib.util
+import pkgutil
 import sys
 import types
 import unittest
@@ -47,6 +50,44 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Whole seconds one case may take. A working case takes low single-digit
 #: milliseconds; the point of the deadline is a case that never finishes.
 CASE_TIMEOUT = 30
+
+#: The non-empty ``__proto__`` tables no family probes, by ``module.Class``
+#: path, and why. Every other one is some family's registry (#2615).
+UNCOVERED = {
+    'pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__':
+        'its ARPHRD entries are pinned as shipped and probed one by one by '
+        'tests/protocols/link/test_linux_sll_arphrd_registry_unit.py (#2510)',
+}
+
+
+def _proto_tables() -> 'dict[str, dict[Any, Any]]':
+    """Every non-empty ``__proto__`` table a protocol class defines itself, by path.
+
+    Found by walking every :class:`~pcapkit.protocols.protocol.ProtocolBase`
+    descendant once every shipped protocol module is imported, as
+    :mod:`tests.foundation.registry.test_registry_wrapper_coverage_2511_unit`
+    finds its maps.
+
+    """
+    import pcapkit.protocols as package
+    from pcapkit.protocols.protocol import ProtocolBase
+
+    for info in pkgutil.walk_packages(package.__path__, 'pcapkit.protocols.'):
+        if 'NotImplemented' not in info.name:
+            importlib.import_module(info.name)
+    found = {}  # type: dict[str, dict[Any, Any]]
+    seen = set()  # type: set[type]
+    pending = [ProtocolBase]  # type: list[type]
+    while pending:
+        klass = pending.pop()
+        if klass in seen:
+            continue
+        seen.add(klass)
+        pending.extend(klass.__subclasses__())
+        table = vars(klass).get('__proto__')
+        if isinstance(table, dict) and table:
+            found[f'{klass.__module__}.{klass.__qualname__}.__proto__'] = table
+    return found
 
 
 class Degrade(NamedTuple):
@@ -160,7 +201,7 @@ class DispatchRegistryTests(unittest.TestCase):
                 self.assertEqual(
                     set(registry), covered,
                     f'{family.label}: every code in the registry needs a case in '
-                    f'examples/generators/dispatch.py'
+                    f'its module under examples/generators/dispatch_families/'
                 )
 
     def test_every_case_has_a_pinned_target(self) -> None:
@@ -195,7 +236,7 @@ class DispatchRegistryTests(unittest.TestCase):
         pointing ``Internet.__proto__[TransType.AH]`` at
         :class:`~pcapkit.protocols.misc.raw.Raw` instead of
         :class:`~pcapkit.protocols.internet.ah.AH` changes nothing
-        :meth:`test_cases_cover_every_table_named_in_the_issue` looks at, nor
+        :meth:`test_cases_match_the_pinned_targets` looks at, nor
         anything a registry-derived dispatch check would, and both pass. This
         test does not: it compares
         :attr:`Case.registered` -- what the table says at run time -- against
@@ -215,41 +256,68 @@ class DispatchRegistryTests(unittest.TestCase):
                     f'deliberate change.'
                 )
 
-    def test_cases_cover_every_table_named_in_the_issue(self) -> None:
-        """The enumeration finds every entry, across the tables of #496, #1574 and #2560.
+    def test_cases_match_the_pinned_targets(self) -> None:
+        """The enumeration finds exactly the entries :data:`PINNED_TARGETS` records.
 
-        A guard on the shape of the result rather than on any one case: if the
-        registries grow or shrink without this module noticing, the per-family
-        counts below catch it even if every individual case still passes.
+        A guard on the shape of the result rather than on any one case: a
+        table that loses an entry, or a family whose table goes missing, leaves
+        a pinned target that no case reaches, and a table that gains one leaves
+        a case that nothing pins -- even if every individual case still
+        passes. Each family module records its own table's entries beside the
+        family (#2615), so the expected shape is derived from those records
+        rather than pinned here as counts, and a failure names the entry.
 
         """
-        cases = self.dispatch.cases()
-        # The tables of #496, including #904's Internet.__proto__[TransType.Shim6]
-        # registered at IPv6_Ext rather than defaulting to Raw, plus #1574's
-        # LinkType.NULL and LinkType.LOOP in both link-type tables, the four
-        # address families of Loopback.__proto__, #2438's
-        # Frame.__proto__[LinkType.LINUX_SLL]/[LinkType.LINUX_SLL2] in both the
-        # pcap and pcapng frame tables, #2439's IGMP, #2436's
-        # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], #2489's
-        # Internet.__proto__[TransType.DCCP], #2560's two NLPIDs of
-        # FRAD.__proto__, #2575's Radiotap.__proto__[LinkType.IEEE802_11], and
-        # #2608's LinkType.IEEE802_11 and LinkType.IEEE802_11_RADIOTAP in both
-        # link-type tables.
-        self.assertEqual(len(cases), 64,
-                         'expected exactly 64 entries across the seven __proto__ '
-                         'tables named in GitHub issue #496, the loopback table '
-                         'of #1574, the FRAD table of #2560 and the radiotap table '
-                         'of #2575; a different count means a registry changed '
-                         'shape and this module was not updated to match')
+        labels = [case.label for case in self.dispatch.cases()]
+        pinned = set(self.dispatch.PINNED_TARGETS)
+        found = collections.Counter(labels)
+        self.assertEqual(
+            {'found twice': sorted(label for label, count in found.items() if count > 1),
+             'not pinned': sorted(set(found) - pinned),
+             'pinned but not found': sorted(pinned - set(found))},
+            {'found twice': [], 'not pinned': [], 'pinned but not found': []},
+            'the __proto__ tables and the PINNED_TARGETS of their modules under '
+            'examples/generators/dispatch_families/ disagree; a registry changed '
+            'shape and its family module was not updated to match')
 
-        by_family = {}  # type: dict[str, int]
-        for case in cases:
-            by_family[case.family] = by_family.get(case.family, 0) + 1
-        self.assertEqual(by_family, {
-            'link': 7, 'internet': 21, 'tcp': 5, 'udp': 4, 'sctp': 2,
-            'pcap-frame': 9, 'pcapng-frame': 9, 'loopback': 4, 'frad': 2,
-            'radiotap': 1,
-        })
+        families = {family.label for family in self.dispatch.FAMILIES}
+        self.assertEqual(sorted(families - {case.family for case in self.dispatch.cases()}), [],
+                         'a family whose table holds no entry probes nothing')
+
+    def test_each_family_module_pins_its_own_families(self) -> None:
+        """A family module pins its own families' entries, under labels no other module uses.
+
+        Merging the modules' tables would otherwise let one module's entry
+        replace another's without a word, and a family's entries filed in the
+        wrong module would put two changes to one family in two files.
+
+        """
+        labels = [family.label for family in self.dispatch.FAMILIES]
+        self.assertEqual(sorted(labels), sorted(set(labels)), 'a family label is used twice')
+        for stem, module in self.dispatch.FAMILY_MODULES.items():
+            own = {family.label for family in module.FAMILIES}
+            with self.subTest(module=stem):
+                self.assertTrue(own, f'{stem} adds no family')
+                strays = sorted(label for label in module.PINNED_TARGETS
+                                if label.split('/', 1)[0] not in own)
+                self.assertEqual(strays, [], f'{stem} pins entries of another module\'s family')
+
+    def test_every_dispatch_table_has_a_family(self) -> None:
+        """Every non-empty ``__proto__`` table is a family's registry, or in :data:`UNCOVERED`.
+
+        Derived from the tree's own tables rather than from the family modules,
+        so a family module that goes missing, its pinned targets with it, still
+        fails here, as does a table no family probes. Checked both ways, so an
+        :data:`UNCOVERED` entry whose table gains a family, or empties, is stale.
+
+        """
+        covered = {id(family.registry()) for family in self.dispatch.FAMILIES}
+        uncovered = sorted(path for path, table in _proto_tables().items()
+                           if id(table) not in covered)
+        self.assertEqual(uncovered, sorted(UNCOVERED),
+                         'a non-empty __proto__ table needs a family module under '
+                         'examples/generators/dispatch_families/, or an UNCOVERED '
+                         'entry saying what covers it instead')
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:
         """Every code either dispatches to its registered class, or degrades exactly as recorded.
