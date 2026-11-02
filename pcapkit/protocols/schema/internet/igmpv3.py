@@ -168,11 +168,6 @@ class Query(Schema):
     #: :attr:`QueryExtension.payload <QueryExtension>` instead -- see there.
     payload: 'bytes' = PayloadField()
 
-    if TYPE_CHECKING:
-        def __init__(self, max_resp_code: 'int', checksum: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-                     group: 'IPv4Address | str | bytes | int', ext: 'Optional[QueryExtension]',
-                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
-
     def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':
         """Get payload of :class:`Query`.
 
@@ -189,6 +184,11 @@ class Query(Schema):
         if self.ext is not None:
             return self.ext.get_payload()  # pylint: disable=no-member
         return super().get_payload('payload')
+
+    if TYPE_CHECKING:
+        def __init__(self, max_resp_code: 'int', checksum: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+                     group: 'IPv4Address | str | bytes | int', ext: 'Optional[QueryExtension]',
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
 
 
 @schema_final
@@ -253,11 +253,6 @@ class Report(Schema):
     #: :attr:`num_group_records` matching the octets actually present.
     payload: 'bytes' = PayloadField()
 
-    if TYPE_CHECKING:
-        def __init__(self, reserved_1: 'int', checksum: 'bytes', reserved_2: 'bytes',
-                     num_group_records: 'int', records: 'list[GroupRecord]',
-                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':  # pylint: disable=unused-argument
         """Trim :attr:`records` to :attr:`num_group_records` and reclaim the rest as :attr:`payload`.
 
@@ -287,6 +282,11 @@ class Report(Schema):
             self.__buffer__['payload'] = raw[consumed:]
         return self
 
+    if TYPE_CHECKING:
+        def __init__(self, reserved_1: 'int', checksum: 'bytes', reserved_2: 'bytes',
+                     num_group_records: 'int', records: 'list[GroupRecord]',
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+
 
 @schema_final
 class IGMPv3(Schema):
@@ -311,9 +311,6 @@ class IGMPv3(Schema):
     #: Message body, switched on :attr:`type`.
     body: 'Query | Report' = SwitchField(selector=igmpv3_body_selector)
 
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Type | int', body: 'Query | Report | bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
-
     def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':  # pylint: disable=unused-argument
         """Get payload of :class:`IGMPv3`.
 
@@ -329,3 +326,6 @@ class IGMPv3(Schema):
         if isinstance(self.body, Schema):
             return self.body.get_payload()
         return b''
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Type | int', body: 'Query | Report | bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin

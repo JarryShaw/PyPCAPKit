@@ -903,6 +903,102 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             raise ProtocolError('TCP: invalid format')
         return options
 
+    def _make_tcp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option',
+                          padding: 'bytes' = b'') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for TCP.
+
+        Args:
+            options: TCP options
+            padding: octets after the End of Option List option
+
+        Returns:
+            Tuple of options and total length of options.
+
+        Raises:
+            ProtocolError: If an option maker rejects its option, e.g. a user
+                timeout too large for 15 bits of minutes, or an MPTCP option
+                whose fields, or the segment's flags, it cannot encode.
+            ProtocolNotImplemented: If an option argument given by name, an
+                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is
+                not in its namespace and has no default.
+            FieldValueError: If an ADD_ADDR ``addr`` is a :obj:`bool` or not a
+                valid IP address.
+
+        Note:
+            The options are emitted in the given order, ``NOP`` and ``EOOL``
+            included, so that a parsed option list re-emits the same octets.
+            ``padding`` follows them as given if they end with ``EOOL``, and is
+            dropped otherwise. Alignment is added only once, after that, when
+            the list does not end on a 32-bit boundary: zero octets if the list
+            already ends with ``EOOL``, otherwise ``NOP`` options followed by an
+            ``EOOL``.
+
+        """
+        total_length = 0
+        options_list = []  # type: list[Schema_Option | bytes]
+        code = None  # type: Optional[Enum_Option]
+        if isinstance(options, list):
+            for schema in options:
+                if isinstance(schema, bytes):
+                    code = Enum_Option.get(schema[0])
+                    data = schema  # type: Schema_Option | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.kind
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    name = self._lookup_registry(self.__option__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_mode_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_mode_donone))
+                    else:
+                        meth = name[1]
+
+                    data = meth(code, **args)
+                    data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+        else:
+            for code, option in options.items(multi=True):
+                name = self._lookup_registry(self.__option__, code)
+                if isinstance(name, str):
+                    meth_name = f'_make_mode_{name}'
+                    meth = cast('OptionConstructor',
+                                getattr(self, meth_name, self._make_mode_donone))
+                else:
+                    meth = name[1]
+
+                data = meth(code, option)
+                data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+
+        # NOTE: ``padding`` belongs after an End of Option List option; with
+        # that gone -- e.g. options edited after parsing -- it is dropped, and
+        # the Data Offset is computed from the options alone.
+        if padding and code == Enum_Option.End_of_Option_List:
+            options_list.append(padding)
+            total_length += len(padding)
+
+        # force alignment to 32-bit boundary
+        if total_length % 4:
+            pad_len = 4 - (total_length % 4)
+            total_length += pad_len
+
+            if code == Enum_Option.End_of_Option_List:
+                options_list.append(bytes(pad_len))
+            else:
+                pad_opt = self._make_mode_nop(Enum_Option.No_Operation)  # type: ignore[arg-type]
+                for _ in range(pad_len - 1):
+                    options_list.append(pad_opt)
+                options_list.append(self._make_mode_eool(Enum_Option.End_of_Option_List))  # type: ignore[arg-type]
+        return options_list, total_length
+
     def _read_mode_donone(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read TCP unassigned option.
 
@@ -2215,102 +2311,6 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             cookie=schema.cookie if schema.cookie is not None else b'',
         )
         return data
-
-    def _make_tcp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option',
-                          padding: 'bytes' = b'') -> 'tuple[list[Schema_Option | bytes], int]':
-        """Make options for TCP.
-
-        Args:
-            options: TCP options
-            padding: octets after the End of Option List option
-
-        Returns:
-            Tuple of options and total length of options.
-
-        Raises:
-            ProtocolError: If an option maker rejects its option, e.g. a user
-                timeout too large for 15 bits of minutes, or an MPTCP option
-                whose fields, or the segment's flags, it cannot encode.
-            ProtocolNotImplemented: If an option argument given by name, an
-                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is
-                not in its namespace and has no default.
-            FieldValueError: If an ADD_ADDR ``addr`` is a :obj:`bool` or not a
-                valid IP address.
-
-        Note:
-            The options are emitted in the given order, ``NOP`` and ``EOOL``
-            included, so that a parsed option list re-emits the same octets.
-            ``padding`` follows them as given if they end with ``EOOL``, and is
-            dropped otherwise. Alignment is added only once, after that, when
-            the list does not end on a 32-bit boundary: zero octets if the list
-            already ends with ``EOOL``, otherwise ``NOP`` options followed by an
-            ``EOOL``.
-
-        """
-        total_length = 0
-        options_list = []  # type: list[Schema_Option | bytes]
-        code = None  # type: Optional[Enum_Option]
-        if isinstance(options, list):
-            for schema in options:
-                if isinstance(schema, bytes):
-                    code = Enum_Option.get(schema[0])
-                    data = schema  # type: Schema_Option | bytes
-                    data_len = len(data)
-                elif isinstance(schema, Schema):
-                    code = schema.kind
-                    data = schema
-                    data_len = len(schema.pack())
-                else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
-                    name = self._lookup_registry(self.__option__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_mode_{name}'
-                        meth = cast('OptionConstructor',
-                                    getattr(self, meth_name, self._make_mode_donone))
-                    else:
-                        meth = name[1]
-
-                    data = meth(code, **args)
-                    data_len = len(data.pack())
-
-                options_list.append(data)
-                total_length += data_len
-        else:
-            for code, option in options.items(multi=True):
-                name = self._lookup_registry(self.__option__, code)
-                if isinstance(name, str):
-                    meth_name = f'_make_mode_{name}'
-                    meth = cast('OptionConstructor',
-                                getattr(self, meth_name, self._make_mode_donone))
-                else:
-                    meth = name[1]
-
-                data = meth(code, option)
-                data_len = len(data.pack())
-
-                options_list.append(data)
-                total_length += data_len
-
-        # NOTE: ``padding`` belongs after an End of Option List option; with
-        # that gone -- e.g. options edited after parsing -- it is dropped, and
-        # the Data Offset is computed from the options alone.
-        if padding and code == Enum_Option.End_of_Option_List:
-            options_list.append(padding)
-            total_length += len(padding)
-
-        # force alignment to 32-bit boundary
-        if total_length % 4:
-            pad_len = 4 - (total_length % 4)
-            total_length += pad_len
-
-            if code == Enum_Option.End_of_Option_List:
-                options_list.append(bytes(pad_len))
-            else:
-                pad_opt = self._make_mode_nop(Enum_Option.No_Operation)  # type: ignore[arg-type]
-                for _ in range(pad_len - 1):
-                    options_list.append(pad_opt)
-                options_list.append(self._make_mode_eool(Enum_Option.End_of_Option_List))  # type: ignore[arg-type]
-        return options_list, total_length
 
     def _make_mode_donone(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
                          data: 'bytes' = b'',

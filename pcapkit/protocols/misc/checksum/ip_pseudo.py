@@ -380,6 +380,11 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             'zero': data.zero,
         }
 
+    @staticmethod
+    def _is_ipv6(address: 'IPv4Address | IPv6Address') -> 'bool':
+        """Tell whether ``address`` selects the IPv6 layout."""
+        return isinstance(address, ipaddress.IPv6Address)
+
     def _source(self, ip: 'IPv4 | IPv6') -> 'IPv4Address | IPv6Address':
         """Read the pseudo-header source address from an IP layer.
 
@@ -553,11 +558,6 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             raise ProtocolError(f'{self.alias}: upper layer of {ip.alias} not parsed; '
                                 'give protocol and upper_length')
         return code, before
-
-    @staticmethod
-    def _is_ipv6(address: 'IPv4Address | IPv6Address') -> 'bool':
-        """Tell whether ``address`` selects the IPv6 layout."""
-        return isinstance(address, ipaddress.IPv6Address)
 
     @staticmethod
     def _is_extension_header(code: 'int') -> 'bool':

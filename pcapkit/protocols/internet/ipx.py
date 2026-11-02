@@ -324,22 +324,6 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         """
         return 0
 
-    @staticmethod
-    def _make_ipx_address(addr: 'Data_Address') -> 'bytes':
-        """Make IPX address field.
-
-        Args:
-            addr: Parsed IPX address field.
-
-        Returns:
-            The 12-octet IPX address: network number, node number and
-            socket number.
-
-        """
-        return (bytes.fromhex(addr.network.replace(':', ''))
-                + bytes.fromhex(addr.node.replace('-', ''))
-                + int(addr.socket).to_bytes(2, 'big', signed=False))
-
     def _read_ipx_address(self, addr: 'bytes') -> 'Data_Address':
         """Read IPX address field.
 
@@ -371,3 +355,19 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             addr=_addr,
         )
         return ipx_addr
+
+    @staticmethod
+    def _make_ipx_address(addr: 'Data_Address') -> 'bytes':
+        """Make IPX address field.
+
+        Args:
+            addr: Parsed IPX address field.
+
+        Returns:
+            The 12-octet IPX address: network number, node number and
+            socket number.
+
+        """
+        return (bytes.fromhex(addr.network.replace(':', ''))
+                + bytes.fromhex(addr.node.replace('-', ''))
+                + int(addr.socket).to_bytes(2, 'big', signed=False))
