@@ -377,8 +377,11 @@ class TestRadiotapFields(unittest.TestCase):
                                                             'presence_type': 5, 'reserved': 0,
                                                             'data': b'\xaa\xbb'}))
         self.assertEqual(got[4], ('TSFT', 8, {'type': 0, 'mactime': 0x8887868584838281}))
-        # S1G cut short by its producer, and a padding item, stay raw
-        self.assertEqual(got[5:], [('S1G', 4, s1g[:4]), ('TLV_fields_in_radiotap', 0, b'')])
+        # S1G cut short by its producer decodes with the zeros it left out (#2655),
+        # and a padding item stays raw
+        self.assertEqual(got[5:], [('S1G', 4, {'type': 32, 'known': 1, 'data1': 2, 'data2': 0,
+                                               '__short_read__': ('data2', 0)}),
+                                   ('TLV_fields_in_radiotap', 0, b'')])
         self._assert_round_trips(parsed, raw)
 
     def test_a_tlv_past_the_region_is_unknown(self) -> None:
@@ -580,8 +583,8 @@ class TestRadiotapFields(unittest.TestCase):
                 self.assertTrue(callable(getattr(Radiotap, f'_read_field_{name}', None)))
                 self.assertTrue(callable(getattr(Radiotap, f'_make_field_{name}', None)))
 
-    def test_a_ragged_eht_tlv_stays_raw_and_quiet(self) -> None:
-        """An EHT item whose user words do not end on a word stays raw, and nothing is logged."""
+    def test_a_ragged_eht_tlv_decodes_quietly(self) -> None:
+        """An EHT item whose last user word is cut short decodes it padded with zeros (#2655), and nothing is logged."""
         import logging
 
         records = []  # type: list[logging.LogRecord]
@@ -595,7 +598,9 @@ class TestRadiotapFields(unittest.TestCase):
             parsed = self._parse(raw)
         finally:
             logger.removeHandler(handler)
-        self.assertEqual([(item.type.name, item.data) for item in parsed.info.decoded[28].tlvs], [('EHT', data)])
+        self.assertEqual([(item.type.name, item.data) for item in parsed.info.decoded[28].tlvs],
+                         [('EHT', {'type': 34, 'known': 0, 'data': tuple(range(9)), 'user_info': (0xA2A1,),
+                                   '__short_read__': ('user_info', 2)})])
         self.assertEqual(records, [])
         self._assert_round_trips(parsed, raw)
 
