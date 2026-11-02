@@ -39,7 +39,7 @@ class TestHTTPDispatcherMessages(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
-            HTTP.make(HTTP.__new__(HTTP), version=3)  # type: ignore[arg-type]
+            HTTP.make(object.__new__(HTTP), version=3)  # type: ignore[arg-type]
         self.assertEqual(str(ctx.exception), 'HTTP: invalid version: 3')
 
     def test_read_names_the_rejected_version(self) -> None:
