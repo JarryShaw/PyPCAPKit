@@ -137,6 +137,13 @@ flow :class:`~pcapkit.utilities.exceptions.BaseError`'s quiet mode exists for, a
 installing a hook from an error the library caught itself is a process-wide side
 effect.
 
+A parse whose refusal a fallback absorbs without
+:func:`~pcapkit.corekit.decorators.beholder` follows the same rule through an explicit
+``CaughtByCaller(ProtocolError)`` around it, as
+:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+keeps a body that does not decode raw -- an application of :issue:`2588`'s rule rather
+than a ruling of its own.
+
 **The block spans the whole call to the next layer**, not the refusal alone. Every
 :exc:`~pcapkit.utilities.exceptions.ProtocolError` built while that call is on the
 stack is quiet, at any depth, unless an inner

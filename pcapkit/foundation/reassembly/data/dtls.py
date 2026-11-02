@@ -111,10 +111,12 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Reassembled message body, undecoded.
     body: 'bytes | tuple[bytes, ...]'
     #: Decoded message, as :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake`
-    #: returns it: decoded on first read, not at construction time, and
-    #: :data:`None` for an incomplete message. A
-    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in
-    #: its place, and reading this attribute then runs it and keeps the result.
+    #: returns it unless the reassembly's ``__protocol_type__`` names another
+    #: protocol, whose ``analyze_handshake`` then decodes it. Decoded on first
+    #: read, not at construction time, and :data:`None` for an incomplete
+    #: message. A :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may
+    #: be passed in its place, and reading this attribute then runs it and keeps
+    #: the result.
     packet: 'Optional[Data_DTLSHandshake]'
 
     if TYPE_CHECKING:

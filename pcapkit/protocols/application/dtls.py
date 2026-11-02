@@ -84,8 +84,8 @@ octets, flagged
 ``Extractor(reassembly=True, dtls=True)`` reassembles the message
 (:class:`~pcapkit.foundation.reassembly.dtls.DTLS`), and
 :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it with
-:meth:`DTLS.read_handshake`. Only the first record of each datagram is
-reassembled.
+:meth:`DTLS.analyze_handshake`, which reads it with :meth:`DTLS.read_handshake`.
+Only the first record of each datagram is reassembled.
 
 **A unified-header record with a connection ID is not decoded**
 (:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the
@@ -112,11 +112,12 @@ from pcapkit.protocols.application.ssl import (_DTLS_VERSION_MAJOR, _WIRE_CONTEN
 from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
 from pcapkit.protocols.data.application.dtls import DTLSCIDCiphertext as Data_DTLSCIDCiphertext
 from pcapkit.protocols.data.application.dtls import DTLSCiphertext as Data_DTLSCiphertext
+from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
 from pcapkit.protocols.data.application.tls import ConnectionId as Data_ConnectionId
 from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
 from pcapkit.protocols.schema.application.dtls import DTLSCIDCiphertext as Schema_DTLSCIDCiphertext
 from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as Schema_DTLSCiphertext
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -125,7 +126,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
+    from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -616,6 +617,49 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             raise ProtocolError(f'{self.alias}: invalid format: {len(messages)} handshake '
                                 'messages where exactly one is expected')
         return cast('Data_DTLSHandshake', messages[0])
+
+    @classmethod
+    def analyze_handshake(cls, header: 'tuple[Enum_HandshakeType, int, int]',
+                          body: 'bytes') -> 'Data_DTLSHandshake':
+        """Analyse a reassembled handshake message from its header and body.
+
+        :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs this, and
+        so does the :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
+        that :class:`~pcapkit.foundation.reassembly.dtls.DTLS` stores as a
+        complete message's ``packet`` (:issue:`2622`).
+
+        The message is read by :meth:`read_handshake` as if it had arrived
+        unfragmented, ``fragment_offset`` 0 and ``fragment_length`` its
+        ``length`` (:rfc:`6347#section-4.2.3`). A body that does not decode
+        as its ``msg_type`` stays raw octets. That refusal is handled here, so
+        it is quiet (:issue:`2588`): nothing is logged and no exception hook
+        installed.
+
+        Args:
+            header: The message's ``(msg_type, length, message_seq)``.
+            body: The reassembled body.
+
+        Returns:
+            The message, unfragmented, its body raw if it does not decode.
+
+        """
+        msg_type, length, message_seq = header
+        message = (bytes([int(msg_type)]) + length.to_bytes(3, 'big')
+                   + message_seq.to_bytes(2, 'big') + bytes(3)  # fragment_offset 0
+                   + length.to_bytes(3, 'big') + body)
+        try:
+            with CaughtByCaller(ProtocolError):
+                return cls.read_handshake(message)
+        except ProtocolError:
+            return Data_DTLSHandshake(
+                msg_type=msg_type,
+                length=length,
+                body=body,
+                message_seq=message_seq,
+                fragment_offset=0,
+                fragment_length=length,
+                is_fragmented=False,
+            )
 
     ##########################################################################
     # Data models.
