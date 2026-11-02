@@ -68,8 +68,8 @@ than misreading it as RFC 2784/2890 GRE.
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.link.gre import GRE as Data_GRE
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.gre import GRE as Schema_GRE
@@ -354,18 +354,22 @@ class GRE(Link[Data_GRE, Schema_GRE],
         return 16
 
     @classmethod
-    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            Numeral registry index of the protocol in Linux ARP hardware
-            types: :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE`, which
+            Numeral registry index of the protocol in `IANA`_ protocol
+            numbers.
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
-            dispatches here alongside
-            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`.
+            names its own keys for this class,
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE` and
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`
+            (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return Enum_ARPHRD.IPGRE  # type: ignore[return-value]
+        return Enum_TransType.GRE  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

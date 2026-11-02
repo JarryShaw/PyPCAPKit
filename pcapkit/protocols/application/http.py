@@ -466,6 +466,34 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     # Data models.
     ##########################################################################
 
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: TCP port 80, the port of
+            :attr:`TCP.http <pcapkit.const.reg.apptype.tcp.TCP.http>` as an
+            :class:`int`, which
+            :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+            dispatches here, as it does port 8080 and as
+            :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
+            does both (:ref:`registry-protocol-index`). The versioned classes
+            inherit it.
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        .. versionchanged:: 1.6.0
+
+           Returns TCP port 80, where it raised
+           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
+
+        """
+        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
+
+        return int(TCP.http)  # type: ignore[call-overload]
+
     def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                  length: 'Optional[int]' = None, *,
                  version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'None':

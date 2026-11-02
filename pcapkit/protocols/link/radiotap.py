@@ -65,7 +65,6 @@ Decoding every optional field radiotap.org defines is tracked on
 import collections
 from typing import TYPE_CHECKING
 
-from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.link.radiotap import Radiotap as Data_Radiotap
@@ -386,17 +385,20 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         return 8
 
     @classmethod
-    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_LinkType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            Numeral registry index of the protocol in Linux ARP hardware
-            types, the ``arphrd_type`` that
+            Numeral registry index of the protocol in `tcpdump`_ link-layer
+            header types.
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
-            dispatches here.
+            names its own key for this class, ``ARPHRD_IEEE80211_RADIOTAP``
+            (:ref:`registry-protocol-index`).
+
+        .. _tcpdump: https://www.tcpdump.org/linktypes.html
 
         """
-        return Enum_ARPHRD.IEEE80211_RADIOTAP  # type: ignore[return-value]
+        return Enum_LinkType.IEEE802_11_RADIOTAP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

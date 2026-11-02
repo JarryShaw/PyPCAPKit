@@ -267,6 +267,35 @@ class FTP(Application[Data_FTP, Schema_FTP],
         )
 
     ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: TCP port 21, the port of
+            :attr:`TCP.ftp <pcapkit.const.reg.apptype.tcp.TCP.ftp>` as an
+            :class:`int`, which
+            :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+            dispatches here (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        .. versionchanged:: 1.6.0
+
+           Returns TCP port 21, where it raised
+           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
+
+        """
+        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
+
+        return int(TCP.ftp)  # type: ignore[call-overload]
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 

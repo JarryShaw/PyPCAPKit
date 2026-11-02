@@ -383,15 +383,19 @@ class TestRadiotap(unittest.TestCase):
                 self.assertEqual(dict(Radiotap.__proto__), before)
 
     def test_id_and_index(self) -> None:
-        """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
+        """``__index__`` is ``LINKTYPE_IEEE802_11_RADIOTAP`` (#2627); LinuxSLL
+        dispatches here under ``ARPHRD_IEEE80211_RADIOTAP``, a key it names
+        itself (#2510).
+        """
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.link.radiotap import Radiotap
 
         self.assertEqual(Radiotap.id(), ('Radiotap',))
-        self.assertIs(Radiotap.__index__(), ARPHRD.IEEE80211_RADIOTAP)
-        self.assertEqual(Radiotap.__index__(), 803)
-        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, Radiotap.__index__()),
+        self.assertIs(Radiotap.__index__(), LinkType.IEEE802_11_RADIOTAP)
+        self.assertEqual(Radiotap.__index__(), 127)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, ARPHRD.IEEE80211_RADIOTAP),
                       Radiotap)
 
 
