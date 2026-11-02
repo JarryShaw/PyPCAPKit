@@ -208,6 +208,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
        * A whole frame after the first in a segment is a further layer of this
          class, where it was kept as :class:`~pcapkit.protocols.misc.raw.Raw`
          (:issue:`2536`).
+       * A ``SETTINGS`` frame the capture cut inside its settings parses as far
+         as its octets go, where it was :class:`~pcapkit.protocols.misc.raw.Raw`,
+         and :meth:`make` takes ``frame_length``, so it rebuilds as captured
+         (:issue:`2659`).
 
     """
 
@@ -314,6 +318,11 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             holds one frame per packet and has no form for a frameless segment.
 
         """
+        # NOTE: A frame ``pack`` made short of its Length parses at that Length (#2659).
+        made_length = vars(self).pop('_made_length', None)
+        if length is None:
+            length = made_length
+
         preface_len = len(_HTTP2_PREFACE)
         if self.__header__ is None and self._data[:preface_len] == _HTTP2_PREFACE \
                 and (length is None or length >= preface_len):
@@ -418,6 +427,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
              frame: 'Optional[bytes | Data_HTTP | Schema_FrameType | dict[str, Any]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              preface: 'bool' = False,  # pylint: disable=unused-argument
+             frame_length: 'Optional[int]' = None,
              **kwargs: 'Any') -> 'Schema_HTTP':
         """Make (construct) packet data.
 
@@ -437,6 +447,12 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             payload: Octets after the frame, e.g. the next frame.
             preface: Whether the HTTP/2 connection preface goes ahead of the
                 frame; :meth:`pack` writes it.
+            frame_length: Length of the frame payload, as transmitted on the
+                wire, the 9-octet header excluded (:rfc:`9113#section-4.1`);
+                computed from ``frame`` when not given, so a ``SETTINGS`` frame
+                the capture cut inside its settings rebuilds as captured. A
+                Length above the one ``frame`` packs to is written as given,
+                as on a frame the capture cut short.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -446,7 +462,11 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If ``frame`` is none of the forms this maker reads --
                 raw :obj:`bytes`, a :obj:`dict` of frame arguments, an
                 :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2` data
-                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
+                model or a :class:`~pcapkit.protocols.schema.schema.Schema`; or
+                if ``frame_length`` is not an :obj:`int` from the Length
+                ``frame`` packs to up to ``0xFFFFFF``, or exceeds that Length
+                with a non-empty ``payload``, which the frame would read as its
+                own (:issue:`2617`).
 
         .. versionchanged:: 1.5.0
 
@@ -497,6 +517,16 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             flags_val[f'bit_{bit}'] = (int(flags) & (1 << bit)) >> bit
 
         length = self._make_http_length(frame_val, flags)
+        if frame_length is not None:
+            if isinstance(frame_length, bool) or not isinstance(frame_length, int) \
+                    or not length <= frame_length <= 0xFFFFFF:
+                raise ProtocolError(f'HTTP/2: [Type {type_val}] invalid frame_length: {frame_length!r} '
+                                    f'for a frame payload of {length} octet(s)')
+            # NOTE: Past the frame payload, the Length would read the next frame as its own.
+            if frame_length > length and payload is not None and len(payload) > 0:
+                raise ProtocolError(f'HTTP/2: [Type {type_val}] invalid frame_length: {frame_length!r} '
+                                    f'for a frame payload of {length} octet(s) with a payload after it')
+            length = frame_length
 
         return Schema_HTTP(
             length=length,
@@ -528,11 +558,22 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             type's own schema. Any other call leaves the instance's header as it
             was (:issue:`1769`).
 
+            A frame whose payload falls short of its Length, as
+            :meth:`from_data` rebuilds a ``SETTINGS`` frame the capture cut
+            inside its settings, is parsed back at that Length, as the capture
+            was, rather than refused as a frame the data cannot back
+            (:issue:`2659`).
+
         """
         data = super().pack(**kwargs)
         # NOTE: Constructing, by the test ``ProtocolBase._packing_target`` makes.
         if '_info' not in vars(self):
             self.__header__ = None  # type: ignore[assignment]
+
+            start = len(_HTTP2_PREFACE) if kwargs.get('preface', False) else 0
+            declared = start + 9 + int.from_bytes(data[start:start + 3], 'big')
+            if declared > len(data):
+                self._made_length = declared
         return data
 
     @classmethod
@@ -600,10 +641,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             Key-value pairs for protocol construction.
 
         """
-        # NOTE: No ``length``: :meth:`make` computes the frame's Length from the
-        # frame it builds, and a ``length`` keyword would instead be taken by
-        # ``ProtocolBase.__init__`` as the number of octets to parse back --
-        # the payload length alone, nine octets short of the frame.
+        # NOTE: The Length as on the wire, so a cut SETTINGS frame keeps it (#2659);
+        # ``length`` would be taken by ``ProtocolBase.__init__`` as octets to parse.
         return {
             'type': data.type,
             'flags': data.flags.__value__ if data.flags is not None else 0,
@@ -612,6 +651,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             'frame': data,
             'payload': cls._make_payload(data),
             'preface': bool(data.get('preface')),
+            'frame_length': data.get('length'),
         }
 
     @staticmethod

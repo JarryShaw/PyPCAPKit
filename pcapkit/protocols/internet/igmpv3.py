@@ -142,6 +142,28 @@ def _encode_resp_code(value: 'int') -> 'int':
     return 0x80 | (exp << 4) | mant
 
 
+def _keep_body_short_read(schema: 'Schema_IGMPv3') -> 'None':
+    """Record on ``schema`` a short read only the schemas in its body recorded (:issue:`2660`).
+
+    Every schema in the body reads to the end of the data, so a field there that
+    reads short has reached it. Elsewhere a nested record need not mean that:
+    hoisting one in :func:`~pcapkit.protocols.schema.schema.keep_short_read` marks
+    a complete TCP segment with a malformed MPTCP DSS option as cut.
+
+    Args:
+        schema: The header just parsed.
+
+    """
+    body = schema.body
+    if isinstance(body, Schema_Query):
+        parts = (body, body.ext)  # type: tuple[Optional[Schema], ...]
+    else:
+        parts = (body, *body.records)
+    if '__short_read__' not in schema.__dict__ and any(
+            part is not None and '__short_read__' in part.__dict__ for part in parts):
+        schema.__dict__['__short_read__'] = ('body', len(schema.__buffer__['body']))
+
+
 class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
              schema=Schema_IGMPv3, data=Data_IGMPv3):
     """This class implements Internet Group Management Protocol version 3.
@@ -214,6 +236,10 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 :attr:`version` 3 -- an IGMPv1/v2-shaped Query, or a type
                 neither version of IGMP defines.
 
+        Note:
+            A message the data ends inside records the cut on its ``body``, with or
+            without an enclosing length, so ``from_data(info)`` rebuilds it as captured.
+
         """
         if length is None:
             length = len(self)
@@ -278,6 +304,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         else:  # pragma: no cover
             raise ProtocolError(f'{self.alias}: unsupported message type: {schema.type!r}')
 
+        _keep_body_short_read(schema)
         self._verify_checksum(igmp, body.checksum, length)
         return self._decode_next_layer(igmp, None, len(trailing))
 
@@ -298,6 +325,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
              sources: 'Optional[Iterable[IPv4Address | str | bytes | int]]' = None,
              reserved_1: 'int' = 0,
              reserved_2: 'bytes' = b'\x00\x00',
+             num_group_records: 'Optional[int]' = None,
              records: 'Optional[Iterable[dict[str, Any] | Data_GroupRecord]]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IGMPv3':
@@ -347,6 +375,11 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 (:rfc:`3376#section-4.2.1`); only meaningful for a Report.
             reserved_2: The reserved 16 bits before the group-record count
                 (:rfc:`3376#section-4.2.1`); only meaningful for a Report.
+            num_group_records: Number of group records, as transmitted on the
+                wire; the length of ``records`` when not given, so a capture cut
+                inside its record list rebuilds as captured; only meaningful for
+                a Report. A count above the length of ``records`` is written as
+                given, as on a Report the capture cut short.
             records: Group records (:rfc:`3376#section-4.2.4`), each either
                 a :class:`~pcapkit.protocols.data.internet.igmpv3.GroupRecord`
                 or a :obj:`dict` of the keyword arguments
@@ -360,7 +393,9 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
 
         Raises:
             ProtocolError: If ``max_resp_time`` is not an :obj:`int` from 0
-                to 255, or ``type`` is neither a Query nor a Report.
+                to 255, ``num_group_records`` is not an :obj:`int` from the
+                length of ``records`` to 65535, or ``type`` is neither a Query
+                nor a Report.
 
         """
         type_value = self._make_index(type, type_default, namespace=type_namespace,
@@ -375,13 +410,19 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 self._make_group_record(record) if not isinstance(record, dict) else
                 self._make_group_record(**record) for record in records
             ]
+            if num_group_records is None:
+                num_group_records = len(record_list)
+            elif isinstance(num_group_records, bool) or not isinstance(num_group_records, int) \
+                    or not len(record_list) <= num_group_records <= 0xFFFF:
+                raise ProtocolError(f'{self.alias}: invalid num_group_records: {num_group_records!r} '
+                                    f'for {len(record_list)} record(s)')
             schema = Schema_IGMPv3(
                 type=type_value,
                 body=Schema_Report(
                     reserved_1=reserved_1,
                     checksum=field,
                     reserved_2=reserved_2,
-                    num_group_records=len(record_list),
+                    num_group_records=num_group_records,
                     records=record_list,
                     payload=payload,
                 ),
@@ -451,6 +492,8 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 'reserved_1': report.reserved_1,
                 'checksum': report.checksum,
                 'reserved_2': report.reserved_2,
+                # NOTE: The count as parsed, so a Report cut inside its records rebuilds as captured.
+                'num_group_records': report.get('num_group_records'),
                 'records': report.records,
                 'payload': cls._make_payload(data),
             }

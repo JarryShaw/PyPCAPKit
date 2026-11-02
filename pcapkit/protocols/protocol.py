@@ -2211,7 +2211,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             raise ProtocolError(f'{self.alias if alias is None else alias}: invalid {name}: {value!r}')
         return int(value)
 
-    def _make_sint(self, value: 'Any', *, bits: 'int', name: 'str') -> 'int':
+    def _make_sint(self, value: 'Any', *, bits: 'int', name: 'str', alias: 'Optional[str]' = None,
+                   allow_unsigned: 'bool' = False) -> 'int':
         """Check that ``value`` is a signed integer that fits in ``bits`` bits.
 
         The inverse of :meth:`_read_sint`. A :obj:`bool` is refused whatever
@@ -2221,6 +2222,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             value: the value given for the field
             bits: width of the field, in bits
             name: name of the field, for the error message
+            alias: prefix of the error message, for a caller whose
+                :attr:`alias` raises before ``read()`` sets it or is not the
+                prefix its messages carry; :attr:`alias` by default
+            allow_unsigned: also accept the unsigned spelling of the field's
+                ``bits`` bits, i.e. up to ``2 ** bits - 1``, for a field whose
+                specification spells one value both ways, as a sentinel
+                written ``-1`` and ``0xFF...F``; both denote the same bits
 
         Returns:
             The unsigned integer whose ``bits`` bits denote ``value`` in
@@ -2229,14 +2237,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Raises:
             ProtocolError: If ``value`` is not an :class:`int`, is a
                 :obj:`bool`, or does not fit in ``bits`` bits as two's
-                complement. The message names :attr:`alias`.
+                complement (or, with ``allow_unsigned``, as an unsigned
+                integer either). The message names ``alias``.
 
         .. versionadded:: 1.6.0
 
         """
         bound = 1 << (bits - 1)
-        if not isinstance(value, int) or isinstance(value, bool) or not -bound <= value < bound:
-            raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        limit = 2 * bound if allow_unsigned else bound
+        if not isinstance(value, int) or isinstance(value, bool) or not -bound <= value < limit:
+            raise ProtocolError(f'{self.alias if alias is None else alias}: invalid {name}: {value!r}')
         return value & ((1 << bits) - 1)
 
     @staticmethod

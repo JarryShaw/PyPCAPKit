@@ -23,7 +23,8 @@ The rest of ``ProtocolBase``'s value helpers, from the audit on #2614:
   integer of so many, out of a buffer, refusing a short read; ``_make_octets``
   checks the octets a field is given;
 * ``_read_sint`` and ``_make_sint`` -- a two's-complement field, read from its
-  unsigned value and checked on the way back;
+  unsigned value and checked on the way back, the unsigned spelling of the same
+  bits accepted too when ``allow_unsigned`` asks for it;
 * ``_uint_size`` -- the octets an unsigned integer needs;
 * ``_read_mac_addr`` and ``_make_mac_addr`` -- a MAC address, an EUI-64 one, or
   one of any length;
@@ -355,6 +356,41 @@ class MakeSintTests(_HelperTestCase):
         for value, shown in ((True, 'True'), (False, 'False'), ('1', "'1'"), (1.0, r'1\.0'), (None, 'None')):
             with self.subTest(value=value):
                 self.assertRefused(f'invalid field: {shown}$', self.proto._make_sint, value, bits=8, name='field')
+
+    def test_the_unsigned_spelling_is_accepted_only_when_asked(self) -> None:
+        """``allow_unsigned`` widens the range to ``-half`` to ``2 ** bits - 1``; both spellings give the same bits."""
+        for bits in (2, 8, 24):
+            half, top = 1 << (bits - 1), 1 << bits
+            for value in (-half, -1, 0, half - 1, half, top - 1):
+                with self.subTest(bits=bits, value=value):
+                    self.assertEqual(self.proto._make_sint(value, bits=bits, name='field', allow_unsigned=True),
+                                     value % top)
+            self.assertEqual(self.proto._make_sint(-1, bits=bits, name='field', allow_unsigned=True),
+                             self.proto._make_sint(top - 1, bits=bits, name='field', allow_unsigned=True))
+            # without it the unsigned half stays refused, as the signed-only tests above pin at ``half``
+            with self.subTest(bits=bits, value=top - 1, allow_unsigned=False):
+                self.assertRefused(rf'invalid field: {top - 1}$', self.proto._make_sint, top - 1, bits=bits,
+                                   name='field')
+
+    def test_one_past_either_end_is_refused_with_the_unsigned_spelling(self) -> None:
+        for bits in (2, 8, 24):
+            half, top = 1 << (bits - 1), 1 << bits
+            for value in (-half - 1, top):
+                with self.subTest(bits=bits, value=value):
+                    self.assertRefused(rf'invalid field: {value}$', self.proto._make_sint, value, bits=bits,
+                                       name='field', allow_unsigned=True)
+        for value, shown in ((True, 'True'), (False, 'False'), ('1', "'1'"), (1.0, r'1\.0'), (None, 'None')):
+            with self.subTest(value=value):
+                self.assertRefused(f'invalid field: {shown}$', self.proto._make_sint, value, bits=8, name='field',
+                                   allow_unsigned=True)
+
+    def test_an_alias_given_prefixes_the_message_before_read(self) -> None:
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = self.unread()
+        self.assertEqual(proto._make_sint(-1, bits=16, name='offset', alias='PCAP-NG'), 0xFFFF)
+        with self.assertRaisesRegex(ProtocolError, '^PCAP-NG: invalid offset: 32768$'):
+            proto._make_sint(0x8000, bits=16, name='offset', alias='PCAP-NG')
 
 
 class UintSizeTests(_HelperTestCase):

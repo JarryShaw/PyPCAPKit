@@ -298,8 +298,8 @@ small part of each is bound to a dissector; everything else resolves to
 complaint and yields nothing useful.
 
 * :class:`~pcapkit.const.reg.linktype.LinkType` --
-  ``NULL``, ``ETHERNET``, ``LOOP``, ``LINUX_SLL``, ``IPV4``, ``IPV6`` and
-  ``LINUX_SLL2``, declared identically
+  ``NULL``, ``ETHERNET``, ``IEEE802_11``, ``FRELAY``, ``LOOP``, ``LINUX_SLL``,
+  ``IEEE802_11_RADIOTAP``, ``IPV4``, ``IPV6`` and ``LINUX_SLL2``, declared identically
   in :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, which also read ``RAW`` as
   ``IPV4`` or ``IPV6`` by its version nibble.
@@ -336,9 +336,10 @@ Some wanted only a table entry, because the dissector was already there:
 
 * **Done.** :class:`~pcapkit.protocols.application.ospf.OSPF` is bound at
   :class:`~pcapkit.const.reg.transtype.TransType` 89 (``OSPFIGP``) and
-  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
-  ``__index__`` raises on both, which is correct: neither is reached through a
-  link-layer EtherType.
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701, and
+  ``__index__`` returns those values: ``TransType.OSPFIGP``, and 1701 as an
+  :class:`int`, as an AppType-valued index is the member's port
+  (:ref:`registry-protocol-index`).
 * **Done.** :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA` is bound at TCP
   port 20 (IANA ``ftp-data``). It is a thin
   :class:`~pcapkit.protocols.misc.raw.Raw` subclass, so this buys the payload a
@@ -370,11 +371,10 @@ Follow-ups to the bindings above:
   reason is structural: it references :rfc:`3931`, i.e. L2TPv3 over IP, and **there is
   no** ``L2TPv3`` **class for it to point at**. What exists is
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing, reached over
-  UDP 1701. So the binding waits on a v3 dissector, which is also the first member of the
-  family to carry an :meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own --
-  115 being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and what
-  ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F [:rfc:`2341`],
-  a separate protocol, not an earlier L2TP.
+  UDP 1701, which is its :meth:`~pcapkit.protocols.protocol.Protocol.__index__`. So the
+  binding waits on a v3 dissector. :mod:`pcapkit.protocols.link.l2tp` records what v3
+  needs, and what ``L2F`` needs alongside it: the version nibble reading ``1`` selects
+  L2F [:rfc:`2341`], a separate protocol, not an earlier L2TP.
 * The :class:`~pcapkit.protocols.link.l2tp.L2TP` family lives under
   :mod:`pcapkit.protocols.link` and so reports ``layer == 'Link'``, although it
   is carried inside UDP. That is deliberate: a tunnelling protocol is placed by what
@@ -961,9 +961,11 @@ offload heuristic on :issue:`2470`.
   clear is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`,
   and ``make()`` computes one when ``checksum_present`` asks without giving it.
   Neither GRE nor the Linux cooked-capture header carries a length, so a GRE frame
-  the capture cut short is
-  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`. Settled at
-  implementation (:issue:`2618`).
+  the capture cut short there is
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`, settled at
+  implementation (:issue:`2618`); behind IPv4 or IPv6, which state the payload
+  length, it is :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
+  (:issue:`2649`).
 * **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
   a pseudo-header that carries the whole packet's length, as TCP's does, so a
   fragment is

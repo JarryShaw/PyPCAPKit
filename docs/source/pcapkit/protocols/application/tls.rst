@@ -132,6 +132,7 @@ this is routine.
    .. automethod:: unpack
 
    .. automethod:: __length_hint__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
 

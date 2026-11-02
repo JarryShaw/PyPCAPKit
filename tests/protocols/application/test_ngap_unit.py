@@ -228,10 +228,10 @@ class NGAPUnitTests(unittest.TestCase):
         ngap.__header__ = mock.Mock(data=NGSETUP_REQUEST)
         self.assertEqual(ngap.length, 58)
 
-        # An application protocol carries no numeral registry index.
-        from pcapkit.utilities.exceptions import IntError
-        with self.assertRaises(IntError):
-            NGAP.__index__()
+        # Its index is IANA's ``ng-control`` port, though SCTP dispatches by PPID (#2627).
+        from pcapkit.const.reg.apptype import SCTP
+        self.assertIs(type(NGAP.__index__()), int)
+        self.assertEqual(int(ngap), int(SCTP.ng_control))
 
     def test_exported_from_the_package_namespaces(self) -> None:
         import pcapkit

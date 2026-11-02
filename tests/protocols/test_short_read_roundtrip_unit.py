@@ -73,6 +73,16 @@ CASES = (
     ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
     ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
     ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
+    ('igmpv3-report', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '45000040123400000102bd710a000001e0000016' '2200c7e100000002'
+        '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
+    ('igmpv3-query', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '45000028123400000102bd9e0a000001e0000001' '1164df14ef0102030a7d0002' '0a0000010a000002')),
+    # #2660: parsed on its own, with no IPv4 length to run past
+    ('igmpv3-report-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+        '2200c7e100000002' '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
+    ('igmpv3-query-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+        '1164df14ef0102030a7d0002' '0a0000010a000002')),
     ('ipv6', IPV6, {}, _ipv6(59, b'')),
     ('ipv6-chain', IPV6, {}, bytes.fromhex(
         '600000000020004000000000000000000000000000000001000000000000000000000000000000023c'
@@ -99,6 +109,10 @@ CASES = (
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
     ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),
     ('http1', 'application.httpv1:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
+    # an HTTP/2 SETTINGS frame of three settings, to TCP port 80 (#2659)
+    ('httpv2-settings', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+        '450000431234000040067c4ac0000201c6336402' '9c40005000000001000000015010ffff00000000'
+        '000012040000000000' '000100001000' '000300000064' '000400010000')),
 )
 
 

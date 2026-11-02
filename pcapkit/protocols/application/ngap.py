@@ -109,6 +109,7 @@ from aenum import IntEnum
 
 from pcapkit.const.ngap.procedure_code import ProcedureCode as Enum_ProcedureCode
 from pcapkit.const.ngap.protocol_ie import ProtocolIE as Enum_ProtocolIE
+from pcapkit.const.reg.apptype.sctp import SCTP as Enum_SCTP
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.application import Application
@@ -543,6 +544,29 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
 
         """
         return 4
+
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: SCTP port 38412, the port of
+            :attr:`SCTP.ng_control <pcapkit.const.reg.apptype.sctp.SCTP.ng_control>`
+            as an :class:`int`.
+            :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+            dispatches by payload protocol identifier rather than by port, so
+            this value keys no dispatch (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        .. versionchanged:: 1.6.0
+
+           Returns SCTP port 38412, where it raised
+           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
+
+        """
+        return int(Enum_SCTP.ng_control)  # type: ignore[call-overload]
 
     ##########################################################################
     # Utilities.

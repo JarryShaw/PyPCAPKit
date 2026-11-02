@@ -1136,6 +1136,298 @@ class IGMPv3ReportTests(unittest.TestCase):
         self.assertEqual(schema.body.records[1].num_sources, 1)
 
 
+#: A Report of two group records with source lists: the first record's header
+#: is octets 8-15 and its sources 16-23, the second's header 24-31 and its
+#: sources 32-43.
+IGMPV3_TWO_RECORD_REPORT = igmpv3_report((
+    igmpv3_group_record(1, '239.1.1.1', ('10.0.0.1', '10.0.0.2')),
+    igmpv3_group_record(2, '239.2.2.2', ('10.0.0.3', '10.0.0.4', '10.0.0.5')),
+))
+
+
+class IGMPv3TruncatedReportTests(unittest.TestCase):
+    """A Report the capture cuts inside its record list parses as far as its
+    octets go and records the cut, as a cut Query does, rather than falling
+    back to ``Raw`` (#2650). Each datagram's IPv4 header declares the whole
+    Report, so the IGMP layer is handed fewer octets than its length."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def parse_cut(self, packet: 'bytes', keep: 'int'):
+        """Parse ``packet`` inside an IPv4 datagram cut to ``keep`` octets of it."""
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
+            cut = outer[:len(outer) - len(packet) + keep]
+            parsed = IPv4(cut)
+        return cut, parsed
+
+    def assert_rebuilds(self, cut: 'bytes', parsed) -> None:
+        """Both layers rebuild the octets captured, from ``info`` and its dict."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        igmp = parsed.payload
+        with warnings.catch_warnings():
+            # a cut layer warns that its length runs past the data, which is the point
+            warnings.simplefilter('ignore')
+            self.assertEqual(IGMPv3.from_data(igmp.info).data, igmp.data)
+            self.assertEqual(IGMPv3.from_data(igmp.info.to_dict()).data, igmp.data)
+            self.assertEqual(IPv4.from_data(parsed.info).data, cut)
+
+    def test_whole_report_is_not_marked(self) -> None:
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.misc.no_payload import NoPayload
+
+        packet = IGMPV3_TWO_RECORD_REPORT
+        cut, parsed = self.parse_cut(packet, len(packet))
+        igmp = parsed.payload
+
+        self.assertIsInstance(igmp, IGMPv3)
+        self.assertNotIn('__short_read__', igmp.info)
+        self.assertEqual(igmp.info.length, len(packet))
+        self.assertEqual(
+            [(str(record.multicast_address), tuple(str(src) for src in record.sources))
+             for record in igmp.info.records],
+            [('239.1.1.1', ('10.0.0.1', '10.0.0.2')),
+             ('239.2.2.2', ('10.0.0.3', '10.0.0.4', '10.0.0.5'))],
+        )
+        self.assertIsInstance(igmp.payload, NoPayload)
+        self.assert_rebuilds(cut, parsed)
+
+    def test_report_cut_inside_a_record_header(self) -> None:
+        """Cut after the second record's Number of Sources, before its
+        Multicast Address: the first record is whole, the second is kept as
+        far as it was read."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.misc.no_payload import NoPayload
+
+        packet = IGMPV3_TWO_RECORD_REPORT
+        cut, parsed = self.parse_cut(packet, 28)
+        igmp = parsed.payload
+
+        self.assertIsInstance(igmp, IGMPv3)
+        self.assertEqual(igmp.info['__short_read__'], ('body', 27))
+        self.assertEqual(igmp.info.length, 28)
+        self.assertEqual(igmp.data, packet[:28])
+        self.assertEqual(igmp.info.num_group_records, 2)
+        self.assertEqual(len(igmp.info.records), 2)
+        first, second = igmp.info.records
+        self.assertEqual(str(first.multicast_address), '239.1.1.1')
+        self.assertEqual(tuple(str(src) for src in first.sources), ('10.0.0.1', '10.0.0.2'))
+        self.assertEqual(second.record_type, 2)
+        self.assertEqual(second.num_sources, 3)
+        self.assertIsInstance(igmp.payload, NoPayload)
+        self.assert_rebuilds(cut, parsed)
+
+    def test_report_cut_inside_a_source_list(self) -> None:
+        """Cut inside the first record's second source: one record of the two
+        the count declares, which the rebuild still writes as two."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.misc.no_payload import NoPayload
+
+        packet = IGMPV3_TWO_RECORD_REPORT
+        cut, parsed = self.parse_cut(packet, 22)
+        igmp = parsed.payload
+
+        self.assertIsInstance(igmp, IGMPv3)
+        self.assertEqual(igmp.info['__short_read__'], ('body', 21))
+        self.assertEqual(igmp.info.length, 22)
+        self.assertEqual(igmp.info.num_group_records, 2)
+        self.assertEqual(len(igmp.info.records), 1)
+        record = igmp.info.records[0]
+        self.assertEqual(str(record.multicast_address), '239.1.1.1')
+        self.assertEqual(record.num_sources, 2)
+        self.assertEqual(str(record.sources[0]), '10.0.0.1')
+        self.assertIsInstance(igmp.payload, NoPayload)
+        self.assert_rebuilds(cut, parsed)
+
+    def test_cut_additional_data_goes_to_the_next_layer(self) -> None:
+        """Octets past the counted records still go to the payload when the
+        capture ends inside them (:rfc:`3376#section-4.2.11`)."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.misc.raw import Raw
+
+        packet = igmpv3_report((igmpv3_group_record(1, '224.0.1.1', ('10.0.0.1',)),)) + b'\xca\xfe\xba\xbe'
+        cut, parsed = self.parse_cut(packet, len(packet) - 2)
+        igmp = parsed.payload
+
+        self.assertIsInstance(igmp, IGMPv3)
+        self.assertEqual(len(igmp.info.records), 1)
+        self.assertIsInstance(igmp.payload, Raw)
+        self.assertEqual(igmp.payload.info.packet, b'\xca\xfe')
+        self.assertEqual(igmp.info.length, len(packet) - 4)
+        self.assert_rebuilds(cut, parsed)
+
+    def test_record_list_reads_bytes_and_a_live_stream_alike(self) -> None:
+        """The record list is sized by the octets present, from a buffer or a
+        stream part-way through, and keeps its declared length afterwards."""
+        from pcapkit.protocols.schema.internet.igmpv3 import Report
+
+        records = IGMPV3_TWO_RECORD_REPORT[8:28]
+        field = Report.__fields__['records']({'__length__': 36})
+        stream = io.BytesIO(b'\xde\xad' + records)
+        stream.seek(2)
+
+        for name, buffer in (('bytes', records), ('stream', stream)):
+            with self.subTest(buffer=name), warnings.catch_warnings():
+                # the record cut short warns that its length runs past the data
+                warnings.simplefilter('ignore')
+                parsed = field.unpack(buffer, {})
+                self.assertEqual([str(record.multicast_address) for record in parsed],
+                                 ['239.1.1.1', '0.0.0.0'])
+                self.assertEqual(parsed[1].num_sources, 3)
+                self.assertEqual(field.length, 36)
+
+
+#: An IGMPv3 Group-and-Source-Specific Query for 239.1.2.3 with S set, QRV 2,
+#: QQIC 125 and two sources: the fixed fields are octets 0-11, the sources 12-19.
+IGMPV3_TWO_SOURCE_QUERY = igmpv3_query(100, '239.1.2.3', s_flag=1, qrv=2, qqic=125,
+                                       sources=('10.0.0.1', '10.0.0.2'))
+
+
+class IGMPv3DirectCutTests(unittest.TestCase):
+    """A message cut short and parsed on its own, as ``IGMPv3(raw, len(raw))``,
+    rebuilds as captured, as it does inside IPv4 (#2660). IGMP has no length
+    field, so the body's own read is never short there: the cut is recorded on
+    the body, after the octets it holds, wherever the data ends inside a field."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def parse(self, raw: 'bytes'):
+        """Parse ``raw`` with the IGMPv3 class, its length as the message's."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+
+        with warnings.catch_warnings():
+            # a cut field warns that its length runs past the data, which is the point
+            warnings.simplefilter('ignore')
+            return IGMPv3(raw, len(raw))
+
+    def assert_rebuilds(self, raw: 'bytes', igmp, record: 'object') -> None:
+        """``igmp`` records ``record`` and rebuilds ``raw``, from ``info`` and its dict."""
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+
+        self.assertEqual(igmp.info.get('__short_read__'), record)
+        self.assertEqual(igmp.data, raw)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertEqual(IGMPv3.from_data(igmp.info).data, raw)
+            self.assertEqual(IGMPv3.from_data(igmp.info.to_dict()).data, raw)
+
+    def test_whole_messages_are_not_marked(self) -> None:
+        query = self.parse(IGMPV3_TWO_SOURCE_QUERY)
+        self.assertEqual((str(query.info.group), query.info.s_flag, query.info.qrv, query.info.qqic),
+                         ('239.1.2.3', True, 2, 125))
+        self.assertEqual(tuple(map(str, query.info.sources)), ('10.0.0.1', '10.0.0.2'))
+        report = self.parse(IGMPV3_TWO_RECORD_REPORT)
+        self.assertEqual([(str(record.multicast_address), len(record.sources))
+                          for record in report.info.records], [('239.1.1.1', 2), ('239.2.2.2', 3)])
+
+        for name, packet, igmp in (('query', IGMPV3_TWO_SOURCE_QUERY, query),
+                                   ('report', IGMPV3_TWO_RECORD_REPORT, report)):
+            with self.subTest(name):
+                self.assertEqual(igmp.info.length, len(packet))
+                self.assert_rebuilds(packet, igmp, None)
+
+    def test_a_query_cut_at_every_offset(self) -> None:
+        """Fewer than 12 octets is no IGMPv3 Query (:rfc:`3376#section-7.1`), so
+        those cuts are refused; every longer one ends inside the source list."""
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        packet = IGMPV3_TWO_SOURCE_QUERY
+        for keep in range(1, len(packet)):
+            raw = packet[:keep]
+            with self.subTest(keep=keep):
+                if keep < 12:
+                    with self.assertRaisesRegex(ProtocolError, r'is not an IGMPv3 message'):
+                        self.parse(raw)
+                    continue
+                igmp = self.parse(raw)
+                self.assertEqual((str(igmp.info.group), igmp.info.qqic, len(igmp.info.sources)),
+                                 ('239.1.2.3', 125, 2))
+                self.assert_rebuilds(raw, igmp, ('body', keep - 1))
+
+    def test_a_report_cut_at_every_offset(self) -> None:
+        """A cut at the end of the header or of the first record ends inside no
+        field, so it is not marked, and the count as parsed rebuilds it (#2650)."""
+        packet = IGMPV3_TWO_RECORD_REPORT
+        for keep in range(1, len(packet)):
+            raw = packet[:keep]
+            with self.subTest(keep=keep):
+                igmp = self.parse(raw)
+                if keep >= 8:
+                    self.assertEqual(igmp.info.num_group_records, 2)
+                record = None if keep in (8, 24) else ('body', keep - 1)
+                self.assert_rebuilds(raw, igmp, record)
+
+    def test_a_cut_is_recorded_as_inside_ipv4(self) -> None:
+        """The record a direct parse makes is the one the enclosing IPv4 layer's
+        longer length gives the body."""
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        for name, packet, keep in (('query', IGMPV3_TWO_SOURCE_QUERY, 17),
+                                   ('report', IGMPV3_TWO_RECORD_REPORT, 30)):
+            with self.subTest(name), warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.22', payload=packet).data
+                carried = IPv4(outer[:len(outer) - len(packet) + keep]).payload
+                direct = self.parse(packet[:keep])
+                self.assertEqual(direct.info['__short_read__'], carried.info['__short_read__'])
+                self.assertEqual(direct.info.to_dict(), carried.info.to_dict())
+
+
+class IGMPv3RecordCountTests(unittest.TestCase):
+    """``IGMPv3.make`` writes the ``num_group_records`` it is given only as an
+    :obj:`int` from the length of ``records`` to 65535; any other is refused
+    rather than written altered or losing records or payload, as ruled on #2617
+    (#2650)."""
+
+    RECORDS = (
+        {'record_type': 1, 'multicast_address': '239.1.1.1'},
+        {'record_type': 2, 'multicast_address': '239.2.2.2'},
+    )
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_a_count_the_records_or_the_field_cannot_carry_is_refused(self) -> None:
+        import re
+
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(IGMPv3)
+        for count, payload in ((65536, b''), (-1, b''), (1, b'XYZW'), (0, b'XYZW'),
+                               (True, b''), (2.0, b''), ('2', b'')):
+            with self.subTest(count=count, payload=payload), self.assertRaisesRegex(
+                    ProtocolError, rf'^IGMPv3: invalid num_group_records: {re.escape(repr(count))} for 2 record'):
+                proto.make(type=Type.IGMPv3_Membership_Report, records=self.RECORDS,
+                           num_group_records=count, payload=payload)
+
+        # True equals one record's count, so only the bool check refuses it
+        with self.subTest(count=True, records=1), self.assertRaisesRegex(
+                ProtocolError, r'^IGMPv3: invalid num_group_records: True for 1 record'):
+            proto.make(type=Type.IGMPv3_Membership_Report, records=self.RECORDS[:1],
+                       num_group_records=True)
+
+    def test_a_count_from_the_records_to_the_field_maximum_is_written(self) -> None:
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+
+        records = igmpv3_group_record(1, '239.1.1.1') + igmpv3_group_record(2, '239.2.2.2')
+        for count, wire in ((None, 2), (2, 2), (3, 3), (0xFFFF, 0xFFFF)):
+            with self.subTest(count=count):
+                built = IGMPv3(type=Type.IGMPv3_Membership_Report, records=self.RECORDS,
+                               num_group_records=count, payload=b'XYZW').data
+                self.assertEqual(built[6:8], wire.to_bytes(2, 'big'))
+                self.assertEqual(built[8:], records + b'XYZW')
+
+
 class IGMPDispatchTests(unittest.TestCase):
     """The IP protocol 2 registry entry is the abstract base, which picks the
     version class per message (#2439, #2448)."""

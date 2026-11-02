@@ -51,6 +51,7 @@ from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
@@ -342,6 +343,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          :exc:`ValueError`, an :exc:`OverflowError` or a
          :exc:`~pcapkit.utilities.exceptions.FieldValueError`, or a rate of
          zero written in its place (:issue:`2617`).
+       * :meth:`make` and the option makers raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` for an integer
+         field given a value its width cannot hold, rather than writing its low
+         bits or raising a :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+         or a bare :exc:`ValueError`, and for a fixed-size octet field given
+         the wrong number of octets, rather than padding or cutting them. A
+         User Timeout that is neither an :class:`int` nor a
+         :class:`~datetime.timedelta` raises the same, rather than an
+         :exc:`AttributeError`. The Quick-Start TTL Diff wraps, as
+         :rfc:`4782` defines it modulo 256 (:issue:`2614`).
 
     """
 
@@ -653,7 +664,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Raises:
             ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
-                (:issue:`2287`).
+                (:issue:`2287`), a numeric field does not fit its width, or
+                ``checksum`` is not two octets.
 
         .. versionchanged:: 1.5.0
 
@@ -711,17 +723,17 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         schema = Schema_TCP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.tcp),
             dstport=self._make_port(dstport, Enum_TransportProtocol.tcp),
-            seq=seq_no,
-            ack=ack_no,
+            seq=self._make_uint(seq_no, bits=32, name='sequence number'),
+            ack=self._make_uint(ack_no, bits=32, name='acknowledgement number'),
             offset={
                 'offset': offset,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=3, name='reserved'),
                 'ns': int(ns),
             },
             flags=flags,
-            window=window,
-            checksum=b'\x00\x00' if checksum is None else checksum,
-            urgent=urgent,
+            window=self._make_uint(window, bits=16, name='window'),
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
+            urgent=self._make_uint(urgent, bits=16, name='urgent pointer'),
             options=options_value,
             payload=payload,
         )
@@ -992,8 +1004,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             total_length += len(padding)
 
         # force alignment to 32-bit boundary
-        if total_length % 4:
-            pad_len = 4 - (total_length % 4)
+        pad_len = pad_length(total_length, 4)
+        if pad_len:
             total_length += pad_len
 
             if code == Enum_Option.End_of_Option_List:
@@ -2389,6 +2401,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``mss`` does not fit 16 bits.
+
         """
         if opt is not None:
             mss = opt.mss
@@ -2396,7 +2411,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_MaximumSegmentSize(
             kind=code,
             length=4,
-            mss=mss,
+            mss=self._make_uint(mss, bits=16, name=f'[OptNo {code}] mss'),
         )
 
     def _make_mode_ws(self, code: 'Enum_Option', opt: 'Optional[Data_WindowScale]' = None, *,
@@ -2413,6 +2428,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``shift`` does not fit 8 bits.
+
         """
         if opt is not None:
             shift = opt.shift
@@ -2420,7 +2438,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_WindowScale(
             kind=code,
             length=3,
-            shift=shift,
+            shift=self._make_uint(shift, bits=8, name=f'[OptNo {code}] shift'),
         )
 
     def _make_mode_sackpmt(self, code: 'Enum_Option', opt: 'Optional[Data_SACKPermitted]' = None,
@@ -2455,21 +2473,17 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If an edge of ``sack`` does not fit 32 bits.
+
         """
         if opt is not None:
-            sack_val = [Schema_SACKBlock(
-                left=block.left,
-                right=block.right,
-            ) for block in opt.sack]
-        else:
-            sack_val = []
+            sack = [(block.left, block.right) for block in opt.sack]
 
-            if sack is not None:
-                for left, right in sack:
-                    sack_val.append(Schema_SACKBlock(
-                        left=left,
-                        right=right,
-                    ))
+        sack_val = [Schema_SACKBlock(
+            left=self._make_uint(left, bits=32, name=f'[OptNo {code}] left edge'),
+            right=self._make_uint(right, bits=32, name=f'[OptNo {code}] right edge'),
+        ) for left, right in sack or []]
 
         return Schema_SACK(
             kind=code,
@@ -2491,6 +2505,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is not four octets.
+
         """
         if opt is not None:
             data = opt.data
@@ -2498,7 +2515,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_Echo(
             kind=code,
             length=6,
-            data=data,
+            data=self._make_octets(data, size=4, name=f'[OptNo {code}] data'),
         )
 
     def _make_mode_echore(self, code: 'Enum_Option', opt: 'Optional[Data_EchoReply]' = None, *,
@@ -2515,6 +2532,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is not four octets.
+
         """
         if opt is not None:
             data = opt.data
@@ -2522,7 +2542,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_EchoReply(
             kind=code,
             length=6,
-            data=data,
+            data=self._make_octets(data, size=4, name=f'[OptNo {code}] data'),
         )
 
     def _make_mode_ts(self, code: 'Enum_Option', opt: 'Optional[Data_Timestamps]' = None, *,
@@ -2541,6 +2561,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``tsval`` or ``tsecr`` does not fit 32 bits.
+
         """
         if opt is not None:
             tsval = opt.timestamp
@@ -2549,8 +2572,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_Timestamps(
             kind=code,
             length=10,
-            value=tsval,
-            reply=tsecr,
+            value=self._make_uint(tsval, bits=32, name=f'[OptNo {code}] tsval'),
+            reply=self._make_uint(tsecr, bits=32, name=f'[OptNo {code}] tsecr'),
         )
 
     def _make_mode_poc(self, code: 'Enum_Option', opt: 'Optional[Data_PartialOrderConnectionPermitted]' = None,
@@ -2589,6 +2612,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 6 bits.
+
         """
         if opt is not None:
             start = opt.start
@@ -2601,7 +2627,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             profile={
                 'start': start,
                 'end': end,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=6, name=f'[OptNo {code}] reserved'),
             },
         )
 
@@ -2619,6 +2645,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``count`` does not fit 32 bits.
+
         """
         if opt is not None:
             count = opt.cc
@@ -2626,7 +2655,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_CC(
             kind=code,
             length=6,
-            count=count,
+            count=self._make_uint(count, bits=32, name=f'[OptNo {code}] count'),
         )
 
     def _make_mode_ccnew(self, code: 'Enum_Option', opt: 'Optional[Data_CCNew]' = None, *,
@@ -2643,6 +2672,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``count`` does not fit 32 bits.
+
         """
         if opt is not None:
             count = opt.cc
@@ -2650,7 +2682,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_CCNew(
             kind=code,
             length=6,
-            count=count,
+            count=self._make_uint(count, bits=32, name=f'[OptNo {code}] count'),
         )
 
     def _make_mode_ccecho(self, code: 'Enum_Option', opt: 'Optional[Data_CCEcho]' = None, *,
@@ -2667,6 +2699,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``count`` does not fit 32 bits.
+
         """
         if opt is not None:
             count = opt.cc
@@ -2674,7 +2709,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_CCEcho(
             kind=code,
             length=6,
-            count=count,
+            count=self._make_uint(count, bits=32, name=f'[OptNo {code}] count'),
         )
 
     def _make_mode_chkreq(self, code: 'Enum_Option', opt: 'Optional[Data_AlternateChecksumRequest]' = None, *,
@@ -2697,6 +2732,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``algorithm`` does not fit 8 bits.
+
         """
         if opt is not None:
             algorithm_val = opt.chksum
@@ -2707,7 +2745,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_AlternateChecksumRequest(
             kind=code,
             length=3,
-            algorithm=algorithm_val,
+            algorithm=cast('Enum_Checksum', self._make_uint(algorithm_val, bits=8, name=f'[OptNo {code}] algorithm')),
         )
 
     def _make_mode_chksum(self, code: 'Enum_Option', opt: 'Optional[Data_AlternateChecksumData]' = None, *,
@@ -2748,6 +2786,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``digest`` is not 16 octets.
+
         """
         if opt is not None:
             digest = opt.digest
@@ -2755,7 +2796,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_MD5Signature(
             kind=code,
             length=18,
-            digest=digest,
+            digest=self._make_octets(digest, size=16, name=f'[OptNo {code}] digest'),
         )
 
     def _make_mode_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartResponse]' = None, *,
@@ -2836,14 +2877,23 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the timeout does not fit in 15 bits of minutes.
+            ProtocolError: If the timeout is a :obj:`bool`, is neither an
+                :class:`int` nor a :class:`~datetime.timedelta`, is negative,
+                or does not fit in 15 bits of minutes.
 
         """
         if opt is not None:
-            seconds = math.floor(opt.timeout.total_seconds())
+            timeout = opt.timeout
             granularity = opt.granularity
+
+        if isinstance(timeout, datetime.timedelta):
+            seconds = math.floor(timeout.total_seconds())  # type: Optional[int]
+        elif isinstance(timeout, int) and not isinstance(timeout, bool):
+            seconds = int(timeout)
         else:
-            seconds = timeout if isinstance(timeout, int) else math.floor(timeout.total_seconds())
+            seconds = None
+        if seconds is None or seconds < 0:
+            raise ProtocolError(f'TCP: invalid [OptNo {code}] timeout: {timeout!r}')
 
         # NOTE: a parsed (or requested) unit that the value no longer fits in --
         # e.g. a parsed seconds option edited past 15 bits, or a minutes option
@@ -2884,6 +2934,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``key_id`` or ``next_key_id`` does not fit 8
+                bits.
+
         """
         if opt is not None:
             key_id = opt.key_id
@@ -2893,8 +2947,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return Schema_Authentication(
             kind=code,
             length=4 + len(mac),
-            key_id=key_id,
-            next_key_id=next_key_id,
+            key_id=self._make_uint(key_id, bits=8, name=f'[OptNo {code}] key_id'),
+            next_key_id=self._make_uint(next_key_id, bits=8, name=f'[OptNo {code}] next_key_id'),
             mac=mac,
         )
 
@@ -2954,11 +3008,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             subtype: MPTCP subtype
             opt: option data
-            data: option payload data
+            data: option payload data, its first octet the four bits after
+                the subtype
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If the first octet of ``data`` does not fit four
+                bits.
 
         """
         if opt is not None:
@@ -2981,7 +3040,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=3 + len(data[1:]),
             test={
                 'subtype': subtype.value,
-                'data': data[0] & 0x0F if data else 0,
+                'data': self._make_uint(data[0], bits=4, name=f'[OptNo {Enum_Option.Multipath_TCP}] '
+                                        f'subtype {subtype} first data octet') if data else 0,
             },
             data=data[1:],
         )
@@ -3025,7 +3085,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If a field is given without the field before it.
+            ProtocolError: If a field is given without the field before it, or
+                does not fit its width.
 
         """
         if opt is not None:
@@ -3049,6 +3110,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                     f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid {names[index]}: '
                     f'must be None when {names[present]} is None, not {fields[index]!r}')
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPCapable(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 4, 12, 20, 22
@@ -3056,19 +3118,19 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=(4, 12, 20, 22, 24)[present],
             test={
                 'subtype': subtype.value,
-                'version': version,
+                'version': self._make_uint(version, bits=4, name=f'{where} version'),
             },
             flags={
                 'req': flag_req,
                 'ext': flag_ext,
                 'deny_join': flag_deny_join,
-                'reserved': flag_reserved,
+                'reserved': self._make_uint(flag_reserved, bits=4, name=f'{where} flag_reserved'),
                 'hsa': flag_hsa,
             },
-            skey=skey,
-            rkey=rkey,
-            dl_len=dl_len,
-            checksum=checksum,
+            skey=None if skey is None else self._make_uint(skey, bits=64, name=f'{where} skey'),
+            rkey=None if rkey is None else self._make_uint(rkey, bits=64, name=f'{where} rkey'),
+            dl_len=None if dl_len is None else self._make_uint(dl_len, bits=16, name=f'{where} dl_len'),
+            checksum=None if checksum is None else self._make_octets(checksum, size=2, name=f'{where} checksum'),
         )
 
     def _make_mptcp_join(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoin]' = None, **kwargs: 'Any') -> 'Schema_MPTCPJoin':
@@ -3117,6 +3179,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If a field does not fit its width.
+
         """
         if opt is not None:
             reserved = opt.reserved
@@ -3125,17 +3190,18 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             token = opt.token
             nonce = opt.nonce
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPJoinSYN(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
                 'backup': backup,
             },
-            addr_id=addr_id,
-            token=token,
-            nonce=nonce,
+            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
+            token=self._make_uint(token, bits=32, name=f'{where} token'),
+            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
         )
 
     def _make_join_synack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYNACK]' = None, *,
@@ -3160,6 +3226,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If a field does not fit its width, or ``hmac`` is
+                not eight octets.
+
         """
         if opt is not None:
             reserved = opt.reserved
@@ -3171,6 +3241,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             hmac = opt.hmac
             nonce = opt.nonce
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPJoinSYNACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             # NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the
@@ -3181,12 +3252,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=16,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
                 'backup': backup,
             },
-            addr_id=addr_id,
-            hmac=hmac,
-            nonce=nonce,
+            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
+            hmac=self._make_octets(hmac, size=8, name=f'{where} hmac'),
+            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
         )
 
     def _make_join_ack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinACK]' = None, *,
@@ -3205,11 +3276,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 12 bits, or ``hmac`` is
+                not 20 octets.
+
         """
         if opt is not None:
             reserved = opt.reserved
             hmac = opt.hmac
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPJoinACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             # NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the
@@ -3219,9 +3295,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=24,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=12, name=f'{where} reserved'),
             },
-            hmac=hmac,
+            hmac=self._make_octets(hmac, size=20, name=f'{where} hmac'),
         )
 
     def _make_mptcp_dss(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPDSS]' = None, *,
@@ -3257,8 +3333,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the mapping fields are given only in part, or a
-                4-octet field is asked to hold a value wider than 32 bits.
+            ProtocolError: If the mapping fields are given only in part, a
+                4-octet field is asked to hold a value wider than 32 bits, or a
+                field does not fit its width.
 
         """
         if opt is not None:
@@ -3271,6 +3348,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ssn = opt.ssn
             dl_len = opt.dl_len
             checksum = opt.checksum
+
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
+        reserved = self._make_uint(reserved, bits=7, name=f'{where} reserved')
+        if ack is not None:
+            ack = self._make_uint(ack, bits=64, name=f'{where} ack')
+        if dsn is not None:
+            dsn = self._make_uint(dsn, bits=64, name=f'{where} dsn')
 
         flag_A = ack is not None
         flag_a = ack_wide if ack_wide is not None else (flag_A and cast('int', ack).bit_length() > 32)
@@ -3312,9 +3396,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             },
             ack=ack,
             dsn=dsn,
-            ssn=ssn,
-            dl_len=dl_len,
-            checksum=checksum,
+            ssn=None if ssn is None else self._make_uint(ssn, bits=32, name=f'{where} ssn'),
+            dl_len=None if dl_len is None else self._make_uint(dl_len, bits=16, name=f'{where} dl_len'),
+            checksum=None if checksum is None else self._make_octets(checksum, size=2, name=f'{where} checksum'),
         )
 
     def _make_mptcp_addaddr(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPAddAddress]' = None, *,
@@ -3343,7 +3427,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Raises:
             ProtocolError: If ``hmac`` is not 8 octets, or is given together
-                with ``echo`` set.
+                with ``echo`` set, or a field does not fit its width.
             FieldValueError: If ``addr`` is a :obj:`bool` or not a valid IP
                 address.
 
@@ -3383,17 +3467,18 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is None and hmac is not None and (echo or len(hmac) != 8):
             raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid HMAC')
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPAddAddress(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=4 + (4 if version == 4 else 16) + (2 if port is not None else 0) + (8 if hmac is not None else 0),
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
                 'echo': echo,
             },
-            addr_id=addr_id,
+            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
             address=addr_val,
-            port=port,
+            port=None if port is None else self._make_uint(port, bits=16, name=f'{where} port'),
             hmac=hmac,
         )
 
@@ -3413,6 +3498,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 4 bits, or an address
+                ID 8 bits.
+
         """
         if opt is not None:
             reserved = opt.reserved
@@ -3420,6 +3509,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         else:
             addr_id_list = addr_id if addr_id is not None else []
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
+        for item in addr_id_list:
+            self._make_uint(item, bits=8, name=f'{where} addr_id')
         return Schema_MPTCPRemoveAddress(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             # NOTE: :rfc:`8684` section 3.4.2 figure 13 gives ``Length = 3 + n``,
@@ -3431,7 +3523,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=3 + len(addr_id_list),
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=4, name=f'{where} reserved'),
             },
             addr_id=addr_id_list,
         )
@@ -3454,6 +3546,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 3 bits, or ``addr_id``
+                8 bits.
+
         """
         if opt is not None:
             # NOTE: ``backup`` must be carried over, or reconstructing a parsed
@@ -3463,6 +3559,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             backup = opt.backup
             addr_id = opt.addr_id
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPPriority(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             # NOTE: :rfc:`8684` section 3.3.8 figure 11 gives MP_PRIO as **3**
@@ -3479,10 +3576,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             length=3 if addr_id is None else 4,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
                 'backup': backup,
             },
-            addr_id=addr_id,
+            addr_id=None if addr_id is None else self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
         )
 
     def _make_mptcp_fail(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPFallback]' = None, *,
@@ -3501,19 +3598,24 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 12 bits, or ``dsn`` 64
+                bits.
+
         """
         if opt is not None:
             reserved = opt.reserved
             dsn = opt.dsn
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPFallback(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=12, name=f'{where} reserved'),
             },
-            dsn=dsn,
+            dsn=self._make_uint(dsn, bits=64, name=f'{where} dsn'),
         )
 
     def _make_mptcp_fastclose(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPFastclose]' = None, *,
@@ -3532,19 +3634,24 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 12 bits, or ``key`` 64
+                bits.
+
         """
         if opt is not None:
             reserved = opt.reserved
             key = opt.rkey
 
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPFastclose(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=12,
             test={
                 'subtype': subtype.value,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=12, name=f'{where} reserved'),
             },
-            key=key,
+            key=self._make_uint(key, bits=64, name=f'{where} key'),
         )
 
     def _make_mode_fastopen(self, code: 'Enum_Option', opt: 'Optional[Data_FastOpenCookie]' = None, *,

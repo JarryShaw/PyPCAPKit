@@ -124,9 +124,11 @@ def _cid_layers(proto: 'Any') -> 'tuple':
                  for layer in _dtls_layers(proto)[0] if isinstance(layer.info, DTLSCIDCiphertext))
 
 
-def _ethernet_pcap(datagrams: 'tuple[tuple[bool, bytes], ...]') -> str:
-    """Write ``datagrams`` as an Ethernet/IPv4/UDP PCAP file in a temporary directory."""
-    path = os.path.join(tempfile.mkdtemp(prefix='pcapkit-dtls-cid-'), 'dtls-cid.pcap')
+def _ethernet_pcap(case: 'unittest.TestCase', datagrams: 'tuple[tuple[bool, bytes], ...]') -> str:
+    """Write ``datagrams`` as an Ethernet/IPv4/UDP PCAP file in a directory ``case`` removes (#2664)."""
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-dtls-cid-')
+    case.addCleanup(tmpdir.cleanup)
+    path = os.path.join(tmpdir.name, 'dtls-cid.pcap')
     client, server = bytes([192, 0, 2, 1]), bytes([192, 0, 2, 2])
     with open(path, 'wb') as file:
         file.write(struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 262144, 1))
@@ -241,7 +243,7 @@ class CaptureTests(unittest.TestCase):
     def test_an_extraction_carries_the_ids_across_its_frames(self) -> None:
         import pcapkit
 
-        path = _ethernet_pcap(MBEDTLS)
+        path = _ethernet_pcap(self, MBEDTLS)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             extraction = pcapkit.extract(fin=path, nofile=True)
@@ -283,7 +285,7 @@ class InstanceMemoryTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            extraction = pcapkit.extract(fin=_ethernet_pcap(datagrams), nofile=True, **kwargs)
+            extraction = pcapkit.extract(fin=_ethernet_pcap(self, datagrams), nofile=True, **kwargs)
         self.addCleanup(close_extractor, extraction)
         return extraction
 

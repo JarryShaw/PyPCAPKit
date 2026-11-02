@@ -22,6 +22,8 @@ Transfer Protocol (FTP) [*]_, whose octets it keeps undissected.
 
    .. autoproperty:: name
 
+   .. automethod:: __index__
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol

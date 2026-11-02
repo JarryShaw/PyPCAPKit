@@ -235,17 +235,20 @@ def _extract_first(data: 'bytes', suffix: 'str') -> 'Any':
 
     Returns:
         The first extracted frame, whose ``.protochain`` is what callers check.
+        The frame is held in memory, so it outlives the capture, whose
+        directory is removed on every path out (#2664).
 
     """
     import pcapkit
 
-    path = os.path.join(tempfile.mkdtemp(prefix='pcapkit-dispatch-'), f'probe{suffix}')
-    with open(path, 'wb') as file:
-        file.write(data)
+    with tempfile.TemporaryDirectory(prefix='pcapkit-dispatch-') as directory:
+        path = os.path.join(directory, f'probe{suffix}')
+        with open(path, 'wb') as file:
+            file.write(data)
 
-    with pcapkit.extract(fin=path, nofile=True, store=True, ip=True, tcp=True,
-                         reassembly=False) as extraction:
-        return extraction.frame[0]
+        with pcapkit.extract(fin=path, nofile=True, store=True, ip=True, tcp=True,
+                             reassembly=False) as extraction:
+            return extraction.frame[0]
 
 
 def _tcp(dstport: 'int', payload: 'bytes' = b'') -> 'bytes':

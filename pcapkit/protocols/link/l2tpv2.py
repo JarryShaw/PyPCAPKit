@@ -58,11 +58,11 @@ from pcapkit.protocols.data.link.l2tp import L2TP as Data_L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as Data_Flags
 from pcapkit.protocols.link.l2tp import L2TP
 from pcapkit.protocols.schema.link.l2tp import L2TP as Schema_L2TP
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -383,28 +383,31 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         return 16
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'int':  # type: ignore[override]
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: UDP port 1701, the port of
+            :attr:`UDP.l2tp <pcapkit.const.reg.apptype.udp.UDP.l2tp>` as an
+            :class:`int`, which
+            :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
+            dispatches here (:ref:`registry-protocol-index`).
+            :class:`~pcapkit.const.reg.transtype.TransType` 115 names L2TPv3
+            over IP instead.
 
-        Note:
-            L2TPv2 is reached through **UDP port 1701**, and a port is not an
-            ``__index__`` value anywhere in this package -- every non-raising
-            ``__index__`` returns a :class:`~pcapkit.const.reg.transtype.TransType`,
-            :class:`~pcapkit.const.reg.ethertype.EtherType`,
-            :class:`~pcapkit.const.reg.linktype.LinkType` or
-            :class:`~pcapkit.const.linux.arphrd.ARPHRD`, bar the PCAP frame and
-            PCAP-NG block instances that return their own index number, and
-            :meth:`Application.__index__
-            <pcapkit.protocols.application.application.Application.__index__>`
-            raises for exactly this reason. So there is no index to return here.
-            ``L2TPv3`` will be the first class in this family with one, IANA
-            protocol number 115.
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        .. versionchanged:: 1.6.0
+
+           Returns UDP port 1701, where it raised
+           :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (:issue:`2627`).
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        # imported here, as ``import pcapkit`` leaves the UDP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.udp import UDP  # pylint: disable=import-outside-toplevel
+
+        return int(UDP.l2tp)  # type: ignore[call-overload]
 
     ##########################################################################
     # Utilities.

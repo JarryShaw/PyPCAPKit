@@ -47,9 +47,9 @@ Versions Not Implemented
 header from v2, and is reachable two ways: over UDP port 1701 like v2, and
 directly over IP as **protocol number 115**. That second route is why
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
-leaves 115 unbound: the binding waits on an ``L2TPv3`` class. It would also be
-the first member of this family with a real
-:meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
+leaves 115 unbound: the binding waits on an ``L2TPv3`` class. Protocol 115 names v3
+alone: v2's :meth:`~pcapkit.protocols.protocol.Protocol.__index__` is its UDP
+port.
 
 **L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*
 an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves

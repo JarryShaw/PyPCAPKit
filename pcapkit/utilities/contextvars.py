@@ -14,8 +14,12 @@ a module at any layer may import it; see :ref:`utilities-or-corekit`.
 
 """
 import contextvars
+from typing import TYPE_CHECKING
 
-__all__ = ['beholding', 'frame_depth', 'rebuilding']
+if TYPE_CHECKING:
+    from typing import Optional
+
+__all__ = ['beholding', 'frame_depth', 'frame_length', 'rebuilding']
 
 #: contextvars.ContextVar[bool]: Whether a layer that raises is discarded by its
 #: caller, as :func:`~pcapkit.corekit.decorators.beholder` replaces it and
@@ -30,6 +34,18 @@ beholding = contextvars.ContextVar('pcapkit.utilities.contextvars.beholding', de
 #: <pcapkit.protocols.protocol.Protocol._parse_next_layer>` parses; see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 frame_depth = contextvars.ContextVar('pcapkit.utilities.contextvars.frame_depth', default=0)
+
+#: contextvars.ContextVar[tuple[int, int] | None]: The captured and the original
+#: length of the frame being dissected, in octets, as its PCAP record or PCAP-NG
+#: packet block states them; :data:`None` outside a frame, and inside the payload
+#: of an :class:`~pcapkit.protocols.internet.internet.Internet` layer, which
+#: bounds it. A frame the capture cut short holds fewer octets than were on the
+#: wire, which a layer stating no length of its own, as
+#: :class:`~pcapkit.protocols.link.gre.GRE`, cannot tell from the octets it is
+#: handed (:issue:`2653`).
+frame_length = contextvars.ContextVar(
+    'pcapkit.utilities.contextvars.frame_length', default=None,
+)  # type: contextvars.ContextVar[Optional[tuple[int, int]]]
 
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
 #: :meth:`Protocol._make_payload

@@ -19,6 +19,11 @@ type's own ``__proto_dest__``, the declaration that backs ``code=`` (#570,
 #2392), so the audit and the registration mechanism cannot drift apart: an enum
 type that declares one gets audited here the same day.
 
+An index is the class's own LinkType, EtherType or TransType value, or AppType
+port, bar Netlink's ARPHRD type (#2627), whether or not anything dispatches it
+there, so a claim nothing reaches is an entry in :data:`UNBOUND` giving the
+reason, checked in both directions.
+
 Nothing is parsed and no capture under :file:`examples/captures/` is read, so
 this belongs to the unit tier.
 
@@ -41,6 +46,10 @@ __tier__ = 'LATEST'
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: Claims nothing reaches, as ``(protocol, destination, found)``: why. Binding
+#: one changes parsed output, and deletes its entry in the same change (#2649).
+UNBOUND = {}  # type: dict[tuple[str, str, Any], str]
 
 
 class Gap(NamedTuple):
@@ -156,17 +165,30 @@ class DispatchReachabilityTests(unittest.TestCase):
         """The invariant itself, over every class rather than a hand-picked few."""
         gaps, checked = audit()
 
-        self.assertEqual(gaps, [], 'protocol classes declare codes nothing dispatches: '
-                                   + '; '.join(f'{gap.protocol} says {gap.code!r} but '
-                                               f'{gap.destination}.__proto__ holds '
-                                               f'{gap.found!r}' for gap in gaps))
+        unrecorded = [gap for gap in gaps
+                      if (gap.protocol, gap.destination, gap.found) not in UNBOUND]
+        self.assertEqual(unrecorded, [], 'protocol classes declare codes nothing dispatches: '
+                                         + '; '.join(f'{gap.protocol} says {gap.code!r} but '
+                                                     f'{gap.destination}.__proto__ holds '
+                                                     f'{gap.found!r}' for gap in unrecorded))
 
         # A walk that found nothing to check would also report no gaps, so pin
         # the measured claim count as a floor: each indexed class once per
         # destination its code's ``__proto_dest__`` names -- ``Frame`` and
-        # ``PCAPNG`` for a ``LinkType`` code, ``LinuxSLL`` for an ``ARPHRD`` one
-        # -- with ``InARP`` and ``DRARP`` reaching their family bases' entries.
-        self.assertGreaterEqual(checked, 39)
+        # ``PCAPNG`` for a ``LinkType`` code, ``Internet`` for a ``TransType``
+        # one, ``Link`` for an ``EtherType`` one, ``LinuxSLL`` for Netlink's
+        # ``ARPHRD`` one -- less the ``UNBOUND`` entries, with ``InARP`` and
+        # ``DRARP`` reaching their family bases' entries.
+        self.assertGreaterEqual(checked, 41)
+
+    def test_unbound_entries_are_gaps_the_audit_finds(self) -> None:
+        """The other direction: an entry whose claim is reached, or whose class,
+        destination or holder moved, fails until it is deleted or rewritten.
+        """
+        gaps, _ = audit()
+
+        found = {(gap.protocol, gap.destination, gap.found) for gap in gaps}
+        self.assertEqual(sorted(set(UNBOUND) - found, key=repr), [])
 
     def test_the_audit_detects_a_code_that_nothing_dispatches(self) -> None:
         """The guard has teeth: inject a gap and confirm the audit reports it.
@@ -213,11 +235,12 @@ class DispatchReachabilityTests(unittest.TestCase):
         IANA-assigned IP protocol ID 115."* So 115 names the v3-over-IP header,
         which no class in this tree implements -- and this audit deliberately
         does **not** flag it, because nothing claims 115 in the first place.
-        :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` raises from
-        ``__index__`` rather than returning it.
+        :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`'s ``__index__`` returns
+        its UDP port rather than 115 (#2627), and the family base raises.
 
         """
         import pcapkit.protocols.link as linkpkg
+        from pcapkit.const.reg.apptype import UDP
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.link.l2tp import L2TP
@@ -225,10 +248,9 @@ class DispatchReachabilityTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertNotIn(TransType.L2TP, Internet.__proto__)
-        for cls in (L2TP, L2TPv2):
-            with self.subTest(cls=cls.__name__):
-                with self.assertRaises(UnsupportedCall):
-                    cls.__index__()
+        with self.assertRaises(UnsupportedCall):
+            L2TP.__index__()
+        self.assertEqual(L2TPv2.__index__(), int(UDP.l2tp))
 
         modules = {info.name for info in pkgutil.iter_modules(linkpkg.__path__)}
         self.assertNotIn('l2tpv3', modules)

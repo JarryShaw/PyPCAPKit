@@ -47,6 +47,7 @@ from pcapkit.const.dccp.reset_code import ResetCode as Enum_ResetCode
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.dccp import DCCP as Data_DCCP
@@ -409,16 +410,21 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Raises:
             ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`, the
                 header with its options runs past the 1020 octets a Data Offset
-                can give, or an option maker rejects its option.
+                can give, an option maker rejects its option, a numeric field
+                does not fit its width, ``checksum`` is not two octets, or
+                ``reset_data`` is not three.
             EnumValueError: If ``type`` is out of its 4-bit range.
 
         """
         code = Enum_PacketType.get(type)
         type_field = {
-            'reserved': reserved,
+            'reserved': self._make_uint(reserved, bits=3, name='reserved'),
             'type': int(code),
             'x': int(x),
         }  # type: Schema_TypeField
+        ccval = self._make_uint(ccval, bits=4, name='ccval')
+        cscov = self._make_uint(cscov, bits=4, name='cscov')
+        seq_bits = (6 if x else 3) * 8
 
         if options is not None:
             options_value, options_length = self._make_dccp_options(options)
@@ -438,15 +444,15 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
                 'ccval': ccval,
                 'cscov': cscov,
             },
-            checksum=b'\x00\x00' if checksum is None else checksum,
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             type=type_field,
-            seq_reserved=seq_reserved,
-            seq=seq,
-            ack_reserved=ack_reserved,
-            ack=ack,
-            service_code=service_code,
+            seq_reserved=self._make_uint(seq_reserved, bits=8, name='seq_reserved'),
+            seq=self._make_uint(seq, bits=seq_bits, name='sequence number'),
+            ack_reserved=self._make_uint(ack_reserved, bits=(2 if x else 1) * 8, name='ack_reserved'),
+            ack=self._make_uint(ack, bits=seq_bits, name='acknowledgement number'),
+            service_code=self._make_uint(service_code, bits=32, name='service code'),
             reset_code=reset_code,
-            reset_data=reset_data,
+            reset_data=self._make_octets(reset_data, size=3, name='reset data'),
             options=options_value,
             payload=payload,
         )
@@ -598,8 +604,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
 
         total_length = sum(len(item) if isinstance(item, bytes) else len(item.pack())
                            for item in options_list)
-        if total_length % 4:
-            pad_len = 4 - total_length % 4
+        pad_len = pad_length(total_length, 4)
+        if pad_len:
             options_list.extend(self._make_opt_padding(Enum_Option.Padding)  # type: ignore[arg-type]
                                 for _ in range(pad_len))
             total_length += pad_len
@@ -1207,15 +1213,15 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``count`` does not fit six octets.
+            ProtocolError: If ``count`` is not an unsigned integer that fits six
+                octets.
 
         """
         if opt is not None:
             count, length = opt.count, opt.length
         else:
-            length = max((count.bit_length() + 7) // 8, 1) + 2
-            if length > 8:
-                raise ProtocolError(f'{self.alias}: [Opt {code}] NDP count {count} does not fit 6 octets')
+            count = self._make_uint(count, bits=48, name=f'[Opt {code}] NDP count')
+            length = self._uint_size(count, minimum=1) + 2
 
         return Schema_NDPCount(
             type=code,
@@ -1317,11 +1323,14 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``timestamp`` does not fit four octets.
+
         """
         if opt is not None:
             timestamp, length = opt.timestamp, opt.length
         else:
-            length = 6
+            timestamp, length = self._make_uint(timestamp, bits=32, name=f'[Opt {code}] timestamp'), 6
 
         return Schema_Timestamp(
             type=code,
@@ -1346,13 +1355,20 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``timestamp`` or ``elapsed`` does not fit four
+                octets.
+
         """
         if opt is not None:
             timestamp, elapsed, length = opt.timestamp, opt.elapsed, opt.length
-        elif elapsed is None:
-            length = 6
         else:
-            length = 8 if elapsed <= 0xFFFF else 10
+            timestamp = self._make_uint(timestamp, bits=32, name=f'[Opt {code}] timestamp')
+            if elapsed is None:
+                length = 6
+            else:
+                elapsed = self._make_uint(elapsed, bits=32, name=f'[Opt {code}] elapsed')
+                length = 8 if elapsed <= 0xFFFF else 10
 
         return Schema_TimestampEcho(
             type=code,
@@ -1376,10 +1392,14 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``elapsed`` does not fit four octets.
+
         """
         if opt is not None:
             elapsed, length = opt.elapsed, opt.length
         else:
+            elapsed = self._make_uint(elapsed, bits=32, name=f'[Opt {code}] elapsed')
             length = 4 if elapsed <= 0xFFFF else 6
 
         return Schema_ElapsedTime(

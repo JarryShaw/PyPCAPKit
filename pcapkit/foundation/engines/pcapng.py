@@ -14,6 +14,7 @@ import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.dumpkit.pcap import PCAPIO
@@ -458,7 +459,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 size = length
                 if block_type == Enum_BlockType.Decryption_Secrets_Block:
                     secrets = int.from_bytes(self._peek(16)[12:16], byteorder)
-                    size = max(size, BLOCK_MINIMUM[block_type] + secrets + -secrets % 4)
+                    size = max(size, BLOCK_MINIMUM[block_type] + secrets + pad_length(secrets, 4))
         # NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a block
         # longer than that is read ahead only so far; the reader moves past the
         # rest itself (#1975).

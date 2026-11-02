@@ -7,9 +7,13 @@
 :mod:`pcapkit.protocols.link.gre` contains
 :class:`~pcapkit.protocols.link.gre.GRE` only, which implements the extractor
 for the Generic Routing Encapsulation base header [:rfc:`2784`] plus the
-optional Key and Sequence Number extensions [:rfc:`2890`], as seen on a
+optional Key and Sequence Number extensions [:rfc:`2890`]. It is reached
+through IP protocol number 47 behind any layer sharing
+:attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`,
+IPv4 and IPv6 among them, and on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
-is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- both land on this one class:
+is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE`` and
+``ARPHRD_IP6GRE`` both land on this one class:
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` dispatches here instead
 of falling back to :class:`~pcapkit.protocols.misc.raw.Raw` for either case;
 see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`. The
@@ -68,12 +72,13 @@ than misreading it as RFC 2784/2890 GRE.
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.link.gre import GRE as Data_GRE
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.gre import GRE as Schema_GRE
 from pcapkit.utilities import config
+from pcapkit.utilities.contextvars import frame_length
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -104,9 +109,11 @@ class GRE(Link[Data_GRE, Schema_GRE],
     :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, and computed by
     :meth:`make` when ``checksum_present`` asks for one without giving it.
     Neither this header nor the Linux cooked-capture header before it states
-    a length, so the octets verified are the ones captured: a frame the
-    capture cut short reads as
-    :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.INVALID`.
+    a length, so the message runs to the end of its frame. A frame the
+    capture cut short, holding fewer octets than its original length, reads
+    as :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`,
+    as :data:`~pcapkit.utilities.contextvars.frame_length` tells it
+    (:issue:`2653`).
 
     """
 
@@ -217,7 +224,13 @@ class GRE(Link[Data_GRE, Schema_GRE],
             if _checksum is None:
                 status = ChecksumStatus.NOT_COMPUTED
             else:
-                status = verify_message(self.alias, self._data, _checksum.to_bytes(2, 'big'), length=length)
+                # NOTE: Behind LinuxSLL the message runs to the end of its frame, so
+                # what the capture cut off is covered too. Behind IP the value is None:
+                # Internet clears it, as the length IP declares bounds GRE (#2653).
+                lengths = frame_length.get()
+                missing = 0 if lengths is None else max(lengths[1] - lengths[0], 0)
+                status = verify_message(self.alias, self._data, _checksum.to_bytes(2, 'big'),
+                                        length=length + missing)
             gre.__update__([
                 ('checksum_status', status),
             ])
@@ -354,18 +367,24 @@ class GRE(Link[Data_GRE, Schema_GRE],
         return 16
 
     @classmethod
-    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            Numeral registry index of the protocol in Linux ARP hardware
-            types: :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE`, which
+            Numeral registry index of the protocol in `IANA`_ protocol
+            numbers, which
+            :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+            is keyed by.
             :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
-            dispatches here alongside
-            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`.
+            names its own keys for this class,
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IPGRE` and
+            :attr:`~pcapkit.const.linux.arphrd.ARPHRD.IP6GRE`
+            (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return Enum_ARPHRD.IPGRE  # type: ignore[return-value]
+        return Enum_TransType.GRE  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

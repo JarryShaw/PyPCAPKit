@@ -41,6 +41,7 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
    .. automethod:: _make_data
 
+   .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
 

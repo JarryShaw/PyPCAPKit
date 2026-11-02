@@ -242,16 +242,18 @@ class TestFRAD(unittest.TestCase):
             FRAD(nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x1_0000)  # out of range
 
     def test_id_and_index(self) -> None:
-        """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
+        """``__index__`` is ``LINKTYPE_FRELAY`` (#2627); LinuxSLL dispatches here
+        under ``ARPHRD_FRAD``, a key it names itself (#2510).
+        """
         from pcapkit.const.linux.arphrd import ARPHRD
+        from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.link.linux_sll import LinuxSLL
         from pcapkit.protocols.link.frad import FRAD
 
         self.assertEqual(FRAD.id(), ('FRAD',))
-        self.assertIs(FRAD.__index__(), ARPHRD.FRAD)
-        self.assertEqual(FRAD.__index__(), 770)
-        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, FRAD.__index__()),
-                      FRAD)
+        self.assertIs(FRAD.__index__(), LinkType.FRELAY)
+        self.assertEqual(FRAD.__index__(), 107)
+        self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, ARPHRD.FRAD), FRAD)
 
     def test_truncated_header_rebuilds_as_captured(self) -> None:
         """A capture ending inside the header must not blow up the parse, and

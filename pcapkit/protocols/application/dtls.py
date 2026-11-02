@@ -759,6 +759,26 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """Return an estimated length for the object."""
         return _LEGACY_HEADER_LENGTH  # type: ignore[return-value]
 
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: UDP port 5684, the port of
+            :attr:`UDP.coaps <pcapkit.const.reg.apptype.udp.UDP.coaps>` as an
+            :class:`int`, which
+            :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
+            dispatches here (:ref:`registry-protocol-index`).
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        """
+        # imported here, as ``import pcapkit`` leaves the UDP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.udp import UDP  # pylint: disable=import-outside-toplevel
+
+        return int(UDP.coaps)  # type: ignore[call-overload]
+
     ##########################################################################
     # Utilities.
     ##########################################################################

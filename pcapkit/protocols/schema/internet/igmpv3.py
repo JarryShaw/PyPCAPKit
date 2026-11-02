@@ -3,7 +3,7 @@
 """header schema for internet group management protocol version 3"""
 
 import io
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
 from pcapkit.const.igmp.type import Type as Enum_Type
@@ -19,7 +19,7 @@ __all__ = ['IGMPv3', 'Query', 'QueryExtension', 'Report', 'GroupRecord']
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
-    from typing import Any, Optional
+    from typing import IO, Any, Optional
 
     from typing_extensions import TypedDict
 
@@ -221,6 +221,46 @@ class GroupRecord(Schema):
                      aux_data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
+class GroupRecordListField(ListField):
+    """Group record list that ends with the data.
+
+    :attr:`Report.records` is sized by the IGMP length, which exceeds the
+    octets present when the capture cuts the Report short. A record read past
+    them consumes nothing, which :meth:`ListField.unpack
+    <pcapkit.corekit.fields.collections.ListField.unpack>` refuses to loop on,
+    so the list is sized by the octets present instead: the record the data
+    ends inside is kept as far as it goes, and :meth:`Schema.unpack
+    <pcapkit.protocols.schema.schema.Schema.unpack>` records the short read
+    (:issue:`2650`).
+
+    """
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[GroupRecord]':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: Field buffer.
+            packet: Packet data.
+
+        Returns:
+            Unpacked group records.
+
+        """
+        if isinstance(buffer, bytes):
+            present = len(buffer)
+        else:
+            start = buffer.tell()
+            present = buffer.seek(0, io.SEEK_END) - start
+            buffer.seek(start, io.SEEK_SET)
+
+        declared = self._length
+        self._length = min(declared, present)
+        try:
+            return cast('list[GroupRecord]', super().unpack(buffer, packet))
+        finally:
+            self._length = declared
+
+
 @schema_final
 class Report(Schema):
     """Header schema for an IGMPv3 Membership Report's body (:rfc:`3376#section-4.2`).
@@ -243,9 +283,10 @@ class Report(Schema):
     reserved_2: 'bytes' = BytesField(length=2, default=b'\x00\x00')
     #: Number of group records, as received on the wire.
     num_group_records: 'int' = UInt16Field()
-    #: Group records; see :meth:`post_process` for how this is kept to
-    #: exactly :attr:`num_group_records` entries.
-    records: 'list[GroupRecord]' = ListField(
+    #: Group records, read no further than the data goes (see
+    #: :class:`GroupRecordListField`); see :meth:`post_process` for how this is
+    #: kept to exactly :attr:`num_group_records` entries.
+    records: 'list[GroupRecord]' = GroupRecordListField(
         length=lambda pkt: pkt['__length__'],
         item_type=SchemaField(schema=GroupRecord),
     )

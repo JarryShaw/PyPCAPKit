@@ -863,3 +863,86 @@ unless its ``EXCUSED`` table gives the reason. It fails as well on a map whose o
 defines no ``register*`` classmethod of its own, unless its ``INHERITED`` table names
 the one typed for that map's keys.
 
+.. _registry-protocol-index:
+
+The Registry Index
+~~~~~~~~~~~~~~~~~~
+
+**A protocol's** :meth:`~pcapkit.protocols.protocol.Protocol.__index__` **returns its**
+:class:`~pcapkit.const.reg.linktype.LinkType`, :class:`~pcapkit.const.reg.ethertype.EtherType`,
+:class:`~pcapkit.const.reg.transtype.TransType` **or**
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` **member wherever one names it**, ahead of
+any other registry's code, such as an :class:`~pcapkit.const.linux.arphrd.ARPHRD` type or an
+NLPID. Ruled on :issue:`2627`. So :class:`~pcapkit.protocols.link.radiotap.Radiotap` returns
+``LinkType.IEEE802_11_RADIOTAP`` rather than ``ARPHRD.IEEE80211_RADIOTAP``.
+
+* **An AppType value is returned as its port.** An
+  :class:`~pcapkit.const.reg.apptype.apptype.AppType` member is a :class:`str`, and
+  :func:`int` and :func:`operator.index` raise :exc:`TypeError` when ``__index__`` returns
+  anything but an :class:`int`, so a class an AppType member names returns that member's
+  port: :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` returns 1701, ``int(UDP.l2tp)``.
+  :class:`~pcapkit.protocols.application.tls.TLS`, which
+  :class:`~pcapkit.protocols.application.sslv3.SSLv3` inherits, and
+  :class:`~pcapkit.protocols.application.dtls.DTLS` return the ports TCP and UDP dispatch
+  them at, 443 and 5684, although IANA registers those ports as ``https`` and ``coaps``,
+  the protocols carried over them. Ruled on :issue:`2627`.
+* **Netlink keeps** ``ARPHRD.NETLINK``: ``LINKTYPE_NETLINK`` (253) names the SLL-framed
+  form, not the ``nlmsghdr`` :class:`~pcapkit.protocols.link.netlink.Netlink` reads. Ruled
+  on :issue:`2627`.
+* **The index keys no registration.** Every built-in ``__proto__`` entry spells out its key,
+  so a class keeps its place in a secondary registry whatever its index:
+  :class:`~pcapkit.protocols.link.frad.FRAD` stays under ``ARPHRD.FRAD`` in
+  :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
+* **A class dispatched under several values returns one of them.**
+  :class:`~pcapkit.protocols.internet.ipv4.IPv4` and
+  :class:`~pcapkit.protocols.internet.ipv6.IPv6`, dispatched under LinkType 228 and 229,
+  EtherType 0x0800 and 0x86DD, and TransType 4 and 41, and
+  :class:`~pcapkit.protocols.internet.ipx.IPX`, under EtherType 0x8137 and TransType 111,
+  keep the TransType value they returned in 1.5.x, so no shipped value changes.
+  :class:`~pcapkit.protocols.link.loopback.Loopback`, at LinkType 0 and 108, returns
+  ``LinkType.NULL``, 0, and :class:`~pcapkit.protocols.application.http.HTTP`, at TCP and
+  UDP ports 80 and 8080, returns 80.
+* **An index is a reachability claim** wherever its enum declares ``__proto_dest__``.
+  :file:`tests/protocols/test_dispatch_reachability_unit.py` requires the class in the
+  registry that enum keys, or an entry in its ``UNBOUND`` table giving the reason nothing
+  dispatches it there, which the binding deletes. A port, being an :class:`int`, makes no
+  such claim.
+* **No value, no index.** :class:`~pcapkit.protocols.link.link.Link`,
+  :class:`~pcapkit.protocols.internet.internet.Internet` and
+  :class:`~pcapkit.protocols.transport.transport.Transport`, and the
+  :class:`~pcapkit.protocols.internet.ip.IP`, :class:`~pcapkit.protocols.internet.ipsec.IPsec`
+  and :class:`~pcapkit.protocols.internet.icmp.ICMP` family bases, leave the abstract method
+  unimplemented and return :obj:`None`. These raise:
+
+  - :class:`~pcapkit.protocols.link.vlan.VLAN`,
+    :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` and
+    :class:`~pcapkit.protocols.link.l2tp.L2TP`, abstract family bases nothing dispatches
+    to, whose members each carry a value of their own;
+  - :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, although
+    :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+    dispatches it at TransType 140, Shim6: one class parses Shim6 and any other
+    :rfc:`6564`-format header registered to it, so its value differs per instance, and
+    ``__index__`` is a class method;
+  - :class:`~pcapkit.protocols.application.application.Application`, and the
+    :class:`~pcapkit.protocols.application.ssl.SSL` family base and
+    :class:`~pcapkit.protocols.application.sslv2.SSLv2`, which define no ``__index__`` and
+    inherit its raise. Nothing dispatches to SSLv2: an SSLv2 record on TCP port 443 parses
+    as a TLS layer adopting SSLv2's data;
+  - :class:`~pcapkit.protocols.misc.raw.Raw` and
+    :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the undissected octets and the
+    empty payload, and :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, the
+    checksum pseudo-header, which no registry value names. TransType 59, under which
+    :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+    dispatches Raw, is IPv6-NoNxt, no next header;
+  - the PCAP :class:`~pcapkit.protocols.misc.pcap.header.Header` and
+    :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, and
+    :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, the capture file's own records. A PCAP
+    frame or PCAP-NG packet block instance returns its index number, an ordinal outside
+    the rule.
+
+  A member sharing its family base's value inherits the base's ``__index__`` rather than
+  overriding it.
+
+:file:`tests/protocols/test_protocol_index_registry_2627_unit.py` holds every protocol
+class to the rule, with each value derived from the registry and the number it assigns.
+

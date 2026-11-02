@@ -149,6 +149,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingPairListField
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingsFrame
    :members:
    :show-inheritance:

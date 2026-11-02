@@ -9,11 +9,11 @@ Available enumerations include:
 
 .. list-table::
 
-   * - :class:`ARPHRD <pcapkit.const.linux.arphrd.ARPHRD>`
+   * - :class:`Linux_ARPHRD <pcapkit.const.linux.arphrd.ARPHRD>`
      - Linux ARP Hardware Types
 
 """
 
-from pcapkit.const.linux.arphrd import ARPHRD
+from pcapkit.const.linux.arphrd import ARPHRD as Linux_ARPHRD
 
-__all__ = ['ARPHRD']
+__all__ = ['Linux_ARPHRD']

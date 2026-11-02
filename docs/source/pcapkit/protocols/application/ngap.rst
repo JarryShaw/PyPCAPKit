@@ -49,6 +49,7 @@ unregistered PPID would, because
    .. automethod:: make
 
    .. automethod:: __length_hint__
+   .. automethod:: __index__
    .. automethod:: _make_data
 
 Decoder Dependency

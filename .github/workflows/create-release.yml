@@ -391,7 +391,8 @@ jobs:
     # because the ``v*`` tag is its own artefact (#888). Its ``if:`` calls no
     # status-check function, so the implicit ``success()`` requires the gate
     # (#1052). The release App's private key is a ``github-release`` secret, so
-    # no job reads it before this approval, and no other job at all. #1748:
+    # no job in this workflow reads it before this approval; the cron ``pr``
+    # jobs read their own copy from ``release-app``. #1748:
     # ``PCAPKIT_TAG_EXISTS`` already skips a tag at another commit off a ``v*``
     # ref, unless it was pushed between ``check_tag`` and ``owner``; the other
     # publishers' clause covers that too.

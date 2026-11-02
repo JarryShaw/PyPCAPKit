@@ -357,6 +357,27 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         """Return an estimated length for the object."""
         return _RECORD_HEADER_LENGTH  # type: ignore[return-value]
 
+    @classmethod
+    def __index__(cls) -> 'int':  # type: ignore[override]
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_ service names and
+            port numbers: TCP port 443, the port of
+            :attr:`TCP.https_443 <pcapkit.const.reg.apptype.tcp.TCP.https_443>`
+            as an :class:`int`, which
+            :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+            dispatches here (:ref:`registry-protocol-index`).
+            :class:`~pcapkit.protocols.application.sslv3.SSLv3` inherits it.
+
+        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
+        """
+        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
+        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
+
+        return int(TCP.https_443)  # type: ignore[call-overload]
+
     ##########################################################################
     # Utilities.
     ##########################################################################

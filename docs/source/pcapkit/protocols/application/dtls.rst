@@ -167,6 +167,7 @@ ones on the wire.
    .. automethod:: analyze_handshake
 
    .. automethod:: __length_hint__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
 
