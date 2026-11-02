@@ -439,7 +439,7 @@ UNRELATED = {
     'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
                                              "decode's mantissa mask (RFC 3376 section 4.1.1's "
                                              "own 0x10), not the PCAP record header length"),
-    'pcapkit/protocols/internet/ipv4.py': ((9, 12, 16, 40), 'IPv4 option counts and sizes; '
+    'pcapkit/protocols/internet/ipv4.py': ((9, 12, 40), 'IPv4 option counts and sizes; '
                                            '40 is the option area maximum, not an IPv6 header'),
     'pcapkit/protocols/internet/ipv6.py': ((16,), 'a hex base and an IPv6 address size'),
     'pcapkit/protocols/internet/ipv6_ext.py': ((6,), 'the IP version number'),

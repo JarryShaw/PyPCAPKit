@@ -104,7 +104,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_ani_suboptions
    .. automethod:: _read_qos_attributes
    .. automethod:: _read_lcmp_suboptions
-   .. automethod:: _decode_signed
    .. automethod:: _read_opt_none
    .. automethod:: _read_opt_pad
    .. automethod:: _read_opt_bra

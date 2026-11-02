@@ -35,6 +35,7 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.protocols.data.internet.hopopt import HOPOPT as Data_HOPOPT
@@ -213,6 +214,15 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
          value written in its place (:issue:`2617`).
        * The Quick-Start maker builds an unassigned function code as an
          unassigned option, the form the reader keeps one in (:issue:`2617`).
+       * An option maker given a value its fixed-width field cannot carry --
+         negative, too wide, or a :obj:`bool` for a field wider than one bit
+         -- raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather
+         than writing a different value or raising another exception; so
+         does :meth:`make` for options too long for the ``Hdr Ext Len``
+         (:issue:`2614`).
+       * A PDM scale, given or derived from its delta, that does not fit its
+         octet raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         where it warned and was written wrapped (:issue:`2614`).
 
     """
 
@@ -384,6 +394,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If the options make a header too long for its
+                one-octet ``Hdr Ext Len``.
+
         """
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
@@ -398,7 +412,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         # NOTE: ``_make_hopopt_options`` has aligned the header, so this division
         # is exact and rounding up is unnecessary.
-        length = (total_length - 6) // 8
+        length = self._make_uint((total_length - 6) // 8, bits=8, name='Hdr Ext Len')
 
         return Schema_HOPOPT(
             next=next_value,  # type: ignore[arg-type]
@@ -1488,10 +1502,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             multiple ``Pad1`` options.
 
         """
-        if offset % 8 == 0:
+        pad_len = pad_length(offset, 8)
+        if pad_len == 0:
             return [], 0
-
-        pad_len = 8 - (offset % 8)
         if pad_len == 1:
             return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
         return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
@@ -1510,13 +1523,17 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``data`` is too long for the one-octet
+                ``Opt Data Len``.
+
         """
         if opt is not None:
             data = opt.data
 
         return Schema_UnassignedOption(
             type=code,
-            len=len(data),
+            len=self._make_uint(len(data), bits=8, name='Opt Data Len'),
             data=data,
         )
 
@@ -1537,6 +1554,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``length`` does not fit the one-octet
+                ``Opt Data Len``.
 
         Warns:
             ProtocolWarning: If ``code`` is ``Pad1`` but ``length`` is not
@@ -1565,7 +1586,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         return Schema_PadOption(
             type=code,
-            len=length,
+            len=self._make_uint(length, bits=8, name='Opt Data Len'),
             pad=pad,
         )
 
@@ -1583,6 +1604,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``limit`` does not fit in one octet.
+
         """
         if opt is not None:
             limit = opt.limit
@@ -1590,7 +1614,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         return Schema_TunnelEncapsulationLimitOption(
             type=code,
             len=1,
-            limit=limit,
+            limit=self._make_uint(limit, bits=8, name='tunnel encapsulation limit'),
         )
 
     def _make_opt_ra(self, code: 'Enum_Option', opt: 'Optional[Data_RouterAlertOption]' = None, *,
@@ -1613,6 +1637,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If the router alert value does not fit in two
+                octets.
+
         """
         if opt is not None:
             value = opt.value
@@ -1620,6 +1648,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
                                      reversed=alert_reversed, pack=False)
 
+        self._make_uint(value, bits=16, name='router alert value')
         return Schema_RouterAlertOption(
             type=code,
             len=2,
@@ -1651,9 +1680,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the bitmap is not bytes-like or an iterable of
-                octets, or is not a whole number of 32-bit words, if ``pad`` is not :obj:`bytes`,
-                or if the option data would exceed the 255 octets
+            ProtocolError: If ``domain`` or ``level`` does not fit its field,
+                if the bitmap is not bytes-like or an iterable of octets, or is
+                not a whole number of 32-bit words, if ``pad`` is not
+                :obj:`bytes`, or if the option data would exceed the 255 octets
                 ``Opt Data Len`` can count.
 
         Note:
@@ -1667,6 +1697,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
             pad = opt.pad
+        domain = self._make_uint(domain, bits=32, name='CALIPSO domain of interpretation')
+        level = self._make_uint(level, bits=8, name='CALIPSO sensitivity level')
         if bitmap is None:
             bitmap_bytes = b''
         elif isinstance(bitmap, (int, str)):
@@ -1681,11 +1713,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 except TypeError as exc:
                     raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap type: '
                                         f'{type(bitmap).__name__}') from exc
-                for octet in octets:
-                    if isinstance(octet, bool) or not isinstance(octet, int) or not 0 <= octet <= 255:
-                        raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap '
-                                            f'octet: {octet!r}')
-                bitmap_bytes = bytes(octets)
+                bitmap_bytes = bytes(self._make_uint(octet, bits=8, name='CALIPSO bitmap octet')
+                                     for octet in octets)
         if len(bitmap_bytes) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap length: '
                                 f'{len(bitmap_bytes)}')
@@ -1744,8 +1773,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Raises:
             ProtocolError: If the DPD mode is invalid, the Tagger ID does
-                not fit the TaggerID type, or the H-DPD Hash Assist Value is
-                empty.
+                not fit the TaggerID type, the H-DPD Hash Assist Value is
+                empty, or the option data is too long for its one-octet
+                ``Opt Data Len``.
 
         """
         if opt is not None:
@@ -1801,7 +1831,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
             schema = Schema_SMFIdentificationBasedDPDOption(
                 type=code,
-                len=1 + tid_len + len(id),
+                len=self._make_uint(1 + tid_len + len(id), bits=8, name='Opt Data Len'),
                 info={
                     'mode': 0,
                     'type': tid_kind,
@@ -1819,7 +1849,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
             schema = Schema_SMFHashBasedDPDOption(
                 type=code,
-                len=len(hav),
+                len=self._make_uint(len(hav), bits=8, name='Opt Data Len'),
                 hav=bytes(hav_ba),
             )
         else:
@@ -1852,9 +1882,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
-        Warns:
-            ProtocolWarning: If a scale exceeds ``255``, too large for its
-                one-octet field.
+        Raises:
+            ProtocolError: If ``psntp`` or ``psnlr`` does not fit in two octets,
+                a scale does not fit in one octet, or a delta is negative or,
+                at the scale given for it, does not fit two octets.
 
         """
         if opt is not None:
@@ -1869,33 +1900,27 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             if (deltatls >> opt.scaledtls).bit_length() <= 16:
                 scaledtls = opt.scaledtls
 
-        if scaledtlr is not None:
-            scale_dtlr = scaledtlr
-        else:
-            dtlr_bl = deltatlr.bit_length()
-            scale_dtlr = dtlr_bl - 16 if dtlr_bl > 16 else 0
-        if scale_dtlr > 255:
-            warn(f'{self.alias}: [OptNo {code}] too large delta time last received: {deltatlr} (scaled: {scale_dtlr})',
-                 ProtocolWarning)
-
-        if scaledtls is not None:
-            scale_dtls = scaledtls
-        else:
-            dtls_bl = deltatls.bit_length()
-            scale_dtls = dtls_bl - 16 if dtls_bl > 16 else 0
-        if scale_dtls > 255:
-            warn(f'{self.alias}: [OptNo {code}] too large delta time last sent: {deltatls} (scaled: {scale_dtls})',
-                 ProtocolWarning)
+        # NOTE: A delta fits two octets at the widest scale, 255, or at none.
+        deltatlr = self._make_uint(deltatlr, bits=16 + 0xFF, name='PDM delta time last received')
+        deltatls = self._make_uint(deltatls, bits=16 + 0xFF, name='PDM delta time last sent')
+        if scaledtlr is None:
+            scaledtlr = max(0, deltatlr.bit_length() - 16)
+        if scaledtls is None:
+            scaledtls = max(0, deltatls.bit_length() - 16)
+        scale_dtlr = self._make_uint(scaledtlr, bits=8, name='PDM scale of delta time last received')
+        scale_dtls = self._make_uint(scaledtls, bits=8, name='PDM scale of delta time last sent')
 
         return Schema_PDMOption(
             type=code,
             len=10,
             scaledtlr=scale_dtlr,
             scaledtls=scale_dtls,
-            psntp=psntp,
-            psnlr=psnlr,
-            deltatlr=deltatlr >> scale_dtlr,
-            deltatls=deltatls >> scale_dtls,
+            psntp=self._make_uint(psntp, bits=16, name='PDM PSN this packet'),
+            psnlr=self._make_uint(psnlr, bits=16, name='PDM PSN last received'),
+            deltatlr=self._make_uint(deltatlr >> scale_dtlr, bits=16,
+                                     name='PDM delta time last received'),
+            deltatls=self._make_uint(deltatls >> scale_dtls, bits=16,
+                                     name='PDM delta time last sent'),
         )
 
     def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption | Data_UnassignedOption]' = None, *,  # pylint: disable=line-too-long
@@ -1983,10 +2008,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                     'reserved': reserved,
                 },
             )
-        if not 0 <= func_enum < 16:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
+        func_val = self._make_uint(func_enum, bits=4, name='QS function')
         ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
-        data = bytes([(func_enum << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
+        data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
         return self._make_opt_none(code, data=data)
 
     def _make_opt_rpl(self, code: 'Enum_Option', opt: 'Optional[Data_RPLOption]' = None, *,
@@ -2016,8 +2040,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``reserved`` does not fit in five bits, or
-                ``sub_tlvs`` does not fit in the option.
+            ProtocolError: If ``reserved``, ``id`` or ``rank`` does not fit its
+                field, or ``sub_tlvs`` does not fit in the option.
 
         """
         if opt is not None:
@@ -2029,8 +2053,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             rank = opt.rank
             sub_tlvs = opt.sub_tlvs
 
-        if not 0 <= reserved < 32:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid RPL reserved flags: {reserved}')
+        reserved = self._make_uint(reserved, bits=5, name='RPL reserved flags')
+        id = self._make_uint(id, bits=8, name='RPL instance ID')
+        rank = self._make_uint(rank, bits=16, name='RPL sender rank')
         if len(sub_tlvs) > 251:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] too long RPL sub-TLVs: {len(sub_tlvs)}')
 
@@ -2082,7 +2107,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the seed ID is missing or does not fit the seed-id type.
+            ProtocolError: If the seed ID is missing or does not fit the seed-id
+                type, or ``reserved`` or ``seq`` does not fit its field.
 
         """
         if opt is not None:
@@ -2092,6 +2118,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             reserved = opt.flags.reserved
             seq = opt.seq
             seed = opt.seed_id
+
+        reserved = self._make_uint(reserved, bits=4, name='MPL reserved bits')
+        seq = self._make_uint(seq, bits=8, name='MPL sequence number')
 
         if seed_type is not None:
             # NOTE: ``seed_type`` defaults to :data:`None`, so ``_make_index`` has no
@@ -2128,9 +2157,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
             if seed is None:
                 raise ProtocolError(f'{self.alias}: [OptNo {code}] missing MPL seed ID for type {kind}')
-            seed_id = int(seed)
-            if seed_id.bit_length() > (clen - 2) * 8:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] too large MPL seed ID: {seed}')
+            seed_id = self._make_uint(int(seed) if isinstance(seed, ipaddress.IPv6Address) else seed,
+                                      bits=(clen - 2) * 8, name='MPL seed ID')
 
         return Schema_MPLOption(
             type=code,
@@ -2159,6 +2187,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``nonce`` is negative, or needs more octets than
+                ``Opt Data Len`` can count.
+
         """
         # NOTE: A parsed nonce keeps the width it had on the wire, leading zero
         # octets and a zero-octet nonce included.
@@ -2169,20 +2201,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 nonce=opt.nonce,
             )
 
-        # NOTE: ``nonce`` is packed by a NumberField whose width is this very
-        # ``len`` (see pcapkit.protocols.schema.internet.hopopt.ILNPOption), so
-        # the declared octet count must be the ceiling of the bit length over
-        # eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an
-        # integer division is a no-op, so any nonce whose bit length is not a
-        # multiple of eight would be sized short and truncated on the wire (a
-        # nonce below 256 as *zero* octets). ``bit_length()`` is 0 for 0, which
-        # would collapse "the nonce is 0" into "there is no nonce" although
-        # RFC 6744 gives the option a Nonce Value field, so the width is
-        # floored at one octet, as in
-        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id.
+        # NOTE: At least one octet, as RFC 6744 gives the option a Nonce Value
+        # field that a nonce of 0 still fills.
+        nonce = self._make_uint(nonce, bits=0xFF * 8, name='ILNP nonce')
         return Schema_ILNPOption(
             type=code,
-            len=max(1, math.ceil(nonce.bit_length() / 8)),
+            len=self._uint_size(nonce, minimum=1),
             nonce=nonce,
         )
 
@@ -2200,13 +2224,17 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``id`` is too long for the one-octet
+                ``Opt Data Len``.
+
         """
         if opt is not None:
             id = opt.line_id
 
         return Schema_LineIdentificationOption(
             type=code,
-            len=len(id) + 1,
+            len=self._make_uint(len(id) + 1, bits=8, name='Opt Data Len'),
             id_len=len(id),
             id=id,
         )
@@ -2225,6 +2253,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``len`` does not fit in four octets.
+
         """
         if opt is not None:
             len = opt.jumbo_len
@@ -2232,7 +2263,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         return Schema_JumboPayloadOption(
             type=code,
             len=4,
-            jumbo_len=len,
+            jumbo_len=self._make_uint(len, bits=32, name='jumbo payload length'),
         )
 
     def _make_opt_home(self, code: 'Enum_Option', opt: 'Optional[Data_HomeAddressOption]' = None, *,
@@ -2281,6 +2312,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``version``, ``reserved`` or ``seq`` does not fit
+                its field.
+
         """
         if opt is not None:
             version = opt.version
@@ -2294,10 +2329,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             type=code,
             len=3,
             flags={
-                'ver': version,
+                'ver': self._make_uint(version, bits=2, name='DFF version'),
                 'dup': dup,
                 'ret': ret,
-                'reserved': reserved,
+                'reserved': self._make_uint(reserved, bits=4, name='DFF reserved bits'),
             },
-            seq=seq,
+            seq=self._make_uint(seq, bits=16, name='DFF sequence number'),
         )

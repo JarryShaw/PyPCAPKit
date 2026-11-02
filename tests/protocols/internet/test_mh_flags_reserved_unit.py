@@ -187,11 +187,12 @@ class TestMHFlagsReserved(unittest.TestCase):
                 self.assertEqual(getattr(model, attr), 0)
 
     def test_make_rejects_a_value_wider_than_the_reserved_bits(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+        # Refused by Protocol._make_uint before the BitField sees it (#2614).
+        from pcapkit.utilities.exceptions import ProtocolError
 
         for site, (_, width) in FRAMES.items():
             with self.subTest(site=site):
-                with self.assertRaisesRegex(FieldValueError, r"subfield 'reserved' value \d+ needs"):
+                with self.assertRaisesRegex(ProtocolError, rf'^MH: invalid reserved bits: {1 << width}$'):
                     self._make(site, value=1 << width)
 
 

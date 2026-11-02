@@ -2897,34 +2897,31 @@ class MHUnitTests(unittest.TestCase):
         self.assertIn('does not appear to be an IPv4 or IPv6 address',
                       str(context.exception))
 
-    def test_mh_bool_is_still_a_valid_value_for_an_integer_field(self) -> None:
-        """#508 must not spread to fields where a :obj:`bool` legitimately means 0/1.
+    def test_mh_bool_is_still_a_valid_value_for_a_code_field(self) -> None:
+        """#508 must not spread to a code field, where a :obj:`bool` means 0/1.
 
-        ``NonceIndicesOption.home`` is a
-        :class:`~pcapkit.corekit.fields.numbers.UInt16Field` in
-        :mod:`pcapkit.protocols.schema.internet.mh` -- a nonce *index* rather
-        than an address -- so ``home=True`` packing as ``1`` is correct, not a
-        defect. ``BindingRevocationMessage.code`` makes the same point through a
-        :class:`~pcapkit.corekit.fields.misc.SwitchField`, which is why the guard
-        for #508 is not a blanket rejection there.
+        ``BindingRevocationMessage.code`` is a
+        :class:`~pcapkit.corekit.fields.misc.SwitchField` whose branches are
+        EnumFields, so ``code=True`` packs as ``1``, and the guard for #508 is not
+        a blanket rejection there. A number field wider than one bit, such as
+        ``NonceIndicesOption.home``, refuses a :obj:`bool` through
+        ``Protocol._make_uint`` instead (#2614).
         """
         from pcapkit.const.mh.binding_revocation import BindingRevocation
         from pcapkit.const.mh.option import Option
         from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
 
+        for flag in (True, False):
+            with self.subTest(home=flag), self.assertRaises(ProtocolError):
+                proto._make_opt_ni(Option.Nonce_Indices, home=flag)  # type: ignore[arg-type]
         self.assertEqual(
-            proto._make_opt_ni(Option.Nonce_Indices, home=True).pack(),  # type: ignore[arg-type]
+            proto._make_opt_ni(Option.Nonce_Indices, home=1).pack(),  # type: ignore[arg-type]
             bytes.fromhex('040400010000'))
-        self.assertEqual(
-            proto._make_opt_ni(Option.Nonce_Indices, home=True).pack(),  # type: ignore[arg-type]
-            proto._make_opt_ni(Option.Nonce_Indices, home=1).pack())  # type: ignore[arg-type]
-        self.assertEqual(
-            proto._make_opt_ni(Option.Nonce_Indices, home=False).pack(),  # type: ignore[arg-type]
-            bytes.fromhex('040400000000'))
 
-        # the same, through a SwitchField whose branches are EnumFields
+        # a code field, through a SwitchField whose branches are EnumFields
         self.assertEqual(
             proto._make_msg_brm(  # type: ignore[arg-type]
                 br_type=BindingRevocation.Binding_Revocation_Indication,
@@ -3325,17 +3322,20 @@ class MHUnitTests(unittest.TestCase):
         # 0, a negative value, and anything above 255 are all outside what
         # ``MNIDSubtype._missing_`` extends. Naming the subtype in a rejection
         # message must not let that enum round-trip's own bare ``ValueError``
-        # escape in its place -- but paired with a non-negative int, an
-        # out-of-range subtype is not itself an error: ``mn_id_selector``
-        # resolves it to the same generic ``BytesField`` fallback as any
-        # unassigned subtype, so only the negative-identifier combination is
-        # expected to raise here.
-        for subtype in (0, -1, 300, 999):
+        # escape in its place. 0 fits the one-octet Subtype and falls back to
+        # the generic ``BytesField``; the rest do not fit it, and are refused
+        # rather than written wrapped (#2614).
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=0, identifier=0x1234)
+        self.assertEqual(schema.length, 3)
+        self.assertEqual(len(schema.pack()), schema.length + 2)
+        for subtype in (-1, 300, 999):
             with self.subTest(subtype=subtype, identifier=0x1234):
-                schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
-                    Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=0x1234)
-                self.assertEqual(schema.length, 3)
-                self.assertEqual(len(schema.pack()), schema.length + 2)
+                with self.assertRaises(ProtocolError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=0x1234)
+                self.assertEqual(str(ctx.exception), f'MH: invalid MN-ID subtype: {subtype}')
+        for subtype in (0, -1, 300, 999):
             with self.subTest(subtype=subtype, identifier=-5):
                 with self.assertRaises(BaseError) as ctx:
                     proto._make_opt_mn_id(  # type: ignore[arg-type]

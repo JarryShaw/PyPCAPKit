@@ -57,6 +57,7 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
 from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckDataParameter
@@ -414,6 +415,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          than from its fields as keyword arguments, which dropped every field
          whose constructor keyword is spelled differently (:issue:`2352`).
 
+    .. versionchanged:: 1.6.0
+
+       :meth:`make` and the parameter makers, given an integer argument its
+       field cannot carry -- negative, too wide, or a :obj:`bool` for a field
+       wider than one bit -- raise
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than writing
+       a different value or raising another exception; so does :meth:`make`
+       for parameters too long for the Header Length, and so do the
+       ``PUZZLE`` and registration makers for a lifetime that is a
+       :obj:`bool` or not a finite number of seconds. Registry codes are not
+       range-checked (:issue:`2614`).
+
     """
 
     ##########################################################################
@@ -679,6 +692,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``version``, a fixed or reserved bit, ``shit`` or
+                ``rhit`` does not fit its field, or the parameters make a header
+                too long for its one-octet Header Length.
+
         .. versionchanged:: 1.5.0
 
            Takes ``packet_fixed`` ahead of ``version`` and ``version_fixed``
@@ -705,23 +723,27 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         return Schema_HIP(
             next=next_value,  # type: ignore[arg-type]
-            len=length,
+            len=self._make_uint(length, bits=8, name='header length', alias=f'HIPv{version}'),
             pkt = {
-                'bit_0': packet_fixed,
+                'bit_0': self._make_uint(packet_fixed, bits=1, name='packet type fixed bit',
+                                         alias=f'HIPv{version}'),
                 'type': packet_value,
             },
             ver = {
-                'bit_1': version_fixed,
-                'version': version,
-                'reserved': version_reserved,
+                'bit_1': self._make_uint(version_fixed, bits=1, name='version fixed bit',
+                                         alias=f'HIPv{version}'),
+                'version': self._make_uint(version, bits=4, name='version', alias=f'HIPv{version}'),
+                'reserved': self._make_uint(version_reserved, bits=3, name='version reserved bits',
+                                            alias=f'HIPv{version}'),
             },
             checksum=checksum,
             control = {
-                'reserved': controls_reserved,
+                'reserved': self._make_uint(controls_reserved, bits=15,
+                                            name='controls reserved bits', alias=f'HIPv{version}'),
                 'anonymous': controls_anonymous,
             },
-            shit=shit,
-            rhit=rhit,
+            shit=self._make_uint(shit, bits=128, name='sender HIT', alias=f'HIPv{version}'),
+            rhit=self._make_uint(rhit, bits=128, name='receiver HIT', alias=f'HIPv{version}'),
             param=parameters_value,
             payload=payload,
         )
@@ -913,7 +935,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     # :rfc:`7401#section-5.2.1` pads every parameter to a
                     # multiple of 8 octets, and Header Length counts in those
                     # units; a raw parameter is taken to omit its padding.
-                    schema += bytes(-len(schema) % 8)
+                    schema += bytes(pad_length(len(schema), 8))
                     parameters_list.append(schema)
                     total_length += len(schema)
                 elif isinstance(schema, Schema):
@@ -2006,8 +2028,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             The ``Lifetime`` octet.
 
         Raises:
-            ProtocolError: If ``lifetime`` is a negative duration, or encodes to
-                a value the one-octet field cannot hold.
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a
+                non-negative and finite duration, or encodes to a value the
+                one-octet field cannot hold.
 
         """
         # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
@@ -2015,9 +2038,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         # escape an :exc:`AttributeError`.
         seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
 
-        if seconds < 0:
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 <= seconds < math.inf):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds} is not a non-negative number of seconds')
+                                f'{seconds!r} is not a non-negative number of seconds')
         # Zero is the RFC's own special case, so it is encoded rather than
         # rejected -- which is where this parts company with
         # ``_make_puzzle_lifetime``, whose field has no such value. Written as a
@@ -2027,9 +2051,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         octet = math.floor(math.log2(seconds) * 8 + 64)
 
-        # ``UInt8Field`` wraps rather than raising (``300`` packs as ``0x2c``), so
-        # an out-of-range lifetime would otherwise be written as some other
-        # valid-looking duration.
+        # NOTE: Not _make_uint, so that the message names the seconds given, and
+        # since the octet 0 is reserved for a zero duration.
         if not 1 <= octet <= 0xFF:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
                                 f'{seconds} seconds encodes to {octet}, outside the '
@@ -2064,10 +2087,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         """
         if exponent is None:
             return self._make_registration_lifetime(code, version, lifetime)
-        if not 0 <= exponent <= 0xFF:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{exponent} is outside the one-octet Lifetime field')
-        return exponent
+        return self._make_uint(exponent, bits=8, name='lifetime', alias=f'HIPv{version}')
 
     def _read_param_reg_info(self, schema: 'Schema_RegInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
@@ -3351,6 +3371,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``reserved``, ``index``, ``old_spi`` or ``new_spi`` does
+                not fit its field.
+
         """
         if param is not None:
             reserved = param.reserved
@@ -3361,10 +3385,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_ESPInfoParameter(
             type=code,
             len=12,
-            reserved=reserved,
-            index=index,
-            old_spi=old_spi,
-            new_spi=new_spi,
+            reserved=self._make_uint(reserved, bits=16, name='reserved bits',
+                                     alias=f'HIPv{version}'),
+            index=self._make_uint(index, bits=16, name='KEYMAT index', alias=f'HIPv{version}'),
+            old_spi=self._make_uint(old_spi, bits=32, name='old SPI', alias=f'HIPv{version}'),
+            new_spi=self._make_uint(new_spi, bits=32, name='new SPI', alias=f'HIPv{version}'),
         )
 
     def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Optional[Data_R1CounterParameter]' = None, *, # pylint: disable=unused-argument
@@ -3388,7 +3413,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If ``code`` is the HIPv1-only ``128`` and ``version``
-                is **NOT** ``1``.
+                is **NOT** ``1``, or ``counter`` does not fit in eight octets.
 
         """
         if code == Enum_Parameter.R1_Counter and version != 1:
@@ -3402,7 +3427,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reserved=reserved,
             type=code,
             len=12,
-            counter=counter,
+            counter=self._make_uint(counter, bits=64, name='R1 generation counter',
+                                    alias=f'HIPv{version}'),
         )
 
     def _make_param_locator_set(self, code: 'Enum_Parameter', param: 'Optional[Data_LocatorSetParameter]' = None, *,  # pylint: disable=unused-argument
@@ -3452,7 +3478,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 ProtocolError: If ``locator`` holds neither an
                     :class:`~ipaddress.IPv6Address` nor a
                     :class:`~pcapkit.protocols.data.internet.hip.LocatorData`,
-                    or if an explicit ``type`` contradicts ``spi``.
+                    or if an explicit ``type`` contradicts ``spi``, or
+                    ``traffic``, ``type``, ``reserved``, ``lifetime`` or
+                    ``spi`` does not fit its field.
 
             """
             if locator is not None:
@@ -3509,7 +3537,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 else:
                     length = 5
                     data = Schema_LocatorData(
-                        spi=spi,
+                        spi=self._make_uint(spi, bits=32, name='SPI', alias=f'HIPv{version}'),
                         ip=ip_val.packed,
                     )
 
@@ -3517,14 +3545,17 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     lifetime = math.floor(lifetime.total_seconds())
 
             return Schema_Locator(
-                traffic=traffic,
-                type=type,
+                traffic=self._make_uint(traffic, bits=8, name='traffic type',
+                                        alias=f'HIPv{version}'),
+                type=self._make_uint(type, bits=8, name='locator type', alias=f'HIPv{version}'),
                 len=length,
                 flags={
-                    'reserved': reserved,
+                    'reserved': self._make_uint(reserved, bits=7, name='reserved bits',
+                                                alias=f'HIPv{version}'),
                     'preferred': preferred,
                 },
-                lifetime=lifetime,
+                lifetime=self._make_uint(lifetime, bits=32, name='locator lifetime',
+                                         alias=f'HIPv{version}'),
                 value=data,
             )
 
@@ -3574,8 +3605,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             The ``Lifetime`` octet.
 
         Raises:
-            ProtocolError: If ``lifetime`` is not a positive duration, or encodes
-                to a value the one-octet field cannot hold.
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive
+                and finite duration, or encodes to a value the one-octet field
+                cannot hold.
 
         """
         # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
@@ -3583,27 +3615,27 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         # escape an :exc:`AttributeError`.
         seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
 
-        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is
-        # not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it would
-        # escape the library's error handling with a message naming neither HIP
-        # nor the field.
-        if seconds <= 0:
+        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and
+        # ``math.floor`` one at infinity or NaN. Neither is a
+        # :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape
+        # the library's error handling with a message naming neither HIP nor
+        # the field.
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 < seconds < math.inf):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds} is not a positive number of seconds')
+                                f'{seconds!r} is not a positive number of seconds')
 
         octet = math.floor(math.log2(seconds) + 32)
 
-        # ``UInt8Field`` wraps rather than raising (``300`` packs as ``0x2c``), so
-        # an out-of-range lifetime would otherwise be written as some other
-        # valid-looking duration.
+        # NOTE: Not _make_uint, so that the message names the seconds given
+        # rather than only the octet they encode to.
         if not 0 <= octet <= 0xFF:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
                                 f'{seconds} seconds encodes to {octet}, outside the '
                                 'one-octet Lifetime field')
         return octet
 
-    @staticmethod
-    def _make_puzzle_field_width(code: 'Enum_Parameter', version: 'int',
+    def _make_puzzle_field_width(self, code: 'Enum_Parameter', version: 'int',
                                  rhash_len: 'Optional[int]', *values: 'int') -> 'int':
         """Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.
 
@@ -3655,12 +3687,19 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             The width of one field, in octets.
 
         Raises:
-            ProtocolError: If the declared width contradicts the protocol version,
-                is not a whole number of octets, or is too narrow for ``values``.
+            ProtocolError: If the declared width is not an :obj:`int`, is a
+                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,
+                contradicts the protocol version, is not a whole number of
+                octets, or is too narrow for ``values``.
 
         """
-        bits = max((value.bit_length() for value in values), default=0)
+        # NOTE: A value that is not an int is sized as nothing here, and the
+        # caller's _make_uint refuses it.
+        bits = max((value.bit_length() for value in values if isinstance(value, int)), default=0)
 
+        if rhash_len is not None:
+            # NOTE: In bits, of a field whose octets a two-octet Length counts.
+            rhash_len = self._make_uint(rhash_len, bits=16 + 3, name='RHASH_len', alias=f'HIPv{version}')
         if version == 1:
             if rhash_len is not None and rhash_len != 64:
                 raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
@@ -3712,7 +3751,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             ProtocolError: If ``lifetime_exponent`` does not fit one octet,
                 ``lifetime`` cannot be encoded, or the width of ``Random #I`` is
                 invalid; see ``_make_puzzle_lifetime`` and
-                ``_make_puzzle_field_width``.
+                ``_make_puzzle_field_width``. Also if ``index`` does not fit
+                one octet, or ``random`` is negative or a :obj:`bool`.
 
         """
         if param is not None:
@@ -3725,20 +3765,23 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         if lifetime_exponent is None:
             lifetime_exponent = self._make_puzzle_lifetime(code, version, lifetime)
-        elif not 0 <= lifetime_exponent <= 0xFF:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{lifetime_exponent} is outside the one-octet Lifetime field')
+        else:
+            lifetime_exponent = self._make_uint(lifetime_exponent, bits=8, name='lifetime',
+                                                alias=f'HIPv{version}')
+
+        width = self._make_puzzle_field_width(code, version, rhash_len, random)
 
         return Schema_PuzzleParameter(
             type=code,
             # One field of ``RHASH_len / 8`` octets after the 4-octet
             # ``#K``/``Lifetime``/``Opaque`` prefix; :rfc:`7401#section-5.2.4`
             # spells the same quantity ``4 + RHASH_len / 8``.
-            len=4 + self._make_puzzle_field_width(code, version, rhash_len, random),
-            index=index,
+            len=4 + width,
+            index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
             lifetime=lifetime_exponent,
             opaque=opaque,
-            random=random,
+            random=self._make_uint(random, bits=8 * width, name='puzzle random',
+                                   alias=f'HIPv{version}'),
         )
 
     def _make_param_solution(self, code: 'Enum_Parameter', param: 'Optional[Data_SolutionParameter]' = None, *,  # pylint: disable=unused-argument
@@ -3779,7 +3822,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If the width of the two fields is invalid; see
-                ``_make_puzzle_field_width``.
+                ``_make_puzzle_field_width``. Also if ``index`` or ``reserved``
+                does not fit one octet, or ``random`` or ``solution`` is
+                negative or a :obj:`bool`.
 
         """
         if param is not None:
@@ -3800,6 +3845,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # :rfc:`7401#section-5.2.5`: "zero when sent".
             reserved = 0
 
+        width = self._make_puzzle_field_width(code, version, rhash_len, random, solution)
+
         return Schema_SolutionParameter(
             type=code,
             # Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of
@@ -3810,13 +3857,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             # ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an
             # arbitrary :meth:`int.bit_length` is not that quantity and yields an odd
             # width that :meth:`_read_param_solution` rejects.
-            len=4 + 2 * self._make_puzzle_field_width(code, version, rhash_len,
-                                                      random, solution),
-            index=index,
-            reserved=reserved,
+            len=4 + 2 * width,
+            index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
+            reserved=self._make_uint(reserved, bits=8, name='reserved octet',
+                                     alias=f'HIPv{version}'),
             opaque=opaque,
-            random=random,
-            solution=solution,
+            random=self._make_uint(random, bits=8 * width, name='puzzle random',
+                                   alias=f'HIPv{version}'),
+            solution=self._make_uint(solution, bits=8 * width, name='puzzle solution',
+                                     alias=f'HIPv{version}'),
         )
 
     def _make_param_seq(self, code: 'Enum_Parameter', param: 'Optional[Data_SEQParameter]' = None, *,  # pylint: disable=unused-argument
@@ -3835,6 +3884,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``update_id`` does not fit its field.
+
         """
         if param is not None:
             update_id = param.id
@@ -3842,7 +3894,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_SEQParameter(
             type=code,
             len=4,
-            update_id=update_id,
+            update_id=self._make_uint(update_id, bits=32, name='update ID', alias=f'HIPv{version}'),
         )
 
     def _make_param_ack(self, code: 'Enum_Parameter', param: 'Optional[Data_ACKParameter]' = None, *,  # pylint: disable=unused-argument
@@ -3861,6 +3913,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If an entry of ``update_id`` does not fit its field.
+
         """
         if param is not None:
             id_list = cast('list[int]', param.update_id)
@@ -3868,6 +3923,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if update_id is None:
                 update_id = []
             id_list = update_id
+
+        for item in id_list:
+            self._make_uint(item, bits=32, name='update ID', alias=f'HIPv{version}')
 
         return Schema_ACKParameter(
             type=code,
@@ -3952,6 +4010,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``pub_val`` is negative, a :obj:`bool`, or wider
+                than its ``pub_len`` octets.
+
         """
         if param is not None:
             group_id = param.group_id
@@ -3960,14 +4022,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         else:
             group_id = self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[assignment]
                                      reversed=group_reversed, pack=False)
-            pub_len = math.ceil(pub_val.bit_length() / 8)
+            pub_len = self._uint_size(pub_val)
 
         return Schema_DiffieHellmanParameter(
             type=code,
             len=3 + pub_len,
             group=group_id,
             pub_len=pub_len,
-            pub_val=pub_val,
+            pub_val=self._make_uint(pub_val, bits=8 * pub_len, name='public value',
+                                    alias=f'HIPv{version}'),
         )
 
     def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransformParameter]' = None, *,  # pylint: disable=unused-argument
@@ -4149,6 +4212,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``min_ta`` does not fit its field.
+
         """
         if param is not None:
             min_ta = param.min_ta
@@ -4156,7 +4222,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_TransactionPacingParameter(
             type=code,
             len=4,
-            min_ta=min_ta,
+            min_ta=self._make_uint(min_ta, bits=32, name='Min Ta', alias=f'HIPv{version}'),
         )
 
     def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Optional[Data_EncryptedParameter]' = None, *,  # pylint: disable=unused-argument
@@ -4437,6 +4503,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``cert_group``, ``cert_count`` or ``cert_id`` does not fit
+                its field.
+
         .. versionchanged:: 1.5.0
 
            ``cert_group`` is a plain :obj:`int` and defaults to ``0``; the
@@ -4462,9 +4532,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_CertParameter(
             type=code,
             len=4 + len(cert),
-            cert_group=group,
-            cert_count=count,
-            cert_id=id,
+            cert_group=self._make_uint(group, bits=8, name='certificate group',
+                                       alias=f'HIPv{version}'),
+            cert_count=self._make_uint(count, bits=8, name='certificate count',
+                                       alias=f'HIPv{version}'),
+            cert_id=self._make_uint(id, bits=8, name='certificate ID', alias=f'HIPv{version}'),
             cert_type=type,
             cert=cert,
         )
@@ -4856,6 +4928,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``port`` does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00')
@@ -4870,7 +4945,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reserved=reserved,
             type=code,
             len=20,
-            port=port,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
             protocol=proto,
             address=address,
         )
@@ -5023,6 +5098,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``seq`` does not fit its field.
+
         """
         if param is not None:
             seq = param.seq
@@ -5030,7 +5108,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_SeqDataParameter(
             type=code,
             len=4,
-            seq=seq,
+            seq=self._make_uint(seq, bits=32, name='sequence number', alias=f'HIPv{version}'),
         )
 
     def _make_param_ack_data(self, code: 'Enum_Parameter', param: 'Optional[Data_AckDataParameter]' = None, *,  # pylint: disable=unused-argument
@@ -5049,11 +5127,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If an entry of ``ack`` does not fit its field.
+
         """
         if param is not None:
             ack = cast('list[int]', param.ack)
         else:
             ack = [] if ack is None else ack
+
+        for item in ack:
+            self._make_uint(item, bits=32, name='acknowledged sequence number',
+                            alias=f'HIPv{version}')
 
         return Schema_AckDataParameter(
             type=code,
@@ -5109,8 +5194,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             mic=mic,
         )
 
-    @staticmethod
-    def _make_identifier_width(code: 'Enum_Parameter', version: 'int',
+    def _make_identifier_width(self, code: 'Enum_Parameter', version: 'int',
                                id_len: 'Optional[int]', identifier: 'int') -> 'int':
         """Resolve the on-wire width of an opaque ``Identifier`` field.
 
@@ -5148,19 +5232,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             The width of the ``Identifier`` field, in octets.
 
         Raises:
-            ProtocolError: If the declared width is negative, too narrow for
-                ``identifier``, or beyond what the 2-octet ``Length`` field can
-                hold.
+            ProtocolError: If ``identifier`` is negative or needs more octets
+                than the 2-octet ``Length`` field can count, or the declared
+                width is negative, too narrow for ``identifier``, or beyond
+                what that field can hold.
 
         """
+        identifier = self._make_uint(identifier, bits=0xFFFF * 8, name='identifier',
+                                     alias=f'HIPv{version}')
         if id_len is None:
-            return math.ceil(identifier.bit_length() / 8)
+            return self._uint_size(identifier)
 
-        # ``UInt16Field`` wraps rather than raising, so an out-of-range width
-        # would otherwise be written as some other valid-looking ``Length``.
-        if not 0 <= id_len <= 0xFFFF:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
-                                f'{id_len} is outside the two-octet Length field')
+        id_len = self._make_uint(id_len, bits=16, name='identifier width', alias=f'HIPv{version}')
         if identifier.bit_length() > id_len * 8:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
                                 f'{id_len} octets cannot hold {identifier!r}')
@@ -5271,6 +5354,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``flags_reserved`` does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
@@ -5288,7 +5374,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags={
                 'symmetric': int(symmetric),
                 'must_follow': int(must_follow),
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits',
+                                            alias=f'HIPv{version}'),
             },
             hit=hit_list,
         )
@@ -5317,6 +5404,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``port`` does not fit its field.
+
         """
         if param is not None:
             port = param.port
@@ -5340,7 +5430,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return Schema_HIPTransportModeParameter(
             type=code,
             len=2 + 2 * len(mode_id),
-            port=port,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
             mode=mode_id,
         )
 
@@ -5556,6 +5646,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``port`` does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00')
@@ -5570,7 +5663,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reserved=reserved,
             type=code,
             len=20,
-            port=port,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
             protocol=proto,
             address=address,
         )
@@ -5605,6 +5698,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``port`` does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00')
@@ -5619,7 +5715,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reserved=reserved,
             type=code,
             len=20,
-            port=port,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
             protocol=proto,
             address=address,
         )
@@ -5646,6 +5742,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``ttl`` does not fit its field.
+
         .. versionchanged:: 1.5.0
 
            ``ttl`` is a hop count rather than a duration, and no longer accepts
@@ -5662,7 +5761,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reserved=reserved,
             type=code,
             len=4,
-            ttl=ttl_val,
+            ttl=self._make_uint(ttl_val, bits=16, name='TTL', alias=f'HIPv{version}'),
         )
 
     def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteViaParameter]' = None, *,  # pylint: disable=unused-argument
@@ -5690,6 +5789,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``flags_reserved`` does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
@@ -5707,7 +5809,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             flags={
                 'symmetric': int(symmetric),
                 'must_follow': int(must_follow),
-                'reserved': flags_reserved,
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits',
+                                            alias=f'HIPv{version}'),
             },
             hit=hit_list,
         )
