@@ -108,7 +108,18 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   extend; :mod:`pcapkit.protocols.schema` and :mod:`pcapkit.protocols.data`
   export the schemas and data models with a ``Radiotap_`` prefix. A bitmap
   radiotap.org defines bit by bit is a member of its flag registry, which
-  keeps the bits it does not name. The field types and those registries are
+  keeps the bits it does not name. One mixing value subfields with flags --
+  MCS ``flags``, HE ``data1`` and ``data2``, HE-MU ``flags1`` and ``flags2``
+  and U-SIG ``common`` -- decodes into a data model of its subfields, each an
+  :class:`int`, and, except in MCS's, its other bits as ``known``, a member of a
+  known-bits registry such as
+  :class:`~pcapkit.const.radiotap.he_data1_known.HEData1Known`; ``make()``
+  takes it as a mapping, refusing a subfield its bits cannot hold or a
+  ``known`` setting a subfield's bit with
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2647`,
+  :pr:`2696`). :class:`~pcapkit.corekit.fields.numbers.BitmapField` reads
+  such a word, an integer in its byte order split into subfields counted from
+  its least-significant bit. The field types and those registries are
   :mod:`pcapkit.const.radiotap`, crawled from radiotap.org's pages; a flag
   takes the name of its macro in Linux's ``ieee80211_radiotap.h``, or in
   Wireshark where Linux defines none, and radiotap.org's wording where neither
@@ -160,11 +171,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :pr:`2444`, :pr:`2465`). An IGMPv3 Query carries its source list and a
   Membership Report its group records, and an IGMPv3 Query's Max Resp Code and
   QQIC are decoded from their floating-point form. An IGMPv3 message the
-  capture cut short, a Report cut inside its group records included, parses as
-  far as its octets go and rebuilds as captured, whether parsed on its own or
-  carried by IPv4, and IGMPv3's ``make()`` takes ``num_group_records``, from
-  the record count to ``0xFFFF`` (:issue:`2650`, :issue:`2660`, :pr:`2662`,
-  :pr:`2672`). Any other message, a 9- to
+  capture cut short, a Report cut inside its group records included, parses
+  and rebuilds as captured, whether parsed on its own or carried by IPv4, and
+  IGMPv3's ``make()`` takes ``num_group_records``, from the record count to
+  ``0xFFFF`` (:issue:`2650`, :issue:`2660`, :pr:`2662`, :pr:`2672`). The
+  octets it lacks read as zeros, the group records included, and a Report's
+  header schema cut inside the Additional Data past its records packs back as
+  captured (:issue:`2686`, :issue:`2687`, :pr:`2701`). Any other message, a 9- to
   11-octet Query included, is kept as :class:`~pcapkit.protocols.misc.raw.Raw`.
   IGMPv1 takes the plain ``IGMP`` of :rfc:`1112` as its ``id()`` and alias, and
   IGMPv2's and IGMPv3's ``id()`` are their own names alone, ``('IGMPv2',)`` and
@@ -368,7 +381,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   takes ``checksum_present`` to set the bit and compute the checksum. GRE
   states no length, so outside an IP layer, which states one, it takes the
   captured and original lengths of its frame, and a GRE layer the capture cut
-  short is ``TRUNCATED`` either way (:issue:`2653`, :pr:`2668`).
+  short is ``TRUNCATED`` either way (:issue:`2653`, :pr:`2668`). ICMP's, IGMP's
+  and GRE's checksums take those lengths as well behind an IPv4 Total Length
+  of 0, as TCP segmentation offload leaves it, and behind an AH there, so one
+  the capture cut short is ``TRUNCATED`` with no warning; a GRE or IGMP layer
+  read directly from octets that end inside its header or message is
+  ``TRUNCATED`` too (:issue:`2689`, :pr:`2699`).
 
 * **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
   :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
@@ -396,7 +414,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   nothing from :mod:`pcapkit` (:issue:`2616`, :pr:`2623`). ``frame_length``
   holds the captured and original length of the frame being dissected, as its
   PCAP record or PCAP-NG packet block states them, and is :data:`None` outside
-  a frame and inside an IP layer's payload (:issue:`2653`, :pr:`2668`).
+  a frame and inside an IP layer's payload (:issue:`2653`, :pr:`2668`), unless
+  the layer states no length for it: an IPv4 Total Length of 0, or an AH that
+  IPv4 carries, hands the frame's lengths on (:issue:`2689`, :pr:`2699`).
 
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
   known extension header whose dedicated parser raises is now the upper layer,
@@ -433,7 +453,35 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.misc.raw.Raw` and the packet rebuilds as
   captured. A capture cut inside an MH message whose Header Len is short of
   it rebuilds with the Header Len it declared, where 1.5.x wrote the one its
-  type takes.
+  type takes. A mobility option whose fields do not take its Length is
+  refused too, and so are such a sub-option, QoS attribute or CGA extension
+  inside one, a target care-of address neither IPv4 nor IPv6, and CGA
+  Parameters whose fixed fields or public key run past the option, where
+  1.5.x read octets that were not the option's and rebuilt another
+  (:issue:`2684`, :pr:`2700`). So an MN-ID option of Length 0 raises
+  ``MH: [OptNo 8] invalid option length: 0``, where 1.5.x read its fields from
+  the octets after it and rebuilt it with Length 17, and a Flow Identification
+  option's 8-octet target care-of address raises
+  ``MH: [FID SubOpt 5] invalid sub-option length: 10``,
+  where 1.5.x parsed it and raised
+  :exc:`~pcapkit.utilities.exceptions.FieldValueError` rebuilding it; inside
+  IPv6 the header is ``Raw`` and the packet rebuilds as captured.
+
+* **Changed** -- **a breaking change to**
+  :class:`~pcapkit.protocols.data.internet.mh.QualityOfServiceOption`, an MH
+  Quality-of-Service option's data model, which gains a required
+  ``tc_reserved`` after ``dscp``: the two reserved bits of the traffic class,
+  which 1.5.x dropped, so a traffic class of ``0xB9`` rebuilt as ``0xB8``
+  (:issue:`2684`, :pr:`2700`). Building the model without it raises
+  :exc:`TypeError`, and :class:`~pcapkit.protocols.internet.mh.MH`'s
+  ``make()`` takes it, ``0`` by default. The MN-ID and Service Selection
+  makers count the octets an identifier packs as, so an NAI of ``'usér@x'``
+  takes Length 8, where 1.5.x wrote 7 from its characters, and a service
+  identifier parsed from octets that are not UTF-8 rebuilds as captured,
+  where 1.5.x re-encoded its text, under Length 4 where 3 were captured. A
+  CGA public key of more than 127 octets, as a 1024-bit RSA key is, parses
+  through the long form of its DER length, where 1.5.x misread the length
+  and raised :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
 
 * **Changed** -- **a breaking change to** construction: a checksum left out of
   ``make()`` is computed rather than zero, so the octets built change
@@ -506,8 +554,14 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   it warned with :exc:`~pcapkit.utilities.warnings.ProtocolWarning` and was
   written wrapped. HIP's lifetimes refuse ``True``, which built as ``1``, and
   a NaN or infinite one, which raised a bare :exc:`ValueError` or
-  :exc:`OverflowError`. Where one of these checks replaces a refusal 1.5.x
-  made, its message drops the option's or parameter's tag, as
+  :exc:`OverflowError`. An MH prefix length is held to its field's width
+  alone, as a parse keeps it -- 0 to 63 in the IPv4 Address Acknowledgement
+  and the IPv4 Home Address Request and Reply, 0 to 255 in the Delegated
+  Mobile Network Prefix -- so a 33 builds and a parsed 63 rebuilds, where
+  1.5.x refused one past the address, as
+  ``MH: [OptNo 30] invalid prefix length: 33`` (:issue:`2684`, :pr:`2700`).
+  Where one of these checks replaces a refusal 1.5.x made, its message drops
+  the option's or parameter's tag, as
   ``HOPOPT: invalid RPL reserved flags: 32``, where it read
   ``HOPOPT: [OptNo 99] invalid RPL reserved flags: 32``. ``MH._decode_signed``,
   which decoded the geo-location degrees, is removed with no alias; the base
@@ -808,17 +862,33 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   upper layer belonging to the enclosing IPv6 header (:issue:`2484`,
   :issue:`2487`, :pr:`2486`, :pr:`2488`).
 
+* **Fixed** -- :meth:`ListField.unpack <pcapkit.corekit.fields.collections.ListField.unpack>`
+  reads a list of schema items the data ends inside zero-filled to its length,
+  as :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+  reads any other field, so a schema cut inside one packs back as captured,
+  where the first item past the data raised
+  :exc:`~pcapkit.utilities.exceptions.FieldValueError` for consuming nothing
+  (:issue:`2686`, :pr:`2701`). Each item filled is a schema object rather than
+  a zero octet, so :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`
+  bounds the fill from its first octet, with neither the free band of
+  :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` nor a one-off
+  allowance, and a cut list declaring more than
+  :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is refused. A TCP
+  ``SACK`` option running past the data raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+  ``Field options has an option that runs past the end of the data: <Option.SACK: 5> ...``,
+  where it raised that ``FieldValueError``,
+  ``Field sack has an item that consumed no data: ...``.
+
 * **Fixed** -- an HTTP/2 ``SETTINGS`` frame the capture cut short inside its
   settings raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
   the list of settings, so a segment carrying one was kept as
-  :class:`~pcapkit.protocols.misc.raw.Raw`. It parses as far as its octets go
-  and rebuilds as captured, and
-  :class:`~pcapkit.protocols.application.httpv2.HTTPv2`'s ``make()`` takes
-  ``frame_length``, from the frame's own length to ``0xFFFFFF``, so that the
-  declared Length survives (:issue:`2659`, :pr:`2666`). A frame of any type
-  the capture cut short after the connection preface rebuilds as captured
-  too, where ``from_data`` gave the preface's first octets, as many as were
-  captured of the frame (:issue:`2665`, :pr:`2675`).
+  :class:`~pcapkit.protocols.misc.raw.Raw`. It parses, with the octets its
+  settings lack read as zeros, as a cut ``DATA`` frame's data is, and rebuilds
+  as captured (:issue:`2659`, :issue:`2686`, :pr:`2666`, :pr:`2701`). A frame
+  of any type the capture cut short after the connection preface rebuilds as
+  captured too, where ``from_data`` gave the preface's first octets, as many
+  as were captured of the frame (:issue:`2665`, :pr:`2675`).
 
 * **Fixed** -- an :class:`~pcapkit.protocols.transport.sctp.SCTP` packet the
   capture cut short of the length declared for it, by an IPv4 Total Length,
@@ -826,6 +896,16 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``from_data`` without the octets after its last whole chunk, which its
   header schema's ``bytes()`` counted twice. It rebuilds as captured, as one
   parsed with no length declared did (:issue:`2673`, :pr:`2679`).
+
+* **Fixed** -- a :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Decryption
+  Secrets Block that ``make()`` built from a parsed ZigBee NWK or APS key
+  shorter than its fixed width was corrupt: it declared that width, 18 or 22
+  octets, as its Secrets Length and sized the block from it, but wrote only
+  the octets held, so a 5-octet NWK key built a 27-octet block declaring 40,
+  where 28 were captured. It is written as captured, and
+  ``pcapkit.protocols.schema.misc.pcapng.zigbee_key_held`` returns a schema
+  whose :func:`bytes` and :func:`len` are those of the octets held, where they
+  were the fixed width's (:issue:`2688`, :pr:`2697`).
 
 * **Fixed** -- importing :mod:`pcapkit.vendor.ipx`, or running its packet or
   socket crawler, without ``requests`` installed lost an entry of
