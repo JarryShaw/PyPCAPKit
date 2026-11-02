@@ -358,9 +358,13 @@ request, an issue closed as not planned -- takes no milestone.
 :file:`.github/workflows/milestone.yml` gives an item the open milestone as it opens,
 and settles it as the item closes; a milestone already set by hand to another
 release is kept, and a manual run backfills the items without one
-(:doc:`../workflows`). The closed milestones
-were backfilled from merge and close dates against the release tags, so an item that
-landed just before a tag may sit one line early.
+(:doc:`../workflows`). **The milestone follows the release, not** ``__version__``:
+after a final tag the version still names the release just made, so its closed
+milestone gives way to the lowest open one above it. The owner ruled that on
+:issue:`2548` over bumping ``__version__`` to a development release after each tag,
+which would block the scheduled releases until the suffix came off by hand. The closed
+milestones were backfilled from merge and close dates against the release tags, so an
+item that landed just before a tag may sit one line early.
 
 **The project board records state that the labels drop.** The state labels above are
 stripped when an item closes, so they say only what is live. The `PyPCAPKit project
