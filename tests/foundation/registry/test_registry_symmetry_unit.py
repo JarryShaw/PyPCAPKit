@@ -160,6 +160,9 @@ METHOD_REGISTRARS = (
     MethodRegistrar('register_pcapng_secrets', 'pcapkit.protocols.misc.pcapng:PCAPNG', '__secrets__',
                     'pcapkit.protocols.schema.misc.pcapng:DSBSecrets',
                     ('pcapkit.const.pcapng.secrets_type:SecretsType.WireGuard_Key_Log',)),
+    MethodRegistrar('register_radiotap_field', 'pcapkit.protocols.link.radiotap:Radiotap', '__field__',
+                    'pcapkit.protocols.schema.link.radiotap:RadiotapField',
+                    ('pcapkit.const.radiotap.field_type:FieldType.Channel',)),
 )
 
 

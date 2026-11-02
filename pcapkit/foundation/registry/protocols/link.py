@@ -17,6 +17,7 @@ This module provides the registries of the link layer protocols in
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
+from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
@@ -28,19 +29,24 @@ from pcapkit.protocols.link.linux_sll import LinuxSLL
 from pcapkit.protocols.link.loopback import Loopback
 from pcapkit.protocols.link.netlink import Netlink
 from pcapkit.protocols.link.radiotap import Radiotap
+from pcapkit.protocols.schema.link.radiotap import RadiotapField as Schema_Radiotap_Field
+from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
-    from typing import Type
+    from typing import Optional, Type
 
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.corekit.sentinels import NullType
+    from pcapkit.protocols.link.radiotap import FieldConstructor as Radiotap_FieldConstructor
+    from pcapkit.protocols.link.radiotap import FieldParser as Radiotap_FieldParser
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
     'register_ethertype',
     'register_loopback',
     'register_arphrd', 'register_frad', 'register_netlink', 'register_radiotap',
+    'register_radiotap_field',
 ]
 
 #: logging.Logger: Module-level logger, a child of the package-wide
@@ -325,3 +331,47 @@ def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[Pro
     if isinstance(module, ModuleDescriptor):
         module = module.klass
     _register_name(module, (Radiotap, code))
+
+
+# NOTE: pcapkit.protocols.link.radiotap.Radiotap.__field__
+def register_radiotap_field(code: 'Radiotap_FieldType',
+                            meth: 'str | tuple[Radiotap_FieldParser, Radiotap_FieldConstructor]', *,
+                            schema: 'Optional[Type[Schema_Radiotap_Field]]' = None) -> 'None':
+    """Register a radiotap field parser.
+
+    The function will register the given field parser to the
+    :data:`pcapkit.protocols.link.radiotap.Radiotap.__field__` registry. A
+    field type is decoded once both it and the schema registry hold an entry
+    for it. A presence bit 28 to 30 follows rules of its own, as does a vendor
+    namespace TLV item, so an entry for one is stored and not reached there; a
+    type from 32 on is reached only as a TLV item.
+
+    Args:
+        code: :class:`~pcapkit.protocols.link.radiotap.Radiotap` field type as
+            in :class:`~pcapkit.const.radiotap.field_type.FieldType`.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the field. A name names the
+            ``_read_field_*`` and ``_make_field_*`` methods, and has to name
+            an existing ``_read_field_*`` one.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the
+            field, whose fields are its subfields and whose ``__align__`` is its
+            alignment. It should be a subclass of
+            :class:`pcapkit.protocols.schema.link.radiotap.RadiotapField`.
+
+    Raises:
+        RegistryError: If ``code`` is not a
+            :class:`~pcapkit.const.radiotap.field_type.FieldType` member, e.g.
+            a member of another enum, or ``meth`` is a name with no matching
+            ``_read_field_*`` method.
+
+    .. versionadded:: 1.6.0
+
+    """
+    _check_code(code, Radiotap_FieldType, Radiotap)
+    if isinstance(meth, str) and not hasattr(Radiotap, f'_read_field_{meth}'):
+        raise RegistryError('method must be a radiotap field parser function')
+
+    Radiotap.register_field(code, meth)
+    if schema is not None:
+        Schema_Radiotap_Field.register(code, schema)
+    logger.debug('registered radiotap field parser: %s', code.name)

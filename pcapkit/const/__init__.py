@@ -33,6 +33,7 @@ from pcapkit.const.linux import *
 from pcapkit.const.mh import *
 from pcapkit.const.ngap import *
 from pcapkit.const.ospf import *
+from pcapkit.const.radiotap import *
 from pcapkit.const.sctp import *
 from pcapkit.const.sslv2 import *
 from pcapkit.const.tcp import *
@@ -100,6 +101,11 @@ __all__ = [
     'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
+    # Radiotap
+    'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
+    'Radiotap_TXFlags', 'Radiotap_MCSKnown', 'Radiotap_AMPDUFlags', 'Radiotap_VHTKnown',
+    'Radiotap_VHTFlags', 'Radiotap_VHTCoding', 'Radiotap_TimestampFlags',
+    'Radiotap_HEMUOtherUserKnown', 'Radiotap_LSIGData1', 'Radiotap_S1GKnown', 'Radiotap_EHTKnown',
     # SCTP
     'SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode', 'SCTP_PayloadProtocolIdentifier',
     # SSLv2

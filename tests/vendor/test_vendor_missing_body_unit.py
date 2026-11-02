@@ -118,6 +118,7 @@ CRAWLERS_WITH_CONSTANT_MISS_LINES = (
     'pcapkit/vendor/pcapng/record_type.py',
     'pcapkit/vendor/pcapng/secrets_type.py',
     'pcapkit/vendor/pcapng/verdict_type.py',
+    'pcapkit/vendor/radiotap/field_type.py',
     'pcapkit/vendor/reg/linktype.py',
     'pcapkit/vendor/sslv2/handshake_type.py',
     'pcapkit/vendor/sslv2/version.py',

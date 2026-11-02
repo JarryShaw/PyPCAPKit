@@ -82,6 +82,8 @@ METHOD_REGISTRARS = (
      'pcapkit.protocols.schema.misc.pcapng:NameResolutionRecord'),
     ('register_pcapng_secrets', 'pcapkit.protocols.misc.pcapng:PCAPNG',
      'pcapkit.protocols.schema.misc.pcapng:DSBSecrets'),
+    ('register_radiotap_field', 'pcapkit.protocols.link.radiotap:Radiotap',
+     'pcapkit.protocols.schema.link.radiotap:RadiotapField'),
 )
 
 #: Registrars keyed on an enum code and given a protocol class, with the classes
@@ -122,6 +124,7 @@ REGISTRAR_ENUMS = {
     'register_pcapng_option': 'pcapkit.const.pcapng.option_type:OptionType',
     'register_pcapng_record': 'pcapkit.const.pcapng.record_type:RecordType',
     'register_pcapng_secrets': 'pcapkit.const.pcapng.secrets_type:SecretsType',
+    'register_radiotap_field': 'pcapkit.const.radiotap.field_type:FieldType',
     'register_linktype': 'pcapkit.const.reg.linktype:LinkType',
     'register_pcap': 'pcapkit.const.reg.linktype:LinkType',
     'register_pcapng': 'pcapkit.const.reg.linktype:LinkType',

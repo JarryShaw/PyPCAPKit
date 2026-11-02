@@ -60,8 +60,9 @@ Measured against the tree, by class:
   :mod:`mh.dhcp_support_mode <pcapkit.const.mh.dhcp_support_mode>` and
   :mod:`vlan.priority_level <pcapkit.const.vlan.priority_level>`.
 * **Cache in the value table only**: :class:`~pcapkit.const.tcp.flags.Flags`,
-  :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header flag
-  registries, such as :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`. They
+  :class:`~pcapkit.const.ftp.command.CommandType`, the Mobility Header flag
+  registries, such as :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`, and
+  the radiotap flag registries, such as :class:`~pcapkit.const.radiotap.flags.Flags`. They
   range-check and hand back to ``super()._missing_``, which for an ``aenum.IntFlag``
   reaches ``_create_pseudo_member_`` and ends in
   ``cls._value2member_map_.setdefault(value, pseudo_member)``.
@@ -232,8 +233,8 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
    lookup then finds. :class:`~pcapkit.const.mh.cga_type.CGAType`
    grows ``__members__``, ``_member_map_`` and ``_value2member_map_``;
    :class:`~pcapkit.const.tcp.flags.Flags`,
-   :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header flag
-   registries grow ``_value2member_map_`` only. Snapshot
+   :class:`~pcapkit.const.ftp.command.CommandType` and the Mobility Header and
+   radiotap flag registries grow ``_value2member_map_`` only. Snapshot
    ``{member.value for member in Cls}`` before any lookup regardless -- that snapshot
    cannot see the flag registries' cache, so compare ``len(Cls._value2member_map_)``
    too -- and use a throwaway process per registry when comparing behaviour across
