@@ -84,9 +84,14 @@ decoded the same way.
   octets after it, kept whole. Without either, the next word continues the
   namespace, each bit numbered 32 past the same bit of the word before.
 * **TLVs.** Bit 28 makes the rest of the region a list of type-length-value
-  items. An item's data is decoded where its type has a schema whose size it
-  matches, and kept raw otherwise; a vendor item is split into its header and
-  raw data.
+  items. An item's data is decoded where its type has a schema it does not run
+  past, and kept raw otherwise; a vendor item is split into its header and raw
+  data. radiotap.org lets a producer leave out the octets that end an item, which
+  are then zeros, so an item short of its schema, or of the vendor header, is
+  decoded as though they were there. Its decoded data records the cut as
+  ``__short_read__``, as :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+  does, so :meth:`Radiotap.make <pcapkit.protocols.link.radiotap.Radiotap.make>`
+  writes the octets that were captured.
 * **What is not decoded.** A radiotap-namespace bit no field is defined for --
   18, FreeBSD's XChannel, which radiotap.org lists as unofficial, and every one
   numbered 32 or more, the TLV-only types included -- or a field that runs

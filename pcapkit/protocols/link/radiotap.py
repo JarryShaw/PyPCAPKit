@@ -89,9 +89,14 @@ decoded the same way.
   octets after it, kept whole. Without either, the next word continues the
   namespace, each bit numbered 32 past the same bit of the word before.
 * **TLVs.** Bit 28 makes the rest of the region a list of type-length-value
-  items. An item's data is decoded where its type has a schema whose size it
-  matches, and kept raw otherwise; a vendor item is split into its header and
-  raw data.
+  items. An item's data is decoded where its type has a schema it does not run
+  past, and kept raw otherwise; a vendor item is split into its header and raw
+  data. radiotap.org lets a producer leave out the octets that end an item, which
+  are then zeros, so an item short of its schema, or of the vendor header, is
+  decoded as though they were there. Its decoded data records the cut as
+  ``__short_read__``, as :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+  does, so :meth:`Radiotap.make <pcapkit.protocols.link.radiotap.Radiotap.make>`
+  writes the octets that were captured.
 * **What is not decoded.** A radiotap-namespace bit no field is defined for --
   18, FreeBSD's XChannel, which radiotap.org lists as unofficial, and every one
   numbered 32 or more, the TLV-only types included -- or a field that runs
@@ -497,8 +502,10 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
                 fit in 32 bits; if ``fields`` is neither :class:`bytes` nor
                 fields; if the fields do not match the bits of ``present``,
                 a word but the last of which ends the chain, or a value does
-                not fit its subfield; or if ``it_len`` is given and does not
-                fit in 16 bits.
+                not fit its subfield; if a TLV item's ``__short_read__`` names
+                no field and an octet count, or cuts short a vendor header that
+                data follows; or if ``it_len`` is given and does not fit in 16
+                bits.
 
         """
         for name, value in (('it_version', it_version), ('it_pad', it_pad)):
@@ -2053,33 +2060,55 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         Returns:
             A vendor TLV for the Vendor Namespace type, the field for a type
-            whose schema ``data`` fills exactly, and the raw octets otherwise.
+            whose schema ``data`` does not run past, and the raw octets
+            otherwise. Data short of its schema, or of the vendor header, is
+            read with the octets it lacks as zeros, and the result records the
+            cut as ``__short_read__``, which :meth:`_make_tlv_data` replays;
+            it stays raw if the zero-padding limits of
+            :mod:`pcapkit.utilities.config` refuse the zeros.
 
         """
+        # NOTE: radiotap.org reads the octets a producer leaves off an item as zeros, so short data is unpacked
+        # at its schema's full length, to the end of a list item, and ``Schema.unpack`` records the cut (#2655).
+        layout = None  # type: Optional[tuple[FieldParser, FieldConstructor, Type[Schema_Field]]]
         if tlv_type == Enum_FieldType.Vendor_Namespace:
-            size, _ = self._field_size(Schema_VendorTLV)
-            if len(data) < size:
+            field_schema = Schema_VendorTLV  # type: Type[Schema]
+            length, _ = self._field_size(field_schema)
+            octets = data[:length]
+        else:
+            layout = self._lookup_field(tlv_type)
+            if layout is None:
                 return data
-            vendor = cast('Schema_VendorTLV',
-                          Schema_VendorTLV.unpack(data[:size], size, None))  # type: ignore[call-arg,misc]
-            return Data_VendorTLV(oui=vendor.oui, subtype=vendor.subtype, presence_type=vendor.presence_type,
-                                  reserved=vendor.reserved, data=data[size:])
+            field_schema = layout[2]
+            size, rest = self._field_size(field_schema)
+            if not rest and len(data) > size:
+                return data
+            length = max(len(data), size)
+            if rest and len(data) > size:
+                tail = next(field for field in field_schema.__fields__.values() if field.length < 0)
+                item = tail._item_type if isinstance(tail, ListField) else None  # pylint: disable=protected-access
+                if item is not None and item.length > 0:
+                    length += -(len(data) - size) % item.length
+            octets = data
 
-        layout = self._lookup_field(tlv_type)
-        if layout is None:
-            return data
-        parser, _, field_schema = layout
-        size, rest = self._field_size(field_schema)
-        if len(data) < size or (not rest and len(data) != size):
-            return data
-        # NOTE: a list taking the rest refuses octets that are not whole items
-        # of it; the refusal is handled here, so it is quiet.
+        # NOTE: a limit on zero-padding, or a list taking the rest, may refuse
+        # what it is given; the refusal is handled here, so it is quiet.
         with CaughtByCaller(FieldValueError):
             try:
-                schema = cast('Schema_Field', field_schema.unpack(data, len(data), None))  # type: ignore[call-arg,misc]
+                schema = cast('Schema', field_schema.unpack(octets, length, None))  # type: ignore[call-arg,misc]
             except FieldValueError:
                 return data
-        return parser(tlv_type, schema)
+        if layout is None:
+            vendor = cast('Schema_VendorTLV', schema)
+            entry = Data_VendorTLV(oui=vendor.oui, subtype=vendor.subtype, presence_type=vendor.presence_type,
+                                   reserved=vendor.reserved, data=data[length:])  # type: Data_Field | Data_VendorTLV
+        else:
+            entry = layout[0](tlv_type, cast('Schema_Field', schema))
+
+        record = schema.__dict__.get('__short_read__')
+        if record is not None:
+            entry.__update__({'__short_read__': record})
+        return entry
 
     def _make_tlv_data(self, tlv_type: 'Enum_FieldType',
                        data: 'Data_Field | Data_VendorTLV | Mapping[str, Any] | bytes') -> 'bytes':
@@ -2087,14 +2116,17 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
 
         Args:
             tlv_type: Type of the item.
-            data: The item's data: raw octets, written as they are, or decoded.
+            data: The item's data: raw octets, written as they are, or decoded,
+                cut back as its ``__short_read__`` says when it has one.
 
         Returns:
             The item's data.
 
         Raises:
             ProtocolError: If decoded data is given for a type with no layout,
-                or does not encode.
+                or does not encode; if its ``__short_read__`` is not a field
+                name and an octet count; or if a vendor TLV whose header is cut
+                short has data.
 
         """
         if isinstance(data, (bytes, bytearray)):
@@ -2102,17 +2134,49 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         if tlv_type == Enum_FieldType.Vendor_Namespace:
             oui, vendor_data = self._make_vendor_data(tlv_type, Schema_VendorTLV, data)
             values = {'reserved': 0, **data}
-            return Schema_VendorTLV(
+            header = self._pack_tlv_data(tlv_type, Schema_VendorTLV(
                 oui=oui,
                 subtype=self._make_subfield(tlv_type, Schema_VendorTLV, values, 'subtype'),
                 presence_type=self._make_subfield(tlv_type, Schema_VendorTLV, values, 'presence_type'),
                 reserved=self._make_subfield(tlv_type, Schema_VendorTLV, values, 'reserved'),
-            ).pack() + vendor_data
+            ), data)
+            if vendor_data and len(header) < self._field_size(Schema_VendorTLV)[0]:
+                raise ProtocolError(f'{self.alias}: invalid VendorTLV.data: {vendor_data!r}, '
+                                    'the vendor header before it is cut short')
+            return header + vendor_data
         layout = self._lookup_field(tlv_type)
         if layout is None:
             raise ProtocolError(f'{self.alias}: invalid TLV.data: {tlv_type!r} defines no layout, '
                                 'so its data must be bytes')
-        return layout[1](tlv_type, data).pack()
+        return self._pack_tlv_data(tlv_type, layout[1](tlv_type, data), data)
+
+    def _pack_tlv_data(self, tlv_type: 'Enum_FieldType', schema: 'Schema',
+                       data: 'Data_Field | Data_VendorTLV | Mapping[str, Any]') -> 'bytes':
+        """Pack a TLV item's schema, cut back as :meth:`_read_tlv_data` recorded.
+
+        Args:
+            tlv_type: Type of the item, for the error message.
+            schema: The schema made from ``data``.
+            data: The item's decoded data, whose ``__short_read__``, if any,
+                names the field its octets ended inside and how many of that
+                field's octets there were.
+
+        Returns:
+            The packed schema, without the octets past the cut.
+
+        Raises:
+            ProtocolError: If ``__short_read__`` is not a field of ``schema``
+                and a count of octets.
+
+        """
+        record = data.get('__short_read__')
+        if record is not None:
+            if not (isinstance(record, (tuple, list)) and len(record) == 2 and record[0] in schema.__fields__
+                    and isinstance(record[1], int) and not isinstance(record[1], bool) and record[1] >= 0):
+                raise ProtocolError(f'{self.alias}: invalid {tlv_type.name}.__short_read__: {record!r}')
+            # NOTE: ``Schema.pack`` cuts its buffers back to a record it holds.
+            schema.__dict__['__short_read__'] = tuple(record)
+        return schema.pack()
 
     def _make_vendor_data(self, field_type: 'Enum_FieldType', schema: 'Type[Schema]',
                           entry: 'Mapping[str, Any]') -> 'tuple[bytes, bytes]':

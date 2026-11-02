@@ -448,8 +448,10 @@ class TLV(Data):
     type: 'FieldType'
     #: Length of :attr:`data`, in octets, less the padding after it.
     length: 'int'
-    #: The data, decoded where the type defines a layout and :attr:`length`
-    #: matches it; the raw octets otherwise.
+    #: The data, decoded where the type defines a layout :attr:`length` does
+    #: not run past; the raw octets otherwise. Data short of the layout is
+    #: decoded with the octets it lacks as zeros, and records the cut as
+    #: ``__short_read__``.
     data: 'RadiotapField | VendorTLV | bytes'
 
     if TYPE_CHECKING:
