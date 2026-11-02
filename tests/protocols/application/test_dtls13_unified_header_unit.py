@@ -18,7 +18,7 @@ from tests._support import reimport_once_per_class
 _L_SHORT_SEQ_EPOCH1 = 0x25  # S=0, L=1, EE=01
 _L_LONG_SEQ_EPOCH2 = 0x2E   # S=1, L=1, EE=10
 _NO_LENGTH_EPOCH3 = 0x23    # S=0, L=0, EE=11
-_CID_PRESENT = 0x38         # C=1, S=0, L=1, EE=00
+_CID_PRESENT = 0x34         # C=1, S=0, L=1, EE=00
 
 #: A 16-octet stand-in for an AEAD ciphertext, the shortest the record-number
 #: sample allows (:rfc:`9147#section-4.2.3`).
@@ -185,6 +185,58 @@ class UnifiedHeaderParseTests(unittest.TestCase):
             warnings.simplefilter('ignore')
             proto = UDP(wire, len(wire))
         self.assertEqual(str(proto.protochain), 'UDP:Raw')
+
+
+class UnifiedHeaderChainTests(unittest.TestCase):
+    """How a unified-header record chains with the records sharing its datagram
+    (RFC 9147 section 4.3, #2535)."""
+
+    #: A legacy-format ``change_cipher_spec`` record, DTLS 1.2.
+    CCS = b'\x14\xfe\xfd\x00\x00' + (1).to_bytes(6, 'big') + b'\x00\x01\x01'
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_a_record_after_one_with_a_length_is_a_further_layer(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+
+        first = _unified(_L_SHORT_SEQ_EPOCH1, b'\x07', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
+        second = _unified(_L_LONG_SEQ_EPOCH2, b'\x12\x34', (20).to_bytes(2, 'big'), bytes(20))
+        for name, wire, chain in (('a unified header', first + second, 'DTLS 1.3:DTLS 1.3'),
+                                  ('a legacy header', first + self.CCS, 'DTLS 1.3:DTLS 1.2'),
+                                  ('after a legacy header', self.CCS + first, 'DTLS 1.2:DTLS 1.3')):
+            with self.subTest(next=name):
+                parsed = DTLS(wire, len(wire))
+                self.assertEqual(str(parsed.protochain), chain)
+                self.assertEqual(bytes(DTLS.from_data(parsed.info)), wire)
+        parsed = DTLS(first + second, len(first + second)).payload
+        self.assertEqual((parsed.info.epoch, parsed.info.sequence_number, parsed.info.length), (2, 0x1234, 20))
+
+    def test_a_record_without_a_length_is_the_last(self) -> None:
+        """It runs to the end of the datagram, so octets that would open a record are its ciphertext."""
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.misc.null import NoPayload
+
+        last = _unified(_NO_LENGTH_EPOCH3, b'\x07', None, _FRAGMENT + self.CCS)
+        wire = self.CCS + last
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(str(parsed.protochain), 'DTLS 1.2:DTLS 1.3')
+        self.assertEqual(parsed.payload.info.content, _FRAGMENT + self.CCS)
+        self.assertIsInstance(parsed.payload.payload, NoPayload)
+        self.assertEqual(bytes(DTLS.from_data(parsed.info)), wire)
+
+    def test_a_connection_id_after_a_record_stays_raw_without_an_error(self) -> None:
+        """Its negotiated length leaves the record's end unknown, so no whole record opens there."""
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.misc.raw import Raw
+
+        refused = _unified(_CID_PRESENT, b'\x07', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
+        wire = self.CCS * 2 + refused
+        parsed = DTLS(wire, len(wire))
+        self.assertEqual(str(parsed.protochain), 'DTLS 1.2:DTLS 1.2:Raw')
+        self.assertIs(type(parsed.payload.payload), Raw)
+        self.assertEqual(bytes(parsed.payload.payload), refused)
+        self.assertIsNone(parsed.payload.payload.info.error)
 
 
 class UnifiedHeaderMakeTests(unittest.TestCase):

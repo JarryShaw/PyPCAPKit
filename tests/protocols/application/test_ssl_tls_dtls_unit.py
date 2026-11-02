@@ -1151,6 +1151,98 @@ class SegmentRecordTests(unittest.TestCase):
                 self.assertEqual(trial.call_count, calls)
 
 
+class DatagramRecordTests(unittest.TestCase):
+    """A whole record after the first in a UDP datagram is a further DTLS layer
+    (#2535); see ``test_tls_dtls_roundtrip_unit`` for the round trips."""
+
+    CCS = b'\x14\xfe\xfd\x00\x00' + (1).to_bytes(6, 'big') + b'\x00\x01\x01'
+    ALERT = b'\x15\xfe\xfd\x00\x00' + (2).to_bytes(6, 'big') + b'\x00\x02\x02\x0a'
+    #: A whole handshake record whose unfragmented ClientHello is too short for its fixed fields.
+    MALFORMED_HELLO = (b'\x16\xfe\xfd\x00\x00' + (3).to_bytes(6, 'big') + b'\x00\x16'
+                       + b'\x01\x00\x00\x0a' + b'\x00\x00' + b'\x00\x00\x00' + b'\x00\x00\x0a' + bytes(10))
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def _udp(self, payload: bytes) -> 'tuple[object, list[warnings.WarningMessage]]':
+        """Parse ``payload`` on UDP 5684 under ``always``, with the warnings it reports."""
+        from pcapkit.protocols.transport.udp import UDP
+
+        raw = _udp_to_5684(payload)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            proto = UDP(raw, len(raw))
+        return proto, caught
+
+    def test_frame_layer_limit_bounds_the_records(self) -> None:
+        """Each record is a layer, so the limit stops the walk with one warning."""
+        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.utilities import config
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        payload = self.CCS * (config.FRAME_LAYER_LIMIT + 6)
+        proto, caught = self._udp(payload)
+        self.assertEqual(str(proto.protochain),  # type: ignore[attr-defined]
+                         ':'.join(['UDP'] + ['DTLS 1.2'] * config.FRAME_LAYER_LIMIT + ['Raw']))
+        self.assertEqual([item.category for item in caught], [ProtocolWarning])
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertEqual(bytes(UDP.from_data(proto.info)), _udp_to_5684(payload))  # type: ignore[attr-defined]
+
+    def test_a_parse_stopping_at_dtls_keeps_the_rest_raw(self) -> None:
+        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.transport.udp import UDP
+
+        wire = self.CCS + self.ALERT
+        raw = _udp_to_5684(wire)
+        self.assertEqual(str(DTLS(wire, len(wire)).protochain), 'DTLS 1.2:DTLS 1.2')
+        for limit in ({'protocol': 'DTLS'}, {'layer': 'Application'}):
+            with self.subTest(**limit):
+                self.assertEqual(str(DTLS(wire, len(wire), **limit).protochain), 'DTLS 1.2:Raw')
+                proto = UDP(raw, len(raw), **limit)
+                self.assertEqual(str(proto.protochain), 'UDP:DTLS 1.2:Raw')
+                self.assertEqual(bytes(proto.payload.payload), self.ALERT)
+
+    def test_octets_opening_no_whole_record_stay_raw_without_an_error(self) -> None:
+        from pcapkit.protocols.misc.raw import Raw
+
+        for name, tail in (('content type 0', b'\x00' + self.CCS[1:]),
+                           ('tls12_cid, whose connection ID has no fixed length', b'\x19' + self.CCS[1:]),
+                           ('a TLS record version', self.CCS[:1] + b'\x03\x03' + self.CCS[3:]),
+                           ('a header cut short', self.CCS[:12]),
+                           ('a length past the datagram', self.CCS[:11] + b'\x00\x05\x01'),
+                           ('a unified header with a connection ID', b'\x34\x07\x00\x10' + bytes(16)),
+                           ('a unified header cut short', b'\x2c\x00\x01')):
+            with self.subTest(tail=name):
+                proto, caught = self._udp(self.CCS + self.ALERT + tail)
+                self.assertEqual(str(proto.protochain), 'UDP:DTLS 1.2:DTLS 1.2:Raw')  # type: ignore[attr-defined]
+                rest = proto.payload.payload.payload  # type: ignore[attr-defined]
+                self.assertIs(type(rest), Raw)
+                self.assertEqual(bytes(rest), tail)
+                self.assertIsNone(rest.info.error)
+                self.assertEqual(caught, [])
+
+    def test_a_later_whole_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
+        """``beholder`` keeps the record, and everything after it, as ``Raw`` (ruling A on #2517)."""
+        from pcapkit.protocols.transport.udp import UDP
+
+        too_short = b'\x25\x07\x00\x0f' + bytes(15)  # a ciphertext under the record-number sample
+        for name, bad, error in (
+                ('a ClientHello short of its fields', self.MALFORMED_HELLO,
+                 r'^DTLS 1\.2: invalid format: client_hello\.random runs past'),
+                ('a unified-header record short of the sample', too_short,
+                 r'^DTLS 1\.3: invalid format: ciphertext is shorter than the record-number sample')):
+            with self.subTest(record=name):
+                payload = self.CCS + self.ALERT + bad + self.CCS
+                proto, caught = self._udp(payload)
+                self.assertEqual(str(proto.protochain), 'UDP:DTLS 1.2:DTLS 1.2:Raw')  # type: ignore[attr-defined]
+                rest = proto.payload.payload.payload  # type: ignore[attr-defined]
+                self.assertEqual(bytes(rest), bad + self.CCS)
+                self.assertRegex(rest.info.error, error)
+                self.assertEqual(caught, [])
+                self.assertEqual(bytes(UDP.from_data(proto.info)), _udp_to_5684(payload))  # type: ignore[attr-defined]
+
+
 class ExportTests(unittest.TestCase):
     """The family is exported, and registered, the way every sibling
     application protocol is -- :class:`~pcapkit.protocols.application.ngap.NGAP`
