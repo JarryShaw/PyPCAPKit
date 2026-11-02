@@ -5,8 +5,9 @@ A versioned family's base never yields an instance of itself: parsing octets
 through :class:`~pcapkit.protocols.application.http.HTTP`, constructing it from
 fields, and its ``from_data`` all give ``HTTPv1`` or ``HTTPv2``. On the read path
 the member is the one an explicit ``version`` names or ``_dispatch_version``
-identifies; on the make path the one ``version`` names or the fields describe.
-Octets neither version takes raise, as they do through either member.
+identifies; on the make path the one ``version`` names, which #2628's module
+pins as required there. Octets neither version takes raise, as they do through
+either member.
 
 This module is unit-tier: every packet is built in memory.
 
@@ -99,15 +100,14 @@ class HTTPBaseDispatchTests(unittest.TestCase):
                 with self.assertRaisesRegex(ProtocolError, message):
                     HTTP(octets)
 
-    def test_building_through_the_base_gives_the_member_the_fields_describe(self) -> None:
+    def test_building_through_the_base_gives_the_member_version_names(self) -> None:
         from pcapkit.const.http.frame import Frame
 
         HTTP, HTTPv1, HTTPv2 = self.classes()
         cases = {
             'version 1': ({'version': 1, 'method': 'GET', 'uri': '/'}, HTTPv1),
-            'HTTP/1 fields': ({'method': 'GET', 'uri': '/'}, HTTPv1),
             'version 2': ({'version': 2, 'type': Frame.DATA, 'sid': 1}, HTTPv2),
-            'HTTP/2 fields': ({'type': Frame.DATA, 'sid': 1, 'frame': {'data': b'x'}}, HTTPv2),
+            'frame': ({'version': 2, 'type': Frame.DATA, 'sid': 1, 'frame': {'data': b'x'}}, HTTPv2),
             'preface': ({'version': 2, 'preface': True, 'type': Frame.SETTINGS}, HTTPv2),
         }
         for label, (fields, klass) in cases.items():
@@ -120,49 +120,36 @@ class HTTPBaseDispatchTests(unittest.TestCase):
                 self.assertEqual(layer.data, direct.data)
         self.assertTrue(HTTP(version=2, preface=True, type=Frame.SETTINGS).data.startswith(_PREFACE))
 
-    def test_a_false_preface_names_no_version(self) -> None:
-        """``preface=False`` is the default, so it names no version.
-
-        HTTP/1 fields beside it still build HTTP/1, as without it, and on its own it
-        picks HTTPv1, the version ``make`` defaults to; only a true ``preface`` means
-        HTTP/2.
-        """
+    def test_a_false_preface_is_the_default(self) -> None:
+        """``preface=False`` builds what leaving it out builds, for either version."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.utilities.exceptions import ProtocolError
 
         HTTP, HTTPv1, HTTPv2 = self.classes()
-        self.assertIs(HTTP._dispatch_fields({'preface': False}), HTTPv1)
-        self.assertIs(HTTP._dispatch_fields({'preface': True}), HTTPv2)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            with_false = HTTP(method='GET', uri='/', preface=False)
-            without = HTTP(method='GET', uri='/')
-            frame = HTTP(type=Frame.DATA, sid=1, preface=False)
+            with_false = HTTP(version=1, method='GET', uri='/', preface=False)
+            without = HTTP(version=1, method='GET', uri='/')
+            frame = HTTP(version=2, type=Frame.DATA, sid=1, preface=False)
         self.assertIs(type(with_false), HTTPv1)
         self.assertEqual(with_false.data, without.data)
         self.assertIs(type(frame), HTTPv2)
         self.assertFalse(frame.data.startswith(_PREFACE))
-        # Alone it builds what ``HTTP()`` builds: an HTTP/1 message with no start
-        # line, which HTTPv1 refuses.
-        with self.assertRaisesRegex(ProtocolError, 'invalid start line'):
-            HTTP(preface=False)
 
-    def test_fields_no_one_version_builds_raise(self) -> None:
+    def test_fields_the_named_version_cannot_build_raise(self) -> None:
         from pcapkit.utilities.exceptions import ProtocolError
 
         HTTP, _, _ = self.classes()
-        for fields, message in (({'method': 'GET', 'sid': 1}, 'fields of both'),
-                                ({'version': 1, 'preface': True}, 'HTTP/2 only'),
-                                ({'method': 'GET', 'uri': '/', 'preface': True},
+        for fields, message in (({'version': 1, 'preface': True},
                                  r'^HTTP/1: connection preface is HTTP/2 only$'),
-                                ({'method': 'GET', 'preface': True, 'sid': 1},
-                                 r'^HTTP: fields of both HTTP/1 \(method\) and HTTP/2 \(preface, sid\)$'),
+                                ({'version': 1, 'method': 'GET', 'uri': '/', 'preface': True},
+                                 r'^HTTP/1: connection preface is HTTP/2 only$'),
                                 ({'version': 3}, 'invalid version')):
             with self.subTest(fields=fields):
                 with self.assertRaisesRegex(ProtocolError, message):
                     HTTP(**fields)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
+        """A data model rebuilds through the base, a :obj:`dict` through its member."""
         from pcapkit.utilities.exceptions import ProtocolError
 
         HTTP, _, _ = self.classes()
@@ -173,9 +160,10 @@ class HTTPBaseDispatchTests(unittest.TestCase):
             for form in ('info', 'dict'):
                 with self.subTest(octets=label, form=form):
                     data = parsed.info if form == 'info' else parsed.info.to_dict()
+                    klass = HTTP if form == 'info' else self.member(name)
                     with warnings.catch_warnings():
                         warnings.simplefilter('ignore')
-                        rebuilt = HTTP.from_data(data)
+                        rebuilt = klass.from_data(data)
                     self.assertIs(type(rebuilt), self.member(name))
                     self.assertEqual(rebuilt.data, octets)
         with self.assertRaisesRegex(ProtocolError, 'invalid data'):
@@ -186,7 +174,8 @@ class HTTPBaseDispatchTests(unittest.TestCase):
         from pcapkit.const.http.frame import Frame
 
         HTTP, _, _ = self.classes()
-        for fields in ({'method': 'GET', 'uri': '/'}, {'type': Frame.DATA, 'sid': 1},
+        for fields in ({'version': 1, 'method': 'GET', 'uri': '/'},
+                       {'version': 2, 'type': Frame.DATA, 'sid': 1},
                        {'version': 2, 'preface': True, 'type': Frame.SETTINGS}):
             with self.subTest(fields=fields):
                 with warnings.catch_warnings():

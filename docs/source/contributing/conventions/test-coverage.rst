@@ -39,8 +39,9 @@ known-failure table keep their cases in a generator, beside the captures it also
        ``EXPECTED_FAILURES``
    * - :file:`tests/protocols/test_dispatch_registry_unit.py`
      - :file:`examples/generators/dispatch.py`, from its family modules under
-       :file:`examples/generators/dispatch_families/`, one per ``__proto__`` table
-       or per tables registered together
+       :file:`examples/generators/dispatch_families/`, one per ``__proto__`` table,
+       per tables registered together, or per member of the versioned family base
+       owning a table
      - every ``__proto__`` entry dispatches to the class its family module's
        ``PINNED_TARGETS`` names; known degrades in
        ``DispatchRegistryTests.KNOWN_DEGRADED``, which the generator's own
@@ -214,10 +215,19 @@ above:
        against the specification's field values. A ``__proto__`` registration also
        needs its ``PINNED_TARGETS`` entry in its family's module under
        :file:`examples/generators/dispatch_families/`, which
-       ``test_every_case_has_a_pinned_target`` enforces, and a ``__proto__`` table no
-       family probes takes a module of its own there, which
-       ``test_every_dispatch_table_has_a_family`` enforces. A :mod:`pcapkit.const`
-       registry it adds is a line in its package's module under
+       ``test_every_case_has_a_pinned_target`` enforces. A protocol with a dispatch
+       registry of its own, as :class:`~pcapkit.protocols.link.frad.FRAD`,
+       :class:`~pcapkit.protocols.link.loopback.Loopback` and
+       :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` have, also needs a
+       ``Family`` probing that ``__proto__`` table once it holds an entry, in a module
+       of its own there, which ``test_every_dispatch_table_has_a_family`` enforces;
+       another family whose probe passes through the table does not count
+       (:issue:`2592`). Where a versioned family base owns the table, each member
+       takes a family of its own, as
+       :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
+       :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` do, which
+       ``test_a_versioned_base_table_has_a_family_per_member`` enforces. A
+       :mod:`pcapkit.const` registry it adds is a line in its package's module under
        :file:`tests/const/census/`, in sorted order, or a module of its own there for a
        package without one; every const sweep compares what it finds against the
        census, and names a registry it lacks.

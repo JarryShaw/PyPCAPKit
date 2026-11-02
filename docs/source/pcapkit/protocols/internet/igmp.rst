@@ -56,6 +56,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: _make_data
    .. automethod:: _classify
+   .. automethod:: _verify_checksum
    .. automethod:: _dispatch
    .. automethod:: _member_of_version
 

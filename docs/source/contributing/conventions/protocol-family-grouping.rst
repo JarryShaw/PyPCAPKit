@@ -122,6 +122,11 @@ version under that name to the layer it carries.
      - ``version``
      - Octets without ``version``
      - ``from_data``
+   * - :class:`~pcapkit.protocols.application.http.HTTP`
+     - ``1``, ``2``
+     - :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version`: the
+       connection preface, a start line or a frame header
+     - the data model; a :obj:`dict` is refused
    * - :class:`~pcapkit.protocols.internet.igmp.IGMP`
      - ``1``, ``2``, ``3``
      - :meth:`~pcapkit.protocols.internet.igmp.IGMP._dispatch`: type, max response
@@ -146,13 +151,11 @@ version under that name to the layer it carries.
      - refused, below
      - the data model; a :obj:`dict` is refused
 
-:class:`~pcapkit.protocols.application.http.HTTP` dispatches otherwise. Its octets
-go to :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version`, which reads
-the connection preface, a start line or a frame header, for a payload a transport
-port binds to HTTP as well. Without ``version``, its
-:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields` picks by each
-member's own fields and builds ``HTTPv1`` from none, and its ``from_data`` reads the
-data model, or a :obj:`dict` by its ``receipt`` or ``sid``.
+HTTP octets carry their version, but the HTTP data models have no top-level
+``version`` field, only HTTP/1's ``receipt.version`` string, so
+:meth:`HTTP.from_data <pcapkit.protocols.application.http.HTTP.from_data>` reads the
+data model's class. It refuses a :obj:`dict` even though the ``receipt`` and ``sid``
+keys would tell the members apart, since no key picks a member (:issue:`2628`).
 
 **Octets that carry no version are refused through the base without** ``version``
 (:issue:`2574`). An ICMP message and a Linux cooked-capture header have no version

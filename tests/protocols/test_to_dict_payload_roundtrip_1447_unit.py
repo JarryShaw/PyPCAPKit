@@ -167,7 +167,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
             with self.subTest(frame=name):
                 http = self.frame(name)[HTTP]
                 self.assertEqual(http.alias, alias)
-                self.assertEqual(HTTP.from_data(http.info.to_dict()).alias, alias)
+                self.assertEqual(type(http).from_data(http.info.to_dict()).alias, alias)
 
     def test_dict_without_a_payload_key_rebuilds_the_header_alone(self) -> None:
         from pcapkit.protocols.link.ethernet import Ethernet

@@ -254,7 +254,7 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
             with self.subTest(segment=name):
                 parsed = HTTP(wire, len(wire))
                 for rebuilt in (HTTP.from_data(parsed.info), HTTPv2.from_data(parsed.info),
-                                HTTP.from_data(parsed.info.to_dict())):
+                                HTTPv2.from_data(parsed.info.to_dict())):
                     self.assertEqual(bytes(rebuilt).hex(), wire.hex())
                     self.assertEqual(len(_layers(rebuilt)[0]), len(_split_frames(wire)))
 

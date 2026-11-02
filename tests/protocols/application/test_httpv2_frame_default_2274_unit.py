@@ -28,7 +28,7 @@ from typing import Any
 
 from tests._support import reimport_once_per_class
 
-#: Octets ``HTTP(type=<name>, sid=<sid>)`` builds, by frame type name and Stream
+#: Octets ``HTTPv2(type=<name>, sid=<sid>)`` builds, by frame type name and Stream
 #: Identifier. Every one of them is also what ``frame={}`` builds.
 DEFAULT_FRAMES = {
     'DATA': (1, bytes.fromhex('000000000000000001')),

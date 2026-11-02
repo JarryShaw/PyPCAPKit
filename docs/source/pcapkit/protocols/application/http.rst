@@ -20,7 +20,10 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
    :class:`~pcapkit.protocols.application.httpv2.HTTPv2` rather than an instance
    of it, so the data sits under ``httpv1`` or ``httpv2`` rather than ``http``
-   (:issue:`2524`).
+   (:issue:`2524`). Building it from fields takes ``version`` and is refused
+   without it, where it built HTTP/1.*, and its
+   :meth:`~pcapkit.protocols.application.http.HTTP.from_data` refuses a
+   :obj:`dict`, where it read the ``receipt`` or ``sid`` key (:issue:`2628`).
 
 .. autoclass:: pcapkit.protocols.application.http.HTTP
    :no-members:
@@ -38,11 +41,11 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
    .. automethod:: _make_data
 
+   .. automethod:: __init__
    .. automethod:: __new__
 
    .. automethod:: _guess_version
    .. automethod:: _dispatch_version
-   .. automethod:: _dispatch_fields
    .. automethod:: _member_of_version
 
    .. autoattribute:: _preface_length

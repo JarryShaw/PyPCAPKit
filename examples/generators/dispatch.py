@@ -296,6 +296,43 @@ def _linux_sll2(payload: 'bytes') -> 'bytes':
     return bytes(LinuxSLL2(payload=payload))
 
 
+def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
+    """The ``protocol_type`` and payload of a cooked header on a registered ``arphrd_type``.
+
+    Shared by the ``linux_sll`` and ``linux_sll2`` families, which probe
+    :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+    through each version.
+
+    Args:
+        arphrd_type: A key of that table.
+
+    Returns:
+        The ``protocol_type`` to write, and the registered target's own wire bytes.
+
+    Raises:
+        LookupError: If ``arphrd_type`` has no payload builder here.
+
+    """
+    from pcapkit.const.linux.arphrd import ARPHRD
+
+    if arphrd_type == ARPHRD.FRAD:
+        from pcapkit.protocols.link.frad import FRAD
+        return 0, bytes(FRAD(nlpid=0xCC, payload=_ip4(6, _tcp(9999))))
+    if arphrd_type in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
+        from pcapkit.protocols.link.gre import GRE
+        return 0x0800, bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
+    if arphrd_type == ARPHRD.IEEE80211_RADIOTAP:
+        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.radiotap import Radiotap
+        ack = bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+        return 0, bytes(Radiotap(payload=ack))
+    if arphrd_type == ARPHRD.NETLINK:
+        from pcapkit.protocols.link.netlink import Netlink
+        return 0, bytes(Netlink(nlmsg_type=3, nlmsg_seq=1, byteorder='little',
+                                payload=b'\xaa\xbb\xcc\xdd'))
+    raise LookupError(f'linux_sll: no payload builder for {arphrd_type!r}')  # pragma: no cover
+
+
 ###############################################################################
 # The families, the cases, and the probe.
 ###############################################################################
@@ -318,8 +355,9 @@ class Family(NamedTuple):
 
 
 #: The directory holding the family modules: one file per ``__proto__`` table,
-#: or per tables registered together, so that a family added in one change and
-#: a family added in another touch different files (#2615).
+#: per tables registered together, or per member of the versioned family base
+#: owning a table (#2592), so that a family added in one change and a family
+#: added in another touch different files (#2615).
 FAMILY_DIR = ROOT / 'examples' / 'generators' / 'dispatch_families'
 
 

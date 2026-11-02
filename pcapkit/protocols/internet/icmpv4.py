@@ -204,15 +204,9 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         # NOTE: The checksum covers the whole message, with no pseudo-header (RFC 792);
         # an IP fragment carries only part of one.
         if config.CHECKSUM_VERIFY:
-            from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
-                ChecksumStatus, verify_checksum)
-            from pcapkit.utilities.contextvars import in_fragment  # isort: skip # pylint: disable=import-outside-toplevel
-            if in_fragment.get():
-                status = ChecksumStatus.NO_PSEUDO_HEADER
-            else:
-                status = verify_checksum(self.alias, self._data, schema.checksum, length=length)
+            from pcapkit.corekit.checksum.internet import verify_message  # isort: skip # pylint: disable=import-outside-toplevel
             icmp.__update__([
-                ('checksum_status', status),
+                ('checksum_status', verify_message(self.alias, self._data, schema.checksum, length=length)),
             ])
 
         # NOTE: The quoted original datagram stays raw in the message body,
