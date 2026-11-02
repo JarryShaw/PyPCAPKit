@@ -647,8 +647,9 @@ class RoundTripTests(unittest.TestCase):
                              ('a 256-octet one', {'content_type': ContentType.tls12_cid, 'cid': bytes(256)}),
                              ('one on application_data', {'content_type': ContentType.application_data,
                                                           'cid': b'\x01'}),
-                             ('one on a unified header', {'ciphertext': True, 'content': bytes(16),
-                                                          'cid': b'\x01'})):
+                             # A unified header takes a connection ID (#2625), but not an empty one.
+                             ('an empty one on a unified header', {'ciphertext': True, 'content': bytes(16),
+                                                                   'cid': b''})):
             with self.subTest(case=name), self.assertRaisesRegex(ProtocolError, 'invalid connection ID'):
                 maker.make(**kwargs)
 

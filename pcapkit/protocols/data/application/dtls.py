@@ -106,6 +106,9 @@ class DTLSCiphertext(Protocol):
 
     #: Low two bits of the epoch; the full 16-bit epoch is not on the wire.
     epoch: 'int'
+    #: Connection ID, as long as the handshake or the caller says, or
+    #: :data:`None` when the header carries none.
+    cid: 'Optional[bytes]'
     #: Sequence number as carried, 8 or 16 bits per :attr:`sequence_long`. It
     #: is header-protected, so it is the value on the wire, not the record's.
     sequence_number: 'int'
@@ -118,7 +121,7 @@ class DTLSCiphertext(Protocol):
     content: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, epoch: 'int', sequence_number: 'int', sequence_long: 'bool', length: 'Optional[int]', content: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, epoch: 'int', cid: 'Optional[bytes]', sequence_number: 'int', sequence_long: 'bool', length: 'Optional[int]', content: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final

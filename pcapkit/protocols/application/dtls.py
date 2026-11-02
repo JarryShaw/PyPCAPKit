@@ -20,16 +20,19 @@ Connection IDs
 --------------
 
 A ``tls12_cid`` record carries a connection ID between its sequence number
-and its length (:rfc:`9146#section-4`), and the ID's length is negotiated
-rather than carried. :class:`DTLSContext` resolves it, in this order:
+and its length (:rfc:`9146#section-4`), and a DTLS 1.3 unified header with
+its ``C`` bit set carries one between its first octet and its sequence number
+(:rfc:`9147#section-4`). Either way the ID's length is negotiated rather than
+carried. :class:`DTLSContext` resolves it for both, in this order:
 
-* a connection ID the record begins with that a ``ClientHello`` or
-  ``ServerHello`` ``connection_id`` extension negotiated earlier in the
-  capture, each peer naming the one it receives (:rfc:`9146#section-3`);
+* a connection ID that a ``ClientHello`` or ``ServerHello``
+  ``connection_id`` extension negotiated earlier in the capture, each peer
+  naming the one it receives (:rfc:`9146#section-3`,
+  :rfc:`9147#section-9.1`), and that the record's ID begins with;
 * the ``cid_length`` the caller gives :class:`DTLSContext`.
 
 Without either the record stays :class:`~pcapkit.protocols.misc.raw.Raw`.
-A dissected one reports its epoch, sequence number, connection ID and length,
+A dissected one reports its connection ID alongside its other header fields,
 and keeps its encrypted content as octets. The context reaches DTLS through
 :mod:`pcapkit.corekit.context`:
 
@@ -49,7 +52,7 @@ across them.
 
 A rebuild parses each layer's octets again, so ``from_data`` takes the same
 ``__context__``. Without it the octets still rebuild exactly, and
-``DTLS.from_data`` keeps its chain, but a ``tls12_cid`` record under a
+``DTLS.from_data`` keeps its chain, but a record with a connection ID under a
 rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 Records in One Datagram
@@ -66,9 +69,8 @@ the last (:rfc:`9147#section-4`). The exceptions:
   :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it.
 * Octets that open no whole record stay raw, with no error: an unsupported
   content type, a legacy version outside ``0xFExx``, a header cut short, a
-  length past the end of the datagram, a unified header with a connection
-  ID, or a ``tls12_cid`` record whose connection ID is not known, either of
-  which leaves the record's end unknown.
+  length past the end of the datagram, or a connection ID whose length is
+  not known, which leaves the record's end unknown.
 * A parse told to stop at DTLS (``protocol='DTLS'`` or ``layer='Application'``)
   keeps the rest of the datagram raw.
 * Each record is a layer, so :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`
@@ -87,12 +89,12 @@ octets, flagged
 :meth:`DTLS.analyze_handshake`, which reads it with :meth:`DTLS.read_handshake`.
 Only the first record of each datagram is reassembled.
 
-**A unified-header record with a connection ID is not decoded**
-(:rfc:`9147#section-4.1`). Its length is negotiated, not carried in the
-record, so it degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
-
 **A connection ID negotiated in a fragmented hello is not learned**: the
 message is not decoded here, so its ``connection_id`` extension is not read.
+
+**A connection ID a DTLS 1.3** ``NewConnectionId`` **issues is not learned**
+(:rfc:`9147#section-9`, :issue:`2625`): the message is encrypted, so only the
+caller can give it to :class:`DTLSContext`.
 
 **A unified-header record carries only the low two bits of the epoch**, and
 its sequence number is header-protected, so the values it reports are the
@@ -188,17 +190,59 @@ def _is_unified_header(octet: int) -> bool:
     return octet >> 5 == _UNIFIED_PREFIX
 
 
-def _ciphertext_header_length(flags: 'dict[str, int]') -> 'int':
+def _unified_flags(octet: 'int') -> 'dict[str, int]':
+    """The ``C``, ``S`` and ``L`` bits of a unified header's first octet, ``001CSLEE``.
+
+    Args:
+        octet: First octet of the record.
+
+    Returns:
+        The bits, keyed as the header schema's ``flags`` keys them.
+
+    """
+    return {'connection_id': octet >> 4 & 1, 'sequence_long': octet >> 3 & 1, 'length_present': octet >> 2 & 1}
+
+
+def _ciphertext_header_length(flags: 'dict[str, int]', cid_length: 'int' = 0) -> 'int':
     """Length of a unified header, from its first octet's decoded flags.
 
     Args:
         flags: Decoded first octet, as the header schema holds it.
+        cid_length: Length of the connection ID the header carries, if any.
 
     Returns:
-        First octet, sequence number and, if present, the length field.
+        First octet, connection ID, sequence number and, if present, the
+        length field.
 
     """
-    return 1 + (2 if flags['sequence_long'] else 1) + (2 if flags['length_present'] else 0)
+    return 1 + cid_length + (2 if flags['sequence_long'] else 1) + (2 if flags['length_present'] else 0)
+
+
+def _record_cid_length(data: 'bytes', context: 'Optional[DTLSContext]') -> 'Optional[int]':
+    """Length of the connection ID of the record ``data`` opens with, as ``context`` matches it.
+
+    A ``tls12_cid`` record's ID follows its sequence number, just before its
+    length (:rfc:`9146#section-4`). A unified header's follows its first
+    octet, before its sequence number and the length, if present
+    (:rfc:`9147#section-4`).
+
+    Args:
+        data: A ``tls12_cid`` record, or a unified-header one with ``C`` set.
+        context: Connection IDs known to the parse, if any.
+
+    Returns:
+        The connection ID's length, or :data:`None` when ``context`` has no
+        candidate for it.
+
+    """
+    if context is None:
+        return None
+    if _is_unified_header(data[0]):
+        flags = _unified_flags(data[0])
+        return context.match(data[1:], sequence_length=2 if flags['sequence_long'] else 1,
+                             length_present=bool(flags['length_present']),
+                             min_content_length=_CIPHERTEXT_MIN_LENGTH)
+    return context.match(data[_CID_OFFSET:])
 
 
 def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'bool':
@@ -209,11 +253,10 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
     <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`: a content
     type a genuine record carries, a ``0xFExx`` legacy version, and a fragment
     that ends inside ``data``. A ``tls12_cid`` header needs DTLS 1.2's version
-    and a connection ID ``context`` knows the length of. A unified header must
-    carry no connection ID, whose negotiated length leaves the record's end
-    unknown, and a fragment that ends inside ``data``; without a length it runs
-    to the end of ``data``, as the last record of a datagram does
-    (:rfc:`9147#section-4`).
+    and a connection ID ``context`` knows the length of. A unified header needs
+    the same of its connection ID, if it carries one, and a fragment that ends
+    inside ``data``; without a length it runs to the end of ``data``, as the
+    last record of a datagram does (:rfc:`9147#section-4`).
 
     Args:
         data: Octets after a record.
@@ -226,16 +269,17 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
     if not data:
         return False
     if _is_unified_header(data[0]):
-        # NOTE: the ``C``, ``S`` and ``L`` bits of ``001CSLEE``, as the header schema reads them.
-        flags = {'connection_id': data[0] >> 4 & 1, 'sequence_long': data[0] >> 3 & 1,
-                 'length_present': data[0] >> 2 & 1}
-        header = _ciphertext_header_length(flags)
-        if flags['connection_id'] or len(data) < header:
+        flags = _unified_flags(data[0])
+        cid_length = _record_cid_length(data, context) if flags['connection_id'] else 0
+        if cid_length is None:
+            return False
+        header = _ciphertext_header_length(flags, cid_length)
+        if len(data) < header:
             return False
         if not flags['length_present']:
             return True
     elif data[0] == Enum_ContentType.tls12_cid:
-        cid_length = None if context is None else context.match(data[_CID_OFFSET:])
+        cid_length = _record_cid_length(data, context)
         if cid_length is None or int.from_bytes(data[1:3], 'big') != _DTLSV1_2_VERSION:
             return False
         header = _LEGACY_HEADER_LENGTH + cid_length
@@ -250,13 +294,15 @@ def _opens_whole_record(data: 'bytes', context: 'Optional[DTLSContext]') -> 'boo
 
 
 class DTLSContext(ProtocolContext):
-    """Connection IDs for the :class:`DTLS` records that carry one (:rfc:`9146`).
+    """Connection IDs for the :class:`DTLS` records that carry one (:rfc:`9146`, :rfc:`9147`).
 
-    A ``tls12_cid`` record does not carry its connection ID's length, so
-    :meth:`match` finds it: from the connection IDs registered here, then from
-    :attr:`cid_length`. :class:`DTLS` registers those a ``ClientHello`` or
-    ``ServerHello`` negotiates, and those of the records a constructed one
-    carries as its payload.
+    Neither a ``tls12_cid`` record nor a DTLS 1.3 unified header carries its
+    connection ID's length, so :meth:`match` finds it: from the connection IDs
+    registered here, then from :attr:`cid_length`. :class:`DTLS` registers
+    those a ``ClientHello`` or ``ServerHello`` negotiates, and those of the
+    records a constructed one carries as its payload. Those a DTLS 1.3
+    ``NewConnectionId`` issues are encrypted, so only the caller can register
+    them (:rfc:`9147#section-9`).
 
     The IDs belong to the instance: a new one starts with none, one reused
     across parses or extractions keeps what it has learned, and nothing is
@@ -265,7 +311,11 @@ class DTLSContext(ProtocolContext):
 
     Matching by value relies on IDs being self-delineating
     (:rfc:`9146#section-4`): with ``c1c2c3c4`` registered, a record whose ID
-    is ``c1c2c3c400010203`` reads as carrying ``c1c2c3c4``.
+    is ``c1c2c3c400010203`` reads as carrying ``c1c2c3c4``. Where one
+    registered ID is a prefix of another, a record carrying the shorter can
+    read as carrying the longer, when the octets after it repeat the longer
+    one's rest and the record still fits; a unified header must also leave
+    room for its record-number sample, which rules most such readings out.
 
     Args:
         *connection_ids: Connection IDs known out of band.
@@ -315,17 +365,30 @@ class DTLSContext(ProtocolContext):
         if cid not in self.__connection_ids__:
             self.__connection_ids__.append(cid)
 
-    def match(self, octets: 'bytes') -> 'Optional[int]':
+    def match(self, octets: 'bytes', *, sequence_length: 'int' = 0, length_present: 'bool' = True,
+              min_content_length: 'int' = 0) -> 'Optional[int]':
         """Find the length of the connection ID that ``octets`` opens with.
 
         Each registered connection ID that ``octets`` begins with is a
         candidate, longest first, and :attr:`cid_length` comes last. The first
-        whose record -- a 16-bit length after the ID, then that many octets --
-        ends inside ``octets`` is the answer. Failing that it is the first
-        candidate, so that reading the record reports what runs past the end.
+        whose record ends inside ``octets`` and carries at least
+        ``min_content_length`` octets of content is the answer. After the ID
+        come ``sequence_length`` octets, then a 16-bit length and that many
+        octets, or, without the length, the rest of ``octets``. Failing that it
+        is the first candidate, so that reading the record reports what is
+        wrong with it.
 
         Args:
-            octets: A ``tls12_cid`` record from its connection ID on.
+            octets: A record from its connection ID on.
+            sequence_length: Octets between the ID and the length: none in a
+                ``tls12_cid`` record (:rfc:`9146#section-4`), and a unified
+                header's sequence number (:rfc:`9147#section-4`).
+            length_present: Whether the record carries its length, as a unified
+                header's ``L`` bit says; a ``tls12_cid`` record always does.
+            min_content_length: Fewest content octets a record may carry: a
+                unified header's record-number sample (:rfc:`9147#section-4.2.3`).
+                A ``tls12_cid`` record's minimum depends on its cipher suite,
+                so none is assumed for it.
 
         Returns:
             The connection ID's length, or :data:`None` with no candidate.
@@ -336,8 +399,9 @@ class DTLSContext(ProtocolContext):
         if self.__cid_length__ is not None:
             candidates.append(self.__cid_length__)
         for length in candidates:
-            end = length + 2
-            if end + int.from_bytes(octets[length:end], 'big') <= len(octets):
+            end = length + sequence_length + (2 if length_present else 0)
+            content = int.from_bytes(octets[end - 2:end], 'big') if length_present else len(octets) - end
+            if min_content_length <= content and end + content <= len(octets):
                 return length
         return candidates[0] if candidates else None
 
@@ -393,12 +457,12 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """Header length of current protocol -- the record header, the
         fragment excluded. Fixed at 13 octets for a legacy record, and the
         connection ID's length more for a ``tls12_cid`` one; a unified
-        header's length follows from its first octet.
+        header's length follows from its first octet and its connection ID.
 
         """
         schema = getattr(self, '__header__', None)
         if isinstance(schema, Schema_DTLSCiphertext):
-            return _ciphertext_header_length(schema.flags)
+            return _ciphertext_header_length(schema.flags, len(schema.cid or b''))
         if isinstance(schema, Schema_DTLSCIDCiphertext):
             return _LEGACY_HEADER_LENGTH + len(schema.cid)
         return _LEGACY_HEADER_LENGTH
@@ -479,9 +543,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 from it.
             payload: Octets after the record, e.g. a further record
                 coalesced in the same buffer. The connection IDs of the
-                ``tls12_cid`` records a :class:`DTLS` payload carries are
-                registered, so that its octets parse again
-                (:class:`DTLSContext`).
+                records a :class:`DTLS` payload carries are registered, so
+                that its octets parse again (:class:`DTLSContext`).
             ciphertext: Make a unified-header record (:rfc:`9147#section-4.1`)
                 instead of a legacy one; ``content_type``, ``version`` and
                 ``data`` do not apply.
@@ -490,15 +553,17 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             length_present: Whether a unified-header record carries its length;
                 if not, it runs to the end of the datagram.
             cid: Connection ID of a ``tls12_cid`` record (:rfc:`9146#section-4`),
-                1 to 255 octets; no other record takes one.
+                which needs one, or of a unified-header record, which sets its
+                ``C`` bit (:rfc:`9147#section-4`); 1 to 255 octets. No other
+                record takes one.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``cid`` is missing or invalid for a ``tls12_cid``
-                record, or given for any other.
+            ProtocolError: If ``cid`` is invalid, missing for a ``tls12_cid``
+                record, or given for a legacy-format one of another type.
             StructError: If a record-header field, or a field of ``content``,
                 does not fit its width.
             FieldValueError: If a unified-header record's ``epoch`` does not
@@ -507,8 +572,9 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         """
         self._learn_payload_connection_ids(payload)
         if ciphertext:
-            if cid is not None:
-                raise ProtocolError(f'{self.alias}: invalid connection ID: only a tls12_cid record carries one')
+            if cid is not None and not _is_cid(cid):
+                raise ProtocolError(f'{self.alias}: invalid connection ID: {cid!r} '
+                                    '(a unified header carries 1 to 255 octets)')
             # NOTE: packed first for the reason below; ``epoch`` is a bit sub-field the schema refuses itself.
             self._make_pack(sequence_number, size=2 if sequence_long else 1)
             if length_present:
@@ -516,11 +582,12 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             return Schema_DTLSCiphertext(
                 flags={
                     'fixed': _UNIFIED_PREFIX,
-                    'connection_id': 0,
+                    'connection_id': int(cid is not None),
                     'sequence_long': int(sequence_long),
                     'length_present': int(length_present),
                     'epoch': epoch,
                 },
+                cid=cid,
                 sequence_number=sequence_number,
                 length=len(content) if length_present else None,
                 fragment=content,
@@ -552,7 +619,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 payload=payload,
             )
         if cid is not None:
-            raise ProtocolError(f'{self.alias}: invalid connection ID: only a tls12_cid record carries one')
+            raise ProtocolError(f'{self.alias}: invalid connection ID: of the legacy-format records, '
+                                'only a tls12_cid one carries one')
         return Schema_DTLS(
             content_type=content_type_,
             version=version,
@@ -569,9 +637,10 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         A unified-header record (:rfc:`9147#section-4.1`) is parsed by
         :class:`~pcapkit.protocols.schema.application.dtls.DTLSCiphertext`,
         and a ``tls12_cid`` one (:rfc:`9146#section-4`) by
-        :class:`~pcapkit.protocols.schema.application.dtls.DTLSCIDCiphertext`
-        with the connection ID length :class:`DTLSContext` finds, rather than
-        the legacy header; every other record uses the inherited behaviour.
+        :class:`~pcapkit.protocols.schema.application.dtls.DTLSCIDCiphertext`,
+        rather than the legacy header; every other record uses the inherited
+        behaviour. Either schema reads a connection ID with the length
+        :class:`DTLSContext` finds.
 
         Args:
             length: Length of packet data.
@@ -581,28 +650,36 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             Parsed packet data.
 
         Raises:
-            ProtocolError: If a ``tls12_cid`` record's connection ID length is
-                not known.
+            ProtocolError: If a record's connection ID length is not known.
 
         """
         octets = self._data[:1]
-        if cast('Optional[Schema_DTLS]', self.__header__) is not None or not octets:
+        header = cast('Optional[Schema_DTLS | Schema_DTLSCiphertext]', self.__header__)
+        if header is not None or not octets:
+            if isinstance(header, Schema_DTLSCiphertext) and header.cid is not None:
+                # NOTE: a made header holding raw items is read again from its octets (#1312),
+                # which do not carry the connection ID's length.
+                kwargs['__packet__'] = {**kwargs.get('__packet__', {}), '__cid_length__': len(header.cid)}
             return super().unpack(length, **kwargs)
-        if _is_unified_header(octets[0]):
-            packet = kwargs.get('__packet__', {})  # packet data
+        unified = _is_unified_header(octets[0])
+        if not unified and octets[0] != Enum_ContentType.tls12_cid:
+            return super().unpack(length, **kwargs)
+        if unified:
+            self._alias = 'DTLS 1.3'
+        packet = kwargs.get('__packet__', {})  # packet data
+        if not unified or _unified_flags(octets[0])['connection_id']:
+            data = self._data if length is None else self._data[:length]
+            cid_length = _record_cid_length(data, self._get_context(DTLSContext))
+            if cid_length is None:
+                record = ('a unified-header record (RFC 9147 section 4)' if unified
+                          else 'a tls12_cid record (RFC 9146 section 4)')
+                raise ProtocolError(f'{self.alias}: invalid format: no connection ID length is known for {record}')
+            packet = {**packet, '__cid_length__': cid_length}
+        if unified:
             self.__header__ = Schema_DTLSCiphertext.unpack(self._file, length, packet)  # type: ignore[call-arg,misc]
             return self.read(length, **kwargs)
-        if octets[0] == Enum_ContentType.tls12_cid:
-            context = self._get_context(DTLSContext)
-            data = self._data if length is None else self._data[:length]
-            cid_length = None if context is None else context.match(data[_CID_OFFSET:])
-            if cid_length is None:
-                raise ProtocolError(f'{self.alias}: invalid format: no connection ID length is known '
-                                    'for a tls12_cid record (RFC 9146 section 4)')
-            packet = {**kwargs.get('__packet__', {}), '__cid_length__': cid_length}
-            self.__header__ = Schema_DTLSCIDCiphertext.unpack(self._file, length, packet)  # type: ignore[call-arg,misc]
-            return self.read(length, **kwargs)
-        return super().unpack(length, **kwargs)
+        self.__header__ = Schema_DTLSCIDCiphertext.unpack(self._file, length, packet)  # type: ignore[call-arg,misc]
+        return self.read(length, **kwargs)
 
     @classmethod
     def read_handshake(cls, message: 'bytes') -> 'Data_DTLSHandshake':
@@ -711,6 +788,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             return {
                 'ciphertext': True,
                 'epoch': data.epoch,
+                'cid': data.cid,
                 'sequence_number': data.sequence_number,
                 'sequence_long': data.sequence_long,
                 'length_present': data.length is not None,
@@ -804,7 +882,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         return self._decode_next_layer(dtls, -1, remaining)
 
     def _learn_payload_connection_ids(self, payload: 'Any') -> 'None':
-        """Register the connection IDs of the ``tls12_cid`` records in ``payload``.
+        """Register the connection IDs of the records in ``payload``.
 
         A constructed record parses its payload's octets again, which needs
         the connection IDs that the payload's records carry.
@@ -816,13 +894,30 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         cids = []  # type: list[bytes]
         layer = payload
         while isinstance(layer, DTLS):
-            if isinstance(layer.info, Data_DTLSCIDCiphertext):
+            if isinstance(layer.info, (Data_DTLSCIDCiphertext, Data_DTLSCiphertext)) and layer.info.cid is not None:
                 cids.append(layer.info.cid)
             layer = layer.payload
         self._register_connection_ids(cids)
 
     def _read_dtls_ciphertext(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_DTLSCiphertext':  # pylint: disable=unused-argument
         """Read a unified-header ciphertext record (:rfc:`9147#section-4.1`).
+
+        Structure of a unified header [:rfc:`9147#section-4`], whose
+        connection ID is as long as :class:`DTLSContext` says:
+
+        .. code-block:: text
+
+           0 1 2 3 4 5 6 7
+           +-+-+-+-+-+-+-+-+
+           |0|0|1|C|S|L|E E|
+           +-+-+-+-+-+-+-+-+
+           | Connection ID |   if C is set
+           +-+-+-+-+-+-+-+-+
+           |  8 or 16 bit  |   as S says
+           |Sequence Number|
+           +-+-+-+-+-+-+-+-+
+           | 16 bit Length |   if L is set
+           +-+-+-+-+-+-+-+-+
 
         Args:
             length: Length of packet data.
@@ -832,19 +927,19 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the header carries a connection ID, whose length
-                is negotiated and not in the record; if the header or its
-                declared length runs past the buffer; or if the ciphertext is
-                shorter than the record-number sample (:rfc:`9147#section-4.2.3`).
+            ProtocolError: If ``C`` is set but no connection ID is carried; if
+                the header or its declared length runs past the buffer; or if
+                the ciphertext is shorter than the record-number sample
+                (:rfc:`9147#section-4.2.3`).
 
         """
         self._alias = 'DTLS 1.3'
-        schema = self.__header__
+        schema = cast('Schema_DTLSCiphertext', self.__header__)
         flags = schema.flags
         available = length if length is not None else len(self)
 
-        if flags['connection_id']:
-            raise ProtocolError(f'{self.alias}: invalid format: connection ID records are not decoded')
+        if flags['connection_id'] and not _is_cid(schema.cid):
+            raise ProtocolError(f'{self.alias}: invalid format: the C bit is set but no connection ID is carried')
         needed = self.length + (schema.length or 0)
         if needed > available:
             raise ProtocolError(f'{self.alias}: invalid format: record of {needed} octets '
@@ -856,6 +951,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         dtls = Data_DTLSCiphertext(
             epoch=flags['epoch'],
+            cid=schema.cid,
             sequence_number=schema.sequence_number,
             sequence_long=bool(flags['sequence_long']),
             length=schema.length,
