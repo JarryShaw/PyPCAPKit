@@ -6,8 +6,9 @@ IEEE 802.11 - Wireless LAN MAC Header
 :mod:`pcapkit.protocols.link.ieee802_11` contains
 :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` only, which implements
 the extractor for the IEEE 802.11 MAC header [*]_ of a protocol version 0
-frame, as :class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its
-fields, in the order they appear, numeric ones little-endian:
+frame, as a ``LINKTYPE_IEEE802_11`` capture carries it or
+:class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its fields, in
+the order they appear, numeric ones little-endian:
 
 .. table::
 
@@ -41,7 +42,8 @@ Scope
 * **The frame body** (§9.2.4.7) is kept as
   :class:`~pcapkit.protocols.misc.raw.Raw`, protected or not.
 * **The FCS** (§9.2.4.8), where one was captured, stays at the end of the
-  body: whether a capture carries it is a radiotap Flags bit, which
+  body: this class does not decide whether a capture carries one, which
+  behind radiotap is a Flags bit
   :class:`~pcapkit.protocols.link.radiotap.Radiotap` does not decode.
 * **Pad octets** that radiotap's data-pad flag says follow the header stay
   at the start of the body, for the same reason.

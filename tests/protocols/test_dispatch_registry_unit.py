@@ -232,9 +232,11 @@ class DispatchRegistryTests(unittest.TestCase):
         # pcap and pcapng frame tables, #2439's IGMP, #2436's
         # Internet.__proto__[TransType.ICMP] and [TransType.IPv6_ICMP], #2489's
         # Internet.__proto__[TransType.DCCP], #2560's two NLPIDs of
-        # FRAD.__proto__, and #2575's Radiotap.__proto__[LinkType.IEEE802_11].
-        self.assertEqual(len(cases), 60,
-                         'expected exactly 60 entries across the seven __proto__ '
+        # FRAD.__proto__, #2575's Radiotap.__proto__[LinkType.IEEE802_11], and
+        # #2608's LinkType.IEEE802_11 and LinkType.IEEE802_11_RADIOTAP in both
+        # link-type tables.
+        self.assertEqual(len(cases), 64,
+                         'expected exactly 64 entries across the seven __proto__ '
                          'tables named in GitHub issue #496, the loopback table '
                          'of #1574, the FRAD table of #2560 and the radiotap table '
                          'of #2575; a different count means a registry changed '
@@ -245,7 +247,7 @@ class DispatchRegistryTests(unittest.TestCase):
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
             'link': 7, 'internet': 21, 'tcp': 5, 'udp': 4, 'sctp': 2,
-            'pcap-frame': 7, 'pcapng-frame': 7, 'loopback': 4, 'frad': 2,
+            'pcap-frame': 9, 'pcapng-frame': 9, 'loopback': 4, 'frad': 2,
             'radiotap': 1,
         })
 

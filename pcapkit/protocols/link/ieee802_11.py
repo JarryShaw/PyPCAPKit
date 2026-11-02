@@ -7,8 +7,9 @@
 :mod:`pcapkit.protocols.link.ieee802_11` contains
 :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` only, which implements
 the extractor for the IEEE 802.11 MAC header [*]_ of a protocol version 0
-frame, as :class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its
-fields, in the order they appear, numeric ones little-endian:
+frame, as a ``LINKTYPE_IEEE802_11`` capture carries it or
+:class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its fields, in
+the order they appear, numeric ones little-endian:
 
 .. table::
 
@@ -37,12 +38,12 @@ S1G Beacon lay out B8-B15 of Frame Control differently; see
 :class:`~pcapkit.protocols.data.link.ieee802_11.FrameControl`.
 
 The frame body (§9.2.4.7) follows the header and is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, protected or not. So is the FCS
-(§9.2.4.8) where one was captured: whether a capture carries it is a
-radiotap Flags bit, which :class:`~pcapkit.protocols.link.radiotap.Radiotap`
-does not decode, so the FCS stays at the end of the body. For the same reason,
-the pad octets that radiotap's data-pad flag says follow the header stay at the
-start of the body.
+:class:`~pcapkit.protocols.misc.raw.Raw`, protected or not. The FCS
+(§9.2.4.8), where one was captured, stays at the end of the body: this class
+does not decide whether a capture carries one, which behind radiotap is a
+Flags bit :class:`~pcapkit.protocols.link.radiotap.Radiotap` does not decode.
+For the same reason, the pad octets that radiotap's data-pad flag says follow
+the header stay at the start of the body.
 
 A frame of any protocol version but 0 is refused: version 1 is the PV1 frame
 format of §9.8, whose Frame Control field is laid out differently, and
@@ -62,6 +63,7 @@ from pcapkit.const.ieee802_11.data_subtype import DataSubtype as Enum_DataSubtyp
 from pcapkit.const.ieee802_11.extension_subtype import ExtensionSubtype as Enum_ExtensionSubtype
 from pcapkit.const.ieee802_11.management_subtype import ManagementSubtype as Enum_ManagementSubtype
 from pcapkit.const.ieee802_11.type import Type as Enum_Type
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.link.ieee802_11 import IEEE802_11 as Data_IEEE802_11
 from pcapkit.protocols.data.link.ieee802_11 import FrameControl as Data_FrameControl
 from pcapkit.protocols.data.link.ieee802_11 import HTControl as Data_HTControl
@@ -71,11 +73,11 @@ from pcapkit.protocols.link.ethernet import PAT_MAC_ADDR
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ieee802_11 import IEEE802_11 as Schema_IEEE802_11
 from pcapkit.protocols.schema.link.ieee802_11 import Layout, layout
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Mapping, NoReturn, Optional, Type, Union
+    from typing import Any, Mapping, Optional, Type, Union
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -330,16 +332,19 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return 36
 
     @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_LinkType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
-        Raises:
-            UnsupportedCall: This protocol is reached only through
-                :class:`~pcapkit.protocols.link.radiotap.Radiotap`'s payload
-                dispatch, not through a link-layer header type of its own.
+        Returns:
+            Numeral registry index of the protocol in `tcpdump`_ link-layer
+            header types, which
+            :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
+            is keyed by too.
+
+        .. _tcpdump: https://www.tcpdump.org/linktypes.html
 
         """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+        return Enum_LinkType.IEEE802_11  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
