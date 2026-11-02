@@ -242,13 +242,12 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
         """
         if byteorder not in ('big', 'little'):
             raise ProtocolError(f'Loopback: invalid byte order: {byteorder!r}')
-        # NOTE: ``bool`` is an ``int`` subclass, so without the explicit check
-        # ``True`` would pack as address family 1 (#2289).
-        if isinstance(family, bool) or not isinstance(family, int) or not 0 <= family <= 0xFFFF_FFFF:
-            raise ProtocolError(f'Loopback: invalid address family: {family!r}')
+        # NOTE: ``_make_uint`` refuses a ``bool``, which would otherwise pack
+        # as address family 1 (#2289).
+        family = self._make_uint(family, bits=32, name='address family')
 
         return Schema_Loopback(
-            family=family.to_bytes(4, byteorder),
+            family=self._make_pack(family, size=4, lilendian=byteorder == 'little'),
             payload=payload,
         )
 
