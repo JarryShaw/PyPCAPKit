@@ -508,9 +508,13 @@ def _default_extension_header(protocol: 'int', data: 'bytes') -> 'Optional[tuple
         data: Raw octets from the header on, as far as the IPv4 packet goes.
 
     Returns:
-        The header's Next Header field and its length, or :data:`None` if its
-        parser raises anything at all, or fewer octets were captured than the
-        header needs.
+        The header's Next Header field and the length it declares, or
+        :data:`None` if its parser raises anything at all, or fewer octets were
+        captured than its :meth:`__length_hint__
+        <pcapkit.protocols.protocol.Protocol.__length_hint__>`. A header
+        captured at least that long is kept even when cut short of the length
+        it declares, as pcapkit's own IPv4 dissection keeps it, so the length
+        can run past ``data`` (:issue:`2695`).
 
     Note:
         The header is parsed on trial as under
@@ -529,7 +533,7 @@ def _default_extension_header(protocol: 'int', data: 'bytes') -> 'Optional[tuple
         return None
     finally:
         beholding.reset(token)
-    nxt = getattr(header.info, 'next', None)  # none on a header cut short, read as raw octets
+    nxt = getattr(header.info, 'next', None)  # none on a header short of its hint, kept as raw octets
     if nxt is None:
         return None
     return int(nxt), header.length
@@ -545,13 +549,16 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
     Returns:
         The protocol number after the last of them, the octets from its header
         on, and how many headers were stepped over -- ``protocol``, ``data`` and
-        ``0`` if ``protocol`` is none of them -- or :data:`None` if one of them
-        is cut short or rejected, or more than
+        ``0`` if ``protocol`` is none of them -- or :data:`None` if an AH is cut
+        short or rejected, :func:`_default_extension_header` answers
+        :data:`None` for any other, or more than
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than
-        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`;
-        any other is read by :func:`_default_extension_header`.
+        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`. Any other
+        is stepped over by the length :func:`_default_extension_header` gives,
+        so one it keeps though cut short leaves no octets after it
+        (:issue:`2695`).
 
     """
     depth = 0
