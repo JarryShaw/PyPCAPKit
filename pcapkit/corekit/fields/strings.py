@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """text field class"""
 
+import operator
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
@@ -8,7 +9,7 @@ from pcapkit.corekit.fields.field import Field
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import Dict, unquote
-from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.exceptions import FieldValueError, IntError
 
 __all__ = [
     '_TextField',
@@ -17,6 +18,7 @@ __all__ = [
     'DecodedString',
     'BitField',
     'PaddingField',
+    'pad_length',
 ]
 
 if TYPE_CHECKING:
@@ -378,9 +380,23 @@ class PaddingField(BytesField):
     Args:
         length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
+            Left out when ``align`` sizes the field.
         default: Field default value, if any.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+        align: Boundary, in octets, that the padding reaches, given with
+            ``after`` in place of ``length``. The field is then
+            :func:`pad_length` octets long.
+        after: What the padding follows: the name of an earlier field whose
+            value is its length in octets, or a callable that accepts the
+            current packet and returns that length.
+
+    Raises:
+        FieldValueError: If ``length`` and ``align`` are both given or both
+            left out, if only one of ``align`` and ``after`` is given, if
+            ``after`` is neither a :obj:`str` nor a callable, or if ``align``
+            is not positive.
+        IntError: If ``align`` is not an :obj:`int`.
 
     Padding packs back as the octets it was given, so a schema unpacked from
     non-zero padding rebuilds byte for byte. An absent or empty value packs as
@@ -388,7 +404,42 @@ class PaddingField(BytesField):
     width is truncated or zero-filled to the field's, as :mod:`struct`'s ``s``
     format does.
 
+    .. versionchanged:: 1.6.0
+
+       Takes ``align`` and ``after`` as an alternative to ``length``
+       (:issue:`2614`).
+
     """
+
+    def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+                 default: 'bytes | NoValueType' = NO_VALUE,
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None, *,
+                 align: 'Optional[int]' = None,
+                 after: 'Optional[str | Callable[[dict[str, Any]], int]]' = None) -> 'None':
+        name = type(self).__name__
+        if align is not None:
+            if length is not None:
+                raise FieldValueError(f'{name}: takes length or align, not both')
+            # NOTE: A bad ``align`` is a mistake in the schema, so it is
+            # rejected here rather than once per packet.
+            pad_length(0, align)
+            if isinstance(after, str):
+                span = operator.itemgetter(after)  # type: Callable[[dict[str, Any]], int]
+            elif callable(after):
+                span = after
+            else:
+                raise FieldValueError(f'{name}: align needs after, a field name or a callable, '
+                                      f'not {after!r}')
+            boundary = align
+
+            def aligned(packet: 'dict[str, Any]') -> 'int':
+                return pad_length(span(packet), boundary)
+            length = aligned
+        elif after is not None:
+            raise FieldValueError(f'{name}: after needs align')
+        elif length is None:
+            raise FieldValueError(f'{name}: needs a length or align')
+        super().__init__(length, default, callback)
 
     def pack(self, value: 'Optional[bytes]', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Pack field value into :obj:`bytes`.
@@ -407,3 +458,32 @@ class PaddingField(BytesField):
         if isinstance(value, (bytes, bytearray)) and value:
             return bytes(value[:length]).ljust(length, b'\x00')
         return bytes(length)
+
+
+def pad_length(length: 'int', align: 'int') -> 'int':
+    """Octets of padding that take ``length`` octets to an ``align``-octet boundary.
+
+    Args:
+        length: Octets to be padded.
+        align: Boundary, in octets.
+
+    Returns:
+        ``-length % align``: from ``0``, where ``length`` is already a multiple
+        of ``align``, to ``align - 1``.
+
+    Raises:
+        IntError: If ``align`` is not an :obj:`int`, or is a :obj:`bool`.
+        FieldValueError: If ``align`` is not positive.
+
+    A schema's ``length`` callbacks are handed the packet data, not a
+    protocol, so this is a plain function and not a protocol method.
+    :class:`PaddingField` sizes itself by it when given ``align``.
+
+    .. versionadded:: 1.6.0
+
+    """
+    if isinstance(align, bool) or not isinstance(align, int):
+        raise IntError(f'align must be an int, not {align!r}')
+    if align < 1:
+        raise FieldValueError(f'align must be positive, not {align!r}')
+    return -length % align

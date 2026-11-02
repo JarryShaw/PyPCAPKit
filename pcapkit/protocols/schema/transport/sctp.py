@@ -16,7 +16,7 @@ from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, PortEnumField, UInt16Field, UInt32Field
-from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, pad_length
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -103,7 +103,7 @@ def padding_length(pkt: 'dict[str, Any]') -> 'int':
 
     """
     length = pkt.get('length') or 0
-    padding = -length % 4
+    padding = pad_length(length, 4)
 
     width = pkt.get('__padding__')
     if isinstance(width, int) and width >= 0:
@@ -206,7 +206,7 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
     """
     def callback(pkt: 'dict[str, Any]') -> 'int':
         length = pkt.get('length') or 0
-        return max(length - base + (-length % 4), 0)
+        return max(length - base + pad_length(length, 4), 0)
     return callback
 
 
@@ -883,7 +883,7 @@ def whole_chunks_length(data: 'bytes') -> 'int':
         stop = end + length
         if length < 4 or stop > size:
             break
-        end = min(stop + (-length % 4), size)
+        end = min(stop + pad_length(length, 4), size)
     return end
 
 
