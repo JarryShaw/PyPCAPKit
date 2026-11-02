@@ -53,7 +53,7 @@ class TestRadiotap(unittest.TestCase):
         extended present-flags word.
         """
         from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         raw = _radiotap(8, [0])
         parsed = Radiotap(raw, len(raw))
@@ -207,7 +207,7 @@ class TestRadiotap(unittest.TestCase):
         what is there, and the payload is empty rather than negative-length.
         """
         from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         raw = _radiotap(200, [0]) + b'\x01\x02\x03'
         parsed = Radiotap(raw, len(raw))

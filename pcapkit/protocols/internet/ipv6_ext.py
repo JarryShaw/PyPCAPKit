@@ -141,7 +141,7 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_ext import IPv6_Ext as Data_IPv6_Ext
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.internet.ipv6_ext import IPv6_Ext as Schema_IPv6_Ext
 from pcapkit.protocols.schema.schema import Schema

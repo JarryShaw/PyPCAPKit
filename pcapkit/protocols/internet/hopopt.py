@@ -65,7 +65,7 @@ from pcapkit.protocols.data.internet.hopopt import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
 from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as Schema_CALIPSOOption
 from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as Schema_HomeAddressOption

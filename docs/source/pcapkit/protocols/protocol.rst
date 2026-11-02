@@ -83,6 +83,9 @@ Internal Definitions below.
    .. automethod:: _make_payload
    .. automethod:: _packing_target
 
+   .. automethod:: _read_mac_addr
+   .. automethod:: _make_mac_addr
+
    .. automethod:: _lookup_registry
    .. automethod:: _lookup_next_layer
    .. automethod:: _decode_next_layer
@@ -198,6 +201,8 @@ Internal Definitions
                   _make_index
                   _make_payload
                   _packing_target
+                  _read_mac_addr
+                  _make_mac_addr
                   _lookup_registry
                   _lookup_next_layer
                   _decode_next_layer
@@ -223,7 +228,8 @@ Internal Definitions
       :meth:`~Protocol.expand_comp`, :meth:`~Protocol._read_packet`,
       :meth:`~Protocol._get_payload`, :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
-      :meth:`~Protocol._packing_target`,
+      :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_mac_addr`,
+      :meth:`~Protocol._make_mac_addr`,
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,

@@ -215,7 +215,7 @@ class UnifiedHeaderChainTests(unittest.TestCase):
     def test_a_record_without_a_length_is_the_last(self) -> None:
         """It runs to the end of the datagram, so octets that would open a record are its ciphertext."""
         from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         last = _unified(_NO_LENGTH_EPOCH3, b'\x07', None, _FRAGMENT + self.CCS)
         wire = self.CCS + last

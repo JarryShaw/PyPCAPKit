@@ -209,9 +209,14 @@ DISTINCTIVE = (10 ** 6, 10 ** 9, 0x1A2B3C4D)
 #: the module, the expression (see :func:`_context`) and why. A hit here is in a
 #: module whose own protocol owns a constant of that value, or that reads one.
 NOT_A_COPY = {
-    ('pcapkit/protocols/application/ssl.py', '_take(32)'):
+    ('pcapkit/protocols/application/ssl.py', 'self._read_octets(size=32)'):
         "a TLS/DTLS ClientHello/ServerHello Random is 32 octets (:rfc:`9846#section-4.2.2`), "
         'not an Interface Description Block minimum',
+    ('pcapkit/protocols/protocol.py', 'def _make_mac_addr(size=6)'):
+        'a MAC address is 6 octets (IEEE 802), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/misc/pcapng.py', 'def _make_mac_addr(size=6)'):
+        "the base MAC maker's 6-octet default, which the override repeats, not the IPv6 Next "
+        'Header offset',
     ('pcapkit/protocols/schema/application/dtls.py', 'NumberField(length=6)'):
         "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
         'Header offset',
@@ -236,6 +241,12 @@ NOT_A_COPY = {
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', "{'version': 6}"):
         'the IP version number, not the Next Header offset',
+    ('pcapkit/protocols/internet/ipv6.py', 'version != 6'):
+        'the IP version number, not the Next Header offset',
+    ('pcapkit/protocols/internet/ip.py', 'version == 6'):
+        'the IP version number, not the Next Header offset',
+    ('pcapkit/protocols/internet/icmp.py', 'version == 6'):
+        'ICMPv6, the ICMP of IP version 6 (:rfc:`4443`), not the Next Header offset',
     ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
         'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
     ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
@@ -402,11 +413,12 @@ UNRELATED = {
     'pcapkit/protocols/schema/internet/ipv6_option.py': ((16,), 'an MPL Seed-ID of 16 octets'),
     'pcapkit/protocols/schema/application/httpv2.py': ((6, 32),
                                                        'an HTTP/2 setting size and a flag bit'),
-    'pcapkit/protocols/application/ospf.py': ((16, 24, 65535),
-                                              'OSPF header length and field bounds; 16 is the '
-                                              'offset of the Authentication field the checksum '
-                                              'leaves out (RFC 2328 appendix A.3.1), not a PCAP '
-                                              'record header'),
+    'pcapkit/protocols/application/ospf.py': ((16, 24),
+                                              'OSPF header length; 16 is the bit width of the '
+                                              'packet length, and the offset of the '
+                                              'Authentication field the checksum leaves out '
+                                              '(RFC 2328 appendix A.3.1), not a PCAP record '
+                                              'header'),
     'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
     'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
     'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "

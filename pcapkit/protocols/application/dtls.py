@@ -499,12 +499,20 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         Raises:
             ProtocolError: If ``cid`` is missing or invalid for a ``tls12_cid``
                 record, or given for any other.
+            StructError: If a record-header field, or a field of ``content``,
+                does not fit its width.
+            FieldValueError: If a unified-header record's ``epoch`` does not
+                fit its two bits.
 
         """
         self._learn_payload_connection_ids(payload)
         if ciphertext:
             if cid is not None:
                 raise ProtocolError(f'{self.alias}: invalid connection ID: only a tls12_cid record carries one')
+            # NOTE: packed first for the reason below; ``epoch`` is a bit sub-field the schema refuses itself.
+            self._make_pack(sequence_number, size=2 if sequence_long else 1)
+            if length_present:
+                self._make_pack(len(content), size=2)
             return Schema_DTLSCiphertext(
                 flags={
                     'fixed': _UNIFIED_PREFIX,
@@ -524,6 +532,11 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
             reversed=content_type_reversed, pack=False))
 
         fragment = data if data is not None else self._make_tls_content(content_type_, content, dtls=True)
+        # NOTE: the schema masks a field to its width, so each is packed here first, to
+        # refuse a wider value with the StructError the content makers raise.
+        for value, size in ((int(content_type_), 1), (version, 2), (epoch, 2), (len(fragment), 2)):
+            self._make_pack(value, size=size)
+        self._make_pack(sequence_number, size=6)
         if int(content_type_) == Enum_ContentType.tls12_cid:
             if cid is None or not _is_cid(cid):
                 raise ProtocolError(f'{self.alias}: invalid connection ID: {cid!r} '

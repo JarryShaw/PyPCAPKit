@@ -12,10 +12,11 @@ Query's source-list extension and the Version 3 Membership Report's
 group-record list, both materially different shapes of their own.
 
 Each case parses its octets with the concrete class for the version it
-names; the abstract base cannot be built. A type none of the three versions
-define falls back to :class:`~pcapkit.protocols.misc.raw.Raw`, as does a
-Membership Query of 9 to 11 octets, which is neither IGMPv1/v2 (8) nor
-IGMPv3 (12 or more) (:rfc:`3376#section-7.1`).
+names; constructing the abstract base gives that class (#2574). A type none
+of the three versions define falls back to
+:class:`~pcapkit.protocols.misc.raw.Raw`, as does a Membership Query of 9 to
+11 octets, which is neither IGMPv1/v2 (8) nor IGMPv3 (12 or more)
+(:rfc:`3376#section-7.1`).
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`,
@@ -230,7 +231,7 @@ class IGMPRoundTripTests(unittest.TestCase):
 
     def test_no_trailing_octets_have_no_payload(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         parsed = IGMPv1(io.BytesIO(IGMP_PACKETS['v1-query'][0]), 8)
         self.assertIsInstance(parsed.payload, NoPayload)
@@ -410,12 +411,15 @@ class IGMPVersionedClassTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_base_is_abstract(self) -> None:
+        """The base stays abstract; constructing it gives the version class (#2574)."""
         from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2
 
         self.assertIn('version', IGMP.__abstractmethods__)
-        packet = IGMP_PACKETS['v2-report'][0]
         with self.assertRaises(TypeError):
-            IGMP(io.BytesIO(packet), len(packet))  # type: ignore[abstract]
+            object.__new__(IGMP)
+        packet = IGMP_PACKETS['v2-report'][0]
+        self.assertIs(type(IGMP(io.BytesIO(packet), len(packet))), IGMPv2)
 
     def test_id_and_version(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMPv1
@@ -1155,12 +1159,204 @@ class IGMPDispatchTests(unittest.TestCase):
             self.assertIs(IGMP._dispatch(IGMP_QUERY_10_OCTETS, len(IGMP_QUERY_10_OCTETS)), Raw)
         self.assertIs(IGMP._dispatch(b'', 0), Raw)
 
-    def test_base_refuses_instantiation(self) -> None:
+    def test_parsing_through_the_base_gives_the_version_class(self) -> None:
+        """``IGMP(octets)`` is the class ``_dispatch`` picks, and keeps the octets (#2574)."""
         from pcapkit.protocols.internet.igmp import IGMP
 
-        self.assertIn('version', IGMP.__abstractmethods__)
-        with self.assertRaises(TypeError):
-            IGMP(io.BytesIO(IGMP_PACKETS['v2-report'][0]), 8)  # type: ignore[abstract]
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            for source in ('bytes', 'stream'):
+                with self.subTest(packet=name, source=source):
+                    layer = (IGMP(packet) if source == 'bytes'
+                             else IGMP(io.BytesIO(packet), len(packet)))
+                    self.assertIs(type(layer), igmp_class(version))
+                    self.assertIsInstance(layer, IGMP)
+                    self.assertEqual(layer.data, packet)
+                    self.assertEqual(IGMP.from_data(layer.info).data, packet)
+
+    def test_octets_no_version_reads_raise(self) -> None:
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for label, octets in (('10-octet-query', IGMP_QUERY_10_OCTETS),
+                              ('unknown type', igmp_packet(0x30, 0, '0.0.0.0')),
+                              ('empty', b'')):
+            with self.subTest(octets=label):
+                with self.assertRaisesRegex(ProtocolError, '^IGMP: unknown version$'):
+                    IGMP(octets)
+
+    def test_version_picks_the_class_from_octets(self) -> None:
+        """``IGMP(octets, version=N)`` parses as that class, and only as it (#2574)."""
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        packets = {**IGMP_PACKETS, **IGMPV3_PACKETS}
+        for name, (packet, version) in packets.items():
+            for source in ('bytes', 'stream'):
+                with self.subTest(packet=name, source=source):
+                    number = int(version[-1])
+                    layer = (IGMP(packet, version=number) if source == 'bytes'
+                             else IGMP(io.BytesIO(packet), len(packet), version=number))
+                    self.assertIs(type(layer), igmp_class(version))
+                    self.assertEqual(layer.data, packet)
+            # NOTE: No cross-check against the octets: the class ``version``
+            # names parses them, and its own ``read`` refuses another version's.
+            for other in (1, 2, 3):
+                if other == int(version[-1]):
+                    continue
+                with self.subTest(packet=name, version=other):
+                    with self.assertRaisesRegex(ProtocolError, f'IGMPv{other}'):
+                        IGMP(packet, version=other)
+
+    def test_version_picks_the_class_from_fields(self) -> None:
+        """Each build is byte-exact against the class's own and parses back unchanged (#2574)."""
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmp import IGMP
+
+        cases = {
+            'v1 defaults': ({}, 'IGMPv1'),
+            'v1 report': ({'type': Type.IGMPv1_Membership_Report, 'group': '224.0.0.1'}, 'IGMPv1'),
+            'v2 query': ({'type': Type.IGMP_Membership_Query, 'max_resp_time': 100}, 'IGMPv2'),
+            'v2 leave by name': ({'type': 'IGMPv2_Leave_Group', 'group': '239.1.2.3'}, 'IGMPv2'),
+            'v3 report by type': ({'type': Type.IGMPv3_Membership_Report}, 'IGMPv3'),
+            'v3 query by field': ({'type': Type.IGMP_Membership_Query, 'qrv': 2, 'qqic': 125}, 'IGMPv3'),
+        }
+        for label, (fields, version) in cases.items():
+            with self.subTest(fields=label):
+                layer = IGMP(version=int(version[-1]), **fields)
+                klass = igmp_class(version)
+                self.assertIs(type(layer), klass)
+                self.assertEqual(layer.data, klass(**fields).data)
+                parsed = IGMP(layer.data)
+                self.assertIs(type(parsed), klass)
+                self.assertEqual(parsed.data, layer.data)
+
+    def test_fields_without_version_raise(self) -> None:
+        """Even a field only IGMPv3 takes picks nothing (#2574)."""
+        from pcapkit.const.igmp.type import Type
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        cases = {
+            'no fields': {},
+            'v2 query': {'type': Type.IGMP_Membership_Query, 'max_resp_time': 100},
+            'v3 report by type': {'type': Type.IGMPv3_Membership_Report},
+            'v3 query by field': {'type': Type.IGMP_Membership_Query, 'qrv': 2, 'qqic': 125},
+            'unknown type': {'type': 0x30},
+            'unknown field': {'no_such_field': 1},
+        }
+        for label, fields in cases.items():
+            with self.subTest(fields=label):
+                with self.assertRaisesRegex(ProtocolError,
+                                            r'^IGMP: no version to build with; pass version=1, 2 or 3$'):
+                    IGMP(**fields)
+
+    def test_version_is_the_only_check(self) -> None:
+        """The class ``version`` names refuses what it does not build, by its own checks."""
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+
+        for version in (0, 4, True, '2', 1.0, 3.0):
+            with self.subTest(version=version):
+                with self.assertRaisesRegex(ProtocolError, f'^IGMP: invalid version: {version!r}$'):
+                    IGMP(version=version)
+        with self.assertRaisesRegex(ProtocolError, 'invalid type'):
+            IGMP(version=2, type=300)
+        with self.assertRaisesRegex(ProtocolError, 'is not an IGMPv2 message'):
+            IGMP(version=2)
+        with self.assertRaises(UnsupportedCall):
+            IGMP(version=1, no_such_field=1)
+        with self.assertRaisesRegex(UnsupportedCall, "^IGMPv1: unexpected keyword\\(s\\): 'qqic', 'qrv'"):
+            IGMP(version=1, qrv=2, qqic=125)
+
+    def test_a_version_class_takes_version_only_as_its_own(self) -> None:
+        """Building, ``version`` must be the class's; parsing, it is handed on unread."""
+        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        self.assertEqual(IGMPv1(version=1).data, IGMPv1().data)
+        with self.assertRaisesRegex(ProtocolError, '^IGMPv1: version=2 names another member$'):
+            IGMPv1(version=2)
+        with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=3 names another member$'):
+            IGMPv2(version=3, max_resp_time=100)
+        # NOTE: The enclosing IP layer passes its own version, ``4``, under the
+        # same name, as ``test_ipv4_dispatches_igmp_to_each_version`` relies on.
+        packet = IGMP_PACKETS['v2-report'][0]
+        self.assertEqual(IGMPv2(packet, version=4).data, packet)
+
+    def test_version_is_in_the_data_model_only(self) -> None:
+        """Each data model carries ``version``; no octet does, and every round trip keeps it (#2574)."""
+        from pcapkit.protocols.internet.igmp import IGMP
+
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            with self.subTest(packet=name):
+                klass, number = igmp_class(version), int(version[-1])
+                parsed = IGMP(packet)
+                self.assertEqual(parsed.info.version, number)
+                self.assertEqual(list(parsed.info.to_dict())[0], 'version')
+                self.assertEqual(parsed.data, packet)
+                rebuilt = klass.from_data(parsed.info)
+                self.assertEqual(rebuilt.info.version, number)
+                self.assertEqual(rebuilt.data, packet)
+                fields = klass._make_data(parsed.info)
+                self.assertEqual(fields['version'], number)
+                made = IGMP(**fields)
+                self.assertEqual(made.info.version, number)
+                self.assertEqual(made.data, packet)
+                self.assertEqual(IGMP(made.data).info, parsed.info)
+
+    def test_from_data_on_the_base_dispatches_on_the_data_s_version(self) -> None:
+        """Not on its type, max response time or length (#2574)."""
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
+            parsed = igmp_class(version)(packet)
+            for form in ('info', 'dict'):
+                with self.subTest(packet=name, form=form):
+                    data = parsed.info if form == 'info' else parsed.info.to_dict()
+                    rebuilt = IGMP.from_data(data)
+                    self.assertIs(type(rebuilt), igmp_class(version))
+                    self.assertEqual(rebuilt.data, packet)
+        report = igmp_class('IGMPv2')(IGMP_PACKETS['v2-report'][0]).info.to_dict()
+        # NOTE: An IGMPv2 Report relabelled ``1`` goes to IGMPv1, whose own read
+        # then refuses the message its type describes.
+        with self.assertRaisesRegex(ProtocolError, 'is not an IGMPv1 message'):
+            IGMP.from_data({**report, 'version': 1})
+        for data in ({'type': 0x30}, {key: val for key, val in report.items() if key != 'version'}):
+            with self.subTest(data=sorted(data)):
+                with self.assertRaisesRegex(ProtocolError,
+                                            '^IGMP: invalid data: must carry a version of 1, 2 or 3$'):
+                    IGMP.from_data(data)
+        with self.assertRaisesRegex(ProtocolError, '^IGMP: invalid version: 4$'):
+            IGMP.from_data({**report, 'version': 4})
+        with self.assertRaisesRegex(ProtocolError, '^IGMPv2: version=1 names another member$'):
+            IGMP.from_data(igmp_class('IGMPv2')(IGMP_PACKETS['v2-report'][0]).info, version=1)
+
+    def test_only_the_base_dispatches(self) -> None:
+        """A subclass of the base is constructed as itself, on every path."""
+        from pcapkit.protocols.data.internet.igmp import IGMP as Data_IGMP
+        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.schema.internet.igmp import IGMP as Schema_IGMP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        class Custom(IGMP, schema=Schema_IGMP, data=Data_IGMP):  # type: ignore[type-arg]
+            """An IGMPv2-shaped subclass of the base, outside the family."""
+
+            @property
+            def version(self) -> 'int':
+                return 2
+
+        packet = IGMP_PACKETS['v2-report'][0]
+        self.assertIs(type(IGMP(packet)), IGMPv2)
+        self.assertIs(type(Custom(packet)), Custom)
+        self.assertIs(type(Custom.from_data(Custom(packet).info)), Custom)
+        self.assertIs(type(Custom(type=0x16, group='239.1.2.3', version=2)), Custom)
+        # NOTE: A subclass outside the members states a version of its own, as
+        # every IGMP class does, and takes no other in ``version``.
+        with self.assertRaisesRegex(ProtocolError, '^Custom: version=1 names another member$'):
+            Custom(type=0x16, group='239.1.2.3', version=1)
 
     def test_ipv4_dispatches_igmp_to_each_version(self) -> None:
         from pcapkit.protocols.internet.igmpv1 import IGMPv1

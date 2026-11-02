@@ -184,8 +184,8 @@ refusing the same value is loud. Quiet means what
 :class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True`` means: nothing is
 logged and no exception hook is installed. A raised miss is still an ordinary
 exception that reaches the caller; left uncaught, it is printed by whichever hook is
-installed, the interpreter's own unless an earlier loud error installed
-:mod:`pcapkit`'s.
+installed: the interpreter's own in development mode, ``tbtrim``'s otherwise, unless a
+loud error has installed :mod:`pcapkit`'s.
 
 * **The name miss** is raised with ``quiet=True``. It is in-library control flow at
   several call sites, and at :meth:`Method.get <pcapkit.const.http.method.Method.get>` it

@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.misc` contains the auxiliary protocol implementations.
 These include the :class:`~pcapkit.protocols.misc.raw.Raw` class for not-supported
-protocols, the :class:`~pcapkit.protocols.misc.null.NoPayload` class for
+protocols, the :class:`~pcapkit.protocols.misc.no_payload.NoPayload` class for
 indication of empty payload, the PCAP and PCAP-NG file format classes, and the
 checksum pseudo-headers in :mod:`pcapkit.protocols.misc.checksum`.
 
@@ -21,7 +21,7 @@ from pcapkit.protocols.misc.pcapng import *
 
 # Miscellaneous Classes for Protocols
 from pcapkit.protocols.misc.raw import Raw
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 
 # Checksum Pseudo-Headers
 from pcapkit.protocols.misc.checksum import IP_Pseudo

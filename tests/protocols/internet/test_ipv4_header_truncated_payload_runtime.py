@@ -6,7 +6,7 @@ handed the next layer the length the header declared even when the capture held
 none of its octets, so its UDP layer was parsed from an empty stream into an
 all-zero header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
 rebuilt those 8 octets as if they had been on the wire. Such a payload is a
-:class:`~pcapkit.protocols.misc.null.NoPayload`. ``test.pcapng`` frame 3, cut
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload`. ``test.pcapng`` frame 3, cut
 inside the IPv4 header itself (18 of 20 octets), is kept as raw octets
 (#1170).
 
@@ -54,7 +54,7 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
 
     def test_header_without_payload_octets(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         parsed = IPv4(HEADER, len(HEADER))
         self.assertIsInstance(parsed.payload, NoPayload)

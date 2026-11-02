@@ -104,7 +104,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def layers(self, name: str):  # type: ignore[no-untyped-def]
         """Yield every layer of ``FRAMES[name]``, from the frame down."""
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         layer = self.frame(name)
         while not isinstance(layer, NoPayload):
@@ -171,7 +171,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def test_dict_without_a_payload_key_rebuilds_the_header_alone(self) -> None:
         from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         eth = Ethernet(FRAMES['ipv4-udp'])
         dict_ = eth.info.to_dict()
@@ -183,7 +183,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def test_dict_without_the_dispatch_keys_rebuilds_the_header_alone(self) -> None:
         from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         # The payload is still there under its name, but nothing names it.
         eth = Ethernet(FRAMES['ipv4-udp'])

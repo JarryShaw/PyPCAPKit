@@ -85,10 +85,9 @@ class SCTPChunkFlagsMessage(MakerMessageTestCase):
                 with self.subTest(maker=maker, flags=flags):
                     with self.assertRaises(ProtocolError) as context:
                         getattr(sctp, maker)(code, flags=flags)
-                    self.assertEqual(
-                        str(context.exception),
-                        f'SCTP: [Chunk {code}] invalid flags: '
-                        f'must be one octet, not {flags!r}')
+                    # ``ProtocolBase._make_octets`` words it, the chunk named with the field (#2614).
+                    self.assertEqual(str(context.exception),
+                                     f'SCTP: invalid [Chunk {code}] flags: must be 1 octet, not {flags!r}')
 
     def test_one_octet_flags_still_build(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
@@ -169,10 +168,9 @@ class SCTPInvalidStreamMessage(MakerMessageTestCase):
             with self.subTest(reserved=reserved):
                 with self.assertRaises(ProtocolError) as context:
                     sctp._make_cause_invalid_stream(code, reserved=reserved)
-                self.assertEqual(
-                    str(context.exception),
-                    f'SCTP: [Cause {code}] invalid reserved: '
-                    f'must be two octets, not {reserved!r}')
+                # ``ProtocolBase._make_octets`` words it, the cause named with the field (#2614).
+                self.assertEqual(str(context.exception),
+                                 f'SCTP: invalid [Cause {code}] reserved: must be 2 octets, not {reserved!r}')
 
     def test_two_octet_reserved_still_builds(self) -> None:
         from pcapkit.const.sctp.cause_code import CauseCode

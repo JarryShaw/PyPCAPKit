@@ -96,13 +96,72 @@ that member alone, so no registry binds :class:`~pcapkit.protocols.internet.ip.I
 the registry only; parsing or building through a base directly is the rule below.
 
 **A versioned family's base dispatches on both paths** (:issue:`2524`). Parsing
-octets through it, constructing it from fields and its ``from_data`` give the member
-the octets, fields or data model describe, never an instance of the base. In
-:class:`~pcapkit.protocols.application.http.HTTP`,
-:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks the member
-from the octets, for a payload a transport port binds to HTTP as well, and
-:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields` from the fields.
-The other versioned families are tracked on :issue:`2574`.
+octets through it, constructing it from fields and its ``from_data`` give a member,
+never an instance of the base, and a subclass of the base is constructed as itself.
+
+**The member is the one the** ``version`` **keyword names, or else the one the octets
+or the data model carry, and never one a field picks.** ``version`` names the member
+on either path, unchecked against the octets it is given; where their format carries
+a version, the member's own parser refuses another's. Without it, octets give the
+member the version they carry, where the format has one, and ``from_data`` reads the
+data model's class or its ``version``, as the table below gives. No field picks a
+member, not even a field only one member takes, and no member is a default: fields
+without ``version`` raise :exc:`~pcapkit.utilities.exceptions.ProtocolError`, and a
+field the member does not take fails that member's own keyword check. Ruled on
+:issue:`2574`. A class built directly takes ``version`` as well, which must then be
+its own version: a member's, or, for a subclass outside the members, the one an IGMP
+class states in its ``version``, which a subclass of the other bases does not have.
+While parsing, the keyword is handed on unread, since an IP layer passes its own
+version under that name to the layer it carries.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 13 15 42 30
+
+   * - Base
+     - ``version``
+     - Octets without ``version``
+     - ``from_data``
+   * - :class:`~pcapkit.protocols.internet.igmp.IGMP`
+     - ``1``, ``2``, ``3``
+     - :meth:`~pcapkit.protocols.internet.igmp.IGMP._dispatch`: type, max response
+       time and length, placed by
+       :meth:`~pcapkit.protocols.internet.igmp.IGMP._classify`
+     - ``version``, which each IGMP data model carries though no octet does,
+       ruled on :issue:`2574`
+   * - :class:`~pcapkit.protocols.internet.ip.IP`
+     - ``4``, ``6``
+     - the Version nibble
+     - ``version``
+   * - :class:`~pcapkit.protocols.internet.icmp.ICMP`
+     - ``4``, ``6``
+     - refused, below
+     - the data model; a :obj:`dict` is refused
+   * - :class:`~pcapkit.protocols.link.l2tp.L2TP`
+     - ``2``
+     - the version nibble
+     - ``version``
+   * - :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`
+     - ``1``, ``2``
+     - refused, below
+     - the data model; a :obj:`dict` is refused
+
+:class:`~pcapkit.protocols.application.http.HTTP` dispatches otherwise. Its octets
+go to :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version`, which reads
+the connection preface, a start line or a frame header, for a payload a transport
+port binds to HTTP as well. Without ``version``, its
+:meth:`~pcapkit.protocols.application.http.HTTP._dispatch_fields` picks by each
+member's own fields and builds ``HTTPv1`` from none, and its ``from_data`` reads the
+data model, or a :obj:`dict` by its ``receipt`` or ``sid``.
+
+**Octets that carry no version are refused through the base without** ``version``
+(:issue:`2574`). An ICMP message and a Linux cooked-capture header have no version
+field: the enclosing layer names it, by IP protocol number 1 or 58 and by link type
+113 or 276, and those registries bind the members. So ``ICMP(...)`` and
+``LinuxSLL(...)`` on octets raise :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+rather than guess, as does their ``from_data`` on a :obj:`dict`, whose keys pick no
+member. A version a family has no member for, such as L2TP's ``1`` (L2F) and ``3``,
+raises the same way.
 
 **Octets neither version takes**, a frameless HTTP/2 connection preface among them,
 are :class:`~pcapkit.protocols.misc.raw.Raw` with no ``error`` on the transport path,
@@ -363,5 +422,4 @@ holds :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`. **The** ``schema/``
 ``data/`` **modules follow the same layout**: the top-level class takes the module's
 name, and sub-structure classes such as
 :class:`~pcapkit.protocols.schema.internet.igmpv3.Query` share its module. Ruled on
-:issue:`2529`, where the class that does not match yet is pending:
-:class:`null.NoPayload <pcapkit.protocols.misc.null.NoPayload>`.
+:issue:`2529`.

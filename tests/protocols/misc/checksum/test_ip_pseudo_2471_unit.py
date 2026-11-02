@@ -223,7 +223,7 @@ class IPPseudoUnitTests(unittest.TestCase):
 
     def test_name_and_chain(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         pseudo = IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20)
         self.assertEqual(pseudo.name, 'IP Pseudo-Header')

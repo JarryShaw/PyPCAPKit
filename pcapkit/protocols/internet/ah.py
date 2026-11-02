@@ -30,7 +30,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
 from pcapkit.protocols.schema.internet.ah import AH_HEADER_LEN
 from pcapkit.utilities.exceptions import UnsupportedCall

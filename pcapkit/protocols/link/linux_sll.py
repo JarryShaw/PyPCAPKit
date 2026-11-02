@@ -7,11 +7,15 @@
 :mod:`pcapkit.protocols.link.linux_sll` contains
 :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` only, the base class of
 :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
-:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`.
+:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`. Constructing the base
+gives the one its ``version`` keyword names, from octets or from fields, and is
+refused without it, since the link type rather than the header names the
+version. Its :meth:`~pcapkit.protocols.link.linux_sll.LinuxSLL.from_data` gives
+the one whose data model it is handed (:issue:`2574`).
 
 """
 import collections
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -24,9 +28,9 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, ClassVar, DefaultDict, NoReturn, Optional, Type
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.protocol import ProtocolBase
@@ -123,6 +127,13 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
     dispatches it through :attr:`Link.__proto__
     <pcapkit.protocols.link.link.Link.__proto__>`, as an Ethernet frame does.
 
+    It dispatches where the version is known, never giving an instance of this
+    class (:issue:`2574`). ``version`` names the member, from octets or from
+    fields, and nothing else does: the header carries no version of its own,
+    and no field picks a member, so either is refused without it.
+    :meth:`from_data` gives the member whose data model it is handed, and
+    refuses a :obj:`dict`. See :meth:`__new__`.
+
     """
 
     ##########################################################################
@@ -203,6 +214,39 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                  f'{incumbent!r} with {entry!r}', RegistryWarning)
         cls.__proto__[code] = entry
 
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: As :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance; on this class, an instance of the member whose data
+            model ``data`` is.
+
+        Raises:
+            ProtocolError: If ``data`` is neither member's data model, on this
+                class. A :obj:`dict` is refused: it carries no version, and no
+                key picks a member.
+
+        """
+        if cls is not LinuxSLL:
+            return super().from_data(data, **kwargs)
+
+        from pcapkit.protocols.data.link.linux_sll1 import LinuxSLL1 as Data_LinuxSLL1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.link.linux_sll2 import LinuxSLL2 as Data_LinuxSLL2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if isinstance(data, Data_LinuxSLL1):
+            return cast('Self', LinuxSLL1.from_data(data, **kwargs))
+        if isinstance(data, Data_LinuxSLL2):
+            return cast('Self', LinuxSLL2.from_data(data, **kwargs))
+        raise ProtocolError('LinuxSLL: invalid data: must be a LinuxSLL1 or LinuxSLL2 data model')
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -217,6 +261,71 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                 length: 'Optional[int]' = None, *,
+                 version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'None':
+        """Initialisation.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            version: Version of the header, ``1`` or ``2``: the member
+                :meth:`__new__` picks. Building from fields, it must be this
+                class's own. Parsing, it is handed on unread.
+            **kwargs: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        Raises:
+            ProtocolError: If, building from fields, ``version`` names neither
+                member, or is not this class's own version: that of the member
+                it is or derives from, which a subclass outside the members
+                does not have.
+
+        """
+        if file is not None:
+            if version is not None:
+                kwargs['version'] = version
+        elif version is not None and not isinstance(self, self._member_of_version(version)):
+            if not any(isinstance(self, self._member_of_version(own)) for own in (1, 2)):
+                raise ProtocolError(f'{type(self).__name__}: no version of its own to match '
+                                    f'version={version!r}')
+            raise ProtocolError(f'{type(self).__name__}: version={version!r} names another member')
+        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
+                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'LinuxSLL':
+        """Create the member a construction of this class describes.
+
+        The ``version`` keyword names the member, on either path, and nothing
+        else does: the header carries no version of its own, and no field picks
+        a member. That member's ``__init__`` then runs with the same arguments. A
+        subclass of this class is created as itself.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            An uninitialised instance of the member.
+
+        Raises:
+            ProtocolError: If ``version`` is missing, or names neither member.
+                Without it, octets are refused as fields are: the link type names
+                the version, ``LINUX_SLL`` (113) or ``LINUX_SLL2`` (276).
+
+        """
+        if cls is not LinuxSLL:
+            return super().__new__(cls, file, length, **kwargs)
+        version = kwargs.get('version')
+        if version is None:
+            if file is not None:
+                raise ProtocolError('LinuxSLL: no version field; pass version=1 or version=2, '
+                                    'or parse with LinuxSLL1 or LinuxSLL2')
+            raise ProtocolError('LinuxSLL: no version to build with; pass version=1 or version=2')
+        member = cls._member_of_version(version)
+        return member.__new__(member, file, length, **kwargs)
 
     ##########################################################################
     # Utilities.
@@ -260,7 +369,7 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         if TYPE_CHECKING:
             protocol: 'Type[ProtocolBase]'
         if not min(length, len(file_)):
-            from pcapkit.protocols.misc.null import \
+            from pcapkit.protocols.misc.no_payload import \
                 NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import \
@@ -273,3 +382,29 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
                                       layer=self._exlayer, protocol=self._exproto,
                                       __context__=self._exctx)
+
+    @staticmethod
+    def _member_of_version(version: 'Any') -> 'Type[LinuxSLL]':
+        """The member a ``version`` of ``1`` or ``2`` names.
+
+        Args:
+            version: Version of the header.
+
+        Returns:
+            :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` or
+            :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`.
+
+        Raises:
+            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a
+                :obj:`bool` or a :obj:`float` is refused even where it equals one.
+
+        """
+        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if isinstance(version, int) and not isinstance(version, bool):
+            if version == 1:
+                return cast('Type[LinuxSLL]', LinuxSLL1)
+            if version == 2:
+                return cast('Type[LinuxSLL]', LinuxSLL2)
+        raise ProtocolError(f'LinuxSLL: invalid version: {version!r}')

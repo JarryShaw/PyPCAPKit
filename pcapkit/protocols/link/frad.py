@@ -411,7 +411,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         if TYPE_CHECKING:
             protocol: 'Type[ProtocolBase]'
         if not min(length, len(file_)):
-            from pcapkit.protocols.misc.null import \
+            from pcapkit.protocols.misc.no_payload import \
                 NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
             from pcapkit.protocols.misc.raw import \

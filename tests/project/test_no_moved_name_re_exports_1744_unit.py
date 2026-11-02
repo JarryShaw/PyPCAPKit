@@ -25,6 +25,9 @@ These checks pin that:
   ``versionremoved`` for the version that removed them, in the module docstring
   and on the docs page, per #1103; the beta-only ones are deleted with no
   directive.
+* :class:`TestMovedModules` -- a shipped module that moved whole does not import
+  at its old path, and the module that took its place records ``versionremoved``
+  for that path, in the docstring and on the docs page.
 
 This module is unit-tier and reads no capture.
 
@@ -121,6 +124,18 @@ SHIPPED = (
     ('pcapkit.protocols.data.application.httpv2', 'HTTP',
      'pcapkit/protocols/data/application/httpv2.py',
      'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
+)
+
+#: Shipped modules that moved whole, as ``(old module, the module recording its
+#: removal, docs page, the version that removed it)``.
+MOVED_MODULES = (
+    # #2529: shipped in 1.5.x, renamed after the class they hold.
+    ('pcapkit.protocols.misc.null', 'pcapkit.protocols.misc.no_payload',
+     'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.misc.null', 'pcapkit.protocols.misc.no_payload',
+     'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
+    ('pcapkit.protocols.data.misc.null', 'pcapkit.protocols.misc.no_payload',
+     'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
 )
 
 
@@ -321,6 +336,27 @@ class TestVersionRemoved(unittest.TestCase):
                     self.assertTrue(any(old_path in block for block in blocks),
                                     f'no versionremoved:: {version} block names {old_path} in {label}')
             self.assertTrue((ROOT / source).is_file())
+
+
+class TestMovedModules(unittest.TestCase):
+    """A shipped module that moved whole is gone, and recorded as removed, twice."""
+
+    def test_the_old_module_does_not_import(self) -> 'None':
+        for old, _, _, _ in MOVED_MODULES:
+            with self.subTest(module=old):
+                with self.assertRaises(ModuleNotFoundError):
+                    importlib.import_module(old)
+
+    def test_docstring_and_docs_page_carry_the_directive(self) -> 'None':
+        for old, recorder, page, version in MOVED_MODULES:
+            module = importlib.import_module(recorder)
+            for label, text in (('docstring', module.__doc__ or ''),
+                                ('docs page', (_docs_dir() / page).read_text(encoding='utf-8'))):
+                with self.subTest(module=old, where=label):
+                    blocks = re.findall(rf'(?ms)^\.\. versionremoved:: {re.escape(version)}\n\n(.*?)(?=^\S|\Z)',
+                                        text)
+                    self.assertTrue(any(f'``{old}``' in block for block in blocks),
+                                    f'no versionremoved:: {version} block names ``{old}`` in {label}')
 
 
 if __name__ == '__main__':

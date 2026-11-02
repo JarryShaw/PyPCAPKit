@@ -282,7 +282,7 @@ __all__ = [
     'UDP',
 
     # Datagram Transport Layer Security
-    'DTLS', 'DTLS_Ciphertext', 'DTLS_Handshake',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_CIDCiphertext', 'DTLS_Handshake',
 
     # File Transfer Protocol
     'FTP',
@@ -315,7 +315,7 @@ __all__ = [
     # Transport Layer Security
     'TLS',
     'TLS_Handshake', 'TLS_ClientHello', 'TLS_ServerHello', 'TLS_EncryptedExtensions',
-    'TLS_Extension', 'TLS_ExtensionData',
+    'TLS_Extension', 'TLS_ExtensionData', 'TLS_ConnectionId',
     'TLS_ServerName', 'TLS_ServerNameList', 'TLS_NamedGroupList', 'TLS_SignatureSchemeList',
     'TLS_ProtocolNameList', 'TLS_SupportedVersionsClientHello', 'TLS_SupportedVersionsServerHello',
     'TLS_KeyShareEntry', 'TLS_KeyShareClientHello', 'TLS_KeyShareHelloRetryRequest',

@@ -9,7 +9,7 @@ that never occurs: ``cmpt_bitmap`` annotated :obj:`bytes` while
 ``Optional`` on an ``RR``/``SSR`` ``route`` that is always built,
 :attr:`~pcapkit.protocols.protocol.ProtocolBase.protochain` declaring a
 :class:`~pcapkit.corekit.protochain.ProtoChain` that
-:class:`~pcapkit.protocols.misc.null.NoPayload` does not have, a ``pack_flags``
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload` does not have, a ``pack_flags``
 constructor stub typing the EPB flags, ``ARP._make_addr_resolve`` leaving out
 the :obj:`bytearray` its body handles, an undeclared ``entry_raw``, two HIP
 parameters missing from both ``__all__`` lists, and a ``version`` that one
@@ -173,7 +173,7 @@ class NoPayloadProtochainTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_protochain_is_none_and_says_so(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.protocol import ProtocolBase
 
         self.assertIsNone(NoPayload().protochain)

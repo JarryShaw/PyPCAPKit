@@ -3,6 +3,7 @@
 
 # Datagram Transport Layer Security
 from pcapkit.protocols.schema.application.dtls import DTLS
+from pcapkit.protocols.schema.application.dtls import DTLSCIDCiphertext as DTLS_CIDCiphertext
 from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as DTLS_Ciphertext
 
 # File Transfer Protocol
@@ -49,7 +50,7 @@ from pcapkit.protocols.schema.application.tls import TLS
 
 __all__ = [
     # Datagram Transport Layer Security
-    'DTLS', 'DTLS_Ciphertext',
+    'DTLS', 'DTLS_Ciphertext', 'DTLS_CIDCiphertext',
 
     # File Transfer Protocol
     'FTP',

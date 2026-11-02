@@ -8,15 +8,18 @@ import gc
 import hashlib
 import importlib.util
 import inspect
+import logging
 import math
 import os
 import pathlib
+import re
 import signal
 import sys
 import time
 import types
 import unittest
-from typing import Callable, Iterable, Iterator, Optional
+import warnings
+from typing import Callable, Iterable, Iterator, Optional, TypeVar
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
@@ -552,7 +555,7 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
             them poisons every later test that imports :mod:`pcapkit`.
         raw_cls: Stand-in to bind as ``pcapkit.protocols.misc.raw.Raw``.
         null_cls: Stand-in to bind as
-            ``pcapkit.protocols.misc.null.NoPayload``.
+            ``pcapkit.protocols.misc.no_payload.NoPayload``.
 
     Raises:
         RuntimeError: If ``test`` is not under :func:`isolate_modules`.
@@ -566,9 +569,9 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
     raw_module.Raw = raw_cls
     sys.modules['pcapkit.protocols.misc.raw'] = raw_module
 
-    null_module = types.ModuleType('pcapkit.protocols.misc.null')
+    null_module = types.ModuleType('pcapkit.protocols.misc.no_payload')
     null_module.NoPayload = null_cls
-    sys.modules['pcapkit.protocols.misc.null'] = null_module
+    sys.modules['pcapkit.protocols.misc.no_payload'] = null_module
 
 
 def _reset_abc_caches() -> None:
@@ -653,7 +656,8 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
     The inverse of :func:`snapshot_modules` over the *bindings*, and exact in
     both directions: a name the test added is removed, a name it dropped is put
     back, and a name it rebound is bound to what it held before. Nothing outside
-    ``prefixes`` is touched.
+    ``prefixes`` is touched, bar the attribute a prefix is bound to on its parent
+    package, which :func:`_rebind_parent_attributes` puts back.
 
     Bindings are the whole of it, though, and the limit is worth stating. This
     restores which module object a name refers to; it does not restore the
@@ -679,11 +683,37 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
             sys.modules.pop(name, None)
     for name, module in snapshot.items():
         sys.modules[name] = module
+    _rebind_parent_attributes(prefixes)
     # For the same reason :func:`purge_modules` does it: whatever the test
     # imported while the region was purged built a second set of ``Mapping``
     # subclasses and churned the shared ABC caches, and those stale answers
     # outlive the modules that caused them.
     _reset_abc_caches()
+
+
+def _rebind_parent_attributes(prefixes: 'tuple[str, ...]') -> None:
+    """Bind each prefix on its parent package to the module :data:`sys.modules` holds.
+
+    Importing ``a.b`` binds ``b`` on ``a`` as well as in :data:`sys.modules`, and
+    ``import a.b as m`` reads that attribute first. A prefix whose parent lies outside
+    the region, ``pcapkit.vendor`` under ``pcapkit``, would keep the generation
+    imported inside it after the table is restored (#2646). A prefix with no parent,
+    as ``pcapkit`` itself, has nothing to rebind.
+
+    """
+    for prefix in prefixes:
+        parent_name, _, child = prefix.rpartition('.')
+        parent = sys.modules.get(parent_name) if parent_name else None
+        if parent is None or _under_prefix(parent_name, prefixes):
+            continue
+        current = getattr(parent, child, None)
+        if current is not None and not isinstance(current, types.ModuleType):
+            continue  # the parent's own name shadows the submodule; not ours to undo
+        held = sys.modules.get(prefix)
+        if held is not None:
+            setattr(parent, child, held)
+        elif current is not None:
+            delattr(parent, child)
 
 
 #: Returned by :func:`_is_running_test` when a runtime has no ``_outcome`` at all,
@@ -1169,6 +1199,87 @@ def close_extractor(extractor: object) -> None:
         _close_quietly(stream)
     finally:
         _close_quietly(engine)
+
+
+#: What CPython's child watchers log for a child whose exit status something else
+#: collected first, reporting ``255`` in its place (#2620).
+LOST_EXIT_STATUS = 'will report returncode 255'
+
+_T = TypeVar('_T')
+
+
+class _LostExitStatus(logging.Handler):
+    """Collects the pids asyncio logs as :data:`LOST_EXIT_STATUS`."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.pids = set()  # type: set[str]
+
+    def emit(self, record: 'logging.LogRecord') -> None:
+        message = record.getMessage()
+        if LOST_EXIT_STATUS in message:
+            self.pids.update(re.findall(r'\bpid (\d+)', message))
+
+
+def _forget_lost_tshark(error: BaseException) -> None:
+    """Empty ``_running_processes`` on the pyshark capture ``error`` came from.
+
+    Its tshark is reaped already, so nothing is left to stop. Left in place, the
+    capture's ``__del__`` closes it again and raises the same crash in whichever
+    test is running when it is collected.
+
+    """
+    trace = error.__traceback__
+    while trace is not None:
+        running = getattr(trace.tb_frame.f_locals.get('self'), '_running_processes', None)
+        if isinstance(running, set):
+            running.clear()
+        trace = trace.tb_next
+
+
+def retry_reaped_tshark(attempt: 'Callable[[], _T]') -> '_T':
+    """Run a PyShark extraction, and once more if asyncio lost its tshark's exit status.
+
+    pyshark 0.6 kills a tshark it has not seen exit when it cleans up. On Python 3.9
+    to 3.12, :meth:`asyncio.subprocess.Process.kill` goes through
+    :meth:`subprocess.Popen.send_signal`, which polls first, so a tshark that has
+    exited but whose ``SIGCHLD`` the event loop has not dispatched is reaped right
+    there. The child watcher then finds no child, logs :data:`LOST_EXIT_STATUS` and
+    reports ``255``, which pyshark raises as ``TSharkCrashException`` when the
+    capture closes. That race is CPython's gh-87744, fixed in 3.13 by signalling
+    with :func:`os.kill` (#2620).
+
+    Only that case is retried, and only once: a ``TSharkCrashException``, matched by
+    name, whose pid asyncio logged as lost during the attempt. A crash of tshark's
+    own raises at once, as does a second loss, so a fault that persists still fails.
+    The retry is reported as a :exc:`RuntimeWarning`.
+
+    Args:
+        attempt: Runs the extraction and returns its result. A retry calls it
+            again, so it must start from nothing rather than from what the lost
+            run left behind.
+
+    Returns:
+        What ``attempt`` returned.
+
+    """
+    lost = _LostExitStatus()
+    watchers = logging.getLogger('asyncio')
+    watchers.addHandler(lost)
+    try:
+        return attempt()
+    except Exception as error:  # pylint: disable=broad-except
+        crashed = re.search(r'\(pid (\d+)\)', str(error))
+        if (type(error).__name__ != 'TSharkCrashException' or crashed is None
+                or crashed.group(1) not in lost.pids):
+            raise
+        _forget_lost_tshark(error)
+        pid = crashed.group(1)
+    finally:
+        watchers.removeHandler(lost)
+    warnings.warn(f'asyncio lost the exit status of tshark (pid {pid}) to another reaper '
+                  '(#2620); retrying once', RuntimeWarning, stacklevel=2)
+    return attempt()
 
 
 #: Seconds, counted from the call, that :func:`collect_until` keeps collecting for a

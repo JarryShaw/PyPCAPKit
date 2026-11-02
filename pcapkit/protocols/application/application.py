@@ -23,7 +23,7 @@ which is a base class for application layer protocols, e.g.
 from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
@@ -49,7 +49,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
     :class:`~pcapkit.protocols.application.sslv2.SSLv2` and
     :class:`~pcapkit.protocols.application.dtls.DTLS` do for a further record and
     :class:`~pcapkit.protocols.application.httpv2.HTTPv2` for a further frame --
-    or to :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
+    or to :class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing remains.
 
     """
 
@@ -124,7 +124,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # ``_decode_next_layer``, which already set the payload and the chain
         # (basis included); only a protocol that did not gets the empty default
         if getattr(self, '_next', None) is None:
-            #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.
+            #: pcapkit.protocols.misc.no_payload.NoPayload: Payload of current instance.
             self._next = NoPayload()
             #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
             self._protos = ProtoChain(self.__class__, self.alias)
@@ -179,7 +179,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         Returns:
             Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of
-            :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
+            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing remains.
 
         Raises:
             UnsupportedCall: If ``proto`` is anything but ``-1``, i.e. a real

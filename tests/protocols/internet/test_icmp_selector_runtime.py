@@ -59,7 +59,7 @@ class ICMPSelectorRuntimeTests(unittest.TestCase):
             yield f'{name} class', getattr(pcapkit, name), MATCHES[name]
 
     def test_frame_selectors(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
         for version in SAMPLES:

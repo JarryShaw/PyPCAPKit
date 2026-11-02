@@ -15,6 +15,11 @@ wire format differs materially (a Query's source-list extension, a Report's
 group-record list), so it carries its own schema and data model instead. The
 registry entry for IP protocol 2 is this base, and :meth:`IGMP._dispatch
 <pcapkit.protocols.internet.igmp.IGMP._dispatch>` picks the version class.
+Constructing the base gives the class its ``version`` keyword names; without it,
+octets give the class ``_dispatch`` picks, and fields are refused.
+:meth:`~pcapkit.protocols.internet.igmp.IGMP.from_data` gives the class the
+``version`` of its data names, which each data model carries and no octet does
+(:issue:`2574`).
 
 .. versionadded:: 1.6.0
 
@@ -34,9 +39,10 @@ from pcapkit.utilities.exceptions import ProtocolError
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, Literal, Optional, Type
+    from typing import IO, Any, Literal, Optional, Type
 
     from aenum import IntEnum as AenumEnum
+    from typing_extensions import Self
 
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
@@ -51,6 +57,12 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     The class is abstract: :attr:`version` is set by the concrete IGMPv1,
     IGMPv2 and IGMPv3 classes. :meth:`read` refuses a message that
     :meth:`_classify` does not place in :attr:`version`.
+
+    It dispatches on both paths, never giving an instance of this class
+    (:issue:`2574`). ``version`` names the version class; without it, octets
+    give the one :meth:`_dispatch` picks, and fields are refused, since no field
+    picks a class. :meth:`from_data` reads the ``version`` of its data. See
+    :meth:`__new__`.
 
     """
 
@@ -128,6 +140,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                                 f'message ({length} octets)')
 
         igmp = Data_IGMP(
+            version=self.version,  # type: ignore[arg-type]
             type=schema.type,
             max_resp_time=schema.max_resp_time,
             checksum=schema.checksum,
@@ -188,6 +201,33 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             payload=payload,
         )  # type: ignore[return-value]
 
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: As :meth:`Protocol.from_data
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
+
+        Returns:
+            Protocol instance; on this class, an instance of the version class
+            the ``version`` of ``data`` names, which every IGMP data model
+            carries (:issue:`2574`).
+
+        Raises:
+            ProtocolError: If ``data`` carries no ``version``, or one that names
+                no version class, on this class.
+
+        """
+        if cls is not IGMP:
+            return super().from_data(data, **kwargs)
+        version = data.get('version')
+        if version is None:
+            raise ProtocolError('IGMP: invalid data: must carry a version of 1, 2 or 3')
+        member = cls._member_of_version(version)
+        return cast('Self', member.from_data(data, **kwargs))
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -208,6 +248,84 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         """Return an estimated length for the object."""
         return 8
 
+    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                 length: 'Optional[int]' = None, *,
+                 version: 'Optional[Literal[1, 2, 3]]' = None, **kwargs: 'Any') -> 'None':
+        """Initialisation.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            version: Version of IGMP, ``1``, ``2`` or ``3``: the class
+                :meth:`__new__` picks. Building from fields, it must be this
+                class's :attr:`version`. Parsing, it is handed on unread, as the
+                enclosing IP layer passes its own version under this name to the
+                layer it carries.
+            **kwargs: As :meth:`Protocol.__init__
+                <pcapkit.protocols.protocol.Protocol.__init__>`.
+
+        Raises:
+            ProtocolError: If, building from fields, ``version`` names no version
+                class, or is not this class's own :attr:`version`, which every
+                IGMP class states, a subclass outside the members included.
+
+        """
+        if file is not None:
+            if version is not None:
+                kwargs['version'] = version
+        elif version is not None:
+            self._member_of_version(version)
+            if version != self.version:
+                raise ProtocolError(f'{type(self).__name__}: version={version!r} '
+                                    'names another member')
+        super().__init__(file, length, **kwargs)  # type: ignore[arg-type]
+
+    def __new__(cls, file: 'Optional[IO[bytes] | bytes]' = None,
+                length: 'Optional[int]' = None, **kwargs: 'Any') -> 'IGMP':
+        """Create the version class a construction of this class describes.
+
+        The ``version`` keyword names the class, on either path. Without it,
+        parsing octets gives the class :meth:`_dispatch` picks, and building from
+        fields is refused, since no field picks a class. That class's
+        ``__init__`` then runs with the same arguments. A subclass of this class
+        is created as itself.
+
+        Args:
+            file: Source packet stream, read here without being consumed.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            An uninitialised instance of the version class.
+
+        Raises:
+            ProtocolError: If ``version`` names no version class; or, without it,
+                if building from fields, or if the octets are no version's
+                message.
+
+        """
+        if cls is not IGMP:
+            return super().__new__(cls, file, length, **kwargs)
+        version = kwargs.get('version')
+        if version is not None:
+            member = cls._member_of_version(version)
+        elif file is None:
+            raise ProtocolError('IGMP: no version to build with; pass version=1, 2 or 3')
+        else:
+            if isinstance(file, bytes):
+                data = file[:length]
+            else:
+                offset = file.tell()
+                data = file.read(length)  # type: ignore[arg-type]
+                file.seek(offset)
+            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+
+            picked = cls._dispatch(data, len(data))
+            if picked is Raw:
+                raise ProtocolError('IGMP: unknown version')
+            member = cast('Type[IGMP]', picked)
+        return member.__new__(member, file, length, **kwargs)
+
     ##########################################################################
     # Utilities.
     ##########################################################################
@@ -224,6 +342,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         """
         return {
+            'version': data.get('version'),
             'type': data.type,
             'max_resp_time': data.max_resp_time,
             'checksum': data.checksum,
@@ -287,12 +406,38 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             for any other message, which then keeps its octets undissected.
 
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
         from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
         if len(data) < 2:
             return Raw
         version = cls._classify(data[0], data[1], length)
-        return {1: IGMPv1, 2: IGMPv2, 3: IGMPv3}.get(version, Raw)
+        return cls._member_of_version(version) if version else Raw
+
+    @staticmethod
+    def _member_of_version(version: 'Any') -> 'Type[IGMP]':
+        """The version class a ``version`` of ``1``, ``2`` or ``3`` names.
+
+        Args:
+            version: Version of IGMP, as :meth:`_classify` returns it or the
+                ``version`` keyword gives it.
+
+        Returns:
+            :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1`,
+            :class:`~pcapkit.protocols.internet.igmpv2.IGMPv2` or
+            :class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`.
+
+        Raises:
+            ProtocolError: If ``version`` names none of them, or is no
+                :obj:`int`: a :obj:`bool` or a :obj:`float` is refused even
+                where it equals one.
+
+        """
+        from pcapkit.protocols.internet.igmpv1 import IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv2 import IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmpv3 import IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if isinstance(version, int) and not isinstance(version, bool):
+            for number, member in ((1, IGMPv1), (2, IGMPv2), (3, IGMPv3)):
+                if version == number:
+                    return cast('Type[IGMP]', member)
+        raise ProtocolError(f'IGMP: invalid version: {version!r}')

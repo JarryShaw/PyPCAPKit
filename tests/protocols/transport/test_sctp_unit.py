@@ -1023,7 +1023,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_packet_without_a_data_chunk_has_no_payload(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         raw = self._build([(Chunk.Cookie_Acknowledgement, {})])
         proto = self._packet(raw)

@@ -66,7 +66,7 @@ class SegmentFrameTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_two_and_three_frames_are_each_a_layer(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
         from pcapkit.protocols.transport.tcp import TCP
 
         for name, segment, chain in (

@@ -36,7 +36,7 @@ from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_Sourc
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as Data_Type2
 from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_UnknownType
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as Schema_RPL
 from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType

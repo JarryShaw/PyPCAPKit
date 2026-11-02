@@ -78,14 +78,14 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
         self.assertIn('Raw', str(proto.protochain))
 
     def test_sentinel_with_nothing_left_is_no_payload(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         proto = self._protocol_class(-1)(packet=b'ab')
 
         self.assertIsInstance(proto.payload, NoPayload)
 
     def test_undispatched_application_still_has_no_payload(self) -> None:
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         proto = self._protocol_class(None)(packet=b'abtrailer')
 

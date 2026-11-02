@@ -190,7 +190,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.Raw"
-       click NoPayload "misc/null.html#pcapkit.protocols.misc.null.NoPayload"
+       click NoPayload "misc/no_payload.html#pcapkit.protocols.misc.no_payload.NoPayload"
        click PCAPNG "misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG"
        click Header "misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header"
        click Frame "misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame"

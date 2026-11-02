@@ -69,7 +69,6 @@ from pcapkit.protocols.data.link.ieee802_11 import FrameControl as Data_FrameCon
 from pcapkit.protocols.data.link.ieee802_11 import HTControl as Data_HTControl
 from pcapkit.protocols.data.link.ieee802_11 import QoSControl as Data_QoSControl
 from pcapkit.protocols.data.link.ieee802_11 import SequenceControl as Data_SequenceControl
-from pcapkit.protocols.link.ethernet import PAT_MAC_ADDR
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ieee802_11 import IEEE802_11 as Schema_IEEE802_11
 from pcapkit.protocols.schema.link.ieee802_11 import Layout, layout
@@ -499,43 +498,6 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
 
         return version | type << 2 | subtype << 4 | low << 8 | high << 12
 
-    def _read_mac_addr(self, addr: 'bytes') -> 'str':
-        """Read MAC address.
-
-        Args:
-            addr: MAC address.
-
-        Returns:
-            Colon (``:``) separated *hex* encoded MAC address.
-
-        """
-        return addr.hex(':')
-
-    def _make_mac_addr(self, addr: 'Optional[str | bytes | bytearray]') -> 'bytes':
-        """Make MAC address.
-
-        Args:
-            addr: MAC address; :obj:`None` makes all zeros.
-
-        Returns:
-            MAC address packed as 6 octets.
-
-        Raises:
-            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated *hex*
-                encoded MAC address.
-
-        """
-        if addr is None:
-            return bytes(6)
-        if not isinstance(addr, (str, bytes, bytearray)):
-            raise ProtocolError(f'{self.alias}: invalid MAC address: must be a str, bytes or '
-                                f'bytearray, not {addr!r}')
-        _addr = addr.encode() if isinstance(addr, str) else bytes(addr)
-
-        if PAT_MAC_ADDR.fullmatch(_addr) is not None:
-            return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
-        raise ProtocolError(f'{self.alias}: invalid MAC address: {addr!r}')
-
     def _read_seq_ctrl(self, value: 'int') -> 'Data_SequenceControl':
         """Read the Sequence Control field (IEEE Std 802.11-2020 §9.2.4.4).
 
@@ -643,3 +605,26 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         if value is None:
             return 0
         return self._make_uint(value, bits=32, name='ht_control')
+
+    def _make_mac_addr(self, addr: 'Optional[str | bytes | bytearray]', *, size: 'Optional[int]' = 6,
+                       name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
+        """Make MAC address.
+
+        Args:
+            addr: MAC address; :obj:`None` makes all zeros.
+            size: Octets in the address, as for :meth:`Protocol._make_mac_addr
+                <pcapkit.protocols.protocol.Protocol._make_mac_addr>`.
+            name: Name of the address, for the error message.
+            alias: Prefix of the error message, :attr:`alias` by default.
+
+        Returns:
+            MAC address packed as ``size`` octets, 6 by default.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a ``:``- or ``-``-separated *hex*
+                encoded MAC address.
+
+        """
+        if addr is None:
+            return bytes(size or 0)
+        return super()._make_mac_addr(addr, size=size, name=name, alias=alias)

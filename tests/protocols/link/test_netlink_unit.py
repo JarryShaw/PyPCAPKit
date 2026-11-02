@@ -117,7 +117,7 @@ class TestNetlink(unittest.TestCase):
 
     def test_zero_length_payload_is_no_payload(self) -> None:
         from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         raw = _nlmsghdr('little', nlmsg_type=3)
         parsed = Netlink(raw, len(raw))

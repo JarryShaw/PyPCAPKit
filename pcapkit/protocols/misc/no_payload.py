@@ -2,21 +2,32 @@
 """No-Payload Packet
 =======================
 
-.. module:: pcapkit.protocols.misc.null
+.. module:: pcapkit.protocols.misc.no_payload
 
-:mod:`pcapkit.protocols.misc.null` contains
-:class:`~pcapkit.protocols.misc.null.NoPayload` only, which
+:mod:`pcapkit.protocols.misc.no_payload` contains
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload` only, which
 implements a :class:`~pcapkit.protocols.protocol.Protocol` like
 object whose payload is
-:class:`~pcapkit.protocols.misc.null.NoPayload` itself.
+:class:`~pcapkit.protocols.misc.no_payload.NoPayload` itself.
+
+.. versionadded:: 1.6.0
+
+   Moved here from ``pcapkit.protocols.misc.null``, with its data model and
+   header schema, since a protocol class is named after its module
+   (:issue:`2529`).
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.misc.null``, ``pcapkit.protocols.data.misc.null`` and
+   ``pcapkit.protocols.schema.misc.null``, with no alias (:issue:`2529`).
 
 """
 import io
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.protocols.data.misc.null import NoPayload as Data_NoPayload
+from pcapkit.protocols.data.misc.no_payload import NoPayload as Data_NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
+from pcapkit.protocols.schema.misc.no_payload import NoPayload as Schema_NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -133,10 +144,10 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
         self._data = b''
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
-        #: pcapkit.protocols.data.misc.null.NoPayload: Data model of current instance.
+        #: pcapkit.protocols.data.misc.no_payload.NoPayload: Data model of current instance.
         self._info = Data_NoPayload()
 
-        #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.
+        #: pcapkit.protocols.misc.no_payload.NoPayload: Payload of current instance.
         self._next = self
         #: None: Protocol chain of current instance, which an empty payload
         #: does not have.

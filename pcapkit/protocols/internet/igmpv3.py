@@ -238,6 +238,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             trailing = ext.get_payload()
 
             igmp = Data_Query(
+                version=self.version,
                 type=schema.type,
                 length=1 + len(body) - len(trailing),
                 max_resp_code=body.max_resp_code,
@@ -264,6 +265,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             )
             trailing = body.payload
             igmp = Data_Report(
+                version=self.version,
                 type=schema.type,
                 length=1 + len(body) - len(trailing),
                 reserved_1=body.reserved_1,
@@ -434,6 +436,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         if data.type == Enum_Type.IGMPv3_Membership_Report:
             report = cast('Data_Report', data)
             return {
+                'version': report.get('version'),
                 'type': report.type,
                 'reserved_1': report.reserved_1,
                 'checksum': report.checksum,
@@ -444,6 +447,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
 
         query = cast('Data_Query', data)
         return {
+            'version': query.get('version'),
             'type': query.type,
             'max_resp_code': query.max_resp_code,
             'checksum': query.checksum,

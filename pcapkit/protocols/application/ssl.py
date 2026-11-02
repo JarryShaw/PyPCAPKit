@@ -61,7 +61,7 @@ from pcapkit.protocols.data.application.tls import \
     SupportedVersionsClientHello as Data_SupportedVersionsClientHello
 from pcapkit.protocols.data.application.tls import \
     SupportedVersionsServerHello as Data_SupportedVersionsServerHello
-from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -158,32 +158,6 @@ def _negotiated_versions(message: 'Any') -> 'tuple[int, ...]':
     return ()
 
 
-def _take(data: 'bytes', pos: 'int', size: 'int', *, what: 'str', alias: 'str') -> 'bytes':
-    """Slice ``size`` octets out of ``data`` at ``pos``, refusing a short read.
-
-    Plain slicing silently returns fewer octets, which would let a truncated
-    message parse short rather than fail.
-
-    Args:
-        data: Buffer being read.
-        pos: Offset to start at.
-        size: Number of octets to take.
-        what: Name of the field being read, for the error message.
-        alias: Protocol alias, for the error message.
-
-    Returns:
-        The requested slice.
-
-    Raises:
-        ProtocolError: If fewer than ``size`` octets remain from ``pos``.
-
-    """
-    chunk = data[pos:pos + size]
-    if len(chunk) != size:
-        raise ProtocolError(f'{alias}: invalid format: {what} runs past the end of the buffer')
-    return chunk
-
-
 def _read_key_share_entry(proto: 'SSL', data: 'bytes', pos: 'int') -> 'tuple[Data_KeyShareEntry, int]':
     """Read one ``KeyShareEntry`` (:rfc:`9846#section-4.3.8`) at ``pos``.
 
@@ -199,7 +173,7 @@ def _read_key_share_entry(proto: 'SSL', data: 'bytes', pos: 'int') -> 'tuple[Dat
         ProtocolError: If the entry runs past the end of ``data``.
 
     """
-    group = int.from_bytes(_take(data, pos, 2, what='key_share.group', alias=proto.alias), 'big')
+    group = proto._read_uint(data, pos, size=2, what='key_share.group')  # pylint: disable=protected-access
     key_exchange, end = proto._read_vector(data, pos + 2, size=2,  # pylint: disable=protected-access
                                            what='key_share.key_exchange')
     return Data_KeyShareEntry(group=group, key_exchange=key_exchange), end
@@ -207,8 +181,9 @@ def _read_key_share_entry(proto: 'SSL', data: 'bytes', pos: 'int') -> 'tuple[Dat
 
 def _make_key_share_entry(proto: 'SSL', entry: 'Data_KeyShareEntry') -> 'bytes':
     """Write one ``KeyShareEntry`` -- the inverse of :func:`_read_key_share_entry`."""
+    group = proto._make_pack(int(entry.group), size=2)  # pylint: disable=protected-access
     key_exchange = proto._make_vector(entry.key_exchange, size=2)  # pylint: disable=protected-access
-    return int(entry.group).to_bytes(2, 'big') + key_exchange
+    return group + key_exchange
 
 
 def _hello_type(random: 'bytes') -> 'Enum_HandshakeType':
@@ -420,7 +395,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         names = []  # type: list[Data_ServerName]
         pos = 0
         while pos < len(body):
-            name_type = _take(body, pos, 1, what='server_name.name_type', alias=alias)[0]
+            name_type = self._read_uint(body, pos, size=1, what='server_name.name_type')
             if name_type != _HOST_NAME:
                 raise ProtocolError(f'{alias}: invalid format: server_name.name_type {name_type} '
                                     'is not host_name')
@@ -558,7 +533,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             if len(data) != 2:
                 raise ProtocolError(f'{alias}: invalid format: supported_versions.selected_version '
                                     'must be exactly two octets')
-            return Data_SupportedVersionsServerHello(selected_version=int.from_bytes(data, 'big'))
+            return Data_SupportedVersionsServerHello(selected_version=self._read_uint(
+                data, size=2, what='supported_versions.selected_version'))
         return data
 
     def _read_ext_key_share(self, ext_type: 'Enum_ExtensionType', data: 'bytes', *,  # pylint: disable=unused-argument
@@ -612,7 +588,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             if len(data) != 2:
                 raise ProtocolError(f'{alias}: invalid format: key_share.selected_group '
                                     'must be exactly two octets')
-            return Data_KeyShareHelloRetryRequest(selected_group=int.from_bytes(data, 'big'))
+            return Data_KeyShareHelloRetryRequest(selected_group=self._read_uint(
+                data, size=2, what='key_share.selected_group'))
         if msg_type == Enum_HandshakeType.server_hello:
             entry, end = _read_key_share_entry(self, data, 0)
             if end != len(data):
@@ -689,8 +666,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         """
         names = data.server_name_list if data is not None else server_name_list
-        return self._make_vector(b''.join(bytes([int(name.name_type)]) + self._make_vector(name.name, size=2)
-                                          for name in names), size=2)
+        return self._make_vector(b''.join(self._make_pack(int(name.name_type), size=1)
+                                          + self._make_vector(name.name, size=2) for name in names), size=2)
 
     def _make_ext_supported_groups(self, ext_type: 'Enum_ExtensionType', data: 'Optional[Data_NamedGroupList]' = None, *,  # pylint: disable=unused-argument,line-too-long
                                    msg_type: 'Enum_HandshakeType',  # pylint: disable=unused-argument
@@ -788,7 +765,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if isinstance(data, Data_SupportedVersionsClientHello):
             return self._make_vector(self._make_uints(data.versions, size=2), size=1)
         if isinstance(data, Data_SupportedVersionsServerHello):
-            return int(data.selected_version).to_bytes(2, 'big')
+            return self._make_pack(int(data.selected_version), size=2)
         raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no supported_versions structure '
                             f'for {msg_type!r}')
 
@@ -832,7 +809,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             return self._make_vector(b''.join(_make_key_share_entry(self, entry) for entry in data.client_shares),
                                      size=2)
         if isinstance(data, Data_KeyShareHelloRetryRequest):
-            return int(data.selected_group).to_bytes(2, 'big')
+            return self._make_pack(int(data.selected_group), size=2)
         if isinstance(data, Data_KeyShareServerHello):
             return _make_key_share_entry(self, data.server_share)
         raise ProtocolError(f'{self.alias}: [Extension {ext_type}] no key_share structure for {msg_type!r}')
@@ -1036,7 +1013,7 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                 return fragment
             if len(fragment) != 2:
                 raise ProtocolError(f'{self.alias}: invalid format: alert record must be exactly two octets')
-            level, description = _take(fragment, 0, 2, what='alert', alias=self.alias)
+            level, description = self._read_octets(fragment, size=2, what='alert')
             return Data_Alert(level=level, description=description)
         if content_type == Enum_ContentType.change_cipher_spec:
             if not self._tls_content_is_cleartext(content_type, fragment, dtls=dtls, epoch=epoch):
@@ -1083,9 +1060,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         pos = 0
         total = len(fragment)
         while pos < total:
-            header = _take(fragment, pos, 4, what='handshake header', alias=self.alias)
-            msg_type = Enum_HandshakeType.get(header[0])
-            length = int.from_bytes(header[1:4], 'big')
+            code = self._read_uint(fragment, pos, size=1, what='handshake header')
+            length = self._read_uint(fragment, pos + 1, size=3, what='handshake header')
+            msg_type = Enum_HandshakeType.get(code)
             pos += 4
 
             is_fragmented = False
@@ -1093,17 +1070,17 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             # :class:`DTLSHandshake` declares these as plain ``int``.
             message_seq = fragment_offset = fragment_length = 0
             if dtls:
-                frag_header = _take(fragment, pos, 8, what='DTLS fragment header', alias=self.alias)
+                what = 'DTLS fragment header'
+                message_seq = self._read_uint(fragment, pos, size=2, what=what)
+                fragment_offset = self._read_uint(fragment, pos + 2, size=3, what=what)
+                fragment_length = self._read_uint(fragment, pos + 5, size=3, what=what)
                 pos += 8
-                message_seq = int.from_bytes(frag_header[0:2], 'big')
-                fragment_offset = int.from_bytes(frag_header[2:5], 'big')
-                fragment_length = int.from_bytes(frag_header[5:8], 'big')
                 is_fragmented = bool(fragment_offset) or fragment_length != length
                 body_length = fragment_length
             else:
                 body_length = length
 
-            body_bytes = _take(fragment, pos, body_length, what='handshake body', alias=self.alias)
+            body_bytes = self._read_octets(fragment, pos, size=body_length, what='handshake body')
             pos += body_length
 
             if not is_fragmented and msg_type == Enum_HandshakeType.client_hello:
@@ -1183,11 +1160,11 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             else:
                 fragment_length = len(body_bytes)
 
-            out += bytes([int(message.msg_type)]) + length.to_bytes(3, 'big')
+            out += self._make_pack(int(message.msg_type), size=1) + self._make_pack(length, size=3)
             if dtls:
-                out += (message.message_seq.to_bytes(2, 'big')
-                       + message.fragment_offset.to_bytes(3, 'big')
-                       + fragment_length.to_bytes(3, 'big'))
+                out += (self._make_pack(message.message_seq, size=2)
+                        + self._make_pack(message.fragment_offset, size=3)
+                        + self._make_pack(fragment_length, size=3))
             out += body_bytes
         return bytes(out)
 
@@ -1240,50 +1217,31 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         """
         alias = self.alias
-        version = int.from_bytes(_take(body, 0, 2, what='client_hello.version', alias=alias), 'big')
-        random = _take(body, 2, 32, what='client_hello.random', alias=alias)
-        pos = 34
-
-        session_id_len = _take(body, pos, 1, what='client_hello.session_id length', alias=alias)[0]
-        pos += 1
-        session_id = _take(body, pos, session_id_len, what='client_hello.session_id', alias=alias)
-        pos += session_id_len
+        version = self._read_uint(body, size=2, what='client_hello.version')
+        random = self._read_octets(body, 2, size=32, what='client_hello.random')
+        session_id, pos = self._read_vector(body, 34, size=1, what='client_hello.session_id')
 
         cookie = None  # type: Optional[bytes]
         if dtls:
-            cookie_len = _take(body, pos, 1, what='client_hello.cookie length', alias=alias)[0]
-            pos += 1
-            cookie = _take(body, pos, cookie_len, what='client_hello.cookie', alias=alias)
-            pos += cookie_len
+            cookie, pos = self._read_vector(body, pos, size=1, what='client_hello.cookie')
 
-        cipher_suites_len = int.from_bytes(
-            _take(body, pos, 2, what='client_hello.cipher_suites length', alias=alias), 'big')
+        what = 'client_hello.cipher_suites'
+        cipher_suites_len = self._read_uint(body, pos, size=2, what=f'{what} length')
         pos += 2
-        # NOTE: a ``CipherSuite`` is 2 octets (:rfc:`9846#section-4.2.2`): an odd length
-        # would decode a lone octet and re-pad it on rebuild, so it is refused.
+        # NOTE: a ``CipherSuite`` is 2 octets (:rfc:`9846#section-4.2.2`), so an odd length is
+        # refused before the short read is checked, rather than decoded and re-padded on rebuild.
         if cipher_suites_len % 2:
-            raise ProtocolError(
-                f'{alias}: invalid format: client_hello.cipher_suites length '
-                f'{cipher_suites_len} is not a multiple of 2')
-        cipher_suites_raw = _take(body, pos, cipher_suites_len, what='client_hello.cipher_suites', alias=alias)
+            raise ProtocolError(f'{alias}: invalid format: {what} length {cipher_suites_len} is not a multiple of 2')
+        cipher_suites = self._read_uints(self._read_octets(body, pos, size=cipher_suites_len, what=what),
+                                         size=2, what=what)
         pos += cipher_suites_len
-        cipher_suites = tuple(
-            int.from_bytes(cipher_suites_raw[i:i + 2], 'big') for i in range(0, cipher_suites_len, 2)
-        )
 
-        compression_len = _take(body, pos, 1, what='client_hello.compression_methods length', alias=alias)[0]
-        pos += 1
-        compression_methods = tuple(
-            _take(body, pos, compression_len, what='client_hello.compression_methods', alias=alias))
-        pos += compression_len
+        compression_methods_raw, pos = self._read_vector(body, pos, size=1, what='client_hello.compression_methods')
+        compression_methods = tuple(compression_methods_raw)
 
         extensions = None  # type: Optional[tuple[Data_Extension, ...]]
         if pos < len(body):
-            ext_total_len = int.from_bytes(
-                _take(body, pos, 2, what='client_hello.extensions length', alias=alias), 'big')
-            pos += 2
-            extensions_raw = _take(body, pos, ext_total_len, what='client_hello.extensions', alias=alias)
-            pos += ext_total_len
+            extensions_raw, pos = self._read_vector(body, pos, size=2, what='client_hello.extensions')
             extensions = self._read_tls_extensions(
                 extensions_raw, msg_type=cast('Enum_HandshakeType', Enum_HandshakeType.client_hello))
 
@@ -1323,32 +1281,21 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
             ProtocolError: If ``body`` is malformed.
 
         """
-        alias = self.alias
-        version = int.from_bytes(_take(body, 0, 2, what='server_hello.version', alias=alias), 'big')
-        random = _take(body, 2, 32, what='server_hello.random', alias=alias)
-        pos = 34
+        version = self._read_uint(body, size=2, what='server_hello.version')
+        random = self._read_octets(body, 2, size=32, what='server_hello.random')
+        session_id, pos = self._read_vector(body, 34, size=1, what='server_hello.session_id')
 
-        session_id_len = _take(body, pos, 1, what='server_hello.session_id length', alias=alias)[0]
-        pos += 1
-        session_id = _take(body, pos, session_id_len, what='server_hello.session_id', alias=alias)
-        pos += session_id_len
-
-        cipher_suite = int.from_bytes(_take(body, pos, 2, what='server_hello.cipher_suite', alias=alias), 'big')
-        pos += 2
-        compression_method = _take(body, pos, 1, what='server_hello.compression_method', alias=alias)[0]
-        pos += 1
+        cipher_suite = self._read_uint(body, pos, size=2, what='server_hello.cipher_suite')
+        compression_method = self._read_uint(body, pos + 2, size=1, what='server_hello.compression_method')
+        pos += 3
 
         extensions = None  # type: Optional[tuple[Data_Extension, ...]]
         if pos < len(body):
-            ext_total_len = int.from_bytes(
-                _take(body, pos, 2, what='server_hello.extensions length', alias=alias), 'big')
-            pos += 2
-            extensions_raw = _take(body, pos, ext_total_len, what='server_hello.extensions', alias=alias)
-            pos += ext_total_len
+            extensions_raw, pos = self._read_vector(body, pos, size=2, what='server_hello.extensions')
             extensions = self._read_tls_extensions(extensions_raw, msg_type=_hello_type(random))
 
         if pos != len(body):
-            raise ProtocolError(f'{alias}: invalid format: server_hello carries excess octets')
+            raise ProtocolError(f'{self.alias}: invalid format: server_hello carries excess octets')
 
         return Data_ServerHello(
             version=version, random=random, session_id=session_id, cipher_suite=cipher_suite,
@@ -1418,11 +1365,11 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         pos = 0
         total = len(data)
         while pos < total:
-            header = _take(data, pos, 4, what='extension header', alias=self.alias)
-            ext_type = Enum_ExtensionType.get(int.from_bytes(header[0:2], 'big'))
-            ext_len = int.from_bytes(header[2:4], 'big')
+            code = self._read_uint(data, pos, size=2, what='extension header')
+            ext_len = self._read_uint(data, pos + 2, size=2, what='extension header')
+            ext_type = Enum_ExtensionType.get(code)
             pos += 4
-            ext_data = _take(data, pos, ext_len, what='extension data', alias=self.alias)
+            ext_data = self._read_octets(data, pos, size=ext_len, what='extension data')
             pos += ext_len
 
             name = self._lookup_registry(self.__extension__, ext_type)
@@ -1459,9 +1406,9 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         if content_type == Enum_ContentType.handshake:
             return self._make_tls_handshake_messages(content, dtls=dtls)
         if content_type == Enum_ContentType.alert:
-            return bytes([int(content.level), int(content.description)])
+            return self._make_uints((content.level, content.description), size=1)
         if content_type == Enum_ContentType.change_cipher_spec:
-            return bytes([int(content.msg)])
+            return self._make_pack(int(content.msg), size=1)
         return bytes(content)
 
     def _make_tls_client_hello(self, data: 'Data_ClientHello', *, dtls: 'bool') -> 'bytes':
@@ -1478,24 +1425,20 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         """
         out = bytearray()
-        out += int(data.version).to_bytes(2, 'big')
+        out += self._make_pack(int(data.version), size=2)
         out += data.random
-        out += bytes([len(data.session_id)]) + data.session_id
+        out += self._make_vector(data.session_id, size=1)
 
         if dtls:
-            cookie = data.cookie if data.cookie is not None else b''
-            out += bytes([len(cookie)]) + cookie
+            out += self._make_vector(data.cookie if data.cookie is not None else b'', size=1)
 
-        cipher_suites = b''.join(int(suite).to_bytes(2, 'big') for suite in data.cipher_suites)
-        out += len(cipher_suites).to_bytes(2, 'big') + cipher_suites
-
-        compression_methods = bytes(int(method) for method in data.compression_methods)
-        out += bytes([len(compression_methods)]) + compression_methods
+        out += self._make_vector(self._make_uints(data.cipher_suites, size=2), size=2)
+        out += self._make_vector(self._make_uints(data.compression_methods, size=1), size=1)
 
         if data.extensions is not None:
             extensions_raw = self._make_tls_extensions(
                 data.extensions, msg_type=cast('Enum_HandshakeType', Enum_HandshakeType.client_hello))
-            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
+            out += self._make_vector(extensions_raw, size=2)
         return bytes(out)
 
     def _make_tls_server_hello(self, data: 'Data_ServerHello') -> 'bytes':
@@ -1510,15 +1453,15 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
 
         """
         out = bytearray()
-        out += int(data.version).to_bytes(2, 'big')
+        out += self._make_pack(int(data.version), size=2)
         out += data.random
-        out += bytes([len(data.session_id)]) + data.session_id
-        out += int(data.cipher_suite).to_bytes(2, 'big')
-        out += bytes([int(data.compression_method)])
+        out += self._make_vector(data.session_id, size=1)
+        out += self._make_pack(int(data.cipher_suite), size=2)
+        out += self._make_pack(int(data.compression_method), size=1)
 
         if data.extensions is not None:
             extensions_raw = self._make_tls_extensions(data.extensions, msg_type=_hello_type(data.random))
-            out += len(extensions_raw).to_bytes(2, 'big') + extensions_raw
+            out += self._make_vector(extensions_raw, size=2)
         return bytes(out)
 
     def _make_tls_encrypted_extensions(self, data: 'Data_EncryptedExtensions') -> 'bytes':
@@ -1571,5 +1514,5 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
                     meth = name[1]
                 ext_data = meth(ext_type, data, msg_type=msg_type, **kwargs)
 
-            out += int(ext_type).to_bytes(2, 'big') + self._make_vector(ext_data, size=2)
+            out += self._make_pack(int(ext_type), size=2) + self._make_vector(ext_data, size=2)
         return bytes(out)

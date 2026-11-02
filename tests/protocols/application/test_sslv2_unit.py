@@ -765,7 +765,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
     def test_every_record_is_an_sslv2_layer(self) -> None:
         """Each record's header form and RECORD-LENGTH, per the draft's §4.1."""
         from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.no_payload import NoPayload
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
