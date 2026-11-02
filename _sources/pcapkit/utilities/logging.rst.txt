@@ -34,16 +34,16 @@ subtree can be addressed on its own:
    # or follow just the extraction path
    logging.getLogger('pcapkit.foundation.extraction').setLevel(logging.DEBUG)
 
-Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``, ``pcapkit.foundation.registry.protocols``,
-``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
+Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``,
+``pcapkit.foundation.registry.protocols.transport``, ``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
 ``pcapkit.foundation.traceflow.tcp``, ``pcapkit.utilities.warnings``.
 
 .. autofunction:: pcapkit.utilities.logging.get_logger
 
 .. autodata:: pcapkit.utilities.logging.ROOT_LOGGER_NAME
 
-What ``DEBUG`` Will Tell You
-============================
+``DEBUG`` Logging
+=================
 
 At :data:`logging.DEBUG` the library reports what it did with a file: which
 input was opened, which engine was requested and which was actually used

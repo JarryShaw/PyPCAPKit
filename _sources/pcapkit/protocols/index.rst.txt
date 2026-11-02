@@ -111,7 +111,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph transport [Transport Layer]
-           Transport --> TCP & UDP & SCTP
+           Transport --> TCP & UDP & SCTP & DCCP
        end
 
        B --> Link & Internet & Transport & Application
@@ -127,7 +127,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click A "protocol.html#pcapkit.protocols.protocol.ProtocolMeta"
        click B "protocol.html#pcapkit.protocols.protocol.ProtocolBase"
        click C "protocol.html#pcapkit.protocols.protocol.Protocol"
-       click D "../../ext.html#what-s-in-for-protocols"
+       click D "../../ext.html#customising-protocols"
 
        click Link "link/link.html#pcapkit.protocols.link.link.Link"
        click Ethernet "link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
@@ -141,7 +141,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
        click ARP "link/arp.html#pcapkit.protocols.link.arp.ARP"
-       click InARP "link/arp.html#pcapkit.protocols.link.arp.InARP"
+       click InARP "link/inarp.html#pcapkit.protocols.link.inarp.InARP"
 
        click Internet "internet/internet.html#pcapkit.protocols.internet.internet.Internet"
        click AH "internet/ah.html#pcapkit.protocols.internet.ah.AH"
@@ -171,6 +171,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click TCP "transport/tcp.html#pcapkit.protocols.transport.tcp.TCP"
        click UDP "transport/udp.html#pcapkit.protocols.transport.udp.UDP"
        click SCTP "transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
+       click DCCP "transport/dccp.html#pcapkit.protocols.transport.dccp.DCCP"
 
        click Application "application/application.html#pcapkit.protocols.application.application.Application"
        click HTTP "application/http.html#pcapkit.protocols.application.http.HTTP"
@@ -185,11 +186,11 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click SSL "application/ssl.html#pcapkit.protocols.application.ssl.SSL"
        click SSLv2 "application/sslv2.html#pcapkit.protocols.application.sslv2.SSLv2"
        click TLS "application/tls.html#pcapkit.protocols.application.tls.TLS"
-       click SSLv3 "application/tls.html#pcapkit.protocols.application.tls.SSLv3"
+       click SSLv3 "application/sslv3.html#pcapkit.protocols.application.sslv3.SSLv3"
        click DTLS "application/dtls.html#pcapkit.protocols.application.dtls.DTLS"
 
        click Raw "misc/raw.html#pcapkit.protocols.misc.raw.Raw"
-       click NoPayload "misc/null.html#pcapkit.protocols.misc.null.NoPayload"
+       click NoPayload "misc/no_payload.html#pcapkit.protocols.misc.no_payload.NoPayload"
        click PCAPNG "misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG"
        click Header "misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header"
        click Frame "misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame"
@@ -202,7 +203,7 @@ Protocol Registry
 
    .. seealso::
 
-      Please refer to :func:`pcapkit.foundation.registry.protocols.register_protocol`
+      Please refer to :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`
       for more information.
 
 Header Schema

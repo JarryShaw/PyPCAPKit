@@ -11,8 +11,8 @@ User Defined Warnings
    :mod:`pcapkit.utilities.logging`; read
    :data:`pcapkit.utilities.logging.DEVMODE` instead.
 
-How a Warning Is Reported
--------------------------
+Reporting a Warning
+-------------------
 
 Every warning :mod:`pcapkit` reports goes through
 :func:`~pcapkit.utilities.warnings.warn`, which reports it **exactly once on each

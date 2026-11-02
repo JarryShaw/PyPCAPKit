@@ -31,7 +31,7 @@ The Order
       :class:`~pcapkit.protocols.internet.mh.MH`, does not count either: it is a
       specific reader, ruled on :issue:`2490`. Each helper's
       ``_read_`` and ``_make_`` methods stay together, with the reader first:
-      ``_read_mac_addr()`` then ``_make_mac_addr()``.
+      ``_read_addr_resolve()`` then ``_make_addr_resolve()``.
    c. **Specific readers and makers.** The option, type and parameter methods,
       all ``_read_*()`` before all ``_make_*()``. Each set opens with the registry's
       default, its fallback for a code with no entry of its own, as
@@ -56,25 +56,37 @@ before its ``_make_xxx()``, and subgroup b, with a table of known exceptions
 Example
 ~~~~~~~
 
-The utilities of :class:`~pcapkit.protocols.link.ethernet.Ethernet`, reduced to
-its member names:
+The utilities of :class:`~pcapkit.protocols.link.arp.ARP`, reduced to its member
+names. ``read()`` resolves a hardware address before a protocol address, so the
+hardware pair comes first:
 
 .. code-block:: python
 
-   class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
+   class ARP(Link[Data_ARP, Schema_ARP]):
 
        # Utilities.
-       def _make_data(cls, data, ...):      # a. data first
+       def _make_data(cls, data):                    # a. data first
            ...
 
-       def _read_mac_addr(self, ...):       # b. helper: reader ...
+       def _read_addr_resolve(self, addr, htype):    # b. first helper: reader ...
            ...
 
-       def _make_mac_addr(self, ...):       # ... then its maker
+       def _make_addr_resolve(self, addr, htype):    # ... then its maker
+           ...
+
+       def _read_proto_resolve(self, addr, ptype):   # b. next helper: reader ...
+           ...
+
+       def _make_proto_resolve(self, addr, ptype):   # ... then its maker
            ...
 
 The Reference
 ~~~~~~~~~~~~~
 
-:class:`~pcapkit.protocols.link.ethernet.Ethernet` is the reference for the
-utilities order.
+:class:`~pcapkit.protocols.link.arp.ARP` is the reference for the utilities
+order. Its utilities are ``_make_data()`` and the helpers that ``read()`` and
+``make()`` name, and nothing else, and there is more than one helper, so the
+first-use order of subgroup b shows as well as each reader preceding its maker.
+Chosen on :issue:`2614`, when the MAC address pair of
+:class:`~pcapkit.protocols.link.ethernet.Ethernet`, the reference before it,
+moved to the base class.

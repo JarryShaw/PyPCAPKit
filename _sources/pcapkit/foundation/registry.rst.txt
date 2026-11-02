@@ -59,96 +59,136 @@ Protocol Registries
 
 .. module:: pcapkit.foundation.registry.protocols
 
+:mod:`pcapkit.foundation.registry.protocols` is a package of one submodule per
+layer of :mod:`pcapkit.protocols`, beside
+:mod:`~pcapkit.foundation.registry.protocols.protocol` for the registries the
+others build on. Every function below is exported by the package, and by
+:mod:`pcapkit.foundation.registry`, as well as by its own submodule.
+
 .. versionchanged:: 1.5.0
 
    ``NULL``, the default of every ``class_`` argument here, is now the
    :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
    string ``'(null)'`` (:issue:`833`).
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_protocol
+.. versionchanged:: 1.6.0
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_protocol_code
+   A package of per-layer submodules rather than a single module
+   (:issue:`2578`).
+
+.. module:: pcapkit.foundation.registry.protocols.protocol
+
+.. autofunction:: pcapkit.foundation.registry.protocols.protocol.register_protocol
+
+.. autofunction:: pcapkit.foundation.registry.protocols.protocol.register_protocol_code
 
 Top-Level Registries
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_linktype
+.. module:: pcapkit.foundation.registry.protocols.misc
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcap
+These are in :mod:`~pcapkit.foundation.registry.protocols.misc` with the
+PCAP-NG registries below, as :class:`~pcapkit.protocols.misc.pcap.frame.Frame`
+and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` are in
+:mod:`pcapkit.protocols.misc`.
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcapng
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_linktype
+
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcap
+
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcapng
 
 Link Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_ethertype
+.. module:: pcapkit.foundation.registry.protocols.link
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_loopback
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_ethertype
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_arphrd
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_loopback
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_frad
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_arphrd
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_netlink
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_frad
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_netlink
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_radiotap
+
+.. autofunction:: pcapkit.foundation.registry.protocols.link.register_radiotap_field
 
 Internet Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_transtype
+.. module:: pcapkit.foundation.registry.protocols.internet
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_ipx
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_transtype
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_ipv4_option
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_ipx
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_icmp_type
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_ipv4_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_hip_parameter
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_icmp_type
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_hopopt_option
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hip_parameter
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_ipv6_opts_option
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_hopopt_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_ipv6_route_routing
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_ipv6_opts_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_message
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_ipv6_route_routing
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_option
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_message
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_extension
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_option
+
+.. autofunction:: pcapkit.foundation.registry.protocols.internet.register_mh_extension
 
 Transport Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_apptype
+.. module:: pcapkit.foundation.registry.protocols.transport
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_tcp
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_apptype
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_tcp_option
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_tcp
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_tcp_mp_option
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_tcp_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_udp
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_tcp_mp_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_udp
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_chunk
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_sctp
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_parameter
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_sctp_chunk
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_sctp_cause
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_sctp_parameter
+
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_sctp_cause
+
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_dccp
+
+.. autofunction:: pcapkit.foundation.registry.protocols.transport.register_dccp_option
 
 Application Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_http_frame
+.. module:: pcapkit.foundation.registry.protocols.application
+
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_http_frame
+
+.. autofunction:: pcapkit.foundation.registry.protocols.application.register_tls_extension
 
 Miscellaneous Protocol Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcapng_block
+.. currentmodule:: pcapkit.foundation.registry.protocols.misc
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcapng_option
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcapng_block
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcapng_record
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcapng_option
 
-.. autofunction:: pcapkit.foundation.registry.protocols.register_pcapng_secrets
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcapng_record
+
+.. autofunction:: pcapkit.foundation.registry.protocols.misc.register_pcapng_secrets

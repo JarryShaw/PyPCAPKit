@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/reassembly-integration.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. The owner’s ruling, given on the DTLS reassembly work of#2440. The Rule: A protocol class does ..." />
-<meta name="description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. The owner’s ruling, given on the DTLS reassembly work of#2440. The Rule: A protocol class does ..." />
+<meta property="og:description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly work, applied in review of#2451(#24..." />
+<meta name="description" content="Where a new reassembly engine under pcapkit.foundation.reassembly plugs into the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly work, applied in review of#2451(#24..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Const-Vendor Pairing" href="const-vendor-pairing.html"><link rel="prev" title="Choosing Between utilities and corekit" href="utilities-or-corekit.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -235,6 +235,8 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
 </ul>
 </li>
@@ -251,11 +253,13 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
@@ -270,8 +274,8 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
@@ -287,14 +291,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
@@ -312,8 +317,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
@@ -321,7 +327,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/no_payload.html">No-Payload Packet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
@@ -334,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -378,8 +385,10 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -390,6 +399,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
@@ -405,8 +415,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -417,6 +429,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
@@ -547,8 +560,12 @@
           <section id="reassembly-integration">
 <span id="id1"></span><h1>Reassembly Integration<a class="headerlink" href="#reassembly-integration" title="Link to this heading">¶</a></h1>
 <p>Where a new reassembly engine under <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> plugs into
-the rest of the package. The owner’s ruling, given on the DTLS reassembly work of
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>.</p>
+the rest of the package. Points 1 to 3 are the owner’s ruling on the DTLS reassembly
+work, applied in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2451">#2451</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>); the issue itself does not hold
+it. Point 4 rests on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2469">#2469</a>, which settled the DTLS case alone: in review of
+how DTLS sizes a handshake message’s buffer, the owner had DTLS reassembly follow its
+RFCs.
+No issue holds that ruling.</p>
 <section id="the-rule">
 <h2>The Rule<a class="headerlink" href="#the-rule" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
@@ -576,6 +593,30 @@ zero-fills to merge a segment. It bounds the memory a capture can have zero-fill
 <a class="reference internal" href="../../pcapkit/utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> does for a field, and <code class="docutils literal notranslate"><span class="pre">-1</span></code>
 lifts it to give the uncapped reassembly point 4 asks for. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2546">#2546</a>.</p>
 </section>
+<section id="parse-ownership">
+<h2>Parse Ownership<a class="headerlink" href="#parse-ownership" title="Link to this heading">¶</a></h2>
+<p><strong>The protocol class owns the parse of a reassembled outcome</strong>, and
+<a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> is a public layer over it. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>:</p>
+<ul class="simple">
+<li><p>The parse is a method of the protocol class:
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a> for IPv4 and
+IPv6, <a class="reference internal" href="../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a>
+for TCP, and
+<a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>
+for a DTLS handshake message.</p></li>
+<li><p>Each <a class="reference internal" href="../../pcapkit/foundation/analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> function is a public wrapper that calls that
+method and holds no parsing of its own.</p></li>
+<li><p>The reassembly <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> calls the
+same method, on the reassembly’s own <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>.</p></li>
+<li><p>Protocol code never imports <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> to do its own work: the
+dependency runs from <code class="docutils literal notranslate"><span class="pre">foundation</span></code> to the protocols. What the protocol base does
+import from <a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> registers a class rather
+than parsing. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_protocols_import_boundary_2622_unit.py</span></code> fails
+on any other import of <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> under <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code>
+made outside a <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> block, the rest of
+<a class="reference internal" href="../../pcapkit/foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> included.</p></li>
+</ul>
+</section>
 <section id="compliance-measured">
 <h2>Compliance, Measured<a class="headerlink" href="#compliance-measured" title="Link to this heading">¶</a></h2>
 <p><strong>Point 1 holds for every engine.</strong> None of
@@ -589,24 +630,40 @@ function on an already-parsed frame, feeding the result to the reassembly instan
 <a class="reference internal" href="../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> holds; for DTLS that function is
 <a class="reference internal" href="../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.dtls_reassembly" title="pcapkit.toolkit.pcap.dtls_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap.dtls_reassembly()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>).
 <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.read_handshake" title="pcapkit.protocols.application.dtls.DTLS.read_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.read_handshake</span></code></a>
-is the parser method the rule allows.</p>
+and <a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>
+are the parser methods the rule allows.</p>
 <p><strong>No engine meets point 2.</strong> No single <a class="reference internal" href="../../pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> helper enumerates which
 output engines support a given reassembly engine. Support is established ad hoc, per
 engine backend, by defining the extraction functions, by defining them raising
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, or by disabling reassembly at the
 engine level, as <a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.pyshark" title="pcapkit.foundation.engines.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pyshark</span></code></a> does. DTLS defines them for
 the default engine and is disabled at the engine level on every other.</p>
-<p><strong>Point 3 holds for DTLS alone.</strong>
-<a class="reference internal" href="../../pcapkit/foundation/analysis/dtls.html#pcapkit.foundation.analysis.dtls.dtls_handshake" title="pcapkit.foundation.analysis.dtls.dtls_handshake"><code class="xref py py-func docutils literal notranslate"><span class="pre">dtls_handshake()</span></code></a> parses a reassembled DTLS
-handshake message (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>). IP and TCP have no such method: what parses their
-outcome is the general-purpose
-<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a> dispatcher,
-reused via <a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>, not a method
-written for reassembly specifically.</p>
-<p>DTLS differs from the IP/TCP shape where the rule is silent: its reassembled body is
-reported eagerly, with no deferred <code class="docutils literal notranslate"><span class="pre">packet</span></code>, and
-<a class="reference internal" href="../../pcapkit/foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS" title="pcapkit.foundation.reassembly.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> sets no <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2531">#2531</a>).</p>
+<p><strong>Point 3 holds for every engine.</strong>
+<a class="reference internal" href="../../pcapkit/foundation/analysis/ip.html#pcapkit.foundation.analysis.ip.ip_datagram" title="pcapkit.foundation.analysis.ip.ip_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">ip_datagram()</span></code></a> parses a reassembled IPv4 or IPv6
+datagram’s payload by its payload protocol type, through
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.analyze</span></code></a>;
+<a class="reference internal" href="../../pcapkit/foundation/analysis/tcp.html#pcapkit.foundation.analysis.tcp.tcp_datagram" title="pcapkit.foundation.analysis.tcp.tcp_datagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_datagram()</span></code></a> parses a reassembled TCP
+datagram’s by its ports, through
+<a class="reference internal" href="../../pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a>;
+and <a class="reference internal" href="../../pcapkit/foundation/analysis/dtls.html#pcapkit.foundation.analysis.dtls.dtls_handshake" title="pcapkit.foundation.analysis.dtls.dtls_handshake"><code class="xref py py-func docutils literal notranslate"><span class="pre">dtls_handshake()</span></code></a> decodes a reassembled
+DTLS handshake message (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2496">#2496</a>), through
+<a class="reference internal" href="../../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.DTLS.analyze_handshake" title="pcapkit.protocols.application.dtls.DTLS.analyze_handshake"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DTLS.analyze_handshake</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>). The owner chose on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a> to give IP and TCP modules of their
+own, each function named for the datagram its engine reassembles, rather than leave
+their outcomes to those dispatchers with no analysis method, which kept the rule true
+for DTLS alone.</p>
+<p><strong>Where the rule is silent, DTLS takes the IP/TCP shape</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2531">#2531</a>). IPv4, IPv6,
+TCP and DTLS reassembly each set <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>, and each reports its parsed
+outcome as a datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>, deferred to first read by
+<a class="reference internal" href="../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>. Each <code class="docutils literal notranslate"><span class="pre">Deferred</span></code> runs the
+parse behind its engine’s analysis function, so a <code class="docutils literal notranslate"><span class="pre">packet</span></code> is what that function
+returns. Each binds that parse to <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code>, calling its <code class="docutils literal notranslate"><span class="pre">analyze</span></code> for
+IP and TCP (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2581">#2581</a>) and its <code class="docutils literal notranslate"><span class="pre">analyze_handshake</span></code> for DTLS (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2622">#2622</a>), so a
+subclass naming another protocol has its <code class="docutils literal notranslate"><span class="pre">packet</span></code> parsed by that one. The engines
+differ in what an incomplete outcome holds. IP and TCP parse a contiguous payload
+whether or not it is complete, as <code class="docutils literal notranslate"><span class="pre">strict=False</span></code> reports one, and hold <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
+only for the received runs <code class="docutils literal notranslate"><span class="pre">strict=True</span></code> reports; DTLS holds <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for any
+incomplete message.</p>
 </section>
 </section>
 
@@ -667,6 +724,7 @@ reported eagerly, with no deferred <code class="docutils literal notranslate"><s
             <ul>
 <li><a class="reference internal" href="#">Reassembly Integration</a><ul>
 <li><a class="reference internal" href="#the-rule">The Rule</a></li>
+<li><a class="reference internal" href="#parse-ownership">Parse Ownership</a></li>
 <li><a class="reference internal" href="#compliance-measured">Compliance, Measured</a></li>
 </ul>
 </li>

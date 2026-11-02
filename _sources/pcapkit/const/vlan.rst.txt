@@ -13,7 +13,7 @@ enumerations include:
    * - :class:`VLAN_PriorityLevel <pcapkit.const.vlan.priority_level.PriorityLevel>`
      - Priority Levels [*]_
 
-Priority levels defined in IEEE 802.1p
+Priority Levels Defined in IEEE 802.1p
 ======================================
 
 .. module:: pcapkit.const.vlan.priority_level

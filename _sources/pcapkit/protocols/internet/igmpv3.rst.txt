@@ -1,4 +1,4 @@
-IGMPv3 - Internet Group Management Protocol version 3
+IGMPv3 - Internet Group Management Protocol Version 3
 ==============================================================
 
 .. module:: pcapkit.protocols.internet.igmpv3
@@ -49,6 +49,7 @@ Octets      Bits        Name                               Description
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: length
 
@@ -82,6 +83,10 @@ Header Schemas
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.igmpv3.GroupRecord
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField
    :members:
    :show-inheritance:
 

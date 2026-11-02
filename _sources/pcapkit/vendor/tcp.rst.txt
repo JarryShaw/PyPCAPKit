@@ -31,7 +31,7 @@ which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
    :members: FLAG
    :show-inheritance:
 
-Multipath TCP options
+Multipath TCP Options
 =====================
 
 .. module:: pcapkit.vendor.tcp.mp_tcp_option

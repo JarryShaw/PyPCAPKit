@@ -16,6 +16,8 @@ enumerations include:
      - TLS/DTLS Content Types [*]_
    * - :class:`TLS_HandshakeType <pcapkit.const.tls.handshake_type.HandshakeType>`
      - TLS/DTLS HandshakeType [*]_
+   * - :class:`TLS_ExtensionType <pcapkit.const.tls.extension_type.ExtensionType>`
+     - TLS/DTLS ExtensionType Values [*]_
 
 .. versionadded:: 1.6.0
 
@@ -47,7 +49,21 @@ DTLS-only messages :rfc:`9147#section-5.2` adds to the registry.
    :undoc-members:
    :show-inheritance:
 
+TLS/DTLS ExtensionType Values
+=============================
+
+.. module:: pcapkit.const.tls.extension_type
+
+This module contains the constant enumeration for **TLS/DTLS ExtensionType Values**,
+which is automatically generated from :class:`pcapkit.vendor.tls.extension_type.ExtensionType`.
+
+.. autoclass:: pcapkit.const.tls.extension_type.ExtensionType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1

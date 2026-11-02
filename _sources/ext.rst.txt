@@ -4,9 +4,9 @@ Customisation & Extensions
 :mod:`pcapkit` is built for customisation: new protocols, layers, fields and
 even new file formats can all be added from outside the library.
 
-------------------------
-What's in for Protocols?
-------------------------
+---------------------
+Customising Protocols
+---------------------
 
 :class:`~pcapkit.protocols.protocol.Protocol` is the most essential concept
 and class in :mod:`pcapkit`: the user-facing abstract base class for a
@@ -22,7 +22,7 @@ The protocol classes :mod:`pcapkit` ships:
 +==================================================================+================+==============+======================================================================+
 |                                                                  |                | :class:`pcapkit.protocols.link.arp.ARP`                                             |
 +                                                                  + ARP Family     +-----------------------+-------------------------------------------------------------+
-|                                                                  |                | :class:`pcapkit.protocols.link.arp.InARP`                                           |
+|                                                                  |                | :class:`pcapkit.protocols.link.inarp.InARP`                                         |
 + Link Layer                                                       +----------------+-----------------------+-------------------------------------------------------------+
 | (:class:`~pcapkit.protocols.link.link.Link` subclasses)          | :class:`pcapkit.protocols.link.ethernet.Ethernet`                                                    |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
@@ -91,6 +91,8 @@ The protocol classes :mod:`pcapkit` ships:
 | subclasses)                                                      | :class:`pcapkit.protocols.transport.udp.UDP`                                                         |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.transport.sctp.SCTP`                                                       |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.transport.dccp.DCCP`                                                       |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.ftp.FTP`                                      |
 +                                                                  + FTP Family     +-----------------------+-------------------------------------------------------------+
@@ -114,7 +116,7 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.tls.TLS`                                      |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
-|                                                                  | SSL Family     | :class:`pcapkit.protocols.application.tls.SSLv3`                                    |
+|                                                                  | SSL Family     | :class:`pcapkit.protocols.application.sslv3.SSLv3`                                  |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.dtls.DTLS`                                    |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
@@ -128,7 +130,7 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  | :class:`pcapkit.protocols.misc.raw.Raw`                                                              |
 +                                                                  +----------------+-----------------------+-------------------------------------------------------------+
-|                                                                  | :class:`pcapkit.protocols.misc.null.NoPayload`                                                       |
+|                                                                  | :class:`pcapkit.protocols.misc.no_payload.NoPayload`                                                 |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 
 .. _ext-new-protocol:
@@ -174,33 +176,35 @@ attributes of the protocol.
 Once the class exists, register it through
 :mod:`pcapkit.foundation.registry.protocols`, picking the registry that matches
 the protocol's layer -- a link layer protocol goes to
-:func:`~pcapkit.foundation.registry.protocols.register_linktype`, and so on.
+:func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`, and so on.
 
 The registry function per protocol type:
 
-+-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
-| Protocol Type     | Registry Function                                                                                                                  | Notes              |
-+===================+===================================================================+================================================================+====================+
-|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_pcap`   | Registry functions |
-+ Link Layer        + :func:`~pcapkit.foundation.registry.protocols.register_linktype`  +----------------------------------------------------------------+ on the left column +
-|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_pcapng` | are combined calls |
-+-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+ to those on the    +
-| Internet Layer    | :func:`~pcapkit.foundation.registry.protocols.register_ethertype`                                                                  | right columns.     |
-+-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+                    +
-| Transport Layer   | :func:`~pcapkit.foundation.registry.protocols.register_transtype`                                                                  | It is recommended  |
-+-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+ to use those on    +
-|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_tcp`    | the left columns   |
-+ Application Layer + :func:`~pcapkit.foundation.registry.protocols.register_apptype`   +----------------------------------------------------------------+ when registering   +
-|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_udp`    | new protocols.     |
-+                   +-------------------------------------------------------------------+----------------------------------------------------------------+                    +
-|                   |                                                                   | :func:`~pcapkit.foundation.registry.protocols.register_sctp`   |                    |
-+-------------------+-------------------------------------------------------------------+----------------------------------------------------------------+--------------------+
++-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+--------------------+
+| Protocol Type     | Registry Function                                                                                                                                  | Notes              |
++===================+===========================================================================+========================================================================+====================+
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap`      | Registry functions |
++ Link Layer        + :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`     +------------------------------------------------------------------------+ on the left column +
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng`    | are combined calls |
++-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+ to those on the    +
+| Internet Layer    | :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype`                                                                             | right columns.     |
++-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
+| Transport Layer   | :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype`                                                                         | It is recommended  |
++-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+ to use those on    +
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp`  | the left columns   |
++ Application Layer + :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype` +------------------------------------------------------------------------+ when registering   +
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_udp`  | new protocols.     |
++                   +---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp` |                    |
++                   +---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
+|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp` |                    |
++-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+--------------------+
 
 A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
 number, so it registers through
-:func:`~pcapkit.foundation.registry.protocols.register_ipx`; one carried over BSD
+:func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`; one carried over BSD
 loopback is keyed by address family rather than by EtherType, and registers through
-:func:`~pcapkit.foundation.registry.protocols.register_loopback`.
+:func:`~pcapkit.foundation.registry.protocols.link.register_loopback`.
 
 Samples
 ~~~~~~~
@@ -354,7 +358,7 @@ The following code snippet shows how to create a new protocol class:
    :meth:`ProtocolBase.__init_subclass__
    <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>` for the full
    rule, and
-   :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` for
+   :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` for
    what runs underneath it.
 
 Extending Existing Protocol
@@ -373,49 +377,53 @@ extension point you need, then register your methods against it.
 The extension points of each protocol class, with the registry function that
 writes them:
 
-+-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Protocol Type     | Protocol Class                                             | Extensible Registry                                                                           | Registry Function                                                          |
-+===================+============================================================+===============================================================================================+============================================================================+
-|                   | :class:`~pcapkit.protocols.internet.ipv4.IPv4`             | :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_ipv4_option`        |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.hip.HIP`               | :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`                  | :func:`~pcapkit.foundation.registry.protocols.register_hip_parameter`      |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`         | :attr:`HOPOPT.__option__ <pcapkit.protocols.internet.hopopt.HOPOPT.__option__>`               | :func:`~pcapkit.foundation.registry.protocols.register_hopopt_option`      |
-+ Internet Layer    +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`   | :attr:`IPv6_Opts.__option__ <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__>`      | :func:`~pcapkit.foundation.registry.protocols.register_ipv6_opts_option`   |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` | :attr:`IPv6_Route.__routing__ <pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__>` | :func:`~pcapkit.foundation.registry.protocols.register_ipv6_route_routing` |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`MH.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`                         | :func:`~pcapkit.foundation.registry.protocols.register_mh_message`         |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.mh.MH`                 | :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`                           | :func:`~pcapkit.foundation.registry.protocols.register_mh_option`          |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`MH.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_mh_extension`       |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4`         | :attr:`ICMPv4.__type__ <pcapkit.protocols.internet.icmpv4.ICMPv4.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_icmp_type`          |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6`         | :attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.ICMPv6.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_icmp_type`          |
-+-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`TCP.__option__ <pcapkit.protocols.transport.tcp.TCP.__option__>`                       | :func:`~pcapkit.foundation.registry.protocols.register_tcp_option`         |
-+ Transport Layer   + :class:`~pcapkit.protocols.transport.tcp.TCP`              +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`TCP.__mp_option__ <pcapkit.protocols.transport.tcp.TCP.__mp_option__>`                 | :func:`~pcapkit.foundation.registry.protocols.register_tcp_mp_option`      |
-+                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`SCTP.__chunk__ <pcapkit.protocols.transport.sctp.SCTP.__chunk__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_chunk`         |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :func:`~pcapkit.foundation.registry.protocols.register_sctp_parameter`     |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :func:`~pcapkit.foundation.registry.protocols.register_sctp_cause`         |
-+-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Application Layer | :class:`~pcapkit.protocols.application.httpv2.HTTPv2`      | :attr:`HTTPv2.__frame__ <pcapkit.protocols.application.httpv2.HTTPv2.__frame__>`              | :func:`~pcapkit.foundation.registry.protocols.register_http_frame`         |
-+-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`PCAPNG.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`                     | :func:`~pcapkit.foundation.registry.protocols.register_pcapng_block`       |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`PCAPNG.__option__ <pcapkit.protocols.misc.pcapng.PCAPNG.__option__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_pcapng_option`      |
-+ Miscellaneous     + :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`             +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Protocols         |                                                            | :attr:`PCAPNG.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`                   | :func:`~pcapkit.foundation.registry.protocols.register_pcapng_record`      |
-+                   +                                                            +-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
-|                   |                                                            | :attr:`PCAPNG.__secrets__ <pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__>`                 | :func:`~pcapkit.foundation.registry.protocols.register_pcapng_secrets`     |
-+-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+----------------------------------------------------------------------------+
++-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+| Protocol Type     | Protocol Class                                             | Extensible Registry                                                                           | Registry Function                                                                   |
++===================+============================================================+===============================================================================================+=====================================================================================+
+|                   | :class:`~pcapkit.protocols.internet.ipv4.IPv4`             | :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`                     | :func:`~pcapkit.foundation.registry.protocols.internet.register_ipv4_option`        |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.hip.HIP`               | :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`                  | :func:`~pcapkit.foundation.registry.protocols.internet.register_hip_parameter`      |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`         | :attr:`HOPOPT.__option__ <pcapkit.protocols.internet.hopopt.HOPOPT.__option__>`               | :func:`~pcapkit.foundation.registry.protocols.internet.register_hopopt_option`      |
++ Internet Layer    +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`   | :attr:`IPv6_Opts.__option__ <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__>`      | :func:`~pcapkit.foundation.registry.protocols.internet.register_ipv6_opts_option`   |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` | :attr:`IPv6_Route.__routing__ <pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__>` | :func:`~pcapkit.foundation.registry.protocols.internet.register_ipv6_route_routing` |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`MH.__message__ <pcapkit.protocols.internet.mh.MH.__message__>`                         | :func:`~pcapkit.foundation.registry.protocols.internet.register_mh_message`         |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.mh.MH`                 | :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`                           | :func:`~pcapkit.foundation.registry.protocols.internet.register_mh_option`          |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`MH.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`                     | :func:`~pcapkit.foundation.registry.protocols.internet.register_mh_extension`       |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.icmpv4.ICMPv4`         | :attr:`ICMPv4.__type__ <pcapkit.protocols.internet.icmpv4.ICMPv4.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.internet.register_icmp_type`          |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.internet.icmpv6.ICMPv6`         | :attr:`ICMPv6.__type__ <pcapkit.protocols.internet.icmpv6.ICMPv6.__type__>`                   | :func:`~pcapkit.foundation.registry.protocols.internet.register_icmp_type`          |
++-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`TCP.__option__ <pcapkit.protocols.transport.tcp.TCP.__option__>`                       | :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp_option`        |
++ Transport Layer   + :class:`~pcapkit.protocols.transport.tcp.TCP`              +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`TCP.__mp_option__ <pcapkit.protocols.transport.tcp.TCP.__mp_option__>`                 | :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp_mp_option`     |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`SCTP.__chunk__ <pcapkit.protocols.transport.sctp.SCTP.__chunk__>`                      | :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk`        |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.transport.sctp.SCTP`            | :attr:`SCTP.__parameter__ <pcapkit.protocols.transport.sctp.SCTP.__parameter__>`              | :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_parameter`    |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`SCTP.__cause__ <pcapkit.protocols.transport.sctp.SCTP.__cause__>`                      | :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_cause`        |
++                   +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.transport.dccp.DCCP`            | :attr:`DCCP.__option__ <pcapkit.protocols.transport.dccp.DCCP.__option__>`                    | :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp_option`       |
++-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.application.httpv2.HTTPv2`      | :attr:`HTTPv2.__frame__ <pcapkit.protocols.application.httpv2.HTTPv2.__frame__>`              | :func:`~pcapkit.foundation.registry.protocols.application.register_http_frame`      |
++ Application Layer +------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   | :class:`~pcapkit.protocols.application.ssl.SSL`            | :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.SSL.__extension__>`               | :func:`~pcapkit.foundation.registry.protocols.application.register_tls_extension`   |
++-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`PCAPNG.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`                     | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng_block`           |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`PCAPNG.__option__ <pcapkit.protocols.misc.pcapng.PCAPNG.__option__>`                   | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng_option`          |
++ Miscellaneous     + :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`             +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+| Protocols         |                                                            | :attr:`PCAPNG.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`                   | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng_record`          |
++                   +                                                            +-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+|                   |                                                            | :attr:`PCAPNG.__secrets__ <pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__>`                 | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng_secrets`         |
++-------------------+------------------------------------------------------------+-----------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 
 .. important::
 

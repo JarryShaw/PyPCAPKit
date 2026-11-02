@@ -204,6 +204,11 @@ was asked for and given -- and it survives the work that implemented it. So cite
 issue a rule was settled on, and describe a change by what it did rather than by its
 number. Ruled on :issue:`719`.
 
+**Cite a ruling given in a pull request's review by the issue that pull request
+closes**, as ``ruled in review of <PR> (:issue:`N`)``. Where it closes none, cite the
+pull request with ``:pr:`` and say that no issue holds the ruling. Ruled in review of
+:pr:`2599` (:issue:`2557`).
+
 **The changelog and** :file:`tests/` **are both exempt, for related reasons.** A
 changelog entry exists so a reader can find the change, and the pull-request number *is*
 that pointer; converting it would delete the thing the entry is for --
@@ -338,6 +343,16 @@ Format and Mechanics
    :file:`tests/project/test_docs_issue_pr_roles_1103_unit.py` fails on a bare number
    or a hand-written link in rendered text, and
    :file:`tests/project/test_issue_refs_in_comments.py` on a role in a plain comment.
+   The first also fails on a role of the wrong kind, reading each number's kind from
+   :file:`tests/project/issue_pr_roles_fixtures/kinds.json`, which
+   ``python util/issue_pr_kinds.py`` regenerates from the tracker, and which the
+   scheduled Issue and PR Kinds workflow proposes a refresh of
+   (:doc:`/contributing/workflows`).
+   It skips a number above the file's highest until a refresh, and fails on a lower
+   one the file lacks, such as a Discussion's. Its ``ALLOWED`` set exempts the
+   hand-written links and the bare ``#1962`` on :doc:`/contributing/workflows`, which
+   other tests pin in that form, so converting one means changing its pin in the same
+   commit.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
    worked example: every one is defined in :mod:`pcapkit.corekit.sentinels`, and

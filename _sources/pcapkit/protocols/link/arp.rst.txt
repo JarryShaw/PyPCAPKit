@@ -1,13 +1,12 @@
-ARP/InARP - (Inverse) Address Resolution Protocol
-=================================================
+ARP - Address Resolution Protocol
+=================================
 
 .. module:: pcapkit.protocols.link.arp
 
 :mod:`pcapkit.protocols.link.arp` contains
-:class:`~pcapkit.protocols.link.arp.ARP` and
-:class:`~pcapkit.protocols.link.arp.InARP`,
-which implement extractors for (Inverse) Address Resolution
-Protocol (ARP/InARP) [*]_, whose structure is described as
+:class:`~pcapkit.protocols.link.arp.ARP` only,
+which implements an extractor for Address Resolution
+Protocol (ARP) [*]_, whose structure is described as
 below:
 
 .. table::
@@ -34,6 +33,12 @@ below:
    24     192  ``arp.tpa``   Target Protocol Address
    ====== ==== ============= =======================
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.link.arp.InARP``, with no alias. The class moved to
+   :mod:`pcapkit.protocols.link.inarp`, since a module holds one protocol
+   class, named after it (:issue:`2529`).
+
 .. autoclass:: pcapkit.protocols.link.arp.ARP
    :no-members:
    :show-inheritance:
@@ -58,12 +63,6 @@ below:
    .. automethod:: _read_proto_resolve
    .. automethod:: _make_addr_resolve
    .. automethod:: _make_proto_resolve
-
-.. autoclass:: pcapkit.protocols.link.arp.InARP
-   :no-members:
-   :show-inheritance:
-
-   .. automethod:: id
 
 Header Schemas
 --------------

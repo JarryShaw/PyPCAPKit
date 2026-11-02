@@ -1,4 +1,4 @@
-IGMPv2 - Internet Group Management Protocol version 2
+IGMPv2 - Internet Group Management Protocol Version 2
 =============================================================
 
 .. module:: pcapkit.protocols.internet.igmpv2
@@ -14,6 +14,7 @@ extractor for Internet Group Management Protocol version 2 (IGMPv2)
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: name
    .. autoproperty:: version
    .. autoproperty:: alias
 

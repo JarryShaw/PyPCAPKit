@@ -235,6 +235,8 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
 </ul>
 </li>
@@ -251,11 +253,13 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
@@ -270,8 +274,8 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
@@ -287,14 +291,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
@@ -312,8 +317,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
@@ -321,7 +327,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/no_payload.html">No-Payload Packet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
@@ -334,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -378,8 +385,10 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -390,6 +399,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
@@ -405,8 +415,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -417,6 +429,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
@@ -578,28 +591,46 @@ known-failure table keep their cases in a generator, beside the captures it also
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code></p></td>
-<td><p><code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code></p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code>, from its family modules under
+<code class="file docutils literal notranslate"><span class="pre">examples/generators/option_families/</span></code>, one per protocol</p></td>
 <td><p>every option, chunk, parameter, message, frame and block code survives construct
 -&gt; parse -&gt; construct with identical octets; known failures in
 <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_registry_unit.py</span></code></p></td>
-<td><p><code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch.py</span></code></p></td>
-<td><p>every <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> entry dispatches to the class <code class="docutils literal notranslate"><span class="pre">PINNED_TARGETS</span></code> names;
-known degrades in <code class="docutils literal notranslate"><span class="pre">DispatchRegistryTests.KNOWN_DEGRADED</span></code>, which the
-generator’s own <code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> mirrors for its command-line report
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>)</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch.py</span></code>, from its family modules under
+<code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch_families/</span></code>, one per <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> table,
+per tables registered together, or per member of the versioned family base
+owning a table</p></td>
+<td><p>every <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> entry dispatches to the class its family module’s
+<code class="docutils literal notranslate"><span class="pre">PINNED_TARGETS</span></code> names; known degrades in
+<code class="docutils literal notranslate"><span class="pre">DispatchRegistryTests.KNOWN_DEGRADED</span></code>, which the generator’s own
+<code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> mirrors for its command-line report (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>What an unrelated change adds to these suites lands in a file of its own or on a line
+of its own, so that concurrent changes do not edit the same lines: a family goes in a
+module of its generator’s family directory, and a <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> registry is a
+line in its package’s module under <code class="file docutils literal notranslate"><span class="pre">tests/const/census/</span></code>. Where a table stays one
+file, as <code class="docutils literal notranslate"><span class="pre">NOT_A_COPY</span></code> and <code class="docutils literal notranslate"><span class="pre">UNRELATED</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_rfc_constants_one_home_1739_unit.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CRAWLERS_WITH_CONSTANT_MISS_LINES</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/vendor/test_vendor_missing_body_unit.py</span></code> do, it is sorted. A sweep holds
+what it finds to these records by name rather than to a pinned count – split under
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2615">#2615</a>.</p>
 <p>The rules those tables carry:</p>
 <ul class="simple">
 <li><p><strong>Every registered code has a case.</strong> <code class="docutils literal notranslate"><span class="pre">test_every_registered_code_has_a_case</span></code>
-fails otherwise. The option suite’s <code class="docutils literal notranslate"><span class="pre">SKIP</span></code> table is the only exit, and each of its
-entries states why a case would assert nothing: <code class="docutils literal notranslate"><span class="pre">Multipath_TCP</span></code> is the
-envelope of the <code class="docutils literal notranslate"><span class="pre">tcp-mptcp</span></code> family and would duplicate one of its subtypes, and
-<code class="docutils literal notranslate"><span class="pre">PadN</span></code> under HOPOPT and IPv6-Opts emits the same option-less header as <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.
+fails otherwise, and so does <code class="docutils literal notranslate"><span class="pre">test_every_option_registry_has_a_family</span></code> or
+<code class="docutils literal notranslate"><span class="pre">test_every_dispatch_table_has_a_family</span></code> on a registry map no family exercises,
+found from the tree’s own maps rather than from the family modules. The option
+suite’s <code class="docutils literal notranslate"><span class="pre">SKIP</span></code> table, the merge of each family module’s own <code class="docutils literal notranslate"><span class="pre">SKIP</span></code>, is the only
+exit, and each of its entries states why a case would assert nothing:
+<code class="docutils literal notranslate"><span class="pre">Multipath_TCP</span></code> is the envelope of the <code class="docutils literal notranslate"><span class="pre">tcp-mptcp</span></code> family and would duplicate
+one of its subtypes, and <code class="docutils literal notranslate"><span class="pre">PadN</span></code> under HOPOPT and IPv6-Opts emits the same
+option-less header as <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>.
 A code that fails is never skipped.</p></li>
 <li><p><strong>A failing case is an entry, never a changed argument.</strong> An <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>
 entry records the status, a failure-detail fragment narrow enough to match one
@@ -644,8 +675,11 @@ declared lengths of a truncated capture.</p>
 <p><strong>Every change raises coverage, and each new test is shown to fail without its fix.</strong>
 A test that also passes on the unfixed tree cannot tell the fix from its absence, so it
 pins nothing. Before opening the pull request, take the fix out, run the new test, put
-the fix back, and say in the pull request that you did:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>diff<span class="w"> </span>origin/main<span class="w"> </span>--<span class="w"> </span>pcapkit/<span class="w"> </span>&gt;<span class="w"> </span>/tmp/fix.diff
+the fix back, and say in the pull request that you did. Diff the committed fix from the
+merge base, with three dots: a two-dot <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">origin/main</span></code> also carries the commits
+<code class="docutils literal notranslate"><span class="pre">origin/main</span></code> has and the branch lacks, as reverse deltas, and reverse-applying it
+undoes that work in the tree.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>diff<span class="w"> </span>origin/main...HEAD<span class="w"> </span>--<span class="w"> </span>pcapkit/<span class="w"> </span>&gt;<span class="w"> </span>/tmp/fix.diff
 git<span class="w"> </span>apply<span class="w"> </span>-R<span class="w"> </span>/tmp/fix.diff
 python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/&lt;path&gt;/test_&lt;name&gt;_unit.py<span class="w"> </span>-q<span class="w">    </span><span class="c1"># must fail</span>
 git<span class="w"> </span>apply<span class="w"> </span>/tmp/fix.diff
@@ -688,7 +722,15 @@ call.</p></li>
 <code class="docutils literal notranslate"><span class="pre">reimport_once_per_class(self)</span></code> from <code class="docutils literal notranslate"><span class="pre">setUp</span></code>, in place of a per-test
 <code class="docutils literal notranslate"><span class="pre">purge_modules</span></code>, which re-imported the package before every test and dominated
 the suite’s time (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1065">#1065</a>). Both live in <code class="file docutils literal notranslate"><span class="pre">tests/_support.py</span></code>; pass
-<code class="docutils literal notranslate"><span class="pre">restore=True</span></code> when the class must leave <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> as it found it.</p></li>
+<code class="docutils literal notranslate"><span class="pre">restore=True</span></code> when the class must leave <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> as it found it.</p>
+<p>A class whose tests each need their own import purges in <code class="docutils literal notranslate"><span class="pre">setUp</span></code> instead of
+calling the helper, and says why in a comment there: <code class="docutils literal notranslate"><span class="pre">ConstEnumRegisterFallbackTests</span></code>
+in <code class="file docutils literal notranslate"><span class="pre">tests/const/test_const_enum_builtin_parity.py</span></code> does, because a lookup in
+one test grows the registries’ tables the next one reads. Calling the helper and
+then purging the whole package, later in <code class="docutils literal notranslate"><span class="pre">setUp</span></code> or in <code class="docutils literal notranslate"><span class="pre">tearDown</span></code>, throws the
+class’s import away while reading as if it kept it;
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_per_class_import_guard.py</span></code> fails on that (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>).</p>
+</li>
 <li><p><strong>Check ordering under plain unittest.</strong> <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> heals cross-module
 import pollution after every test, so pytest alone cannot see it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/981">#981</a>).
 <code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code> runs one <code class="file docutils literal notranslate"><span class="pre">tests/</span></code> subdirectory, then the
@@ -726,17 +768,35 @@ above:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>an option-like code</p></td>
-<td><p>Registering it gives it a case automatically. Add arguments to the generator’s
-tables in <code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> where the <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> defaults
-are degenerate, and a <code class="docutils literal notranslate"><span class="pre">Family</span></code> to <code class="docutils literal notranslate"><span class="pre">FAMILIES</span></code> for a new registry. Its cycle
-closes before it merges.</p></td>
+<td><p>Registering it gives it a case automatically. Add arguments where the
+<code class="docutils literal notranslate"><span class="pre">_make_*</span></code> defaults are degenerate to the tables of its protocol’s module under
+<code class="file docutils literal notranslate"><span class="pre">examples/generators/option_families/</span></code>. A registry map no family exercises
+takes a <code class="docutils literal notranslate"><span class="pre">Family</span></code> in that module’s <code class="docutils literal notranslate"><span class="pre">FAMILIES</span></code>, or a module of its own for a
+protocol without one, which <code class="docutils literal notranslate"><span class="pre">test_every_option_registry_has_a_family</span></code>
+enforces. Its cycle closes before it merges.</p></td>
 </tr>
 <tr class="row-odd"><td><p>a protocol</p></td>
 <td><p>A unit-tier <code class="file docutils literal notranslate"><span class="pre">tests/protocols/&lt;layer&gt;/test_&lt;name&gt;_unit.py</span></code> that builds its
 own octets, asserts construct -&gt; parse -&gt; construct identity, and checks a parse
 against the specification’s field values. A <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> registration also
-needs its <code class="docutils literal notranslate"><span class="pre">PINNED_TARGETS</span></code> entry in <code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch.py</span></code>,
-which <code class="docutils literal notranslate"><span class="pre">test_every_case_has_a_pinned_target</span></code> enforces.</p></td>
+needs its <code class="docutils literal notranslate"><span class="pre">PINNED_TARGETS</span></code> entry in its family’s module under
+<code class="file docutils literal notranslate"><span class="pre">examples/generators/dispatch_families/</span></code>, which
+<code class="docutils literal notranslate"><span class="pre">test_every_case_has_a_pinned_target</span></code> enforces. A protocol with a dispatch
+registry of its own, as <a class="reference internal" href="../../pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.FRAD" title="pcapkit.protocols.link.frad.FRAD"><code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code></a>,
+<a class="reference internal" href="../../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.Loopback" title="pcapkit.protocols.link.loopback.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL" title="pcapkit.protocols.link.linux_sll.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a> have, also needs a
+<code class="docutils literal notranslate"><span class="pre">Family</span></code> probing that <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> table once it holds an entry, in a module
+of its own there, which <code class="docutils literal notranslate"><span class="pre">test_every_dispatch_table_has_a_family</span></code> enforces;
+another family whose probe passes through the table does not count
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2592">#2592</a>). Where a versioned family base owns the table, each member
+takes a family of its own, as
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> do, which
+<code class="docutils literal notranslate"><span class="pre">test_a_versioned_base_table_has_a_family_per_member</span></code> enforces. A
+<a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> registry it adds is a line in its package’s module under
+<code class="file docutils literal notranslate"><span class="pre">tests/const/census/</span></code>, in sorted order, or a module of its own there for a
+package without one; every const sweep compares what it finds against the
+census, and names a registry it lacks.</p></td>
 </tr>
 <tr class="row-even"><td><p>a dumper</p></td>
 <td><p>Unit tests under <code class="file docutils literal notranslate"><span class="pre">tests/dumpkit/</span></code> asserting the output exactly, and a case

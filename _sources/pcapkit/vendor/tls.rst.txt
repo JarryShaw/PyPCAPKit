@@ -17,6 +17,8 @@ include:
      - TLS/DTLS Content Types [*]_
    * - :class:`TLS_HandshakeType <pcapkit.vendor.tls.handshake_type.HandshakeType>`
      - TLS/DTLS HandshakeType [*]_
+   * - :class:`TLS_ExtensionType <pcapkit.vendor.tls.extension_type.ExtensionType>`
+     - TLS/DTLS ExtensionType Values [*]_
 
 .. versionadded:: 1.6.0
 
@@ -44,7 +46,20 @@ which is automatically generating :class:`pcapkit.const.tls.handshake_type.Hands
    :members: FLAG, LINK
    :show-inheritance:
 
+TLS/DTLS ExtensionType Values
+=============================
+
+.. module:: pcapkit.vendor.tls.extension_type
+
+This module contains the vendor crawler for **TLS/DTLS ExtensionType Values**,
+which is automatically generating :class:`pcapkit.const.tls.extension_type.ExtensionType`.
+
+.. autoclass:: pcapkit.vendor.tls.extension_type.ExtensionType
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. rubric:: Footnotes
 
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-5
 .. [*] https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-7
+.. [*] https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#tls-extensiontype-values-1

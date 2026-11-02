@@ -15,7 +15,13 @@ data model as-is; IGMPv3's wire format differs materially by message, so
 instead -- see :doc:`igmpv3`.
 :attr:`~pcapkit.protocols.internet.igmp.IGMP.alias` names the protocol each
 message is read as: ``'IGMP'`` for IGMPv1, the name :rfc:`1112` gives it, and
-``'IGMPv2'`` or ``'IGMPv3'`` for the others.
+``'IGMPv2'`` or ``'IGMPv3'`` for the others. Constructing the base gives the
+version class its ``version`` keyword names; without it, octets give the class
+the message classifies as, and fields are refused. Its
+:meth:`~pcapkit.protocols.internet.igmp.IGMP.from_data` gives the class the
+``version`` of its data names: every IGMP data model carries one, ``1``, ``2`` or
+``3``, set by the class that read or built the message and on no octet, so an
+IGMPv1 and an IGMPv2 message read alike apart from it (:issue:`2574`).
 
 The structure is keyed as for IGMPv1; an IGMPv2 message's keys start ``igmpv2``
 instead:
@@ -42,11 +48,17 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: from_data
 
    .. automethod:: __index__
+   .. automethod:: __init__
+   .. automethod:: __new__
 
-   .. automethod:: _classify
    .. automethod:: _make_data
+   .. automethod:: _classify
+   .. automethod:: _verify_checksum
+   .. automethod:: _dispatch
+   .. automethod:: _member_of_version
 
 Header Schemas
 --------------

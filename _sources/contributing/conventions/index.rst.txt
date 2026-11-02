@@ -13,12 +13,14 @@ House Conventions
    * :ref:`mint-criterion` -- :mod:`pcapkit.const`, which is where the settled
      questions have mostly arisen;
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
-   * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, and the registration
-     wrappers of :mod:`pcapkit.foundation.registry`;
+   * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, the registration
+     wrappers of :mod:`pcapkit.foundation.registry`, and the value a protocol's
+     :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns;
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members
-     spell :meth:`~pcapkit.protocols.protocol.Protocol.id`, and how a protocol class
-     is named after its module;
+     spell :meth:`~pcapkit.protocols.protocol.Protocol.id`, how a protocol class
+     is named after its module, and how quietly a next-layer fallback keeps a
+     refused layer as :class:`~pcapkit.protocols.misc.raw.Raw`;
    * :ref:`protocol-member-order` -- the order of members in a protocol class body;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;
@@ -26,7 +28,8 @@ House Conventions
      reference, rather than any code at all;
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
-     :mod:`pcapkit.corekit` a support module belongs in;
+     :mod:`pcapkit.corekit` a support module belongs in, and where a context
+     variable lives;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`;

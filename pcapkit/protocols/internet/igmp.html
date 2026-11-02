@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1, 2 and 3. IGMPv1 and IGMPv2 share the 8-octet structure below. IGMPv1 a..." />
 <meta name="description" content="pcapkit.protocols.internet.igmp contains IGMP, the abstract base of the Internet Group Management Protocol (IGMP)* versions 1, 2 and 3. IGMPv1 and IGMPv2 share the 8-octet structure below. IGMPv1 a..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IGMPv1 - Internet Group Management Protocol version 1" href="igmpv1.html"><link rel="prev" title="HIP - Host Identity Protocol" href="hip.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IGMPv1 - Internet Group Management Protocol Version 1" href="igmpv1.html"><link rel="prev" title="HIP - Host Identity Protocol" href="hip.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>IGMP - Internet Group Management Protocol - PyPCAPKit</title>
@@ -235,6 +235,8 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
 </ul>
 </li>
@@ -251,11 +253,13 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
@@ -270,8 +274,8 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
@@ -287,14 +291,15 @@
 <li class="toctree-l4"><a class="reference internal" href="icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IGMP - Internet Group Management Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
-<li class="toctree-l4"><a class="reference internal" href="igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/udp.html">UDP - User Datagram Protocol</a></li>
@@ -312,8 +317,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ssl.html">SSL - Secure Sockets Layer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
@@ -321,7 +327,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/no_payload.html">No-Payload Packet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
@@ -334,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -378,8 +385,10 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -390,6 +399,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
@@ -405,8 +415,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -417,6 +429,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
@@ -555,10 +568,16 @@ and IGMPv2 share the 8-octet structure below.
 <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> and reuse this schema and
 data model as-is; IGMPv3’s wire format differs materially by message, so
 <a class="reference internal" href="igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMPv3" title="pcapkit.protocols.internet.igmpv3.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a> carries its own
-instead – see <a class="reference internal" href="igmpv3.html"><span class="doc">IGMPv3 - Internet Group Management Protocol version 3</span></a>.
+instead – see <a class="reference internal" href="igmpv3.html"><span class="doc">IGMPv3 - Internet Group Management Protocol Version 3</span></a>.
 <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.alias" title="pcapkit.protocols.internet.igmp.IGMP.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> names the protocol each
 message is read as: <code class="docutils literal notranslate"><span class="pre">'IGMP'</span></code> for IGMPv1, the name <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a> gives it, and
-<code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv3'</span></code> for the others.</p>
+<code class="docutils literal notranslate"><span class="pre">'IGMPv2'</span></code> or <code class="docutils literal notranslate"><span class="pre">'IGMPv3'</span></code> for the others. Constructing the base gives the
+version class its <code class="docutils literal notranslate"><span class="pre">version</span></code> keyword names; without it, octets give the class
+the message classifies as, and fields are refused. Its
+<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.from_data" title="pcapkit.protocols.internet.igmp.IGMP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> gives the class the
+<code class="docutils literal notranslate"><span class="pre">version</span></code> of its data names: every IGMP data model carries one, <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or
+<code class="docutils literal notranslate"><span class="pre">3</span></code>, set by the class that read or built the message and on no octet, so an
+IGMPv1 and an IGMPv2 message read alike apart from it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
 <p>The structure is keyed as for IGMPv1; an IGMPv2 message’s keys start <code class="docutils literal notranslate"><span class="pre">igmpv2</span></code>
 instead:</p>
 <div class="table-wrapper docutils container">
@@ -602,6 +621,15 @@ instead:</p>
 <p>The class is abstract: <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> is set by the concrete IGMPv1,
 IGMPv2 and IGMPv3 classes. <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.read" title="pcapkit.protocols.internet.igmp.IGMP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> refuses a message that
 <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> does not place in <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>.</p>
+<p>It dispatches on both paths, never giving an instance of this class
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>). <code class="docutils literal notranslate"><span class="pre">version</span></code> names the version class; without it, octets
+give the one <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a> picks, and fields are refused, since no field
+picks a class. <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.from_data" title="pcapkit.protocols.internet.igmp.IGMP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">version</span></code> of its data. See
+<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.__new__" title="pcapkit.protocols.internet.igmp.IGMP.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>.</p>
+<p>The checksum of every version is verified on read under
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>, unless the enclosing IP
+layer is a fragment, see <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._verify_checksum" title="pcapkit.protocols.internet.igmp.IGMP._verify_checksum"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_verify_checksum()</span></code></a>; <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.make" title="pcapkit.protocols.internet.igmp.IGMP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> computes
+one it is not given.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Group</span> <span class="pre">Management</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.name" title="Link to this definition">¶</a></dt>
@@ -679,7 +707,7 @@ narrow it to their own canonical name.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Type.IGMP_Membership_Query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\x00\x00'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.make" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Type.IGMP_Membership_Query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <p>The version of a constructed message is decided by its <code class="docutils literal notranslate"><span class="pre">type</span></code>,
 <code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> and length (see <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a>), not by the class
@@ -693,8 +721,11 @@ that built it.</p>
 <li><p><strong>type_reversed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If the namespace is reversed.</p></li>
 <li><p><strong>max_resp_time</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Max response time, in tenths of a second; zero for
 an IGMPv1 message.</p></li>
-<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Checksum over the message with this field zeroed, no
-pseudo-header (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.3"><strong>RFC 2236 Section 2.3</strong></a>).</p></li>
+<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Checksum over the message with this field zeroed, no
+pseudo-header (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.3"><strong>RFC 2236 Section 2.3</strong></a>); if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>,
+computed over the message, <code class="docutils literal notranslate"><span class="pre">payload</span></code> included, when
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_COMPUTE" title="pcapkit.utilities.config.CHECKSUM_COMPUTE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_COMPUTE</span></code></a> is on, zero
+when it is off.</p></li>
 <li><p><strong>group</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Group address; <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> for a General Query.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload of current instance.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
@@ -714,6 +745,32 @@ pseudo-header (<span class="target" id="index-6"></span><a class="rfc reference 
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.from_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.from_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create protocol instance from data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Protocol data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Protocol instance; on this class, an instance of the version class
+the <code class="docutils literal notranslate"><span class="pre">version</span></code> of <code class="docutils literal notranslate"><span class="pre">data</span></code> names, which every IGMP data model
+carries (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> carries no <code class="docutils literal notranslate"><span class="pre">version</span></code>, or one that names
+    no version class, on this class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.__index__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
@@ -723,6 +780,79 @@ pseudo-header (<span class="target" id="index-6"></span><a class="rfc reference 
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialisation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Source packet stream.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">1</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">2</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">3</span></span></code></span>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Version of IGMP, <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code>: the class
+<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.__new__" title="pcapkit.protocols.internet.igmp.IGMP.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> picks. Building from fields, it must be this
+class’s <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>. Parsing, it is handed on unread, as the
+enclosing IP layer passes its own version under this name to the
+layer it carries.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If, building from fields, <code class="docutils literal notranslate"><span class="pre">version</span></code> names no version
+    class, or is not this class’s own <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a>, which every
+    IGMP class states, a subclass outside the members included.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create the version class a construction of this class describes.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">version</span></code> keyword names the class, on either path. Without it,
+parsing octets gives the class <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a> picks, and building from
+fields is refused, since no field picks a class. That class’s
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> then runs with the same arguments. A subclass of this class
+is created as itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Source packet stream, read here without being consumed.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of packet data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP" title="pcapkit.protocols.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An uninitialised instance of the version class.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> names no version class; or, without it,
+    if building from fields, or if the octets are no version’s
+    message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._make_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.igmp.IGMP" title="pcapkit.protocols.data.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a></span>) – protocol data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -757,18 +887,74 @@ on it).</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._make_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._verify_checksum">
+<span class="sig-name descname"><span class="pre">_verify_checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">igmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._verify_checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._verify_checksum" title="Link to this definition">¶</a></dt>
+<dd><p>Record on <code class="docutils literal notranslate"><span class="pre">igmp</span></code> the outcome of verifying the message’s checksum.</p>
+<p>Only under <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>, as
+<code class="docutils literal notranslate"><span class="pre">checksum_status</span></code>. Every version’s checksum covers the whole message,
+the entire IP payload, with no pseudo-header (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.3"><strong>RFC 2236 Section 2.3</strong></a>,
+<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>, <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.2"><strong>RFC 3376 Section 4.2.2</strong></a>). That holds for
+IGMPv1 as well: <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a> defines an 8-octet message, and <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html"><strong>RFC 2236</strong></a>,
+which updates it, sums a longer one whole (<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.5"><strong>RFC 2236 Section 2.5</strong></a>). See
+<a class="reference internal" href="../../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.verify_message" title="pcapkit.corekit.checksum.internet.verify_message"><code class="xref py py-func docutils literal notranslate"><span class="pre">verify_message()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.igmp.IGMP" title="pcapkit.protocols.data.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a></span>) – protocol data</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>igmp</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – Parsed message data.</p></li>
+<li><p><strong>checksum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The checksum field, as on the wire.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The whole message’s length, in octets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._dispatch">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._dispatch" title="Link to this definition">¶</a></dt>
+<dd><p>Pick the class that parses the IGMP message at the start of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<p>The type and max response time are the first two octets, read here
+before any class is built, and <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> decides the version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Payload of the IP layer, starting at the IGMP message.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The IGMP message’s length, in octets.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type">Type[ProtocolBase] | Type[Raw]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
+<dd class="field-odd"><p><a class="reference internal" href="igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMPv1" title="pcapkit.protocols.internet.igmpv1.IGMPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>,
+<a class="reference internal" href="igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMPv2" title="pcapkit.protocols.internet.igmpv2.IGMPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> or
+<a class="reference internal" href="igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMPv3" title="pcapkit.protocols.internet.igmpv3.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a> for the version
+the message classifies as; <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+for any other message, which then keeps its octets undissected.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP._member_of_version">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmp.html#IGMP._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP._member_of_version" title="Link to this definition">¶</a></dt>
+<dd><p>The version class a <code class="docutils literal notranslate"><span class="pre">version</span></code> of <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code> names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Version of IGMP, as <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP._classify" title="pcapkit.protocols.internet.igmp.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> returns it or the
+<code class="docutils literal notranslate"><span class="pre">version</span></code> keyword gives it.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP" title="pcapkit.protocols.internet.igmp.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMPv1" title="pcapkit.protocols.internet.igmpv1.IGMPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>,
+<a class="reference internal" href="igmpv2.html#pcapkit.protocols.internet.igmpv2.IGMPv2" title="pcapkit.protocols.internet.igmpv2.IGMPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> or
+<a class="reference internal" href="igmpv3.html#pcapkit.protocols.internet.igmpv3.IGMPv3" title="pcapkit.protocols.internet.igmpv3.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> names none of them, or is no
+    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>: a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> is refused even
+    where it equals one.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -782,8 +968,8 @@ on it).</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.igmp.</span></span><span class="sig-name descname"><span class="pre">IGMP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/igmp.html#IGMP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmp.IGMP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for IGMP packet.</p>
-<p>The same 8-octet layout serves IGMPv1 (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>) and IGMPv2
-(<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2"><strong>RFC 2236 Section 2</strong></a>): v1 leaves <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmp.IGMP.max_resp_time" title="pcapkit.protocols.schema.internet.igmp.IGMP.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> reserved at zero
+<p>The same 8-octet layout serves IGMPv1 (<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>) and IGMPv2
+(<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2"><strong>RFC 2236 Section 2</strong></a>): v1 leaves <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmp.IGMP.max_resp_time" title="pcapkit.protocols.schema.internet.igmp.IGMP.max_resp_time"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_resp_time</span></code></a> reserved at zero
 rather than omitting the octet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmp.IGMP.type">
@@ -804,8 +990,8 @@ IGMPv2 Membership Query).</p>
 <dd><p>Checksum. The 16-bit one’s complement of the one’s complement sum of
 the message, with the checksum field itself taken as zero and no
 pseudo-header involved – the 8-octet message itself for IGMPv1
-(<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>), or the whole IP payload for IGMPv2
-(<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.3"><strong>RFC 2236 Section 2.3</strong></a>).</p>
+(<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>), or the whole IP payload for IGMPv2
+(<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.3"><strong>RFC 2236 Section 2.3</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -828,15 +1014,30 @@ pseudo-header involved – the 8-octet message itself for IGMPv1
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.igmp" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.igmp.</span></span><span class="sig-name descname"><span class="pre">IGMP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/igmp.html#IGMP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.igmp.</span></span><span class="sig-name descname"><span class="pre">IGMP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_resp_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/igmp.html#IGMP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>Data model for Internet Group Management Protocol.</p>
-<p>This single schema covers both IGMPv1 (<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>) and IGMPv2
-(<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2"><strong>RFC 2236 Section 2</strong></a>) messages: v1’s 8-octet header is the same shape as
+<p>This single schema covers both IGMPv1 (<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>) and IGMPv2
+(<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2"><strong>RFC 2236 Section 2</strong></a>) messages: v1’s 8-octet header is the same shape as
 v2’s, with <code class="docutils literal notranslate"><span class="pre">max_resp_time</span></code> reserved at zero and fewer <a class="reference internal" href="#pcapkit.protocols.data.internet.igmp.IGMP.type" title="pcapkit.protocols.data.internet.igmp.IGMP.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>
-values defined (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>). IGMPv3 (<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>) adds a
+values defined (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>). IGMPv3 (<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>) adds a
 group-record-list body of a materially different shape and is out of
 scope here – see <a class="reference internal" href="igmpv3.html#module-pcapkit.protocols.data.internet.igmpv3" title="pcapkit.protocols.data.internet.igmpv3"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.data.internet.igmpv3</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.version" title="Link to this definition">¶</a></dt>
+<dd><p>the
+<a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> of the class that
+read or built it. It is on no octet, since the versions share this
+layout, and <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.from_data" title="pcapkit.protocols.internet.igmp.IGMP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP.from_data</span></code></a> dispatches on it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Version of IGMP the message was read as, <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.type">
 <span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/igmp.html#pcapkit.const.igmp.type.Type" title="pcapkit.const.igmp.type.Type"><span class="pre">Type</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.type" title="Link to this definition">¶</a></dt>
@@ -847,9 +1048,9 @@ scope here – see <a class="reference internal" href="igmpv3.html#module-pcapki
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.max_resp_time">
 <span class="sig-name descname"><span class="pre">max_resp_time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.max_resp_time" title="Link to this definition">¶</a></dt>
 <dd><p>Max response time, in units of 1/10 second. Meaningful only for a
-Membership Query under IGMPv2 (<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.2"><strong>RFC 2236 Section 2.2</strong></a>); reserved and
+Membership Query under IGMPv2 (<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.2"><strong>RFC 2236 Section 2.2</strong></a>); reserved and
 zero on every other message, including every IGMPv1 one
-(<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>).</p>
+(<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html#page-11"><strong>RFC 1112 Page 11</strong></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -868,6 +1069,13 @@ left, or <code class="docutils literal notranslate"><span class="pre">0.0.0.0</s
 <dd class="field-odd"><p>Group address</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.checksum_status">
+<span class="sig-name descname"><span class="pre">checksum_status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus" title="pcapkit.corekit.checksum.internet.ChecksumStatus"><span class="pre">ChecksumStatus</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.checksum_status" title="Link to this definition">¶</a></dt>
+<dd><p>Outcome of verifying <a class="reference internal" href="#pcapkit.protocols.data.internet.igmp.IGMP.checksum" title="pcapkit.protocols.data.internet.igmp.IGMP.checksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">checksum</span></code></a>, present only when
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a> is on.</p>
 </dd></dl>
 
 </dd></dl>
@@ -892,7 +1100,7 @@ left, or <code class="docutils literal notranslate"><span class="pre">0.0.0.0</s
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">IGMPv1 - Internet Group Management Protocol version 1</div>
+                <div class="title">IGMPv1 - Internet Group Management Protocol Version 1</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

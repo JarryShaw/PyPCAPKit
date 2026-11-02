@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.transport.sctp contains SCTP only, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is described as below:,,,, Octets, Bits, Name, ..." />
 <meta name="description" content="pcapkit.protocols.transport.sctp contains SCTP only, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is described as below:,,,, Octets, Bits, Name, ..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="TCP - Transmission Control Protocol" href="tcp.html"><link rel="prev" title="Transport Layer Base Protocol" href="transport.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="TCP - Transmission Control Protocol" href="tcp.html"><link rel="prev" title="DCCP - Datagram Congestion Control Protocol" href="dccp.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>SCTP - Stream Control Transmission Protocol - PyPCAPKit</title>
@@ -235,6 +235,8 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
 </ul>
 </li>
@@ -251,11 +253,13 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
@@ -270,8 +274,8 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
@@ -287,14 +291,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="udp.html">UDP - User Datagram Protocol</a></li>
@@ -312,8 +317,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/ssl.html">SSL - Secure Sockets Layer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
@@ -321,7 +327,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/no_payload.html">No-Payload Packet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
@@ -334,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -378,8 +385,10 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -390,6 +399,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
@@ -405,8 +415,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -417,6 +429,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
@@ -746,6 +759,23 @@ codes fall through to
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0.</span></p>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP.make" title="pcapkit.protocols.transport.sctp.SCTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> and the chunk, parameter and error cause makers raise
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> for an integer field
+given a value its width cannot hold, a length included, rather than
+writing its low bits or raising a
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> or a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and for a checksum that is not four octets, rather
+than padding or cutting it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2614">#2614</a>).</p></li>
+<li><p>A packet the capture cut short of the length an enclosing layer
+declares, such as an IPv4 Total Length, rebuilds through
+<a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport.from_data" title="pcapkit.protocols.transport.transport.Transport.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> as
+captured, where it lost the octets after its last whole chunk
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2673">#2673</a>).</p></li>
+</ul>
+</div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.SCTP.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Stream</span> <span class="pre">Control</span> <span class="pre">Transmission</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.sctp.SCTP.name" title="Link to this definition">¶</a></dt>
@@ -857,7 +887,8 @@ the computed checksum.</p></li>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">srcport</span></code> or <code class="docutils literal notranslate"><span class="pre">dstport</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>
-    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2287">#2287</a>).</p>
+    (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2287">#2287</a>), <code class="docutils literal notranslate"><span class="pre">vtag</span></code> does not fit 32 bits, <code class="docutils literal notranslate"><span class="pre">chksum</span></code> is
+    not four octets, or a chunk maker rejects its chunk.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -1079,7 +1110,7 @@ chunk found by <a class="reference internal" href="#pcapkit.protocols.transport.
 whose payload protocol identifier selects the next layer. Should the
 packet carry no DATA chunk, an empty <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> is returned and the
 next layer resolves to
-<a class="reference internal" href="../misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>.</p>
+<a class="reference internal" href="../misc/no_payload.html#pcapkit.protocols.misc.no_payload.NoPayload" title="pcapkit.protocols.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
@@ -1902,7 +1933,8 @@ parameter rather than the parameter itself, so the cookie is a plain
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is empty, since <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.1"><strong>RFC 9260 Section 3.3.1</strong></a>
-    requires at least one byte of user data.</p>
+    requires at least one byte of user data, or a field does not
+    fit its width.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1933,7 +1965,8 @@ parameter rather than the parameter itself, so the cookie is a plain
 <dd class="field-odd"><p>Constructed chunk schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte, or a field
+    does not fit its width.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -1969,7 +2002,8 @@ default to zero; a parsed chunk’s flags are kept as received.</p>
 <dd class="field-odd"><p>Constructed chunk schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte, or a field
+    does not fit its width.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1999,7 +2033,9 @@ default to zero; a parsed chunk’s flags are kept as received.</p>
 <dd class="field-odd"><p>Constructed chunk schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte, or a
+    field, a gap ack block’s offset or a duplicate TSN does not
+    fit its width.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -2083,6 +2119,9 @@ disagree with the lists they count.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed chunk schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">reserved</span></code> does not fit 7 bits.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -2107,7 +2146,8 @@ disagree with the lists they count.</p>
 <dd class="field-odd"><p>Constructed chunk schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">flags</span></code> is <strong>NOT</strong> exactly one byte, or
+    <code class="docutils literal notranslate"><span class="pre">cum_tsn_ack</span></code> does not fit 32 bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2234,6 +2274,9 @@ cookie parameter</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed chunk schema.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">reserved</span></code> does not fit 7 bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2701,6 +2744,9 @@ kept as read and rebuilds as read (<a class="extlink-issue reference external" h
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed parameter schema.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">increment</span></code> does not fit 32 bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3261,7 +3307,8 @@ cause-specific information is recorded verbatim rather than raising.</p>
 <dd class="field-odd"><p>Constructed error cause schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">reserved</span></code> is <strong>NOT</strong> exactly two bytes.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">reserved</span></code> is <strong>NOT</strong> exactly two bytes, or
+    <code class="docutils literal notranslate"><span class="pre">stream_id</span></code> does not fit 16 bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3316,6 +3363,9 @@ it counts.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed error cause schema.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">staleness</span></code> does not fit 32 bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3450,6 +3500,9 @@ lengths</p></li>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed error cause schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">tsn</span></code> does not fit 32 bits.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -3561,9 +3614,9 @@ by port number as in <a class="reference internal" href="tcp.html#pcapkit.protoc
 <dd><p>the enum a key must be a member of,
 and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
 class <em>owning</em> the registry, and read from it by
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol_code" title="pcapkit.foundation.registry.protocols.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
 <code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a> checks its own
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a> checks its own
 – a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is accepted because the registry is keyed by
 payload protocol identifier, which is a number in its own right (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
 <dl class="field-list simple">
@@ -3673,6 +3726,37 @@ for how the next layer is located.</p>
 <span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">trailer&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.SCTP.trailer" title="Link to this definition">¶</a></dt>
 <dd><p>Octets captured after the last whole chunk, see <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.ChunkListField" title="pcapkit.protocols.schema.transport.sctp.ChunkListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChunkListField</span></code></a>
 and <a class="reference internal" href="../internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.IPv4.trailer" title="pcapkit.protocols.schema.internet.ipv4.IPv4.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.trailer</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.sctp.SCTP.unpack">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/sctp.html#SCTP.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.SCTP.unpack" title="Link to this definition">¶</a></dt>
+<dd><p>Unpack <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> into <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP" title="pcapkit.protocols.schema.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>, no further than the octets present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Packed data.</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Length of data, as the enclosing layer declares it.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Unpacked data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Unpacked data as <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP" title="pcapkit.protocols.schema.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>.</p>
+</dd>
+</dl>
+<p>SCTP has no packet length field (<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3"><strong>RFC 9260 Section 3</strong></a>), so a <code class="docutils literal notranslate"><span class="pre">length</span></code>
+past the octets present, as an IPv4 Total Length the capture cut short of
+declares, is cut to them. Sized past them, <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.chunks" title="pcapkit.protocols.schema.transport.sctp.SCTP.chunks"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chunks</span></code></a> would record the
+data as ending inside it while <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.ChunkListField" title="pcapkit.protocols.schema.transport.sctp.ChunkListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChunkListField</span></code></a> hands the octets
+after the last whole chunk to <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.trailer" title="pcapkit.protocols.schema.transport.sctp.SCTP.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>, so <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> would drop them and
+<code class="docutils literal notranslate"><span class="pre">bytes(schema)</span></code> count them twice (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2673">#2673</a>).</p>
+<p>When no octet follows the last whole chunk, which the capture may have cut
+inside its padding, the data does end inside <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.chunks" title="pcapkit.protocols.schema.transport.sctp.SCTP.chunks"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chunks</span></code></a>, so the cut is
+recorded there as <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records a short read, and
+packing writes back only the octets read.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4243,7 +4327,7 @@ see <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.sctp.HostNameAddressParameter.name">
 <span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">name&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.HostNameAddressParameter.name" title="Link to this definition">¶</a></dt>
-<dd><p>Host name as captured. <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a> asks for at least one
+<dd><p>Host name as captured. <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a> asks for at least one
 null terminator, but a parsed name may lack it.</p>
 </dd></dl>
 
@@ -4568,7 +4652,9 @@ null terminator, but a parsed name may lack it.</p>
 fewer than a chunk header, or a chunk whose <code class="docutils literal notranslate"><span class="pre">length</span></code> runs past the data –
 cannot be told apart from a chunk cut short. They are not parsed but
 reported as option padding, which <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> hands back to the stream for
-<a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.trailer" title="pcapkit.protocols.schema.transport.sctp.SCTP.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.trailer</span></code></a> to keep as captured (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1468">#1468</a>).</p>
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.trailer" title="pcapkit.protocols.schema.transport.sctp.SCTP.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.trailer</span></code></a> to keep as captured (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1468">#1468</a>). The area reaches no
+further than the octets present, as <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.SCTP.unpack" title="pcapkit.protocols.schema.transport.sctp.SCTP.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP.unpack()</span></code></a> sizes it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2673">#2673</a>).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.sctp.ChunkListField.unpack">
 <span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/sctp.html#ChunkListField.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.ChunkListField.unpack" title="Link to this definition">¶</a></dt>
@@ -4658,7 +4744,7 @@ SHUTDOWN COMPLETE chunks.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.sctp.</span></span><span class="sig-name descname"><span class="pre">padding_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/sctp.html#padding_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.padding_length" title="Link to this definition">¶</a></dt>
 <dd><p>Length of the trailing padding of an SCTP type-length-value structure.</p>
 <p>Chunks, chunk parameters and error causes are all padded with all-zero
-bytes to a multiple of four bytes, and per <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> that
+bytes to a multiple of four bytes, and per <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> that
 padding is <strong>not</strong> counted in the <code class="docutils literal notranslate"><span class="pre">length</span></code> field. The padding is still
 on the wire, though, so it has to be consumed for the enclosing list to
 stay aligned.</p>
@@ -4672,7 +4758,7 @@ stay aligned.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of padding bytes, clamped to the number of bytes left in the
 enclosing structure, so that a final chunk captured without (all of)
-its padding still parses, although <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> has the
+its padding still parses, although <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> has the
 sender pad every chunk. When packing, it is clamped as well
 to the <code class="docutils literal notranslate"><span class="pre">__padding__</span></code> width <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.pre_pack_padding" title="pcapkit.protocols.schema.transport.sctp.pre_pack_padding"><code class="xref py py-func docutils literal notranslate"><span class="pre">pre_pack_padding()</span></code></a> hands over, so a
 final chunk captured without (all of) its padding rebuilds without it
@@ -4754,7 +4840,7 @@ HEARTBEAT ACK, ABORT and ERROR – deliberately have no separate
 trailing padding into the nested list’s own span instead, which parsing and
 construction each need for a reason of their own:</p>
 <ul class="simple">
-<li><p>On parsing, a sender is allowed by <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> to leave the
+<li><p>On parsing, a sender is allowed by <span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> to leave the
 final parameter’s padding out of the chunk length, so the padding has to
 be consumed whether or not the length accounts for it. Folding it into the
 list’s span does that, and leaves it visible as the field’s
@@ -4789,7 +4875,7 @@ padding.</p></li>
 <dd class="field-odd"><p>Number of octets up to the end of the last chunk whose declared
 <code class="docutils literal notranslate"><span class="pre">length</span></code> octets are all present, with as much of its padding as there
 is, see <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp.padding_length" title="pcapkit.protocols.schema.transport.sctp.padding_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">padding_length()</span></code></a>. A <code class="docutils literal notranslate"><span class="pre">length</span></code> below the four-octet chunk
-header (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a>) delimits nothing, so the run stops
+header (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a>) delimits nothing, so the run stops
 there too; four zero octets would otherwise read as a DATA chunk.</p>
 </dd>
 </dl>
@@ -5688,14 +5774,14 @@ anywhere else. <code class="docutils literal notranslate"><span class="pre">make
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="transport.html">
+          <a class="prev-page" href="dccp.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Transport Layer Base Protocol</div>
+                <div class="title">DCCP - Datagram Congestion Control Protocol</div>
                 
               </div>
             </a>

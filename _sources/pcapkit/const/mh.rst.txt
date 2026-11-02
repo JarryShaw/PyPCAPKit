@@ -472,7 +472,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.option.Option`.
    :undoc-members:
    :show-inheritance:
 
-Mobility Header Types - for the MH Type field in the Mobility Header
+Mobility Header Types - for the MH Type Field in the Mobility Header
 ====================================================================
 
 .. module:: pcapkit.const.mh.packet

@@ -1,4 +1,4 @@
-IPv4 - Internet Protocol version 4
+IPv4 - Internet Protocol Version 4
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv4
@@ -48,6 +48,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: unpack
 
    .. automethod:: _make_data
 

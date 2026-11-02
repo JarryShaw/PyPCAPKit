@@ -22,7 +22,7 @@ PPID 60
 and PPID 66
 (:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP`);
 see
-:func:`pcapkit.foundation.registry.protocols.register_sctp`.
+:func:`pcapkit.foundation.registry.protocols.transport.register_sctp`.
 
 An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded
 in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). There is no
@@ -49,6 +49,7 @@ unregistered PPID would, because
    .. automethod:: make
 
    .. automethod:: __length_hint__
+   .. automethod:: __index__
    .. automethod:: _make_data
 
 Decoder Dependency

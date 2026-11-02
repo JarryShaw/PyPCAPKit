@@ -1,4 +1,4 @@
-IPv6 - Internet Protocol version 6
+IPv6 - Internet Protocol Version 6
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv6
@@ -37,6 +37,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: unpack
 
    .. automethod:: _make_data
 

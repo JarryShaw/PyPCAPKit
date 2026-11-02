@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.data.misc.null - PyPCAPKit</title>
+        <title>pcapkit.foundation.registry.protocols.protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -228,6 +228,8 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/index.html">Reassembled Payload Analysis</a><input aria-label="Toggle navigation of Reassembled Payload Analysis" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/ip.html">IP Datagram Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/tcp.html">TCP Datagram Analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/analysis/dtls.html">DTLS Handshake-Message Analysis</a></li>
 </ul>
 </li>
@@ -244,11 +246,13 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/arp.html">ARP - Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/inarp.html">InARP - Inverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/frad.html">FRAD - Frame Relay Access Device</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/gre.html">GRE - Generic Routing Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ieee802_11.html">IEEE 802.11 - Wireless LAN MAC Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll.html">LinuxSLL - Linux “Cooked” Capture Encapsulation Family</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll1.html">Linux “Cooked” Capture Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/linux_sll2.html">Linux “Cooked” Capture Encapsulation v2</a></li>
@@ -263,8 +267,8 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol Version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol Version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
@@ -280,14 +284,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/icmpv6.html">ICMPv6 - Internet Control Message Protocol for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmp.html">IGMP - Internet Group Management Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol version 1</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol version 3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv1.html">IGMPv1 - Internet Group Management Protocol Version 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv2.html">IGMPv2 - Internet Group Management Protocol Version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/igmpv3.html">IGMPv3 - Internet Group Management Protocol Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/dccp.html">DCCP - Datagram Congestion Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
@@ -305,8 +310,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/rarp.html">RARP - Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/drarp.html">DRARP - Dynamic Reverse Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ssl.html">SSL - Secure Sockets Layer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv2.html">SSLv2 - Secure Sockets Layer Version 2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/tls.html">TLS/SSL - Transport Layer Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/sslv3.html">SSLv3 - Secure Sockets Layer Version 3</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/dtls.html">DTLS - Datagram Transport Layer Security</a></li>
 </ul>
 </li>
@@ -314,7 +320,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/no_payload.html">No-Payload Packet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/checksum.html">Checksums</a></li>
 </ul>
 </li>
@@ -327,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -371,8 +378,10 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/linux.html">Linux-Specific Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -383,6 +392,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
@@ -398,8 +408,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/linux.html">Linux-Specific Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/radiotap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -410,6 +422,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
@@ -527,29 +540,531 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.data.misc.null</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.registry.protocols.protocol</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data models for no-payload packet"""</span>
+<span class="sd">"""Protocol Base Registries</span>
+<span class="sd">==============================</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
+<span class="sd">.. module:: pcapkit.foundation.registry.protocols.protocol</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NoPayload'</span><span class="p">]</span>
+<span class="sd">This module provides the protocol registries the per-layer modules beside it</span>
+<span class="sd">build on: :func:`register_protocol` for the by-name registry</span>
+<span class="sd">:data:`pcapkit.protocols.__proto__`, :func:`register_protocol_code` for the</span>
+<span class="sd">next-layer registries a ``code`` names, and the validation and by-name</span>
+<span class="sd">bookkeeping every registrar shares.</span>
+
+<span class="sd">.. versionadded:: 1.6.0</span>
+
+<span class="sd">   Moved here from the single :file:`pcapkit/foundation/registry/protocols.py`</span>
+<span class="sd">   module. The :mod:`pcapkit.foundation.registry.protocols` package exports</span>
+<span class="sd">   this module's public functions (:issue:`2578`).</span>
+
+<span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'register_protocol'</span><span class="p">,</span>
+    <span class="s1">'register_protocol_code'</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
+<span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="NoPayload">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.data.misc.null.NoPayload">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NoPayload</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""No-payload packet is an empty packet."""</span>
+<span class="c1"># NOTE: pcapkit.protocols.__proto__</span>
+<div class="viewcode-block" id="register_protocol">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Register a protocol class.</span>
 
-    <span class="c1"># NOTE: We add this method for both type annotation and to mark that this</span>
-    <span class="c1"># class accepts no arguments at runtime, since for a class with no</span>
-    <span class="c1"># annotations :class:`Info` generates an ``__init__`` taking any mapping</span>
-    <span class="c1"># and keywords.</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=super-init-not-called</span>
-        <span class="k">pass</span></div>
+<span class="sd">    The protocol class must be a subclass of</span>
+<span class="sd">    :class:`~pcapkit.protocols.protocol.ProtocolBase`, and will be registered to</span>
+<span class="sd">    the :data:`pcapkit.protocols.__proto__` registry.</span>
 
+<span class="sd">    The registry is keyed on ``protocol.__name__.upper()``, which nothing makes</span>
+<span class="sd">    unique: two protocol classes of the same name, such as a user's class</span>
+<span class="sd">    named after a shipped one, compete for one key. Registering one of them</span>
+<span class="sd">    replaces whichever was there, and the replacement is observable through</span>
+<span class="sd">    every reader of the registry, e.g. :meth:`Protocol.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.expand_comp&gt;`, which resolves a</span>
+<span class="sd">    bare protocol name through it. Per :issue:`675` the overwrite is reported,</span>
+<span class="sd">    matching :meth:`Protocol.register</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.register&gt;` and the other</span>
+<span class="sd">    overwrite-warning registries.</span>
+
+<span class="sd">    The guard reads "key present **and** incumbent is a different class" --</span>
+<span class="sd">    presence alone is not enough. This registry's key is *derived* from the</span>
+<span class="sd">    class rather than supplied by a caller, and this function is the funnel</span>
+<span class="sd">    every wrapper registrar calls --</span>
+<span class="sd">    :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp`,</span>
+<span class="sd">    :func:`~pcapkit.foundation.registry.protocols.transport.register_udp`,</span>
+<span class="sd">    :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype`,</span>
+<span class="sd">    :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype` and</span>
+<span class="sd">    the rest all end by calling it with their class, and registering their</span>
+<span class="sd">    code back undoes that call's write (:issue:`1505`). So registering one class under two codes, a</span>
+<span class="sd">    supported and documented thing to do, reaches this function twice with the</span>
+<span class="sd">    same class and nothing at stake; a presence-only guard would warn about an</span>
+<span class="sd">    overwrite that overwrote nothing. Warning on the harmless case is not free:</span>
+<span class="sd">    it teaches a caller to filter</span>
+<span class="sd">    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that</span>
+<span class="sd">    filter would then hide the name collision this warning exists to</span>
+<span class="sd">    surface. The sibling ``register`` methods across the package, each keyed on a</span>
+<span class="sd">    caller-supplied ``code``, apply the same identity criterion (:issue:`718`).</span>
+
+<span class="sd">    Making the key itself unique would resolve the collision rather than</span>
+<span class="sd">    merely reporting it, but it is a registry-format change that the bare-name</span>
+<span class="sd">    readers outside this module cannot absorb on their own -- the registry is a</span>
+<span class="sd">    documented public attribute, and its readers look a bare name up and then</span>
+<span class="sd">    degrade *silently* on a miss rather than raising, so a re-keying would not</span>
+<span class="sd">    announce itself either. :meth:`Protocol.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.expand_comp&gt;` falls back to the</span>
+<span class="sd">    name as a plain string, and the ``protocol`` properties on</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
+<span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of</span>
+<span class="sd">    :issue:`514` keeps this key, and its thread records the shared namespace as</span>
+<span class="sd">    a risk that design does not resolve, so the collision is reported here</span>
+<span class="sd">    rather than fixed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        pcapkit.utilities.warnings.RegistryWarning: If the registry already</span>
+<span class="sd">            holds a *different* class under this protocol's name, i.e. the</span>
+<span class="sd">            registration displaced another protocol class. Re-registering the</span>
+<span class="sd">            same class under the same name is silent.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       The HTTP member classes are named</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.httpv1.HTTPv1` and</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, so registering</span>
+<span class="sd">       one keeps its own key and no longer displaces</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.http.HTTP` under ``'HTTP'``</span>
+<span class="sd">       (:issue:`2529`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a class, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">incumbent</span> <span class="o">=</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+        <span class="n">incumbent_repr</span><span class="p">,</span> <span class="n">protocol_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">incumbent</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent_repr</span> <span class="o">==</span> <span class="n">protocol_repr</span><span class="p">:</span>
+            <span class="c1"># #710: two *distinct* objects whose repr() -- for an ordinary</span>
+            <span class="c1"># class, its module plus qualname -- happens to coincide, e.g. a</span>
+            <span class="c1"># factory that builds a fresh closure-local class of the same</span>
+            <span class="c1"># name on every call. Appending __module__/__qualname__ would not</span>
+            <span class="c1"># help here: that is exactly what the coinciding repr() already</span>
+            <span class="c1"># renders, so both sides would still print identically. id() is</span>
+            <span class="c1"># the fallback that actually differs, so it is only added in this</span>
+            <span class="c1"># branch -- the common case, two genuinely different classes,</span>
+            <span class="c1"># keeps the plain repr() and stays free of the extra noise.</span>
+            <span class="n">incumbent_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent_repr</span><span class="si">}</span><span class="s1"> (id=</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">incumbent</span><span class="p">)</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">)'</span>
+            <span class="n">protocol_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">protocol_repr</span><span class="si">}</span><span class="s1"> (id=</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">)'</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting </span><span class="si">{</span><span class="n">incumbent_repr</span><span class="si">}</span><span class="s1"> '</span>
+             <span class="sa">f</span><span class="s1">'with </span><span class="si">{</span><span class="n">protocol_repr</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+
+    <span class="n">protocol_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_NameLease</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A :data:`pcapkit.protocols.__proto__` entry a code registration put there.</span>
+
+<span class="sd">    Each code registrar below ends by naming its class in the by-name registry,</span>
+<span class="sd">    and :mod:`pcapkit.foundation.registry` has no ``unregister``: a code is</span>
+<span class="sd">    undone by registering the entry it displaced (:issue:`1363`). Without a</span>
+<span class="sd">    record of that by-name write, handing a code back would restore the code and</span>
+<span class="sd">    leave the name behind (:issue:`1505`). A lease records what the write</span>
+<span class="sd">    displaced and which codes still dispatch to the class, so the last of them</span>
+<span class="sd">    to be handed back puts the displaced entry back, or removes the name if it</span>
+<span class="sd">    was new.</span>
+
+<span class="sd">    A lease is one write, not one class: the same class can hold two leases on</span>
+<span class="sd">    a name -- e.g. a built-in registered at one port over a custom class</span>
+<span class="sd">    shadowing it at another -- and each undoes only its own write.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'protocol'</span><span class="p">,</span> <span class="s1">'displaced'</span><span class="p">,</span> <span class="s1">'codes'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">displaced</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1">#: The key written in :data:`pcapkit.protocols.__proto__`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c1">#: The class written under it.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="c1">#: The entry it displaced, or :data:`~pcapkit.corekit.sentinels.MISSING` for a new name.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaced</span> <span class="o">=</span> <span class="n">displaced</span>
+        <span class="c1">#: ``(destination, code)`` registrations still holding the lease.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[tuple[type, Any]]</span>
+
+
+<span class="c1">#: Name -&gt; its leases, oldest first. Each lease displaced the one below it,</span>
+<span class="c1">#: unless the name was written by other means in between; the last is the one</span>
+<span class="c1">#: a lookup sees, unless the name has been written since.</span>
+<span class="n">_NAME_LEASES</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, list[_NameLease]]</span>
+<span class="c1">#: ``(destination, code)`` -&gt; the lease its registration holds.</span>
+<span class="n">_CODE_LEASES</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[tuple[type, Any], _NameLease]</span>
+<span class="c1">#: Serialises the lease tables above, so concurrent registrars cannot tear them.</span>
+<span class="n">_LEASE_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fold_lease</span><span class="p">(</span><span class="n">stack</span><span class="p">:</span> <span class="s1">'list[_NameLease]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Retire ``stack[index]``, a lease now displacing its own class.</span>
+
+<span class="sd">    That happens once the lease between it and an earlier write of the same</span>
+<span class="sd">    class is handed back, e.g. a custom ``IPv4`` released from under the</span>
+<span class="sd">    built-in ``IPv4`` registered over it. Undoing it would change nothing, so</span>
+<span class="sd">    its codes move to the lease below when that is the same class, and</span>
+<span class="sd">    otherwise -- the class was named by other means -- hold nothing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stack: The name's leases, oldest first.</span>
+<span class="sd">        index: Position of the lease to retire.</span>
+
+<span class="sd">    """</span>
+    <span class="n">lease</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">below</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">below</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">below</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+        <span class="n">below</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lease</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">below</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">below</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">below</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_release_name</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="s1">'tuple[type, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Hand back the lease ``target``'s registration held.</span>
+
+<span class="sd">    Once no code holds the lease, it leaves its name's stack. On top, it puts</span>
+<span class="sd">    the name back to the entry it displaced, or removes a new name -- unless the</span>
+<span class="sd">    name was written by other means since, in which case that write stands.</span>
+<span class="sd">    Buried, it hands what it displaced to the lease above, if that lease</span>
+<span class="sd">    displaced it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        target: The ``(destination, code)`` being registered over.</span>
+
+<span class="sd">    """</span>
+    <span class="n">lease</span> <span class="o">=</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lease</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="n">lease</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">del</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">):</span>
+        <span class="n">above</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+            <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="o">=</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span>
+            <span class="k">if</span> <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">above</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+                <span class="n">_fold_lease</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
+            <span class="n">protocol_registry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">protocol_registry</span><span class="p">[</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'released protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">:</span> <span class="s1">'tuple[type, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Name ``protocol`` in :data:`pcapkit.protocols.__proto__` for ``targets``.</span>
+
+<span class="sd">    The tail of every code registrar: :func:`register_protocol`, preceded by</span>
+<span class="sd">    releasing whatever each target code held before, and followed by a lease</span>
+<span class="sd">    when the write changed the name, so that registering the code back undoes</span>
+<span class="sd">    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined</span>
+<span class="sd">    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or</span>
+<span class="sd">    registered directly -- is not leased, so no restore takes it away; one</span>
+<span class="sd">    showing it through a lease extends that lease to ``targets``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class just registered -- and so validated -- at ``targets``.</span>
+<span class="sd">        *targets: The ``(destination, code)`` pairs it was registered at.</span>
+
+<span class="sd">    """</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">_LEASE_LOCK</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="n">protocol</span> <span class="ow">and</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: Optional[_NameLease]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">current</span><span class="p">:</span>
+                <span class="n">_release_name</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING</span><span class="p">)</span>
+        <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">lease</span> <span class="o">=</span> <span class="n">_NameLease</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">incumbent</span><span class="p">)</span>
+            <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lease</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">lease</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[Type[ProtocolBase], Any]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Flatten a ``code=`` argument into ``(destination, key)`` pairs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: See :func:`register_protocol_code`.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        One ``(destination, key)`` pair per registration the caller asked</span>
+<span class="sd">        for -- possibly several, e.g. a single :class:`~pcapkit.const.reg.\</span>
+<span class="sd">linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If a value has no destination it can name or infer;</span>
+<span class="sd">            see :func:`register_protocol_code`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">yield from</span> <span class="n">code</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
+        <span class="c1"># NOTE: read with ``getattr``, not out of the type's own ``vars()`` as</span>
+        <span class="c1"># the ``__proto_key__`` check in ``register_protocol_code`` does. That</span>
+        <span class="c1"># read is deliberately non-inheriting because a protocol subclass can</span>
+        <span class="c1"># own a registry keyed by something other than its parent's -- Loopback</span>
+        <span class="c1"># does. No enum registry can be in that position: declaring a</span>
+        <span class="c1"># destination means having members, and aenum refuses to extend an</span>
+        <span class="c1"># enumeration with members, so none of these registries has a subclass</span>
+        <span class="c1"># and none can gain one. The one enum registry that is subclassed is</span>
+        <span class="c1"># AppType, a memberless base partitioned by transport protocol, and its</span>
+        <span class="c1"># subclass relationship is irrelevant here only because AppType itself</span>
+        <span class="c1"># declares no ``__proto_dest__`` at all -- the inheriting read finds</span>
+        <span class="c1"># nothing to inherit, so none of its parts reaches this branch. A</span>
+        <span class="c1"># class-level destination would in fact be the wrong model for it:</span>
+        <span class="c1"># ``register_apptype`` routes each member to the registry named by that</span>
+        <span class="c1"># member's own transport protocol, which one shared destination for the</span>
+        <span class="c1"># whole family could not express.</span>
+        <span class="n">destinations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="s1">'__proto_dest__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">destinations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'no destination registry is known for enum type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> '</span>
+                <span class="sa">f</span><span class="s1">'(key </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">); pass an explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">SomeClass: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">destinations</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">code</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'code must be an enum member, a </span><span class="se">{{</span><span class="s1">destination: key</span><span class="se">}}</span><span class="s1"> mapping, or an '</span>
+                            <span class="sa">f</span><span class="s1">'iterable thereof, not </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="n">_iter_code_targets</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'raw key </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1"> has no destination registry it can infer; pass an '</span>
+                        <span class="sa">f</span><span class="s1">'explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">TCP: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="register_protocol_code">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_protocol_code</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register ``protocol`` into the next-layer dispatch registry (or</span>
+<span class="sd">    registries) named by ``code``.</span>
+
+<span class="sd">    This is what backs the ``code`` class keyword of</span>
+<span class="sd">    :class:`~pcapkit.protocols.protocol.ProtocolBase` subclasses; it can also</span>
+<span class="sd">    be called directly to register a class that declined at class-definition</span>
+<span class="sd">    time.</span>
+
+<span class="sd">    ``code`` is normalised into a flat sequence of targets, where each item</span>
+<span class="sd">    is either:</span>
+
+<span class="sd">    * an enum member, whose *type* names the class(es) owning the matching</span>
+<span class="sd">      ``__proto__`` in its</span>
+<span class="sd">      :attr:`__proto_dest__ &lt;pcapkit.const.reg.ethertype.EtherType.__proto_dest__&gt;` --</span>
+<span class="sd">      :class:`~pcapkit.const.reg.ethertype.EtherType` to</span>
+<span class="sd">      :class:`~pcapkit.protocols.link.link.Link`,</span>
+<span class="sd">      :class:`~pcapkit.const.reg.transtype.TransType` to</span>
+<span class="sd">      :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
+<span class="sd">      :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
+<span class="sd">      to :class:`~pcapkit.protocols.transport.sctp.SCTP`,</span>
+<span class="sd">      :class:`~pcapkit.const.linux.arphrd.ARPHRD` to</span>
+<span class="sd">      :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`, and</span>
+<span class="sd">      :class:`~pcapkit.const.reg.linktype.LinkType` to *both*</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or</span>
+<span class="sd">    * a :class:`dict` mapping an explicit destination class to a key -- the</span>
+<span class="sd">      only form accepted for a bare :class:`int`, since e.g. a port number</span>
+<span class="sd">      does not say by itself whether it means</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.tcp.TCP` or</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.udp.UDP`;</span>
+
+<span class="sd">    or an iterable of either, to register ``protocol`` into several</span>
+<span class="sd">    registries from one call -- e.g. a</span>
+<span class="sd">    :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both by its</span>
+<span class="sd">    IP protocol number and by a UDP port:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       register_protocol_code(L2TPv3, [TransType.L2TP, {UDP: 1701}])</span>
+
+<span class="sd">    The explicit mapping form is accepted for any key, even one whose type</span>
+<span class="sd">    could be inferred -- being more explicit than required is never an</span>
+<span class="sd">    error.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        That example names ``L2TPv3``, which this package does not implement,</span>
+<span class="sd">        rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is</span>
+<span class="sd">        v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it</span>
+<span class="sd">        directly over IP on protocol 115 and §4.1.2 puts it over UDP on port</span>
+<span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.L2TPv2&gt;` answers on</span>
+<span class="sd">        port 1701 only, and registering *it* at</span>
+<span class="sd">        :attr:`TransType.L2TP &lt;pcapkit.const.reg.transtype.TransType.L2TP&gt;` would point the</span>
+<span class="sd">        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.L2TP`</span>
+<span class="sd">        and GitHub issue :issue:`548` for what that produced when measured.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class to register.</span>
+<span class="sd">        code: Registration key(s); see above.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If a bare :class:`int` (or any other non-enum,</span>
+<span class="sd">            non-mapping value) is given without an explicit destination, or if</span>
+<span class="sd">            an enum member's type declares no</span>
+<span class="sd">            :attr:`__proto_dest__ &lt;pcapkit.const.reg.ethertype.EtherType.__proto_dest__&gt;` --</span>
+<span class="sd">            inference refuses rather than guesses; or if a key is not of the</span>
+<span class="sd">            type its destination's registry is keyed by, as its typed registrar</span>
+<span class="sd">            would reject it, e.g. ``{Frame: TransType.ICMP}``. What a registry is</span>
+<span class="sd">            keyed by is read from the</span>
+<span class="sd">            :attr:`__proto_key__ &lt;pcapkit.protocols.link.link.Link.__proto_key__&gt;`</span>
+<span class="sd">            declared by the class owning it, so a destination sharing another's</span>
+<span class="sd">            registry is checked as its owner is, and one whose owner declares no</span>
+<span class="sd">            pairing is not checked. Every target is checked before any is</span>
+<span class="sd">            registered, so a rejected ``code`` leaves every registry as it was</span>
+<span class="sd">            (:issue:`2268`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">klass</span> <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s1">'__mro__'</span><span class="p">,</span> <span class="p">())</span>
+                      <span class="k">if</span> <span class="s1">'__proto__'</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">klass</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">owner</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># NOTE: the pairing is read out of the owner's own ``vars()`` rather than</span>
+        <span class="c1"># with ``getattr``, which walks the MRO and would hand a class keeping a</span>
+        <span class="c1"># registry of its own its parent's pairing --</span>
+        <span class="c1"># :attr:`Loopback.__proto__ &lt;pcapkit.protocols.link.loopback.Loopback.__proto__&gt;`</span>
+        <span class="c1"># is keyed by address family rather than by EtherType, so inheriting</span>
+        <span class="c1"># :class:`Link`'s would reject every key it does accept. A class is</span>
+        <span class="c1"># checked against the registry it owns, or not at all.</span>
+        <span class="n">pairing</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__proto_key__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pairing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kind</span><span class="p">,</span> <span class="n">number</span> <span class="o">=</span> <span class="n">pairing</span>
+            <span class="n">_check_code</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> into </span><span class="si">%s</span><span class="s1">.__proto__: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                     <span class="n">destination</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_code</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Optional[type]'</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                <span class="n">number</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject a registration key that is not a member of the enum its</span>
+<span class="sd">    destination registry is keyed by.</span>
+
+<span class="sd">    Each registrar typed on one enum calls this before touching any registry,</span>
+<span class="sd">    as does :func:`register_protocol_code` for an inferred or explicitly</span>
+<span class="sd">    named destination, so a bad ``code`` leaves every registry as it was</span>
+<span class="sd">    (:issue:`2186`). The check is on the type, not the value: the registry</span>
+<span class="sd">    enums compare equal to their values, so a member of another enum would</span>
+<span class="sd">    key the entry of the member it equals, e.g.</span>
+<span class="sd">    :attr:`TransType.ICMP &lt;pcapkit.const.reg.transtype.TransType.ICMP&gt;` would</span>
+<span class="sd">    replace :attr:`LinkType.ETHERNET &lt;pcapkit.const.reg.linktype.LinkType.ETHERNET&gt;`</span>
+<span class="sd">    (:issue:`2224`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: Registration key handed to the registrar.</span>
+<span class="sd">        kind: Enum the registrar is typed on, or :data:`None` for a registry</span>
+<span class="sd">            keyed by a number no enum names, which takes a bare :class:`int`</span>
+<span class="sd">            only (:issue:`2511`).</span>
+<span class="sd">        target: Protocol class whose registry ``code`` is destined for, named in</span>
+<span class="sd">            the error message so a rejection says *whose* registry rejected the</span>
+<span class="sd">            key rather than only what it wanted -- its callers share one</span>
+<span class="sd">            message, and several of them are typed on the same enum.</span>
+<span class="sd">        number: Whether a bare :class:`int` is a valid key too, as for the</span>
+<span class="sd">            registrars keyed on a port number or a payload protocol identifier.</span>
+<span class="sd">            Implied when ``kind`` is :data:`None`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If ``code`` is not a member of ``kind`` and, with</span>
+<span class="sd">            ``number``, not an :class:`int` either. A member of another enum is</span>
+<span class="sd">            rejected even where an :class:`int` is accepted, and so is a</span>
+<span class="sd">            :class:`bool`, which would otherwise key ``0`` or ``1``</span>
+<span class="sd">            (:issue:`2269`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">number</span> <span class="ow">or</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="n">member</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">member</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="s1">'an int'</span>
+    <span class="k">elif</span> <span class="n">number</span><span class="p">:</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'an int or a member of </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'a member of </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span>
+    <span class="k">if</span> <span class="n">member</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: code must be </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s1">, not a member of '</span>
+                            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: code must be </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s1">, not </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>
