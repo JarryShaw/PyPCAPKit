@@ -249,6 +249,9 @@ NOT_A_COPY = {
         'record header length',
     ('pcapkit/protocols/internet/icmp.py', 'version == 6'):
         'ICMPv6, the ICMP of IP version 6 (:rfc:`4443`), not the Next Header offset',
+    ('pcapkit/protocols/internet/igmpv3.py', 'len(record_list) <= num_group_records <= 65535'):
+        "the 16-bit Number of Group Records field's maximum (:rfc:`3376#section-4.2.1`), not an "
+        'IP total length',
     ('pcapkit/protocols/internet/ip.py', 'version == 6'):
         'the IP version number, not the Next Header offset',
     ('pcapkit/protocols/internet/ipv6.py', "schema.hextet['version'] != 6"):
