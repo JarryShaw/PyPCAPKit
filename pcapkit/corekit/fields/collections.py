@@ -76,9 +76,22 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         item_type: Field type of the contained items.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+        count: Number of items a field before this one counts, for a list
+            running to the end of the data; if a callable is given, it should
+            return an integer value and accept the current packet as its only
+            argument. A negative value, the default, counts none.
 
     This field is used to represent a list of fields, as in the case of lists of
     constant-length-field items in a protocol.
+
+    A list whose octets hold fewer items than ``count`` ended with the data
+    before the rest, and reports them as :attr:`shortfall`, so that
+    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+    records the cut; the items absent are not made up.
+
+    .. versionchanged:: 1.6.0
+
+       Takes ``count`` (:issue:`2711`).
 
     """
 
@@ -92,9 +105,20 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         """Field is optional."""
         return True
 
+    @property
+    def count(self) -> 'int':
+        """Number of items counted; negative where none are."""
+        return self._count
+
+    @property
+    def shortfall(self) -> 'int':
+        """Number of the items counted that the octets last unpacked did not hold."""
+        return self._shortfall
+
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  item_type: 'Optional[FieldBase]' = None,
-                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None,
+                 count: 'int | Callable[[dict[str, Any]], int]' = -1) -> 'None':
         #self._name = '<list>'
         if not hasattr(self, '_name'):
             self._name = f'<{type(self).__name__[:-5].lower()}>'
@@ -107,6 +131,12 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             self._length_callback, length = length, -1
         self._length = length
         self._template = '0s'
+
+        self._count_callback = None
+        if not isinstance(count, int):
+            self._count_callback, count = count, -1
+        self._count = count
+        self._shortfall = 0
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
@@ -126,6 +156,8 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
             new_self._template = f'{new_self._length}s'
+        if new_self._count_callback is not None:
+            new_self._count = new_self._count_callback(packet)
         return new_self
 
     def pack(self, value: 'Optional[list[_TL]]', packet: 'dict[str, Any]') -> 'bytes':
@@ -306,6 +338,11 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                 data = field.unpack(buffer, packet)
 
             temp.append(data)
+
+        # NOTE: Items are read to the end of the octets, so those counted past them are
+        # not there to read: the data ended first, and the field reads short (#2711).
+        if self._count >= 0:
+            self._shortfall = max(self._count - len(temp), 0)
         return temp
 
 

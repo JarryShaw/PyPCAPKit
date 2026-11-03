@@ -1424,6 +1424,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             For construction arguments, please refer to
             :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
 
+        Note:
+            Inside a payload :meth:`_make_payload` rebuilds, the warnings of the
+            parse are dropped, as the layer the payload is rebuilt for parses
+            the same octets again and reports them there (:issue:`2711`). Those
+            of a parse that raises are reported as the error leaves, unless
+            :func:`~pcapkit.corekit.decorators.beholder` replaces the layer.
+
         """
         if file is None:
             _data = self.pack(**kwargs)
@@ -1439,8 +1446,20 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
-        #: pcapkit.protocols.data.data.Data: Parsed packet data.
-        self._info = self.unpack(length, **kwargs)
+        if not rebuilding.get():
+            #: pcapkit.protocols.data.data.Data: Parsed packet data.
+            self._info = self.unpack(length, **kwargs)
+            return
+
+        # NOTE: The enclosing layer parses these octets again and reports what
+        # they carry; as in ``_parse_next_layer``, a raise keeps them (#2711).
+        with hold_warnings() as held:
+            try:
+                self._info = self.unpack(length, **kwargs)
+            except Exception:
+                held.discard = beholding.get()
+                raise
+            held.discard = True
 
     def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
                           data: 'Optional[Type[_PT]]' = None,
@@ -2561,8 +2580,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         parses its own octets again. So rebuilding a frame stops at
         :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where parsing it did, rather than that many
         layers below each layer of it (:issue:`1610`). Nor does the payload's
-        parse warn of the limit: this protocol's own parse goes over the same
-        octets, so the rebuilt frame warns of it once, as the parsed one did.
+        parse report anything, the limit included: this protocol's own parse
+        goes over the same octets, so the rebuilt frame reports each warning,
+        and each error a next-layer fallback absorbs, once, as the parsed one
+        did (:issue:`2711`).
 
         Args:
             data: protocol data

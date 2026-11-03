@@ -738,6 +738,17 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             remainder itself rather than the same number of octets from beyond
             it, and record a cut inside it (:issue:`2685`).
 
+            A payload field of a declared length the data ends inside is a cut
+            like any other field's, so a layer whose octets fall short of the
+            length it declares records it, and its rebuild reads as cut
+            (:issue:`2711`). One declaring no length takes what the message
+            leaves, as a trailer or the next record does, which is no part of
+            the layer, and records nothing. A
+            :class:`~pcapkit.corekit.fields.collections.ListField` whose octets
+            hold fewer items than it counts records the cut too, the items
+            absent being its
+            :attr:`~pcapkit.corekit.fields.collections.ListField.shortfall`.
+
             The fields after the one the data ends inside find it in ``packet``
             as ``__short_read__``: the ``(name, octets read)`` pair recorded as
             the short read, or that of a
@@ -775,7 +786,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 # the declared length leaves, never less than nothing; a
                 # computed zero is an empty payload, not an unset one, or it
                 # would swallow the fields after it (#1275).
-                length = field.length
+                length = declared = field.length
                 if length < 0:
                     length = max(cast('int', packet['__length__']), 0)
 
@@ -786,6 +797,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 # that, so the bounded read is the same short read (#1975).
                 payload = data.read(min(length, sys.maxsize))
                 self.__buffer__[field.name] = payload
+                # NOTE: A payload of a declared length the data ends inside is recorded as
+                # any field is; one taking what is left, as a trailer does, is not (#2711).
+                if declared >= 0:
+                    self._note_short_read(field.name, length, payload, packet)
 
                 packet['__length__'] -= length
                 packet[field.name] = payload
@@ -823,6 +838,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 self._note_short_read(field.name, length, byte, packet)
 
             value = field.unpack(byte, packet.copy())
+            if isinstance(field, ListField) and field.shortfall > 0:
+                # NOTE: The data ended before the items the list counts, each at least an
+                # octet, so it declares that many past those read (#2711).
+                self._note_short_read(field.name, len(byte) + field.shortfall, byte, packet)
             if isinstance(field, SchemaField) and isinstance(value, Schema):
                 # NOTE: Kept on the nested schema rather than only in
                 # ``__buffer__``, so that the octets it left unread go wherever
@@ -1255,6 +1274,47 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             elif key == name:
                 self.__buffer__[key] = self.__buffer__[key][:count]
                 cut = True
+
+    def _frame_end_field(self) -> 'Optional[str]':
+        """The field this header's message runs to the end of its frame in, if any.
+
+        Returns:
+            The last field sized by what is left of the length the layer was
+            given, as :class:`~pcapkit.protocols.schema.link.gre.GRE`'s payload
+            is: the message runs on in it to the end of whatever holds it.
+            :data:`None` where the last field is instead fixed or sized by the
+            header, as UDP's payload is by its Length and an HTTP/2 frame's by
+            its own, since the message then ends where its header says
+            (:issue:`2711`), and where it is a list, as SCTP's chunks are, whose
+            buffer holds only what its items took. A payload field declaring no
+            length at all, as a trailer or the next record does, takes what the
+            message leaves, and is passed over.
+
+        Each field's length is resolved from this schema's own values under two
+        lengths given; the one that changes with them is sized by what was left.
+        :func:`~pcapkit.corekit.schema.shortread.keep_short_read` records a
+        frame the capture cut short on that field.
+
+        """
+        packet = dict(self.__dict__)
+        for name, field in reversed(self.__fields__.items()):
+            try:
+                if isinstance(field, ConditionalField) and not field.test(packet):
+                    continue
+                # NOTE: Lengths far past any message, so a ``max(..., 0)`` callback still moves.
+                resolved = field(dict(packet, __length__=0x7FFF_FFFE))
+                near, far = resolved.length, field(dict(packet, __length__=0x7FFF_FFFF)).length
+            except Exception:  # a length its own values cannot resolve
+                return None
+            if isinstance(field, PayloadField) and far < 0:
+                continue
+            # NOTE: A list keeps in its buffer only the octets its items took, not the
+            # rest of the layer's, so a cut recorded on it would drop them (#2711).
+            if any(isinstance(kind, (ListField, ForwardMatchField))
+                   for kind in (resolved, getattr(resolved, 'field', None))):
+                return None
+            return name if near != far else None
+        return None
 
 
 class _EnumRegistry(collections.defaultdict):

@@ -220,10 +220,13 @@ class TSOCutChecksumTests(unittest.TestCase):
                 wire.ethernet(ipv4(ipv4(msg, 1, tso=False), 4, tso=True), 0x0800), False),
         }
         for name, (whole, kept) in cases.items():
+            # A cut inside a declared length is recorded on the message, which then reads
+            # TRUNCATED without verifying (#2711), so a declared case is read whole.
+            captured = whole[:-CUT] if kept else whole
             with self.subTest(case=name), mock.patch.object(checksum, 'verify_message', spy):
                 seen.clear()
-                self.extract(pcap(ETHERNET, whole[:-CUT], len(whole)))
-                self.assertEqual(seen, [(len(whole) - CUT, len(whole)) if kept else None])
+                self.extract(pcap(ETHERNET, captured, len(whole)))
+                self.assertEqual(seen, [(len(captured), len(whole)) if kept else None])
         self.assertIsNone(frame_length.get())
 
     def test_parse_rebuild_is_exact(self) -> None:

@@ -97,7 +97,10 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
 
        The checksum is computed when :meth:`make` is given none, and verified
        on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`,
-       unless the enclosing IP layer is a fragment (:issue:`2470`).
+       unless the enclosing IP layer is a fragment (:issue:`2470`). A message
+       whose header records a cut reads
+       :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`
+       (:issue:`2711`).
 
     """
 
@@ -202,9 +205,16 @@ class ICMPv4(ICMP[Data_ICMPv4, Schema_ICMPv4],
         # NOTE: The checksum covers the whole message, with no pseudo-header (RFC 792);
         # an IP fragment carries only part of one.
         if config.CHECKSUM_VERIFY:
-            from pcapkit.corekit.checksum.internet import verify_message  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
+                ChecksumStatus, verify_message)
+            # NOTE: A message whose header records a cut leaves part of what the
+            # checksum covers uncaptured, as for GRE and IGMP (#2711).
+            if '__short_read__' in schema.__dict__:
+                status = ChecksumStatus.TRUNCATED
+            else:
+                status = verify_message(self.alias, self._data, schema.checksum, length=length)
             icmp.__update__([
-                ('checksum_status', verify_message(self.alias, self._data, schema.checksum, length=length)),
+                ('checksum_status', status),
             ])
 
         # NOTE: The quoted original datagram stays raw in the message body,
