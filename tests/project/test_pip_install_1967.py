@@ -73,10 +73,13 @@ LEFT_INLINE = frozenset({
     ('test', "Install the whole suite's dependencies on latest"),
     ('integration', "Install the whole suite's dependencies on latest"),
     ('test', 'Install coverage'),
+    ('coverage', 'Install coverage'),
     ('engine-tests', 'Write the per-cell script'),
 })
-#: The KTLO jobs, which run their twin's steps by alias (#1738).
-TWINS = {'test-ktlo': 'test', 'integration-ktlo': 'integration', 'pypcap-parity-ktlo': 'pypcap-parity'}
+#: The KTLO jobs, which run their twin's steps by alias (#1738), and #2751's
+#: ``test-latest-tier``, which runs ``test``'s.
+TWINS = {'test-ktlo': 'test', 'test-latest-tier': 'test', 'integration-ktlo': 'integration',
+         'pypcap-parity-ktlo': 'pypcap-parity'}
 #: Text only the inline install holds.
 INLINE = ('pip-install.log', 'did not install on', "s/^ERROR: //p")
 #: The covered steps outside ``unit-tests.yml``, as ``(workflow, job)``, each step whole,

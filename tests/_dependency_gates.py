@@ -1305,7 +1305,8 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
         # A KTLO job (#1738) writes its steps as a YAML alias of its gating
         # twin's -- `steps: *test-steps` -- so its slice holds no pytest line and
         # is skipped here: it installs and selects what the twin does, so it
-        # reaches no gate the twin does not.
+        # reaches no gate the twin does not. `test-latest-tier` (#2751) runs
+        # `test`'s steps the same way, a part of what that step selects.
         if 'python -m pytest' not in section:
             continue
 
@@ -1385,9 +1386,11 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       answer it -- and
       :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
 .test_ignore_flags_match_the_fixture_tier_constants`
-      is what keeps that equivalence true. It is the ``latest`` leg's: the
-      others also leave out the ``LATEST`` test tier,
-      :func:`~tests._tiers.latest_tier_paths` (#1958), which changes no answer,
+      is what keeps that equivalence true. It is what the ``latest`` legs run
+      between them, ``test``'s, which runs the ``ALL`` tier, and the halves of the
+      ``LATEST`` one that ``test-latest-tier`` runs by ``test``'s steps (#2751); the
+      other legs also leave out the ``LATEST`` test tier,
+      :func:`~tests._tiers.latest_tier_paths` (#1958). That changes no answer,
       since every leg shares the job's one install line. The same holds for a
       ``'fixture-tier'`` job with a ``latest`` leg, whose other legs ask for the
       ``ALL`` tier alone.

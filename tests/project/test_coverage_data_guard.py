@@ -6,10 +6,13 @@ with every test passing in both, and posted 85.85% against about 88.9%. A
 process that dies before coverage's atexit save leaves no ``.coverage.*`` file,
 and ``coverage combine`` reports what is left as the whole. So the ``Run unit
 tests`` step of :file:`.github/workflows/unit-tests.yml` logs every measured
-process (``COVERAGE_DEBUG=pid,process``), and ``Report coverage`` runs
-:file:`util/coverage_report.py` (#1967), whose check, before ``coverage combine``,
-fails the step, posting no total, unless the controller and each of its direct
-children -- the xdist workers -- saved a file.
+process (``COVERAGE_DEBUG=pid,process``), and ``Check coverage data`` runs
+:file:`util/coverage_report.py` (#1967), whose check fails the step unless the
+controller and each of its direct children -- the xdist workers -- saved a file.
+
+#2751: each coverage leg measures a part of the suite and uploads it only once
+that check passed; the ``coverage`` job's ``Report coverage`` combines the parts,
+and its ``combine`` stage posts no total unless every part arrived.
 
 The script's ``check`` stage is run here, both on hand-written logs and on one
 written by a real ``coverage run``, so the format it parses is the one coverage
@@ -19,6 +22,9 @@ emits rather than one assumed.
 
 from __future__ import annotations
 
+import contextlib
+import importlib.util
+import io
 import os
 import pathlib
 import re
@@ -45,10 +51,10 @@ CONTROLLER_CMD = ("['/x/coverage/__main__.py', 'run', '--rcfile=.github/coverage
 CHILD = re.compile(r"^ *(\d+)\.\w+: New process: cmd: \['-c'\]", re.M)
 
 
-def _report_step() -> str:
-    """The ``run:`` text of the ``Report coverage`` step."""
+def _report_step(name: str = 'Report coverage') -> str:
+    """The text of the step ``name``, ``Report coverage`` by default."""
     text = WORKFLOW.read_text(encoding='utf-8')
-    return text.split('- name: Report coverage', 1)[1].split('\n      - name:', 1)[0]
+    return text.split(f'- name: {name}\n', 1)[1].split('\n      - name:', 1)[0]
 
 
 def _has_coverage() -> bool:
@@ -92,8 +98,19 @@ class CoverageDataGuardTests(unittest.TestCase):
         self.assertIn('**Coverage not reported:**', self.summary.read_text(encoding='utf-8'))
 
     def test_the_check_runs_before_combine(self) -> None:
-        """``combine`` deletes the data files it merges, so the check must come first."""
-        self.assertIn('run: python util/coverage_report.py\n', _report_step())
+        """``combine`` deletes the data files it merges, so the check must come first.
+
+        #2751: on CI each leg checks its part, and uploads it only once the check
+        passed, before the ``coverage`` job combines the parts.
+
+        """
+        check = _report_step('Check coverage data')
+        self.assertIn('\n          python util/coverage_report.py check\n', check)
+        self.assertIn('id: coverage-check\n', check)
+        upload = _report_step('Upload coverage data')
+        self.assertIn("if: ${{ !cancelled() && matrix.coverage && steps.coverage-check.outcome == 'success' }}\n",
+                      upload)
+        self.assertIn('run: python util/coverage_report.py combine ', _report_step())
         log = _entry(100, 1, CONTROLLER_CMD) + _entry(101, 100, "['-c']") + _entry(102, 100, "['-c']")
         self.write(log, [100, 101])
         result = self.run_guard('all')
@@ -182,6 +199,87 @@ class CoverageDataGuardTests(unittest.TestCase):
         step = step.split('\n      - name:', 1)[0]
         self.assertIn('if: ${{ !cancelled() && matrix.coverage }}', step)
         self.assertIn(f'path: {LOG}', step)
+
+
+class CoveragePartsTests(unittest.TestCase):
+    """#2751: the ``coverage`` job combines every leg's part, or posts no total."""
+
+    def setUp(self) -> None:
+        self.tempdir = pathlib.Path(tempfile.mkdtemp(prefix='coverage-parts-'))
+        self.addCleanup(shutil.rmtree, self.tempdir, ignore_errors=True)
+        self.summary = self.tempdir / 'summary.md'
+        self.summary.touch()
+
+    def part(self, name: str, outcome: str, pids: 'list[int]') -> 'list[pathlib.Path]':
+        """A part as a leg uploads it: its data files, and its tests step's outcome."""
+        part = self.tempdir / name
+        part.mkdir()
+        (part / 'coverage-tests-outcome').write_text(f'{outcome}\n', encoding='utf-8')
+        files = [part / f'.coverage.{name}.pid{pid}.Xabcdefgh' for pid in pids]
+        for path in files:
+            path.touch()
+        return files
+
+    def gather(self, *parts: str) -> 'tuple[int, str, str]':
+        """``gather(parts)`` in the temporary directory: its status and outcome, and what it printed."""
+        spec = importlib.util.spec_from_file_location('coverage_report_2751', SCRIPT)
+        module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        sys.path.insert(0, str(SCRIPT.parent))
+        try:
+            spec.loader.exec_module(module)  # type: ignore[union-attr]
+        finally:
+            sys.path.remove(str(SCRIPT.parent))
+        out = io.StringIO()
+        cwd = os.getcwd()
+        os.chdir(self.tempdir)
+        try:
+            with unittest.mock.patch.dict(os.environ, {'GITHUB_STEP_SUMMARY': str(self.summary)}), \
+                    contextlib.redirect_stdout(out):
+                status, outcome = module.gather(list(parts))
+        finally:
+            os.chdir(cwd)
+        return status, outcome, out.getvalue()
+
+    def test_every_part_is_moved_in_and_the_outcome_spans_them(self) -> None:
+        moved = self.part('all', 'success', [100, 101]) + self.part('latest-half-1', 'failure', [200])
+        self.assertEqual(self.gather('all', 'latest-half-1')[:2], (0, 'failure'))
+        self.assertEqual(sorted(path.name for path in self.tempdir.glob('.coverage.*')),
+                         sorted(path.name for path in moved))
+        self.assertEqual(self.summary.read_text(encoding='utf-8'), '')
+        self.part('latest-half-2', 'success', [300])
+        self.assertEqual(self.gather('latest-half-2')[:2], (0, 'success'))
+
+    def test_a_missing_part_posts_no_total(self) -> None:
+        """A leg whose check failed uploads nothing, so its part is absent and nothing is combined."""
+        kept = self.part('all', 'success', [100])
+        status, _, out = self.gather('all', 'latest-half-1')
+        self.assertEqual(status, 1)
+        self.assertIn("::error::Coverage data is incomplete: no data from ['latest-half-1']", out)
+        self.assertIn('**Coverage not reported:**', self.summary.read_text(encoding='utf-8'))
+        self.assertTrue(all(path.exists() for path in kept))
+        self.assertEqual(list(self.tempdir.glob('.coverage.*')), [])
+
+    def test_the_parts_combined_are_the_ones_the_legs_upload(self) -> None:
+        """``all`` from ``test``'s ``latest`` leg, and one per half of ``test-latest-tier``."""
+        # pylint: disable=import-outside-toplevel
+        from tests import _tiers, _workflows
+        from tests.project.test_ktlo_legs_stay_green_1672 import interpolate
+        from tests.project.test_python_matrix_tiers_1633 import legs
+
+        jobs = _workflows.load(WORKFLOW)['jobs']
+        upload = next(step for step in jobs['test']['steps'] if step.get('name') == 'Upload coverage data')
+        covered = [leg for job in ('test', 'test-latest-tier') for leg in legs('unit-tests.yml', job)
+                   if leg.get('coverage')]
+        self.assertEqual(sorted(leg.get('half') for leg in covered if leg.get('half')),
+                         [str(half) for half in _tiers.LATEST_TIER_HALVES])
+        names = [interpolate(upload['with']['name'], {'matrix': leg}) for leg in covered]
+        self.assertEqual(names, ['coverage-data-all'] + [f'coverage-data-latest-half-{half}'
+                                                         for half in _tiers.LATEST_TIER_HALVES])
+        download = next(step for step in jobs['coverage']['steps'] if step.get('name') == 'Download coverage data')
+        self.assertEqual(download['with'], {'pattern': 'coverage-data-*', 'path': 'coverage-data'})
+        report = next(step for step in jobs['coverage']['steps'] if step.get('name') == 'Report coverage')
+        self.assertEqual(report['run'], 'python util/coverage_report.py combine '
+                         + ' '.join(f'coverage-data/{name}' for name in names))
 
 
 class WorkerSessionFinishSaveTests(unittest.TestCase):

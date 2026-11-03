@@ -208,7 +208,10 @@ def matrix(name: 'str', job_id: 'str', values: 'Optional[dict[str, str]]' = None
         found = resolve(name, job_id, raw, values)
         assert isinstance(found, dict), f'{name} {job_id} matrix is {raw!r}'
         return found
-    return {key: (resolve(name, job_id, value, values) if isinstance(value, str) else value)
+    # #2751: an axis may list a single output, as `test-latest-tier`'s version axis does.
+    return {key: (resolve(name, job_id, value, values) if isinstance(value, str)
+                  else [resolve(name, job_id, item, values) if isinstance(item, str) and READ.fullmatch(item.strip())
+                        else item for item in value] if isinstance(value, list) else value)
             for key, value in raw.items()}
 
 

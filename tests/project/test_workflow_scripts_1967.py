@@ -222,14 +222,63 @@ class TestCoverageReport(_Scratch):
         self.assertEqual(json.loads((self.tmp / 'coverage-comment' / 'coverage-summary.json').read_text())['total'],
                          100.0)
 
+    def test_the_combine_stage_on_two_real_parts(self) -> None:
+        """#2751: two legs' parts, each from a real ``coverage run`` that its check passed, combined."""
+        try:
+            import coverage  # pylint: disable=import-outside-toplevel
+        except ImportError:  # pragma: no cover
+            self.skipTest('needs coverage')
+        if tuple(int(x) for x in coverage.__version__.split('.')[:2]) < (7, 10):  # pragma: no cover
+            self.skipTest('needs coverage 7.10+ (`[run] patch`)')
+        (self.tmp / '.github').mkdir()
+        shutil.copy(ROOT / '.github' / 'coverage.toml', self.tmp / '.github' / 'coverage.toml')
+        (self.tmp / 'pcapkit').mkdir()
+        (self.tmp / 'pcapkit' / '__init__.py').write_text('def f(x):\n    if x:\n        return 1\n    return 2\n',
+                                                          encoding='utf-8')
+        env = {k: v for k, v in os.environ.items() if not k.startswith('COVERAGE')}
+        env.update(COVERAGE_DEBUG='pid,process', COVERAGE_DEBUG_FILE=str(self.tmp / 'coverage-processes.log'),
+                   PYTHONPATH=str(self.tmp))
+        # Both parts' tests passed, so `TESTS_OUTCOME`'s failure in the environment is not read.
+        for part, argument in (('all', 1), ('latest-half-1', 0)):
+            (self.tmp / 'spawn.py').write_text(
+                'import subprocess, sys\n'
+                f'subprocess.run([sys.executable, "-c", "import pcapkit; pcapkit.f({argument})"], check=True)\n',
+                encoding='utf-8')
+            subprocess.run([sys.executable, '-m', 'coverage', 'run', '--rcfile=.github/coverage.toml',  # nosec: B603
+                            'spawn.py'], cwd=self.tmp, env=env, check=True, timeout=120, capture_output=True)
+            checked = run('coverage_report.py', 'check', env=self.env(), cwd=self.tmp)
+            self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+            # What `Upload coverage data` takes, as `Download coverage data` lays it out.
+            folder = self.tmp / 'coverage-data' / f'coverage-data-{part}'
+            folder.mkdir(parents=True)
+            (folder / 'coverage-tests-outcome').write_text('success\n', encoding='utf-8')
+            for path in self.tmp.glob('.coverage.*'):
+                path.rename(folder / path.name)
+            (self.tmp / 'coverage-processes.log').unlink()
+        result = run('coverage_report.py', 'combine', 'coverage-data/coverage-data-all',
+                     'coverage-data/coverage-data-latest-half-1', env=self.env(), cwd=self.tmp)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('coverage-data/coverage-data-latest-half-1: 2 data files, tests success', result.stdout)
+        self.assertTrue((self.tmp / 'coverage-html' / 'index.html').is_file())
+        page = self.page.read_text(encoding='utf-8')
+        # Each part took one branch of `f`; only the two together cover it.
+        self.assertRegex(page, r'^earlier\n\*\*Coverage: 100\.00%\*\* \(unit tier, Python 3\.15, `012345678`\)\n')
+        self.assertEqual(json.loads((self.tmp / 'coverage-comment' / 'coverage-summary.json').read_text())['tests'],
+                         'success')
+
     def test_the_step_runs_the_script(self) -> None:
-        step = next(step for step in steps('unit-tests.yml', 'test')
-                    if step.get('name') == 'Report coverage')
-        self.assertEqual(step['run'], 'python util/coverage_report.py')
-        self.assertEqual(step['shell'], 'bash')
+        """#2751: each coverage leg checks its part, and ``coverage`` combines the parts."""
+        check = next(step for step in steps('unit-tests.yml', 'test') if step.get('name') == 'Check coverage data')
+        self.assertEqual(check['run'], "printf '%s\\n' \"$TESTS_OUTCOME\" > coverage-tests-outcome\n"
+                                       'python util/coverage_report.py check\n')
         # #2030: and the job's copy of its summary.
-        self.assertEqual(set(step['env']), {'SHA', 'PYTHON', 'TESTS_OUTCOME', 'JOB_SUMMARY_COPY'})
-        self.assertTrue(re.search(r"steps\.tests\.outcome", step['env']['TESTS_OUTCOME']))
+        self.assertEqual(set(check['env']), {'TESTS_OUTCOME', 'JOB_SUMMARY_COPY'})
+        self.assertTrue(re.search(r"steps\.tests\.outcome", check['env']['TESTS_OUTCOME']))
+        report = next(step for step in steps('unit-tests.yml', 'coverage') if step.get('name') == 'Report coverage')
+        self.assertTrue(report['run'].startswith('python util/coverage_report.py combine '), report['run'])
+        self.assertEqual(set(report['env']), {'SHA', 'PYTHON', 'JOB_SUMMARY_COPY'})
+        for step in (check, report):
+            self.assertEqual(step['shell'], 'bash')
 
 
 if __name__ == '__main__':

@@ -1,28 +1,38 @@
 # -*- coding: utf-8 -*-
-"""The coverage leg's report: check the data is whole, combine it, and summarise it (#1387).
+"""The coverage legs' report: check the data is whole, combine it, and summarise it (#1387).
 
-The ``Report coverage`` step of :file:`.github/workflows/unit-tests.yml`'s ``test``
-job runs ``python util/coverage_report.py`` on the coverage leg, after ``Run unit
-tests`` measured the unit tier with ``COVERAGE_DEBUG=pid,process`` logging every
-measured process to :data:`LOG`. In the checkout, in order:
+Each coverage leg of :file:`.github/workflows/unit-tests.yml` -- ``test``'s
+``latest`` leg, which runs the ``ALL`` tier, and each cell of ``test-latest-tier``,
+a half of the ``LATEST`` one (#2751) -- measures its part of the unit tier in ``Run
+unit tests``, with ``COVERAGE_DEBUG=pid,process`` logging every measured process to
+:data:`LOG`. Its ``Check coverage data`` step runs ``python util/coverage_report.py
+check``, and uploads the part only if that passed; the ``coverage`` job's ``Report
+coverage`` step then runs ``python util/coverage_report.py combine PART...``. In the
+checkout, in order:
 
-1. :func:`check`: a worker killed before its atexit save leaves no ``.coverage.*``
-   file, and ``coverage combine`` then reports the rest as the whole. So unless
-   the controller and every xdist worker, its direct children in the log, left
-   one, it writes **Coverage not reported** to the job summary and an
+1. :func:`check`, on each leg: a worker killed before its atexit save leaves no
+   ``.coverage.*`` file, and ``coverage combine`` then reports the rest as the
+   whole. So unless the controller and every xdist worker, its direct children in
+   the log, left one, it writes **Coverage not reported** to the job summary and an
    ``::error`` annotation, and exits 1 before anything is combined. #1423: each
    missing process is named with its command line and whether coverage's atexit
    handler ran in it at all.
-2. :data:`COMMANDS`: ``coverage combine``, ``report``, ``html`` into
+2. :func:`gather`, in ``coverage``: each part's data moved into the checkout, and
+   the same failure, naming the part, for one that did not arrive. Its
+   :data:`OUTCOME` file holds its tests step's ``outcome``.
+3. :data:`COMMANDS`: ``coverage combine``, ``report``, ``html`` into
    ``coverage-html/`` and ``json`` into ``coverage.json``, each under
    :data:`RCFILE`. The first to fail ends the script with its exit status.
-3. :func:`summary`: writes ``coverage-comment/coverage-summary.json``, the
+4. :func:`summary`: writes ``coverage-comment/coverage-summary.json``, the
    numbers coverage-comment.yml renders as a PR comment, and appends the
-   per-package table to ``$GITHUB_STEP_SUMMARY``. ``TESTS_OUTCOME``, the tests
-   step's ``outcome``, marks a total measured over failing tests as partial;
-   ``PYTHON`` and ``SHA`` name the leg and the commit.
+   per-package table to ``$GITHUB_STEP_SUMMARY``. The tests' outcome -- the parts'
+   outcomes under ``combine``, ``TESTS_OUTCOME`` otherwise -- marks a total
+   measured over failing tests as partial; ``PYTHON`` and ``SHA`` name the
+   version and the commit.
 
-``python util/coverage_report.py check`` and ``... summary`` run one stage alone.
+Run without a stage, it runs :func:`check`, :data:`COMMANDS` and :func:`summary` on
+one leg's data in the checkout. ``python util/coverage_report.py check`` and
+``... summary`` run one stage alone.
 
 """
 
@@ -34,6 +44,7 @@ import glob
 import json
 import os
 import re
+import shutil
 # coverage, with a fixed argument list and no shell.
 import subprocess  # nosec B404
 import sys
@@ -47,10 +58,12 @@ except ImportError:  # imported as util.<script>, or loaded by path, from the re
 if TYPE_CHECKING:
     from typing import Optional, TextIO
 
-__all__ = ['COMMANDS', 'LOG', 'RCFILE', 'check', 'main', 'summary']
+__all__ = ['COMMANDS', 'LOG', 'OUTCOME', 'RCFILE', 'check', 'gather', 'main', 'summary']
 
 #: The process log ``Run unit tests`` writes through ``COVERAGE_DEBUG_FILE``.
 LOG = 'coverage-processes.log'
+#: The file a coverage leg writes beside its data: its tests step's ``outcome`` (#2751).
+OUTCOME = 'coverage-tests-outcome'
 #: The coverage leg's configuration, relative to the checkout.
 RCFILE = '.github/coverage.toml'
 #: The coverage commands between :func:`check` and :func:`summary`, each run as ``python -m coverage``.
@@ -91,12 +104,41 @@ def check(log: 'str' = LOG) -> 'int':
         print(f'  pid {pid}: cmd {cmd.get(pid, "<no cmd line logged>")}')
         print(f'  pid {pid}: {atexit_.get(pid, "no atexit/sigterm entry -- died before saving")}')
     if len(root) != 1 or not workers or missing:
-        why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
-        _actions.summary(f'**Coverage not reported:** {why} (#1387); a total would under-count.')
-        # #2047: deliberately unescaped.
-        _actions.annotate('error', f'Coverage data is incomplete: {why}.', escape=False)
-        return 1
+        return _not_reported(f'no data file from pid {missing}' if missing
+                             else 'the process log is missing or unreadable')
     return 0
+
+
+def _not_reported(why: 'str') -> 'int':
+    """Say no total is reported, and why, in the job summary and an error annotation; 1."""
+    _actions.summary(f'**Coverage not reported:** {why} (#1387); a total would under-count.')
+    # #2047: deliberately unescaped.
+    _actions.annotate('error', f'Coverage data is incomplete: {why}.', escape=False)
+    return 1
+
+
+def gather(parts: 'list[str]') -> 'tuple[int, str]':
+    """Move each part's data files into the checkout, and the tests' outcome over every part (#2751).
+
+    Each of ``parts`` is a directory a coverage leg uploaded once :func:`check`
+    passed on it, holding its ``.coverage.*`` files and :data:`OUTCOME`. A missing
+    one fails as an incomplete check does, before anything is moved. The outcome is
+    ``success`` when every part's is, else the first part's that is not. Returns
+    the exit status and the outcome.
+
+    """
+    absent = [part for part in parts if not os.path.isfile(os.path.join(part, OUTCOME))]
+    if not parts or absent:
+        return _not_reported(f'no data from {absent}' if absent else 'no part was named'), ''
+    outcomes = []
+    for part in parts:
+        with open(os.path.join(part, OUTCOME), encoding='utf-8') as file:
+            outcomes.append(file.read().strip())
+        files = glob.glob(os.path.join(part, '.coverage.*'))
+        print(f'{part}: {len(files)} data files, tests {outcomes[-1]}')
+        for path in files:
+            shutil.move(path, os.path.basename(path))
+    return 0, next((outcome for outcome in outcomes if outcome != 'success'), 'success')
 
 
 def _percent(counts: 'collections.Counter[str]') -> 'float':
@@ -104,8 +146,12 @@ def _percent(counts: 'collections.Counter[str]') -> 'float':
     return 100.0 * (counts['covered_lines'] + counts['covered_branches']) / total if total else 100.0
 
 
-def summary(page: 'TextIO') -> 'int':
-    """Write ``coverage-comment/coverage-summary.json`` from ``coverage.json``, and the table to ``page``."""
+def summary(page: 'TextIO', tests: 'Optional[str]' = None) -> 'int':
+    """Write ``coverage-comment/coverage-summary.json`` from ``coverage.json``, and the table to ``page``.
+
+    ``tests`` is the tests' outcome, ``TESTS_OUTCOME`` when not given.
+
+    """
     with open('coverage.json', encoding='utf-8') as file:
         data = json.load(file)
     packages = collections.defaultdict(collections.Counter)  # type: dict[str, collections.Counter[str]]
@@ -116,7 +162,7 @@ def summary(page: 'TextIO') -> 'int':
     rows = [[name, counts['num_statements'], counts['missing_lines'], counts['num_branches'],
              counts['num_partial_branches'], round(_percent(counts), 2)] for name, counts in sorted(packages.items())]
     total = round(data['totals']['percent_covered'], 2)
-    tests = os.environ['TESTS_OUTCOME']
+    tests = os.environ['TESTS_OUTCOME'] if tests is None else tests
     os.makedirs('coverage-comment', exist_ok=True)
     with open('coverage-comment/coverage-summary.json', 'w', encoding='utf-8') as file:
         json.dump({'total': total, 'tests': tests, 'packages': rows, 'python': os.environ['PYTHON']}, file)
@@ -133,22 +179,30 @@ def summary(page: 'TextIO') -> 'int':
     return 0
 
 
-def _summary_to_job_page() -> 'int':
+def _summary_to_job_page(tests: 'Optional[str]' = None) -> 'int':
     with _actions.open_summary() as page:
-        return summary(page)
+        return summary(page, tests)
 
 
 def main(argv: 'Optional[list[str]]' = None) -> 'int':
     """Run ``stage``, or every stage in order; the exit status of the first to fail."""
     parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
-    parser.add_argument('stage', nargs='?', choices=('all', 'check', 'summary'), default='all',
-                        help='the stage to run alone (default: every stage)')
+    parser.add_argument('stage', nargs='?', choices=('all', 'check', 'combine', 'summary'), default='all',
+                        help='the stage to run alone, or `combine` to report the parts (default: every stage)')
+    parser.add_argument('parts', nargs='*', metavar='PART',
+                        help='for `combine`: each directory a coverage leg uploaded (#2751)')
     args = parser.parse_args(argv)
+    if args.parts and args.stage != 'combine':
+        parser.error('only `combine` takes parts')
     if args.stage == 'check':
         return check()
     if args.stage == 'summary':
         return _summary_to_job_page()
-    status = check()
+    tests = None  # type: Optional[str]
+    if args.stage == 'combine':
+        status, tests = gather(args.parts)
+    else:
+        status = check()
     if status:
         return status
     for command in COMMANDS:
@@ -156,7 +210,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         status = subprocess.run([sys.executable, '-m', 'coverage', *command], check=False).returncode  # nosec B603
         if status:
             return status
-    return _summary_to_job_page()
+    return _summary_to_job_page(tests)
 
 
 if __name__ == '__main__':
