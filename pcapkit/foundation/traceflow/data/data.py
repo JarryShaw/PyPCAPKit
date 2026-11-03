@@ -4,13 +4,12 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.utilities.pickle import ReduceAsProtocol2
 
 __all__ = ['TraceFlowData', 'Deferred', 'FrameRecord']
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import Any, Optional
+    from typing import Any, Mapping, Optional, SupportsIndex
 
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
@@ -67,7 +66,13 @@ class Deferred:
         return self.reassembly.datagram
 
 
-class FrameRecord(ReduceAsProtocol2, dict):
+#: Each attribute a :class:`FrameRecord` carries beside its mapping, to the
+#: dunder key holding it, which iteration, ``len()`` and the dumps leave out.
+_RECORD = {'packet': '__packet__', 'frame_info': '__frame_info__', 'time_epoch': '__time_epoch__'}
+
+
+@info_final
+class FrameRecord(Info):
     """A frame as a third-party engine's flow tracing adapter reports it.
 
     The mapping is the engine's own dissection of the frame, which every trace
@@ -76,7 +81,9 @@ class FrameRecord(ReduceAsProtocol2, dict):
     reads of a frame -- :meth:`PCAPIO._append_value
     <pcapkit.dumpkit.pcap.PCAPIO._append_value>` takes ``packet``,
     ``frame_info`` and ``time_epoch`` -- so ``trace_format='pcap'`` writes the
-    frame's record too (:issue:`1507`).
+    frame's record too (:issue:`1507`). A key of the mapping and an attribute
+    of the same name stay apart: ``record['packet']`` is the engine's, and
+    ``record.packet`` the frame's captured octets.
 
     Args:
         mapping: The engine's dissection of the frame.
@@ -84,36 +91,83 @@ class FrameRecord(ReduceAsProtocol2, dict):
         frame_info: The frame's PCAP record header.
         time_epoch: The frame's exact UNIX timestamp.
 
+    .. versionchanged:: 1.6.0
+
+       An :class:`~pcapkit.corekit.infoclass.Info` rather than a :obj:`dict`
+       subclass, so it is immutable and no :obj:`dict`. :meth:`to_dict`
+       exports the mapping alone, as any :class:`~pcapkit.corekit.infoclass.Info`
+       exports its keys, and drops the ``packet``, ``frame_info`` and
+       ``time_epoch`` attributes (:issue:`2726`).
+
     """
 
-    __slots__ = ('packet', 'frame_info', 'time_epoch')
+    #: The dunder keys holding the attributes, which ``repr`` and ``str``
+    #: leave out as well.
+    __excluded__ = list(_RECORD.values())
 
-    #: The frame's captured octets.
-    packet: 'bytes'
-    #: The frame's PCAP record header, with the fraction in the capture's own
-    #: resolution.
-    frame_info: 'Data_FrameInfo'
-    #: The frame's exact UNIX timestamp, from which
-    #: :meth:`PCAPIO._make_timestamp <pcapkit.dumpkit.pcap.PCAPIO._make_timestamp>`
-    #: tells which resolution ``frame_info.ts_usec`` is in. A
-    #: :class:`~decimal.Decimal`, since only that settles it exactly.
-    time_epoch: 'Decimal'
+    # NOTE: annotated for the type checker alone, since the attributes are no
+    # fields of the mapping, which is the engine's.
+    if TYPE_CHECKING:
+        #: The frame's captured octets.
+        packet: 'bytes'
+        #: The frame's PCAP record header, with the fraction in the capture's own
+        #: resolution.
+        frame_info: 'Data_FrameInfo'
+        #: The frame's exact UNIX timestamp, from which
+        #: :meth:`PCAPIO._make_timestamp <pcapkit.dumpkit.pcap.PCAPIO._make_timestamp>`
+        #: tells which resolution ``frame_info.ts_usec`` is in. A
+        #: :class:`~decimal.Decimal`, since only that settles it exactly.
+        time_epoch: 'Decimal'
 
-    def __init__(self, mapping: 'dict[str, Any]', *, packet: 'bytes',
+    def __init__(self, mapping: 'Mapping[str, Any]', *, packet: 'bytes',
                  frame_info: 'Data_FrameInfo', time_epoch: 'Decimal') -> 'None':
         super().__init__(mapping)
-        self.packet = packet
-        self.frame_info = frame_info
-        self.time_epoch = time_epoch
+        self.__dict__.update(zip(_RECORD.values(), (packet, frame_info, time_epoch)))
+
+    def __getattribute__(self, name: 'str') -> 'Any':
+        """Read an attribute, taking :attr:`packet`, :attr:`frame_info` and
+        :attr:`time_epoch` from the keys holding them.
+
+        So a mapping key of the same name never stands in for one of them.
+
+        Args:
+            name: Attribute name.
+
+        Raises:
+            AttributeError: If ``name`` is one of them and the record carries
+                none, as one :meth:`from_dict` builds from a mapping.
+
+        """
+        key = _RECORD.get(name)
+        if key is None:
+            return super().__getattribute__(name)
+        try:
+            return super().__getattribute__('__dict__')[key]
+        except KeyError:
+            raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}') from None
+
+    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'tuple[Any, ...]':
+        """Reduce to a call of :func:`_frame_record`, under every protocol.
+
+        A release before 1.6.0 reduces a record to it as well, so a pickle
+        loads on either side of 1.6.0.
+
+        Args:
+            protocol: Pickle protocol in use, which does not change the reduction.
+
+        Returns:
+            ``(_frame_record, (mapping, packet, frame_info, time_epoch))``.
+
+        """
+        return _frame_record, (dict(self), self.packet, self.frame_info, self.time_epoch)
 
 
-def _frame_record(mapping: 'dict[str, Any]', packet: 'bytes',
+def _frame_record(mapping: 'Mapping[str, Any]', packet: 'bytes',
                   frame_info: 'Data_FrameInfo', time_epoch: 'Decimal') -> 'FrameRecord':
-    """Rebuild a :class:`FrameRecord` pickled by a release before 1.6.0.
+    """Rebuild a pickled :class:`FrameRecord`.
 
-    Those pickles call this; a :class:`FrameRecord` reduces through
-    :class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` instead, which carries
-    the slots under every protocol (:issue:`2714`).
+    Its pickles call this under every protocol, as those of a release before
+    1.6.0 do.
 
     Args:
         mapping: The engine's dissection of the frame.

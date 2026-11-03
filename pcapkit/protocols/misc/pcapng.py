@@ -129,6 +129,7 @@ from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimpleP
 from pcapkit.protocols.data.misc.pcapng import \
     SystemdJournalExportBlock as Data_SystemdJournalExportBlock
 from pcapkit.protocols.data.misc.pcapng import TLSKeyLog as Data_TLSKeyLog
+from pcapkit.protocols.data.misc.pcapng import TLSKeyLogEntries as Data_TLSKeyLogEntries
 from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
 from pcapkit.protocols.data.misc.pcapng import UnknownOption as Data_UnknownOption
 from pcapkit.protocols.data.misc.pcapng import UnknownRecord as Data_UnknownRecord
@@ -225,8 +226,8 @@ if TYPE_CHECKING:
     from datetime import timedelta, timezone
     from decimal import Decimal
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import (IO, Any, Callable, ClassVar, Counter, DefaultDict, Optional, Tuple, Type,
-                        TypeVar, Union)
+    from typing import (IO, Any, Callable, ClassVar, Counter, DefaultDict, Mapping, Optional, Tuple,
+                        Type, TypeVar, Union)
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
@@ -4355,9 +4356,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         secrets = Data_TLSKeyLog(
-            # NOTE: each label's entries as an OrderedMultiInfo, which ``Info``
-            # does not do for a mapping held in a dict (#1484).
-            entries={label: OrderedMultiInfo(entry) for (label, entry) in schema.entries.items()},
+            # NOTE: each label's entries become an OrderedMultiInfo as the model
+            # stores them (#1484, #2726).
+            entries=Data_TLSKeyLogEntries(schema.entries),
         )
         # NOTE: the log text is kept as well, since :attr:`entries` holds
         # neither its comments nor the order of its lines, and a rebuild writes
@@ -6856,7 +6857,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_secrets_tls(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_TLSKeyLog]' = None, *,
-                          entries: 'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
+                          entries: 'Optional[Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
                           data: 'Optional[str]' = None,
                           **kwargs: 'Any') -> 'Schema_TLSKeyLog':
         """Make PCAP-NG TLS Key Log secrets.
@@ -6893,7 +6894,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             )
         if secrets is not None:
             # NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.
-            entries = cast('dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]', secrets.entries)
+            entries = cast('Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]', secrets.entries)
 
         if entries is None:
             entries = {}

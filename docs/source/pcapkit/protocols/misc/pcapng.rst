@@ -835,6 +835,10 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.misc.pcapng.TLSKeyLogEntries
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.misc.pcapng.TLSKeyLog
    :members:
    :show-inheritance:

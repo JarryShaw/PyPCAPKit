@@ -65,6 +65,7 @@ from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as PCAPNG_Simpl
 from pcapkit.protocols.data.misc.pcapng import \
     SystemdJournalExportBlock as PCAPNG_SystemdJournalExportBlock
 from pcapkit.protocols.data.misc.pcapng import TLSKeyLog as PCAPNG_TLSKeyLog
+from pcapkit.protocols.data.misc.pcapng import TLSKeyLogEntries as PCAPNG_TLSKeyLogEntries
 from pcapkit.protocols.data.misc.pcapng import UnknownBlock as PCAPNG_UnknownBlock
 from pcapkit.protocols.data.misc.pcapng import UnknownOption as PCAPNG_UnknownOption
 from pcapkit.protocols.data.misc.pcapng import UnknownRecord as PCAPNG_UnknownRecord
@@ -98,8 +99,8 @@ __all__ = [
     'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
     'PCAPNG_PACK_FlagsOption', 'PCAPNG_PACK_HashOption',
     'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
-    'PCAPNG_DSBSecrets', 'PCAPNG_UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
-    'PCAPNG_ZigBeeAPSKey',
+    'PCAPNG_DSBSecrets', 'PCAPNG_UnknownSecrets', 'PCAPNG_TLSKeyLogEntries', 'PCAPNG_TLSKeyLog',
+    'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey', 'PCAPNG_ZigBeeAPSKey',
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
