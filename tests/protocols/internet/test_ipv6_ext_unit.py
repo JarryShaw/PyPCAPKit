@@ -250,12 +250,12 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """GitHub issue #2477: the ``Raw`` the walk ends on is the upper layer,
         not parsed again, so the header's parser runs once and no
         ``SchemaWarning`` is left from the header it replaced. The refusal is
-        handled, so it logs nothing (#2588).
+        handled, so it logs nothing (#2588). A header the capture cut short is not
+        refused at all, since it parses as the schema's short read (#2694).
         """
         from unittest import mock
 
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
-        from pcapkit.const.ipv6.option import Option
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -263,12 +263,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.utilities.logging import logger
 
         udp = int(TransType.UDP)
-        truncated = (f'Field options has an option that runs past the end of the data: '
-                     f'{Option.PadN!r} at offset 0 of 6, with only 1 octet(s) of it present')
         for form, hopopt, error in (
             ('malformed', bytes([udp, 0, 0x05, 10]) + bytes(4) + _udp_bytes(b'ok'),
              'HOPOPT: [OptNo 5] invalid format'),
-            ('truncated', bytes([udp, 0, 1]), truncated),
         ):
             raw = _ipv6_bytes(int(EH.HOPOPT), hopopt)
             with self.subTest(form=form):

@@ -445,18 +445,39 @@ class OptionField(ListField, Generic[_TS]):
             ``packet`` as ``__option_padding__`` so that the next fields can
             be aware of it.
 
+            A ``__capture_cut__`` key in ``packet``, false, says that the data
+            ends at the length the enclosing layer declares for it, so that an
+            area the data ends inside runs past that length rather than being
+            cut short by the capture, as
+            :class:`~pcapkit.protocols.internet.ipv6.IPv6` tells the extension
+            headers it walks (:issue:`2694`). Absent, the data may end at a cut.
+
         Raises:
             FieldValueError: If an option consumes nothing from ``buffer``, since
                 the loop below has then no way to get past it.
             ProtocolError: If an option that begins with octets present reads
-                past the end of the data, unless :meth:`_accepts_short_read`
-                accepts it.
+                past the end of the data, unless the data ends inside the area,
+                the option's fields fit it and :meth:`_accepts_cut` keeps it, or
+                :meth:`_accepts_short_read` accepts it. Or if the area runs past
+                the end of the data where ``packet`` gives ``__capture_cut__``
+                as false, the data ending at the length the enclosing layer
+                declares rather than at a cut.
 
         .. versionchanged:: 1.5.0
 
            An option that begins with octets present and reads past the end of
            the data raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
            where it was parsed from zero-filled octets (:issue:`1325`).
+
+        .. versionchanged:: 1.6.0
+
+           Where the data ends inside the area, as a capture cut short leaves
+           it, the list ends with the data, and an option it ends inside is
+           kept if its fields fit the area, so :meth:`Schema.unpack
+           <pcapkit.protocols.schema.schema.Schema.unpack>` records the cut as
+           a short read rather than either error being raised
+           (:issue:`2694`). See :meth:`_accepts_cut`, and ``__capture_cut__``
+           above.
 
         """
         length = self._length
@@ -529,6 +550,24 @@ class OptionField(ListField, Generic[_TS]):
         # nothing at all and is left to the end-of-option-list and progress
         # handling below, which is what an option area declared longer than its
         # octets relies on.
+        #
+        # Unless the data ends inside the area: fewer octets are left than it
+        # declares, as a capture cut short leaves them. An option the cut lands
+        # inside, or in front of, is not one running past its area, and is read
+        # as the short read :meth:`Schema.unpack` records (#2694). An enclosing
+        # layer that knows the data ends at the length it declares, not at a cut,
+        # says so with ``__capture_cut__`` false in ``packet``, and the area then
+        # runs past that length.
+        if isinstance(buffer, bytes):
+            present = len(buffer)
+        else:
+            try:
+                present = file.seek(0, io.SEEK_END) - start
+                file.seek(start, io.SEEK_SET)
+            except (OSError, ValueError):  # a stream that cannot seek to its end counts as whole
+                present = self._length
+        short = present < self._length
+        cut = short and packet.get('__capture_cut__', True)
         tracker = file = _ShortReadTracker(file)  # type: ignore[assignment]
 
         temp = []  # type: list[_TS]
@@ -547,6 +586,20 @@ class OptionField(ListField, Generic[_TS]):
                 byte = file.read(field.length)
                 code = field.unpack(byte, packet.copy())
                 consumed = len(byte)
+
+            # NOTE: The data ends where this option would begin, inside the area: the
+            # cut leaves no option to read, so the list ends with the data, and
+            # :meth:`Schema.unpack` records the cut from the rest of the area left
+            # as ``option_padding`` (#2694). Where no cut ends it, the area runs
+            # past the data. A registry whose end-of-option-list code is 0 reads its
+            # exhausted type as that code, and stops at it below.
+            if not consumed and short and code != self._eool:
+                if cut:
+                    break
+                raise ProtocolError(
+                    f'Field {self.name} has an option area that runs past the end of '
+                    f'the data: {self._length} octet(s) declared, with {present} present'
+                )
             schema = self._registry[code]
 
             # rewind to the beginning of the option
@@ -554,7 +607,14 @@ class OptionField(ListField, Generic[_TS]):
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
-            if tracker.short and consumed > 0 and not self._accepts_short_read(data):
+
+            # NOTE: An option the cut lands inside stands when the fields it
+            # declares fit the area, as ``__length__`` left at zero or more shows,
+            # and it read the octets there (#2694). One whose fields reach past
+            # the area runs past both (#1325).
+            stands = (cut and packet['__length__'] >= 0 and file.tell() > offset
+                      and self._accepts_cut(data))
+            if tracker.short and consumed > 0 and not stands and not self._accepts_short_read(data):
                 raise ProtocolError(
                     f'Field {self.name} has an option that runs past the end of '
                     f'the data: {code!r} at offset {offset - start} of '
@@ -604,7 +664,8 @@ class OptionField(ListField, Generic[_TS]):
         """Whether an option that read past the end of the data may stand.
 
         Args:
-            option: Option just unpacked, which read short.
+            option: Option just unpacked, which read short and ran past its area
+                or past the data at the end of the area.
 
         Returns:
             :data:`False`, so that :meth:`unpack` refuses the option
@@ -617,3 +678,20 @@ class OptionField(ListField, Generic[_TS]):
 
         """
         return False
+
+    def _accepts_cut(self, option: '_TS') -> 'bool':  # pylint: disable=unused-argument
+        """Whether an option the data ends inside, inside its area, may stand.
+
+        Args:
+            option: Option just unpacked, which read short where the data ends
+                short of the area declared, and whose fields fit the area.
+
+        Returns:
+            :data:`True`, so that :meth:`unpack` keeps the option, as the short
+            read :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+            records (:issue:`2694`). A list that keeps such an area as the octets
+            captured instead may override this, as
+            :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField` does.
+
+        """
+        return True

@@ -582,13 +582,18 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             #     proto = None
             #     break
 
+            # NOTE: The Payload Length left bounds this header. With every octet of
+            # it present, a header longer than that runs past it, malformed and
+            # not cut by the capture, which its option area is told (#2694).
+            context = dict(packet or {}, __capture_cut__=len(payload) < raw_len)
+
             # make protocol name
             # NOTE: Counted after every header walked, as it would be were each
             # dissected by the one before it. ESP dissects its decrypted
             # payload even when walked, and those layers count on from here.
             token = frame_depth.set(depth + len(_protos))
             try:
-                next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
+                next_ = self._import_next_layer(proto, packet=context, version=6, extension=True,
                                                 payload=payload)  # type: ignore[misc,call-arg]
             finally:
                 frame_depth.reset(token)

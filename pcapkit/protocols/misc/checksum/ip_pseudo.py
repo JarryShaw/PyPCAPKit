@@ -425,12 +425,16 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             The code the walk stopped on, and the octets of the headers ahead of
             it. The code is an extension header's if ``ip`` did not parse that
             header: a malformed one (:issue:`2477`), one past the header limit,
-            or one not captured.
+            or one not captured, or cut short by the capture (:issue:`2694`).
 
         """
         code, before = ip.info.next, 0
         for _, header in ip.extension_headers.items(multi=True):
             if code in _TERMINAL_HEADERS or code == Enum_TransType.ESP:
+                break
+            # NOTE: A header the capture cut short is its schema's short read
+            # (#2694), and as unwalked as one not captured at all.
+            if header.info.get('__short_read__') is not None:
                 break
             before += header.length
             code = header.info.next

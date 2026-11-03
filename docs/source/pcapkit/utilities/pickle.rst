@@ -5,8 +5,8 @@ Pickle Reductions
 
 :mod:`pcapkit.utilities.pickle` holds the :mod:`pickle` reductions several
 :mod:`pcapkit` classes share, so each is written once (:issue:`2714`).
-:class:`ReduceAsProtocol2` lets a :class:`typing.Generic` subclass or a slotted
-:class:`dict` pickle under protocol 0 and 1, on GraalPy as on CPython;
+:class:`ReduceAsProtocol2` lets a :class:`typing.Generic` subclass or a class with
+``__slots__`` pickle under protocol 0 and 1, on GraalPy as on CPython;
 :class:`ReduceToName` reduces a singleton to the module-level name holding it;
 :class:`ReduceToItems` reduces a multi-valued mapping to a call of its class on its
 item pairs; and :func:`reduce_to` makes one instance reduce to a call of a given

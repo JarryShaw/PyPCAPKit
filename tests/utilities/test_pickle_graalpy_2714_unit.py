@@ -208,7 +208,7 @@ class SharedReductionTests(unittest.TestCase):
                                  (IPv4.analyze, TransType.UDP, payload))
                 self.assertEqual(copy().info, deferred().info)
 
-    def test_a_frame_record_pickles_with_its_slots(self) -> None:
+    def test_a_frame_record_pickles_with_its_attributes(self) -> None:
         from pcapkit.foundation.traceflow.data.data import FrameRecord
         from pcapkit.protocols.data.misc.pcap.frame import FrameInfo
 

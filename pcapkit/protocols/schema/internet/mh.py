@@ -132,7 +132,7 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional
+    from typing import Any, Callable, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
@@ -648,6 +648,37 @@ def cga_public_key_length(pkt: 'dict[str, Any]') -> 'int':
     return length
 
 
+def item_list_length(width: 'int', label: 'str', offset: 'int' = 0) -> 'Callable[[dict[str, Any]], int]':
+    """Return a callback sizing a list of fixed-width items from a ``length`` field.
+
+    Args:
+        width: Octets of each item.
+        label: Name of the structure the list is in, for the error message,
+            as ``'OptNo'`` for a mobility option.
+        offset: Octets the ``length`` counts ahead of the list.
+
+    Returns:
+        A callback returning the octets of the list.
+
+    The callback raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a
+    length that leaves part of an item, which
+    :class:`~pcapkit.corekit.fields.collections.ListField` would otherwise refuse
+    with a :exc:`~pcapkit.utilities.exceptions.FieldValueError`, logged even
+    where the refusal is handled (:issue:`2694`). A length short of ``offset``
+    is left to the parser of the structure, which refuses it.
+
+    .. versionadded:: 1.6.0
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        length = pkt['length'] - offset
+        if length > 0 and length % width:
+            raise ProtocolError(f'MH: [{label} {pkt["type"]}] invalid length: {pkt["length"]}, '
+                                f'not a whole number of {width}-octet items')
+        return length
+    return callback
+
+
 @schema_final
 class MH(Schema):
     """Header schema for MH packets.
@@ -959,7 +990,7 @@ class MultiPrefixExtension(CGAExtension, code=Enum_CGAExtension.Multi_Prefix):
     })
     #: Prefixes.
     prefixes: 'list[int]' = ListField(
-        length=lambda pkt: pkt['length'] - 4,
+        length=item_list_length(8, 'CGA Ext', offset=4),
         item_type=UInt64Field(),
     )
 
@@ -1618,7 +1649,7 @@ class FlowSummaryOption(Option, code=Enum_Option.Flow_Summary_Mobility_Option):
 
     #: Flow identifiers being refreshed.
     fid: 'list[int]' = ListField(
-        length=lambda pkt: pkt['length'],
+        length=item_list_length(2, 'OptNo'),
         item_type=UInt16Field(),
     )
 
@@ -1692,7 +1723,7 @@ class BIDReferenceSuboption(FlowIdentificationSuboption,
 
     #: Referenced binding identifiers.
     bid: 'list[int]' = ListField(
-        length=lambda pkt: pkt['length'],
+        length=item_list_length(2, 'FID SubOpt'),
         item_type=UInt16Field(),
     )
 

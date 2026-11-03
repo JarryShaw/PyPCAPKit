@@ -30,8 +30,8 @@ House Conventions
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
      :mod:`pcapkit.corekit` a support module belongs in, where a context
-     variable lives, and where a schema helper used outside the schema layer or
-     outside its own protocol lives;
+     variable lives, where a schema helper used outside the schema layer or
+     outside its own protocol lives, and what reads a capture cut;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`;

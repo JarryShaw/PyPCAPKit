@@ -92,7 +92,7 @@ from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as Schema_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import BaseError, CaughtByCaller, ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -398,7 +398,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
     def make(self,
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | ProtocolBase | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'', *,
+             len: 'Optional[int]' = None,  # pylint: disable=redefined-builtin
              **kwargs: 'Any') -> 'Schema_HOPOPT':
         """Make (construct) packet data.
 
@@ -406,6 +407,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             next: Next header type.
             options: Hop-by-Hop Options.
             payload: Payload of current protocol.
+            len: ``Hdr Ext Len`` to declare, rather than the one the options
+                fill. A header the capture cut short declares one its parsed
+                options do not fill, which :meth:`from_data` passes on, so that
+                the rebuild declares it too (:issue:`2694`). Options that fill
+                less than it declares are not padded out to it, so the header
+                then declares more octets than it packs, as a cut one does.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -415,7 +422,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             ProtocolError: If ``next``, or the type of an option, is a name, a
                 :obj:`bool`, or a member or code that does not fit in one
                 octet; or if the options make a header too long for its
-                one-octet ``Hdr Ext Len``.
+                one-octet ``Hdr Ext Len``, or longer than ``len`` declares.
+
+        .. versionchanged:: 1.6.0
+
+           Takes ``len``, the ``Hdr Ext Len`` of a header the capture cut short
+           (:issue:`2694`).
 
         """
         next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
@@ -431,6 +443,11 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         # NOTE: ``_make_hopopt_options`` has aligned the header, so this division
         # is exact and rounding up is unnecessary.
         length = self._make_uint((total_length - 6) // 8, bits=8, name='Hdr Ext Len')
+        if len is not None:
+            length = self._make_uint(len, bits=8, name='Hdr Ext Len')
+            if length * 8 + 6 < total_length:
+                raise ProtocolError(f'{self.alias}: Hdr Ext Len {length} declares fewer octets '
+                                    f'than the options take ({total_length})')
 
         return Schema_HOPOPT(
             next=next_value,
@@ -541,10 +558,13 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: A header the capture cut short declares an area its parsed options
+        # do not fill, and is rebuilt with the Hdr Ext Len it declared (#2694).
         return {
             'next': data.next,
             'options': data.options,
             'payload': cls._make_payload(data),
+            'len': data.length // 8 - 1 if data.get('__short_read__') is not None else None,
         }
 
     def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
@@ -612,7 +632,16 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Raises:
             ProtocolError: If the parsed options do not total exactly ``length``
-                octets.
+                octets, unless the capture cut the header short, as its short
+                read records. Or if the capture cut an option short and its
+                parser refuses the zeros it lacks, or its maker does not write
+                the octets captured back.
+
+        .. versionchanged:: 1.6.0
+
+           A header the capture cut short reads as the short read it is, and an
+           option it cuts as its parser reads the zeros it lacks, rather than
+           being refused (:issue:`2694`).
 
         """
         counter = 0                   # length of read options
@@ -626,16 +655,34 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
                 meth_name = f'_read_opt_{name}'
                 meth = cast('OptionParser',
                             getattr(self, meth_name, self._read_opt_none))
+                maker = cast('OptionConstructor',
+                             getattr(self, f'_make_opt_{name}', self._make_opt_none))
             else:
-                meth = name[0]
-            data = meth(schema, options=options)
+                meth, maker = name
+
+            # NOTE: The capture cut this option short, as its short read records, so
+            # the octets it lacks read as zeros. It stands if its parser takes those
+            # zeros and its maker writes the octets captured back (#2694); otherwise
+            # it is refused, as an option running past the data is (#1325).
+            if '__short_read__' in schema.__dict__:
+                try:
+                    with CaughtByCaller(BaseError):
+                        data = meth(schema, options=options)
+                        made = maker(dscp, data).pack()[:len(schema)]
+                except BaseError as error:
+                    raise ProtocolError(f'{self.alias}: [OptNo {dscp}] option cut short: {error}') from error
+                if made != bytes(schema):
+                    raise ProtocolError(f'{self.alias}: [OptNo {dscp}] option cut short does not '
+                                        'rebuild as captured')
+            else:
+                data = meth(schema, options=options)
 
             # record option data
             options.add(dscp, data)
             counter += len(schema)
 
-        # check threshold
-        if counter != length:
+        # check threshold, which a header the capture cut short falls short of (#2694)
+        if counter != length and '__short_read__' not in self.__header__.__dict__:
             raise ProtocolError('HOPOPT: invalid format')
         return options
 

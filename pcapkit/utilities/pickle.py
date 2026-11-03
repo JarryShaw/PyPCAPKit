@@ -8,7 +8,7 @@
 :mod:`pcapkit` classes share, so each is written once (:issue:`2714`):
 
 * :class:`ReduceAsProtocol2` reduces under every protocol as protocol 2 does, so a
-  :class:`typing.Generic` subclass or a slotted :class:`dict` pickles under
+  :class:`typing.Generic` subclass or a class with ``__slots__`` pickles under
   protocol 0 and 1, on GraalPy as on CPython;
 * :class:`ReduceToName` reduces a singleton to the module-level name holding it;
 * :class:`ReduceToItems` reduces a multi-valued mapping to a call of its class on
@@ -56,8 +56,7 @@ class ReduceAsProtocol2:
     :class:`~pcapkit.corekit.infoclass.Info`,
     :class:`~pcapkit.protocols.schema.schema.Schema`,
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and
-    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, and before
-    :class:`dict` on :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`.
+    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
 
     .. versionadded:: 1.6.0
 
