@@ -50,6 +50,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   short, and is kept as ``Raw`` with nothing logged behind ``LinuxSLL`` or a
   ``LINKTYPE_FRELAY`` capture. A header the capture cut short, before its NLPID
   included, rebuilds as captured and logs nothing (:issue:`2710`, :pr:`2719`).
+  The data model records as ``pad`` whether the one ``0x00`` pad octet
+  :rfc:`2427#section-3` allows ahead of an NLPID was captured, so a frame
+  rebuilds with its pad or without it, as captured; ``make()`` takes ``pad``,
+  by default writing one ahead of a SNAP header or an NLPID of 0, and refuses
+  ``pad=False`` with an NLPID of 0 (:issue:`2716`, :pr:`2721`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.netlink.Netlink`, a dissector for
   the fixed 16-octet ``nlmsghdr`` framing of Linux's kernel/userspace IPC
@@ -430,6 +435,21 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   the layer states no length for it: an IPv4 Total Length of 0, or an AH that
   IPv4 carries, hands the frame's lengths on (:issue:`2689`, :pr:`2699`).
 
+* **Added** -- :mod:`pcapkit.utilities.pickle`, holding the :mod:`pickle`
+  reductions classes share (:issue:`2714`, :pr:`2722`):
+  :class:`~pcapkit.utilities.pickle.ReduceAsProtocol2`, which reduces under
+  every protocol as protocol 2 does;
+  :class:`~pcapkit.utilities.pickle.ReduceToName`, which reduces a singleton to
+  the name holding it; :class:`~pcapkit.utilities.pickle.ReduceToItems`, which
+  reduces a multi-valued mapping to a call of its class on its item pairs; and
+  :func:`~pcapkit.utilities.pickle.reduce_to`, which makes one instance reduce
+  to a given call. :class:`~pcapkit.corekit.infoclass.Info`,
+  :class:`~pcapkit.protocols.schema.schema.Schema` and the reassembly engines
+  take ``ReduceAsProtocol2``, so on GraalPy they pickle under protocols 0 and
+  1, where 1.5.x raised ``TypeError: typing.Generic() takes no arguments``.
+  ``pcapkit.corekit.fields.numbers._reduce_unregistered_member`` is removed
+  with no alias, ``reduce_to`` installing the reduction it built.
+
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
   known extension header whose dedicated parser raises is now the upper layer,
   parsed once as :class:`~pcapkit.protocols.misc.raw.Raw`, and the walk stops
@@ -593,7 +613,20 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``HOPOPT: invalid RPL reserved flags: 32``, where it read
   ``HOPOPT: [OptNo 99] invalid RPL reserved flags: 32``. ``MH._decode_signed``,
   which decoded the geo-location degrees, is removed with no alias; the base
-  class's ``_read_sint`` decodes them.
+  class's ``_read_sint`` decodes them. A fixed-size octet field given octets of
+  any other width raises as well, where 1.5.x padded or cut them, so
+  ``IPv4(checksum=b'\x01')`` raises
+  ``IPv4: invalid checksum: must be 2 octets, not b'\x01'``, where it wrote
+  ``0100``, and a 300-octet CALIPSO checksum raises, where its first two
+  octets were written (:issue:`2676`, :pr:`2691`). The fields are the IPv4,
+  MH, HIP, IPX and OSPF checksums, the CALIPSO checksum, MH cookies and keygen
+  tokens, HIP opaque and payload data, IPX addresses, and the reserved and
+  unused octets of the IPv6 extension headers, MH, HIP and OSPF; ICMP's,
+  IGMP's and IP_Pseudo's makers, added above, check theirs the same way.
+  A model parsed from a capture, one cut inside such a field included,
+  rebuilds as captured. IPv4's Timestamp option refuses a slot count past what
+  its 40 octets hold, nine timestamps or four address and timestamp pairs, as
+  ``IPv4: invalid timestamp count: 10``, where 1.5.x cut it to fit.
 
 * **Changed** -- **a breaking change to** building
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` blocks: a field given a value
@@ -608,7 +641,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   their signed 32 and 64 bits, where they wrote it masked, and the Interface
   Description Block's snaplen refusal reads
   ``PCAP-NG: invalid [IDB] snaplen: 4294967296``, where it read
-  ``PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: 4294967296``.
+  ``PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: 4294967296``. A
+  ZigBee NWK or APS key of other than 16 octets raises
+  ``PCAP-NG: invalid [ZigBee NWK Key] key: must be 16 octets, not ...`` say,
+  where 1.5.x zero-filled or cut it (:issue:`2676`, :pr:`2691`).
 
 * **Changed** -- **a breaking change to** construction: a ``make()`` field
   holding an enumeration takes the member or an :class:`int` code, resolved
@@ -991,6 +1027,20 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   cut inside an option area packs back the octets read, where a TCP header
   schema of data offset 8 cut 25 octets in gave 32 octets from ``bytes()`` and
   23 from ``pack()`` (:issue:`2680`, :issue:`2685`, :pr:`2682`).
+
+* **Fixed** -- :class:`~pcapkit.protocols.transport.tcp.TCP`'s maker, given an
+  option as raw octets, raised :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+  for a kind its registry does not name, such as 255, and :exc:`IndexError` for
+  empty octets. The kind resolves as a ``(code, arguments)`` pair's does, so
+  255 builds, and empty octets raise
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2708`,
+  :pr:`2724`). ``HIP(next=59)`` wrote HIP version 6, taking the IP version for
+  it, and writes 2, ``make()``'s default from :rfc:`7401#section-5.1`. HIP's
+  ``ENCRYPTED`` maker refuses an IV given with a cipher that takes none, which
+  1.5.x counted in the parameter's Length but did not write. A parsed
+  ``ENCRYPTED`` parameter takes its cipher from the ``HIP_CIPHER`` before it,
+  where 1.5.x warned ``HIP: [ParamNo 641] missing HIP_CIPHER parameter`` and
+  read an AES IV as encrypted data.
 
 * **Fixed** -- a :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Decryption
   Secrets Block that ``make()`` built from a parsed ZigBee NWK or APS key
