@@ -127,10 +127,12 @@ undoes that work in the tree.
    git apply /tmp/fix.diff
    python -m pytest tests/<path>/test_<name>_unit.py -q    # must pass
 
-CI measures one leg, the ``test`` job's Python 3.15 cell in
-:file:`.github/workflows/unit-tests.yml`, with branch coverage over :mod:`pcapkit`
-configured by :file:`.github/coverage.toml`; :file:`.github/workflows/coverage-comment.yml`
-posts the totals on the pull request. Locally, measure with ``coverage run`` rather than
+CI measures the ``test`` job's Python 3.15 cell in
+:file:`.github/workflows/unit-tests.yml`, which runs the ``ALL`` tier, and each half
+of the ``LATEST`` tier in its ``test-latest-tier`` job, with branch coverage over
+:mod:`pcapkit` configured by :file:`.github/coverage.toml`; its ``coverage`` job
+combines them, and :file:`.github/workflows/coverage-comment.yml` posts the totals on
+the pull request. Locally, measure with ``coverage run`` rather than
 a pytest plugin, which this project does not install, and narrow at report time --
 ``[tool.coverage.run]``'s ``source`` in :file:`pyproject.toml` takes precedence over
 ``--include`` at run time:

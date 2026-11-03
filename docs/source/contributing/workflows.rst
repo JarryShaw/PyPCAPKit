@@ -454,13 +454,14 @@ uploads it, and a second dispatch is needed only if it did not.
 suite, on ``latest``) but also ``changelog`` (checks ``CHANGELOG.md`` against its
 source entry) and ``python-versions``, which reads ``gate``'s version (see
 `Python Versions`_ below). It skips the rest -- the matrix jobs, ``test``,
-``test-ktlo``, ``integration``, ``integration-ktlo``, ``engine-tests`` (a job per
-engine, each looping over its Python versions), ``pypcap-parity``,
-``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run
-once for this commit from Unit Tests' own ``push`` trigger (and, all but
-``unittest-ordering``, which runs on ``main`` pushes only, from its
+``test-ktlo``, ``test-latest-tier``, ``integration``, ``integration-ktlo``,
+``engine-tests`` (a job per engine, each looping over its Python versions),
+``pypcap-parity``, ``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which
+has already run once for this commit from Unit Tests' own ``push`` trigger (and,
+all but ``unittest-ordering``, which runs on ``main`` pushes only, from its
 ``pull_request`` trigger), so running any of them again per caller would test
-the same commit several times over. It also skips ``changes``,
+the same commit several times over. It also skips ``changes``, ``coverage``,
+which combines what ``test`` and ``test-latest-tier`` measured,
 ``project-tests``, whose project pins ``gate``'s full suite runs too (see
 `Project Pins`_ below), and ``required-checks`` (see `Required Status
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
@@ -647,10 +648,12 @@ writes its state as it then stands.
 Coverage (:issue:`1063`)
 -------------------------------------------------------------------------
 
-Coverage is measured inside an existing leg rather than by a workflow of its
+Coverage is measured inside existing legs rather than by a workflow of its
 own: the ``Python 3.15`` leg of ``test`` (matrix key ``coverage: true``) runs
-its unchanged pytest selection under ``coverage run
---rcfile=.github/coverage.toml``. That rcfile repeats
+its unchanged pytest selection, the ``ALL`` tier, under ``coverage run
+--rcfile=.github/coverage.toml``, and each cell of ``test-latest-tier`` runs its
+half of the ``LATEST`` tier the same way (:issue:`2751`, see `Test Tiers`_
+below). That rcfile repeats
 :file:`pyproject.toml`'s ``[tool.coverage.*]`` settings
 (``tests/project/test_coverage_rcfile.py`` asserts it) and adds ``parallel``
 and ``patch = ["subprocess"]``, without which only the xdist controller is
@@ -660,14 +663,16 @@ and re-importing pcapkit, one module's peak RSS was 4.17 GiB under the default
 killed the runner. ``sigterm = true`` and a ``pytest_sessionfinish`` hook in
 :file:`tests/conftest.py` that saves each xdist worker's data early keep a
 worker that dies during shutdown from losing its file
-(:issue:`1423`). The leg's
-``Report coverage`` step then runs :file:`util/coverage_report.py`, which fails,
-posting no total, unless the controller and every xdist worker saved a data file
-(:issue:`1387`), and otherwise
-writes the total and a per-package table to the job summary. The leg uploads the HTML
-report as the ``coverage-html`` artifact (30 days), with the bare numbers as the
-``coverage-summary`` artifact and the per-process debug log as
-``coverage-processes-log``.
+(:issue:`1423`). Each such leg's
+``Check coverage data`` step then runs :file:`util/coverage_report.py`'s ``check``,
+which fails the leg unless the controller and every xdist worker saved a data file
+(:issue:`1387`), and only then uploads the leg's part as a ``coverage-data-*``
+artifact; the per-process debug log goes up as ``coverage-processes-log-*`` either
+way. The ``coverage`` job combines the parts: its ``Report coverage`` step's
+``combine`` fails, posting no total, unless every part arrived, and otherwise
+writes the total and a per-package table to the job summary, partial where a
+part's tests failed. It uploads the HTML report as the ``coverage-html`` artifact
+(30 days), with the bare numbers as the ``coverage-summary`` artifact.
 
 The PR comment comes from **Coverage Comment** (:file:`coverage-comment.yml`),
 not from ``unit-tests.yml``. That file is also a reusable workflow, a called
@@ -679,8 +684,9 @@ treats the artifact as untrusted: it never checks out pull-request code. It
 takes the PR number from the API, as the open PR whose head is the run's head
 sha, and renders its own Markdown from validated numbers. It edits one comment,
 found by a hidden marker, on each push. The first line says when the tests
-failed. Neither workflow's coverage step is a required check. A push run has no
-pull request, so its report goes to Discussions instead (see `CI Reports`_).
+failed. ``coverage`` gates through ``Required checks passed``, as the coverage legs
+do; Coverage Comment is not a required check. A push run has no pull request, so its
+report goes to Discussions instead (see `CI Reports`_).
 
 CI Timing Review (:issue:`1538`)
 ---------------------------------------------------------------------------------
@@ -715,11 +721,13 @@ thread (see `CI Reports`_). It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.
 
-Per-test timings come from the ``test`` and ``integration`` legs, and from
-:file:`experimental.yml`'s, which run pytest with ``--durations=30
+Per-test timings come from the ``test``, ``test-latest-tier`` and ``integration``
+legs, and from :file:`experimental.yml`'s, which run pytest with ``--durations=30
 --durations-min=1.0`` and ``--junitxml`` and upload the file as
 ``junit-unit-<version>``, ``junit-integration-<version>`` or
-``junit-experimental-<version>`` (14 days). Each upload step is ``continue-on-error``,
+``junit-experimental-<version>`` (14 days); a half of the ``LATEST`` tier uploads
+``junit-unit-<version>-latest-half-<half>``, which the review reads as part of its
+``latest`` leg's (:issue:`2751`). Each upload step is ``continue-on-error``,
 so an artifact-service outage cannot fail a leg. pytest writes one ``<testcase>`` per test however
 many subtests it runs -- about 0.6 MB per unit leg (estimate) -- but the suite's
 ``tests=`` count includes subtests, so the review reads each testcase's ``time``. The
@@ -862,6 +870,9 @@ Anything else, and a diff the script cannot list, is code: ``code: true`` and
    * - ``unit-tests.yml``: ``test``, ``integration``
      - skipped
      - the ``latest`` leg alone, the coverage leg included
+   * - ``unit-tests.yml``: ``test-latest-tier``, ``coverage``
+     - skipped
+     - runs
    * - ``unit-tests.yml``: ``test-ktlo``, ``integration-ktlo``, ``engine-tests``,
        ``pypcap-parity``, ``pypcap-parity-ktlo``
      - skipped
@@ -890,11 +901,12 @@ Each job skips by its own ``if:``, so its check reads ``skipped``, never ``cance
 which GitHub counts against the commit. ``test`` and ``integration`` pick their matrix
 with ``fromJSON``, from :file:`util/python_versions.py`'s ``test-latest`` and
 ``integration-latest`` outputs on a test-only diff. ``Required checks passed``
-accepts ``skipped`` from ``test``, ``integration``, ``engine-tests`` and
-``pypcap-parity`` only where ``changes`` succeeded and said docs-only, and from
-``engine-tests`` and ``pypcap-parity`` only where it said test-only; a skipped
-``test`` or ``integration`` fails a test-only diff, and ``project-tests`` must
-succeed on every diff (see `Required Status Checks`_).
+accepts ``skipped`` from ``test``, ``test-latest-tier``, ``coverage``,
+``integration``, ``engine-tests`` and ``pypcap-parity`` only where ``changes``
+succeeded and said docs-only, and from ``engine-tests`` and ``pypcap-parity`` only
+where it said test-only; a skipped ``test``, ``test-latest-tier``, ``coverage`` or
+``integration`` fails a test-only diff, and ``project-tests`` must succeed on every
+diff (see `Required Status Checks`_).
 
 The ``Compat Python`` legs are required contexts, so they cannot be skipped the same
 way. A conditionally skipped job reports ``Success`` (docs.github.com,
@@ -979,9 +991,9 @@ without defining it.
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, with ``Lint``, and
 nothing else. It ``needs:`` the gating jobs of ``unit-tests.yml`` --
-``test``, ``integration``, ``engine-tests`` and ``pypcap-parity``, plus
-``project-tests``, the one run of the project pins, and ``changes`` for the
-docs-only path -- and checks each result explicitly, in its "Check every
+``test``, ``test-latest-tier``, ``coverage``, ``integration``, ``engine-tests``
+and ``pypcap-parity``, plus ``project-tests``, the one run of the project pins,
+and ``changes`` for the docs-only path -- and checks each result explicitly, in its "Check every
 required job succeeded" step. Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
@@ -1396,12 +1408,12 @@ Which legs run which tier:
 
    * - Leg
      - Tiers
-   * - ``test`` on ``latest``, the coverage leg
-     - ``ALL`` and ``LATEST``, less the project pins
+   * - ``test-latest-tier``, on ``latest``, a half per cell
+     - ``LATEST``, less the project pins
    * - ``project-tests``
      - the project pins
-   * - ``test`` off ``latest``, PyPy's among them, ``test-ktlo``, ``experimental``,
-       ``windows``
+   * - ``test``, ``latest``'s coverage leg and PyPy's among them, ``test-ktlo``,
+       ``experimental``, ``windows``
      - ``ALL``
    * - ``integration`` on ``latest``
      - ``ALL`` and ``LATEST``
@@ -1412,8 +1424,9 @@ Which legs run which tier:
      - ``ALL`` and ``LATEST``
 
 Each leg asks :file:`tests/_tiers.py` at run time, so no workflow lists a tier: a
-``test`` leg off ``latest`` passes each module ``latest_tier_paths()`` prints as an
-``--ignore``, and an ``integration`` or ``pypcap-parity`` leg off ``latest`` runs
+``test`` leg passes each module ``latest_tier_paths()`` prints as an ``--ignore``, a
+``test-latest-tier`` cell runs the modules ``latest_tier_half()`` prints for its
+half, and an ``integration`` or ``pypcap-parity`` leg off ``latest`` runs
 ``fixture_tier_paths('ALL')``, which drops each ``LATEST`` path and node ID and
 replaces a directory holding a ``LATEST`` module by its ``ALL`` ones, since pytest
 applies no ignore to a path it was handed. :file:`tests/test_tier_guard.py` checks
@@ -1421,10 +1434,18 @@ that every module resolves to exactly one tier and runs the steps to check what 
 does with the answer, and :file:`tests/project/test_sweeps_on_latest_only_1732.py`
 does the same for every leg the tier file gives.
 
-The project pins stay in a job of their own rather than joining the ``latest`` leg:
-``project-tests`` runs in parallel with the coverage leg, the slowest of ``test``'s,
-rather than lengthening it under coverage, and it is also the job that runs the docs
-readers on a docs-only diff.
+The ``LATEST`` tier is a job of its own, halved at ``LATEST_TIER_BOUNDARY`` in
+:file:`tests/_tiers.py` (:issue:`2751`), as ``project`` was cut for
+``unittest-ordering`` (:issue:`2254`): a half is every module sorting before the
+boundary or the rest, so a new module runs in exactly one, and the boundary is chosen
+so the halves take about the same CI time. Run with the ``ALL`` tier on one leg under
+coverage, it held ``test``'s ``latest`` leg past half its cap. The workflow's comment
+above ``test-latest-tier`` records the measurement; move the boundary to rebalance.
+
+The project pins stay in a job of their own rather than joining a coverage leg:
+``project-tests`` runs in parallel with the coverage legs rather than lengthening
+one under coverage, and it is also the job that runs the docs readers on a docs-only
+diff.
 
 Latest CPython runs the whole suite, as the sanity check and the gate (the owner's
 ruling on :issue:`1958`), so it also installs what the whole suite gates on. In ``test`` and
@@ -1432,6 +1453,8 @@ ruling on :issue:`1958`), so it also installs what the whole suite gates on. In 
 the ``latest`` leg alone, after the install every leg runs, and adds the engines pip
 can install there (``Scapy``, ``PyShark``), html5lib through ``vendor``, Sphinx and
 the pinned sphinx-autodoc-typehints through ``docs``, and emoji through ``cli``.
+Each cell of ``test-latest-tier``, which runs ``test``'s steps, is a ``latest`` leg
+too, and runs that step as well.
 ``project-tests`` and ``gate``, which run on ``latest`` only, install the same set in
 their ``Install package and test dependencies`` and ``Install package, test and
 generator dependencies`` steps. The other legs keep their install lines and run the
@@ -1458,17 +1481,18 @@ loader or a child process, counts as importing it, and so does a file that does
 not parse. Every pin is in the ``LATEST`` test tier (see `Test Tiers`_ above),
 and a ``tests/project`` module marked ``__tier__ = 'ALL'`` is no pin. The modules
 that import ``pcapkit`` are no pins either; those the tiers send to ``latest`` run
-on ``test``'s ``latest`` leg, under coverage.
+in a half of ``test-latest-tier``, under coverage.
 
 ``project-tests`` runs the pins under pytest, with ``test``'s flags, on ``latest``,
 on every push to ``main`` and every pull request but a docs-only one, which runs
 :file:`tests/project` under plain unittest instead (see `Light Pull Requests
 (#2243)`_), and ``required-checks`` needs it.
 Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
-``--ignore``, ``latest``'s coverage leg included, which measures only ``pcapkit``.
-``latest`` asks ``project_pin_paths()`` at run time, and every other leg
-``latest_tier_paths()``, which holds each pin, as ``integration`` asks for its
-selection, so no workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
+``--ignore``, through ``latest_tier_paths()``, which holds each pin, and
+``latest_tier_half()`` leaves them out of ``test-latest-tier``, whose coverage
+measures only ``pcapkit``, and ``project-tests`` runs what ``project_pin_paths()``
+prints. Each asks at run time, as ``integration`` asks for its selection, so no
+workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
 the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
 full suite runs the pins with everything else. ``unittest-ordering``'s ``project``
 cells keep them, as they ask how a module runs in one interpreter, in file order and
@@ -1488,7 +1512,8 @@ several gigabytes on every run. So every pytest and unittest command in
 :file:`.github/workflows/unit-tests.yml` runs as ``python util/cap_file_size.py
 python -m ...``: ``test``'s ``Run unit tests``; ``integration``'s,
 ``pypcap-parity``'s and ``gate``'s ``Run full test suite``; the KTLO twins of
-``test``, ``integration`` and ``pypcap-parity``, which share their steps; the
+``test``, ``integration`` and ``pypcap-parity``, and ``test-latest-tier``, which
+share their steps; the
 engine cells that ``engine-tests``' ``Write the per-cell script`` writes;
 ``unittest-ordering``'s cells; and each run step of ``project-tests``.
 
@@ -1536,7 +1561,9 @@ to a script. Each script's docstring says what it does; each has tests under
        ``experimental.yml`` and of ``python-compatibility.yml``.
      - No.
    * - :file:`util/coverage_report.py`
-     - ``Report coverage`` in ``unit-tests.yml``'s ``test``, on the coverage leg.
+     - ``Check coverage data`` in ``unit-tests.yml``'s ``test`` and
+       ``test-latest-tier``, on each coverage leg, as ``coverage_report.py check``,
+       and ``Report coverage`` in its ``coverage``, as ``coverage_report.py combine``.
      - No.
    * - :file:`util/pytest_shards.py`
      - ``Run unit tests`` in ``experimental.yml``'s ``experimental``, on GraalPy's leg

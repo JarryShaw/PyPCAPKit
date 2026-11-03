@@ -61,13 +61,14 @@ CLASSIFIER = ROOT / 'util' / 'classify_changes.py'
 #: ``Classify the diff``'s command, as the job's checkout root runs it.
 CLASSIFY_RUN = '        run: python3 util/classify_changes.py\n'
 
-#: The legs a docs-only pull request may skip.
-LEGS = ('test', 'integration', 'engine-tests', 'pypcap-parity')
+#: The legs a docs-only pull request may skip; #2751 split the ``LATEST`` tier and
+#: the coverage report out of ``test``.
+LEGS = ('test', 'test-latest-tier', 'coverage', 'integration', 'engine-tests', 'pypcap-parity')
 #: The legs a test-only pull request may skip (#2243); the others run ``latest`` alone.
 TEST_ONLY_SKIPS = ('engine-tests', 'pypcap-parity')
 #: The variable each leg's result reaches the gate's step in.
-LEG_ENV = {'test': 'TEST', 'integration': 'INTEGRATION', 'engine-tests': 'ENGINE_TESTS',
-           'pypcap-parity': 'PYPCAP_PARITY'}
+LEG_ENV = {'test': 'TEST', 'test-latest-tier': 'TEST_LATEST_TIER', 'coverage': 'COVERAGE',
+           'integration': 'INTEGRATION', 'engine-tests': 'ENGINE_TESTS', 'pypcap-parity': 'PYPCAP_PARITY'}
 
 
 def job(name: 'str') -> 'str':
@@ -118,7 +119,7 @@ class TestRequiredChecksSkips(unittest.TestCase):
     def gate(self, code: 'str', legs: 'str', project: 'str', changes: 'str' = 'success',
              test_only: 'str' = 'false', **override: 'str') -> 'int':
         """The gate's exit status with every leg reporting ``legs`` unless overridden."""
-        results = {'TEST': legs, 'INTEGRATION': legs, 'ENGINE_TESTS': legs, 'PYPCAP_PARITY': legs}
+        results = dict.fromkeys(LEG_ENV.values(), legs)
         results.update(override)
         env = dict(os.environ, CHANGES=changes, CODE=code, TEST_ONLY=test_only, PROJECT_TESTS=project,
                    **results)
@@ -159,7 +160,7 @@ class TestRequiredChecksSkips(unittest.TestCase):
 
     def test_every_leg_is_checked_on_its_own(self) -> None:
         """One failing leg among passing ones fails the gate, on either path."""
-        for env_name in ('TEST', 'INTEGRATION', 'ENGINE_TESTS', 'PYPCAP_PARITY'):
+        for env_name in LEG_ENV.values():
             with self.subTest(leg=env_name):
                 for code, legs, project, odd in (('true', 'success', 'success', 'failure'),
                                                  ('true', 'success', 'success', 'skipped'),
@@ -290,12 +291,13 @@ class TestJobGating(unittest.TestCase):
     """Which jobs run on which events, read off their job-level keys."""
 
     def test_each_leg_skips_only_on_a_docs_only_diff(self) -> None:
-        """Each leg is gated on ``changes`` by a job-level ``if:``."""
+        """Each leg is gated on ``changes`` by a job-level ``if:``; ``coverage`` waits on the legs it combines."""
         for name in LEGS:
             with self.subTest(job=name):
                 head = header(job(name))
                 self.assertIn("needs.changes.outputs.code != 'false'", head)
-                self.assertRegex(head, r'(?m)^    needs: \[changes, python-versions\]$')
+                needs = 'changes, test, test-latest-tier' if name == 'coverage' else 'changes, python-versions'
+                self.assertRegex(head, rf'(?m)^    needs: \[{needs}\]$')
 
     def test_project_tests_runs_on_every_diff_and_never_duplicates_test(self) -> None:
         """#1954: ``project-tests`` runs on every diff, but not under ``gate-only``, whose ``gate``

@@ -204,14 +204,14 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
 def pytest_sessionfinish(session: 'pytest.Session') -> 'None':
     """Write an xdist worker's coverage data out before the process can die (#1423).
 
-    The coverage leg of ``unit-tests.yml`` measures each worker through
+    Each coverage leg of ``unit-tests.yml`` measures each worker through
     coverage's ``patch = ["subprocess"]`` hook, and that measurement is saved by
     an :mod:`atexit` handler -- so it is written *after* the worker has already
     reported its results and told the controller it is finished. Anything that
     kills the process in that window takes the whole worker's data with it, and
     takes it silently: pytest has its results, so every test still passes, while
     ``coverage combine`` merges one file fewer and reports the rest as the whole.
-    That is #1387, and the guard in ``Report coverage`` turns it into a failed
+    That is #1387, and the guard in ``Check coverage data`` turns it into a failed
     step rather than a quietly low number -- four times on 2026-10-08.
 
     Saving here closes the window instead of policing it. :func:`cov.save` is
@@ -220,7 +220,7 @@ def pytest_sessionfinish(session: 'pytest.Session') -> 'None':
     this point on and a worker that dies during shutdown costs at most the arcs
     executed after this hook.
 
-    A no-op outside that one leg: it returns immediately unless the process is
+    A no-op outside those legs: it returns immediately unless the process is
     an xdist worker (``workerinput``) whose coverage was auto-started by the
     subprocess patch.
 

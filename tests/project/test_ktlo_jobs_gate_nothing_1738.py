@@ -181,12 +181,17 @@ class TestTheKTLOJobsKeepTheirMechanics(unittest.TestCase):
                 self.assertEqual(outputs[twin], f'${{{{ steps.read.outputs.{twin} }}}}')
 
     def test_the_steps_are_one_yaml_node(self) -> None:
-        """An alias, not a copy, so the twins cannot drift: ``steps: &<job>-steps`` and ``steps: *<job>-steps``."""
+        """An alias, not a copy, so the twins cannot drift: ``steps: &<job>-steps`` and ``steps: *<job>-steps``.
+
+        #2751: ``test-latest-tier`` runs ``test``'s steps by the same alias.
+
+        """
         text = WORKFLOW.read_text(encoding='utf-8')
         for job_id, twin in TWINS.items():
             with self.subTest(job=twin):
                 self.assertEqual(len(re.findall(rf'(?m)^    steps: &{re.escape(job_id)}-steps$', text)), 1)
-                self.assertEqual(len(re.findall(rf'(?m)^    steps: \*{re.escape(job_id)}-steps$', text)), 1)
+                aliases = re.findall(rf'(?m)^  ([\w-]+):\n(?:    .*\n|\n)*?    steps: \*{re.escape(job_id)}-steps$', text)
+                self.assertEqual(aliases, [twin, 'test-latest-tier'] if job_id == 'test' else [twin])
 
 
 def ci_timing() -> 'Any':

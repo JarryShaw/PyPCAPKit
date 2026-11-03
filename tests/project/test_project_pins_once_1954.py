@@ -94,14 +94,17 @@ class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
         self.assertEqual(pins - modules, set())
 
     def test_every_pin_is_in_the_latest_tier(self) -> None:
-        """#1958: the pins are ``LATEST`` modules, so the legs off ``latest`` leave them out with the rest of
-        the tier, and ``latest`` leaves out the pins alone."""
+        """#1958: the pins are ``LATEST`` modules, so every ``test`` leg leaves them out with the rest of
+        the tier, and #2751: the ``LATEST`` tier's halves leave out the pins alone."""
         pins = set(_tiers.project_pin_paths())
         self.assertTrue(pins)
         self.assertEqual({_tiers.module_tier(pin) for pin in pins}, {_tiers.TIER_LATEST})
         self.assertLess(pins, set(_tiers.latest_tier_paths()))
+        halves = {path for half in _tiers.LATEST_TIER_HALVES for path in _tiers.latest_tier_half(half)}
+        self.assertEqual(halves & pins, set())
+        self.assertEqual(halves | pins, {path for path in _tiers.latest_tier_paths() if _tiers.is_unit_tier(path)})
         run = str(step(('unit-tests.yml', 'test'), 'Run unit tests')['run'])
-        self.assertIn(_tiers.PROJECT_PINS_SELECTOR, run)
+        self.assertIn(_tiers.LATEST_HALF_SELECTOR, run)
         self.assertIn(_tiers.LATEST_TIER_SELECTOR, run)
 
 

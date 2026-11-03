@@ -93,14 +93,15 @@ SAVE, UPLOAD = 'Name the job summary', 'Upload the job summary'
 #: Each job that writes its summary, as ``(workflow, job)``: the KTLO summaries,
 #: the coverage table, the engine cells' table and the experimental summaries.
 SUMMARISED = (
-    ('unit-tests.yml', 'test'), ('unit-tests.yml', 'test-ktlo'), ('unit-tests.yml', 'integration'),
+    ('unit-tests.yml', 'test'), ('unit-tests.yml', 'test-ktlo'), ('unit-tests.yml', 'test-latest-tier'),
+    ('unit-tests.yml', 'coverage'), ('unit-tests.yml', 'integration'),
     ('unit-tests.yml', 'integration-ktlo'), ('unit-tests.yml', 'engine-tests'),
     ('unit-tests.yml', 'pypcap-parity'), ('unit-tests.yml', 'pypcap-parity-ktlo'),
     ('experimental.yml', 'experimental'), ('experimental.yml', 'windows'),
     ('python-compatibility.yml', 'compatibility'),
 )
 #: The steps that copy the summary through util/_actions.py's JOB_SUMMARY_COPY.
-COPYING = ('Report coverage', 'KTLO summary', 'Experimental summary')
+COPYING = ('Check coverage data', 'Report coverage', 'KTLO summary', 'Experimental summary')
 #: The shell's copy of a summary line.
 TEE = '| tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"'
 

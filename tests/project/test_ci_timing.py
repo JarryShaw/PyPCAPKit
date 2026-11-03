@@ -52,7 +52,8 @@ from unittest import mock
 
 import requests
 
-from tests import _workflows
+from tests import _tiers, _workflows
+from tests.project.test_ktlo_legs_stay_green_1672 import interpolate
 from tests.project.test_python_versions_1660 import NO_TOMLLIB
 from tests.project.test_python_versions_1660 import legs as matrix_legs
 from tests.project.test_python_versions_1660 import matrix, tomllib
@@ -1135,9 +1136,16 @@ class TestTimingArtifacts(unittest.TestCase):
     def test_every_unit_and_integration_leg_uploads_its_timings(self) -> 'None':
         blocks = step_blocks(self.text, 'Upload test timings')
         names = [re.search(r'(?m)^          name: (.+)$', block).group(1) for block in blocks]
-        self.assertEqual(names, ['junit-unit-${{ matrix.python-version }}',
-                                 'junit-integration-${{ matrix.python-version }}'])
-        self.assertIn(ci_timing.JUNIT_ARTIFACT.format(leg='${{ matrix.python-version }}'), names)
+        # #2751: a half of the LATEST tier, which `test-latest-tier` runs by `test`'s steps, has its own.
+        unit = "junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}"
+        self.assertEqual(names, [unit, 'junit-integration-${{ matrix.python-version }}'])
+        legs = [leg for job in ('test', 'test-latest-tier') for leg in matrix_legs(matrix('unit-tests.yml', job))
+                if leg['python-version'] == ci_timing.LATEST_VERSION]
+        self.assertEqual(sorted(interpolate(unit, {'matrix': leg}) for leg in legs),
+                         [ci_timing.JUNIT_ARTIFACT.format(leg=ci_timing.LATEST_VERSION)]
+                         + [ci_timing.JUNIT_HALF_ARTIFACT.format(leg=ci_timing.LATEST_VERSION, half=half)
+                            for half in ci_timing.JUNIT_HALVES])
+        self.assertEqual(ci_timing.JUNIT_HALVES, _tiers.LATEST_TIER_HALVES)
         # #2005: a PyPy unit leg writes a JUnit file per pytest run, junit.xml among them.
         paths = ('junit*.xml', 'junit.xml')
         self.assertEqual(len(blocks), len(paths))
@@ -1151,6 +1159,43 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertIn(f'path: ${{{{ runner.temp }}}}/{path}\n', block)
                 # tests/_dependency_gates.py reads exactly one pytest step per job.
                 self.assertNotIn('python -m pytest', block)
+
+    def test_the_latest_tiers_halves_are_read_as_the_latest_legs(self) -> 'None':
+        """#2751: a push run's ``latest`` leg and each half of the ``LATEST`` tier are one entry."""
+        latest = ci_timing.LATEST_VERSION
+        names = [ci_timing.JUNIT_ARTIFACT.format(leg=latest)] + [
+            ci_timing.JUNIT_HALF_ARTIFACT.format(leg=latest, half=half) for half in ci_timing.JUNIT_HALVES]
+        ids = {name: JUNIT_ARTIFACT_ID + 100 + index for index, name in enumerate(names)}
+        base = 'https://api.github.com/repos/JarryShaw/PyPCAPKit/actions/artifacts'
+
+        class HalvesAPI(FakeAPI):
+            """The fixtures, with the ``latest`` leg's and its halves' files in the push run's artifacts."""
+
+            def __call__(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+                path = urllib.parse.urlsplit(url).path
+                if path.endswith(f'/actions/runs/{PUSH_RUN}/artifacts'):
+                    self.requests.append((url, accept))
+                    listing = json.loads(fixture(f'artifacts-{PUSH_RUN}.json'))
+                    listing['artifacts'] += [{'id': ident, 'name': name, 'expired': False,
+                                              'archive_download_url': f'{base}/{ident}/zip'}
+                                             for name, ident in ids.items()]
+                    listing['total_count'] = len(listing['artifacts'])
+                    return json.dumps(listing).encode(), {'x-ratelimit-remaining': '4321'}
+                ident = next((ident for ident in ids.values() if path.endswith(f'/actions/artifacts/{ident}/zip')), None)
+                if ident is None:
+                    return super().__call__(url, accept)
+                self.requests.append((url, accept))
+                buffer = io.BytesIO()
+                with zipfile.ZipFile(buffer, 'w') as archive:
+                    archive.writestr('junit.xml', f'<testsuite tests="1"><testcase classname="tests.m{ident}.Case" '
+                                                  f'name="test_it" time="1.5"/></testsuite>')
+                return buffer.getvalue(), {}
+
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+            _, _, report, _ = run_main(api=HalvesAPI())
+        leg = report['tests'][latest]
+        self.assertEqual(leg['runs'], 1)
+        self.assertEqual(sorted(name for name, _ in leg['top_modules']), sorted(f'tests.m{ident}' for ident in ids.values()))
 
     def test_artifact_names_are_unique_in_a_run(self) -> 'None':
         names = [found.group(1) for found in
