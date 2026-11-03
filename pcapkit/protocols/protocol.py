@@ -44,7 +44,9 @@ import aenum
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.decorators import beholder, seekset
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
+from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.multidict import MultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.sentinels import ABSENT
 from pcapkit.protocols import data as data_module
@@ -96,15 +98,20 @@ def _passes_raw(value: 'Any', nested: 'bool' = False) -> 'bool':
 
     Returns:
         :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,
-        :obj:`tuple` or :obj:`dict` among ``value``, or a
+        :obj:`tuple`, :obj:`dict` or data model among ``value``, or a
         :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A
-        top-level :obj:`bytes` keyword (e.g. a payload) does not count.
+        top-level :obj:`bytes` keyword (e.g. a payload) does not count. A data
+        model is looked into as a :obj:`dict` is, since a maker builds from its
+        fields as given, and a multi-mapping through every value of each key
+        (:issue:`2725`).
 
     """
     if isinstance(value, bytes):
         return nested
     if isinstance(value, Schema):  # a ready-made item, which ``make()`` may pack into raw octets
         return True
+    if isinstance(value, (Info, MultiDict)):
+        return any(_passes_raw(item, nested) for key, item in value.items(multi=True) if key != '__packet__')
     if isinstance(value, dict):
         return any(_passes_raw(item, nested) for key, item in value.items() if key != '__packet__')
     if isinstance(value, (list, tuple)):
@@ -848,14 +855,21 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :meth:`__post_init__` makes to construct the instance, that schema
             is kept, unless it still holds raw :obj:`bytes` where parsing its
             packed octets yields a schema -- e.g. a raw option given to
-            ``make()`` -- which :meth:`read` cannot consume. The header is
-            then replaced by the parsed one (:issue:`1312`).
+            ``make()``, directly or inside a data model -- which :meth:`read`
+            cannot consume. The header is then replaced by the parsed one
+            (:issue:`1312`).
 
         Raises:
             ProtocolError: If the made header holds raw items and its packed
                 octets do not parse, either as a schema or by :meth:`read`.
                 The message carries the original error's, which is also
                 chained as ``__cause__``.
+
+        .. versionchanged:: 1.6.0
+
+           A raw item that ``make()`` takes from inside a data model, such as
+           the one :meth:`from_data` passes on, is replaced too, rather than
+           reaching :meth:`read` (:issue:`2725`).
 
         """
         packet = kwargs.get('__packet__', {})  # packet data
