@@ -44,7 +44,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   Ethernet/VLAN/LinuxSLL frame shares) ARP among others; any other NLPID or
   SNAP OUI is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, and
   :func:`~pcapkit.foundation.registry.protocols.link.register_frad` registers a
-  dissector for a further NLPID (:pr:`2527`).
+  dissector for a further NLPID (:pr:`2527`). A Q.922 address other than the
+  2-octet form, its EA bits other than 0 then 1, is refused with
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` unless the capture cut it
+  short, and is kept as ``Raw`` with nothing logged behind ``LinuxSLL`` or a
+  ``LINKTYPE_FRELAY`` capture. A header the capture cut short, before its NLPID
+  included, rebuilds as captured and logs nothing (:issue:`2710`, :pr:`2719`).
 
 * **Added** -- :class:`~pcapkit.protocols.link.netlink.Netlink`, a dissector for
   the fixed 16-octet ``nlmsghdr`` framing of Linux's kernel/userspace IPC
@@ -250,7 +255,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   registers a parser and constructor for a further type (:issue:`2514`,
   :pr:`2595`). ``make()`` refuses a value too wide for its field, in the record
   header or in the content it builds, with
-  :exc:`~pcapkit.utilities.exceptions.StructError` (:issue:`2614`, :pr:`2638`).
+  :exc:`~pcapkit.utilities.exceptions.StructError` (:issue:`2614`, :pr:`2638`),
+  and a name, or a code too wide, for an enumeration field with
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as the other makers do,
+  below (:issue:`2594`, :pr:`2692`).
   Each whole TLS record in a TCP segment is a layer of its own,
   the previous record's payload, so each alias names its own version --
   ``TCP:TLS 1.3:TLS 1.2`` -- and one that fails to decode is
@@ -386,7 +394,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   of 0, as TCP segmentation offload leaves it, and behind an AH there, so one
   the capture cut short is ``TRUNCATED`` with no warning; a GRE or IGMP layer
   read directly from octets that end inside its header or message is
-  ``TRUNCATED`` too (:issue:`2689`, :pr:`2699`).
+  ``TRUNCATED`` too (:issue:`2689`, :pr:`2699`). A layer ``from_data`` rebuilds
+  from a cut capture, from its data model or its :class:`dict`, verifies as its
+  parse did, so a cut GRE, ICMP, IGMP or OSPF layer is ``TRUNCATED`` with no
+  warning (:issue:`2703`, :pr:`2712`).
 
 * **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
   :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
@@ -401,12 +412,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   classmethods the IPX and Loopback wrappers call (:issue:`2511`,
   :pr:`2521`).
 
-* **Added** -- :func:`pcapkit.corekit.fields.strings.pad_length`, the octets of
+* **Added** -- :func:`pcapkit.corekit.schema.padding.pad_length`, the octets of
   padding that take a length to an ``align``-octet boundary, and a
   :class:`~pcapkit.corekit.fields.strings.PaddingField` sized by it, given
   ``align`` and ``after`` -- the boundary, and the field or callable whose
   length the padding follows -- in place of ``length`` (:issue:`2614`,
-  :pr:`2624`).
+  :pr:`2624`), in the :mod:`pcapkit.corekit.schema` package of helpers shared
+  across the schema layer, given below (:issue:`2674`, :pr:`2704`).
 
 * **Added** -- :mod:`pcapkit.utilities.contextvars`, holding the context
   variables more than one module sets or reads -- ``beholding``,
@@ -467,12 +479,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :exc:`~pcapkit.utilities.exceptions.FieldValueError` rebuilding it; inside
   IPv6 the header is ``Raw`` and the packet rebuilds as captured.
 
-* **Changed** -- **a breaking change to**
-  :class:`~pcapkit.protocols.data.internet.mh.QualityOfServiceOption`, an MH
-  Quality-of-Service option's data model, which gains a required
-  ``tc_reserved`` after ``dscp``: the two reserved bits of the traffic class,
-  which 1.5.x dropped, so a traffic class of ``0xB9`` rebuilt as ``0xB8``
-  (:issue:`2684`, :pr:`2700`). Building the model without it raises
+* **Changed** -- **a breaking change to** MH option data models.
+  :class:`~pcapkit.protocols.data.internet.mh.QualityOfServiceOption`, the
+  Quality-of-Service option's, gains a required ``tc_reserved`` after
+  ``dscp``: the two reserved bits of the traffic class, which 1.5.x dropped,
+  so a traffic class of ``0xB9`` rebuilt as ``0xB8`` (:issue:`2684`,
+  :pr:`2700`). Building the model without it raises
   :exc:`TypeError`, and :class:`~pcapkit.protocols.internet.mh.MH`'s
   ``make()`` takes it, ``0`` by default. The MN-ID and Service Selection
   makers count the octets an identifier packs as, so an NAI of ``'usér@x'``
@@ -482,6 +494,22 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   CGA public key of more than 127 octets, as a 1024-bit RSA key is, parses
   through the long form of its DER length, where 1.5.x misread the length
   and raised :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+  :class:`~pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption`, the
+  Mobile Network Prefix option's, gains a required ``prefix_length``, and its
+  ``prefix`` is the :class:`~ipaddress.IPv6Address` captured, where it was an
+  :class:`~ipaddress.IPv6Network`, so a prefix with bits set past its length,
+  or a length past 128, parses and rebuilds, where 1.5.x raised a bare
+  :exc:`ValueError` such as ``2001:db8::1/64 has host bits set``
+  (:issue:`2702`, :pr:`2709`). Its maker takes ``prefix_length``, from 0 to
+  255, where 1.5.x ignored it and wrote the length ``prefix`` gave, 128 for an
+  address; and it takes ``prefix`` as an address, a network or an
+  :class:`int`, keeping any bits past the length. In
+  :class:`~pcapkit.protocols.data.internet.mh.TimestampOption`, ``timestamp``
+  is :data:`None` past the year 9999, ``pmip_timestamp`` holding the value,
+  where 1.5.x raised :exc:`ValueError` for a time past it, or late enough in
+  its last second to round up to the year 10000. It is read without summing
+  the second and its fraction as a :class:`float`, which was off by up to 15
+  microseconds past ``2**36`` seconds.
 
 * **Changed** -- **a breaking change to** construction: a checksum left out of
   ``make()`` is computed rather than zero, so the octets built change
@@ -582,6 +610,35 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``PCAP-NG: invalid [IDB] snaplen: 4294967296``, where it read
   ``PCAP-NG: [IDB] snaplen must be in range 0 to 0xFFFFFFFF: 4294967296``.
 
+* **Changed** -- **a breaking change to** construction: a ``make()`` field
+  holding an enumeration takes the member or an :class:`int` code, resolved
+  with the enumeration's ``get``, and the ``X_default``, ``X_namespace`` and
+  ``X_reversed`` keywords beside such a field are removed with no alias
+  (:issue:`2594`, :pr:`2692`). The makers of IPv4, IPv6 and its extension
+  headers, IPX, TCP, ARP, Ethernet, VLAN, L2TPv2, OSPF, HTTP, the PCAP header
+  and PCAP-NG took them in 1.5.x, and construction given one raises
+  :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, as
+  ``IPv4: unexpected keyword(s): 'protocol_default' (did you mean 'protocol'?)``.
+  A name raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as
+  ``IPv4: invalid protocol: 'TCP'``, where 1.5.x resolved it against the
+  field's ``X_namespace`` or an enumeration it inferred from the caller's
+  frame. So does a name given as NGAP's ``procedure`` or ``criticality``,
+  which 1.5.x resolved to its member. A caller holding a name resolves it
+  first with
+  :meth:`Protocol.resolve_index <pcapkit.protocols.protocol.Protocol.resolve_index>`,
+  given the namespace, a default and whether a :class:`dict` namespace maps
+  names to codes. A code is checked against the field's width as an integer
+  field's is, above, so ``IPv4(protocol=256)`` raises
+  ``IPv4: invalid protocol: 256``, where it wrote ``0x00``, and
+  ``IPv4(protocol=True)`` raises, where it wrote ``0x01``. So is the code of
+  an option, sub-option or chunk given as a ``(code, arguments)`` pair: MH's
+  option type 300 raises ``MH: invalid option type: 300`` and TCP's option
+  kind 300 ``TCP: invalid option kind: 300``, where 1.5.x wrote ``0x2C``
+  (:issue:`2693`). An :class:`int` HTTP/1 status given without a ``message``
+  writes its registry phrase, as a member did, so ``404`` writes
+  ``404 Not Found``, ``299`` ``299 Unassigned`` and ``600`` ``600 Unknown``,
+  where 1.5.x wrote the code with an empty phrase.
+
 * **Changed** -- **a breaking change to**
   :class:`~pcapkit.protocols.application.drarp.DRARP` and
   :class:`~pcapkit.protocols.link.inarp.InARP`, which move from
@@ -605,6 +662,26 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   package exports of that name are unchanged. A frame pickled by 1.5.x fails
   to load, as the pickle names the old module, though its pickled ``info``
   loads.
+
+* **Changed** -- **a breaking change to** the schema helpers that code outside
+  the schema layer calls, which move to :mod:`pcapkit.corekit.schema`, a
+  package with a module per group, with no re-export at their old paths
+  (:issue:`2674`, :pr:`2704`).
+  :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address` moves from
+  ``pcapkit.corekit.fields.ipaddress`` to
+  :mod:`pcapkit.corekit.schema.ipaddress`;
+  :func:`~pcapkit.corekit.schema.byteorder.packet_byteorder` and
+  :func:`~pcapkit.corekit.schema.byteorder.byteorder_callback` from
+  ``pcapkit.corekit.fields.byteorder``, which is removed with no alias, to
+  :mod:`pcapkit.corekit.schema.byteorder`;
+  :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length` from
+  ``pcapkit.protocols.schema.internet.ipv6`` to
+  :mod:`pcapkit.corekit.schema.jumbogram`; and
+  :func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
+  :func:`~pcapkit.corekit.schema.shortread.replay_short_read` from
+  ``pcapkit.protocols.schema.schema`` to
+  :mod:`pcapkit.corekit.schema.shortread`. The header schema framework stays
+  :mod:`pcapkit.protocols.schema`.
 
 * **Changed** -- **a breaking change to** HTTP: parsing octets through
   :class:`~pcapkit.protocols.application.http.HTTP`, building it from fields
@@ -765,7 +842,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   layout read under it is a class-level registry map, with its
   ``register_<kind>`` classmethod and wrapper, never a module-level
   dictionary, and each layout is a concrete schema with typed fields, never
-  built inside the map (:issue:`2576`, :pr:`2657`).
+  built inside the map (:issue:`2576`, :pr:`2657`). A ``make()`` field holding
+  an enumeration takes the member or an :class:`int` code, never a name,
+  checked against the field's width and resolved with the ``get`` of an
+  enumeration named at the call, never one read from the caller's frame, and
+  no keyword group sits beside it (:issue:`2594`, :pr:`2692`). A helper that code outside the schema layer
+  calls lives in :mod:`pcapkit.corekit.schema`, a module per group, as does a
+  helper in one protocol's schema module once code outside that protocol uses
+  it and it is generic enough to reuse, with no re-export at its old path
+  (:issue:`2674`, :pr:`2704`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -788,7 +873,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   workflow's Windows leg passes pytest the modules it ignores as an
   ``@``-prefixed argument file, where they went on its command line and had
   outgrown Windows' limit, so the leg failed before pytest started
-  (:issue:`2678`, :pr:`2681`).
+  (:issue:`2678`, :pr:`2681`). The GraalPy leg there splits the long shards
+  whose xdist workers outgrew their heap and died, each sized from its tests'
+  JUnit seconds to run in under 5 minutes (:issue:`2713`, :pr:`2720`).
 
 * **Changed** -- once a release's milestone is closed while ``__version__``
   still names that release, the milestone workflow gives an item the lowest
@@ -873,7 +960,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   bounds the fill from its first octet, with neither the free band of
   :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` nor a one-off
   allowance, and a cut list declaring more than
-  :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is refused. A TCP
+  :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is refused. If the
+  items then fail, the fill stays charged, as a field's does, and the octets
+  it counted as read are given back (:issue:`2705`, :pr:`2706`). A TCP
   ``SACK`` option running past the data raises
   :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
   ``Field options has an option that runs past the end of the data: <Option.SACK: 5> ...``,
@@ -895,7 +984,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   an IPv6 Payload Length or a caller's ``length``, rebuilt through
   ``from_data`` without the octets after its last whole chunk, which its
   header schema's ``bytes()`` counted twice. It rebuilds as captured, as one
-  parsed with no length declared did (:issue:`2673`, :pr:`2679`).
+  parsed with no length declared did (:issue:`2673`, :pr:`2679`). Its header
+  schema cut inside the padding of its last chunk, parameter or cause, or such
+  an item's own schema cut inside its padding, packs back as captured, where
+  1.5.x packed it at full width, 34 octets in and 36 out; and a header schema
+  cut inside an option area packs back the octets read, where a TCP header
+  schema of data offset 8 cut 25 octets in gave 32 octets from ``bytes()`` and
+  23 from ``pack()`` (:issue:`2680`, :issue:`2685`, :pr:`2682`).
 
 * **Fixed** -- a :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Decryption
   Secrets Block that ``make()`` built from a parsed ZigBee NWK or APS key
@@ -905,7 +1000,14 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   where 28 were captured. It is written as captured, and
   ``pcapkit.protocols.schema.misc.pcapng.zigbee_key_held`` returns a schema
   whose :func:`bytes` and :func:`len` are those of the octets held, where they
-  were the fixed width's (:issue:`2688`, :pr:`2697`).
+  were the fixed width's (:issue:`2688`, :pr:`2697`). Rebuilt by ``from_data``
+  from the block's :class:`dict`, a TLS or WireGuard key log was written from its
+  entries under a ``# generated by PyPCAPKit`` line, dropping its comments and
+  the lines its entries do not hold, and a ZigBee key cut short of its fixed
+  width was written at that width, zero-filled. The TLS, WireGuard and ZigBee
+  secrets makers take the captured text or octets as ``data``, so the block
+  rebuilds as captured from its :class:`dict`, as from its data model
+  (:issue:`2698`, :pr:`2707`).
 
 * **Fixed** -- importing :mod:`pcapkit.vendor.ipx`, or running its packet or
   socket crawler, without ``requests`` installed lost an entry of

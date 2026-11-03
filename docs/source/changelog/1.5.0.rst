@@ -414,9 +414,9 @@ Added
   subclasses that are also a :class:`.MultiDict` and an :class:`.OrderedMultiDict`, so a
   repeated key keeps every value. The data models' option lists use them (:issue:`1484`,
   :pr:`1523`).
-* :mod:`pcapkit.corekit.fields.byteorder`, holding ``packet_byteorder`` and
-  ``byteorder_callback``, the byte-order helpers the PCAP and PCAP-NG schemas share
-  (:pr:`1528`, :issue:`1711`, :pr:`1715`).
+* :mod:`pcapkit.corekit.fields.byteorder <pcapkit.corekit.schema.byteorder>`, holding
+  ``packet_byteorder`` and ``byteorder_callback``, the byte-order helpers the PCAP and
+  PCAP-NG schemas share (:pr:`1528`, :issue:`1711`, :pr:`1715`).
 * :func:`~pcapkit.corekit.io.can_seek`, whether a stream really seeks: on Windows a pipe
   answers ``seekable()`` with ``True`` while its ``seek`` does nothing. It trusts
   ``seekable()`` only for a regular file or a stream with no descriptor.
