@@ -238,7 +238,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   option parser. The registries are :mod:`pcapkit.const.dccp`, crawled from
   IANA. Its ``make()`` refuses a value a field cannot hold with
   :exc:`~pcapkit.utilities.exceptions.ProtocolError` naming the field
-  (:issue:`2614`, :pr:`2670`).
+  (:issue:`2614`, :pr:`2670`), and an option given as empty raw octets
+  (:issue:`2723`, :pr:`2728`).
 
 * **Added** -- :class:`~pcapkit.protocols.application.tls.TLS` (SSLv3 and TLS
   1.0 to 1.3) at TCP 443 and :class:`~pcapkit.protocols.application.dtls.DTLS`
@@ -1034,7 +1035,18 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   empty octets. The kind resolves as a ``(code, arguments)`` pair's does, so
   255 builds, and empty octets raise
   :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2708`,
-  :pr:`2724`). ``HIP(next=59)`` wrote HIP version 6, taking the IP version for
+  :pr:`2724`). The other makers taking a raw item refuse empty octets the same
+  way, as ``IPv4: invalid option: b'' holds no type octet`` (:issue:`2723`,
+  :pr:`2728`). IPv4's, HOPOPT's and IPv6-Opts' options raised
+  :exc:`IndexError`. SCTP's parameters and error causes, and MH's options,
+  sub-options, QoS attributes and CGA extensions, raised a bare
+  :exc:`AttributeError` alone -- or, for MH's access network identifier and
+  LMA-controlled MAG sub-options, a ``ProtocolError`` for an option of length
+  0 -- and were dropped beside a whole item. HIP's parameters were dropped.
+  PCAP-NG's options and Name Resolution records refuse octets shorter than
+  their 2-octet code, where 1.5.x wrote empty or zero octets as an
+  end-of-options or end-of-records marker, and misread one other octet as a
+  code. ``HIP(next=59)`` wrote HIP version 6, taking the IP version for
   it, and writes 2, ``make()``'s default from :rfc:`7401#section-5.1`. HIP's
   ``ENCRYPTED`` maker refuses an IV given with a cipher that takes none, which
   1.5.x counted in the parameter's Length but did not write. A parsed
