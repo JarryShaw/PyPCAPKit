@@ -695,10 +695,12 @@ git<span class="w"> </span>apply<span class="w"> </span>/tmp/fix.diff
 python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/&lt;path&gt;/test_&lt;name&gt;_unit.py<span class="w"> </span>-q<span class="w">    </span><span class="c1"># must pass</span>
 </pre></div>
 </div>
-<p>CI measures one leg, the <code class="docutils literal notranslate"><span class="pre">test</span></code> job’s Python 3.15 cell in
-<code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>, with branch coverage over <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-configured by <code class="file docutils literal notranslate"><span class="pre">.github/coverage.toml</span></code>; <code class="file docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml</span></code>
-posts the totals on the pull request. Locally, measure with <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span></code> rather than
+<p>CI measures the <code class="docutils literal notranslate"><span class="pre">test</span></code> job’s Python 3.15 cell in
+<code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>, which runs the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier, and each half
+of the <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> tier in its <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> job, with branch coverage over
+<a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> configured by <code class="file docutils literal notranslate"><span class="pre">.github/coverage.toml</span></code>; its <code class="docutils literal notranslate"><span class="pre">coverage</span></code> job
+combines them, and <code class="file docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml</span></code> posts the totals on
+the pull request. Locally, measure with <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span></code> rather than
 a pytest plugin, which this project does not install, and narrow at report time –
 <code class="docutils literal notranslate"><span class="pre">[tool.coverage.run]</span></code>’s <code class="docutils literal notranslate"><span class="pre">source</span></code> in <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> takes precedence over
 <code class="docutils literal notranslate"><span class="pre">--include</span></code> at run time:</p>
