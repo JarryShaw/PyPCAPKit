@@ -375,7 +375,9 @@ class CALIPSOLengthTests(unittest.TestCase):
 
     ``calipso_pad_len`` sizes ``pad`` on both routes that reach the reader --
     a parse, where the option is unpacked off the wire, and a construction,
-    where the caller's own option schema is packed -- so each is pinned.
+    where the caller's own option schema is packed -- so each is pinned. It
+    rejects one with a ``ProtocolError``, so that a header refused for it is
+    refused quietly (#2727).
 
     """
 
@@ -385,14 +387,14 @@ class CALIPSOLengthTests(unittest.TestCase):
     def test_short_option_raises_from_the_pad_length(self) -> None:
         from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
 
         for length, cmpt_len in ((7, 0), (5, 0), (8, 1), (11, 1)):
             option = (bytes([7, length]) + bytes(4) + bytes([cmpt_len, 0]) + b'\xab\xcd'
                       + bytes(max(0, length - 8)))
             for protocol in (HOPOPT, IPv6_Opts):
                 with self.subTest(protocol=protocol.__name__, length=length):
-                    with self.assertRaises(FieldValueError) as caught:
+                    with self.assertRaises(ProtocolError) as caught:
                         protocol(hopopt_bytes(option))
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
 
@@ -412,7 +414,7 @@ class CALIPSOLengthTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
         from pcapkit.protocols.schema.internet import hopopt as schema_hopopt
         from pcapkit.protocols.schema.internet import ipv6_opts as schema_ipv6_opts
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
 
         for length, cmpt_len in ((7, 0), (5, 0), (8, 1), (11, 1)):
             # ``bitmap`` is conditional on a non-zero ``cmpt_len``, and is the
@@ -424,10 +426,10 @@ class CALIPSOLengthTests(unittest.TestCase):
                         type=Option.CALIPSO, len=length, domain=0x12345678,
                         cmpt_len=cmpt_len, level=5, checksum=b'\xab\xcd',
                         bitmap=bitmap, pad=b'')
-                    with self.assertRaises(FieldValueError) as caught:
+                    with self.assertRaises(ProtocolError) as caught:
                         option.pack()
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
-                    with self.assertRaises(FieldValueError) as caught:
+                    with self.assertRaises(ProtocolError) as caught:
                         protocol(options=[option], next=59, payload=b'')
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
 

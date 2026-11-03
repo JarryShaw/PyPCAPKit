@@ -111,14 +111,15 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
                 self.assertEqual(opt.data, bytes.fromhex('534012345678'))
 
     def test_zero_length_smf_dpd_is_rejected_in_both_modes(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+        # a ``ProtocolError``, so that a header refused for it is refused quietly (#2727)
+        from pcapkit.utilities.exceptions import ProtocolError
 
         for cls in self._protocols():
             # the octet after ``Opt Data Len`` 0 is the next option's type, so its
             # top bit must not be taken as the H-DPD (``80``) or I-DPD mode bit
             for mode, hexstr in (('H-DPD', '3b00080080000000'), ('I-DPD', '3b00080000000000')):
                 with self.subTest(protocol=cls.__name__, mode=mode):
-                    with self.assertRaisesRegex(FieldValueError, 'invalid SMF DPD option length: 0'):
+                    with self.assertRaisesRegex(ProtocolError, 'invalid SMF DPD option length: 0'):
                         self._parse(cls, bytes.fromhex(hexstr))
 
     def test_ip_dff_data_length_is_three(self) -> None:

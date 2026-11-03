@@ -84,6 +84,14 @@ through them, never through an ``unpack`` override of its own or a length callab
 clamped to the octets present, which hides the cut from the record. Ruled in review
 of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
 
+A field callback tells a value the cut left as zero from one read through the same
+record: :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` gives
+it to the fields after the one the data ends inside, as ``__short_read__`` in their
+packet. A callback that would refuse such a zero leaves it to the short read, and
+refuses a value read with a :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as
+the ``Opt Data Len`` helpers of
+:mod:`pcapkit.protocols.schema.internet.ipv6_option` do (:issue:`2727`).
+
 **A helper in one protocol's own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse**, so that another implementor can
 find it; a helper only its own protocol calls stays beside the schema. Ruled on
