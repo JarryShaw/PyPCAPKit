@@ -499,7 +499,8 @@ from pcapkit.protocols.schema.internet.mh import \
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.datetime import fromtimestamp, totimestamp
-from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import (BaseError, CaughtByCaller, EnumValueError, ProtocolError,
+                                          UnsupportedCall)
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -3060,12 +3061,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If an option read by a ``_read_opt_*`` method has fields
                 that do not take exactly the octets its ``Option Length`` declares
                 [:rfc:`6275#section-6.2.1`]. A parser registered as a callable
-                reports its own length, and is not checked.
+                reports its own length, and is not checked. Or if the capture cut
+                an option short and its parser refuses the zeros it lacks, or its
+                maker does not write the octets captured back.
 
         .. versionchanged:: 1.6.0
 
-           Such an option is refused, rather than read from octets outside it and
-           rebuilt with the length its fields give (:issue:`2684`).
+           * Such an option is refused, rather than read from octets outside it
+             and rebuilt with the length its fields give (:issue:`2684`).
+           * An option the capture cut short is read, its missing octets as
+             zeros, if its maker writes the octets captured back
+             (:issue:`2694`).
 
         """
         options = OrderedMultiDict()  # type: Option
@@ -3078,14 +3084,34 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 meth_name = f'_read_opt_{name}'
                 meth = cast('OptionParser',
                             getattr(self, meth_name, self._read_opt_none))
+                maker = cast('OptionConstructor',
+                             getattr(self, f'_make_opt_{name}', self._make_opt_none))
             else:
-                meth = name[0]
-            data = meth(schema, options=options)
+                meth, maker = name
 
-            # NOTE: Fields are read at their own widths, so a length they do not fill
-            # exactly reads octets not the option's, and rebuilds as another (#2684).
-            if isinstance(name, str) and len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
+            # NOTE: The capture cut this option short, as its short read records, so
+            # the octets it lacks read as zeros and it is short of its length. It
+            # stands if its parser takes those zeros and its maker writes the octets
+            # captured back (#2694); otherwise it is refused, as an option running
+            # past the data is (#1325).
+            if '__short_read__' in schema.__dict__:
+                try:
+                    with CaughtByCaller(BaseError):
+                        data = meth(schema, options=options)
+                        made = maker(type, data).pack()[:len(schema)]
+                except BaseError as error:
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short: {error}') from error
+                if made != bytes(schema):
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short does not '
+                                        'rebuild as captured')
+            else:
+                data = meth(schema, options=options)
+
+                # NOTE: Fields are read at their own widths, so a length they do not
+                # fill exactly reads octets not the option's, and rebuilds as another
+                # (#2684).
+                if isinstance(name, str) and len(schema) != data.length:
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
 
             # record option data
             options.add(type, data)

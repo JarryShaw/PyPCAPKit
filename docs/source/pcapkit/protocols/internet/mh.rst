@@ -988,6 +988,7 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.internet.mh.bid_address_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.br_code_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.cga_public_key_length
+.. autofunction:: pcapkit.protocols.schema.internet.mh.item_list_length
 .. autofunction:: pcapkit.protocols.schema.internet.mh.dmnp_prefix_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.fb_code_selector
 .. autofunction:: pcapkit.protocols.schema.internet.mh.lma_address_selector

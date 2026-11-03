@@ -72,6 +72,18 @@ header schema framework, which stays :mod:`pcapkit.protocols.schema` and its
 :class:`~pcapkit.protocols.schema.schema.Schema`; it holds only the helpers shared
 across the layer.
 
+**A capture cut belongs to the built-in short read of**
+:class:`~pcapkit.protocols.schema.schema.Schema`. :meth:`Schema.unpack
+<pcapkit.protocols.schema.schema.Schema.unpack>` records the field the data ends
+inside, through ``_note_short_read``, as ``__short_read__``;
+:meth:`~pcapkit.protocols.schema.schema.Schema._cut_short_read` packs back only the
+octets read; and :func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
+:func:`~pcapkit.corekit.schema.shortread.replay_short_read` carry the record through
+``info`` and cut a rebuild back by it. A protocol reads and rebuilds a cut header
+through them, never through an ``unpack`` override of its own or a length callable
+clamped to the octets present, which hides the cut from the record. Ruled in review
+of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
+
 **A helper in one protocol's own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse**, so that another implementor can
 find it; a helper only its own protocol calls stays beside the schema. Ruled on

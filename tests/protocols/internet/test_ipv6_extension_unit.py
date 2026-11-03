@@ -2202,15 +2202,15 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         self._assert_mpl_option_rejects_underflowing_length(IPv6_Opts)
 
-    def _assert_a_truncated_option_area_is_diagnosed(self, protocol_cls: type) -> None:
-        """An option area with nothing behind it is an error, not a hang.
+    def _assert_a_truncated_option_area_ends_with_the_data(self, protocol_cls: type) -> None:
+        """An option area with nothing behind it ends with the data, and is no hang.
 
         The simplest form of #431, and the one that needs no option schema at all:
         a header extension length of 1 declares a 14-octet option area, and the
         two octets given here are the whole header. The option loop reads ``b''``
         for every field, which decodes the type octet as 0 -- ``Pad1`` in this
-        registry, not an end-of-option-list -- so it appends a phantom one-octet
-        ``Pad1``, subtracts the zero octets it actually read, and goes round
+        registry, not an end-of-option-list -- so it appended a phantom one-octet
+        ``Pad1``, subtracted the zero octets it actually read, and went round
         again forever.
 
         Note that this is registry-dependent, and IPv4, TCP and PCAP-NG behave
@@ -2218,27 +2218,29 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         loop's ``eool`` break has always absorbed a truncated area and reported
         the rest as padding. Their tolerance is pinned in their own tests.
 
-        """
-        from pcapkit.utilities.exceptions import FieldValueError
+        The data ends inside the area, so the loop ends with the data, and the
+        header reads as the short read its schema records (#2694).
 
+        """
         for name, raw in (
             ('no option octets at all', b'\x3b\x01'),
             ('four of fourteen octets', b'\x3b\x01' + b'\x01\x02\x00\x00'),
         ):
             with self.subTest(case=name):
-                with self.assertRaisesRegex(FieldValueError, 'consumed no data'):
-                    with time_limit():
-                        protocol_cls(raw, len(raw), extension=True)
+                with time_limit():
+                    header = protocol_cls(raw, len(raw), extension=True)
+                self.assertEqual(header.info.__short_read__, ('options', len(raw) - 2))
+                self.assertEqual(protocol_cls.from_data(header.info).data, raw)
 
-    def test_hopopt_truncated_option_area_is_diagnosed(self) -> None:
+    def test_hopopt_truncated_option_area_ends_with_the_data(self) -> None:
         from pcapkit.protocols.internet.hopopt import HOPOPT
 
-        self._assert_a_truncated_option_area_is_diagnosed(HOPOPT)
+        self._assert_a_truncated_option_area_ends_with_the_data(HOPOPT)
 
-    def test_ipv6_opts_truncated_option_area_is_diagnosed(self) -> None:
+    def test_ipv6_opts_truncated_option_area_ends_with_the_data(self) -> None:
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 
-        self._assert_a_truncated_option_area_is_diagnosed(IPv6_Opts)
+        self._assert_a_truncated_option_area_ends_with_the_data(IPv6_Opts)
 
     def _assert_padding_option_schema_sizes_itself(self, protocol_cls: type) -> None:
         """The padding option schema, on its own.
