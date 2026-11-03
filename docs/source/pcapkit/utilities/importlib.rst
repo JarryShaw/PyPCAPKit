@@ -1,9 +1,9 @@
 Lazy Imports
 ============
 
-.. module:: pcapkit.utilities.lazy
+.. module:: pcapkit.utilities.importlib
 
-:mod:`pcapkit.utilities.lazy` holds :func:`lazy_exports`, which gives a package the
+:mod:`pcapkit.utilities.importlib` holds :func:`lazy_exports`, which gives a package the
 :pep:`562` ``__getattr__`` and ``__dir__`` that import each name it exports the first
 time the name is reached, rather than with the package itself. Every package under
 :mod:`pcapkit.const` imports its enumerations that way (:issue:`2729`), so a caller
@@ -12,4 +12,4 @@ pays only for the enumerations it uses. This module imports nothing from
 
 .. versionadded:: 1.6.0
 
-.. autofunction:: pcapkit.utilities.lazy.lazy_exports
+.. autofunction:: pcapkit.utilities.importlib.lazy_exports

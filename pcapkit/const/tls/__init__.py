@@ -28,7 +28,7 @@ enumerations include:
 
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     from pcapkit.const.tls.content_type import ContentType as TLS_ContentType

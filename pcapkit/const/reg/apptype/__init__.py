@@ -50,7 +50,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.reg.apptype.apptype import AppType, TransportProtocol
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     from typing import Any, ItemsView, Iterable, Iterator, Mapping, Optional, SupportsIndex, Type
