@@ -466,6 +466,23 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   is :data:`None` unless a caller supplies one; the ``Raw`` layer's
   ``info.error`` holds the failure instead.
 
+* **Changed** -- **a breaking change to** parsing a CALIPSO, SMF_DPD or MPL
+  option in :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` or
+  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`: an Opt Data Len too
+  short for the option raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+  where 1.5.x raised :exc:`~pcapkit.utilities.exceptions.FieldValueError`, so
+  code catching ``FieldValueError`` for it catches ``ProtocolError`` instead,
+  both being :exc:`ValueError`; inside IPv6 the header is kept as ``Raw`` with
+  nothing logged, where 1.5.x logged it at ``CRITICAL`` (:issue:`2727`,
+  :pr:`2737`). So do the length
+  callbacks of :mod:`pcapkit.protocols.schema.internet.ipv6_option` that size
+  those options -- ``calipso_pad_len``, ``mpl_opt_pad_len``,
+  ``smf_i_dpd_id_len`` and ``smf_dpd_data_selector``. A capture cut after such
+  an option's type octet reads as a short read, a CALIPSO or SMF_DPD option
+  kept and rebuilt as captured and an MPL option refused quietly, where 1.5.x
+  raised ``FieldValueError: HOPOPT: invalid CALIPSO option length: 0`` logged
+  at ``CRITICAL``.
+
 * **Changed** -- **a breaking change to** parsing a Mobility Header or a
   Multipath TCP DSS option whose length does not fit its fields: it raises
   :exc:`~pcapkit.utilities.exceptions.ProtocolError`, where 1.5.x read the
@@ -736,7 +753,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``PCAPNG_TLSKeyLogEntries``, where it was a :class:`dict`;
   a mapping given for it is stored as one, and ``to_dict()`` exports it as an
   ``OrderedMultiDict``, where it gave a :class:`dict`. Pickles of either load
-  across 1.5.x and 1.6.0 in both directions.
+  across 1.5.x and 1.6.0 in both directions. ``AppType.__registries__`` is an
+  ``Info`` keyed by
+  :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, where 1.5.x
+  held a :class:`dict` subclass, so setting a key raises :exc:`TypeError`
+  (:issue:`2729`, :pr:`2735`).
 
 * **Changed** -- **a breaking change to** HTTP: parsing octets through
   :class:`~pcapkit.protocols.application.http.HTTP`, building it from fields
@@ -810,6 +831,16 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   (:issue:`2578`, :pr:`2635`). A registrar's ``__module__`` names its
   submodule, and its log records carry that submodule's logger name, a child
   of the package's, so configuring the package's logger still applies.
+
+* **Changed** -- a :mod:`pcapkit.const` package imports each of its
+  enumeration modules on first use rather than with itself, and
+  :mod:`pcapkit.const` its packages, through
+  :func:`pcapkit.utilities.lazy.lazy_exports`, which builds a package's
+  PEP 562 ``__getattr__`` and ``__dir__`` from its exports
+  (:issue:`2729`, :pr:`2735`). Each package's ``__all__``, ``dir()`` and
+  members are as in 1.5.x. The SCTP and DCCP application-type registries load
+  on first use, as TCP's and UDP's did in 1.5.x, where importing
+  :mod:`pcapkit.const` loaded both.
 
 * **Changed** -- :class:`~pcapkit.protocols.transport.sctp.SCTP`'s chunk makers
   refuse flags that are not one octet, and its Invalid Stream Identifier cause
@@ -908,7 +939,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   no re-export at its old path (:issue:`2674`, :pr:`2704`). A protocol reads
   and rebuilds a capture cut through the schema's built-in short read, never an
   ``unpack`` override of its own or a length callable clamped to the octets
-  present (:issue:`2680`, :issue:`2694`, :pr:`2731`).
+  present (:issue:`2680`, :issue:`2694`, :pr:`2731`); a field callback leaves
+  a value the cut left as zero to that short read, and refuses one read with
+  ``ProtocolError`` (:issue:`2727`, :pr:`2737`). A :mod:`pcapkit.const`
+  package imports its enumerations on first use, through
+  :func:`~pcapkit.utilities.lazy.lazy_exports`, and a crawler never writes a
+  package's ``__init__.py`` (:issue:`2729`, :pr:`2735`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -916,6 +952,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :mod:`pcapkit.const.linux`, the :mod:`pcapkit.vendor.tls` and
   :mod:`pcapkit.vendor.sslv2` crawlers and the checksum packages -- now have
   one (:issue:`2559`, :pr:`2584`).
+
+* **Changed** -- the ``docs`` extra pins ``sphinx-autodoc-typehints`` 3.17.4,
+  where 1.5.x pinned 3.17.2 (:pr:`2742`).
 
 * **Changed** -- the CPython unit-test legs run ``pytest -n logical``, a worker
   per logical CPU, where ``-n auto`` counted physical cores and ran 2 workers
@@ -933,7 +972,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   outgrown Windows' limit, so the leg failed before pytest started
   (:issue:`2678`, :pr:`2681`). The GraalPy leg there splits the long shards
   whose xdist workers outgrew their heap and died, each sized from its tests'
-  JUnit seconds to run in under 5 minutes (:issue:`2713`, :pr:`2720`).
+  JUnit seconds to run in under 5 minutes (:issue:`2713`, :pr:`2720`). Its
+  tests' timeout is 180 minutes, where it was 110, and the internet and
+  application protocol shards are split too, as a slower runner ran out of
+  time with no worker lost (:issue:`2739`, :pr:`2741`).
 
 * **Changed** -- once a release's milestone is closed while ``__version__``
   still names that release, the milestone workflow gives an item the lowest
@@ -1106,7 +1148,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   the octets held, so a 5-octet NWK key built a 27-octet block declaring 40,
   where 28 were captured. It is written as captured, and
   ``pcapkit.protocols.schema.misc.pcapng.zigbee_key_held`` returns a schema
-  whose :func:`bytes` and :func:`len` are those of the octets held, where they
+  whose :class:`bytes` and :func:`len` are those of the octets held, where they
   were the fixed width's (:issue:`2688`, :pr:`2697`). Rebuilt by ``from_data``
   from the block's :class:`dict`, a TLS or WireGuard key log was written from its
   entries under a ``# generated by PyPCAPKit`` line, dropping its comments and
@@ -1115,6 +1157,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   secrets makers take the captured text or octets as ``data``, so the block
   rebuilds as captured from its :class:`dict`, as from its data model
   (:issue:`2698`, :pr:`2707`).
+
+* **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
+  :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
+  left out a field named like one of its builtin names, such as ``items``,
+  ``keys`` or a reassembled datagram's ``packet``. Each is dumped under its own
+  name, and a reassembled datagram's ``packet`` as its parsed layer's ``info``
+  (:issue:`2733`, :pr:`2736`).
 
 * **Fixed** -- importing :mod:`pcapkit.vendor.ipx`, or running its packet or
   socket crawler, without ``requests`` installed lost an entry of
