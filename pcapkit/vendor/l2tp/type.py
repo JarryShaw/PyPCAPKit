@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = ['Type']
 
-#: L2TP packet types, i.e. the ``T`` bit: :rfc:`2661` §3.1 sets it "to 0 for
+#: L2TP packet types, i.e. the ``T`` bit. :rfc:`2661` §3.1 sets it "to 0 for
 #: a data message and 1 for a control message".
 DATA = {
     0:  'Data',

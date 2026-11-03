@@ -115,7 +115,7 @@ TLS13_VERSION = 0x0304
 #: The ``supported_versions`` value for DTLS 1.3 (:rfc:`9147#section-5.3`).
 DTLS13_VERSION = 0xFEFC
 
-#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest``: the
+#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest`` -- the
 #: SHA-256 of ``"HelloRetryRequest"`` (:rfc:`9846#section-4.2.3`).
 _HRR_RANDOM = bytes.fromhex('cf21ad74e59a6111be1d8c021e65b891c2a211167abb8c5e079e09e2c8a8339c')
 

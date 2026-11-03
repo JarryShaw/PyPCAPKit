@@ -265,7 +265,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
     @property
     def length(self) -> 'int':
-        """Header length of current protocol: the 9-octet frame header, after the
+        """Header length of current protocol -- the 9-octet frame header, after the
         24-octet connection preface when one opens the payload."""
         return 9 + self._preface_length
 

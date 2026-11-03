@@ -47,14 +47,16 @@ class TestSMFDPDTruncatedLength(unittest.TestCase):
     def _protocols(self) -> 'list[type]':
         return [getattr(importlib.import_module(mod), name) for mod, name in PROTOCOLS]
 
-    def test_smf_dpd_raises_field_value_error(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+    def test_smf_dpd_raises_protocol_error(self) -> None:
+        # the header is whole, so its ``Opt Data Len`` of zero is on the wire, and
+        # a ``ProtocolError`` refuses it quietly in a header that is handled (#2727)
+        from pcapkit.utilities.exceptions import ProtocolError
 
         for cls in self._protocols():
             with self.subTest(protocol=cls.__name__):
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
-                    with self.assertRaisesRegex(FieldValueError, 'invalid SMF DPD option length: 0'):
+                    with self.assertRaisesRegex(ProtocolError, 'invalid SMF DPD option length: 0'):
                         cls(io.BytesIO(PREFIX + bytes.fromhex('0800')))
 
     def test_no_option_type_raises_a_non_library_error(self) -> None:

@@ -61,12 +61,12 @@ class Packet(Info, Generic[_AT]):
 
     """
 
-    #: Data link type: the PCAP global header's, or that of the PCAP-NG
+    #: Data link type -- the PCAP global header's, or that of the PCAP-NG
     #: interface the packet was captured on.
     protocol: 'Enum_LinkType'
     #: Frame number.
     index: 'int'
-    #: Extracted frame info: the default engine's frame, a third-party
+    #: Extracted frame info -- the default engine's frame, a third-party
     #: engine's :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, or
     #: the :obj:`dict` PyShark's adapter reports, which carries no frame record.
     frame: 'Data_Frame | FrameRecord | dict[str, Any]'

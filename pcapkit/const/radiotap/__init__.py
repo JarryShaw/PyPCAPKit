@@ -54,27 +54,34 @@ enumerations include:
 
 """
 
-from pcapkit.const.radiotap.ampdu_flags import AMPDUFlags as Radiotap_AMPDUFlags
-from pcapkit.const.radiotap.channel_flags import ChannelFlags as Radiotap_ChannelFlags
-from pcapkit.const.radiotap.eht_known import EHTKnown as Radiotap_EHTKnown
-from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
-from pcapkit.const.radiotap.flags import Flags as Radiotap_Flags
-from pcapkit.const.radiotap.he_data1_known import HEData1Known as Radiotap_HEData1Known
-from pcapkit.const.radiotap.he_data2_known import HEData2Known as Radiotap_HEData2Known
-from pcapkit.const.radiotap.he_mu_flags1_known import HEMUFlags1Known as Radiotap_HEMUFlags1Known
-from pcapkit.const.radiotap.he_mu_flags2_known import HEMUFlags2Known as Radiotap_HEMUFlags2Known
-from pcapkit.const.radiotap.he_mu_other_user_known import \
-    HEMUOtherUserKnown as Radiotap_HEMUOtherUserKnown
-from pcapkit.const.radiotap.lsig_data1 import LSIGData1 as Radiotap_LSIGData1
-from pcapkit.const.radiotap.mcs_known import MCSKnown as Radiotap_MCSKnown
-from pcapkit.const.radiotap.rx_flags import RXFlags as Radiotap_RXFlags
-from pcapkit.const.radiotap.s1g_known import S1GKnown as Radiotap_S1GKnown
-from pcapkit.const.radiotap.timestamp_flags import TimestampFlags as Radiotap_TimestampFlags
-from pcapkit.const.radiotap.tx_flags import TXFlags as Radiotap_TXFlags
-from pcapkit.const.radiotap.usig_common_known import USIGCommonKnown as Radiotap_USIGCommonKnown
-from pcapkit.const.radiotap.vht_coding import VHTCoding as Radiotap_VHTCoding
-from pcapkit.const.radiotap.vht_flags import VHTFlags as Radiotap_VHTFlags
-from pcapkit.const.radiotap.vht_known import VHTKnown as Radiotap_VHTKnown
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.radiotap.ampdu_flags import AMPDUFlags as Radiotap_AMPDUFlags
+    from pcapkit.const.radiotap.channel_flags import ChannelFlags as Radiotap_ChannelFlags
+    from pcapkit.const.radiotap.eht_known import EHTKnown as Radiotap_EHTKnown
+    from pcapkit.const.radiotap.field_type import FieldType as Radiotap_FieldType
+    from pcapkit.const.radiotap.flags import Flags as Radiotap_Flags
+    from pcapkit.const.radiotap.he_data1_known import HEData1Known as Radiotap_HEData1Known
+    from pcapkit.const.radiotap.he_data2_known import HEData2Known as Radiotap_HEData2Known
+    from pcapkit.const.radiotap.he_mu_flags1_known import \
+        HEMUFlags1Known as Radiotap_HEMUFlags1Known
+    from pcapkit.const.radiotap.he_mu_flags2_known import \
+        HEMUFlags2Known as Radiotap_HEMUFlags2Known
+    from pcapkit.const.radiotap.he_mu_other_user_known import \
+        HEMUOtherUserKnown as Radiotap_HEMUOtherUserKnown
+    from pcapkit.const.radiotap.lsig_data1 import LSIGData1 as Radiotap_LSIGData1
+    from pcapkit.const.radiotap.mcs_known import MCSKnown as Radiotap_MCSKnown
+    from pcapkit.const.radiotap.rx_flags import RXFlags as Radiotap_RXFlags
+    from pcapkit.const.radiotap.s1g_known import S1GKnown as Radiotap_S1GKnown
+    from pcapkit.const.radiotap.timestamp_flags import TimestampFlags as Radiotap_TimestampFlags
+    from pcapkit.const.radiotap.tx_flags import TXFlags as Radiotap_TXFlags
+    from pcapkit.const.radiotap.usig_common_known import USIGCommonKnown as Radiotap_USIGCommonKnown
+    from pcapkit.const.radiotap.vht_coding import VHTCoding as Radiotap_VHTCoding
+    from pcapkit.const.radiotap.vht_flags import VHTFlags as Radiotap_VHTFlags
+    from pcapkit.const.radiotap.vht_known import VHTKnown as Radiotap_VHTKnown
 
 __all__ = [
     'Radiotap_FieldType', 'Radiotap_Flags', 'Radiotap_ChannelFlags', 'Radiotap_RXFlags',
@@ -84,3 +91,26 @@ __all__ = [
     'Radiotap_HEMUOtherUserKnown', 'Radiotap_LSIGData1', 'Radiotap_S1GKnown',
     'Radiotap_USIGCommonKnown', 'Radiotap_EHTKnown',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'Radiotap_FieldType': ('field_type', 'FieldType'),
+    'Radiotap_Flags': ('flags', 'Flags'),
+    'Radiotap_ChannelFlags': ('channel_flags', 'ChannelFlags'),
+    'Radiotap_RXFlags': ('rx_flags', 'RXFlags'),
+    'Radiotap_TXFlags': ('tx_flags', 'TXFlags'),
+    'Radiotap_MCSKnown': ('mcs_known', 'MCSKnown'),
+    'Radiotap_AMPDUFlags': ('ampdu_flags', 'AMPDUFlags'),
+    'Radiotap_VHTKnown': ('vht_known', 'VHTKnown'),
+    'Radiotap_VHTFlags': ('vht_flags', 'VHTFlags'),
+    'Radiotap_VHTCoding': ('vht_coding', 'VHTCoding'),
+    'Radiotap_TimestampFlags': ('timestamp_flags', 'TimestampFlags'),
+    'Radiotap_HEData1Known': ('he_data1_known', 'HEData1Known'),
+    'Radiotap_HEData2Known': ('he_data2_known', 'HEData2Known'),
+    'Radiotap_HEMUFlags1Known': ('he_mu_flags1_known', 'HEMUFlags1Known'),
+    'Radiotap_HEMUFlags2Known': ('he_mu_flags2_known', 'HEMUFlags2Known'),
+    'Radiotap_HEMUOtherUserKnown': ('he_mu_other_user_known', 'HEMUOtherUserKnown'),
+    'Radiotap_LSIGData1': ('lsig_data1', 'LSIGData1'),
+    'Radiotap_S1GKnown': ('s1g_known', 'S1GKnown'),
+    'Radiotap_USIGCommonKnown': ('usig_common_known', 'USIGCommonKnown'),
+    'Radiotap_EHTKnown': ('eht_known', 'EHTKnown'),
+})

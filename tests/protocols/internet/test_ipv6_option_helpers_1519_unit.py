@@ -35,22 +35,26 @@ HEADERS = (
     ('pcapkit.protocols.schema.internet.ipv6_opts', 'IPv6-Opts'),
 )
 
-#: ``(helper, packet, message after the prefix)`` for every ``raise`` in the
-#: helpers whose packet alone triggers it.
+#: ``(helper, packet, message after the prefix, error)`` for every ``raise`` in
+#: the helpers whose packet alone triggers it. An ``Opt Data Len`` too short is a
+#: ``ProtocolError``, so that a header refused for it is refused quietly (#2727).
 ERRORS = (
-    ('mpl_opt_seed_id_len', {'flags': {'type': 4}}, 'invalid MPL Seed-ID type: 4'),
+    ('mpl_opt_seed_id_len', {'flags': {'type': 4}}, 'invalid MPL Seed-ID type: 4', 'FieldValueError'),
     ('smf_i_dpd_id_len', {'len': 0, 'info': {'type': 0, 'len': 0}},
-     'invalid SMF I-DPD option length: 0'),
+     'invalid SMF I-DPD option length: 0', 'ProtocolError'),
     ('smf_i_dpd_id_len', {'len': 3, 'info': {'type': 2, 'len': 3}},
-     'invalid SMF I-DPD option length: 3'),
+     'invalid SMF I-DPD option length: 3', 'ProtocolError'),
     ('smf_dpd_data_selector', {'test': {'len': 0, 'mode': 0}},
-     'invalid SMF DPD option length: 0'),
-    ('smf_i_dpd_tid_selector', {'info': {'type': 0, 'len': 1}}, 'invalid TaggerID length: 1'),
-    ('smf_i_dpd_tid_selector', {'info': {'type': 2, 'len': 4}}, 'invalid TaggerID length: 4'),
-    ('smf_i_dpd_tid_selector', {'info': {'type': 3, 'len': 16}}, 'invalid TaggerID length: 16'),
-    ('calipso_pad_len', {'len': 11, 'cmpt_len': 1}, 'invalid CALIPSO option length: 11'),
-    ('mpl_opt_pad_len', {'len': 3, 'flags': {'type': 1}}, 'invalid MPL option length: 3'),
-    ('mpl_opt_pad_len', {'len': 1, 'flags': {'type': 0}}, 'invalid MPL option length: 1'),
+     'invalid SMF DPD option length: 0', 'ProtocolError'),
+    ('smf_i_dpd_tid_selector', {'info': {'type': 0, 'len': 1}}, 'invalid TaggerID length: 1',
+     'FieldValueError'),
+    ('smf_i_dpd_tid_selector', {'info': {'type': 2, 'len': 4}}, 'invalid TaggerID length: 4',
+     'FieldValueError'),
+    ('smf_i_dpd_tid_selector', {'info': {'type': 3, 'len': 16}}, 'invalid TaggerID length: 16',
+     'FieldValueError'),
+    ('calipso_pad_len', {'len': 11, 'cmpt_len': 1}, 'invalid CALIPSO option length: 11', 'ProtocolError'),
+    ('mpl_opt_pad_len', {'len': 3, 'flags': {'type': 1}}, 'invalid MPL option length: 3', 'ProtocolError'),
+    ('mpl_opt_pad_len', {'len': 1, 'flags': {'type': 0}}, 'invalid MPL option length: 1', 'ProtocolError'),
 )
 
 #: The helpers each header binds, and the keywords it binds them with beyond
@@ -85,15 +89,15 @@ class TestIPv6OptionHelpers(unittest.TestCase):
         self.assertEqual(sorted(shared.__all__), sorted([*BOUND, 'quick_start_data_selector', *UNBOUND]))
 
     def test_shared_helpers_report_the_prefix_they_are_given(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities import exceptions
 
         shared = self._shared()
         hopopt = importlib.import_module(HEADERS[0][0])
         for prefix in ('HOPOPT', 'IPv6-Opts', 'any-header'):
-            for name, packet, message in ERRORS:
+            for name, packet, message, error in ERRORS:
                 extra = {'base': hopopt.SMFDPDOption} if name == 'smf_dpd_data_selector' else {}
                 with self.subTest(prefix=prefix, helper=name, packet=packet):
-                    with self.assertRaises(FieldValueError) as caught:
+                    with self.assertRaises(getattr(exceptions, error)) as caught:
                         getattr(shared, name)(copy.deepcopy(packet), prefix=prefix, **extra)
                     self.assertEqual(str(caught.exception), f'{prefix}: {message}')
 
@@ -165,12 +169,12 @@ class TestIPv6OptionHelpers(unittest.TestCase):
                     self.assertEqual(field.length, length)
 
     def test_headers_keep_their_exact_error_text(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities import exceptions
 
         for module, prefix in self._headers():
-            for name, packet, message in ERRORS:
+            for name, packet, message, error in ERRORS:
                 with self.subTest(module=module.__name__, helper=name, packet=packet):
-                    with self.assertRaises(FieldValueError) as caught:
+                    with self.assertRaises(getattr(exceptions, error)) as caught:
                         getattr(module, name)(copy.deepcopy(packet))
                     self.assertEqual(str(caught.exception), f'{prefix}: {message}')
 

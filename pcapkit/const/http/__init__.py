@@ -30,10 +30,23 @@ enumerations include:
 
 """
 
-from pcapkit.const.http.error_code import ErrorCode as HTTP_ErrorCode
-from pcapkit.const.http.frame import Frame as HTTP_Frame
-from pcapkit.const.http.method import Method as HTTP_Method
-from pcapkit.const.http.setting import Setting as HTTP_Setting
-from pcapkit.const.http.status_code import StatusCode as HTTP_Status
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.http.error_code import ErrorCode as HTTP_ErrorCode
+    from pcapkit.const.http.frame import Frame as HTTP_Frame
+    from pcapkit.const.http.method import Method as HTTP_Method
+    from pcapkit.const.http.setting import Setting as HTTP_Setting
+    from pcapkit.const.http.status_code import StatusCode as HTTP_Status
 
 __all__ = ['HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_Status']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'HTTP_ErrorCode': ('error_code', 'ErrorCode'),
+    'HTTP_Frame': ('frame', 'Frame'),
+    'HTTP_Method': ('method', 'Method'),
+    'HTTP_Setting': ('setting', 'Setting'),
+    'HTTP_Status': ('status_code', 'StatusCode'),
+})

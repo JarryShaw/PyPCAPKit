@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from pcapkit.protocols.misc.raw import Raw
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
@@ -83,7 +84,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
     @property
     @abc.abstractmethod
     def version(self) -> 'Literal[1, 2, 3]':
-        """IGMP version this class reads: ``1``, ``2`` or ``3``."""
+        """IGMP version this class reads, ``1``, ``2`` or ``3``."""
 
     @property
     def alias(self) -> 'str':

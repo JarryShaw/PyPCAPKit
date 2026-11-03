@@ -224,18 +224,18 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.numbers import BitmapField
     from pcapkit.protocols.data.link.radiotap import RadiotapField as Data_Field
 
-    #: A field given to :meth:`Radiotap.make`: a data model, or a ``(type, mapping)`` pair.
+    #: A field given to :meth:`Radiotap.make` -- a data model, or a ``(type, mapping)`` pair.
     FieldEntry = Union[Data_Field, Tuple[Union[Enum_FieldType, int], Mapping[str, Any]]]
-    #: Parser of a field type registered as a callable: the type and the
+    #: Parser of a field type registered as a callable -- the type and the
     #: parsed schema, to the data model.
     FieldParser = Callable[[Enum_FieldType, Schema_Field], Data_Field]
-    #: Constructor of a field type registered as a callable: the type and a
+    #: Constructor of a field type registered as a callable -- the type and a
     #: data model or a mapping of its subfields, to the schema.
     FieldConstructor = Callable[[Enum_FieldType, Union[Data_Field, Mapping[str, Any]]], Schema_Field]
 
 __all__ = ['Radiotap']
 
-#: Bit 31 of an ``it_present`` word: set, another present-flags word
+#: Bit 31 of an ``it_present`` word -- set, another present-flags word
 #: follows; clear, the field-data region starts right after this word.
 _IT_PRESENT_EXTENDED = 1 << 31
 

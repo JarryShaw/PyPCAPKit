@@ -423,7 +423,7 @@ class QSOption(Option):
 
     #: QS function.
     func: 'QSFunction'
-    #: Rate request/report, in kbps: ``40 * 2 ** N`` for the Rate Request or
+    #: Rate request/report, in kbps -- ``40 * 2 ** N`` for the Rate Request or
     #: Rate Report field ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782`
     #: Section 3.1).
     rate: 'int'

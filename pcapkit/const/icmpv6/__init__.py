@@ -27,14 +27,26 @@ enumerations include:
 
 """
 
-from pcapkit.const.icmpv6.destination_unreachable_code import \
-    DestinationUnreachableCode as ICMPv6_DestinationUnreachableCode
-from pcapkit.const.icmpv6.parameter_problem_code import \
-    ParameterProblemCode as ICMPv6_ParameterProblemCode
-from pcapkit.const.icmpv6.time_exceeded_code import TimeExceededCode as ICMPv6_TimeExceededCode
-from pcapkit.const.icmpv6.type import Type as ICMPv6_Type
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.icmpv6.destination_unreachable_code import \
+        DestinationUnreachableCode as ICMPv6_DestinationUnreachableCode
+    from pcapkit.const.icmpv6.parameter_problem_code import \
+        ParameterProblemCode as ICMPv6_ParameterProblemCode
+    from pcapkit.const.icmpv6.time_exceeded_code import TimeExceededCode as ICMPv6_TimeExceededCode
+    from pcapkit.const.icmpv6.type import Type as ICMPv6_Type
 
 __all__ = [
     'ICMPv6_Type',
     'ICMPv6_DestinationUnreachableCode', 'ICMPv6_TimeExceededCode', 'ICMPv6_ParameterProblemCode',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'ICMPv6_Type': ('type', 'Type'),
+    'ICMPv6_DestinationUnreachableCode': ('destination_unreachable_code', 'DestinationUnreachableCode'),
+    'ICMPv6_TimeExceededCode': ('time_exceeded_code', 'TimeExceededCode'),
+    'ICMPv6_ParameterProblemCode': ('parameter_problem_code', 'ParameterProblemCode'),
+})

@@ -32,163 +32,136 @@ and a caller that only has a port and a transport protocol can still reach the
 right registry through :meth:`AppType.get
 <pcapkit.const.reg.apptype.apptype.AppType.get>`.
 
-:class:`~pcapkit.const.reg.apptype.tcp.TCP` and
-:class:`~pcapkit.const.reg.apptype.udp.UDP` are imported the first time either
-is reached -- as an attribute of this package, or through :meth:`AppType.get
-<pcapkit.const.reg.apptype.apptype.AppType.get>` -- rather than with the package
-itself, since they are most of its import time (GitHub issue :issue:`1538`).
+Each per-transport registry -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+:class:`~pcapkit.const.reg.apptype.udp.UDP`,
+:class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
+:class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- is imported the first time it
+is reached, as an attribute of this package or through :meth:`AppType.get
+<pcapkit.const.reg.apptype.apptype.AppType.get>`, rather than with the package
+itself: TCP and UDP for being most of its import time (GitHub issue
+:issue:`1538`), and SCTP and DCCP as every :mod:`pcapkit.const` enumeration is
+(:issue:`2729`).
 
 """
 
-import importlib
-import sys
+import itertools
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype.apptype import AppType, TransportProtocol
-from pcapkit.const.reg.apptype.dccp import DCCP
-from pcapkit.const.reg.apptype.sctp import SCTP
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.utilities.lazy import lazy_exports
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, ItemsView, Iterable, Iterator, Mapping, Optional, SupportsIndex, Type
 
+    from pcapkit.const.reg.apptype.dccp import DCCP
+    from pcapkit.const.reg.apptype.sctp import SCTP
     from pcapkit.const.reg.apptype.tcp import TCP
     from pcapkit.const.reg.apptype.udp import UDP
+    from pcapkit.corekit.multidict import OrderedMultiDict
 
 __all__ = ['AppType', 'TransportProtocol', 'TCP', 'UDP', 'SCTP', 'DCCP']
 
-#: Registries imported on first use rather than with this package, as submodule
-#: name to class name -- GitHub issue :issue:`1538`. Generated from IANA's
-#: registry, they hold about 49,700 lines of members, about 30% of
-#: ``import pcapkit`` when imported eagerly, while SCTP's and DCCP's cost a few
-#: milliseconds and stay eager.
-_LAZY = {'tcp': 'TCP', 'udp': 'UDP'}
+#: Registries imported on first use rather than with this package, as public
+#: name to submodule and class name: every per-transport registry (GitHub issues
+#: :issue:`1538` and :issue:`2729`).
+_LAZY = {'TCP': ('tcp', 'TCP'), 'UDP': ('udp', 'UDP'), 'SCTP': ('sctp', 'SCTP'), 'DCCP': ('dccp', 'DCCP')}
 
 
-class _Registries(dict):
+@info_final
+class _Registries(Info['Type[AppType]']):
     """:attr:`AppType.__registries__ <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`,
     importing a lazy registry the first time its value is read.
 
-    Every key is present from the start, in the order
-    :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` declares them,
-    so :func:`len`, ``in`` and iteration import nothing. A lazy
-    registry's value is a :class:`~pcapkit.corekit.module.ModuleDescriptor`
-    until the first read replaces it with the class. Every way of reading a
-    value is overridden, :meth:`__iter__` included: overriding it is what makes
-    ``dict(...)`` and ``{**...}`` go through :meth:`__getitem__` instead of
-    copying the descriptors in C, so no caller ever sees one.
+    An :class:`~pcapkit.corekit.infoclass.Info` keyed by
+    :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` members, in
+    the order it is built from. Each registry is held under a name made from its
+    member's, as an :class:`~pcapkit.corekit.infoclass.Info` holds a key named
+    like one of its methods, and the ``__map__`` and ``__map_reverse__`` it keeps
+    for those pair the two: a lookup by member or by bare :class:`int` finds the
+    registry, and iteration yields the members. :func:`len`, ``in`` and
+    iteration import nothing.
+
+    A lazy registry is held as a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+    until the first read of its value replaces it with the class. Every read of a
+    value -- indexing, ``get()``, ``values()``, ``items()``, ``==``,
+    :func:`repr`, :meth:`to_dict`, a copy or a pickle -- goes through
+    :meth:`__getitem__` or imports every registry first, so no caller ever sees a
+    descriptor.
+
+    It is immutable, as every :class:`~pcapkit.corekit.infoclass.Info` is, and no
+    :obj:`dict` subclass (GitHub issue :issue:`2726`): it has none of the
+    :obj:`dict` methods that change a mapping, nor ``copy()`` or the ``|``
+    operator.
 
     """
 
-    __slots__ = ()
+    if TYPE_CHECKING:
+        def __init__(self, dict_: 'Mapping[TransportProtocol, Type[AppType] | ModuleDescriptor[AppType]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
-    def _resolve(self, key: 'Any', value: 'Any') -> 'Any':
-        if isinstance(value, ModuleDescriptor):
-            value = value.klass
-            dict.__setitem__(self, key, value)
-        return value
+    def __update__(self, dict_: 'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]' = None,
+                   **kwargs: 'Type[AppType] | ModuleDescriptor[AppType]') -> 'None':
+        """Hold each registry under the name made from its transport protocol.
 
-    def _resolve_all(self) -> 'None':
-        for key, value in list(dict.items(self)):
-            self._resolve(key, value)
+        Args:
+            dict_: Registries, each keyed by a
+                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
+                member, or by its value or name.
+            **kwargs: More registries, each keyed by its transport protocol's name.
 
-    def __getitem__(self, key: 'Any') -> 'Any':
-        return self._resolve(key, dict.__getitem__(self, key))
+        """
+        for (key, registry) in itertools.chain(dict(dict_ or ()).items(), kwargs.items()):
+            proto = TransportProtocol.get(key)
+            name = f'_{type(self).__name__}{proto.name}'
+            self.__map__[proto] = name
+            self.__map_reverse__[name] = proto
+            self.__dict__[name] = registry
 
-    def get(self, key: 'Any', default: 'Any' = None) -> 'Any':
-        value = dict.get(self, key, default)
-        # NOTE: the second test keeps a caller's own ``default`` from being
-        # resolved and stored, should it ever be a descriptor itself.
-        if isinstance(value, ModuleDescriptor) and dict.__contains__(self, key):
-            value = self._resolve(key, value)
-        return value
+    def __getitem__(self, key: 'Any') -> 'Type[AppType]':
+        # NOTE: ``__map__`` holds the transport protocols alone, so any other
+        # key, the names of the bookkeeping attributes included, raises
+        # :exc:`KeyError` as a missing :obj:`dict` key does.
+        name = self.__map__[key]
+        registry = self.__dict__[name]
+        if isinstance(registry, ModuleDescriptor):
+            registry = registry.klass
+            self.__dict__[name] = registry
+        return registry
 
-    def __iter__(self) -> 'Any':
-        return dict.__iter__(self)
-
-    def values(self) -> 'Any':
-        self._resolve_all()
-        return dict.values(self)
-
-    def items(self) -> 'Any':
-        self._resolve_all()
-        return dict.items(self)
-
-    def copy(self) -> 'dict[Any, Any]':
-        self._resolve_all()
-        return dict.copy(self)
-
-    def pop(self, *args: 'Any') -> 'Any':
-        self._resolve_all()
-        return dict.pop(self, *args)
-
-    def popitem(self) -> 'Any':
-        self._resolve_all()
-        return dict.popitem(self)
-
-    def setdefault(self, key: 'Any', default: 'Any' = None) -> 'Any':
-        self._resolve_all()
-        return dict.setdefault(self, key, default)
-
-    def __eq__(self, other: 'object') -> 'bool':
-        self._resolve_all()
-        return dict.__eq__(self, other)
-
-    def __ne__(self, other: 'object') -> 'bool':
-        self._resolve_all()
-        return dict.__ne__(self, other)
-
-    # NOTE: dict union is :pep:`584`, Python 3.9 and up, so a registry has it
-    # from 3.9 only, as :obj:`dict` does (GitHub issue #1694): before
-    # 3.9, ``|`` and ``|=`` raise dict's :exc:`TypeError` and import nothing.
-    # ``|=`` stays dict's own, since it updates in place and reads no value.
-    if sys.version_info >= (3, 9):  # pragma: no branch -- Python 3.9 and up
-        def __or__(self, other: 'Any') -> 'Any':
-            self._resolve_all()
-            return dict.__or__(self, other)
-
-        def __ror__(self, other: 'Any') -> 'Any':
-            self._resolve_all()
-            return dict.__ror__(self, other)
+    def __contains__(self, key: 'object') -> 'bool':
+        return key in self.__map__
 
     def __repr__(self) -> 'str':
+        return repr(dict(self.items()))
+
+    __str__ = __repr__
+
+    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'Any':
         self._resolve_all()
-        return dict.__repr__(self)
+        return super().__reduce_ex__(protocol)
+
+    def items(self, multi: 'bool' = False) -> 'ItemsView[str, Type[AppType]] | Iterator[tuple[str, Type[AppType]]]':  # type: ignore[override] # pylint: disable=line-too-long
+        if multi:
+            self._resolve_all()
+        return super().items(multi)
+
+    def to_dict(self) -> 'OrderedMultiDict[str, Type[AppType]]':
+        self._resolve_all()
+        return super().to_dict()
+
+    def _resolve_all(self) -> 'None':
+        """Import every pending registry, as reading each value does."""
+        list(self.values())
 
 
 # NOTE: this is what makes ``AppType.get(port, proto=...)`` work on the base
 # class, which is where every caller in the library addresses it. It cannot live
 # in ``apptype.py``: that module is imported *by* every per-transport registry,
-# so it cannot import them back. Here is the first point at which all of them
-# exist, or, for the lazy ones, where to import them from.
-AppType.__registries__ = _Registries({
-    TransportProtocol.tcp: ModuleDescriptor(f'{__name__}.tcp', _LAZY['tcp']),
-    TransportProtocol.udp: ModuleDescriptor(f'{__name__}.udp', _LAZY['udp']),
-    TransportProtocol.sctp: SCTP,
-    TransportProtocol.dccp: DCCP,
+# so it cannot import them back. Here is where to import each of them from.
+AppType.__registries__ = _Registries({  # type: ignore[assignment] # Info types its keys as str
+    TransportProtocol.get(module): ModuleDescriptor(f'{__name__}.{module}', klass)
+    for (module, klass) in _LAZY.values()
 })
 
-
-def __getattr__(name: 'str') -> 'Any':
-    """Import a :data:`_LAZY` registry, or its submodule, on first access.
-
-    :pep:`562` calls this only for a name missing from this module's globals,
-    so it runs once per name: importing a submodule binds it here, and the
-    class is bound here before it is returned.
-
-    """
-    if name in _LAZY:
-        return importlib.import_module(f'{__name__}.{name}')
-    module = name.lower()
-    if _LAZY.get(module) == name:
-        registry = getattr(importlib.import_module(f'{__name__}.{module}'), name)
-        globals()[name] = registry
-        return registry
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
-
-
-def __dir__() -> 'list[str]':
-    """The names an eager import of every per-transport registry would list."""
-    helpers = {'importlib', 'sys', 'TYPE_CHECKING', 'ModuleDescriptor', '_LAZY', '_Registries',
-               '__getattr__', '__dir__'}
-    return sorted({*globals(), *_LAZY, *_LAZY.values()} - helpers)
+__getattr__, __dir__ = lazy_exports(__name__, globals(), _LAZY)

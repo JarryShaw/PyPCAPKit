@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
 #: How the tests step resolves GNU's ``timeout``, and how it runs it.
 RESOLVE = 'gnu_timeout=$(command -v gnutimeout || command -v timeout)\n'
-RUN = '"$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"\n'
+RUN = '"$gnu_timeout" --signal=INT --kill-after=3m 180m "$@"\n'
 #: ``timeout`` run as a command and given an option, which only GNU's honours as GNU does.
 OPTIONED = re.compile(r'(?<![\w$"/.-])timeout\s+-')
 #: A shell comment, a whole line of one or one after a space.
@@ -197,7 +197,7 @@ class TestTheTestsStepRunsGNUs(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = self.calls.read_text(encoding='utf-8').splitlines()
         self.assertEqual(len(calls), 1, calls)
-        self.assertTrue(calls[0].startswith('gnutimeout --signal=INT --kill-after=3m 110m python -m pytest '), calls)
+        self.assertTrue(calls[0].startswith('gnutimeout --signal=INT --kill-after=3m 180m python -m pytest '), calls)
 
 
 if __name__ == '__main__':

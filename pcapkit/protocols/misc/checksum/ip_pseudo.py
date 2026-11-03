@@ -82,7 +82,7 @@ if TYPE_CHECKING:
 
 __all__ = ['IP_Pseudo', 'pseudo_header', 'verify_upper']
 
-#: Extension headers that end the chain, as the upper layer: the Mobility Header
+#: Extension headers that end the chain, as the upper layer -- the Mobility Header
 #: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).
 _TERMINAL_HEADERS = (Enum_ExtensionHeader.Mobility_Header, Enum_ExtensionHeader.HIP)
 

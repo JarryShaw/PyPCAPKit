@@ -75,7 +75,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
 
     #: Protocol name of current reassembly object.
     __protocol_name__ = 'DTLS'
-    #: Protocol of current reassembly object. An extension point: a protocol
+    #: Protocol of current reassembly object. An extension point -- a protocol
     #: named here need only define ``analyze_handshake``, with the signature of
     #: :meth:`DTLS.analyze_handshake
     #: <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`, and is read

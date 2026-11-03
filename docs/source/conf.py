@@ -576,6 +576,41 @@ def resolve_builtins_exactly(app: 'Sphinx', doctree: 'document') -> None:  # pyl
             del attributes['refspecific']
 
 
+def qualify_type_parameters(app: 'Sphinx', doctree: 'document') -> None:  # pylint: disable=unused-argument
+    """Point a name in a type parameter's bound or constraints at the class its module binds.
+
+    ``sphinx-autodoc-typehints`` writes a generic class's type parameters after its
+    name, and renders a legacy :class:`~typing.TypeVar`'s string bound or
+    constraints verbatim, so each name in them is a bare reference the Python
+    domain suffix-matches. Only a string can name a ``TYPE_CHECKING`` import
+    there: ``_KT`` in :mod:`pcapkit.foundation.reassembly.data.data` names
+    ``TransType`` and ``HandshakeType``, as crawlers under :mod:`pcapkit.vendor`
+    are also named, so the build warned ``more than one target found`` for both
+    and linked ``HandshakeType`` to the SSLv2 enumeration rather than the TLS one
+    the module imports (:issue:`2743`).
+
+    :func:`bind_type_checking_names` has bound each module's guarded names, so the
+    module says what each name is. A bare name it binds to a :mod:`pcapkit` class
+    is pointed at that class's dotted path, which the exact lookup finds; the text
+    is left as written. Any other name is left to the default resolution.
+
+    Args:
+        app: Sphinx application.
+        doctree: The document just read.
+
+    """
+    for parameters in doctree.findall(addnodes.desc_type_parameter_list):
+        for node in parameters.findall(addnodes.pending_xref):
+            target = node.get('reftarget', '')
+            module = sys.modules.get(node.get('py:module') or '')
+            if node.get('refdomain') != 'py' or '.' in target or module is None:
+                continue
+            value = vars(module).get(target)
+            if (isinstance(value, type) and isinstance(getattr(value, '__module__', None), str)
+                    and value.__module__.partition('.')[0] == 'pcapkit'):
+                node['reftarget'] = f'{value.__module__}.{value.__qualname__}'
+
+
 def warning_reference(name: str) -> str:
     """Write a ``Warns:`` entry's warning class as the link ``Raises:`` would make.
 
@@ -1281,6 +1316,7 @@ def setup(app: 'Sphinx') -> None:
     app.add_post_transform(DropTableWrapperIds)
     app.connect('doctree-resolved', link_pcap_module)
     app.connect('doctree-read', resolve_builtins_exactly)
+    app.connect('doctree-read', qualify_type_parameters)
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.
     app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)

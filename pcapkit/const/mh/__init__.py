@@ -141,52 +141,60 @@ enumerations include:
 
 """
 
-from pcapkit.const.mh.access_type import AccessType as MH_AccessType
-from pcapkit.const.mh.ack_status_code import ACKStatusCode as MH_ACKStatusCode
-from pcapkit.const.mh.ani_suboption import ANISuboption as MH_ANISuboption
-from pcapkit.const.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
-from pcapkit.const.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
-from pcapkit.const.mh.binding_error import BindingError as MH_BindingError
-from pcapkit.const.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
-from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
-from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
-from pcapkit.const.mh.cga_sec import CGASec as MH_CGASec
-from pcapkit.const.mh.cga_type import CGAType as MH_CGAType
-from pcapkit.const.mh.dhcp_support_mode import DHCPSupportMode as MH_DHCPSupportMode
-from pcapkit.const.mh.dns_status_code import DNSStatusCode as MH_DNSStatusCode
-from pcapkit.const.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
-from pcapkit.const.mh.dsmipv6_home_address import DSMIPv6HomeAddress as MH_DSMIPv6HomeAddress
-from pcapkit.const.mh.enumerating_algorithm import EnumeratingAlgorithm as MH_EnumeratingAlgorithm
-from pcapkit.const.mh.fb_ack_status import FlowBindingACKStatus as MH_FlowBindingACKStatus
-from pcapkit.const.mh.fb_action import FlowBindingAction as MH_FlowBindingAction
-from pcapkit.const.mh.fb_indication_trigger import \
-    FlowBindingIndicationTrigger as MH_FlowBindingIndicationTrigger
-from pcapkit.const.mh.fb_type import FlowBindingType as MH_FlowBindingType
-from pcapkit.const.mh.flow_id_status import FlowIDStatus as MH_FlowIDStatus
-from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption as MH_FlowIDSuboption
-from pcapkit.const.mh.handoff_type import HandoffType as MH_HandoffType
-from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
-from pcapkit.const.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
-from pcapkit.const.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
-from pcapkit.const.mh.handover_initiate_status import \
-    HandoverInitiateStatus as MH_HandoverInitiateStatus
-from pcapkit.const.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
-from pcapkit.const.mh.lla_code import LLACode as MH_LLACode
-from pcapkit.const.mh.lma_mag_suboption import \
-    LMAControlledMAGSuboption as MH_LMAControlledMAGSuboption
-from pcapkit.const.mh.mn_group_id import MNGroupID as MH_MNGroupID
-from pcapkit.const.mh.mn_id_subtype import MNIDSubtype as MH_MNIDSubtype
-from pcapkit.const.mh.operator_id import OperatorID as MH_OperatorID
-from pcapkit.const.mh.option import Option as MH_Option
-from pcapkit.const.mh.packet import Packet as MH_Packet
-from pcapkit.const.mh.qos_attribute import QoSAttribute as MH_QoSAttribute
-from pcapkit.const.mh.revocation_status_code import RevocationStatusCode as MH_RevocationStatusCode
-from pcapkit.const.mh.revocation_trigger import RevocationTrigger as MH_RevocationTrigger
-from pcapkit.const.mh.status_code import StatusCode as MH_StatusCode
-from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
-from pcapkit.const.mh.upa_status import \
-    UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
-from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.mh.access_type import AccessType as MH_AccessType
+    from pcapkit.const.mh.ack_status_code import ACKStatusCode as MH_ACKStatusCode
+    from pcapkit.const.mh.ani_suboption import ANISuboption as MH_ANISuboption
+    from pcapkit.const.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
+    from pcapkit.const.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
+    from pcapkit.const.mh.binding_error import BindingError as MH_BindingError
+    from pcapkit.const.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
+    from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
+    from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
+    from pcapkit.const.mh.cga_sec import CGASec as MH_CGASec
+    from pcapkit.const.mh.cga_type import CGAType as MH_CGAType
+    from pcapkit.const.mh.dhcp_support_mode import DHCPSupportMode as MH_DHCPSupportMode
+    from pcapkit.const.mh.dns_status_code import DNSStatusCode as MH_DNSStatusCode
+    from pcapkit.const.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
+    from pcapkit.const.mh.dsmipv6_home_address import DSMIPv6HomeAddress as MH_DSMIPv6HomeAddress
+    from pcapkit.const.mh.enumerating_algorithm import \
+        EnumeratingAlgorithm as MH_EnumeratingAlgorithm
+    from pcapkit.const.mh.fb_ack_status import FlowBindingACKStatus as MH_FlowBindingACKStatus
+    from pcapkit.const.mh.fb_action import FlowBindingAction as MH_FlowBindingAction
+    from pcapkit.const.mh.fb_indication_trigger import \
+        FlowBindingIndicationTrigger as MH_FlowBindingIndicationTrigger
+    from pcapkit.const.mh.fb_type import FlowBindingType as MH_FlowBindingType
+    from pcapkit.const.mh.flow_id_status import FlowIDStatus as MH_FlowIDStatus
+    from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption as MH_FlowIDSuboption
+    from pcapkit.const.mh.handoff_type import HandoffType as MH_HandoffType
+    from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
+    from pcapkit.const.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
+    from pcapkit.const.mh.handover_initiate_flag import \
+        HandoverInitiateFlag as MH_HandoverInitiateFlag
+    from pcapkit.const.mh.handover_initiate_status import \
+        HandoverInitiateStatus as MH_HandoverInitiateStatus
+    from pcapkit.const.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
+    from pcapkit.const.mh.lla_code import LLACode as MH_LLACode
+    from pcapkit.const.mh.lma_mag_suboption import \
+        LMAControlledMAGSuboption as MH_LMAControlledMAGSuboption
+    from pcapkit.const.mh.mn_group_id import MNGroupID as MH_MNGroupID
+    from pcapkit.const.mh.mn_id_subtype import MNIDSubtype as MH_MNIDSubtype
+    from pcapkit.const.mh.operator_id import OperatorID as MH_OperatorID
+    from pcapkit.const.mh.option import Option as MH_Option
+    from pcapkit.const.mh.packet import Packet as MH_Packet
+    from pcapkit.const.mh.qos_attribute import QoSAttribute as MH_QoSAttribute
+    from pcapkit.const.mh.revocation_status_code import \
+        RevocationStatusCode as MH_RevocationStatusCode
+    from pcapkit.const.mh.revocation_trigger import RevocationTrigger as MH_RevocationTrigger
+    from pcapkit.const.mh.status_code import StatusCode as MH_StatusCode
+    from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
+    from pcapkit.const.mh.upa_status import \
+        UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
+    from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -204,3 +212,48 @@ __all__ = [
     'MH_LMAControlledMAGSuboption', 'MH_LLACode', 'MH_CGAType',
     'MH_CGAExtension', 'MH_CGASec', 'MH_BindingError',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'MH_Packet': ('packet', 'Packet'),
+    'MH_Option': ('option', 'Option'),
+    'MH_DNSStatusCode': ('dns_status_code', 'DNSStatusCode'),
+    'MH_ACKStatusCode': ('ack_status_code', 'ACKStatusCode'),
+    'MH_MNIDSubtype': ('mn_id_subtype', 'MNIDSubtype'),
+    'MH_StatusCode': ('status_code', 'StatusCode'),
+    'MH_EnumeratingAlgorithm': ('enumerating_algorithm', 'EnumeratingAlgorithm'),
+    'MH_AuthSubtype': ('auth_subtype', 'AuthSubtype'),
+    'MH_HandoffType': ('handoff_type', 'HandoffType'),
+    'MH_AccessType': ('access_type', 'AccessType'),
+    'MH_BindingUpdateFlag': ('binding_update_flag', 'BindingUpdateFlag'),
+    'MH_BindingACKFlag': ('binding_ack_flag', 'BindingACKFlag'),
+    'MH_DSMIPv6HomeAddress': ('dsmipv6_home_address', 'DSMIPv6HomeAddress'),
+    'MH_BindingRevocation': ('binding_revocation', 'BindingRevocation'),
+    'MH_RevocationTrigger': ('revocation_trigger', 'RevocationTrigger'),
+    'MH_RevocationStatusCode': ('revocation_status_code', 'RevocationStatusCode'),
+    'MH_HomeAddressReply': ('home_address_reply', 'HomeAddressReply'),
+    'MH_DHCPSupportMode': ('dhcp_support_mode', 'DHCPSupportMode'),
+    'MH_HandoverInitiateFlag': ('handover_initiate_flag', 'HandoverInitiateFlag'),
+    'MH_HandoverACKFlag': ('handover_ack_flag', 'HandoverACKFlag'),
+    'MH_HandoverInitiateStatus': ('handover_initiate_status', 'HandoverInitiateStatus'),
+    'MH_HandoverACKStatus': ('handover_ack_status', 'HandoverACKStatus'),
+    'MH_FlowIDStatus': ('flow_id_status', 'FlowIDStatus'),
+    'MH_FlowIDSuboption': ('flow_id_suboption', 'FlowIDSuboption'),
+    'MH_TrafficSelector': ('traffic_selector', 'TrafficSelector'),
+    'MH_MNGroupID': ('mn_group_id', 'MNGroupID'),
+    'MH_DSMIP6TLSPacket': ('dsmip6_tls_packet', 'DSMIP6TLSPacket'),
+    'MH_ANISuboption': ('ani_suboption', 'ANISuboption'),
+    'MH_OperatorID': ('operator_id', 'OperatorID'),
+    'MH_UpdateNotificationReason': ('upn_reason', 'UpdateNotificationReason'),
+    'MH_UpdateNotificationACKStatus': ('upa_status', 'UpdateNotificationACKStatus'),
+    'MH_FlowBindingType': ('fb_type', 'FlowBindingType'),
+    'MH_FlowBindingIndicationTrigger': ('fb_indication_trigger', 'FlowBindingIndicationTrigger'),
+    'MH_FlowBindingACKStatus': ('fb_ack_status', 'FlowBindingACKStatus'),
+    'MH_FlowBindingAction': ('fb_action', 'FlowBindingAction'),
+    'MH_QoSAttribute': ('qos_attribute', 'QoSAttribute'),
+    'MH_LMAControlledMAGSuboption': ('lma_mag_suboption', 'LMAControlledMAGSuboption'),
+    'MH_LLACode': ('lla_code', 'LLACode'),
+    'MH_CGAType': ('cga_type', 'CGAType'),
+    'MH_CGAExtension': ('cga_extension', 'CGAExtension'),
+    'MH_CGASec': ('cga_sec', 'CGASec'),
+    'MH_BindingError': ('binding_error', 'BindingError'),
+})

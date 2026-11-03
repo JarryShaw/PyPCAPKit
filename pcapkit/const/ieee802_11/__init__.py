@@ -25,15 +25,28 @@ Available enumerations include:
 
 """
 
-from pcapkit.const.ieee802_11.control_subtype import ControlSubtype as IEEE802_11_ControlSubtype
-from pcapkit.const.ieee802_11.data_subtype import DataSubtype as IEEE802_11_DataSubtype
-from pcapkit.const.ieee802_11.extension_subtype import \
-    ExtensionSubtype as IEEE802_11_ExtensionSubtype
-from pcapkit.const.ieee802_11.management_subtype import \
-    ManagementSubtype as IEEE802_11_ManagementSubtype
-from pcapkit.const.ieee802_11.type import Type as IEEE802_11_Type
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ieee802_11.control_subtype import ControlSubtype as IEEE802_11_ControlSubtype
+    from pcapkit.const.ieee802_11.data_subtype import DataSubtype as IEEE802_11_DataSubtype
+    from pcapkit.const.ieee802_11.extension_subtype import \
+        ExtensionSubtype as IEEE802_11_ExtensionSubtype
+    from pcapkit.const.ieee802_11.management_subtype import \
+        ManagementSubtype as IEEE802_11_ManagementSubtype
+    from pcapkit.const.ieee802_11.type import Type as IEEE802_11_Type
 
 __all__ = [
     'IEEE802_11_Type', 'IEEE802_11_ManagementSubtype', 'IEEE802_11_ControlSubtype',
     'IEEE802_11_DataSubtype', 'IEEE802_11_ExtensionSubtype',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'IEEE802_11_Type': ('type', 'Type'),
+    'IEEE802_11_ManagementSubtype': ('management_subtype', 'ManagementSubtype'),
+    'IEEE802_11_ControlSubtype': ('control_subtype', 'ControlSubtype'),
+    'IEEE802_11_DataSubtype': ('data_subtype', 'DataSubtype'),
+    'IEEE802_11_ExtensionSubtype': ('extension_subtype', 'ExtensionSubtype'),
+})

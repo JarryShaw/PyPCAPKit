@@ -8,7 +8,8 @@ Module Utilities
 built with: user-refined exceptions and warnings, logging, the tunable limits
 of :mod:`~pcapkit.utilities.config`, a compatibility layer, timestamp
 conversion, pickle reductions, the
-:mod:`context variables <pcapkit.utilities.contextvars>` its modules share, and
+:mod:`context variables <pcapkit.utilities.contextvars>` its modules share,
+:mod:`lazy imports <pcapkit.utilities.lazy>` for a package's exports, and
 wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
 outside itself; see :ref:`utilities-or-corekit`.
 
@@ -23,6 +24,7 @@ outside itself; see :ref:`utilities-or-corekit`.
    datetime
    pickle
    contextvars
+   lazy
 
 Version Compatibility
 =====================

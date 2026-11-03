@@ -10,8 +10,8 @@
 warnings, logging, the tunable limits of
 :mod:`~pcapkit.utilities.config`, a compatibility layer,
 timestamp conversion, pickle reductions, the context
-variables its modules share, and wrappers around third-party
-libraries. It imports nothing from :mod:`pcapkit`
+variables its modules share, lazy imports for a package's
+exports, and wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
 outside itself (:issue:`1712`).
 
 .. versionremoved:: 1.5.0

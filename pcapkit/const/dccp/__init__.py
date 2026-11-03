@@ -33,12 +33,26 @@ enumerations include:
 
 """
 
-from pcapkit.const.dccp.ack_vector_state import AckVectorState as DCCP_AckVectorState
-from pcapkit.const.dccp.drop_code import DropCode as DCCP_DropCode
-from pcapkit.const.dccp.feature import Feature as DCCP_Feature
-from pcapkit.const.dccp.option import Option as DCCP_Option
-from pcapkit.const.dccp.packet_type import PacketType as DCCP_PacketType
-from pcapkit.const.dccp.reset_code import ResetCode as DCCP_ResetCode
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.dccp.ack_vector_state import AckVectorState as DCCP_AckVectorState
+    from pcapkit.const.dccp.drop_code import DropCode as DCCP_DropCode
+    from pcapkit.const.dccp.feature import Feature as DCCP_Feature
+    from pcapkit.const.dccp.option import Option as DCCP_Option
+    from pcapkit.const.dccp.packet_type import PacketType as DCCP_PacketType
+    from pcapkit.const.dccp.reset_code import ResetCode as DCCP_ResetCode
 
 __all__ = ['DCCP_PacketType', 'DCCP_ResetCode', 'DCCP_Option', 'DCCP_Feature',
            'DCCP_AckVectorState', 'DCCP_DropCode']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'DCCP_PacketType': ('packet_type', 'PacketType'),
+    'DCCP_ResetCode': ('reset_code', 'ResetCode'),
+    'DCCP_Option': ('option', 'Option'),
+    'DCCP_Feature': ('feature', 'Feature'),
+    'DCCP_AckVectorState': ('ack_vector_state', 'AckVectorState'),
+    'DCCP_DropCode': ('drop_code', 'DropCode'),
+})

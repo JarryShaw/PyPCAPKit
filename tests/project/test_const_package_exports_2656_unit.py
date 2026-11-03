@@ -10,7 +10,8 @@ rules without an edit here, as *Round-Trip Invariants* in
 
 * :class:`ReaderTests` -- the toctree, ``__all__`` and star-import readers the sweeps use.
 * :class:`ConstPackageTests` -- each subpackage is star-imported by
-  :mod:`pcapkit.const`, lists every name of its own ``__all__`` in
+  :mod:`pcapkit.const` for the type checkers and named in its ``lazy_exports`` call
+  for the run time (#2729), lists every name of its own ``__all__`` in
   :data:`pcapkit.const.__all__`, and is in the toctree of the index page.
 * :class:`VendorPackageTests` -- the toctree rule for :mod:`pcapkit.vendor`, which
   mirrors :mod:`pcapkit.const` (*Const-Vendor Pairing* in
@@ -107,6 +108,14 @@ def star_imports(path: 'pathlib.Path') -> 'set[str]':
             and any(alias.name == '*' for alias in node.names)}
 
 
+def lazy_packages(path: 'pathlib.Path') -> 'set[str]':
+    """The subpackages the ``packages`` argument of the ``lazy_exports`` calls in ``path`` names."""
+    return {element.value for node in ast.walk(parse(path))
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'lazy_exports'
+            for keyword in node.keywords if keyword.arg == 'packages' and isinstance(keyword.value, ast.Tuple)
+            for element in keyword.value.elts if isinstance(element, ast.Constant)}
+
+
 def toctree_entries(path: 'pathlib.Path') -> 'set[str]':
     """The documents listed by every toctree in the page at ``path``, as written.
 
@@ -184,6 +193,12 @@ class ReaderTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(AssertionError):
                 literal_all(self.write(text))
 
+    def test_lazy_packages_read_the_packages_argument(self) -> 'None':
+        """The names in a ``packages=`` tuple count; positional and other calls' arguments do not."""
+        path = self.write("a = lazy_exports(n, g, {'x': ('y', 'z')}, packages=('b', 'c'))\n"
+                          "d = other(packages=('e',))\n")
+        self.assertEqual(lazy_packages(path), {'b', 'c'})
+
     def test_star_imports_read_nested_absolute_ones(self) -> 'None':
         """A star import under ``if``/``else`` counts; a named or relative one does not."""
         path = self.write('from a.b import *\nif x:\n    from c import *\nfrom d import e\nfrom . import *\n')
@@ -201,11 +216,16 @@ class ConstPackageTests(unittest.TestCase):
         self.assertTrue(toctree_entries(index_page('const')))
 
     def test_every_subpackage_is_star_imported(self) -> 'None':
-        """Its ``from pcapkit.const.<name> import *`` is what puts the names on the package."""
-        stars = star_imports(self.init)
+        """Its ``from pcapkit.const.<name> import *``, under ``TYPE_CHECKING``, puts the names on
+        the package for the type checkers, and its name in the ``lazy_exports`` call does at run
+        time (#2729)."""
+        stars, lazy = star_imports(self.init), lazy_packages(self.init)
         missing = [name for name in subpackages('const')
                    if name not in KNOWN_UNWIRED and f'pcapkit.const.{name}' not in stars]
         self.assertEqual(missing, [], 'add a "from pcapkit.const.<name> import *" for each')
+        unnamed = [name for name in subpackages('const') if name not in KNOWN_UNWIRED and name not in lazy]
+        self.assertEqual(unnamed, [], 'name each in the packages argument of the lazy_exports call')
+        self.assertEqual(sorted(lazy - set(subpackages('const'))), [])
 
     def test_every_subpackage_name_is_in_all(self) -> 'None':
         """Each name of its own ``__all__`` is in :data:`pcapkit.const.__all__`."""

@@ -27,9 +27,21 @@ enumerations include:
 
 """
 
-from pcapkit.const.tcp.checksum import Checksum as TCP_Checksum
-from pcapkit.const.tcp.flags import Flags as TCP_Flags
-from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
-from pcapkit.const.tcp.option import Option as TCP_Option
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.tcp.checksum import Checksum as TCP_Checksum
+    from pcapkit.const.tcp.flags import Flags as TCP_Flags
+    from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
+    from pcapkit.const.tcp.option import Option as TCP_Option
 
 __all__ = ['TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'TCP_Checksum': ('checksum', 'Checksum'),
+    'TCP_Option': ('option', 'Option'),
+    'TCP_MPTCPOption': ('mp_tcp_option', 'MPTCPOption'),
+    'TCP_Flags': ('flags', 'Flags'),
+})
