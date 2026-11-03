@@ -377,7 +377,10 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
     #: List of names of keys left out of ``repr``, ``str`` and the dumps of
     #: :mod:`pcapkit.dumpkit` -- metadata such as ``__next_type__``, which
     #: :meth:`to_dict` may still carry, see :attr:`__included__`.
-    #: Finalisation adds the names in :attr:`__builtin__`.
+    #: Finalisation adds the names in :attr:`__builtin__`, though ``repr``,
+    #: ``str`` and the dumps write a field renamed for clashing with one of
+    #: them, such as a reassembled datagram's ``packet``, under its own name
+    #: (:issue:`2733`).
     __excluded__: 'list[str]' = []
     #: List of names of dunder keys that iterating an instance, ``len()`` and
     #: :meth:`to_dict` carry -- metadata such as ``__next_type__``, which a
@@ -771,9 +774,16 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
            :attr:`__excluded__`, and records those as its own ``__excluded__``
            for the dumpers to leave out (:issue:`2003`).
 
+        .. versionchanged:: 1.6.0
+
+           The ``__excluded__`` it records leaves out a field renamed for
+           clashing with a builtin name, such as a reassembled datagram's
+           ``packet``, so the dumpers write that field under its own name
+           (:issue:`2733`).
+
         """
         dict_ = _OrderedMultiDict()  # type: _OrderedMultiDict[str, Any]
-        dict_.__excluded__ = self.__excluded__
+        dict_.__excluded__ = _dump_excluded(self)
         for (key, value) in self.__items_multi():
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
@@ -827,8 +837,9 @@ class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
     __ne__ = _ne
 
     #: Names of the keys the dumpers leave out: the :attr:`Info.__excluded__`
-    #: of the info exported, kept by copies, deep copies and pickles; none for
-    #: an export of a multi-mapping (:issue:`2003`).
+    #: of the info exported, less the fields it renamed for clashing with a
+    #: builtin name (:issue:`2733`), kept by copies, deep copies and pickles;
+    #: none for an export of a multi-mapping (:issue:`2003`).
     __excluded__ = ()  # type: Collection[str]
 
     def __repr__(self) -> 'str':
@@ -860,6 +871,29 @@ def _restore_export(cls: 'Type[_OrderedMultiDict]', pairs: 'list[tuple[Any, Any]
     new = cls(pairs)
     new.__excluded__ = excluded
     return new
+
+
+def _dump_excluded(info: 'Info') -> 'Collection[str]':
+    """Return the names of the keys of ``info`` the dumps leave out.
+
+    Args:
+        info: A field model, i.e. an :class:`Info` that is no multi-mapping.
+
+    Returns:
+        Its :attr:`Info.__excluded__`, less each field it renamed for clashing
+        with a builtin name. Finalisation adds every such name to
+        :attr:`Info.__excluded__`, and the dumps see a key under its own name
+        rather than as renamed, so they would otherwise leave out every renamed
+        field, a reassembled datagram's ``packet`` among them (:issue:`2733`).
+        ``repr`` and ``str`` see the renamed key, and write the field. A
+        renamed dunder key stays left out, being metadata.
+
+    """
+    renamed = info.__map__
+    if not renamed:
+        return info.__excluded__
+    return [name for name in info.__excluded__
+            if name not in renamed or (name.startswith('__') and name.endswith('__'))]
 
 
 class _MultiInfo(Info[VT], Generic[KT, VT]):
