@@ -70,9 +70,10 @@ CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cro
 #: The workflows that wait on "Experimental Tests" completing, to post its report alone (#2030).
 REPORTERS = ('ci-reports.yml',)
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
-#: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
+#: main's, ``experimental``'s are sized for GraalPy (#2739: about 1.5 times its leg in job
+#: 125752017215, whose last run is estimated).
 #: The watcher's interpreter and its requests are capped too (#1938).
-CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
+CAPS = {JOB: (45, {}), EXPERIMENTAL: (210, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 190})}
 #: A pytest-xdist worker count on a command line: ``-n X``, ``-nX``, ``--numprocesses X`` or
 #: ``--numprocesses=X``, with or without ``--dist`` after it.
 WORKERS_FLAG = re.compile(r'(?<![\w-])(?:--numprocesses(?:=|\s+)|-n\s*)(?P<value>[^\s;|&]+)')
@@ -670,7 +671,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         self.assertIn('test', [found.name for found in _dependency_gates.pytest_jobs()])
 
     def test_ci_timing_still_reads_its_legs(self) -> None:
-        """The weekly CI Timing review reads the workflow, so its two-hour legs stay measured."""
+        """The weekly CI Timing review reads the workflow, so its long legs stay measured."""
         from util import ci_timing  # pylint: disable=import-outside-toplevel
         self.assertIn('experimental.yml', ci_timing.OTHER_WORKFLOWS)
         specs = ci_timing.parse_workflow((ROOT / '.github' / 'workflows' / 'experimental.yml').read_text(encoding='utf-8'))
@@ -678,7 +679,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
             with self.subTest(python=version):
                 spec = ci_timing.match_job(specs, f'Python {version} (experimental)')
                 self.assertEqual((spec['id'], spec['timeout'], ci_timing.step_cap(spec, ci_timing.TESTS_STEP)),
-                                 ('experimental', 140, 120))
+                                 ('experimental', 210, 190))
 
     def test_no_required_context_names_a_leg(self) -> None:
         names = {f'Python {leg["python-version"]} (experimental)' for leg in legs(*EXPERIMENTAL)}

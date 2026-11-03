@@ -173,10 +173,12 @@ COMPILEALL = re.compile(r'-m compileall\b(?:[^\n]*\\\n)*[^\n]*')
 #: ``experimental``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``:
 #: setup-python, the install, the watcher's setup-python and requests (#1938) and the
 #: tests. #1732: the tests' is GraalPy's unit tier less the round-trip sweeps, 88-113
-#: minutes (estimate) from the 26% its leg reached in 25 (job 115915976024).
-EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
+#: minutes (estimate) from the 26% its leg reached in 25 (job 115915976024). #2739: its
+#: 180-minute timeout is about 1.5 times the leg in job 125752017215, whose last run is
+#: estimated.
+EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 190}
 #: ``experimental``'s own ``timeout-minutes`` (#1732), and ``test``'s.
-EXPERIMENTAL_JOB_CAP = 140
+EXPERIMENTAL_JOB_CAP = 210
 JOB_CAP = 45
 #: The job's minutes those caps leave for the rest of an experimental leg: the steps
 #: without a cap of their own -- checkout, the parallelism report, the resource

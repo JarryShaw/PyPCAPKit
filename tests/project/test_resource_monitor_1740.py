@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """#1740: the experimental legs sample their runner while the tests run.
 
-GraalPy's leg loses its runner 18-30 minutes into ``Run unit tests``, under a
-120-minute cap, so experimental.yml records what the runner has left: a sampler
+GraalPy's leg loses its runner 18-30 minutes into ``Run unit tests``, under its
+step cap, so experimental.yml records what the runner has left: a sampler
 started before the tests, stopped ``if: always()`` after them, whose samples
 ``Run unit tests`` copies into its own log, each line led by ``[monitor]``, and a
 file uploaded ``if: always()`` with ``continue-on-error``. A lost runner runs no
@@ -53,7 +53,7 @@ PROBES = ('free -m', 'df -h / "$GITHUB_WORKSPACE"', 'cat /proc/loadavg',
           'ps -eo pid,rss,vsz,etime,args --sort=-rss | head -6')
 #: The experimental job's caps and its check name, which the monitor leaves alone.
 #: The watcher's interpreter and its requests (#1938) are capped as the rest are.
-CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
+CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 190}
 CHECK_NAME = 'Python ${{ matrix.python-version }} (experimental)'
 #: A sample's first line, ``[monitor] <UTC time> sample <n>``.
 HEADER = re.compile(r'^\[monitor\] \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ sample (\d+)$')
@@ -299,7 +299,7 @@ class TestTheTestsAreContained(unittest.TestCase):
         self.assertIsNotNone(match, script)
         assert match is not None
         kill_after, duration = map(int, match.groups())
-        self.assertEqual((duration, kill_after), (110, 3))
+        self.assertEqual((duration, kill_after), (180, 3))
         self.assertLess(duration + kill_after, step(TESTS)['timeout-minutes'])
 
     def test_no_file_grows_past_2_gib(self) -> None:
@@ -408,7 +408,7 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertTrue(probe.endswith(f' GRAAL_PYTHON_VM_ARGS={HEAP} true'), probe)
         self.assertTrue(run.startswith(SUDO_ARGV.format(unit='pcapkit-tests.scope', **ids)), run)
         # #2020: GNU's timeout, `gnutimeout` where the image has one, by its path.
-        self.assertIn(f' prlimit --fsize={FSIZE} {gnu_timeout(self.env)} --signal=INT --kill-after=3m 110m '
+        self.assertIn(f' prlimit --fsize={FSIZE} {gnu_timeout(self.env)} --signal=INT --kill-after=3m 180m '
                       'python -m pytest -q -n 3 ', run)
         self.assertIn('args: -m pytest -q -n 3 --dist load', result.stdout)
         self.assertIn(f'heap {HEAP}\n', result.stdout)
@@ -463,7 +463,7 @@ class TestTheContainmentRuns(unittest.TestCase):
     def test_a_timeout_exits_124(self) -> None:
         self.scope()
         self.stub('python', 'exec sleep 30\n')
-        script = step(TESTS)['run'].replace('--kill-after=3m 110m', '--kill-after=3s 1s')
+        script = step(TESTS)['run'].replace('--kill-after=3m 180m', '--kill-after=3s 1s')
         self.assertNotEqual(script, step(TESTS)['run'])
         result = self.run_step(script)
         self.assertEqual(result.returncode, 124, result.stderr)
@@ -488,7 +488,7 @@ class TestTheContainmentRuns(unittest.TestCase):
             encoding='utf-8')
         base = 'scope=12G\n'
         self.assertEqual(self.titles(base + 'exit=124\noom_kills=0\nmemory_errors=0\n'),
-                         ['tests timed out at 110 minutes'])
+                         ['tests timed out at 180 minutes'])
         self.assertEqual(self.titles(base + 'exit=137\noom_kills=1\nmemory_errors=0\n'),
                          ['tests lost a process to the OOM killer'])
         self.assertEqual(self.titles(base + 'exit=1\noom_kills=0\nmemory_errors=3\n'), ['tests raised MemoryError'])
@@ -501,21 +501,21 @@ class TestTheContainmentRuns(unittest.TestCase):
     def test_a_hung_teardown_killed_after_the_timeout_is_a_timeout(self) -> None:
         """``--kill-after`` ends a teardown SIGINT did not with SIGKILL, exit 137, as an OOM kill does."""
         base = 'scope=12G\nmemory_errors=0\n'
-        timeout = ['tests timed out at 110 minutes']
-        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=6781\n'), timeout)
-        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=6600\n'), timeout)
-        # Before 110 minutes, or with an OOM kill, 137 is not the timeout's.
-        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=6599\n'), [])
-        self.assertEqual(self.titles(base + 'exit=137\noom_kills=1\nelapsed=6781\n'),
+        timeout = ['tests timed out at 180 minutes']
+        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=10981\n'), timeout)
+        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=10800\n'), timeout)
+        # Before 180 minutes, or with an OOM kill, 137 is not the timeout's.
+        self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=10799\n'), [])
+        self.assertEqual(self.titles(base + 'exit=137\noom_kills=1\nelapsed=10981\n'),
                          ['tests lost a process to the OOM killer'])
         self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\n'), [])
-        killed = self.summary(base + 'exit=137\noom_kills=0\nelapsed=6781\n')[0]
-        self.assertIn('timeout sent SIGKILL 3 minutes on (exit 137, no OOM kill), scope 12G, 6781 s', killed)
+        killed = self.summary(base + 'exit=137\noom_kills=0\nelapsed=10981\n')[0]
+        self.assertIn('timeout sent SIGKILL 3 minutes on (exit 137, no OOM kill), scope 12G, 10981 s', killed)
 
     def test_a_tests_step_killed_after_the_timeout_records_137_and_its_time(self) -> None:
         self.scope()
         self.stub('python', "trap '' INT\nsleep 5\n")
-        script = step(TESTS)['run'].replace('--kill-after=3m 110m', '--kill-after=1s 1s')
+        script = step(TESTS)['run'].replace('--kill-after=3m 180m', '--kill-after=1s 1s')
         self.assertNotEqual(script, step(TESTS)['run'])
         self.no_real_sudo()
         result = self.run_step(script)
@@ -558,7 +558,7 @@ class TestItGatesNothing(unittest.TestCase):
     def test_the_caps_and_check_name_are_unchanged(self) -> None:
         spec = job(*EXPERIMENTAL)
         self.assertEqual(spec['name'], CHECK_NAME)
-        self.assertEqual(spec['timeout-minutes'], 140)
+        self.assertEqual(spec['timeout-minutes'], 210)
         self.assertEqual({entry.get('id'): entry['timeout-minutes'] for entry in spec['steps']
                           if 'timeout-minutes' in entry}, CAPS)
 
@@ -589,10 +589,10 @@ class TestTheDocsSayIt(unittest.TestCase):
 
     def test_the_workflows_page_describes_the_containment(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        for phrase in (f'``GRAAL_PYTHON_VM_ARGS={HEAP}``', '``-n 3``', '``timeout --signal=INT --kill-after=3m 110m``',
+        for phrase in (f'``GRAAL_PYTHON_VM_ARGS={HEAP}``', '``-n 3``', '``timeout --signal=INT --kill-after=3m 180m``',
                        f'``prlimit --fsize={FSIZE}``', '``Containment summary``', '``pcapkit-probe-<pid>.scope``',
                        '117-151 minutes', '137', f'``MemoryMax={SCOPE_MEMORY}``',
-                       '``No memory cap``', '``$RUNNER_TEMP/tests-status``', '``tests timed out at 110 minutes``',
+                       '``No memory cap``', '``$RUNNER_TEMP/tests-status``', '``tests timed out at 180 minutes``',
                        '``tests lost a process to the OOM killer``', '``tests raised MemoryError``'):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, page)

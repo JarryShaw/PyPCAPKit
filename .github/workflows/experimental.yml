@@ -155,8 +155,8 @@ jobs:
   # tests/project/test_ktlo_legs_stay_green_1672.py pins the caps and the
   # minutes they leave the rest.
   #
-  # The tests' cap is sized for GraalPy (#1732), whose leg may still end on the
-  # 110-minute `timeout` in `Run unit tests`, which `Containment summary`
+  # The tests' cap is sized for GraalPy (#1732, #2739), whose leg may still end on
+  # the 180-minute `timeout` in `Run unit tests`, which `Containment summary`
   # reports as a warning that blocks nothing.
   experimental:
     name: Python ${{ matrix.python-version }} (experimental)
@@ -169,7 +169,7 @@ jobs:
       && needs.changes.outputs.test-only != 'true' }}
     needs: [current, changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
-    timeout-minutes: 140
+    timeout-minutes: 210
     continue-on-error: true
     # #1938: `Run unit tests` reads the pull request, as `current` does.
     permissions:
@@ -334,14 +334,14 @@ jobs:
       # - #1963: util/pytest_shards.py runs pytest once per shard `SHARDS`
       #   names, a directory or a glob of one directory's entries, then once
       #   over the rest, so every run starts its workers afresh and none
-      #   outlives its heap. #2713: the shards that lost workers are split by
-      #   their tests' JUnit seconds on GraalPy, each to run in under 5
-      #   minutes; the run over the rest is left whole, as it took about 6.7
-      #   minutes in job 125639681253 and lost no worker. The script runs
+      #   outlives its heap. #2713 split the shards that lost workers in job
+      #   125639681253 by their tests' JUnit seconds there, and #2739 the two
+      #   that ran 11-14 minutes in job 125752017215 by its; the run over the
+      #   rest is left whole, as it lost no worker in either. The script runs
       #   inside the timeout, scope and watcher below, so they hold over the
       #   whole tier; on the timeout's SIGINT no later run starts. Each shard's
       #   run writes a JUnit file of its own beside junit.xml.
-      # - `timeout` sends SIGINT at 110 minutes, under the step's cap, so pytest
+      # - `timeout` sends SIGINT at 180 minutes, under the step's cap, so pytest
       #   still writes the JUnit XML, and exits 124; SIGKILL 3 minutes on.
       #   #2020: GNU's `timeout`, which Ubuntu 26.04 installs as `gnutimeout`:
       #   its `timeout` is uutils' (0.10.0), whose `--kill-after` sends SIGKILL with the
@@ -387,7 +387,7 @@ jobs:
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: true
-        timeout-minutes: 120
+        timeout-minutes: 190
         env:
           GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
           # #2571: 3.14t, which installs psutil, takes `logical` as unit-tests.yml `test` does.
@@ -397,8 +397,9 @@ jobs:
             ${{ startsWith(matrix.python-version, 'graalpy') && 'tests/const
             tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit
             tests/foundation/reassembly tests/foundation/test_* tests/foundation
-            tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet
-            tests/protocols/application tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc
+            tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet/test_igmp*
+            tests/protocols/internet tests/protocols/application/test_tls* tests/protocols/application
+            tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc
             tests/protocols/transport/test_tcp* tests/protocols/transport tests/protocols/test_t* tests/protocols
             tests/toolkit' || '' }}
           GH_TOKEN: ${{ github.token }}
@@ -425,7 +426,7 @@ jobs:
           fi
           # #2020: GNU's `timeout` on any image, `gnutimeout` where it exists.
           gnu_timeout=$(command -v gnutimeout || command -v timeout)
-          set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"
+          set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 180m "$@"
           scoped() {
             unit=$1
             shift
@@ -528,7 +529,7 @@ jobs:
       # summary's (tests/project/test_ktlo_legs_stay_green_1672.py). Each cause
       # gets a warning of its own: no 12G scope, an OOM kill, a MemoryError, a
       # worker xdist replaced (#1753), and a timeout -- exit 124, or 137 with
-      # no OOM kill after 110 minutes, `--kill-after` ending a teardown SIGINT
+      # no OOM kill after 180 minutes, `--kill-after` ending a teardown SIGINT
       # did not; an OOM kill of pytest itself also exits 137. Nothing here
       # fails. #2077: a run the watcher stopped as superseded exits 0, so the
       # watcher's `stopped=true` makes the closing line say the tests were
@@ -566,9 +567,9 @@ jobs:
             warn "tests lost a process to the OOM killer" "${oom} OOM kill(s) while the tests ran, scope ${scope}, exit ${code}, ${elapsed} s; ${last}."
           fi
           if [ "$code" = 124 ]; then
-            warn "tests timed out at 110 minutes" "timeout sent SIGINT (exit 124), scope ${scope}, ${elapsed} s; ${last}."
-          elif [ "$code" = 137 ] && [ "$oom" -eq 0 ] 2>/dev/null && [ "$elapsed" -ge 6600 ] 2>/dev/null; then
-            warn "tests timed out at 110 minutes" "SIGINT did not end them, so timeout sent SIGKILL 3 minutes on (exit 137, no OOM kill), scope ${scope}, ${elapsed} s; ${last}."
+            warn "tests timed out at 180 minutes" "timeout sent SIGINT (exit 124), scope ${scope}, ${elapsed} s; ${last}."
+          elif [ "$code" = 137 ] && [ "$oom" -eq 0 ] 2>/dev/null && [ "$elapsed" -ge 10800 ] 2>/dev/null; then
+            warn "tests timed out at 180 minutes" "SIGINT did not end them, so timeout sent SIGKILL 3 minutes on (exit 137, no OOM kill), scope ${scope}, ${elapsed} s; ${last}."
           fi
           if [ "$errors" -gt 0 ] 2>/dev/null; then
             warn "tests raised MemoryError" "${errors} MemoryError line(s) in the pytest output, exit ${code}, scope ${scope}; ${last}."
