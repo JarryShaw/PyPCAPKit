@@ -147,7 +147,7 @@ class Query(Schema):
     #: <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` decodes per
     #: :rfc:`3376#section-4.1.1`.
     max_resp_code: 'int' = UInt8Field()
-    #: Checksum: the 16-bit one's complement of the one's complement sum of
+    #: Checksum. The 16-bit one's complement of the one's complement sum of
     #: the message, with the checksum field itself taken as zero and no
     #: pseudo-header involved -- the whole IP payload (:rfc:`3376#section-4.1.2`).
     checksum: 'bytes' = BytesField(length=2)
