@@ -30,7 +30,7 @@ import os
 import traceback
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.contextvars import beholding
+from pcapkit.utilities.contextvars import beholding, rebuilding
 from pcapkit.utilities.exceptions import (CaughtByCaller, ProtocolError, StreamEOFError,
                                           StructError, stacklevel)
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
@@ -124,6 +124,13 @@ def beholder(
     exception is logged here at :data:`logging.WARNING`, and is as loud as it
     was constructed.
 
+    Inside a payload :meth:`Protocol._make_payload
+    <pcapkit.protocols.protocol.Protocol._make_payload>` rebuilds, the block
+    names every :exc:`Exception`, which is what the ``except`` below catches,
+    and nothing is logged here: the layer the payload is rebuilt for parses
+    the same octets again, outside the rebuild, and its own :func:`beholder`
+    reports the error there (:issue:`2711`).
+
     The recovery runs after the block has ended. Under the outermost
     :func:`beholder` of a parse, a
     :exc:`~pcapkit.utilities.exceptions.ProtocolError` it raises therefore
@@ -155,7 +162,8 @@ def beholder(
 
        A :exc:`~pcapkit.utilities.exceptions.ProtocolError` the decorated
        function builds is quiet, and one this decorator absorbs is not logged
-       here either (:issue:`2588`).
+       here either (:issue:`2588`). Inside a payload being rebuilt, so is every
+       other error (:issue:`2711`).
 
     :param func: decorated function
     :meta decorator:
@@ -173,13 +181,16 @@ def beholder(
         except IndexError:
             length = None
 
+        # NOTE: A rebuilt payload's parse is repeated by the layer it is rebuilt
+        # for, which reports what this one would (#2711).
+        rebuilt = rebuilding.get()
         try:
             # call method
             token = beholding.set(True)
             try:
                 # NOTE: The whole call is quiet for a ProtocolError, which the ``except`` below
                 # records; the recovery runs after it, loud unless an outer block is active (#2588).
-                with CaughtByCaller(ProtocolError):
+                with CaughtByCaller(Exception if rebuilt else ProtocolError):
                     return func(*args, **kwargs)
             finally:
                 beholding.reset(token)
@@ -192,7 +203,7 @@ def beholder(
 
             # NOTE: Keyed on the class, not on quietness: a quiet end-of-file StructError is still
             # logged here, and a ProtocolError built loud has logged at CRITICAL already (#2588).
-            if not isinstance(exc, ProtocolError):
+            if not isinstance(exc, ProtocolError) and not rebuilt:
                 logger.warning(str(exc), stack_info=DEVMODE, stacklevel=stacklevel())
 
                 if VERBOSE:

@@ -22,6 +22,8 @@ import collections.abc
 import io
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.utilities.contextvars import frame_length
+
 if TYPE_CHECKING:
     from typing import Any, Optional, TypeVar
 
@@ -53,10 +55,26 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for
     a header that was captured whole.
 
+    Where the capture cut the frame short, as
+    :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a
+    layer whose message runs to the end of the frame records the cut too, on the
+    field it runs to the end in, through :meth:`Schema._note_short_read
+    <pcapkit.protocols.schema.schema.Schema._note_short_read>`, so its rebuild
+    reads as cut, as the layer did inside the frame (:issue:`2711`). A layer
+    whose own header declares where its message ends records none, whether the
+    cut falls at that end or past it; see :meth:`Schema._frame_end_field
+    <pcapkit.protocols.schema.schema.Schema._frame_end_field>`.
+
     """
     header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
     if header is None:
         return
+    lengths = frame_length.get()
+    if lengths is not None and lengths[1] > lengths[0]:
+        name = header._frame_end_field()  # pylint: disable=protected-access
+        if name is not None:
+            octets = header.__buffer__[name]
+            header._note_short_read(name, len(octets) + lengths[1] - lengths[0], octets)  # pylint: disable=protected-access
     record = header.__dict__.get('__short_read__')
     if record is not None:
         protocol._info.__update__({'__short_read__': record})  # pylint: disable=protected-access

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""":func:`pcapkit.utilities.lazy.lazy_exports`, on packages written for the test (GitHub issue #2729).
+""":func:`pcapkit.utilities.importlib.lazy_exports`, on packages written for the test (GitHub issue #2729).
 
 Every :mod:`pcapkit.const` package uses it, and
 :mod:`tests.const.test_const_lazy_exports_2729_unit` sweeps those. Here it runs
@@ -32,7 +32,7 @@ NAME = '_lazy_exports_2729_probe'
 #: subpackages', and records each module the tree imports in ``imported``.
 TREE = {
     '__init__.py': '''
-        from pcapkit.utilities.lazy import lazy_exports
+        from pcapkit.utilities.importlib import lazy_exports
 
         imported = []
 
@@ -43,7 +43,7 @@ TREE = {
     'probe/__init__.py': '''
         from typing import TYPE_CHECKING
 
-        from pcapkit.utilities.lazy import lazy_exports
+        from pcapkit.utilities.importlib import lazy_exports
 
         if TYPE_CHECKING:
             from {NAME}.probe.sub import Deep
@@ -76,7 +76,7 @@ TREE = {
         VALUE = 1
     ''',
     'probe/sub/__init__.py': '''
-        from pcapkit.utilities.lazy import lazy_exports
+        from pcapkit.utilities.importlib import lazy_exports
 
         __all__ = ['Deep']
 

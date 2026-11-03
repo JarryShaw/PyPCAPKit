@@ -75,15 +75,15 @@ RECORD = bytes.fromhex('01000001ef0101010a000001')
 #: Each message built on its octets: the module and class it is read as, its octets,
 #: where its checksum sits, and the cuts that leave its header a short read. Shorter
 #: than eight octets, an IGMPv3 Query is refused by its class, which classifies a
-#: Query by its length, and a Report cut after its header or its first group record
-#: ends on a whole field, which records no short read.
+#: Query by its length. A Report cut after its header or its first group record ends
+#: on a whole field, before the records its count declares, which reads short (#2711).
 DIRECT = {
     'GRE C': ('link.gre', 'GRE', gre(0x8000, b''), 4, range(1, 8)),
     'GRE C, K, S': ('link.gre', 'GRE', gre(0xB000, struct.pack('>II', 0x11223344, 7)), 4, range(1, 16)),
     'IGMPv1 report': ('internet.igmpv1', 'IGMPv1', message(b'\x12\x00', bytes([224, 0, 0, 1])), 2, range(1, 8)),
     'IGMPv2 leave': ('internet.igmpv2', 'IGMPv2', message(b'\x17\x00', bytes([239, 1, 2, 3])), 2, range(1, 8)),
     'IGMPv3 report': ('internet.igmpv3', 'IGMPv3', message(b'\x22\x00', bytes.fromhex('00000002') + RECORD * 2),
-                      2, [*range(1, 8), *range(9, 20), *range(21, 32)]),
+                      2, range(1, 32)),
     'IGMPv3 query': ('internet.igmpv3', 'IGMPv3', message(b'\x11\x64', bytes(4) + bytes.fromhex('027d00010a000001')),
                      2, range(12, 16)),
     'OSPFv2': ('application.ospf', 'OSPF', ospf(), 12, range(1, 24)),

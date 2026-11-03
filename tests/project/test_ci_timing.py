@@ -262,7 +262,7 @@ class TestWorkflowText(unittest.TestCase):
                 self.assertEqual(ci_timing.match_job(specs, name)['id'], 'test')
         test = next(spec for spec in specs if spec['id'] == 'test')
         self.assertIn(ci_timing.TESTS_STEP, [step['name'] for step in test['steps']])
-        ordering = ci_timing.match_job(specs, 'Plain unittest ordering (protocols (rest))')
+        ordering = ci_timing.match_job(specs, 'Plain unittest ordering (protocols (rest, half 1))')
         self.assertEqual(ci_timing.step_cap(
             ordering, 'Run tests/protocols and the root-level modules under plain unittest'), 20)
         caps = {spec['id']: spec['timeout'] for spec in specs}

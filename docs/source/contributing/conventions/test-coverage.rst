@@ -183,7 +183,8 @@ Running the Tests
    .. code-block:: shell
 
       python util/run_unittest_leg.py protocols/internet
-      python util/run_unittest_leg.py protocols --exclude protocols/internet
+      python util/run_unittest_leg.py protocols --exclude protocols/internet --half 1
+      python util/run_unittest_leg.py protocols --exclude protocols/internet --half 2
       python util/run_unittest_leg.py project --half 1
       python util/run_unittest_leg.py project --half 2
 

@@ -111,7 +111,8 @@ class GRE(Link[Data_GRE, Schema_GRE],
     as :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`,
     as :data:`~pcapkit.utilities.contextvars.frame_length` tells it
     (:issue:`2653`), and so does a header the data ends inside
-    (:issue:`2689`).
+    (:issue:`2689`). The header records such a cut, so the message rebuilt on
+    its own reads as cut too (:issue:`2711`).
 
     """
 

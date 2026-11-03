@@ -1143,16 +1143,24 @@ jobs:
   # modules split between the two does not share a process, so pollution
   # between them is invisible; every pair of a protocols module followed
   # by a root-level module survives. The modules directly in tests/protocols
-  # stay in the rest cell, as moving them would split more pairs than it joins.
+  # stay in the rest, as moving them would split more pairs than it joins.
   #
   # #2254: the project cell's run step ran near its step cap, so tests/project,
   # which has no subdirectories, is cut at a module name: `--half 1` and
-  # `--half 2`, at the one boundary SHARD_BOUNDARIES in util/run_unittest_leg.py
-  # holds, which `project-tests` cuts at too, so every module, a new one
+  # `--half 2`, at the boundary SHARD_BOUNDARIES in util/run_unittest_leg.py
+  # holds for it, which `project-tests` cuts at too, so every module, a new one
   # included, runs in exactly one half. The boundary is chosen so the halves
   # take about the same CI time; both also run the root-level modules. Move
-  # SHARD_BOUNDARIES to rebalance. The same cost as #1029's: a pair split
+  # the entry to rebalance. The same cost as #1029's: a pair split
   # between the two cells does not share a process.
+  #
+  # The rest of protocols is halved the same way, at its SHARD_BOUNDARIES
+  # entry, with the `--exclude` in both halves. Its run step took 527 s on
+  # a25eb0e39 and 1096 s on ab7be2fb0, and reached its 20-minute cap on
+  # dea098b15: the modules added between took 267 s, and those already there
+  # 826 s rather than 525 s, more the later they ran in the one process.
+  # Measured locally on dea098b15, the halves took 530 s and 484 s, the whole
+  # rest 1229 s.
   #
   # Every tests/ subdirectory is a leg except those below, and
   # tests/project/test_unittest_ordering_shards.py fails on a new one left out:
@@ -1197,10 +1205,16 @@ jobs:
           - utilities
           - vendor
         include:
-          # The remainder of tests/protocols -- see the #1029 note above.
+          # The remainder of tests/protocols, cut at one name -- see the #1029
+          # note above and the one on the rest's halves.
           - leg: protocols
             exclude: --exclude protocols/internet
-            label: protocols (rest)
+            shard: --half 1
+            label: protocols (rest, half 1)
+          - leg: protocols
+            exclude: --exclude protocols/internet
+            shard: --half 2
+            label: protocols (rest, half 2)
           # tests/project, cut at one module name -- see the #2254 note above.
           - leg: project
             shard: --half 1
@@ -1239,7 +1253,8 @@ jobs:
       # `--verbose` names every test as it runs, so a hung cell shows where it
       # was. The step cap sits under the job's, so a hang reports as this step
       # timing out. util/ci_timing.py flags a cell whose p90 reaches half of
-      # it, and such a cell is split, as `project` is (#2254).
+      # it, and such a cell is split, as `project` (#2254) and the rest of
+      # `protocols` are.
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         timeout-minutes: 20
         run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} ${{ matrix.shard }} --verbose
