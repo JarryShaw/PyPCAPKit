@@ -10,7 +10,7 @@ from pcapkit.protocols.data.protocol import Protocol
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from datetime import timedelta
-    from ipaddress import IPv4Address, IPv6Address, IPv6Network
+    from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
     from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -932,15 +932,28 @@ class MobileNetworkPrefixOption(Option):
 
        New required field ``reserved`` (:issue:`1437`).
 
+    .. versionchanged:: 1.6.0
+
+       New required field ``prefix_length``, and :attr:`prefix` is the
+       :class:`~ipaddress.IPv6Address` captured rather than an
+       :class:`~ipaddress.IPv6Network`, which cannot hold a prefix with bits set
+       past its length or a length past 128 (:issue:`2702`).
+
     """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
-    #: Mobile Network Prefix.
-    prefix: 'IPv6Network'
+    #: Prefix length, as captured.
+    prefix_length: 'int'
+    #: Mobile Network Prefix. Kept apart from :attr:`prefix_length` rather than
+    #: fused into an :class:`~ipaddress.IPv6Network`, so that bits past
+    #: :attr:`prefix_length`, which :rfc:`3963#section-6.2` reads as given, survive a
+    #: round trip. Same reasoning as :class:`HomeNetworkPrefixOption`.
+    prefix: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix: 'IPv6Network') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
+                     prefix: 'IPv6Address') -> 'None': ...
 
 
 @info_final
@@ -1310,17 +1323,26 @@ class PMIPv6Timestamp(Data):
 
 @info_final
 class TimestampOption(Option):
-    """Data model for MH Timestamp option."""
+    """Data model for MH Timestamp option.
 
-    #: Timestamp.
-    timestamp: 'dt_type'
+    .. versionchanged:: 1.6.0
+
+       :attr:`timestamp` is :data:`None` for a time past the year 9999, which
+       :class:`~datetime.datetime` cannot hold, rather than the read raising
+       :exc:`ValueError` (:issue:`2702`).
+
+    """
+
+    #: Timestamp, or :data:`None` past the year 9999, which the 48-bit second
+    #: count reaches and :class:`~datetime.datetime` cannot hold.
+    timestamp: 'Optional[dt_type]'
     #: Timestamp in the fixed-point format of :rfc:`5213#section-8.8`, kept
     #: alongside :attr:`timestamp` so that the 1/65536-second resolution of the
     #: wire format survives a round trip.
     pmip_timestamp: 'PMIPv6Timestamp'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', timestamp: 'dt_type',
+        def __init__(self, type: 'Enum_Option', length: 'int', timestamp: 'Optional[dt_type]',
                      pmip_timestamp: 'PMIPv6Timestamp') -> 'None': ...
 
 
