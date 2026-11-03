@@ -35,11 +35,12 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
-from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
+from pcapkit.protocols.schema.internet.ipv6 import jumbogram_error
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import frame_depth
 from pcapkit.utilities.exceptions import ProtocolError

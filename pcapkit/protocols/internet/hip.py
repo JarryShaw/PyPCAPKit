@@ -56,9 +56,9 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
 from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckDataParameter
 from pcapkit.protocols.data.internet.hip import ACKParameter as Data_ACKParameter

@@ -432,7 +432,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
 
         :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
         seeded the file's byte order under the key ``bytesorder``, where
-        ``byteorder_callback`` (:file:`pcapkit/corekit/fields/byteorder.py`)
+        ``byteorder_callback`` (:file:`pcapkit/corekit/schema/byteorder.py`)
         reads ``byteorder``, so the lookup always missed and always fell back to
         :data:`sys.byteorder`. On a little-endian host reading a little-endian
         capture that is the right answer by coincidence, so little-endian

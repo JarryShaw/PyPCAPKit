@@ -145,7 +145,7 @@ def _keep_body_short_read(schema: 'Schema_IGMPv3') -> 'None':
 
     Every schema in the body reads to the end of the data, so a field there that
     reads short has reached it. Elsewhere a nested record need not mean that:
-    hoisting one in :func:`~pcapkit.protocols.schema.schema.keep_short_read` marks
+    hoisting one in :func:`~pcapkit.corekit.schema.shortread.keep_short_read` marks
     a complete TCP segment with a malformed MPTCP DSS option as cut.
 
     Args:

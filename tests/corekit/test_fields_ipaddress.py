@@ -278,7 +278,7 @@ class IPAddressFieldTests(unittest.TestCase):
         which is what #508 turned out to be. This function is the one place those
         callers convert, so it is the one place the guard has to hold.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         # the bool rejection holds for every family the callers ask for, since
@@ -315,7 +315,7 @@ class IPAddressFieldTests(unittest.TestCase):
         :mod:`ipaddress` object unchanged cannot -- so the version check has to
         sit after the branch rather than inside the conversion it guards.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         with self.assertRaises(FieldValueError) as context:
@@ -334,7 +334,7 @@ class IPAddressFieldTests(unittest.TestCase):
         e.g. ``MH._make_opt_bid(address='nonsense')`` raises a plain
         :exc:`ValueError`, which ``except BaseError`` cannot catch.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         for value in ('nonsense', b'\x00' * 3, None, 1 << 200, -1):
@@ -353,7 +353,7 @@ class IPAddressFieldTests(unittest.TestCase):
         parameter is one that can be broken without a failure, and the widening it
         controls is the whole reason the parameter exists.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
 
         # the same int is a different address in each family
         self.assertEqual(parse_ip_address(0x102, 'x', 4), ipaddress.IPv4Address('0.0.1.2'))
@@ -379,7 +379,7 @@ class IPAddressFieldTests(unittest.TestCase):
         is the only thing that can catch either direction -- and a check written for
         one direction only would still pass a test that exercises one direction only.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         cases = [
@@ -411,7 +411,7 @@ class IPAddressFieldTests(unittest.TestCase):
         moves with ``version`` -- and :class:`ipaddress.AddressValueError`, a bare
         :exc:`ValueError`, must not escape either way.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         self.assertEqual(parse_ip_address(1 << 32, 'x', 6),
@@ -431,7 +431,7 @@ class IPAddressFieldTests(unittest.TestCase):
         what lets ``address=IPv6Address(...)`` round-trip identically rather than
         through a re-conversion that could normalise it.
         """
-        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
 
         for value in (ipaddress.IPv4Address('198.51.100.7'),
                       ipaddress.IPv6Address('2001:db8::1')):

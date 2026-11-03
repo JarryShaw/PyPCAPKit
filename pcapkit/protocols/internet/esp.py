@@ -789,7 +789,7 @@ class SecurityAssociation:
         if isinstance(destination, bool):
             # NOTE: checked before the ``ipaddress.ip_address`` call below, for
             # the same reason as ``_reject_bool`` in
-            # ``pcapkit.corekit.fields.ipaddress`` (this module calls
+            # ``pcapkit.corekit.schema.ipaddress`` (this module calls
             # ``ipaddress.ip_address`` directly rather than through a Field, so
             # it needs its own copy of the guard): ``bool`` is an ``int``
             # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below

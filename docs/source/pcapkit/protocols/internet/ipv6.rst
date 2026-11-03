@@ -61,6 +61,11 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.internet.ipv6
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length``, now
+   :func:`pcapkit.corekit.schema.jumbogram.jumbo_payload_length` (:issue:`2674`).
+
 .. autodata:: pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6.IPv6
@@ -92,7 +97,6 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6.jumbogram_error
 
 Data Models

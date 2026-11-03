@@ -292,13 +292,13 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
         """The rejection is of :obj:`bool` specifically, and every branch still packs.
 
         Also pins an asymmetry that is easy to trip over, and that
-        :func:`~pcapkit.corekit.fields.ipaddress._reject_bool` already describes:
+        :func:`~pcapkit.corekit.schema.ipaddress._reject_bool` already describes:
         the ``int(...)`` escape hatch the error message advertises works on an
         **IPv4** branch and not on an IPv6 one. ``_IPAddressField.pre_process``
         converts with the family-agnostic :func:`ipaddress.ip_address`, so ``1``
         becomes ``0.0.0.1`` and is then refused by an IPv6-typed field for
         mismatching version -- whereas
-        :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` called with
+        :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address` called with
         ``version=6``, which is how the ``_make_*`` sites reach the same guard,
         widens ``1`` to ``::1`` instead. Both behaviours are deliberate; they just
         are not the same behaviour, and only the maker path honours the message
@@ -337,14 +337,14 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
     def test_parse_ip_address_widens_an_int_where_a_bare_field_would_not(self) -> None:
         """The other half of the asymmetry above, stated from the maker's side.
 
-        This is why :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` takes
+        This is why :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address` takes
         a ``version`` at all: the maker sites that pin the family need ``1`` to mean
         ``::1``, which the family-agnostic conversion in the field cannot give them.
         """
         import ipaddress
 
-        from pcapkit.corekit.fields.ipaddress import (IPv6AddressField,
-                                                      parse_ip_address)
+        from pcapkit.corekit.fields.ipaddress import IPv6AddressField
+        from pcapkit.corekit.schema.ipaddress import parse_ip_address
         from pcapkit.utilities.exceptions import FieldValueError
 
         self.assertEqual(parse_ip_address(1, 'x', 6), ipaddress.IPv6Address('::1'))

@@ -39,6 +39,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.foundation.engines.scapy import Scapy
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
@@ -47,7 +48,6 @@ from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN
 from pcapkit.protocols.schema.internet.ipv4 import IPV4_HEADER_LEN
-from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION, RESOLUTION_PLACES
 from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,

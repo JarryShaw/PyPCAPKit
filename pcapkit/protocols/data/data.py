@@ -46,5 +46,5 @@ class Data(Info):
         #: octets were there; present only then. :meth:`to_dict` carries it,
         #: so that ``from_data(info.to_dict())`` cuts the rebuild back as
         #: ``from_data(info)`` does. See
-        #: :func:`~pcapkit.protocols.schema.schema.keep_short_read`.
+        #: :func:`~pcapkit.corekit.schema.shortread.keep_short_read`.
         __short_read__: 'tuple[str, int]'

@@ -63,12 +63,13 @@ from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.corekit.fields.byteorder import packet_byteorder
-from pcapkit.corekit.fields.strings import DecodedString, pad_length
+from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.infoclass import OrderedMultiInfo
 from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.byteorder import packet_byteorder
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as Data_CommentOption

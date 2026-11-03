@@ -14,9 +14,9 @@ import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG

@@ -35,13 +35,13 @@ import sys
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.header import GLOBAL_HEADER_LEN, MAGIC_NUMBER
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
-from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import EndianError, UnsupportedCall
 
 if TYPE_CHECKING:

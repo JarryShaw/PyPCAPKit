@@ -35,9 +35,9 @@ from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
 from pcapkit.const.sctp.parameter import Parameter as Enum_Parameter
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.transport.sctp import SCTP as Data_SCTP
 from pcapkit.protocols.data.transport.sctp import AbortChunk as Data_AbortChunk
 from pcapkit.protocols.data.transport.sctp import CookieACKChunk as Data_CookieACKChunk

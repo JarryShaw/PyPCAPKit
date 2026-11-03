@@ -175,7 +175,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     def test_pcapng_byteorder_consumer_still_works_with_both_shapes(self) -> None:
         """A hand-rolled ``__packet__`` fallback works with both shapes.
 
-        :func:`~pcapkit.corekit.fields.byteorder.packet_byteorder` is called
+        :func:`~pcapkit.corekit.schema.byteorder.packet_byteorder` is called
         both with a plain dict built by hand -- as several tests and
         :mod:`pcapkit.foundation.engines.pcapng` construct -- and with what
         ``SchemaField`` actually builds. Both must work: the site implements the

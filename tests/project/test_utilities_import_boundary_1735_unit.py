@@ -57,9 +57,12 @@ def imported_names(source: 'str', module: 'str', is_package: 'bool' = False
                    ) -> 'list[tuple[int, str]]':
     """Every module ``source`` imports, as ``(line, dotted name)`` in line order.
 
-    ``from X import a, b`` yields ``X``, except that ``from pcapkit import a``
-    yields ``pcapkit.a``, so ``from pcapkit import utilities`` is told apart from
-    ``from pcapkit import protocols``.
+    ``from X import a, b`` yields ``X``, ``X.a`` and ``X.b``, since ``a`` may be a
+    submodule: ``from pcapkit.corekit import fields`` imports
+    :mod:`pcapkit.corekit.fields` as surely as ``import pcapkit.corekit.fields``
+    does (#2674). ``from pcapkit import a``, and a relative import naming no
+    module, yield ``pcapkit.a`` alone, so ``from pcapkit import utilities`` is told
+    apart from ``from pcapkit import protocols``.
 
     Args:
         source: Python source to read.
@@ -82,6 +85,9 @@ def imported_names(source: 'str', module: 'str', is_package: 'bool' = False
                 found.extend((node.lineno, f'{target}.{alias.name}') for alias in node.names)
             else:
                 found.append((node.lineno, target))
+                # ``a`` may be a submodule, which this imports as well (#2674).
+                found.extend((node.lineno, f'{target}.{alias.name}') for alias in node.names
+                             if alias.name != '*')
         elif isinstance(node, ast.Call) and node.args:
             func = node.func
             name = func.attr if isinstance(func, ast.Attribute) else getattr(func, 'id', None)
@@ -153,14 +159,33 @@ class UtilitiesImportBoundaryTests(unittest.TestCase):
                     if crosses_the_boundary(name)]
         self.assertEqual(crossing, [
             (7, 'pcapkit.protocols.protocol'),
+            (7, 'pcapkit.protocols.protocol.P'),
             (9, 'pcapkit.protocols.misc.raw'),
+            (9, 'pcapkit.protocols.misc.raw.Raw'),
             (10, 'pcapkit.const'),
             (11, 'pcapkit.corekit'),
+            (11, 'pcapkit.corekit.fields'),
             (12, 'pcapkit.protocols'),
             (13, 'pcapkit.__version__'),
             (14, 'pcapkit.foundation'),
             (15, 'pcapkit.dumpkit'),
             (16, 'pcapkit'),
+        ])
+
+    def test_a_from_import_names_the_submodule_it_imports(self) -> None:
+        # ``from pcapkit.corekit import fields`` imports the fields package, so a
+        # boundary drawn at it has to see more than ``pcapkit.corekit`` (#2674).
+        source = '\n'.join([
+            'from pcapkit.corekit import fields',          # 1
+            'from pcapkit.corekit import fields as f',     # 2
+            'from ..fields import numbers',                # 3
+            'from pcapkit.corekit.fields import *',        # 4
+        ])
+        self.assertEqual(imported_names(source, 'pcapkit.corekit.schema.padding'), [
+            (1, 'pcapkit.corekit'), (1, 'pcapkit.corekit.fields'),
+            (2, 'pcapkit.corekit'), (2, 'pcapkit.corekit.fields'),
+            (3, 'pcapkit.corekit.fields'), (3, 'pcapkit.corekit.fields.numbers'),
+            (4, 'pcapkit.corekit.fields'),
         ])
 
     def test_relative_imports_resolve_from_the_package_itself(self) -> None:

@@ -29,8 +29,8 @@ from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
@@ -290,7 +290,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Raises:
             FieldValueError: If ``dst`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`)
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`)
                 and ``data`` is a :obj:`dict` or a data model; ``dst`` is not
                 read for any other ``data``.
             ProtocolError: If ``next`` or ``type`` is a name, a :obj:`bool`,
@@ -861,7 +861,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Raises:
             FieldValueError: If an entry of ``ip`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
             ProtocolError: If ``ip`` is empty, or ``reserved`` does not fit in
                 its twenty bits.
 

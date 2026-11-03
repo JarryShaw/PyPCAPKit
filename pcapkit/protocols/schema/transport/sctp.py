@@ -16,7 +16,8 @@ from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, PortEnumField, UInt16Field, UInt32Field
-from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, pad_length
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 

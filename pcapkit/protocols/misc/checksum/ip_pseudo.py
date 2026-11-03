@@ -61,14 +61,15 @@ from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.data.misc.checksum.ip_pseudo import IP_Pseudo as Data_IP_Pseudo
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPv6
 from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH, jumbo_payload_length
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
 from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IP_Pseudo as Schema_IP_Pseudo
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, UnsupportedCall

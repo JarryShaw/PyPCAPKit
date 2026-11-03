@@ -211,6 +211,13 @@ Header Schema
 
 .. module:: pcapkit.protocols.schema.schema
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.schema.keep_short_read`` and
+   ``pcapkit.protocols.schema.schema.replay_short_read``, now
+   :func:`pcapkit.corekit.schema.shortread.keep_short_read` and
+   :func:`pcapkit.corekit.schema.shortread.replay_short_read` (:issue:`2674`).
+
 .. autoclass:: pcapkit.protocols.schema.schema.Schema
    :no-members:
    :show-inheritance:
@@ -258,10 +265,6 @@ Header Schema
    .. automethod:: __init_subclass__
 
 .. autodecorator:: pcapkit.protocols.schema.schema.schema_final
-
-.. autofunction:: pcapkit.protocols.schema.schema.keep_short_read
-
-.. autofunction:: pcapkit.protocols.schema.schema.replay_short_read
 
 Internal Definitions
 ~~~~~~~~~~~~~~~~~~~~

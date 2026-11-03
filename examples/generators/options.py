@@ -816,7 +816,7 @@ def _frame(family: 'Family', octets: 'bytes', index: 'int') -> 'Any':
         frame = link / IP(src=SRC_IP, dst=DST_IP, proto=family.proto,
                           id=index, ttl=64) / Raw(octets)
     elif family.envelope == 'ipv6':
-        from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+        from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 
         # A Jumbo Payload option where it makes the packet a jumbogram gets a
         # genuine one: a Payload Length of 0 (RFC 2675 section 3, #1687), and

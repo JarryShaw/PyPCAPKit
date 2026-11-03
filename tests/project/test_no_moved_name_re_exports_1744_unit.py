@@ -72,6 +72,11 @@ PURE = (
     ('pcapkit.protocols.schema.application.httpv2', 'HTTP'),
     ('pcapkit.protocols.data.application.httpv1', 'HTTP'),
     ('pcapkit.protocols.data.application.httpv2', 'HTTP'),
+    # #2674: helpers called from outside the schema layer, moved to
+    # pcapkit.corekit.schema.
+    ('pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
+    ('pcapkit.protocols.schema.schema', 'keep_short_read'),
+    ('pcapkit.protocols.schema.schema', 'replay_short_read'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -81,6 +86,12 @@ USED = (
     ('pcapkit.corekit.enum', 'NO_DEFAULT', 'pcapkit.corekit.sentinels'),
     ('pcapkit.corekit.module', 'NULL', 'pcapkit.corekit.sentinels'),
     ('pcapkit.protocols.protocol', 'ABSENT', 'pcapkit.corekit.sentinels'),
+    # #2674: the IP address fields' guards, moved with ``parse_ip_address``, and
+    # the helpers the old modules still call.
+    ('pcapkit.corekit.fields.ipaddress', '_reject_bool', 'pcapkit.corekit.schema.ipaddress'),
+    ('pcapkit.corekit.fields.ipaddress', '_reraise_as_field_value_error',
+     'pcapkit.corekit.schema.ipaddress'),
+    ('pcapkit.protocols.schema.internet.ipv6', 'jumbo_payload_length', 'pcapkit.corekit.schema.jumbogram'),
 )
 
 #: Every removed ``(old module, name)`` pair.
@@ -124,6 +135,17 @@ SHIPPED = (
     ('pcapkit.protocols.data.application.httpv2', 'HTTP',
      'pcapkit/protocols/data/application/httpv2.py',
      'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
+    # #2674: shipped in 1.5.x, moved to pcapkit.corekit.schema.
+    ('pcapkit.corekit.fields.ipaddress', 'parse_ip_address',
+     'pcapkit/corekit/fields/ipaddress.py', 'pcapkit/corekit/fields/ipaddress.rst', '1.6.0'),
+    ('pcapkit.corekit.fields.ipaddress', '_reject_bool',
+     'pcapkit/corekit/fields/ipaddress.py', 'pcapkit/corekit/fields/ipaddress.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.schema', 'keep_short_read',
+     'pcapkit/protocols/schema/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.schema', 'replay_short_read',
+     'pcapkit/protocols/schema/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
+    ('pcapkit.protocols.schema.internet.ipv6', 'jumbo_payload_length',
+     'pcapkit/protocols/schema/internet/ipv6.py', 'pcapkit/protocols/internet/ipv6.rst', '1.6.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
@@ -136,6 +158,9 @@ MOVED_MODULES = (
      'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
     ('pcapkit.protocols.data.misc.null', 'pcapkit.protocols.misc.no_payload',
      'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
+    # #2674: shipped in 1.5.x, moved whole into pcapkit.corekit.schema.
+    ('pcapkit.corekit.fields.byteorder', 'pcapkit.corekit.schema.byteorder',
+     'pcapkit/corekit/schema/byteorder.rst', '1.6.0'),
 )
 
 

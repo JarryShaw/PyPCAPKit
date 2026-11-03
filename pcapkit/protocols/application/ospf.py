@@ -72,7 +72,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.application.ospf import \
@@ -430,13 +430,13 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         Raises:
             FieldValueError: If ``id`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
 
         Notes:
             Latent rather than live: nothing in this module calls this method
             (:meth:`make` builds ``router_id``/``area_id`` straight from its
             own arguments), so the only caller is a unit test. It is routed
-            through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
+            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
             anyway, so that a future caller passing a :obj:`bool` gets
             :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a
             silent ``0.0.0.1``.

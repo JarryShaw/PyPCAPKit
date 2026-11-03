@@ -50,10 +50,10 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
 from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
 from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK

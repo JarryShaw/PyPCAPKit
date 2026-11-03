@@ -84,9 +84,9 @@ from pcapkit.const.mh.upa_status import \
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.data.internet.mh import \
     AccessNetworkIdentifierOption as Data_AccessNetworkIdentifierOption
