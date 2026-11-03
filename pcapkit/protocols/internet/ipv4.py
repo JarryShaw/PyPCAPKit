@@ -243,6 +243,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          the option has no room for, rather than cutting it to nine or four,
          and :meth:`make` for a checksum that is not two octets, rather than
          padding or cutting it (:issue:`2676`).
+       * An option given to :meth:`make` as empty raw octets, which hold no
+         type octet, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+         rather than an :exc:`IndexError` (:issue:`2723`).
 
     .. versionremoved:: 1.6.0
 
@@ -882,7 +885,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Raises:
             ProtocolError: If the type of an option, given in a ``(type,
                 kwargs)`` pair or as the key of a container, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if an option
+                given as raw octets is empty (:issue:`2723`).
 
         """
         total_length = 0
@@ -891,6 +895,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         if isinstance(options, list):
             for schema in options:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no type octet')
                     code = Enum_OptionNumber.get(schema[0])
                     if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
                         continue

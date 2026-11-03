@@ -80,7 +80,6 @@ Internal Definitions below.
    .. automethod:: _get_payload
 
    .. automethod:: _make_data
-   .. automethod:: _make_uint
    .. automethod:: _make_index
    .. automethod:: _make_payload
    .. automethod:: _packing_target
@@ -177,7 +176,7 @@ one its field cannot carry rather than masking it (:issue:`2617`):
   cut left out, for the rebuild to cut back.
 
 :meth:`~Protocol._uint_size` counts the octets a variable-width integer needs,
-and :func:`~pcapkit.corekit.fields.strings.pad_length` the padding that takes a
+and :func:`~pcapkit.corekit.schema.padding.pad_length` the padding that takes a
 length to an alignment boundary.
 
 Data Models
@@ -241,7 +240,6 @@ Internal Definitions
                   _read_packet
                   _get_payload
                   _make_data
-                  _make_uint
                   _make_index
                   _make_payload
                   _packing_target
@@ -286,7 +284,7 @@ Internal Definitions
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
       :meth:`~Protocol.resolve_index`, :meth:`~Protocol.expand_comp`,
       :meth:`~Protocol._read_packet`, :meth:`~Protocol._get_payload`,
-      :meth:`~Protocol._make_data`, :meth:`~Protocol._make_uint`,
+      :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
       :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_unpack`,
       :meth:`~Protocol._read_octets`, :meth:`~Protocol._read_uint`,

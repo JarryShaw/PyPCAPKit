@@ -423,6 +423,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          :meth:`make` for parameters too long for the Header Length, and so do
          the ``PUZZLE`` and registration makers for a lifetime that is a
          :obj:`bool` or not a finite number of seconds (:issue:`2614`).
+       * The same makers raise it for a fixed-size octet argument of the wrong
+         width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
+         ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
+         or cutting it to the field. The opaque and payload data default to
+         zeros of that width (:issue:`2676`).
        * Each enumeration field of :meth:`make` and of the parameter makers,
          and the code of each parameter in ``parameters``, as a ``(code,
          value)`` pair or parsed data, takes a member or an :class:`int` code,
@@ -442,6 +447,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          ``HIP_CIPHER`` parameters before it, so an AES cipher's IV is read
          as the IV, rather than warning of a missing ``HIP_CIPHER`` and
          reading the IV as encrypted data (:issue:`2708`).
+       * A parameter given to :meth:`make` as empty raw octets, which hold no
+         type, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than being dropped from the header (:issue:`2723`).
 
     .. versionremoved:: 1.6.0
 
@@ -451,12 +459,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        the items of ``groups``; resolve a name with
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
-
-       The same makers raise it for a fixed-size octet argument of the wrong
-       width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
-       ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
-       or cutting it to the field. The opaque and payload data default to
-       zeros of that width (:issue:`2676`).
 
     """
 
@@ -965,7 +967,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If the code of a ``(code, value)`` pair, or the key
                 of a parameter given as parsed data, is a name, a :obj:`bool` or
-                a code its field cannot carry.
+                a code its field cannot carry, or if a parameter given as raw
+                octets is empty (:issue:`2723`).
 
         """
         total_length = 0
@@ -973,6 +976,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_list = []  # type: list[Schema_Parameter | bytes]
             for schema in parameters:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'HIPv{version}: invalid parameter: {schema!r} holds no type field')
                     # :rfc:`7401#section-5.2.1` pads every parameter to a
                     # multiple of 8 octets, and Header Length counts in those
                     # units; a raw parameter is taken to omit its padding.

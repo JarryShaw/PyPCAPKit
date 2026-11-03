@@ -123,6 +123,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
          writing a different value or raising another exception
          (:issue:`2614`).
+       * The Source Route and Type 2 makers raise it for ``reserved`` octets that
+         are not four, rather than padding or cutting them (:issue:`2676`).
        * Each enumeration field of :meth:`make`, ``next`` and ``type``, takes
          a member or an :class:`int` code, resolved with the enumeration's
          ``get``; a name, a :obj:`bool`, or a code that does not fit in one
@@ -137,9 +139,6 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
        :meth:`make`; resolve a name with
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
-
-       The Source Route and Type 2 makers raise it for ``reserved`` octets that
-       are not four, rather than padding or cutting them (:issue:`2676`).
 
     """
 

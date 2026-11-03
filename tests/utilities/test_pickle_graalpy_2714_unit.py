@@ -72,14 +72,19 @@ def _graalpy_reduce_ex(obj: 'Any', proto: int) -> 'Any':
     GraalPy's error, from calling ``Generic(obj)``; anywhere else defers to the real
     walk, which stops at the same base.
 
+    PyPy's own walk leaves the ``__new__`` check out, and its ``__new__`` is a plain
+    function with no ``__self__``, so the check reads ``__self__`` with
+    :func:`getattr` and never stops the walk there, as on PyPy (#2714).
+
     """
     def stops(base: type) -> bool:
         new = base.__new__
-        return (base is Generic or not base.__flags__ & 1 << 9  # Py_TPFLAGS_HEAPTYPE
-                or isinstance(new, type(int.__new__)) and new.__self__ is base)
+        return (base is Generic
+                or hasattr(base, '__flags__') and not base.__flags__ & 1 << 9  # Py_TPFLAGS_HEAPTYPE
+                or isinstance(new, type(int.__new__)) and getattr(new, '__self__', None) is base)
 
-    # NOTE: the walk always stops, at object if nowhere earlier.
-    if next(base for base in type(obj).__mro__ if stops(base)) is Generic:
+    # NOTE: the walk stops at object if nowhere earlier, as copyreg's does.
+    if next((base for base in type(obj).__mro__ if stops(base)), object) is Generic:
         raise TypeError('typing.Generic() takes no arguments')
     return _REDUCE_EX(obj, proto)
 

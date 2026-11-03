@@ -35,7 +35,7 @@ class ReduceAsProtocol2:
     """Mixin reducing an instance under every :mod:`pickle` protocol as protocol 2 does.
 
     Below protocol 2, :meth:`object.__reduce_ex__` hands the instance to
-    :func:`copyreg._reduce_ex`, which walks ``type(self).__mro__`` for the first
+    ``copyreg._reduce_ex``, which walks ``type(self).__mro__`` for the first
     base that is not a heap type and, unless that base is :class:`object`, calls it
     on the instance. :class:`~typing.Generic` is a heap type on CPython, so the walk
     passes it. GraalPy builds ``Generic`` as a built-in, so the walk stops there and
@@ -45,7 +45,7 @@ class ReduceAsProtocol2:
 
     Protocol 2's reduction reads the class and the instance state without that
     walk, slots included, and protocol 0 and 1 write it as an ordinary call of
-    :func:`copyreg.__newobj__`, restoring the instance through ``__new__`` as
+    ``copyreg.__newobj__``, restoring the instance through ``__new__`` as
     protocol 2 does. The next ``__reduce_ex__`` in the MRO builds it, so a base
     with a reduction of its own keeps it, as
     :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` keeps
