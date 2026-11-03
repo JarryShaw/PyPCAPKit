@@ -28,9 +28,10 @@ import dictdumper.json
 import dictdumper.plist
 import dictdumper.tree
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, _dump_excluded
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -357,6 +358,16 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
        kept (:issue:`1257`), and a string carrying a character XML forbids
        is written as ``<data>`` (:issue:`1262`).
 
+    .. versionchanged:: 1.6.0
+
+       A field an :class:`~pcapkit.corekit.infoclass.Info` renamed for
+       clashing with a builtin name, such as a reassembled datagram's
+       ``packet``, is written under its own name rather than left out, and
+       reading it resolves a deferred ``packet`` as indexing does. A protocol
+       object, such as that ``packet``, is written as its
+       :attr:`~pcapkit.protocols.protocol.Protocol.info`, as a frame is,
+       rather than by its attributes (:issue:`2733`).
+
     """
     # NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what
     # :attr:`Extractor.__output__ <pcapkit.foundation.extraction.Extractor.__output__>`
@@ -416,21 +427,27 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             The :attr:`~pcapkit.corekit.infoclass.Info.__excluded__` of a field
             model, or of the field model an export was made from -- metadata
             such as ``__next_type__``, which only a rebuild reads
-            (:issue:`2003`). Empty for an option list, whose keys are its
+            (:issue:`2003`) -- less the fields it renamed for clashing with a
+            builtin name, which are written under their own names
+            (:issue:`2733`). Empty for an option list, whose keys are its
             options.
 
         """
-        if isinstance(info, Info) and isinstance(info, MultiDict):
-            return ()
+        if isinstance(info, Info):
+            if isinstance(info, MultiDict):
+                return ()
+            return _dump_excluded(info)
         return getattr(info, '__excluded__', ())
 
-    def fields(info: 'Info | MultiDict[Any, Any]') -> 'dict[Any, Any]':
+    def fields(info: 'Info | MultiDict[Any, Any] | ProtocolBase') -> 'dict[Any, Any]':
         """Return the fields of ``info`` as the :class:`dict` the writer is handed.
 
         Args:
             info: The fields, as an :class:`~pcapkit.corekit.infoclass.Info` or
                 as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` its
-                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns.
+                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, or a
+                protocol object, whose fields are those of its
+                :attr:`~pcapkit.protocols.protocol.Protocol.info`.
 
         Returns:
             One entry per field, in order, with its key unchanged -- the writer
@@ -443,8 +460,11 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             written. The keys :func:`excluded` names are left out.
 
         """
-        skip = excluded(info)
-        pairs = [(key, val) for key, val in info.items(multi=True) if key not in skip]
+        # NOTE: a protocol object, as a reassembled datagram's ``packet``, is
+        # written as its info, as a frame is, never by its attributes (#2733).
+        model = info.info if isinstance(info, ProtocolBase) else info  # type: Info | MultiDict[Any, Any]
+        skip = excluded(model)
+        pairs = [(key, val) for key, val in model.items(multi=True) if key not in skip]
         counts = collections.Counter(key for key, _ in pairs)
         result = {}  # type: dict[Any, Any]
         for key, val in pairs:
@@ -454,7 +474,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 # NOTE: read by indexing, so that a model overriding it is
                 # honoured -- the traceflow and reassembly models resolve a
                 # deferred ``packet`` there.
-                result[key] = info[key]
+                result[key] = model[key]
         return result
 
     #: Whether the writer is handed the fields of an
@@ -484,12 +504,13 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     :class:`~pcapkit.corekit.multidict.MultiDict` its
                     :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, is
                     written as the :class:`dict` :func:`fields` makes of it, so
-                    that a repeated field keeps every value. The writer walks
+                    that a repeated field keeps every value; a protocol object
+                    is written as that of its info. The writer walks
                     the block it is handed without calling
                     :meth:`object_hook` on it, only on what it holds.
 
                 """
-                if isinstance(value, (Info, MultiDict)):
+                if isinstance(value, (Info, MultiDict, ProtocolBase)):
                     value = fields(value)
                 return super().__call__(value, name)
 
@@ -526,14 +547,18 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 the option lists an :class:`~pcapkit.corekit.infoclass.Info`
                 holds. An :class:`~pcapkit.corekit.infoclass.Info` itself
                 becomes the :class:`dict` of its fields that :func:`fields`
-                returns, holding every value of a repeated field.
+                returns, holding every value of a repeated field, and so does a
+                protocol object, as its
+                :attr:`~pcapkit.protocols.protocol.Protocol.info`, rather
+                than by its attributes, which hold such per-process detail as
+                the address of its file object (:issue:`2733`).
 
             """
             if isinstance(o, decimal.Decimal):
                 result = str(o)  # type: Any
             elif isinstance(o, datetime.timedelta):
                 result = o.total_seconds()
-            elif isinstance(o, Info) and not isinstance(o, MultiDict):
+            elif isinstance(o, ProtocolBase) or (isinstance(o, Info) and not isinstance(o, MultiDict)):
                 # NOTE: a MultiInfo or OrderedMultiInfo, though an Info, is
                 # an option list, and is written by the branches below.
                 result = fields(o)
