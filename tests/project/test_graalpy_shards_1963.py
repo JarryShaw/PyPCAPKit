@@ -34,9 +34,14 @@ from tests.project.test_python_versions_1660 import ROOT, prose
 from tests.project.test_resource_monitor_1740 import DEFAULT, EXPERIMENTAL, HEAP, TESTS, by_impl, sh, step
 from util import pytest_shards
 
-#: GraalPy's shards, in the order they run; the rest of the tier runs last.
+#: GraalPy's shards, in the order they run; the rest of the tier runs last. #2713 split the
+#: shards that lost workers in job 125639681253 by their JUnit seconds there.
 SHARDS = ('tests/const tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit '
-          'tests/foundation tests/protocols/internet tests/protocols/[a-m]* tests/protocols tests/toolkit')
+          'tests/foundation/reassembly tests/foundation/test_* tests/foundation '
+          'tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet '
+          'tests/protocols/application tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc '
+          'tests/protocols/transport/test_tcp* tests/protocols/transport tests/protocols/test_t* tests/protocols '
+          'tests/toolkit')
 SCRIPT = ROOT / 'util' / 'pytest_shards.py'
 #: The lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'

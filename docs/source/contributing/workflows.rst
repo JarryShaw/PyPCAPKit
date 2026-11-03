@@ -1228,15 +1228,27 @@ warnings:
   names -- a directory, or a glob of one directory's entries such as
   ``tests/corekit/test_i*`` -- and once more over the rest, and every run starts its
   own workers. Each run also ignores what every earlier shard took, so a glob may
-  precede its own directory, which then takes the remainder. The shards are sized by
-  each one's largest live heap after a full GC, measured locally on GraalPy 25.4.4 at
-  ``-n 3``: run whole, the tier lost 8 workers, its heap reached the 2 GiB cap, and it
-  took 3559 s; in these shards none went down, no heap passed 1303 MB, and it
-  took 1879 s. The runs share the step's ``timeout``, scope and watcher, so the
-  caps hold over the whole tier; on ``timeout``'s SIGINT the run in progress writes
-  its JUnit file and no later one starts. Each shard's run writes a JUnit file of its
-  own beside ``junit.xml``, such as ``junit-tests-protocols.xml``, and ``Upload test
-  timings`` takes them all. 3.14t's leg runs pytest once.
+  precede its own directory, which then takes the remainder. The shards were first
+  sized by each one's largest live heap after a full GC, measured locally on GraalPy
+  25.4.4 at ``-n 3``: run whole, the tier lost 8 workers, its heap reached the 2 GiB
+  cap, and it took 3559 s; in those shards none went down, no heap passed 1303 MB, and
+  it took 1879 s. The tier outgrew them (:issue:`2713`). On ``57a6c366d``, job
+  125639681253 lost 8 workers, all in its runs of 10-14 minutes -- ``tests/foundation``,
+  ``tests/protocols/internet``, ``tests/protocols/[a-m]*`` and ``tests/protocols`` --
+  and all 9.8-12 minutes into the run. The ``[monitor]`` samples in its ``Run unit
+  tests`` log put each of those runs' largest worker at 2.2 GiB RSS at 5 minutes old,
+  and at 2.65-2.78 GiB at its largest. Its runs of 2-7 minutes lost none, and its
+  tests took 4510 s of the ``timeout``'s 6600. So those shards are split by time,
+  sized from that job's ``junit-experimental-graalpy-25.4`` artifact: a shard's
+  estimate is its tests' JUnit seconds over the 3 workers, plus 50 s for the 46-57 s
+  that each of the job's shards that lost no worker took beyond that, start to start.
+  Every shard split this way comes to under 5 minutes, and the tier to about 4750 s
+  (estimate). The run over the rest is left whole: in that job it took about 6.7
+  minutes and lost no worker. The runs share the step's ``timeout``, scope and
+  watcher, so the caps hold over the whole tier; on ``timeout``'s SIGINT the run in
+  progress writes its JUnit file and no later one starts. Each shard's run writes a
+  JUnit file of its own beside ``junit.xml``, such as ``junit-tests-protocols.xml``,
+  and ``Upload test timings`` takes them all. 3.14t's leg runs pytest once.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists

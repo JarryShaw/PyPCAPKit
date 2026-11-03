@@ -334,11 +334,13 @@ jobs:
       # - #1963: util/pytest_shards.py runs pytest once per shard `SHARDS`
       #   names, a directory or a glob of one directory's entries, then once
       #   over the rest, so every run starts its workers afresh and none
-      #   outlives its heap. Each shard is sized by its largest live heap after
-      #   a full GC on GraalPy. The script runs inside the timeout, scope and
-      #   watcher below, so they hold over the whole tier; on the timeout's
-      #   SIGINT no later run starts. Each shard's run writes a JUnit file of
-      #   its own beside junit.xml.
+      #   outlives its heap. #2713: the shards that lost workers are split by
+      #   their tests' JUnit seconds on GraalPy, each to run in under 5
+      #   minutes; the run over the rest is left whole, as it took about 6.7
+      #   minutes in job 125639681253 and lost no worker. The script runs
+      #   inside the timeout, scope and watcher below, so they hold over the
+      #   whole tier; on the timeout's SIGINT no later run starts. Each shard's
+      #   run writes a JUnit file of its own beside junit.xml.
       # - `timeout` sends SIGINT at 110 minutes, under the step's cap, so pytest
       #   still writes the JUnit XML, and exits 124; SIGKILL 3 minutes on.
       #   #2020: GNU's `timeout`, which Ubuntu 26.04 installs as `gnutimeout`:
@@ -394,7 +396,10 @@ jobs:
           SHARDS: >-
             ${{ startsWith(matrix.python-version, 'graalpy') && 'tests/const
             tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit
-            tests/foundation tests/protocols/internet tests/protocols/[a-m]* tests/protocols
+            tests/foundation/reassembly tests/foundation/test_* tests/foundation
+            tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet
+            tests/protocols/application tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc
+            tests/protocols/transport/test_tcp* tests/protocols/transport tests/protocols/test_t* tests/protocols
             tests/toolkit' || '' }}
           GH_TOKEN: ${{ github.token }}
           WATCHER: ${{ steps.watcher.outcome }}
