@@ -238,6 +238,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
          Quick-Start report, given the wrong number of octets, raise
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than being
          padded or cut to their field (:issue:`2676`).
+       * An option given to :meth:`make` as empty raw octets, which hold no
+         type octet, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+         rather than an :exc:`IndexError` (:issue:`2723`).
 
     .. versionremoved:: 1.6.0
 
@@ -633,6 +636,12 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Returns:
             Tuple of options and total length of options.
 
+        Raises:
+            ProtocolError: If the type of an option, given in a ``(type,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an option
+                given as raw octets is empty (:issue:`2723`).
+
         Note:
             Options given as a :obj:`list` are fresh input: padding options in
             it are dropped, and padding is inserted after each option to align
@@ -654,6 +663,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no type octet')
                     code = Enum_Option.get(schema[0])
                     if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
                         continue

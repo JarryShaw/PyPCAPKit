@@ -723,16 +723,21 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     .. versionchanged:: 1.6.0
 
-       Each enumeration field of :meth:`make` and of the block and option
-       makers, and the code of each option and the type of each name
-       resolution record given to a block maker, takes a member or an
-       :class:`int` code, resolved with the enumeration's ``get``, an option
-       code in the block's namespace; a name, a :obj:`bool` for a field wider
-       than one bit, or a code the field cannot carry raises
-       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
-       resolving against an enumeration inferred from the caller's frame,
-       writing a different value or raising another exception
-       (:issue:`2594`).
+       * Each enumeration field of :meth:`make` and of the block and option
+         makers, and the code of each option and the type of each name
+         resolution record given to a block maker, takes a member or an
+         :class:`int` code, resolved with the enumeration's ``get``, an option
+         code in the block's namespace; a name, a :obj:`bool` for a field
+         wider than one bit, or a code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame,
+         writing a different value or raising another exception
+         (:issue:`2594`).
+       * An option or a name resolution record given to a block maker as raw
+         octets too short to hold its 16-bit code raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         reading empty octets as code 0 and writing an end-of-options or
+         end-of-records marker for them (:issue:`2723`).
 
     .. versionremoved:: 1.6.0
 
@@ -5150,7 +5155,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Raises:
             ProtocolError: If an option's code is a name, a :obj:`bool`, or a
                 code the 16-bit option code field cannot carry
-                (:issue:`2594`).
+                (:issue:`2594`), or if an option given as raw octets is
+                shorter than that field (:issue:`2723`).
 
         """
         # an option area kept as captured is written back verbatim
@@ -5163,6 +5169,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
+                    # NOTE: Octets short of the code field would read as code 0
+                    # and be taken for an opt_endofopt (#2723).
+                    if len(schema) < 2:
+                        raise ProtocolError(f'PCAP-NG: invalid option: {schema!r} holds no whole option code')
                     code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
                                                namespace=namespace)
                     if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
@@ -6630,7 +6640,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Raises:
             ProtocolError: If a record's type is a name, a :obj:`bool`, or a
                 code the 16-bit record type field cannot carry
-                (:issue:`2594`).
+                (:issue:`2594`), or if a record given as raw octets is shorter
+                than that field (:issue:`2723`).
 
         """
         # a record area kept as captured is written back verbatim
@@ -6643,6 +6654,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records_list = []  # type: list[Schema_NameResolutionRecord | bytes]
             for schema in records:
                 if isinstance(schema, bytes):
+                    # NOTE: Octets short of the type field would read as type 0
+                    # and be taken for an nrb_record_end (#2723).
+                    if len(schema) < 2:
+                        raise ProtocolError(f'PCAP-NG: invalid record: {schema!r} holds no whole record type')
                     code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
                     if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True

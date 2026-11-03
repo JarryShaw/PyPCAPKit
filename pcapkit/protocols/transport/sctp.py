@@ -465,6 +465,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          code no member holds is written as given; a name, a :obj:`bool` for a
          field wider than one bit, or a code the field cannot carry raises
          :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2594`).
+       * A parameter or an error cause given to a chunk maker as empty raw
+         octets, which hold no type or code, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than an
+         :exc:`AttributeError` (:issue:`2723`).
 
     """
 
@@ -1169,11 +1173,19 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed parameter schemas.
 
+        Raises:
+            ProtocolError: If the type of a parameter, given in a ``(type,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if a parameter
+                given as raw octets is empty (:issue:`2723`).
+
         """
         parameters_list = []  # type: list[Schema_Parameter | bytes]
 
         if isinstance(parameters, list):
             for schema in parameters:
+                if isinstance(schema, bytes) and not schema:
+                    raise ProtocolError(f'{self.alias}: invalid parameter: {schema!r} holds no type field')
                 if isinstance(schema, (bytes, Schema)):
                     parameters_list.append(schema)
                 else:
@@ -1243,11 +1255,19 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Constructed error cause schemas.
 
+        Raises:
+            ProtocolError: If the code of an error cause, given in a ``(code,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an error
+                cause given as raw octets is empty (:issue:`2723`).
+
         """
         causes_list = []  # type: list[Schema_ErrorCause | bytes]
 
         if isinstance(causes, list):
             for schema in causes:
+                if isinstance(schema, bytes) and not schema:
+                    raise ProtocolError(f'{self.alias}: invalid error cause: {schema!r} holds no code field')
                 if isinstance(schema, (bytes, Schema)):
                     causes_list.append(schema)
                 else:

@@ -442,6 +442,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          ``HIP_CIPHER`` parameters before it, so an AES cipher's IV is read
          as the IV, rather than warning of a missing ``HIP_CIPHER`` and
          reading the IV as encrypted data (:issue:`2708`).
+       * A parameter given to :meth:`make` as empty raw octets, which hold no
+         type, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than being dropped from the header (:issue:`2723`).
 
     .. versionremoved:: 1.6.0
 
@@ -965,7 +968,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If the code of a ``(code, value)`` pair, or the key
                 of a parameter given as parsed data, is a name, a :obj:`bool` or
-                a code its field cannot carry.
+                a code its field cannot carry, or if a parameter given as raw
+                octets is empty (:issue:`2723`).
 
         """
         total_length = 0
@@ -973,6 +977,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_list = []  # type: list[Schema_Parameter | bytes]
             for schema in parameters:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'HIPv{version}: invalid parameter: {schema!r} holds no type field')
                     # :rfc:`7401#section-5.2.1` pads every parameter to a
                     # multiple of 8 octets, and Header Length counts in those
                     # units; a raw parameter is taken to omit its padding.

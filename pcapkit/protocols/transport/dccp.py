@@ -585,6 +585,12 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         Returns:
             Tuple of options and total length of options.
 
+        Raises:
+            ProtocolError: If the type of an option, given in a ``(type,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an option
+                given as raw octets is empty (:issue:`2723`).
+
         Note:
             The options are emitted in the given order, Padding included, so
             that a parsed option list re-emits the same octets. Padding
@@ -595,6 +601,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         options_list = []  # type: list[Schema_Option | bytes]
         if isinstance(options, list):
             for item in options:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid option: {item!r} holds no type octet')
                 if isinstance(item, (bytes, Schema)):
                     options_list.append(item)
                 else:
