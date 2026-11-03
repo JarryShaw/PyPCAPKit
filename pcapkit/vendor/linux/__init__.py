@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:mod:`pcapkit.const.linux` Vendor Crawlers
-===============================================
+================================================
 
 .. module:: pcapkit.vendor.linux
 

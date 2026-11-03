@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """LINUX_SLL - Linux "Cooked" Capture Encapsulation Family
-==============================================================
+=============================================================
 
 .. module:: pcapkit.protocols.link.linux_sll
 

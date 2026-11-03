@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """TLS/DTLS ExtensionType Values
-==================================
+===================================
 
 .. module:: pcapkit.vendor.tls.extension_type
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Packet Types
-====================
+=======================
 
 .. module:: pcapkit.vendor.dccp.packet_type
 

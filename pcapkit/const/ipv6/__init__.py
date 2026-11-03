@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.internet.ipv6.IPv6` Constant Enumerations
-===========================================================================
+==========================================================================
 
 .. module:: pcapkit.const.ipv6
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Padding Arithmetic
-==================
+========================
 
 .. module:: pcapkit.corekit.schema.padding
 

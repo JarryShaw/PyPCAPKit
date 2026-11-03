@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Application Layer Protocol Numbers (SCTP)
-==============================================
+===============================================
 
 .. module:: pcapkit.vendor.reg.apptype.sctp
 

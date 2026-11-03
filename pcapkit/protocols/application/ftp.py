@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """FTP - File Transfer Protocol
-================================
+==================================
 
 .. module:: pcapkit.protocols.application.ftp
 

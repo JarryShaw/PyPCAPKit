@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` Constant Enumerations
-========================================================================
+==============================================================================
 
 .. module:: pcapkit.const.icmp
 

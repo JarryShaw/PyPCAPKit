@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IGMPv1 - Internet Group Management Protocol version 1
-=============================================================
+===========================================================
 
 .. module:: pcapkit.protocols.internet.igmpv1
 

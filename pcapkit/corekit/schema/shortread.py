@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Short-Read Replay
-=================
+=======================
 
 .. module:: pcapkit.corekit.schema.shortread
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """EdDSA Curve Label
-===========================
+=======================
 
 .. module:: pcapkit.vendor.hip.eddsa_curve
 

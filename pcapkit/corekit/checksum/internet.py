@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Internet Checksum
-=====================
+=======================
 
 .. module:: pcapkit.corekit.checksum.internet
 

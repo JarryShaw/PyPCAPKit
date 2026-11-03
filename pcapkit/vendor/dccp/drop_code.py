@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Drop Codes
-==================
+=====================
 
 .. module:: pcapkit.vendor.dccp.drop_code
 

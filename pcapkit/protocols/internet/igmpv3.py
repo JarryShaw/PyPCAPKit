@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IGMPv3 - Internet Group Management Protocol version 3
-==============================================================
+===========================================================
 
 .. module:: pcapkit.protocols.internet.igmpv3
 

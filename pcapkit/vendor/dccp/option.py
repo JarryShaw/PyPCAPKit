@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Option Types
-====================
+=======================
 
 .. module:: pcapkit.vendor.dccp.option
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ICMPv4 - Internet Control Message Protocol
-=================================================
+================================================
 
 .. module:: pcapkit.protocols.internet.icmpv4
 

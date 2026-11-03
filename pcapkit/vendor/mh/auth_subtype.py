@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options
-==========================================================================
+===========================================================================
 
 .. module:: pcapkit.vendor.mh.auth_subtype
 

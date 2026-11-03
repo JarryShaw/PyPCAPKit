@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IGMP - Internet Group Management Protocol
-================================================
+===============================================
 
 .. module:: pcapkit.protocols.internet.igmp
 

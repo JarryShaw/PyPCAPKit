@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """SSL - Secure Sockets Layer
-===============================
+================================
 
 .. module:: pcapkit.protocols.application.ssl
 

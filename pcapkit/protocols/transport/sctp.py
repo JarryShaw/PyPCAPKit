@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=dict-item
 """SCTP - Stream Control Transmission Protocol
-================================================
+=================================================
 
 .. module:: pcapkit.protocols.transport.sctp
 

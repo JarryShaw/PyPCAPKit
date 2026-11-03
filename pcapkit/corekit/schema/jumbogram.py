@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Jumbo Payload Lookup
-====================
+==========================
 
 .. module:: pcapkit.corekit.schema.jumbogram
 

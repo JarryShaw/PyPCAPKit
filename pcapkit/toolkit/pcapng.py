@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """PCAP-NG Tools
-=============
+===================
 
 .. module:: pcapkit.toolkit.pcapng
 

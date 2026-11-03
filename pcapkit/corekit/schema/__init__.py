@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Schema Helpers
-==============
+====================
 
 .. module:: pcapkit.corekit.schema
 

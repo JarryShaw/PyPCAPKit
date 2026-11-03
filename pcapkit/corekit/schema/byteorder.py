@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Byte-Order Helpers
-==================
+========================
 
 .. module:: pcapkit.corekit.schema.byteorder
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Constant Enumeration Base
-==============================
+===============================
 
 .. module:: pcapkit.corekit.enum
 

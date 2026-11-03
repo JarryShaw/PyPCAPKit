@@ -44,6 +44,19 @@ while a gerund or infinitive phrase is a noun phrase and needs only re-casing --
    been named for sat well below, leaving the page's most navigable artefact
    unfindable from the table of contents.
 
+**A module docstring's** ``=`` **title underline runs six past the title**, so the
+heading reads balanced. The title is measured as written, inline markup included,
+which is how the crawler templates under :mod:`pcapkit.vendor` compute it. Ruled on
+:issue:`2718`; :file:`tests/project/test_docs_module_title_underline_2718_unit.py`
+fails on an underline of any other length.
+
+.. code-block:: python
+
+   """Some Module
+   =================
+
+   """
+
 Renaming a Heading
 ~~~~~~~~~~~~~~~~~~
 

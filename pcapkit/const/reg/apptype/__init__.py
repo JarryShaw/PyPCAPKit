@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """Application Layer Protocol Numbers Constant Enumerations
-============================================================
+==============================================================
 
 .. module:: pcapkit.const.reg.apptype
 

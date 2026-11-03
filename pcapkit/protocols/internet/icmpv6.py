@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ICMPv6 - Internet Control Message Protocol for IPv6
-===========================================================
+=========================================================
 
 .. module:: pcapkit.protocols.internet.icmpv6
 

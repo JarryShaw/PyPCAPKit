@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IPv6-Ext - IPv6 Extension Header
-================================
+======================================
 
 .. module:: pcapkit.protocols.internet.ipv6_ext
 

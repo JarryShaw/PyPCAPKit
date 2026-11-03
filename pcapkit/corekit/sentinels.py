@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Sentinel Objects
-=====================
+======================
 
 .. module:: pcapkit.corekit.sentinels
 

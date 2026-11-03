@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.internet.hip.HIP` Vendor crawlers
-========================================================================
+==================================================================
 
 .. module:: pcapkit.vendor.hip
 

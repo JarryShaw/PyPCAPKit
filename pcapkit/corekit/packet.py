@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Deferred Packet
-===================
+=====================
 
 .. module:: pcapkit.corekit.packet
 
