@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+    from pcapkit.foundation.traceflow.data.data import FrameRecord
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
@@ -47,6 +48,17 @@ class Packet(Info, Generic[_AT]):
         * :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.dump`
         * :term:`trace.tcp.packet`
 
+    .. versionchanged:: 1.6.0
+
+       A third-party engine's :attr:`frame` is a
+       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, which
+       :meth:`to_dict` exports as an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict`; so
+       ``Packet.from_dict(packet.to_dict())`` holds the frame as an
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`, not a
+       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`
+       (:issue:`2726`).
+
     """
 
     #: Data link type: the PCAP global header's, or that of the PCAP-NG
@@ -54,8 +66,10 @@ class Packet(Info, Generic[_AT]):
     protocol: 'Enum_LinkType'
     #: Frame number.
     index: 'int'
-    #: Extracted frame info.
-    frame: 'Data_Frame | dict[str, Any]'
+    #: Extracted frame info: the default engine's frame, a third-party
+    #: engine's :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, or
+    #: the :obj:`dict` PyShark's adapter reports, which carries no frame record.
+    frame: 'Data_Frame | FrameRecord | dict[str, Any]'
     #: TCP synchronise (SYN) flag.
     syn: 'bool'
     #: TCP finish (FIN) flag.
@@ -91,7 +105,7 @@ class Packet(Info, Generic[_AT]):
     payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float', seq: 'int', ack: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | FrameRecord | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float', seq: 'int', ack: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final

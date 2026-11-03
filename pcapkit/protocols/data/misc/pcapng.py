@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """data models for PCAP-NG file format"""
 
+import collections.abc
 import datetime
 import decimal
 from typing import TYPE_CHECKING
@@ -29,8 +30,8 @@ __all__ = [
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
-    'DSBSecrets', 'UnknownSecrets', 'TLSKeyLog', 'WireGuardKeyLog', 'ZigBeeNWKKey',
-    'ZigBeeAPSKey',
+    'DSBSecrets', 'UnknownSecrets', 'TLSKeyLogEntries', 'TLSKeyLog', 'WireGuardKeyLog',
+    'ZigBeeNWKKey', 'ZigBeeAPSKey',
 
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
     'EnhancedPacketBlock', 'SimplePacketBlock', 'NameResolutionBlock',
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
     from datetime import timezone as dt_timezone
     from decimal import Decimal
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
+    from typing import Any, Mapping, Optional
 
     from typing_extensions import Literal
 
@@ -830,18 +832,85 @@ class UnknownSecrets(DSBSecrets):
 
 
 @info_final
+class TLSKeyLogEntries(Data):
+    """Data model for the entries of a TLS key log, keyed by label.
+
+    A key is each :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`
+    the log has an entry under, and its value that label's client random to
+    secret pairs, in log order, as an
+    :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`. A label also reads
+    as an attribute, as ``entries.CLIENT_RANDOM``.
+
+    .. versionadded:: 1.6.0
+
+    """
+
+    if TYPE_CHECKING:
+        def __init__(self, dict_: 'Optional[Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None) -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+
+
+@info_final
 class TLSKeyLog(DSBSecrets):
-    """Data model for TLS key log DSB secrets."""
+    """Data model for TLS key log DSB secrets.
+
+    .. versionchanged:: 1.6.0
+
+       :attr:`entries` is a :class:`TLSKeyLogEntries` rather than a
+       :obj:`dict`, and a mapping given for it is stored as one; :meth:`to_dict`
+       exports it as an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`,
+       as it does any nested data model. A pickle holds it as a :obj:`dict`, so
+       pickles load across 1.6.0 in both directions (:issue:`2726`).
+
+    """
 
     #: TLS key log entries.
-    entries: 'dict[Enum_TLSKeyLabel, OrderedMultiInfo[bytes, bytes]]'
+    entries: 'TLSKeyLogEntries'
 
     if TYPE_CHECKING:
         #: TLS key log text as the block carries it, comments and line order
         #: included. Set on parsing only, and written back verbatim on rebuild.
         data: 'str'
 
-        def __init__(self, entries: 'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...
+        def __init__(self, entries: 'TLSKeyLogEntries | Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+
+    def __post_init__(self) -> 'None':
+        """Store a mapping given for :attr:`entries` as a :class:`TLSKeyLogEntries`."""
+        _hold_entries(self.__dict__)
+
+    def __getstate__(self) -> 'dict[str, Any]':
+        """Return the state to pickle, holding :attr:`entries` as a :obj:`dict`.
+
+        A release before 1.6.0 loads them as the :obj:`dict` it holds, and
+        :meth:`__setstate__` loads them as a :class:`TLSKeyLogEntries`.
+
+        """
+        state = dict(self.__dict__)
+        if isinstance(state.get('entries'), TLSKeyLogEntries):
+            state['entries'] = dict(state['entries'])
+        return state
+
+    def __setstate__(self, state: 'dict[str, Any]') -> 'None':
+        """Restore a pickled state, storing :attr:`entries` as a :class:`TLSKeyLogEntries`.
+
+        Args:
+            state: The state :meth:`__getstate__` returns, or one holding the
+                entries as a :obj:`dict`, as before 1.6.0.
+
+        """
+        self.__dict__.update(state)
+        _hold_entries(self.__dict__)
+
+
+def _hold_entries(namespace: 'dict[str, Any]') -> 'None':
+    """Store the ``entries`` in ``namespace`` as a :class:`TLSKeyLogEntries`, unless they are one.
+
+    Args:
+        namespace: The :attr:`~object.__dict__` of a :class:`TLSKeyLog`.
+
+    """
+    entries = namespace.get('entries')
+    if isinstance(entries, collections.abc.Mapping) and not isinstance(entries, TLSKeyLogEntries):
+        namespace['entries'] = TLSKeyLogEntries(entries)
 
 
 @info_final
