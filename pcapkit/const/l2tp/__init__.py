@@ -16,6 +16,15 @@ enumerations include:
 
 """
 
-from pcapkit.const.l2tp.type import Type as L2TP_Type
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.l2tp.type import Type as L2TP_Type
 
 __all__ = ['L2TP_Type']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'L2TP_Type': ('type', 'Type'),
+})

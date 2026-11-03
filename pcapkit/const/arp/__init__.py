@@ -19,7 +19,17 @@ enumerations include:
 
 """
 
-from pcapkit.const.arp.hardware import Hardware as ARP_Hardware
-from pcapkit.const.arp.operation import Operation as ARP_Operation
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.arp.hardware import Hardware as ARP_Hardware
+    from pcapkit.const.arp.operation import Operation as ARP_Operation
 
 __all__ = ['ARP_Hardware', 'ARP_Operation']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'ARP_Hardware': ('hardware', 'Hardware'),
+    'ARP_Operation': ('operation', 'Operation'),
+})

@@ -26,8 +26,19 @@ enumerations include:
 
 """
 
-from pcapkit.const.tls.content_type import ContentType as TLS_ContentType
-from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
-from pcapkit.const.tls.handshake_type import HandshakeType as TLS_HandshakeType
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.tls.content_type import ContentType as TLS_ContentType
+    from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
+    from pcapkit.const.tls.handshake_type import HandshakeType as TLS_HandshakeType
 
 __all__ = ['TLS_ContentType', 'TLS_HandshakeType', 'TLS_ExtensionType']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'TLS_ContentType': ('content_type', 'ContentType'),
+    'TLS_HandshakeType': ('handshake_type', 'HandshakeType'),
+    'TLS_ExtensionType': ('extension_type', 'ExtensionType'),
+})

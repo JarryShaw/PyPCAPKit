@@ -35,8 +35,9 @@ House Conventions
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`;
-   * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const` and the
-     :mod:`pcapkit.vendor` crawler each module needs.
+   * :ref:`const-vendor-pairing` -- :mod:`pcapkit.const`, the
+     :mod:`pcapkit.vendor` crawler each module needs, and how a package of it
+     imports its modules.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a

@@ -6,39 +6,49 @@
 This module contains all constant enumerations of :mod:`pcapkit`, which are
 automatically generated from the :mod:`pcapkit.vendor` module.
 
+Each enumeration is imported the first time it is reached -- as an attribute
+of this package or of the subpackage holding it -- rather than with the
+package, through :func:`~pcapkit.utilities.lazy.lazy_exports`
+(:issue:`2729`). The subpackages themselves are imported with it, and import
+none of their enumerations.
+
 """
+from typing import TYPE_CHECKING
 
-# IANA registration
-from pcapkit.const.reg import *
+from pcapkit.utilities.lazy import lazy_exports
 
-# Miscellaneous
-from pcapkit.const.pcapng import *
+if TYPE_CHECKING:
+    # IANA registration
+    from pcapkit.const.reg import *
 
-# per protocol
-from pcapkit.const.arp import *
-from pcapkit.const.dccp import *
-from pcapkit.const.esp import *
-from pcapkit.const.ftp import *
-from pcapkit.const.hip import *
-from pcapkit.const.http import *
-from pcapkit.const.icmp import *
-from pcapkit.const.icmpv6 import *
-from pcapkit.const.ieee802_11 import *
-from pcapkit.const.igmp import *
-from pcapkit.const.ipv4 import *
-from pcapkit.const.ipv6 import *
-from pcapkit.const.ipx import *
-from pcapkit.const.l2tp import *
-from pcapkit.const.linux import *
-from pcapkit.const.mh import *
-from pcapkit.const.ngap import *
-from pcapkit.const.ospf import *
-from pcapkit.const.radiotap import *
-from pcapkit.const.sctp import *
-from pcapkit.const.sslv2 import *
-from pcapkit.const.tcp import *
-from pcapkit.const.tls import *
-from pcapkit.const.vlan import *
+    # Miscellaneous
+    from pcapkit.const.pcapng import *
+
+    # per protocol
+    from pcapkit.const.arp import *
+    from pcapkit.const.dccp import *
+    from pcapkit.const.esp import *
+    from pcapkit.const.ftp import *
+    from pcapkit.const.hip import *
+    from pcapkit.const.http import *
+    from pcapkit.const.icmp import *
+    from pcapkit.const.icmpv6 import *
+    from pcapkit.const.ieee802_11 import *
+    from pcapkit.const.igmp import *
+    from pcapkit.const.ipv4 import *
+    from pcapkit.const.ipv6 import *
+    from pcapkit.const.ipx import *
+    from pcapkit.const.l2tp import *
+    from pcapkit.const.linux import *
+    from pcapkit.const.mh import *
+    from pcapkit.const.ngap import *
+    from pcapkit.const.ospf import *
+    from pcapkit.const.radiotap import *
+    from pcapkit.const.sctp import *
+    from pcapkit.const.sslv2 import *
+    from pcapkit.const.tcp import *
+    from pcapkit.const.tls import *
+    from pcapkit.const.vlan import *
 
 __all__ = [
     # Protocol Registration
@@ -123,3 +133,11 @@ __all__ = [
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
     'PCAPNG_FilterType', 'PCAPNG_TLSKeyLabel',
 ]
+
+# NOTE: the subpackages whose ``__all__`` this package re-exports, which the
+# type checkers star-import above.
+__getattr__, __dir__ = lazy_exports(__name__, globals(), packages=(
+    'reg', 'pcapng', 'arp', 'dccp', 'esp', 'ftp', 'hip', 'http', 'icmp', 'icmpv6',
+    'ieee802_11', 'igmp', 'ipv4', 'ipv6', 'ipx', 'l2tp', 'linux', 'mh', 'ngap', 'ospf',
+    'radiotap', 'sctp', 'sslv2', 'tcp', 'tls', 'vlan',
+))

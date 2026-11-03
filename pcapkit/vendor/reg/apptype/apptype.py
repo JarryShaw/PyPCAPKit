@@ -114,7 +114,7 @@ from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError
 __all__ = ['TransportProtocol', '{NAME}']
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Mapping, Optional, Type
 
     from pcapkit.corekit.multidict import MultiDict
 
@@ -328,9 +328,9 @@ class {NAME}(EnumRegistry, StrEnum):
 
     #: Registry class owning each transport protocol, i.e. what
     #: :meth:`get` delegates to when called on this class rather than on one of
-    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once every one of
-    #: them has been imported, since this module cannot import its own subclasses.
-    __registries__: 'dict[TransportProtocol, Type[{NAME}]]' = {{}}
+    #: them. Populated by :mod:`pcapkit.const.reg.apptype`, which imports each
+    #: of them on first use, since this module cannot import its own subclasses.
+    __registries__: 'Mapping[TransportProtocol, Type[{NAME}]]' = {{}}
 
     #: Canonical service per port, for the ports carrying more than one. The base
     #: registry has no members and so no collisions.
@@ -516,13 +516,13 @@ class {NAME}(EnumRegistry, StrEnum):
         if isinstance(proto, str):
             proto = TransportProtocol.get(proto.lower())
 
-        # NOTE: a direct dict lookup covers every genuine single transport --
+        # NOTE: a direct lookup covers every genuine single transport --
         # one of the real members, or a bare int equal to one of their
         # values -- since ``__registries__`` keys compare by the same
         # int-valued hash/eq every member and bare int alike already use. The
-        # cast is for mypy alone: ``dict.get`` accepts any hashable key at run
+        # cast is for mypy alone: ``.get`` accepts any hashable key at run
         # time regardless of its declared key type, but mypy holds ``.get`` to
-        # the dict's own ``TransportProtocol`` keys, and does not know ``proto``
+        # the mapping's own ``TransportProtocol`` keys, and does not know ``proto``
         # can genuinely be a bare :class:`int` here, TransportProtocol not being
         # an ``IntFlag`` (GitHub issue #808) -- see the annotation on ``proto``
         # above.

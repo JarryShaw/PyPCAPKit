@@ -34,9 +34,21 @@ base ``APPTYPE`` they all subclass. See :mod:`pcapkit.const.reg.apptype`.
 
 """
 
-from pcapkit.const.reg.apptype import AppType as APPTYPE
-from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
-from pcapkit.const.reg.linktype import LinkType as LINKTYPE
-from pcapkit.const.reg.transtype import TransType as TRANSTYPE
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.reg.apptype import AppType as APPTYPE
+    from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
+    from pcapkit.const.reg.linktype import LinkType as LINKTYPE
+    from pcapkit.const.reg.transtype import TransType as TRANSTYPE
 
 __all__ = ['ETHERTYPE', 'LINKTYPE', 'TRANSTYPE', 'APPTYPE']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'ETHERTYPE': ('ethertype', 'EtherType'),
+    'LINKTYPE': ('linktype', 'LinkType'),
+    'TRANSTYPE': ('transtype', 'TransType'),
+    'APPTYPE': ('apptype', 'AppType'),
+})

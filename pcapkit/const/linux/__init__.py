@@ -14,6 +14,15 @@ Available enumerations include:
 
 """
 
-from pcapkit.const.linux.arphrd import ARPHRD as Linux_ARPHRD
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.linux.arphrd import ARPHRD as Linux_ARPHRD
 
 __all__ = ['Linux_ARPHRD']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'Linux_ARPHRD': ('arphrd', 'ARPHRD'),
+})

@@ -27,11 +27,23 @@ enumerations include:
 
 """
 
-from pcapkit.const.sctp.cause_code import CauseCode as SCTP_CauseCode
-from pcapkit.const.sctp.chunk import Chunk as SCTP_Chunk
-from pcapkit.const.sctp.parameter import Parameter as SCTP_Parameter
-from pcapkit.const.sctp.payload_protocol_identifier import \
-    PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.sctp.cause_code import CauseCode as SCTP_CauseCode
+    from pcapkit.const.sctp.chunk import Chunk as SCTP_Chunk
+    from pcapkit.const.sctp.parameter import Parameter as SCTP_Parameter
+    from pcapkit.const.sctp.payload_protocol_identifier import \
+        PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
 
 __all__ = ['SCTP_Chunk', 'SCTP_Parameter', 'SCTP_CauseCode',
            'SCTP_PayloadProtocolIdentifier']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'SCTP_Chunk': ('chunk', 'Chunk'),
+    'SCTP_Parameter': ('parameter', 'Parameter'),
+    'SCTP_CauseCode': ('cause_code', 'CauseCode'),
+    'SCTP_PayloadProtocolIdentifier': ('payload_protocol_identifier', 'PayloadProtocolIdentifier'),
+})

@@ -69,26 +69,53 @@ enumerations include:
 
 """
 
-from pcapkit.const.hip.certificate import Certificate as HIP_Certificate
-from pcapkit.const.hip.cipher import Cipher as HIP_Cipher
-from pcapkit.const.hip.di import DITypes as HIP_DITypes
-from pcapkit.const.hip.ecdsa_curve import ECDSACurve as HIP_ECDSACurve
-from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as HIP_ECDSALowCurve
-from pcapkit.const.hip.eddsa_curve import EdDSACurve as HIP_EdDSACurve
-from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as HIP_ESPTransformSuite
-from pcapkit.const.hip.group import Group as HIP_Group
-from pcapkit.const.hip.hi_algorithm import HIAlgorithm as HIP_HIAlgorithm
-from pcapkit.const.hip.hit_suite import HITSuite as HIP_HITSuite
-from pcapkit.const.hip.nat_traversal import NATTraversal as HIP_NATTraversal
-from pcapkit.const.hip.notify_message import NotifyMessage as HIP_NotifyMessage
-from pcapkit.const.hip.packet import Packet as HIP_Packet
-from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
-from pcapkit.const.hip.registration import Registration as HIP_Registration
-from pcapkit.const.hip.registration_failure import RegistrationFailure as HIP_RegistrationFailure
-from pcapkit.const.hip.suite import Suite as HIP_Suite
-from pcapkit.const.hip.transport import Transport as HIP_Transport
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.hip.certificate import Certificate as HIP_Certificate
+    from pcapkit.const.hip.cipher import Cipher as HIP_Cipher
+    from pcapkit.const.hip.di import DITypes as HIP_DITypes
+    from pcapkit.const.hip.ecdsa_curve import ECDSACurve as HIP_ECDSACurve
+    from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as HIP_ECDSALowCurve
+    from pcapkit.const.hip.eddsa_curve import EdDSACurve as HIP_EdDSACurve
+    from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as HIP_ESPTransformSuite
+    from pcapkit.const.hip.group import Group as HIP_Group
+    from pcapkit.const.hip.hi_algorithm import HIAlgorithm as HIP_HIAlgorithm
+    from pcapkit.const.hip.hit_suite import HITSuite as HIP_HITSuite
+    from pcapkit.const.hip.nat_traversal import NATTraversal as HIP_NATTraversal
+    from pcapkit.const.hip.notify_message import NotifyMessage as HIP_NotifyMessage
+    from pcapkit.const.hip.packet import Packet as HIP_Packet
+    from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
+    from pcapkit.const.hip.registration import Registration as HIP_Registration
+    from pcapkit.const.hip.registration_failure import \
+        RegistrationFailure as HIP_RegistrationFailure
+    from pcapkit.const.hip.suite import Suite as HIP_Suite
+    from pcapkit.const.hip.transport import Transport as HIP_Transport
 
 __all__ = ['HIP_Certificate', 'HIP_Cipher', 'HIP_DITypes', 'HIP_ECDSACurve', 'HIP_ECDSALowCurve',
            'HIP_ESPTransformSuite', 'HIP_Group', 'HIP_HIAlgorithm', 'HIP_HITSuite', 'HIP_NATTraversal',
            'HIP_NotifyMessage', 'HIP_Packet', 'HIP_Parameter', 'HIP_Registration', 'HIP_RegistrationFailure',
            'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'HIP_Certificate': ('certificate', 'Certificate'),
+    'HIP_Cipher': ('cipher', 'Cipher'),
+    'HIP_DITypes': ('di', 'DITypes'),
+    'HIP_ECDSACurve': ('ecdsa_curve', 'ECDSACurve'),
+    'HIP_ECDSALowCurve': ('ecdsa_low_curve', 'ECDSALowCurve'),
+    'HIP_ESPTransformSuite': ('esp_transform_suite', 'ESPTransformSuite'),
+    'HIP_Group': ('group', 'Group'),
+    'HIP_HIAlgorithm': ('hi_algorithm', 'HIAlgorithm'),
+    'HIP_HITSuite': ('hit_suite', 'HITSuite'),
+    'HIP_NATTraversal': ('nat_traversal', 'NATTraversal'),
+    'HIP_NotifyMessage': ('notify_message', 'NotifyMessage'),
+    'HIP_Packet': ('packet', 'Packet'),
+    'HIP_Parameter': ('parameter', 'Parameter'),
+    'HIP_Registration': ('registration', 'Registration'),
+    'HIP_RegistrationFailure': ('registration_failure', 'RegistrationFailure'),
+    'HIP_Suite': ('suite', 'Suite'),
+    'HIP_Transport': ('transport', 'Transport'),
+    'HIP_EdDSACurve': ('eddsa_curve', 'EdDSACurve'),
+})

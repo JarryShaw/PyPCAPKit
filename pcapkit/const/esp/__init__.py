@@ -33,7 +33,17 @@ separate question, answered by
 
 """
 
-from pcapkit.const.esp.cipher import Cipher as ESP_Cipher
-from pcapkit.const.esp.integrity import Integrity as ESP_Integrity
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.esp.cipher import Cipher as ESP_Cipher
+    from pcapkit.const.esp.integrity import Integrity as ESP_Integrity
 
 __all__ = ['ESP_Cipher', 'ESP_Integrity']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'ESP_Cipher': ('cipher', 'Cipher'),
+    'ESP_Integrity': ('integrity', 'Integrity'),
+})

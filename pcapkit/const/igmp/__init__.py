@@ -21,7 +21,17 @@ enumerations include:
 
 """
 
-from pcapkit.const.igmp.record_type import RecordType as IGMP_RecordType
-from pcapkit.const.igmp.type import Type as IGMP_Type
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.igmp.record_type import RecordType as IGMP_RecordType
+    from pcapkit.const.igmp.type import Type as IGMP_Type
 
 __all__ = ['IGMP_Type', 'IGMP_RecordType']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'IGMP_Type': ('type', 'Type'),
+    'IGMP_RecordType': ('record_type', 'RecordType'),
+})

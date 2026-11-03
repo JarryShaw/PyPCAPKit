@@ -28,7 +28,17 @@ issue :issue:`880` for the ruling.
 
 """
 
-from pcapkit.const.ngap.procedure_code import ProcedureCode as NGAP_ProcedureCode
-from pcapkit.const.ngap.protocol_ie import ProtocolIE as NGAP_ProtocolIE
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ngap.procedure_code import ProcedureCode as NGAP_ProcedureCode
+    from pcapkit.const.ngap.protocol_ie import ProtocolIE as NGAP_ProtocolIE
 
 __all__ = ['NGAP_ProcedureCode', 'NGAP_ProtocolIE']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'NGAP_ProcedureCode': ('procedure_code', 'ProcedureCode'),
+    'NGAP_ProtocolIE': ('protocol_ie', 'ProtocolIE'),
+})

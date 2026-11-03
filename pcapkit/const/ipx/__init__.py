@@ -21,7 +21,17 @@ enumerations include:
 
 """
 
-from pcapkit.const.ipx.packet import Packet as IPX_Packet
-from pcapkit.const.ipx.socket import Socket as IPX_Socket
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ipx.packet import Packet as IPX_Packet
+    from pcapkit.const.ipx.socket import Socket as IPX_Socket
 
 __all__ = ['IPX_Packet', 'IPX_Socket']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'IPX_Packet': ('packet', 'Packet'),
+    'IPX_Socket': ('socket', 'Socket'),
+})
