@@ -35,18 +35,20 @@ from tests.project.test_resource_monitor_1740 import DEFAULT, EXPERIMENTAL, HEAP
 from util import pytest_shards
 
 #: GraalPy's shards, in the order they run; the rest of the tier runs last. #2713 split the
-#: shards that lost workers in job 125639681253 by their JUnit seconds there.
+#: shards that lost workers in job 125639681253 by their JUnit seconds there, and #2739
+#: split the two that ran 11-14 minutes in job 125752017215 by its.
 SHARDS = ('tests/const tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit '
           'tests/foundation/reassembly tests/foundation/test_* tests/foundation '
-          'tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet '
-          'tests/protocols/application tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc '
+          'tests/protocols/internet/test_ipv4* tests/protocols/internet/test_ipv6* tests/protocols/internet/test_igmp* '
+          'tests/protocols/internet tests/protocols/application/test_tls* tests/protocols/application '
+          'tests/protocols/link tests/protocols/misc/test_pcapng* tests/protocols/misc '
           'tests/protocols/transport/test_tcp* tests/protocols/transport tests/protocols/test_t* tests/protocols '
           'tests/toolkit')
 SCRIPT = ROOT / 'util' / 'pytest_shards.py'
 #: The lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'
 SHARDED = 'set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"\n'
-CAPPED = 'set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"\n'
+CAPPED = 'set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 180m "$@"\n'
 
 
 def rest_ignores(shards: 'str') -> 'list[str]':
@@ -184,7 +186,7 @@ class TestTheStepRuns(unittest.TestCase):
 
     def test_the_timeout_ends_the_run_in_progress_and_starts_no_other(self) -> None:
         # pytest ends on SIGINT, which timeout sends to its whole process group, with exit 2.
-        script = step(TESTS)['run'].replace('--kill-after=3m 110m', '--kill-after=5s 1s')
+        script = step(TESTS)['run'].replace('--kill-after=3m 180m', '--kill-after=5s 1s')
         self.assertNotEqual(script, step(TESTS)['run'])
         result = self.run_step("trap 'echo interrupted; exit 2' INT\nsleep 30 &\nwait $!\nexit 0\n", script)
         self.assertEqual(result.returncode, 124, result.stderr)

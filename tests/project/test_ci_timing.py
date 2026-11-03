@@ -275,7 +275,7 @@ class TestWorkflowText(unittest.TestCase):
             with self.subTest(job=name):
                 experimental = ci_timing.match_job(own, name)
                 self.assertEqual((experimental['id'], experimental['timeout'],
-                                  ci_timing.step_cap(experimental, ci_timing.TESTS_STEP)), ('experimental', 140, 120))
+                                  ci_timing.step_cap(experimental, ci_timing.TESTS_STEP)), ('experimental', 210, 190))
 
     def test_every_step_of_interest_names_a_real_step(self) -> 'None':
         """#2230: each alternative of :data:`STEPS_OF_INTEREST` matches a step some workflow has.
@@ -1037,7 +1037,7 @@ class TestNonBlockingLegs(unittest.TestCase):
     """#1732: a cap finding on a leg nothing waits on is a warning, not HARD."""
 
     #: (workflow, job name, its cap in the real workflow file).
-    EXPERIMENTAL = ('experimental.yml', 'Python graalpy-25.4 (experimental)', 140)
+    EXPERIMENTAL = ('experimental.yml', 'Python graalpy-25.4 (experimental)', 210)
     KTLO = ('unit-tests.yml', 'Python 3.10 (KTLO)', 45)
     BLOCKING = ('unit-tests.yml', 'Python 3.14', 45)
 
