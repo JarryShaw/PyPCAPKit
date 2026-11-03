@@ -449,7 +449,8 @@ class OptionField(ListField, Generic[_TS]):
             FieldValueError: If an option consumes nothing from ``buffer``, since
                 the loop below has then no way to get past it.
             ProtocolError: If an option that begins with octets present reads
-                past the end of the data.
+                past the end of the data, unless :meth:`_accepts_short_read`
+                accepts it.
 
         .. versionchanged:: 1.5.0
 
@@ -553,7 +554,7 @@ class OptionField(ListField, Generic[_TS]):
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
-            if tracker.short and consumed > 0:
+            if tracker.short and consumed > 0 and not self._accepts_short_read(data):
                 raise ProtocolError(
                     f'Field {self.name} has an option that runs past the end of '
                     f'the data: {code!r} at offset {offset - start} of '
@@ -598,3 +599,21 @@ class OptionField(ListField, Generic[_TS]):
 
         self._option_padding = length
         return temp
+
+    def _accepts_short_read(self, option: '_TS') -> 'bool':  # pylint: disable=unused-argument
+        """Whether an option that read past the end of the data may stand.
+
+        Args:
+            option: Option just unpacked, which read short.
+
+        Returns:
+            :data:`False`, so that :meth:`unpack` refuses the option
+            (:issue:`1325`): padding cut short may be content the option's own
+            length declares, as a ``PadN`` option's is. A list whose items'
+            lengths leave out their trailing padding may override this, as
+            :class:`~pcapkit.protocols.schema.transport.sctp.PaddedOptionField`
+            does; :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+            then writes back only the octets read.
+
+        """
+        return False
