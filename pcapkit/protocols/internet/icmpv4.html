@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -648,7 +648,10 @@ attribute:</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>The checksum is computed when <a class="reference internal" href="#pcapkit.protocols.internet.icmpv4.ICMPv4.make" title="pcapkit.protocols.internet.icmpv4.ICMPv4.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> is given none, and verified
 on read under <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>,
-unless the enclosing IP layer is a fragment (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>).</p>
+unless the enclosing IP layer is a fragment (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>). A message
+whose header records a cut reads
+<a class="reference internal" href="../../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.icmpv4.ICMPv4.name">

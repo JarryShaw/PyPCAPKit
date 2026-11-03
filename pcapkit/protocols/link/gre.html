@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -671,7 +671,8 @@ capture cut short, holding fewer octets than its original length, reads
 as <a class="reference internal" href="../../corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a>,
 as <a class="reference internal" href="../../utilities/contextvars.html#pcapkit.utilities.contextvars.frame_length" title="pcapkit.utilities.contextvars.frame_length"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_length</span></code></a> tells it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2653">#2653</a>), and so does a header the data ends inside
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>). The header records such a cut, so the message rebuilt on
+its own reads as cut too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.gre.GRE.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Generic</span> <span class="pre">Routing</span> <span class="pre">Encapsulation'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.gre.GRE.name" title="Link to this definition">¶</a></dt>

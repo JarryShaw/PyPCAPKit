@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Lazy Imports" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/lazy.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/importlib.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.lazy holds lazy_exports(), which gives a package the PEP 562__getattr__ and__dir__ that import each name it exports the first time the name is reached, rather than with the packag..." />
-<meta name="description" content="pcapkit.utilities.lazy holds lazy_exports(), which gives a package the PEP 562__getattr__ and__dir__ that import each name it exports the first time the name is reached, rather than with the packag..." />
+<meta property="og:description" content="pcapkit.utilities.importlib holds lazy_exports(), which gives a package the PEP 562__getattr__ and__dir__ that import each name it exports the first time the name is reached, rather than with the p..." />
+<meta name="description" content="pcapkit.utilities.importlib holds lazy_exports(), which gives a package the PEP 562__getattr__ and__dir__ that import each name it exports the first time the name is reached, rather than with the p..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Core Utilities" href="../corekit/index.html"><link rel="prev" title="Shared Context Variables" href="contextvars.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -544,12 +544,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/lazy.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/importlib.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/lazy.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/importlib.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -566,9 +566,9 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.utilities.lazy">
-<span id="lazy-imports"></span><h1>Lazy Imports<a class="headerlink" href="#module-pcapkit.utilities.lazy" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities.lazy" title="pcapkit.utilities.lazy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.lazy</span></code></a> holds <a class="reference internal" href="#pcapkit.utilities.lazy.lazy_exports" title="pcapkit.utilities.lazy.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a>, which gives a package the
+          <section id="module-pcapkit.utilities.importlib">
+<span id="lazy-imports"></span><h1>Lazy Imports<a class="headerlink" href="#module-pcapkit.utilities.importlib" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.utilities.importlib" title="pcapkit.utilities.importlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.importlib</span></code></a> holds <a class="reference internal" href="#pcapkit.utilities.importlib.lazy_exports" title="pcapkit.utilities.importlib.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a>, which gives a package the
 <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0562/"><strong>PEP 562</strong></a> <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__dir__</span></code> that import each name it exports the first
 time the name is reached, rather than with the package itself. Every package under
 <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> imports its enumerations that way (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2729">#2729</a>), so a caller
@@ -578,8 +578,8 @@ pays only for the enumerations it uses. This module imports nothing from
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.lazy.lazy_exports">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.lazy.</span></span><span class="sig-name descname"><span class="pre">lazy_exports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/lazy.html#lazy_exports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.lazy.lazy_exports" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.importlib.lazy_exports">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.importlib.</span></span><span class="sig-name descname"><span class="pre">lazy_exports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/importlib.html#lazy_exports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.importlib.lazy_exports" title="Link to this definition">¶</a></dt>
 <dd><p>Return the <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__dir__</span></code> of a package that imports its exports on first use.</p>
 <p>A package binds both at module level, after its <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, and imports the
 exported names only under <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TYPE_CHECKING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code></a>, for the type checkers:</p>
@@ -615,7 +615,7 @@ each name in once it is imported.</p></li>
 it is defined in, relative to <code class="docutils literal notranslate"><span class="pre">package</span></code>, and its name there.</p></li>
 <li><p><strong>packages</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – Subpackages, relative to <code class="docutils literal notranslate"><span class="pre">package</span></code>, whose <code class="docutils literal notranslate"><span class="pre">__all__</span></code> this
 package re-exports. Each is imported by this call – one using
-<a class="reference internal" href="#pcapkit.utilities.lazy.lazy_exports" title="pcapkit.utilities.lazy.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a> itself imports none of its exports – and every
+<a class="reference internal" href="#pcapkit.utilities.importlib.lazy_exports" title="pcapkit.utilities.importlib.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a> itself imports none of its exports – and every
 name in its <code class="docutils literal notranslate"><span class="pre">__all__</span></code> is read off it on first use.</p></li>
 </ul>
 </dd>

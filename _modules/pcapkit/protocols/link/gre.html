@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -665,7 +665,8 @@
 <span class="sd">    as :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`,</span>
 <span class="sd">    as :data:`~pcapkit.utilities.contextvars.frame_length` tells it</span>
 <span class="sd">    (:issue:`2653`), and so does a header the data ends inside</span>
-<span class="sd">    (:issue:`2689`).</span>
+<span class="sd">    (:issue:`2689`). The header records such a cut, so the message rebuilt on</span>
+<span class="sd">    its own reads as cut too (:issue:`2711`).</span>
 
 <span class="sd">    """</span>
 

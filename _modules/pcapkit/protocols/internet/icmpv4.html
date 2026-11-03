@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -651,7 +651,10 @@
 
 <span class="sd">       The checksum is computed when :meth:`make` is given none, and verified</span>
 <span class="sd">       on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`,</span>
-<span class="sd">       unless the enclosing IP layer is a fragment (:issue:`2470`).</span>
+<span class="sd">       unless the enclosing IP layer is a fragment (:issue:`2470`). A message</span>
+<span class="sd">       whose header records a cut reads</span>
+<span class="sd">       :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`</span>
+<span class="sd">       (:issue:`2711`).</span>
 
 <span class="sd">    """</span>
 
@@ -761,9 +764,16 @@
         <span class="c1"># NOTE: The checksum covers the whole message, with no pseudo-header (RFC 792);</span>
         <span class="c1"># an IP fragment carries only part of one.</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_VERIFY</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_message</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="n">ChecksumStatus</span><span class="p">,</span> <span class="n">verify_message</span><span class="p">)</span>
+            <span class="c1"># NOTE: A message whose header records a cut leaves part of what the</span>
+            <span class="c1"># checksum covers uncaptured, as for GRE and IGMP (#2711).</span>
+            <span class="k">if</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">ChecksumStatus</span><span class="o">.</span><span class="n">TRUNCATED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">verify_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
             <span class="n">icmp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">'checksum_status'</span><span class="p">,</span> <span class="n">verify_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">'checksum_status'</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
             <span class="p">])</span>
 
         <span class="c1"># NOTE: The quoted original datagram stays raw in the message body,</span>

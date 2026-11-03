@@ -229,7 +229,10 @@ What stays loud:
   mode, installs the hooks.
 * **Any other error class.** An error the fallback absorbs is as loud as it was
   constructed, and :func:`~pcapkit.corekit.decorators.beholder` logs it at
-  :data:`logging.WARNING` as well.
+  :data:`logging.WARNING` as well. Inside a payload
+  :meth:`Protocol._make_payload <pcapkit.protocols.protocol.Protocol._make_payload>`
+  rebuilds, it is quiet, as the owner ruled on :issue:`2711`: the layer the payload
+  is rebuilt for parses the same octets again and reports it there, once.
 * **A refusal built under an inner** ``CaughtByCaller()``. A block naming no class,
   such as the one :meth:`~pcapkit.corekit.enum.EnumRegistry.register` enters, makes
   errors loud again inside the fallback's.

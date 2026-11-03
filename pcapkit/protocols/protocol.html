@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1355,8 +1355,10 @@ protocol, as <a class="reference internal" href="#pcapkit.protocols.protocol.Pro
 parses its own octets again. So rebuilding a frame stops at
 <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> where parsing it did, rather than that many
 layers below each layer of it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>). Nor does the payload’s
-parse warn of the limit: this protocol’s own parse goes over the same
-octets, so the rebuilt frame warns of it once, as the parsed one did.</p>
+parse report anything, the limit included: this protocol’s own parse
+goes over the same octets, so the rebuilt frame reports each warning,
+and each error a next-layer fallback absorbs, once, as the parsed one
+did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></span>) – protocol data</p>
@@ -2307,6 +2309,14 @@ republished beside it as <code class="docutils literal notranslate"><span class=
 <p class="admonition-title">See also</p>
 <p>For construction arguments, please refer to
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.make</span></code></a>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, the warnings of the
+parse are dropped, as the layer the payload is rebuilt for parses
+the same octets again and reports them there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). Those
+of a parse that raises are reported as the error leaves, unless
+<a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> replaces the layer.</p>
 </div>
 </dd></dl>
 

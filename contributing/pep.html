@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1463,7 +1463,10 @@ Total Length of 0 states none, so behind one, and through an AH after it, GRE,
 ICMP and IGMP go by the original length as well (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>). A GRE or IGMP
 header the data ends inside is
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a> too
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>).</p></li>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>). Each of these cuts is recorded on the message’s own header, so
+the message rebuilt on its own reads
+<a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a> as well, an
+ICMP one included (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p></li>
 <li><p><strong>DCCP covers what its Checksum Coverage gives</strong> (<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-9.2"><strong>RFC 4340 Section 9.2</strong></a>), over
 a pseudo-header that carries the whole packet’s length, as TCP’s does, so a
 fragment is

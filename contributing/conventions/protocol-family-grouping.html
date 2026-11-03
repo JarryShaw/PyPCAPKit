@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -786,7 +786,10 @@ octets raises an error that logs at <a class="reference external" href="https://
 mode, installs the hooks.</p></li>
 <li><p><strong>Any other error class.</strong> An error the fallback absorbs is as loud as it was
 constructed, and <a class="reference internal" href="../../pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> logs it at
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> as well.</p></li>
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> as well. Inside a payload
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._make_payload</span></code></a>
+rebuilds, it is quiet, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>: the layer the payload
+is rebuilt for parses the same octets again and reports it there, once.</p></li>
 <li><p><strong>A refusal built under an inner</strong> <code class="docutils literal notranslate"><span class="pre">CaughtByCaller()</span></code>. A block naming no class,
 such as the one <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> enters, makes
 errors loud again inside the fallback’s.</p></li>

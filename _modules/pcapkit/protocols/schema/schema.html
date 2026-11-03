@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1321,6 +1321,17 @@
 <span class="sd">            remainder itself rather than the same number of octets from beyond</span>
 <span class="sd">            it, and record a cut inside it (:issue:`2685`).</span>
 
+<span class="sd">            A payload field of a declared length the data ends inside is a cut</span>
+<span class="sd">            like any other field's, so a layer whose octets fall short of the</span>
+<span class="sd">            length it declares records it, and its rebuild reads as cut</span>
+<span class="sd">            (:issue:`2711`). One declaring no length takes what the message</span>
+<span class="sd">            leaves, as a trailer or the next record does, which is no part of</span>
+<span class="sd">            the layer, and records nothing. A</span>
+<span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` whose octets</span>
+<span class="sd">            hold fewer items than it counts records the cut too, the items</span>
+<span class="sd">            absent being its</span>
+<span class="sd">            :attr:`~pcapkit.corekit.fields.collections.ListField.shortfall`.</span>
+
 <span class="sd">            The fields after the one the data ends inside find it in ``packet``</span>
 <span class="sd">            as ``__short_read__``: the ``(name, octets read)`` pair recorded as</span>
 <span class="sd">            the short read, or that of a</span>
@@ -1358,7 +1369,7 @@
                 <span class="c1"># the declared length leaves, never less than nothing; a</span>
                 <span class="c1"># computed zero is an empty payload, not an unset one, or it</span>
                 <span class="c1"># would swallow the fields after it (#1275).</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">declared</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -1369,6 +1380,10 @@
                 <span class="c1"># that, so the bounded read is the same short read (#1975).</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
+                <span class="c1"># NOTE: A payload of a declared length the data ends inside is recorded as</span>
+                <span class="c1"># any field is; one taking what is left, as a trailer does, is not (#2711).</span>
+                <span class="k">if</span> <span class="n">declared</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
@@ -1406,6 +1421,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
             <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ListField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">shortfall</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># NOTE: The data ended before the items the list counts, each at least an</span>
+                <span class="c1"># octet, so it declares that many past those read (#2711).</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">shortfall</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                 <span class="c1"># NOTE: Kept on the nested schema rather than only in</span>
                 <span class="c1"># ``__buffer__``, so that the octets it left unread go wherever</span>
@@ -1853,7 +1872,48 @@
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">][:</span><span class="n">count</span><span class="p">]</span>
                 <span class="n">cut</span> <span class="o">=</span> <span class="kc">True</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_frame_end_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The field this header's message runs to the end of its frame in, if any.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The last field sized by what is left of the length the layer was</span>
+<span class="sd">            given, as :class:`~pcapkit.protocols.schema.link.gre.GRE`'s payload</span>
+<span class="sd">            is: the message runs on in it to the end of whatever holds it.</span>
+<span class="sd">            :data:`None` where the last field is instead fixed or sized by the</span>
+<span class="sd">            header, as UDP's payload is by its Length and an HTTP/2 frame's by</span>
+<span class="sd">            its own, since the message then ends where its header says</span>
+<span class="sd">            (:issue:`2711`), and where it is a list, as SCTP's chunks are, whose</span>
+<span class="sd">            buffer holds only what its items took. A payload field declaring no</span>
+<span class="sd">            length at all, as a trailer or the next record does, takes what the</span>
+<span class="sd">            message leaves, and is passed over.</span>
+
+<span class="sd">        Each field's length is resolved from this schema's own values under two</span>
+<span class="sd">        lengths given; the one that changes with them is sized by what was left.</span>
+<span class="sd">        :func:`~pcapkit.corekit.schema.shortread.keep_short_read` records a</span>
+<span class="sd">        frame the capture cut short on that field.</span>
+
+<span class="sd">        """</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="c1"># NOTE: Lengths far past any message, so a ``max(..., 0)`` callback still moves.</span>
+                <span class="n">resolved</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">__length__</span><span class="o">=</span><span class="mh">0x7FFF_FFFE</span><span class="p">))</span>
+                <span class="n">near</span><span class="p">,</span> <span class="n">far</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">field</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">__length__</span><span class="o">=</span><span class="mh">0x7FFF_FFFF</span><span class="p">))</span><span class="o">.</span><span class="n">length</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># a length its own values cannot resolve</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">far</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># NOTE: A list keeps in its buffer only the octets its items took, not the</span>
+            <span class="c1"># rest of the layer's, so a cut recorded on it would drop them (#2711).</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="p">(</span><span class="n">ListField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">))</span>
+                   <span class="k">for</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="s1">'field'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">name</span> <span class="k">if</span> <span class="n">near</span> <span class="o">!=</span> <span class="n">far</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 

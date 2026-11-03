@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -582,7 +582,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholding</span><span class="p">,</span> <span class="n">rebuilding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">StreamEOFError</span><span class="p">,</span>
                                           <span class="n">StructError</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
@@ -681,6 +681,13 @@
 <span class="sd">    exception is logged here at :data:`logging.WARNING`, and is as loud as it</span>
 <span class="sd">    was constructed.</span>
 
+<span class="sd">    Inside a payload :meth:`Protocol._make_payload</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol._make_payload&gt;` rebuilds, the block</span>
+<span class="sd">    names every :exc:`Exception`, which is what the ``except`` below catches,</span>
+<span class="sd">    and nothing is logged here: the layer the payload is rebuilt for parses</span>
+<span class="sd">    the same octets again, outside the rebuild, and its own :func:`beholder`</span>
+<span class="sd">    reports the error there (:issue:`2711`).</span>
+
 <span class="sd">    The recovery runs after the block has ended. Under the outermost</span>
 <span class="sd">    :func:`beholder` of a parse, a</span>
 <span class="sd">    :exc:`~pcapkit.utilities.exceptions.ProtocolError` it raises therefore</span>
@@ -712,7 +719,8 @@
 
 <span class="sd">       A :exc:`~pcapkit.utilities.exceptions.ProtocolError` the decorated</span>
 <span class="sd">       function builds is quiet, and one this decorator absorbs is not logged</span>
-<span class="sd">       here either (:issue:`2588`).</span>
+<span class="sd">       here either (:issue:`2588`). Inside a payload being rebuilt, so is every</span>
+<span class="sd">       other error (:issue:`2711`).</span>
 
 <span class="sd">    :param func: decorated function</span>
 <span class="sd">    :meta decorator:</span>
@@ -730,13 +738,16 @@
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># NOTE: A rebuilt payload's parse is repeated by the layer it is rebuilt</span>
+        <span class="c1"># for, which reports what this one would (#2711).</span>
+        <span class="n">rebuilt</span> <span class="o">=</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># call method</span>
             <span class="n">token</span> <span class="o">=</span> <span class="n">beholding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># NOTE: The whole call is quiet for a ProtocolError, which the ``except`` below</span>
                 <span class="c1"># records; the recovery runs after it, loud unless an outer block is active (#2588).</span>
-                <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="ne">Exception</span> <span class="k">if</span> <span class="n">rebuilt</span> <span class="k">else</span> <span class="n">ProtocolError</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="n">beholding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
@@ -749,7 +760,7 @@
 
             <span class="c1"># NOTE: Keyed on the class, not on quietness: a quiet end-of-file StructError is still</span>
             <span class="c1"># logged here, and a ProtocolError built loud has logged at CRITICAL already (#2588).</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rebuilt</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
                 <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>

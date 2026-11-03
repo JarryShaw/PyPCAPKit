@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -639,6 +639,11 @@ registry entry whose class its module has since lost. One that reaches
 here is recorded on <code class="docutils literal notranslate"><span class="pre">error</span></code> and is not logged here either. Any other
 exception is logged here at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a>, and is as loud as it
 was constructed.</p>
+<p>Inside a payload <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._make_payload</span></code></a> rebuilds, the block
+names every <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a>, which is what the <code class="docutils literal notranslate"><span class="pre">except</span></code> below catches,
+and nothing is logged here: the layer the payload is rebuilt for parses
+the same octets again, outside the rebuild, and its own <a class="reference internal" href="#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>
+reports the error there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 <p>The recovery runs after the block has ended. Under the outermost
 <a class="reference internal" href="#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> of a parse, a
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> it raises therefore
@@ -668,7 +673,8 @@ failure (<a class="extlink-issue reference external" href="https://github.com/Ja
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>A <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> the decorated
 function builds is quiet, and one this decorator absorbs is not logged
-here either (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>).</p>
+here either (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>). Inside a payload being rebuilt, so is every
+other error (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

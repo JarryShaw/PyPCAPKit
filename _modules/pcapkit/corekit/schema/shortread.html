@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -574,6 +574,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">frame_length</span>
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
 
@@ -607,10 +609,26 @@
 <span class="sd">    and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for</span>
 <span class="sd">    a header that was captured whole.</span>
 
+<span class="sd">    Where the capture cut the frame short, as</span>
+<span class="sd">    :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a</span>
+<span class="sd">    layer whose message runs to the end of the frame records the cut too, on the</span>
+<span class="sd">    field it runs to the end in, through :meth:`Schema._note_short_read</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._note_short_read&gt;`, so its rebuild</span>
+<span class="sd">    reads as cut, as the layer did inside the frame (:issue:`2711`). A layer</span>
+<span class="sd">    whose own header declares where its message ends records none, whether the</span>
+<span class="sd">    cut falls at that end or past it; see :meth:`Schema._frame_end_field</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._frame_end_field&gt;`.</span>
+
 <span class="sd">    """</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="s1">'__header__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">lengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">_frame_end_field</span><span class="p">()</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">octets</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">+</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">octets</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
     <span class="n">record</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">protocol</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="s1">'__short_read__'</span><span class="p">:</span> <span class="n">record</span><span class="p">})</span>  <span class="c1"># pylint: disable=protected-access</span></div>

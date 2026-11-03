@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.utilities.contextvars holds the ContextVar objects that more than one pcapkit module sets or reads, so that no module imports another’s private state (#2616). A context variable that only i..." />
 <meta name="description" content="pcapkit.utilities.contextvars holds the ContextVar objects that more than one pcapkit module sets or reads, so that no module imports another’s private state (#2616). A context variable that only i..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Lazy Imports" href="lazy.html"><link rel="prev" title="Pickle Reductions" href="pickle.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Lazy Imports" href="importlib.html"><link rel="prev" title="Pickle Reductions" href="pickle.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>Shared Context Variables - PyPCAPKit</title>
@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -628,7 +628,8 @@ cannot tell from the octets it is handed (<a class="extlink-issue reference exte
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.contextvars.</span></span><span class="sig-name descname"><span class="pre">rebuilding</span></span><a class="headerlink" href="#pcapkit.utilities.contextvars.rebuilding" title="Link to this definition">¶</a></dt>
 <dd><p>Whether a payload is being rebuilt by
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._make_payload</span></code></a>, so that the layer
-it is rebuilt for parses the same octets again; see
+it is rebuilt for parses the same octets again and reports what they carry,
+which the payload’s own parse then does not (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>); see
 <a class="reference internal" href="config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -644,7 +645,7 @@ it is rebuilt for parses the same octets again; see
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="lazy.html">
+          <a class="next-page" href="importlib.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>

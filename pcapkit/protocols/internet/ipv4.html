@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -2185,7 +2185,9 @@ Total Length rather than dropping them (<a class="extlink-issue reference extern
 <dd><p>Payload. A Total Length of 0, as TCP segmentation offload leaves it in a
 capture taken on the sending host, takes the rest of the data and leaves
 no trailer; any other Total Length shorter than the header leaves the
-payload empty and the rest to the trailer (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>).</p>
+payload empty and the rest to the trailer (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>). The rest is
+sized as what is left of the length given, so a frame the capture cut
+records its cut on it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">

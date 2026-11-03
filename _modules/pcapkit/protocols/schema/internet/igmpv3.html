@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -563,7 +563,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_MAX_LENGTH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">frame_depth</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IGMPv3'</span><span class="p">,</span> <span class="s1">'Query'</span><span class="p">,</span> <span class="s1">'QueryExtension'</span><span class="p">,</span> <span class="s1">'Report'</span><span class="p">,</span> <span class="s1">'GroupRecord'</span><span class="p">]</span>
@@ -640,6 +642,43 @@
     <span class="k">if</span> <span class="s1">'ext'</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'ext'</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">report_record_count</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Count callback for :attr:`Report.records`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :attr:`Report.num_group_records`, for a message parsed on its own;</span>
+<span class="sd">        otherwise ``-1``, counting none: inside a frame, the layer before the</span>
+<span class="sd">        message or the frame's own lengths say where it ends, and on the</span>
+<span class="sd">        packing path ``'records'`` is already in ``pkt``, as no count is</span>
+<span class="sd">        without :attr:`Report.num_group_records`.</span>
+
+<span class="sd">    No layer before a message parsed on its own gives its length, and none</span>
+<span class="sd">    tells a cut from the end of the message, so the count does: records it</span>
+<span class="sd">    counts past the data are a cut, however the cut falls, on a field boundary</span>
+<span class="sd">    too, and :meth:`Schema.unpack</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records it, the records</span>
+<span class="sd">    present alone being read (:issue:`2711`).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the records counted, at the 8 fixed octets of each,</span>
+<span class="sd">            behind the 8 octets ahead of them, reach past the</span>
+<span class="sd">            :data:`~pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH` octets</span>
+<span class="sd">            an IP payload can hold, so the count is no cut but one the message</span>
+<span class="sd">            cannot carry (:issue:`2711`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'num_group_records'</span><span class="p">)</span>  <span class="c1"># type: Optional[int]</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">'records'</span> <span class="ow">in</span> <span class="n">pkt</span> <span class="ow">or</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c1"># NOTE: The 8 octets ahead of the records count against the IP payload too.</span>
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMPv3: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1"> group records cannot fit in one IP payload'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">count</span>
 
 
 <div class="viewcode-block" id="QueryExtension">
@@ -796,7 +835,8 @@
 <span class="sd">        :class:`~pcapkit.protocols.schema.internet.hip.LocatorSetParameter`).</span>
 <span class="sd">        :meth:`post_process` keeps only the first :attr:`num_group_records`</span>
 <span class="sd">        records and gives the rest to :attr:`payload`, which is</span>
-<span class="sd">        :rfc:`3376#section-4.2.11`'s "Additional Data".</span>
+<span class="sd">        :rfc:`3376#section-4.2.11`'s "Additional Data". Where the data ends</span>
+<span class="sd">        before the records counted, see :func:`report_record_count`.</span>
 
 <span class="sd">    """</span>
 
@@ -813,6 +853,7 @@
     <span class="n">records</span><span class="p">:</span> <span class="s1">'list[GroupRecord]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">GroupRecord</span><span class="p">),</span>
+        <span class="n">count</span><span class="o">=</span><span class="n">report_record_count</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Payload; empty for a standards-conformant message with</span>
     <span class="c1">#: :attr:`num_group_records` matching the octets actually present.</span>

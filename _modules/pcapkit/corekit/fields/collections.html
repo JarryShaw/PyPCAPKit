@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -630,9 +630,22 @@
 <span class="sd">        item_type: Field type of the contained items.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+<span class="sd">        count: Number of items a field before this one counts, for a list</span>
+<span class="sd">            running to the end of the data; if a callable is given, it should</span>
+<span class="sd">            return an integer value and accept the current packet as its only</span>
+<span class="sd">            argument. A negative value, the default, counts none.</span>
 
 <span class="sd">    This field is used to represent a list of fields, as in the case of lists of</span>
 <span class="sd">    constant-length-field items in a protocol.</span>
+
+<span class="sd">    A list whose octets hold fewer items than ``count`` ended with the data</span>
+<span class="sd">    before the rest, and reports them as :attr:`shortfall`, so that</span>
+<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">    records the cut; the items absent are not made up.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       Takes ``count`` (:issue:`2711`).</span>
 
 <span class="sd">    """</span>
 
@@ -646,9 +659,20 @@
 <span class="w">        </span><span class="sd">"""Field is optional."""</span>
         <span class="k">return</span> <span class="kc">True</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Number of items counted; negative where none are."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shortfall</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Number of the items counted that the octets last unpacked did not hold."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shortfall</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">item_type</span><span class="p">:</span> <span class="s1">'Optional[FieldBase]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">count</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1">#self._name = '&lt;list&gt;'</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_name'</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&gt;'</span>
@@ -661,6 +685,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="s1">'0s'</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count_callback</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shortfall</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="ListField.__call__">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.__call__">[docs]</a>
@@ -682,6 +712,8 @@
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span>
+        <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_count_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_count_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
 
@@ -871,6 +903,11 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
             <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Items are read to the end of the octets, so those counted past them are</span>
+        <span class="c1"># not there to read: the data ended first, and the field reads short (#2711).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shortfall</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">temp</span></div>
 </div>
 

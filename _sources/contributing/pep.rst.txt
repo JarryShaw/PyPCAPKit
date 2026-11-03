@@ -969,7 +969,10 @@ offload heuristic on :issue:`2470`.
   ICMP and IGMP go by the original length as well (:issue:`2689`). A GRE or IGMP
   header the data ends inside is
   :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED` too
-  (:issue:`2689`).
+  (:issue:`2689`). Each of these cuts is recorded on the message's own header, so
+  the message rebuilt on its own reads
+  :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED` as well, an
+  ICMP one included (:issue:`2711`).
 * **DCCP covers what its Checksum Coverage gives** (:rfc:`4340#section-9.2`), over
   a pseudo-header that carries the whole packet's length, as TCP's does, so a
   fragment is

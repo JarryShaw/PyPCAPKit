@@ -99,7 +99,7 @@ Lazy Package Imports
 itself. Ruled by the owner in session and recorded on :issue:`2729`. Its
 :file:`__init__.py` names each export in an import under ``if TYPE_CHECKING:``, for
 the type checkers, and binds the ``__getattr__`` and ``__dir__`` that
-:func:`~pcapkit.utilities.lazy.lazy_exports` returns; :mod:`pcapkit.const` re-exports
+:func:`~pcapkit.utilities.importlib.lazy_exports` returns; :mod:`pcapkit.const` re-exports
 its subpackages' ``__all__`` the same way. The one real import is of
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` and
 :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, which

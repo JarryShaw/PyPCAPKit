@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.utilities.lazy - PyPCAPKit</title>
+        <title>pcapkit.utilities.importlib - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -549,14 +549,14 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.utilities.lazy</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.utilities.importlib</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">"""Lazy Imports</span>
 <span class="sd">==================</span>
 
-<span class="sd">.. module:: pcapkit.utilities.lazy</span>
+<span class="sd">.. module:: pcapkit.utilities.importlib</span>
 
-<span class="sd">:mod:`pcapkit.utilities.lazy` holds :func:`lazy_exports`, which gives a package</span>
+<span class="sd">:mod:`pcapkit.utilities.importlib` holds :func:`lazy_exports`, which gives a package</span>
 <span class="sd">the :pep:`562` ``__getattr__`` and ``__dir__`` that import each name it exports</span>
 <span class="sd">the first time the name is reached, rather than with the package itself. Every</span>
 <span class="sd">package under :mod:`pcapkit.const` imports its enumerations that way</span>
@@ -577,7 +577,7 @@
 
 
 <div class="viewcode-block" id="lazy_exports">
-<a class="viewcode-back" href="../../../pcapkit/utilities/lazy.html#pcapkit.utilities.lazy.lazy_exports">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/utilities/importlib.html#pcapkit.utilities.importlib.lazy_exports">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">lazy_exports</span><span class="p">(</span><span class="n">package</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span>
                  <span class="n">exports</span><span class="p">:</span> <span class="s1">'Optional[Mapping[str, tuple[str, str]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                  <span class="n">packages</span><span class="p">:</span> <span class="s1">'Iterable[str]'</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Callable[[str], Any], Callable[[], list[str]]]'</span><span class="p">:</span>

@@ -335,7 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -2034,6 +2034,13 @@
 <span class="sd">            For construction arguments, please refer to</span>
 <span class="sd">            :meth:`self.make &lt;pcapkit.protocols.protocol.Protocol.make&gt;`.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            Inside a payload :meth:`_make_payload` rebuilds, the warnings of the</span>
+<span class="sd">            parse are dropped, as the layer the payload is rebuilt for parses</span>
+<span class="sd">            the same octets again and reports them there (:issue:`2711`). Those</span>
+<span class="sd">            of a parse that raises are reported as the error leaves, unless</span>
+<span class="sd">            :func:`~pcapkit.corekit.decorators.beholder` replaces the layer.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2049,8 +2056,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_data</span>
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
-        <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># NOTE: The enclosing layer parses these octets again and reports what</span>
+        <span class="c1"># they carry; as in ``_parse_next_layer``, a raise keeps them (#2711).</span>
+        <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="n">beholding</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">raise</span>
+            <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="ProtocolBase.__init_subclass__">
@@ -3264,8 +3283,10 @@
 <span class="sd">        parses its own octets again. So rebuilding a frame stops at</span>
 <span class="sd">        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where parsing it did, rather than that many</span>
 <span class="sd">        layers below each layer of it (:issue:`1610`). Nor does the payload's</span>
-<span class="sd">        parse warn of the limit: this protocol's own parse goes over the same</span>
-<span class="sd">        octets, so the rebuilt frame warns of it once, as the parsed one did.</span>
+<span class="sd">        parse report anything, the limit included: this protocol's own parse</span>
+<span class="sd">        goes over the same octets, so the rebuilt frame reports each warning,</span>
+<span class="sd">        and each error a next-layer fallback absorbs, once, as the parsed one</span>
+<span class="sd">        did (:issue:`2711`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>

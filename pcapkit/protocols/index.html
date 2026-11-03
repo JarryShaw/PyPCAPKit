@@ -342,7 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/lazy.html">Lazy Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/importlib.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1056,6 +1056,16 @@ parsed, we rewind <code class="docutils literal notranslate"><span class="pre">d
 fields which size themselves from <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> read the
 remainder itself rather than the same number of octets from beyond
 it, and record a cut inside it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2685">#2685</a>).</p>
+<p>A payload field of a declared length the data ends inside is a cut
+like any other field’s, so a layer whose octets fall short of the
+length it declares records it, and its rebuild reads as cut
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). One declaring no length takes what the message
+leaves, as a trailer or the next record does, which is no part of
+the layer, and records nothing. A
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> whose octets
+hold fewer items than it counts records the cut too, the items
+absent being its
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.shortfall" title="pcapkit.corekit.fields.collections.ListField.shortfall"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shortfall</span></code></a>.</p>
 <p>The fields after the one the data ends inside find it in <code class="docutils literal notranslate"><span class="pre">packet</span></code>
 as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>: the <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">octets</span> <span class="pre">read)</span></code> pair recorded as
 the short read, or that of a
