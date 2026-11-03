@@ -26,7 +26,7 @@ below:
 Only this fixed 16-octet header is dissected; per-family message payloads and
 multiple messages packed into one capture are out of scope for this first
 cut -- see the module docstring's *Scope* section. The byte order the header
-was written in is ambiguous (Netlink is kernel/userspace IPC, not wire
+was written in is ambiguous (Netlink [*]_ is kernel/userspace IPC, not wire
 format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
 ``netlink.byteorder``.
 

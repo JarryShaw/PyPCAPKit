@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from pcapkit.protocols.misc.raw import Raw
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
