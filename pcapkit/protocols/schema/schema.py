@@ -738,12 +738,31 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             remainder itself rather than the same number of octets from beyond
             it, and record a cut inside it (:issue:`2685`).
 
+            The fields after the one the data ends inside find it in ``packet``
+            as ``__short_read__``: the ``(name, octets read)`` pair recorded as
+            the short read, or that of a
+            :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` the data
+            ends inside first, which the record leaves out as it consumes
+            nothing. So a field callback can tell a value the end of the data
+            left as zero from one read, and leave such a value to the short
+            read rather than refuse it. The key is cleared as unpacking starts,
+            so a nested schema finds only its own.
+
+        .. versionchanged:: 1.6.0
+
+           The field the data ends inside is given to the fields after it, as
+           ``__short_read__`` in ``packet`` (:issue:`2727`).
+
         """
         # force cast arg type since decorator changed their signatures
         if TYPE_CHECKING:
             data = cast('IO[bytes]', data)
             length = cast('int', length)
             packet = cast('dict[str, Any]', packet)
+
+        # NOTE: ``packet`` may be an enclosing schema's, copied into a nested
+        # context, so its short read is not this schema's (#2727).
+        packet.pop('__short_read__', None)
 
         self = cls.__new__(cls)
         for field in self.__fields__.values():
@@ -779,7 +798,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
                 byte = data.read(length)
                 self.__buffer__[field.name] = byte
-                self._note_short_read(field.name, length, byte)
+                self._note_short_read(field.name, length, byte, packet)
 
                 packet[field.name] = byte
                 packet['__length__'] -= length
@@ -801,7 +820,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             byte = data.read(min(length, sys.maxsize))
             self.__buffer__[field.name] = byte
             if not isinstance(field, (ForwardMatchField, OptionField)):
-                self._note_short_read(field.name, length, byte)
+                self._note_short_read(field.name, length, byte, packet)
 
             value = field.unpack(byte, packet.copy())
             if isinstance(field, SchemaField) and isinstance(value, Schema):
@@ -843,6 +862,12 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 # preceding octet as their first.
                 data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
+
+                # NOTE: Left out of the record, but the values it matched past the
+                # end of the data are zeros all the same, so the fields after it
+                # are told (#2727).
+                if len(byte) < length:
+                    packet.setdefault('__short_read__', (field.name, len(byte)))
             elif isinstance(field, OptionField) and field.option_padding > 0:
                 # NOTE: The option list ended before the declared area did, and
                 # ``option_padding`` is the rest of that area; give back as much
@@ -856,10 +881,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 self.__buffer__[field.name] = byte[:kept]
                 packet['__length__'] -= consumed
                 if kept == len(byte):
-                    self._note_short_read(field.name, length, byte)
+                    self._note_short_read(field.name, length, byte, packet)
             else:
                 if isinstance(field, OptionField):
-                    self._note_short_read(field.name, length, byte)
+                    self._note_short_read(field.name, length, byte, packet)
                 packet['__length__'] -= length
 
             if packet['__length__'] < 0:
@@ -1187,17 +1212,24 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             return
         return super().__delattr__(name)
 
-    def _note_short_read(self, name: 'str', length: 'int', byte: 'bytes') -> 'None':
+    def _note_short_read(self, name: 'str', length: 'int', byte: 'bytes',
+                         packet: 'Optional[dict[str, Any]]' = None) -> 'None':
         """Record the first field the data ends inside, for :meth:`_cut_short_read`.
 
         Args:
             name: Field name.
             length: Octets the field declares.
             byte: Octets actually read for it.
+            packet: Unpacked data, where the fields after it find the record,
+                unless a forward match the data ended inside is there first
+                (see :meth:`unpack`). Without it, the record is kept on the
+                schema alone.
 
         """
         if len(byte) < length and '__short_read__' not in self.__dict__:
             self.__dict__['__short_read__'] = (name, len(byte))
+            if packet is not None:
+                packet.setdefault('__short_read__', self.__dict__['__short_read__'])
 
     def _cut_short_read(self) -> 'None':
         """Cut the packed buffers back to the octets a short read consumed.

@@ -23,7 +23,7 @@ from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import NoValueField, SchemaField
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 __all__ = [
     'rpl_opt_sub_tlv_len', 'mpl_opt_seed_id_len', 'smf_i_dpd_id_len',
@@ -36,6 +36,23 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.schema.schema import EnumMeta, Schema
+
+
+def _opt_data_len_cut(pkt: 'dict[str, Any]') -> 'bool':
+    """Whether the data ends before an option's ``Opt Data Len``.
+
+    Args:
+        pkt: Option unpacked schema.
+
+    Returns:
+        Whether the field :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` gives as the one the
+        data ends inside is ``len``, so that its value is the zero a capture cut
+        leaves rather than a length read (:issue:`2727`).
+
+    """
+    record = pkt.get('__short_read__')
+    return record is not None and record[0] == 'len'
 
 
 def rpl_opt_sub_tlv_len(pkt: 'dict[str, Any]') -> 'int':
@@ -87,17 +104,27 @@ def smf_i_dpd_id_len(pkt: 'dict[str, Any]', *, prefix: 'str') -> 'int':
         prefix: Name of the extension header, leading the error message.
 
     Returns:
-        SMF I-DPD identifier length.
+        SMF I-DPD identifier length, or zero if the data ends before
+        ``Opt Data Len``, which leaves the option to the short read.
 
     Raises:
-        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold
             the TaggerID it declares, which would otherwise underflow the
             identifier length below zero.
+
+    .. versionchanged:: 1.6.0
+
+       A length the data ends before is left to the short read, and one too
+       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+       (:issue:`2727`).
 
     """
     length = pkt['len'] - (1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2))
     if length < 0:
-        raise FieldValueError(f'{prefix}: invalid SMF I-DPD option length: {pkt["len"]}')
+        if _opt_data_len_cut(pkt):
+            return 0
+        raise ProtocolError(f'{prefix}: invalid SMF I-DPD option length: {pkt["len"]}')
     return length
 
 
@@ -120,8 +147,8 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]', *, prefix: 'str',
           wrapped ``SMFHashBasedDPDOption`` instance.
 
     Raises:
-        FieldValueError: If ``Opt Data Len`` is ``0``, or if no schema is
-            registered for the DPD mode.
+        ProtocolError: If ``Opt Data Len`` is ``0`` on the wire.
+        FieldValueError: If no schema is registered for the DPD mode.
 
     Note:
         The field is sized ``Opt Data Len + 2`` rather than ``Opt Data Len``.
@@ -133,11 +160,26 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]', *, prefix: 'str',
         :class:`~pcapkit.corekit.fields.collections.OptionField` would then
         mis-count against the option area.
 
+        Where the data ends before ``Opt Data Len``, the forward match reads
+        it as zero, and the option is the short read of the schema chosen by
+        the mode bit, likewise zero.
+
+    .. versionchanged:: 1.6.0
+
+       A length the data ends before is left to the short read, and a zero
+       on the wire raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+       rather than :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+       (:issue:`2727`).
+
     """
     # NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode
-    # bit forward-matched above belongs to whatever follows the option.
-    if pkt['test']['len'] == 0:
-        raise FieldValueError(f'{prefix}: invalid SMF DPD option length: 0')
+    # bit forward-matched above belongs to whatever follows the option. Unless
+    # the data ends inside the forward match before ``Opt Data Len``, the
+    # option's second octet, which then reads as zero (#2727).
+    record = pkt.get('__short_read__')
+    cut = record is not None and record[0] == 'test' and record[1] < 2
+    if pkt['test']['len'] == 0 and not cut:
+        raise ProtocolError(f'{prefix}: invalid SMF DPD option length: 0')
 
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
     schema: 'Optional[Type[Schema]]' = base.registry[mode]
@@ -268,18 +310,28 @@ def calipso_pad_len(pkt: 'dict[str, Any]', *, prefix: 'str') -> 'int':
         prefix: Name of the extension header, leading the error message.
 
     Returns:
-        CALIPSO option padding length.
+        CALIPSO option padding length, or zero if the data ends before
+        ``Opt Data Len``, which leaves the option to the short read.
 
     Raises:
-        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold
             the fixed header and the compartment bitmap declared by
             ``cmpt_len``, which would otherwise underflow the padding length
             below zero.
 
+    .. versionchanged:: 1.6.0
+
+       A length the data ends before is left to the short read, and one too
+       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+       (:issue:`2727`).
+
     """
     length = pkt['len'] - 8 - pkt['cmpt_len'] * 4
     if length < 0:
-        raise FieldValueError(f'{prefix}: invalid CALIPSO option length: {pkt["len"]}')
+        if _opt_data_len_cut(pkt):
+            return 0
+        raise ProtocolError(f'{prefix}: invalid CALIPSO option length: {pkt["len"]}')
     return length
 
 
@@ -291,16 +343,26 @@ def mpl_opt_pad_len(pkt: 'dict[str, Any]', *, prefix: 'str') -> 'int':
         prefix: Name of the extension header, leading the error message.
 
     Returns:
-        MPL option padding length.
+        MPL option padding length, or zero if the data ends before
+        ``Opt Data Len``, which leaves the option to the short read.
 
     Raises:
-        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold
             the fixed header and the Seed-ID declared by ``flags.type``, which
             would otherwise underflow the padding length below zero.
+
+    .. versionchanged:: 1.6.0
+
+       A length the data ends before is left to the short read, and one too
+       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+       (:issue:`2727`).
 
     """
     length = pkt['len'] - 2 - (0 if pkt['flags']['type'] == 0
                                else mpl_opt_seed_id_len(pkt, prefix=prefix))
     if length < 0:
-        raise FieldValueError(f'{prefix}: invalid MPL option length: {pkt["len"]}')
+        if _opt_data_len_cut(pkt):
+            return 0
+        raise ProtocolError(f'{prefix}: invalid MPL option length: {pkt["len"]}')
     return length

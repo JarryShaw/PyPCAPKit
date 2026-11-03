@@ -1422,7 +1422,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
         from pcapkit.corekit.fields.misc import NoValueField, SchemaField
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
         self.assertEqual(schema.mpl_opt_seed_id_len({'flags': {'type': 0}}), 0)
         self.assertEqual(schema.mpl_opt_seed_id_len({'flags': {'type': 1}}), 2)
@@ -1439,10 +1439,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(schema.smf_i_dpd_id_len({'len': 7, 'info': {'type': 2, 'len': 3}}), 2)
         # ``Opt Data Len`` too short to hold the TaggerID it declares must raise
         # rather than drive the identifier length negative -- c.f. #438, where the
-        # unguarded subtraction reached :func:`struct.calcsize` as ``'-1s'``.
-        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+        # unguarded subtraction reached :func:`struct.calcsize` as ``'-1s'``. A
+        # ``ProtocolError``, so that a header refused for it is refused quietly (#2727).
+        with self.assertRaisesRegex(ProtocolError, 'invalid SMF I-DPD option length'):
             schema.smf_i_dpd_id_len({'len': 0, 'info': {'type': 0, 'len': 0}})
-        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+        with self.assertRaisesRegex(ProtocolError, 'invalid SMF I-DPD option length'):
             schema.smf_i_dpd_id_len({'len': 0, 'info': {'type': 2, 'len': 3}})
 
         for mode in (SMFDPDMode.I_DPD, SMFDPDMode.H_DPD):
@@ -2110,14 +2111,15 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         identifier length to ``-1``. That reached :func:`struct.calcsize` as the
         template ``'-1s'`` and raised a bare ``struct.error: bad char in struct
         format`` -- not one of pcapkit's own exception types, and uncatchable
-        through :mod:`pcapkit.utilities.exceptions`.
+        through :mod:`pcapkit.utilities.exceptions`. It is a ``ProtocolError``, so
+        that a header refused for it is refused quietly (#2727).
 
         """
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
 
         raw = bytes.fromhex('3b00080000000000')
 
-        with self.assertRaisesRegex(FieldValueError, 'invalid SMF (I-)?DPD option length'):
+        with self.assertRaisesRegex(ProtocolError, 'invalid SMF (I-)?DPD option length'):
             with time_limit():
                 protocol_cls(raw, extension=True)
 
@@ -2143,17 +2145,18 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         length to ``-8``. That reached :func:`struct.calcsize` as the template
         ``'-8s'`` and raised a bare ``struct.error: bad char in struct
         format`` -- not one of pcapkit's own exception types, and uncatchable
-        through :mod:`pcapkit.utilities.exceptions`.
+        through :mod:`pcapkit.utilities.exceptions`. It is a ``ProtocolError``, so
+        that a header refused for it is refused quietly (#2727).
 
         """
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
 
         # next(1) hdr_ext_len(1)=1 -> 16-octet extension header; option
         # type(1)=CALIPSO(0x07) len(1)=0, then domain(4) cmpt_len(1) level(1)
         # checksum(2) all zero, with four trailing zero octets.
         raw = bytes.fromhex('3b0007000000000000000000000000')
 
-        with self.assertRaisesRegex(FieldValueError, 'invalid CALIPSO option length'):
+        with self.assertRaisesRegex(ProtocolError, 'invalid CALIPSO option length'):
             with time_limit():
                 protocol_cls(raw, extension=True)
 
@@ -2178,17 +2181,18 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         :func:`struct.calcsize` as the template ``'-2s'`` and raised a bare
         ``struct.error: bad char in struct format`` -- not one of pcapkit's
         own exception types, and uncatchable through
-        :mod:`pcapkit.utilities.exceptions`.
+        :mod:`pcapkit.utilities.exceptions`. It is a ``ProtocolError``, so that a
+        header refused for it is refused quietly (#2727).
 
         """
-        from pcapkit.utilities.exceptions import FieldValueError
+        from pcapkit.utilities.exceptions import ProtocolError
 
         # next(1) hdr_ext_len(1)=0 -> 8-octet extension header; option
         # type(1)=MPL_Option(0x6d) len(1)=0, flags(1)=0 (Seed-ID type 0),
         # seq(1)=0, with two trailing zero octets.
         raw = bytes.fromhex('3b006d0000000000')
 
-        with self.assertRaisesRegex(FieldValueError, 'invalid MPL option length'):
+        with self.assertRaisesRegex(ProtocolError, 'invalid MPL option length'):
             with time_limit():
                 protocol_cls(raw, extension=True)
 
