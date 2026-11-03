@@ -187,7 +187,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``0xFFFF`` (:issue:`2650`, :issue:`2660`, :pr:`2662`, :pr:`2672`). The
   octets it lacks read as zeros, the group records included, and a Report's
   header schema cut inside the Additional Data past its records packs back as
-  captured (:issue:`2686`, :issue:`2687`, :pr:`2701`). Any other message, a 9- to
+  captured (:issue:`2686`, :issue:`2687`, :pr:`2701`). A Report parsed on its
+  own sizes its group records by its record count, so one cut before the
+  records it counts reads ``TRUNCATED``, as it does behind IPv4, holding the
+  records captured and none made up, and a count no IP payload could carry
+  raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2711`,
+  :pr:`2738`). Any other message, a 9- to
   11-octet Query included, is kept as :class:`~pcapkit.protocols.misc.raw.Raw`.
   IGMPv1 takes the plain ``IGMP`` of :rfc:`1112` as its ``id()`` and alias, and
   IGMPv2's and IGMPv3's ``id()`` are their own names alone, ``('IGMPv2',)`` and
@@ -403,7 +408,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``TRUNCATED`` too (:issue:`2689`, :pr:`2699`). A layer ``from_data`` rebuilds
   from a cut capture, from its data model or its :class:`dict`, verifies as its
   parse did, so a cut GRE, ICMP, IGMP or OSPF layer is ``TRUNCATED`` with no
-  warning (:issue:`2703`, :pr:`2712`).
+  warning (:issue:`2703`, :pr:`2712`). Each of these cuts, a TSO IPv4
+  payload's included, is recorded on the message's own header, so the message
+  rebuilt on its own reads ``TRUNCATED`` too, an ICMPv4 one included
+  (:issue:`2711`, :pr:`2738`).
 
 * **Added** -- :func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`,
   :func:`~pcapkit.foundation.registry.protocols.link.register_loopback`,
@@ -835,7 +843,7 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Changed** -- a :mod:`pcapkit.const` package imports each of its
   enumeration modules on first use rather than with itself, and
   :mod:`pcapkit.const` its packages, through
-  :func:`pcapkit.utilities.lazy.lazy_exports`, which builds a package's
+  :func:`pcapkit.utilities.importlib.lazy_exports`, which builds a package's
   PEP 562 ``__getattr__`` and ``__dir__`` from its exports
   (:issue:`2729`, :pr:`2735`). Each package's ``__all__``, ``dir()`` and
   members are as in 1.5.x. The SCTP and DCCP application-type registries load
@@ -943,8 +951,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   a value the cut left as zero to that short read, and refuses one read with
   ``ProtocolError`` (:issue:`2727`, :pr:`2737`). A :mod:`pcapkit.const`
   package imports its enumerations on first use, through
-  :func:`~pcapkit.utilities.lazy.lazy_exports`, and a crawler never writes a
-  package's ``__init__.py`` (:issue:`2729`, :pr:`2735`).
+  :func:`~pcapkit.utilities.importlib.lazy_exports`, and a crawler never
+  writes a package's ``__init__.py`` (:issue:`2729`, :pr:`2735`). A next-layer
+  refusal in a payload a layer rebuilds is quiet, as the layer's own parse
+  reports it once (:issue:`2711`, :pr:`2738`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
@@ -1062,7 +1072,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   allowance, and a cut list declaring more than
   :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is refused. If the
   items then fail, the fill stays charged, as a field's does, and the octets
-  it counted as read are given back (:issue:`2705`, :pr:`2706`). A TCP
+  it counted as read are given back (:issue:`2705`, :pr:`2706`). A
+  ``ListField`` given a ``count`` reports a list whose octets hold fewer items
+  than it counts as a short read, the absent items never made up
+  (:issue:`2711`, :pr:`2738`). A TCP
   ``SACK`` option running past the data raises
   :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
   ``Field options has an option that runs past the end of the data: <Option.SACK: 5> ...``,
@@ -1157,6 +1170,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   secrets makers take the captured text or octets as ``data``, so the block
   rebuilds as captured from its :class:`dict`, as from its data model
   (:issue:`2698`, :pr:`2707`).
+
+* **Fixed** -- rebuilding a layer through ``from_data`` reported its payload's
+  messages twice, once from the payload's own rebuild and again from the
+  layer's parse of it: in 1.5.x, ``Ethernet.from_data`` of a frame cut inside
+  its TCP header logged the refusal twice, where the parse logged it once.
+  Each is reported once (:issue:`2711`, :pr:`2738`). IPv4 records a cut inside
+  the payload length it declares as its ``__short_read__``, where 1.5.x
+  recorded none, and so do Ethernet, GRE, ICMP, IGMP and a TSO IPv4 layer for
+  a cut at the end of their frame.
 
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
