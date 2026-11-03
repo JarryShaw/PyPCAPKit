@@ -1966,10 +1966,27 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``Header Len`` declares fewer octets than the fixed</span>
+<span class="sd">                fields of the message type take, a message :rfc:`6275#section-9.2`</span>
+<span class="sd">                has the receiver discard.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           * Such a message is refused, rather than read with the missing fields</span>
+<span class="sd">             as zeros and rebuilt longer than captured (:issue:`2669`).</span>
+<span class="sd">           * A header cut short is rebuilt with the ``Header Len`` it declared,</span>
+<span class="sd">             rather than one worked out from the message (:issue:`2669`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+
+        <span class="c1"># NOTE: A whole message whose fields run past its Header Len reads the rest as</span>
+        <span class="c1"># zeros, and its rebuild writes them and a longer Header Len back (#2669).</span>
+        <span class="k">if</span> <span class="s1">'__short_read__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid header length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -2071,9 +2088,15 @@
         <span class="c1"># whatever happens to be past the end of the buffer.</span>
         <span class="n">data_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_mh_message</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: A capture cut short rebuilds with the Header Len it declared, not one</span>
+        <span class="c1"># worked out from the message, and its short read cuts the rest (#2669).</span>
+        <span class="n">header_len</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_MH</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">header_len</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span>
+
         <span class="k">return</span> <span class="n">Schema_MH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'header length'</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">header_len</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'header length'</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">reserved</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'reserved octet'</span><span class="p">),</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">chksum</span><span class="p">,</span>
@@ -3694,6 +3717,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed MH options data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an option read by a ``_read_opt_*`` method has fields</span>
+<span class="sd">                that do not take exactly the octets its ``Option Length`` declares</span>
+<span class="sd">                [:rfc:`6275#section-6.2.1`]. A parser registered as a callable</span>
+<span class="sd">                reports its own length, and is not checked.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such an option is refused, rather than read from octets outside it and</span>
+<span class="sd">           rebuilt with the length its fields give (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">options</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Option</span>
 
@@ -3708,6 +3742,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: Fields are read at their own widths, so a length they do not fill</span>
+            <span class="c1"># exactly reads octets not the option's, and rebuilds as another (#2684).</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid option length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
             <span class="c1"># record option data</span>
             <span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -5750,6 +5789,19 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed sub-option data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a sub-option's fields do not take exactly the octets</span>
+<span class="sd">                its ``Sub-Opt Length`` declares [:rfc:`6089#section-4.2.1`], or a</span>
+<span class="sd">                target care-of address is neither IPv4 nor IPv6</span>
+<span class="sd">                [:rfc:`7109#section-6.2.2`], as the binding identifier option's</span>
+<span class="sd">                is refused.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such a sub-option is refused, as a mobility option is by</span>
+<span class="sd">           :meth:`_read_mh_options`, rather than read from octets outside it or</span>
+<span class="sd">           left unable to rebuild (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">suboptions</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: FlowIDSuboption</span>
 
@@ -5790,6 +5842,8 @@
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Target_Care_of_Address</span><span class="p">:</span>
                 <span class="n">target</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_TargetCareofAddressSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [FID SubOpt </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid sub-option length: </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TargetCareofAddressSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
@@ -5804,6 +5858,8 @@
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [FID SubOpt </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid sub-option length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">suboptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">suboptions</span></div>
@@ -6166,6 +6222,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed sub-option data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a sub-option's fields do not take exactly the octets</span>
+<span class="sd">                its ``ANI Length`` declares [:rfc:`6757#section-3.1`].</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such a sub-option is refused, as a mobility option is by</span>
+<span class="sd">           :meth:`_read_mh_options` (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">suboptions</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: ANISuboption</span>
 
@@ -6233,6 +6298,8 @@
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [ANI SubOpt </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid sub-option length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">suboptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">suboptions</span></div>
@@ -6582,6 +6649,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed attribute data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an attribute's fields do not take exactly the octets</span>
+<span class="sd">                its ``Length`` declares [:rfc:`7222#section-4.2`].</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such an attribute is refused, as a mobility option is by</span>
+<span class="sd">           :meth:`_read_mh_options` (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">attributes</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: QoSAttribute</span>
 
@@ -6649,6 +6725,8 @@
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [QoS Attr </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid attribute length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">attributes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">attributes</span></div>
@@ -6676,8 +6754,9 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            The traffic class octet is a 6-bit differentiated services code point</span>
-<span class="sd">            with two reserved bits below it, so only the code point is carried into</span>
-<span class="sd">            the data model.</span>
+<span class="sd">            with two reserved bits below it, which the receiver ignores</span>
+<span class="sd">            [:rfc:`7222#section-4.1`]; both are carried into the data model, so</span>
+<span class="sd">            that the octet rebuilds as captured.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -6685,6 +6764,11 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option data.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           The two reserved bits of the traffic class are kept, as</span>
+<span class="sd">           ``tc_reserved``, rather than dropped (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
@@ -6695,6 +6779,7 @@
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">sr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sr_id</span><span class="p">,</span>
             <span class="n">dscp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tc</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">tc_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tc</span> <span class="o">&amp;</span> <span class="mb">0b11</span><span class="p">,</span>
             <span class="n">oc</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">oc</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">attributes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_qos_attributes</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">attributes</span><span class="p">),</span>
@@ -6882,6 +6967,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed sub-option data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a sub-option's fields do not take exactly the octets</span>
+<span class="sd">                its ``LCMP Length`` declares [:rfc:`8127#section-3.1`].</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such a sub-option is refused, as a mobility option is by</span>
+<span class="sd">           :meth:`_read_mh_options` (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">suboptions</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: LMAControlledMAGSuboption</span>
 
@@ -6916,6 +7010,8 @@
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [LCMP SubOpt </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid sub-option length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">suboptions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">suboptions</span></div>
@@ -7413,6 +7509,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed CGA extensions data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an extension read by a ``_read_ext_*`` method has</span>
+<span class="sd">                fields that do not take exactly the octets its ``Extension Data</span>
+<span class="sd">                Length`` declares [:rfc:`4581#section-2`]; a parser registered as</span>
+<span class="sd">                a callable is not checked.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such an extension is refused, as a mobility option is by</span>
+<span class="sd">           :meth:`_read_mh_options` (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="n">extensions</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Extension</span>
 
@@ -7427,6 +7534,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">extensions</span><span class="o">=</span><span class="n">extensions</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [CGA Ext </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid extension length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
             <span class="c1"># record extension data</span>
             <span class="n">extensions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -9283,6 +9392,11 @@
 <span class="sd">                Also if ``subtype`` does not fit in one octet, or the option is too long</span>
 <span class="sd">                for its one-octet ``Option Length``.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           An ``NAI`` identifier's length counts the octets it packs as, rather</span>
+<span class="sd">           than its characters (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>
@@ -9409,7 +9523,9 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype NAI '</span>
                     <span class="sa">f</span><span class="s1">'identifier must be str, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+            <span class="c1"># NOTE: The field packs UTF-8 octets, or a DecodedString's ``raw``</span>
+            <span class="c1"># ones, so the length counts those rather than characters (#2684).</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="s1">'raw'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">identifier</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: every other subtype's field is a</span>
             <span class="c1"># BytesField(length=pkt['length'] - 1) (see mn_id_selector),</span>
@@ -9986,11 +10102,19 @@
 <span class="sd">            ProtocolError: If the option is too long for its one-octet</span>
 <span class="sd">                ``Option Length``.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           The length counts the octets a</span>
+<span class="sd">           :class:`~pcapkit.corekit.fields.strings.DecodedString` identifier</span>
+<span class="sd">           packs back as, rather than its text re-encoded (:issue:`2684`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">identifier</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">identifier</span>
 
-        <span class="n">encoded</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+        <span class="c1"># NOTE: An identifier that is not UTF-8 parses as a DecodedString, whose</span>
+        <span class="c1"># ``raw`` octets are what packs back, so the length counts those (#2684).</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="s1">'raw'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">identifier</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">encoded</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] service identifier must not be empty'</span><span class="p">)</span>
 
@@ -10355,10 +10479,19 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,</span>
-<span class="sd">                or longer than the address, or ``reserved`` does not fit</span>
-<span class="sd">                its field.</span>
+<span class="sd">            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a</span>
+<span class="sd">                :obj:`bool`, or does not fit its field.</span>
 <span class="sd">                Also if ``status`` does not fit in one octet.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The prefix length is checked against its 6-bit field alone, as</span>
+<span class="sd">            :rfc:`5555#section-3.2.1` does not have the receiver discard one longer</span>
+<span class="sd">            than the address, so whatever the reader keeps is written back.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A prefix length longer than the address is written, rather than</span>
+<span class="sd">           refused, so that every one the reader keeps rebuilds (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -10371,8 +10504,6 @@
                                           <span class="nb">reversed</span><span class="o">=</span><span class="n">status_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">prefix_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">prefix_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'prefix length'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">status_val</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'status'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Schema_IPv4AddressAcknowledgementOption</span><span class="p">(</span>
@@ -10600,9 +10731,18 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,</span>
-<span class="sd">                or longer than the address, or ``reserved`` does not fit</span>
-<span class="sd">                its field.</span>
+<span class="sd">            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a</span>
+<span class="sd">                :obj:`bool`, or does not fit its field.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The prefix length is checked against its 6-bit field alone, as</span>
+<span class="sd">            :rfc:`5844#section-3.3.1` does not have the receiver discard one longer</span>
+<span class="sd">            than the address, so whatever the reader keeps is written back.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A prefix length longer than the address is written, rather than</span>
+<span class="sd">           refused, so that every one the reader keeps rebuilds (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -10611,8 +10751,6 @@
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
 
         <span class="n">prefix_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">prefix_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'prefix length'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv4HomeAddressRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -10652,10 +10790,19 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,</span>
-<span class="sd">                or longer than the address, or ``reserved`` does not fit</span>
-<span class="sd">                its field.</span>
+<span class="sd">            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a</span>
+<span class="sd">                :obj:`bool`, or does not fit its field.</span>
 <span class="sd">                Also if ``status`` does not fit in one octet.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The prefix length is checked against its 6-bit field alone, as</span>
+<span class="sd">            :rfc:`5844#section-3.3.2` does not have the receiver discard one longer</span>
+<span class="sd">            than the address, so whatever the reader keeps is written back.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A prefix length longer than the address is written, rather than</span>
+<span class="sd">           refused, so that every one the reader keeps rebuilds (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -10668,8 +10815,6 @@
                                           <span class="nb">reversed</span><span class="o">=</span><span class="n">status_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">prefix_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">prefix_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'prefix length'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">status_val</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'status'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Schema_IPv4HomeAddressReplyOption</span><span class="p">(</span>
@@ -11770,12 +11915,18 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The ``V`` flag is derived from the prefix's own family rather than</span>
 <span class="sd">            taken as an argument, so that the flag and the emitted width cannot</span>
-<span class="sd">            disagree.</span>
+<span class="sd">            disagree. The prefix length is checked against its 8-bit field alone,</span>
+<span class="sd">            as :rfc:`7148#section-4.1` does not have the receiver discard one</span>
+<span class="sd">            longer than the address, so whatever the reader keeps is written back.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,</span>
-<span class="sd">                or longer than the address, or ``reserved`` does not fit</span>
-<span class="sd">                its field.</span>
+<span class="sd">            ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a</span>
+<span class="sd">                :obj:`bool`, or does not fit its field.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A prefix length longer than the address is written, rather than</span>
+<span class="sd">           refused, so that every one the reader keeps rebuilds (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -11794,8 +11945,6 @@
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span>
 
         <span class="n">prefix_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">prefix_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'prefix length'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">32</span> <span class="k">if</span> <span class="n">ipv4</span> <span class="k">else</span> <span class="mi">128</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid prefix length: </span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_DelegatedMNPOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -12041,6 +12190,7 @@
                       <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">attributes</span><span class="p">:</span> <span class="s1">'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
+                      <span class="n">tc_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QualityOfServiceOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH quality-of-service option.</span>
 
@@ -12053,26 +12203,35 @@
 <span class="sd">            attributes: Quality-of-service attributes.</span>
 <span class="sd">            reserved: The three reserved octets as captured, truncated or zero-</span>
 <span class="sd">                filled to 3 octets.</span>
+<span class="sd">            tc_reserved: The 2 reserved bits of the traffic class, after ``dscp``.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``sr_id``, ``dscp`` or ``oc`` does not fit its field.</span>
+<span class="sd">            ProtocolError: If ``sr_id``, ``dscp``, ``tc_reserved`` or ``oc`` does</span>
+<span class="sd">                not fit its field.</span>
 <span class="sd">                Also if the option is too long for its one-octet ``Option Length``.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes ``tc_reserved``, which a data model passed as ``option`` carries</span>
+<span class="sd">           as well (:issue:`2684`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">sr_id</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">sr_id</span>
             <span class="n">dscp</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">dscp</span>
+            <span class="n">tc_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'tc_reserved'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">oc</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">oc</span>
             <span class="n">attributes</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">attributes</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">attributes</span> <span class="o">=</span> <span class="n">attributes</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="n">dscp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">dscp</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'DSCP'</span><span class="p">)</span>
+        <span class="n">tc_reserved</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">tc_reserved</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'traffic class reserved bits'</span><span class="p">)</span>
 
         <span class="n">entries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_qos_attributes</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
         <span class="n">length</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
@@ -12082,7 +12241,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Option Length'</span><span class="p">),</span>
             <span class="n">sr_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">sr_id</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'service request identifier'</span><span class="p">),</span>
-            <span class="n">tc</span><span class="o">=</span><span class="n">dscp</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">tc</span><span class="o">=</span><span class="n">dscp</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">tc_reserved</span><span class="p">,</span>
             <span class="n">oc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">oc</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'operational code'</span><span class="p">),</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">attributes</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>

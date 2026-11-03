@@ -722,6 +722,10 @@ parses the same octets again, so a rebuilt frame warns once.</p>
 cover the octets of their own message, with no pseudo-header, so they are
 verified as the message is parsed, unless an IP fragment carries it; see
 <a class="reference internal" href="#pcapkit.corekit.checksum.internet.fragment_payload" title="pcapkit.corekit.checksum.internet.fragment_payload"><code class="xref py py-func docutils literal notranslate"><span class="pre">fragment_payload()</span></code></a>.</p>
+<p>Where no layer before the message declares its length, the message runs to
+the end of its frame, and the octets the capture cut off the frame, as
+<a class="reference internal" href="../../utilities/contextvars.html#pcapkit.utilities.contextvars.frame_length" title="pcapkit.utilities.contextvars.frame_length"><code class="xref py py-data docutils literal notranslate"><span class="pre">frame_length</span></code></a> gives them, are
+covered too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2653">#2653</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

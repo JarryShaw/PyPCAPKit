@@ -555,7 +555,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.error_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCode</span> <span class="k">as</span> <span class="n">Enum_ErrorCode</span>
@@ -579,7 +578,7 @@
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
@@ -938,52 +937,6 @@
 
 
 
-<div class="viewcode-block" id="SettingPairListField">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingPairListField">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SettingPairListField</span><span class="p">(</span><span class="n">ListField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Setting list that ends with the data.</span>
-
-<span class="sd">    :attr:`SettingsFrame.settings` is sized by the frame's Length, which exceeds</span>
-<span class="sd">    the octets present once the capture cuts the frame short. A setting read</span>
-<span class="sd">    past them consumes nothing, which :meth:`ListField.unpack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;` refuses to loop on,</span>
-<span class="sd">    so the list is sized by the octets present instead: the setting the data</span>
-<span class="sd">    ends inside is kept as far as it goes, and :meth:`Schema.unpack</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records the short read</span>
-<span class="sd">    (:issue:`2659`).</span>
-
-<span class="sd">    """</span>
-
-<div class="viewcode-block" id="SettingPairListField.unpack">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingPairListField.unpack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[SettingPair]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            buffer: Field buffer.</span>
-<span class="sd">            packet: Packet data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Unpacked settings.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">present</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-            <span class="n">present</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
-            <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-
-        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">declared</span><span class="p">,</span> <span class="n">present</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[SettingPair]'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">declared</span></div>
-</div>
-
-
-
 <div class="viewcode-block" id="SettingsFrame">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingsFrame">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -998,9 +951,8 @@
         <span class="n">ACK</span> <span class="o">=</span> <span class="n">BIT_0</span> <span class="o">=</span> <span class="mh">0x1</span></div>
 
 
-    <span class="c1">#: Settings, read no further than the data goes (see</span>
-    <span class="c1">#: :class:`SettingPairListField`).</span>
-    <span class="n">settings</span><span class="p">:</span> <span class="s1">'list[SettingPair]'</span> <span class="o">=</span> <span class="n">SettingPairListField</span><span class="p">(</span>
+    <span class="c1">#: Settings.</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="s1">'list[SettingPair]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">SettingPair</span><span class="p">),</span>
     <span class="p">)</span>

@@ -72,7 +72,11 @@ retries, bits 16 and 17, from its unofficially used ones, which those three
 size alike; OpenBSD writes a 2-octet RSSI field at bit 16 instead, which is not
 read. A bitmap radiotap.org defines bit by bit is a member of its flag registry
 under :mod:`pcapkit.const.radiotap`, which keeps the bits it does not name. A
-field type registered through
+bitmap that mixes value subfields with known bits -- the MCS ``flags``, the HE
+``data1`` and ``data2``, the HE-MU ``flags1`` and ``flags2`` and the U-SIG
+``common`` -- is split: each value subfield is an integer, and its other bits,
+the undefined ones among them, a member of its known-bits registry. A field
+type registered through
 :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field` is
 decoded the same way.
 
@@ -84,9 +88,14 @@ decoded the same way.
   octets after it, kept whole. Without either, the next word continues the
   namespace, each bit numbered 32 past the same bit of the word before.
 * **TLVs.** Bit 28 makes the rest of the region a list of type-length-value
-  items. An item's data is decoded where its type has a schema whose size it
-  matches, and kept raw otherwise; a vendor item is split into its header and
-  raw data.
+  items. An item's data is decoded where its type has a schema it does not run
+  past, and kept raw otherwise; a vendor item is split into its header and raw
+  data. radiotap.org lets a producer leave out the octets that end an item, which
+  are then zeros, so an item short of its schema, or of the vendor header, is
+  decoded as though they were there. Its decoded data records the cut as
+  ``__short_read__``, as :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+  does, so :meth:`Radiotap.make <pcapkit.protocols.link.radiotap.Radiotap.make>`
+  writes the octets that were captured.
 * **What is not decoded.** A radiotap-namespace bit no field is defined for --
   18, FreeBSD's XChannel, which radiotap.org lists as unofficial, and every one
   numbered 32 or more, the TLV-only types included -- or a field that runs
@@ -440,6 +449,10 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.link.radiotap.MCSFlags
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.link.radiotap.AMPDUStatus
    :members:
    :show-inheritance:
@@ -456,7 +469,23 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData1
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData2
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.link.radiotap.HEMU
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags1
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags2
    :members:
    :show-inheritance:
 
@@ -489,6 +518,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.link.radiotap.USIG
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.link.radiotap.USIGCommon
    :members:
    :show-inheritance:
 

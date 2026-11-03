@@ -7812,6 +7812,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_tls">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_secrets_tls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="s1">'Optional[Data_TLSKeyLog]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TLSKeyLog'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG TLS Key Log secrets.</span>
 
@@ -7822,33 +7823,43 @@
 <span class="sd">                On a parsed model the text wins, so an edit to its</span>
 <span class="sd">                ``entries`` alone is silently ignored.</span>
 <span class="sd">            entries: TLS Key Log entries.</span>
+<span class="sd">            data: TLS key log text, written back verbatim in place of</span>
+<span class="sd">                ``entries``, as the text of ``secrets`` is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed secrets schema.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes the key log text as ``data``, so that the :obj:`dict` of a</span>
+<span class="sd">           parsed model rebuilds the log as captured, as the model itself does,</span>
+<span class="sd">           rather than as its entries under a generated comment</span>
+<span class="sd">           (:issue:`2698`).</span>
+
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">,</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 
@@ -7856,6 +7867,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_wireguard">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_secrets_wireguard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="s1">'Optional[Data_WireGuardKeyLog]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[OrderedMultiDict[WireGuardKeyLabel, bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_WireGuardKeyLog'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG WireGuard secrets.</span>
 
@@ -7866,31 +7878,39 @@
 <span class="sd">                On a parsed model the text wins, so an edit to its</span>
 <span class="sd">                ``entries`` alone is silently ignored.</span>
 <span class="sd">            entries: WireGuard Key Log entries.</span>
+<span class="sd">            data: WireGuard key log text, written back verbatim in place of</span>
+<span class="sd">                ``entries``, as the text of ``secrets`` is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed secrets schema.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes the key log text as ``data``, as</span>
+<span class="sd">           :meth:`_make_secrets_tls` does (:issue:`2698`).</span>
+
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'# generated by PyPCAPKit v</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_WireGuardKeyLog</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 
@@ -7899,6 +7919,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_secrets_zigbee_nwk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="s1">'Optional[Data_ZigBeeNWKKey]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                  <span class="n">nwk_key</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                                  <span class="n">pan_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ZigBeeNWKKey'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG ZigBee NWK Key secrets.</span>
 
@@ -7912,16 +7933,25 @@
 <span class="sd">                ignored.</span>
 <span class="sd">            nwk_key: NWK key.</span>
 <span class="sd">            pan_id: PAN ID.</span>
+<span class="sd">            data: Secrets Data octets, written back verbatim in place of</span>
+<span class="sd">                ``nwk_key`` and ``pan_id``, as the octets of ``secrets`` are.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed secrets schema.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes the Secrets Data octets as ``data``, so that the :obj:`dict`</span>
+<span class="sd">           of a parsed model rebuilds the key as captured, as the model itself</span>
+<span class="sd">           does, rather than as its zero-filled fields (:issue:`2698`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">held</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">held</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeNWKKey</span><span class="p">,</span> <span class="n">held</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeNWKKey</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">nwk_key</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">nwk_key</span>
             <span class="n">pan_id</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">pan_id</span>
 
@@ -7937,6 +7967,7 @@
                                  <span class="n">aps_key</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                                  <span class="n">pan_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                  <span class="n">short_address</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ZigBeeAPSKey'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG ZigBee APS Key secrets.</span>
 
@@ -7948,16 +7979,24 @@
 <span class="sd">            aps_key: APS key.</span>
 <span class="sd">            pan_id: PAN ID.</span>
 <span class="sd">            short_address: Short address.</span>
+<span class="sd">            data: Secrets Data octets, written back verbatim in place of the</span>
+<span class="sd">                fields, as the octets of ``secrets`` are.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed secrets schema.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes the Secrets Data octets as ``data``, as</span>
+<span class="sd">           :meth:`_make_secrets_zigbee_nwk` does (:issue:`2698`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">held</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">held</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeAPSKey</span><span class="p">,</span> <span class="n">held</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeAPSKey</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">aps_key</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">aps_key</span>
             <span class="n">pan_id</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">pan_id</span>
             <span class="n">short_address</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">short_address</span>

@@ -1130,10 +1130,9 @@ records and gives the rest to <a class="reference internal" href="#pcapkit.proto
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.Report.records">
-<span class="sig-name descname"><span class="pre">records</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecord" title="pcapkit.protocols.schema.internet.igmpv3.GroupRecord"><span class="pre">GroupRecord</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GroupRecordListField</span> <span class="pre">records&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.Report.records" title="Link to this definition">¶</a></dt>
-<dd><p>Group records, read no further than the data goes (see
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField" title="pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupRecordListField</span></code></a>); see <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.post_process" title="pcapkit.protocols.schema.internet.igmpv3.Report.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> for how this is
-kept to exactly <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.num_group_records" title="pcapkit.protocols.schema.internet.igmpv3.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_group_records</span></code></a> entries.</p>
+<span class="sig-name descname"><span class="pre">records</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecord" title="pcapkit.protocols.schema.internet.igmpv3.GroupRecord"><span class="pre">GroupRecord</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">records&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.Report.records" title="Link to this definition">¶</a></dt>
+<dd><p>Group records; see <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.post_process" title="pcapkit.protocols.schema.internet.igmpv3.Report.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> for how this is kept to
+exactly <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.num_group_records" title="pcapkit.protocols.schema.internet.igmpv3.Report.num_group_records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_group_records</span></code></a> entries.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1158,6 +1157,9 @@ kept to exactly <a class="reference internal" href="#pcapkit.protocols.schema.in
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
 </dl>
+<p>A capture that ends past the records kept ends inside <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.payload" title="pcapkit.protocols.schema.internet.igmpv3.Report.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>, so
+the short read <code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code> recorded on <a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.records" title="pcapkit.protocols.schema.internet.igmpv3.Report.records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">records</span></code></a> is moved there
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2687">#2687</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -1201,39 +1203,6 @@ kept to exactly <a class="reference internal" href="#pcapkit.protocols.schema.in
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.GroupRecord.aux_data">
 <span class="sig-name descname"><span class="pre">aux_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">aux_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecord.aux_data" title="Link to this definition">¶</a></dt>
 <dd><p>Auxiliary data (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.10"><strong>RFC 3376 Section 4.2.10</strong></a>).</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.igmpv3.</span></span><span class="sig-name descname"><span class="pre">GroupRecordListField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">lambda</span> <span class="pre">_:</span> <span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">lambda</span> <span class="pre">*_:</span> <span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/igmpv3.html#GroupRecordListField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a></p>
-<p>Group record list that ends with the data.</p>
-<p><a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.Report.records" title="pcapkit.protocols.schema.internet.igmpv3.Report.records"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Report.records</span></code></a> is sized by the IGMP length, which exceeds the
-octets present when the capture cuts the Report short. A record read past
-them consumes nothing, which <a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.unpack</span></code></a> refuses to loop on,
-so the list is sized by the octets present instead: the record the data
-ends inside is kept as far as it goes, and <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records the short read
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2650">#2650</a>).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField.unpack">
-<span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/igmpv3.html#GroupRecordListField.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField.unpack" title="Link to this definition">¶</a></dt>
-<dd><p>Unpack field value from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>buffer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Field buffer.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.igmpv3.GroupRecord" title="pcapkit.protocols.schema.internet.igmpv3.GroupRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupRecord</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Unpacked group records.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

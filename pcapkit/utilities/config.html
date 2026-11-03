@@ -999,10 +999,16 @@ hundred; <a class="extlink-issue reference external" href="https://github.com/Ja
 rather than cut. 16 octets of further allowance per octet genuinely read
 leaves any real file an allowance orders of magnitude past the one event it
 can want, while bounding the sum for a file whose blocks all lie.</p>
+<p>It bounds the zero-fill of a cut list of schema items as well, from its first
+octet and with no one-off allowance, since each item filled is a schema object
+rather than a zero octet; see <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ListField.unpack</span></code></a>.</p>
 <p>Set with <span class="target" id="index-32"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
 budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> still bounds each field.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Bounds the zero-fill of a cut list of schema items too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2686">#2686</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>

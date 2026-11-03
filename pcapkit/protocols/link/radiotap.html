@@ -647,7 +647,11 @@ retries, bits 16 and 17, from its unofficially used ones, which those three
 size alike; OpenBSD writes a 2-octet RSSI field at bit 16 instead, which is not
 read. A bitmap radiotap.org defines bit by bit is a member of its flag registry
 under <a class="reference internal" href="../../const/radiotap.html#module-pcapkit.const.radiotap" title="pcapkit.const.radiotap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.radiotap</span></code></a>, which keeps the bits it does not name. A
-field type registered through
+bitmap that mixes value subfields with known bits – the MCS <code class="docutils literal notranslate"><span class="pre">flags</span></code>, the HE
+<code class="docutils literal notranslate"><span class="pre">data1</span></code> and <code class="docutils literal notranslate"><span class="pre">data2</span></code>, the HE-MU <code class="docutils literal notranslate"><span class="pre">flags1</span></code> and <code class="docutils literal notranslate"><span class="pre">flags2</span></code> and the U-SIG
+<code class="docutils literal notranslate"><span class="pre">common</span></code> – is split: each value subfield is an integer, and its other bits,
+the undefined ones among them, a member of its known-bits registry. A field
+type registered through
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_radiotap_field" title="pcapkit.foundation.registry.protocols.link.register_radiotap_field"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_radiotap_field()</span></code></a> is
 decoded the same way.</p>
 <ul class="simple">
@@ -659,9 +663,14 @@ namespace field select vendor fields, whose data is the <code class="docutils li
 octets after it, kept whole. Without either, the next word continues the
 namespace, each bit numbered 32 past the same bit of the word before.</p></li>
 <li><p><strong>TLVs.</strong> Bit 28 makes the rest of the region a list of type-length-value
-items. An item’s data is decoded where its type has a schema whose size it
-matches, and kept raw otherwise; a vendor item is split into its header and
-raw data.</p></li>
+items. An item’s data is decoded where its type has a schema it does not run
+past, and kept raw otherwise; a vendor item is split into its header and raw
+data. radiotap.org lets a producer leave out the octets that end an item, which
+are then zeros, so an item short of its schema, or of the vendor header, is
+decoded as though they were there. Its decoded data records the cut as
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>, as <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
+does, so <a class="reference internal" href="#pcapkit.protocols.link.radiotap.Radiotap.make" title="pcapkit.protocols.link.radiotap.Radiotap.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Radiotap.make</span></code></a>
+writes the octets that were captured.</p></li>
 <li><p><strong>What is not decoded.</strong> A radiotap-namespace bit no field is defined for –
 18, FreeBSD’s XChannel, which radiotap.org lists as unofficial, and every one
 numbered 32 or more, the TLV-only types included – or a field that runs
@@ -824,8 +833,10 @@ ends the region.</p></li>
     fit in 32 bits; if <code class="docutils literal notranslate"><span class="pre">fields</span></code> is neither <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> nor
     fields; if the fields do not match the bits of <code class="docutils literal notranslate"><span class="pre">present</span></code>,
     a word but the last of which ends the chain, or a value does
-    not fit its subfield; or if <code class="docutils literal notranslate"><span class="pre">it_len</span></code> is given and does not
-    fit in 16 bits.</p>
+    not fit its subfield; if a TLV item’s <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> names
+    no field and an octet count, or cuts short a vendor header that
+    data follows; or if <code class="docutils literal notranslate"><span class="pre">it_len</span></code> is given and does not fit in 16
+    bits.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2634,8 +2645,9 @@ radiotap-library align it to 2.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.MCS.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.MCS.flags" title="Link to this definition">¶</a></dt>
-<dd><p>Flags, which hold value subfields.</p>
+<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">flags&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.MCS.flags" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, guard interval, HT format, FEC type, STBC streams and the
+low bit of the extension spatial streams.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2764,14 +2776,15 @@ radiotap-library align it to 2.</p>
 <p>Header schema for the HE field, bit 23.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.HE.data1">
-<span class="sig-name descname"><span class="pre">data1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">data1&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HE.data1" title="Link to this definition">¶</a></dt>
-<dd><p>Format and which other subfields are known.</p>
+<span class="sig-name descname"><span class="pre">data1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">data1&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HE.data1" title="Link to this definition">¶</a></dt>
+<dd><p>PPDU format, and which other subfields are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.HE.data2">
-<span class="sig-name descname"><span class="pre">data2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">data2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HE.data2" title="Link to this definition">¶</a></dt>
-<dd><p>Second data word.</p>
+<span class="sig-name descname"><span class="pre">data2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">data2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HE.data2" title="Link to this definition">¶</a></dt>
+<dd><p>RU allocation offset, primary or secondary 80 MHz, and which other
+subfields are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2807,14 +2820,16 @@ radiotap-library align it to 2.</p>
 <p>Header schema for the HE-MU field, bit 24.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.HEMU.flags1">
-<span class="sig-name descname"><span class="pre">flags1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">flags1&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HEMU.flags1" title="Link to this definition">¶</a></dt>
-<dd><p>First flags word.</p>
+<span class="sig-name descname"><span class="pre">flags1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">flags1&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HEMU.flags1" title="Link to this definition">¶</a></dt>
+<dd><p>SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields
+are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.HEMU.flags2">
-<span class="sig-name descname"><span class="pre">flags2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">flags2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HEMU.flags2" title="Link to this definition">¶</a></dt>
-<dd><p>Second flags word.</p>
+<span class="sig-name descname"><span class="pre">flags2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">flags2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.HEMU.flags2" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble
+puncturing, the channel 2 center 26-tone RU, and which are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2954,8 +2969,8 @@ its own; nor is the schema registered, since a vendor namespace TLV is a
 <p>Header schema for the U-SIG field, type 33, which only a TLV carries.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.link.radiotap.USIG.common">
-<span class="sig-name descname"><span class="pre">common</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">common&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.USIG.common" title="Link to this definition">¶</a></dt>
-<dd><p>Common subfields, which hold value subfields.</p>
+<span class="sig-name descname"><span class="pre">common</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitmapField</span> <span class="pre">common&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.link.radiotap.USIG.common" title="Link to this definition">¶</a></dt>
+<dd><p>PHY version, bandwidth, UL/DL, BSS color and TXOP, and which are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3415,14 +3430,60 @@ when the first bit of the MPDU arrived.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCS.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCS.flags" title="Link to this definition">¶</a></dt>
-<dd><p>Bandwidth, guard interval, HT format, FEC type, STBC and Ness, a bitmap.</p>
+<span class="sig-name descname"><span class="pre">flags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.MCSFlags" title="pcapkit.protocols.data.link.radiotap.MCSFlags"><span class="pre">MCSFlags</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCS.flags" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, guard interval, HT format, FEC type, STBC and Ness.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCS.mcs">
 <span class="sig-name descname"><span class="pre">mcs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCS.mcs" title="Link to this definition">¶</a></dt>
 <dd><p>MCS rate index, as in IEEE Std 802.11n-2009.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">MCSFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guard_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ht_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fec_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stbc_streams</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ness_bit0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#MCSFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the MCS field’s <code class="docutils literal notranslate"><span class="pre">flags</span></code>, each a value subfield.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.bandwidth">
+<span class="sig-name descname"><span class="pre">bandwidth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.bandwidth" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, <code class="docutils literal notranslate"><span class="pre">0</span></code> for 20, <code class="docutils literal notranslate"><span class="pre">1</span></code> for 40, <code class="docutils literal notranslate"><span class="pre">2</span></code> for 20L and <code class="docutils literal notranslate"><span class="pre">3</span></code> for 20U.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.guard_interval">
+<span class="sig-name descname"><span class="pre">guard_interval</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.guard_interval" title="Link to this definition">¶</a></dt>
+<dd><p>Guard interval, <code class="docutils literal notranslate"><span class="pre">0</span></code> for long and <code class="docutils literal notranslate"><span class="pre">1</span></code> for short.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.ht_format">
+<span class="sig-name descname"><span class="pre">ht_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.ht_format" title="Link to this definition">¶</a></dt>
+<dd><p>HT format, <code class="docutils literal notranslate"><span class="pre">0</span></code> for mixed and <code class="docutils literal notranslate"><span class="pre">1</span></code> for greenfield.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.fec_type">
+<span class="sig-name descname"><span class="pre">fec_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.fec_type" title="Link to this definition">¶</a></dt>
+<dd><p>FEC type, <code class="docutils literal notranslate"><span class="pre">0</span></code> for BCC and <code class="docutils literal notranslate"><span class="pre">1</span></code> for LDPC.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.stbc_streams">
+<span class="sig-name descname"><span class="pre">stbc_streams</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.stbc_streams" title="Link to this definition">¶</a></dt>
+<dd><p>Number of STBC streams.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.MCSFlags.ness_bit0">
+<span class="sig-name descname"><span class="pre">ness_bit0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.MCSFlags.ness_bit0" title="Link to this definition">¶</a></dt>
+<dd><p>Bit 0, the least significant, of the number of extension spatial streams.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3546,14 +3607,14 @@ beamformed.</p>
 <p>Data model for the HE field, bit 23, mostly the common part of HE-SIG-A.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HE.data1">
-<span class="sig-name descname"><span class="pre">data1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HE.data1" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.HEData1" title="pcapkit.protocols.data.link.radiotap.HEData1"><span class="pre">HEData1</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HE.data1" title="Link to this definition">¶</a></dt>
 <dd><p>PPDU format and which of the subfields are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HE.data2">
-<span class="sig-name descname"><span class="pre">data2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HE.data2" title="Link to this definition">¶</a></dt>
-<dd><p>Which of the subfields are known, and the primary 80 MHz channel.</p>
+<span class="sig-name descname"><span class="pre">data2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.HEData2" title="pcapkit.protocols.data.link.radiotap.HEData2"><span class="pre">HEData2</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HE.data2" title="Link to this definition">¶</a></dt>
+<dd><p>RU allocation offset, the 80 MHz channel, and which subfields are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3583,20 +3644,73 @@ beamformed.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData1">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">HEData1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ppdu_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#HEData1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData1" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the HE field’s <code class="docutils literal notranslate"><span class="pre">data1</span></code>, a value subfield and known bits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData1.ppdu_format">
+<span class="sig-name descname"><span class="pre">ppdu_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData1.ppdu_format" title="Link to this definition">¶</a></dt>
+<dd><p>HE PPDU format, <code class="docutils literal notranslate"><span class="pre">0</span></code> for HE_SU, <code class="docutils literal notranslate"><span class="pre">1</span></code> for HE_EXT_SU, <code class="docutils literal notranslate"><span class="pre">2</span></code> for HE_MU and
+<code class="docutils literal notranslate"><span class="pre">3</span></code> for HE_TRIG.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData1.known">
+<span class="sig-name descname"><span class="pre">known</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.he_data1_known.HEData1Known" title="pcapkit.const.radiotap.he_data1_known.HEData1Known"><span class="pre">HEData1Known</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData1.known" title="Link to this definition">¶</a></dt>
+<dd><p>Which of the other subfields are known.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData2">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">HEData2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ru_offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pri_sec_80mhz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#HEData2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData2" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the HE field’s <code class="docutils literal notranslate"><span class="pre">data2</span></code>, value subfields and known bits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData2.ru_offset">
+<span class="sig-name descname"><span class="pre">ru_offset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData2.ru_offset" title="Link to this definition">¶</a></dt>
+<dd><p>RU allocation offset, within the 80 MHz channel.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData2.pri_sec_80mhz">
+<span class="sig-name descname"><span class="pre">pri_sec_80mhz</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData2.pri_sec_80mhz" title="Link to this definition">¶</a></dt>
+<dd><p>The 80 MHz channel, <code class="docutils literal notranslate"><span class="pre">0</span></code> for the primary and <code class="docutils literal notranslate"><span class="pre">1</span></code> for the secondary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEData2.known">
+<span class="sig-name descname"><span class="pre">known</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.he_data2_known.HEData2Known" title="pcapkit.const.radiotap.he_data2_known.HEData2Known"><span class="pre">HEData2Known</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEData2.known" title="Link to this definition">¶</a></dt>
+<dd><p>Which of the other subfields are known.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMU">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">HEMU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ru_channel1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ru_channel2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#HEMU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.RadiotapField" title="pcapkit.protocols.data.link.radiotap.RadiotapField"><code class="xref py py-class docutils literal notranslate"><span class="pre">RadiotapField</span></code></a></p>
 <p>Data model for the HE-MU field, bit 24, from HE-SIG-A and HE-SIG-B.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMU.flags1">
-<span class="sig-name descname"><span class="pre">flags1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU.flags1" title="Link to this definition">¶</a></dt>
-<dd><p>SIG-B MCS, DCM, compression and which of the subfields are known.</p>
+<span class="sig-name descname"><span class="pre">flags1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1" title="pcapkit.protocols.data.link.radiotap.HEMUFlags1"><span class="pre">HEMUFlags1</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU.flags1" title="Link to this definition">¶</a></dt>
+<dd><p>SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields
+are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMU.flags2">
-<span class="sig-name descname"><span class="pre">flags2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU.flags2" title="Link to this definition">¶</a></dt>
-<dd><p>Bandwidth, SIG-B symbols or MU-MIMO users, and punctured preamble.</p>
+<span class="sig-name descname"><span class="pre">flags2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2" title="pcapkit.protocols.data.link.radiotap.HEMUFlags2"><span class="pre">HEMUFlags2</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU.flags2" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble
+puncturing and the channel 2 center 26-tone RU.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3609,6 +3723,87 @@ beamformed.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMU.ru_channel2">
 <span class="sig-name descname"><span class="pre">ru_channel2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMU.ru_channel2" title="Link to this definition">¶</a></dt>
 <dd><p>RU_channel2, one octet per RU.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags1">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sig_b_mcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_b_dcm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch1_center_26_tone_ru</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#HEMUFlags1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the HE-MU field’s <code class="docutils literal notranslate"><span class="pre">flags1</span></code>, value subfields and known bits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags1.sig_b_mcs">
+<span class="sig-name descname"><span class="pre">sig_b_mcs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1.sig_b_mcs" title="Link to this definition">¶</a></dt>
+<dd><p>SIG-B MCS, from HE-SIG-A.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags1.sig_b_dcm">
+<span class="sig-name descname"><span class="pre">sig_b_dcm</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1.sig_b_dcm" title="Link to this definition">¶</a></dt>
+<dd><p>SIG-B DCM, from HE-SIG-A.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags1.ch1_center_26_tone_ru">
+<span class="sig-name descname"><span class="pre">ch1_center_26_tone_ru</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1.ch1_center_26_tone_ru" title="Link to this definition">¶</a></dt>
+<dd><p>Channel 1 center 26-tone RU value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags1.known">
+<span class="sig-name descname"><span class="pre">known</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known"><span class="pre">HEMUFlags1Known</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags1.known" title="Link to this definition">¶</a></dt>
+<dd><p>Which of the subfields of this word and of <code class="docutils literal notranslate"><span class="pre">flags2</span></code> are known.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_b_compression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_b_symbols_users</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preamble_puncturing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch2_center_26_tone_ru</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#HEMUFlags2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the HE-MU field’s <code class="docutils literal notranslate"><span class="pre">flags2</span></code>, value subfields and known bits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.bandwidth">
+<span class="sig-name descname"><span class="pre">bandwidth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.bandwidth" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth from the Bandwidth field of HE-SIG-A, <code class="docutils literal notranslate"><span class="pre">0</span></code> for 20 MHz up to
+<code class="docutils literal notranslate"><span class="pre">3</span></code> for 160 or 80+80 MHz.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.sig_b_compression">
+<span class="sig-name descname"><span class="pre">sig_b_compression</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.sig_b_compression" title="Link to this definition">¶</a></dt>
+<dd><p>SIG-B compression, from HE-SIG-A.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.sig_b_symbols_users">
+<span class="sig-name descname"><span class="pre">sig_b_symbols_users</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.sig_b_symbols_users" title="Link to this definition">¶</a></dt>
+<dd><p>Number of HE-SIG-B symbols or MU-MIMO users, less one, from HE-SIG-A.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.preamble_puncturing">
+<span class="sig-name descname"><span class="pre">preamble_puncturing</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.preamble_puncturing" title="Link to this definition">¶</a></dt>
+<dd><p>Preamble puncturing, from the Bandwidth field of HE-SIG-A.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.ch2_center_26_tone_ru">
+<span class="sig-name descname"><span class="pre">ch2_center_26_tone_ru</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.ch2_center_26_tone_ru" title="Link to this definition">¶</a></dt>
+<dd><p>Channel 2 center 26-tone RU value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.HEMUFlags2.known">
+<span class="sig-name descname"><span class="pre">known</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known"><span class="pre">HEMUFlags2Known</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.HEMUFlags2.known" title="Link to this definition">¶</a></dt>
+<dd><p>Which of the bandwidth and preamble puncturing are known.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3766,8 +3961,8 @@ them is in <a class="reference internal" href="#pcapkit.protocols.data.link.radi
 <p>Data model for the U-SIG field, TLV type 33.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIG.common">
-<span class="sig-name descname"><span class="pre">common</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIG.common" title="Link to this definition">¶</a></dt>
-<dd><p>Which of the common subfields are known, and their values.</p>
+<span class="sig-name descname"><span class="pre">common</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.USIGCommon" title="pcapkit.protocols.data.link.radiotap.USIGCommon"><span class="pre">USIGCommon</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIG.common" title="Link to this definition">¶</a></dt>
+<dd><p>The common subfields, and which are known.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3780,6 +3975,54 @@ them is in <a class="reference internal" href="#pcapkit.protocols.data.link.radi
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIG.mask">
 <span class="sig-name descname"><span class="pre">mask</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIG.mask" title="Link to this definition">¶</a></dt>
 <dd><p>Which bits of <a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.USIG.value" title="pcapkit.protocols.data.link.radiotap.USIG.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a> are known.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.radiotap.</span></span><span class="sig-name descname"><span class="pre">USIGCommon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phy_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ul_dl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bss_color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/radiotap.html#USIGCommon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data model for the U-SIG field’s <code class="docutils literal notranslate"><span class="pre">common</span></code>, value subfields and known bits.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.phy_version">
+<span class="sig-name descname"><span class="pre">phy_version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.phy_version" title="Link to this definition">¶</a></dt>
+<dd><p>PHY version identifier.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.bandwidth">
+<span class="sig-name descname"><span class="pre">bandwidth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.bandwidth" title="Link to this definition">¶</a></dt>
+<dd><p>Bandwidth, <code class="docutils literal notranslate"><span class="pre">0</span></code> for 20 MHz up to <code class="docutils literal notranslate"><span class="pre">3</span></code> for 160 MHz, and <code class="docutils literal notranslate"><span class="pre">4</span></code> and <code class="docutils literal notranslate"><span class="pre">5</span></code> for
+the two 320 MHz channelizations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.ul_dl">
+<span class="sig-name descname"><span class="pre">ul_dl</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.ul_dl" title="Link to this definition">¶</a></dt>
+<dd><p>UL/DL.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.bss_color">
+<span class="sig-name descname"><span class="pre">bss_color</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.bss_color" title="Link to this definition">¶</a></dt>
+<dd><p>BSS color.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.txop">
+<span class="sig-name descname"><span class="pre">txop</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.txop" title="Link to this definition">¶</a></dt>
+<dd><p>TXOP.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.USIGCommon.known">
+<span class="sig-name descname"><span class="pre">known</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/radiotap.html#pcapkit.const.radiotap.usig_common_known.USIGCommonKnown" title="pcapkit.const.radiotap.usig_common_known.USIGCommonKnown"><span class="pre">USIGCommonKnown</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.USIGCommon.known" title="Link to this definition">¶</a></dt>
+<dd><p>Which of the subfields are known, and whether the U-SIG CRC failed and its
+validate bits were checked and found right.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3829,8 +4072,10 @@ them is in <a class="reference internal" href="#pcapkit.protocols.data.link.radi
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.radiotap.TLV.data">
 <span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.RadiotapField" title="pcapkit.protocols.data.link.radiotap.RadiotapField"><span class="pre">RadiotapField</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.VendorTLV" title="pcapkit.protocols.data.link.radiotap.VendorTLV"><span class="pre">VendorTLV</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.link.radiotap.TLV.data" title="Link to this definition">¶</a></dt>
-<dd><p>The data, decoded where the type defines a layout and <a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.TLV.length" title="pcapkit.protocols.data.link.radiotap.TLV.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>
-matches it; the raw octets otherwise.</p>
+<dd><p>The data, decoded where the type defines a layout <a class="reference internal" href="#pcapkit.protocols.data.link.radiotap.TLV.length" title="pcapkit.protocols.data.link.radiotap.TLV.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> does
+not run past; the raw octets otherwise. Data short of the layout is
+decoded with the octets it lacks as zeros, and records the cut as
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>.</p>
 </dd></dl>
 
 </dd></dl>

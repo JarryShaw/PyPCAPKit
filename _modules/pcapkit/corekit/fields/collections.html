@@ -547,7 +547,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">_zero_filled_items</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
@@ -727,8 +727,19 @@
 <span class="sd">            Unpacked field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If the items overrun the field, or if a schema item</span>
-<span class="sd">                consumes nothing from ``buffer`` -- see the note below.</span>
+<span class="sd">            FieldValueError: If the items overrun the field, if a schema item</span>
+<span class="sd">                consumes nothing from ``buffer``, or if schema items short of the</span>
+<span class="sd">                field's length cannot be zero-filled.</span>
+
+<span class="sd">        When ``buffer`` falls short of the field's length, schema items are read</span>
+<span class="sd">        from its octets zero-filled to that length, as</span>
+<span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
+<span class="sd">        reads any other field, so the items cover the length declared.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Schema items short of the field's length are zero-filled to it, where</span>
+<span class="sd">           an item past the data was refused as consuming nothing (:issue:`2686`).</span>
 
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
@@ -754,7 +765,7 @@
         <span class="c1"># before, from the first one -- is still an instance of the original.</span>
         <span class="c1"># ``isinstance`` against the new class would report :data:`False` for an</span>
         <span class="c1"># item that plainly is a ``SchemaField``, ``is_schema`` would go the</span>
-        <span class="c1"># wrong way, and this method's other branch would bill each item by its</span>
+        <span class="c1"># wrong way, and the item loop's other branch would bill each item by its</span>
         <span class="c1"># *declared* length instead of by what it actually consumed -- so a</span>
         <span class="c1"># malformed TCP SACK option's length check could raise</span>
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead</span>
@@ -768,17 +779,46 @@
         <span class="c1"># :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`</span>
         <span class="c1"># afterwards.</span>
         <span class="n">is_schema</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_schema</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">present</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">_zero_filled_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="k">as</span> <span class="n">filled</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">filled</span><span class="p">),</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListField._unpack_items">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField._unpack_items">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unpack_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_TL]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack the field's items from ``file``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: Stream the items are read from.</span>
+<span class="sd">            packet: Packet data.</span>
+<span class="sd">            is_schema: Whether the items are schemas.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Unpacked items.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If the items overrun the field, or if a schema item</span>
+<span class="sd">                consumes nothing from ``file`` -- see the note below.</span>
+
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
+        <span class="n">item_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'FieldBase'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">)</span>
 
         <span class="c1"># NOTE: The item-typed branch below sizes each item by ``field.length``,</span>
         <span class="c1"># which is what it read, but the schema branch sizes it by ``len(data)``,</span>
-        <span class="c1"># which is only what the schema *recorded*. A schema reading a stream that</span>
-        <span class="c1"># has already run out records nothing, so ``length -= len(data)`` makes no</span>
-        <span class="c1"># progress and the loop spins forever. Reachable from a TCP segment: a</span>
-        <span class="c1"># ``SACK`` option declaring more octets than the option area holds leaves</span>
-        <span class="c1"># ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.</span>
-        <span class="c1"># Remembering where the previous item ended is what bounds the iteration</span>
-        <span class="c1"># count, since it does not depend on what the schema reports. Cf. #431,</span>
-        <span class="c1"># which is the same defect in the ``OptionField`` subclass.</span>
+        <span class="c1"># which is only what the schema *recorded*. A schema that reads nothing</span>
+        <span class="c1"># records nothing, so ``length -= len(data)`` makes no progress and the</span>
+        <span class="c1"># loop spins forever. The zero-fill in ``unpack`` gives every item octets,</span>
+        <span class="c1"># but an item schema may still consume none of them. Remembering where the</span>
+        <span class="c1"># previous item ended is what bounds the iteration count, since it does</span>
+        <span class="c1"># not depend on what the schema reports. Cf. #431, which is the same</span>
+        <span class="c1"># defect in the ``OptionField`` subclass.</span>
         <span class="c1">#</span>
         <span class="c1"># ``start`` is where the field itself begins. The comparison needs stream</span>
         <span class="c1"># positions, but the diagnostic wants an offset into the field, and the two</span>
@@ -789,7 +829,7 @@
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TL]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_schema</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>

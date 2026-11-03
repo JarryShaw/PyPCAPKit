@@ -3058,13 +3058,22 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.QualityOfServiceOption">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QualityOfServiceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for MH Quality-of-Service option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for MH Quality-of-Service option.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       New required field ``tc_reserved`` (:issue:`2684`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Service request identifier.</span>
     <span class="n">sr_id</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Differentiated services code point, the significant 6 bits of the traffic</span>
     <span class="c1">#: class octet.</span>
     <span class="n">dscp</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The 2 reserved bits of the traffic class octet, after the code point, as</span>
+    <span class="c1">#: captured [:rfc:`7222#section-4.1`].</span>
+    <span class="n">tc_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Operational code -- ``0`` response, ``1`` allocate, ``2`` de-allocate,</span>
     <span class="c1">#: ``3`` modify, ``4`` query, ``5`` negotiate.</span>
     <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -3075,7 +3084,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dscp</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">tc_reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 

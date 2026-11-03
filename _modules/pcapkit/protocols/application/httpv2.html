@@ -753,10 +753,10 @@
 <span class="sd">       * A whole frame after the first in a segment is a further layer of this</span>
 <span class="sd">         class, where it was kept as :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">         (:issue:`2536`).</span>
-<span class="sd">       * A ``SETTINGS`` frame the capture cut inside its settings parses as far</span>
-<span class="sd">         as its octets go, where it was :class:`~pcapkit.protocols.misc.raw.Raw`,</span>
-<span class="sd">         and :meth:`make` takes ``frame_length``, so it rebuilds as captured</span>
-<span class="sd">         (:issue:`2659`).</span>
+<span class="sd">       * A ``SETTINGS`` frame the capture cut inside its settings parses, with the</span>
+<span class="sd">         settings past the data read as zeros, as a cut ``DATA`` frame's data is,</span>
+<span class="sd">         where it was :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2659`,</span>
+<span class="sd">         :issue:`2686`).</span>
 
 <span class="sd">    """</span>
 
@@ -865,11 +865,6 @@
 <span class="sd">            holds one frame per packet and has no form for a frameless segment.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: A frame ``pack`` made short of its Length parses at that Length (#2659).</span>
-        <span class="n">made_length</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_made_length'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">made_length</span>
-
         <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">preface_len</span><span class="p">]</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE</span> \
                 <span class="ow">and</span> <span class="p">(</span><span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="n">preface_len</span><span class="p">):</span>
@@ -980,7 +975,6 @@
              <span class="n">frame</span><span class="p">:</span> <span class="s1">'Optional[bytes | Data_HTTP | Schema_FrameType | dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="n">preface</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-             <span class="n">frame_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HTTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -1000,12 +994,6 @@
 <span class="sd">            payload: Octets after the frame, e.g. the next frame.</span>
 <span class="sd">            preface: Whether the HTTP/2 connection preface goes ahead of the</span>
 <span class="sd">                frame; :meth:`pack` writes it.</span>
-<span class="sd">            frame_length: Length of the frame payload, as transmitted on the</span>
-<span class="sd">                wire, the 9-octet header excluded (:rfc:`9113#section-4.1`);</span>
-<span class="sd">                computed from ``frame`` when not given, so a ``SETTINGS`` frame</span>
-<span class="sd">                the capture cut inside its settings rebuilds as captured. A</span>
-<span class="sd">                Length above the one ``frame`` packs to is written as given,</span>
-<span class="sd">                as on a frame the capture cut short.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1015,11 +1003,7 @@
 <span class="sd">            ProtocolError: If ``frame`` is none of the forms this maker reads --</span>
 <span class="sd">                raw :obj:`bytes`, a :obj:`dict` of frame arguments, an</span>
 <span class="sd">                :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2` data</span>
-<span class="sd">                model or a :class:`~pcapkit.protocols.schema.schema.Schema`; or</span>
-<span class="sd">                if ``frame_length`` is not an :obj:`int` from the Length</span>
-<span class="sd">                ``frame`` packs to up to ``0xFFFFFF``, or exceeds that Length</span>
-<span class="sd">                with a non-empty ``payload``, which the frame would read as its</span>
-<span class="sd">                own (:issue:`2617`).</span>
+<span class="sd">                model or a :class:`~pcapkit.protocols.schema.schema.Schema`.</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
@@ -1070,16 +1054,6 @@
             <span class="n">flags_val</span><span class="p">[</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit</span>
 
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_http_length</span><span class="p">(</span><span class="n">frame_val</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">frame_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame_length</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame_length</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> \
-                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="n">frame_length</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFF</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid frame_length: </span><span class="si">{</span><span class="n">frame_length</span><span class="si">!r}</span><span class="s1"> '</span>
-                                    <span class="sa">f</span><span class="s1">'for a frame payload of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s)'</span><span class="p">)</span>
-            <span class="c1"># NOTE: Past the frame payload, the Length would read the next frame as its own.</span>
-            <span class="k">if</span> <span class="n">frame_length</span> <span class="o">&gt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid frame_length: </span><span class="si">{</span><span class="n">frame_length</span><span class="si">!r}</span><span class="s1"> '</span>
-                                    <span class="sa">f</span><span class="s1">'for a frame payload of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with a payload after it'</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">frame_length</span>
 
         <span class="k">return</span> <span class="n">Schema_HTTP</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -1112,22 +1086,11 @@
 <span class="sd">            type's own schema. Any other call leaves the instance's header as it</span>
 <span class="sd">            was (:issue:`1769`).</span>
 
-<span class="sd">            A frame whose payload falls short of its Length, as</span>
-<span class="sd">            :meth:`from_data` rebuilds a ``SETTINGS`` frame the capture cut</span>
-<span class="sd">            inside its settings, is parsed back at that Length, as the capture</span>
-<span class="sd">            was, rather than refused as a frame the data cannot back</span>
-<span class="sd">            (:issue:`2659`).</span>
-
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># NOTE: Constructing, by the test ``ProtocolBase._packing_target`` makes.</span>
         <span class="k">if</span> <span class="s1">'_info'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
-
-            <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span> <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-            <span class="n">declared</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">+</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">declared</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_made_length</span> <span class="o">=</span> <span class="n">declared</span>
         <span class="k">return</span> <span class="n">data</span>
 
 <div class="viewcode-block" id="HTTPv2.id">
@@ -1203,8 +1166,8 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The Length as on the wire, so a cut SETTINGS frame keeps it (#2659);</span>
-        <span class="c1"># ``length`` would be taken by ``ProtocolBase.__init__`` as octets to parse.</span>
+        <span class="c1"># NOTE: No ``length``: ``make`` computes the Length from the frame it builds, and</span>
+        <span class="c1"># ``ProtocolBase.__init__`` would take a ``length`` as the octets to parse back.</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="s1">'flags'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">__value__</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
@@ -1213,7 +1176,6 @@
             <span class="s1">'frame'</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="s1">'preface'</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preface'</span><span class="p">)),</span>
-            <span class="s1">'frame_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 

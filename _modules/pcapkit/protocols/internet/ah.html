@@ -742,7 +742,9 @@
             <span class="c1"># IPv6 header, so hold NoPayload here so that membership does not raise (#2484).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">ah</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ah</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ah</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
+        <span class="c1"># NOTE: The payload is the rest of the parent's, so a frame's cut the</span>
+        <span class="c1"># parent handed on is handed on in turn (#2689).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ah</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ah</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">declared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AH.make">

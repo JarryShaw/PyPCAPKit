@@ -545,8 +545,7 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">"""header schema for internet group management protocol version 3"""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.igmp.record_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordType</span> <span class="k">as</span> <span class="n">Enum_RecordType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.igmp.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
@@ -556,13 +555,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">StreamEOFError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IGMPv3'</span><span class="p">,</span> <span class="s1">'Query'</span><span class="p">,</span> <span class="s1">'QueryExtension'</span><span class="p">,</span> <span class="s1">'Report'</span><span class="p">,</span> <span class="s1">'GroupRecord'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
@@ -776,52 +775,6 @@
 
 
 
-<div class="viewcode-block" id="GroupRecordListField">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GroupRecordListField</span><span class="p">(</span><span class="n">ListField</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Group record list that ends with the data.</span>
-
-<span class="sd">    :attr:`Report.records` is sized by the IGMP length, which exceeds the</span>
-<span class="sd">    octets present when the capture cuts the Report short. A record read past</span>
-<span class="sd">    them consumes nothing, which :meth:`ListField.unpack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;` refuses to loop on,</span>
-<span class="sd">    so the list is sized by the octets present instead: the record the data</span>
-<span class="sd">    ends inside is kept as far as it goes, and :meth:`Schema.unpack</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records the short read</span>
-<span class="sd">    (:issue:`2650`).</span>
-
-<span class="sd">    """</span>
-
-<div class="viewcode-block" id="GroupRecordListField.unpack">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.schema.internet.igmpv3.GroupRecordListField.unpack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[GroupRecord]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            buffer: Field buffer.</span>
-<span class="sd">            packet: Packet data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Unpacked group records.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">present</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-            <span class="n">present</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
-            <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-
-        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">declared</span><span class="p">,</span> <span class="n">present</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[GroupRecord]'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">declared</span></div>
-</div>
-
-
-
 <div class="viewcode-block" id="Report">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.schema.internet.igmpv3.Report">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -846,10 +799,9 @@
     <span class="n">reserved_2</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
     <span class="c1">#: Number of group records, as received on the wire.</span>
     <span class="n">num_group_records</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
-    <span class="c1">#: Group records, read no further than the data goes (see</span>
-    <span class="c1">#: :class:`GroupRecordListField`); see :meth:`post_process` for how this is</span>
-    <span class="c1">#: kept to exactly :attr:`num_group_records` entries.</span>
-    <span class="n">records</span><span class="p">:</span> <span class="s1">'list[GroupRecord]'</span> <span class="o">=</span> <span class="n">GroupRecordListField</span><span class="p">(</span>
+    <span class="c1">#: Group records; see :meth:`post_process` for how this is kept to</span>
+    <span class="c1">#: exactly :attr:`num_group_records` entries.</span>
+    <span class="n">records</span><span class="p">:</span> <span class="s1">'list[GroupRecord]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">GroupRecord</span><span class="p">),</span>
     <span class="p">)</span>
@@ -868,17 +820,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
+<span class="sd">        A capture that ends past the records kept ends inside :attr:`payload`, so</span>
+<span class="sd">        the short read :meth:`unpack` recorded on :attr:`records` is moved there</span>
+<span class="sd">        (:issue:`2687`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_group_records</span><span class="p">:</span>
             <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="s1">'records'</span><span class="p">]</span>
-            <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-            <span class="n">valid</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[GroupRecord]</span>
-            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_group_records</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">valid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GroupRecord</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
-                <span class="k">except</span> <span class="n">StreamEOFError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                    <span class="k">break</span>
-            <span class="n">consumed</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">num_group_records</span><span class="p">]</span>
+            <span class="n">consumed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">[</span><span class="s1">'records'</span><span class="p">]</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="p">{}))</span>
 
             <span class="c1"># NOTE: ``get_payload`` reads ``__buffer__``, and ``prepare()`` clears</span>
             <span class="c1"># ``__updated__`` after this runs, so the buffer must be set here too.</span>
@@ -886,6 +836,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">consumed</span><span class="p">:]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="s1">'records'</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[:</span><span class="n">consumed</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="s1">'payload'</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">consumed</span><span class="p">:]</span>
+
+            <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'records'</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">consumed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'payload'</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">consumed</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 

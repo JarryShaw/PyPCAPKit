@@ -559,8 +559,9 @@
 <span class="sd">A table row whose mask sets one bit is a member. A row that sets more bits, or</span>
 <span class="sd">that radiotap.org marks reserved or unused, is not: its bits stay undefined,</span>
 <span class="sd">which an ``aenum.IntFlag`` keeps in a value rather than dropping, so they</span>
-<span class="sd">round-trip. The Flags page lists its last bit in a table of its own, which the</span>
-<span class="sd">member's comment names.</span>
+<span class="sd">round-trip. Nor is a row of :attr:`~Flags.VALUES`, a value subfield of a bitmap</span>
+<span class="sd">that mixes them with flags, which its schema splits off. The Flags page lists</span>
+<span class="sd">its last bit in a table of its own, which the member's comment names.</span>
 
 <span class="sd">A member's value and comment come from radiotap.org, and its name from the</span>
 <span class="sd">crawler's :attr:`~Flags.NAMES`: the macro the Linux kernel's</span>
@@ -691,6 +692,9 @@
     <span class="c1">#: Subfield whose table is scraped, as the page names it before the table;</span>
     <span class="c1">#: :obj:`None` for every table on the page.</span>
     <span class="n">SUBFIELD</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[str]</span>
+    <span class="c1">#: Masks of the value subfields the bitmap mixes with its flags, whose rows</span>
+    <span class="c1">#: are no members.</span>
+    <span class="n">VALUES</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: tuple[int, ...]</span>
     <span class="c1">#: The source macro of each bit, keyed by mask, which is Linux's for ``0x01``</span>
     <span class="c1">#: to ``0x40``, and Wireshark's ``packet-ieee80211-radiotap.c`` for ``0x80``,</span>
     <span class="c1">#: which Linux leaves unnamed.</span>
@@ -815,7 +819,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">MASK</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                     <span class="k">continue</span>
                 <span class="n">mask</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mask</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mask</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">mask</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">VALUES</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="n">meanings</span> <span class="o">=</span> <span class="p">[(</span><span class="n">column</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
                             <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">'notes'</span><span class="p">]</span>

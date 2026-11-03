@@ -552,6 +552,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.eht_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">EHTKnown</span> <span class="k">as</span> <span class="n">Enum_EHTKnown</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.field_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldType</span> <span class="k">as</span> <span class="n">Enum_FieldType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Enum_Flags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_data1_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEData1Known</span> <span class="k">as</span> <span class="n">Enum_HEData1Known</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_data2_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEData2Known</span> <span class="k">as</span> <span class="n">Enum_HEData2Known</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_flags1_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEMUFlags1Known</span> <span class="k">as</span> <span class="n">Enum_HEMUFlags1Known</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_flags2_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEMUFlags2Known</span> <span class="k">as</span> <span class="n">Enum_HEMUFlags2Known</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_other_user_known</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">HEMUOtherUserKnown</span> <span class="k">as</span> <span class="n">Enum_HEMUOtherUserKnown</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.lsig_data1</span><span class="w"> </span><span class="kn">import</span> <span class="n">LSIGData1</span> <span class="k">as</span> <span class="n">Enum_LSIGData1</span>
@@ -560,13 +564,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.s1g_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">S1GKnown</span> <span class="k">as</span> <span class="n">Enum_S1GKnown</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.timestamp_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimestampFlags</span> <span class="k">as</span> <span class="n">Enum_TimestampFlags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.tx_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">TXFlags</span> <span class="k">as</span> <span class="n">Enum_TXFlags</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.usig_common_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">USIGCommonKnown</span> <span class="k">as</span> <span class="n">Enum_USIGCommonKnown</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_coding</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTCoding</span> <span class="k">as</span> <span class="n">Enum_VHTCoding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTFlags</span> <span class="k">as</span> <span class="n">Enum_VHTFlags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTKnown</span> <span class="k">as</span> <span class="n">Enum_VHTKnown</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">Int8Field</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span>
-                                            <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BitmapField</span><span class="p">,</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">Int8Field</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span>
+                                            <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
@@ -584,9 +589,10 @@
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+
 
 
 <div class="viewcode-block" id="Radiotap">
@@ -945,13 +951,21 @@
 
     <span class="c1">#: Which of :attr:`flags` and :attr:`mcs` are known.</span>
     <span class="n">known</span><span class="p">:</span> <span class="s1">'Enum_MCSKnown'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_MCSKnown</span><span class="p">)</span>
-    <span class="c1">#: Flags, which hold value subfields.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Bandwidth, guard interval, HT format, FEC type, STBC streams and the</span>
+    <span class="c1">#: low bit of the extension spatial streams.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'bandwidth'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'guard_interval'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'ht_format'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'fec_type'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'stbc_streams'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'ness_bit0'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
     <span class="c1">#: MCS rate index.</span>
     <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'Enum_MCSKnown | int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'Enum_MCSKnown | int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
 
@@ -1039,10 +1053,16 @@
 
     <span class="n">__align__</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Format and which other subfields are known.</span>
-    <span class="n">data1</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
-    <span class="c1">#: Second data word.</span>
-    <span class="n">data2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
+    <span class="c1">#: PPDU format, and which other subfields are known.</span>
+    <span class="n">data1</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'ppdu_format'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'known'</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Enum_HEData1Known</span><span class="p">)</span>
+    <span class="c1">#: RU allocation offset, primary or secondary 80 MHz, and which other</span>
+    <span class="c1">#: subfields are known.</span>
+    <span class="n">data2</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'ru_offset'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s1">'pri_sec_80mhz'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'known'</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Enum_HEData2Known</span><span class="p">)</span>
     <span class="c1">#: Third data word.</span>
     <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
     <span class="c1">#: Fourth data word.</span>
@@ -1053,7 +1073,7 @@
     <span class="n">data6</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data1</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data4</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data5</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data1</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data4</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data5</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
                      <span class="n">data6</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
 
 
@@ -1066,17 +1086,30 @@
 
     <span class="n">__align__</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: First flags word.</span>
-    <span class="n">flags1</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
-    <span class="c1">#: Second flags word.</span>
-    <span class="n">flags2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
+    <span class="c1">#: SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields</span>
+    <span class="c1">#: are known.</span>
+    <span class="n">flags1</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'sig_b_mcs'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'sig_b_dcm'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'ch1_center_26_tone_ru'</span><span class="p">:</span> <span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'known'</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Enum_HEMUFlags1Known</span><span class="p">)</span>
+    <span class="c1">#: Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble</span>
+    <span class="c1">#: puncturing, the channel 2 center 26-tone RU, and which are known.</span>
+    <span class="n">flags2</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'bandwidth'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'sig_b_compression'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'sig_b_symbols_users'</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">'preamble_puncturing'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">'ch2_center_26_tone_ru'</span><span class="p">:</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'known'</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Enum_HEMUFlags2Known</span><span class="p">)</span>
     <span class="c1">#: RU allocation of channel 1.</span>
     <span class="n">ru_channel1</span><span class="p">:</span> <span class="s1">'list[int]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">item_type</span><span class="o">=</span><span class="n">UInt8Field</span><span class="p">())</span>
     <span class="c1">#: RU allocation of channel 2.</span>
     <span class="n">ru_channel2</span><span class="p">:</span> <span class="s1">'list[int]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">item_type</span><span class="o">=</span><span class="n">UInt8Field</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags1</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ru_channel1</span><span class="p">:</span> <span class="s1">'list[int] | tuple[int, ...]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags1</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">flags2</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+                     <span class="n">ru_channel1</span><span class="p">:</span> <span class="s1">'list[int] | tuple[int, ...]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                      <span class="n">ru_channel2</span><span class="p">:</span> <span class="s1">'list[int] | tuple[int, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
 
 
@@ -1190,15 +1223,21 @@
 
     <span class="n">__align__</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Common subfields, which hold value subfields.</span>
-    <span class="n">common</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
+    <span class="c1">#: PHY version, bandwidth, UL/DL, BSS color and TXOP, and which are known.</span>
+    <span class="n">common</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span> <span class="o">=</span> <span class="n">BitmapField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'phy_version'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">'bandwidth'</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="s1">'ul_dl'</span><span class="p">:</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">'bss_color'</span><span class="p">:</span> <span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="s1">'txop'</span><span class="p">:</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+    <span class="p">},</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">'known'</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Enum_USIGCommonKnown</span><span class="p">)</span>
     <span class="c1">#: Value of the U-SIG bits.</span>
     <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
     <span class="c1">#: Which of :attr:`value`'s bits are known.</span>
     <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
 

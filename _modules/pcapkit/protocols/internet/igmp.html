@@ -986,7 +986,10 @@
 <span class="sd">        :rfc:`3376#section-4.1.2`, :rfc:`3376#section-4.2.2`). That holds for</span>
 <span class="sd">        IGMPv1 as well: :rfc:`1112` defines an 8-octet message, and :rfc:`2236`,</span>
 <span class="sd">        which updates it, sums a longer one whole (:rfc:`2236#section-2.5`). See</span>
-<span class="sd">        :func:`~pcapkit.corekit.checksum.internet.verify_message`.</span>
+<span class="sd">        :func:`~pcapkit.corekit.checksum.internet.verify_message`. A message the</span>
+<span class="sd">        data ends inside, as its header's ``__short_read__`` records, is</span>
+<span class="sd">        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED`</span>
+<span class="sd">        (:issue:`2689`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            igmp: Parsed message data.</span>
@@ -995,9 +998,16 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_VERIFY</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_message</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="n">ChecksumStatus</span><span class="p">,</span> <span class="n">verify_message</span><span class="p">)</span>
+            <span class="c1"># NOTE: The checksum covers the whole message, so a message the data</span>
+            <span class="c1"># ends inside leaves part of what it covers uncaptured (#2689).</span>
+            <span class="k">if</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">ChecksumStatus</span><span class="o">.</span><span class="n">TRUNCATED</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">verify_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
             <span class="n">igmp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">'checksum_status'</span><span class="p">,</span> <span class="n">verify_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">'checksum_status'</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
             <span class="p">])</span></div>
 
 

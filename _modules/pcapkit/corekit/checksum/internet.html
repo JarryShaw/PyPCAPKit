@@ -574,7 +574,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">rebuilding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">frame_length</span><span class="p">,</span> <span class="n">rebuilding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChecksumWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -764,6 +764,11 @@
 <span class="sd">    verified as the message is parsed, unless an IP fragment carries it; see</span>
 <span class="sd">    :func:`fragment_payload`.</span>
 
+<span class="sd">    Where no layer before the message declares its length, the message runs to</span>
+<span class="sd">    the end of its frame, and the octets the capture cut off the frame, as</span>
+<span class="sd">    :data:`~pcapkit.utilities.contextvars.frame_length` gives them, are</span>
+<span class="sd">    covered too (:issue:`2653`, :issue:`2689`).</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        alias: Protocol alias, to name in the warning.</span>
 <span class="sd">        data: Octets the checksum covers, the checksum field included.</span>
@@ -781,6 +786,9 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">_in_fragment</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">ChecksumStatus</span><span class="o">.</span><span class="n">NO_PSEUDO_HEADER</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">lengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span><span class="p">)</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">verify_checksum</span><span class="p">(</span><span class="n">alias</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span></div>
 
 

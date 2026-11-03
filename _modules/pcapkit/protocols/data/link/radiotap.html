@@ -556,6 +556,10 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.eht_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">EHTKnown</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.field_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Radiotap_Flags</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_data1_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEData1Known</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_data2_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEData2Known</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_flags1_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEMUFlags1Known</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_flags2_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEMUFlags2Known</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.he_mu_other_user_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEMUOtherUserKnown</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.lsig_data1</span><span class="w"> </span><span class="kn">import</span> <span class="n">LSIGData1</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.mcs_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">MCSKnown</span>
@@ -563,6 +567,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.s1g_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">S1GKnown</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.timestamp_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimestampFlags</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.tx_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">TXFlags</span> <span class="k">as</span> <span class="n">Radiotap_TXFlags</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.usig_common_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">USIGCommonKnown</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_coding</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTCoding</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTFlags</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.radiotap.vht_known</span><span class="w"> </span><span class="kn">import</span> <span class="n">VHTKnown</span>
@@ -576,9 +581,10 @@
     <span class="s1">'TSFT'</span><span class="p">,</span> <span class="s1">'Flags'</span><span class="p">,</span> <span class="s1">'Rate'</span><span class="p">,</span> <span class="s1">'Channel'</span><span class="p">,</span> <span class="s1">'FHSS'</span><span class="p">,</span> <span class="s1">'AntennaSignal'</span><span class="p">,</span> <span class="s1">'AntennaNoise'</span><span class="p">,</span>
     <span class="s1">'LockQuality'</span><span class="p">,</span> <span class="s1">'TXAttenuation'</span><span class="p">,</span> <span class="s1">'DBTXAttenuation'</span><span class="p">,</span> <span class="s1">'DBmTXPower'</span><span class="p">,</span> <span class="s1">'Antenna'</span><span class="p">,</span>
     <span class="s1">'DBAntennaSignal'</span><span class="p">,</span> <span class="s1">'DBAntennaNoise'</span><span class="p">,</span> <span class="s1">'RXFlags'</span><span class="p">,</span> <span class="s1">'TXFlags'</span><span class="p">,</span> <span class="s1">'RTSRetries'</span><span class="p">,</span> <span class="s1">'DataRetries'</span><span class="p">,</span>
-    <span class="s1">'MCS'</span><span class="p">,</span> <span class="s1">'AMPDUStatus'</span><span class="p">,</span>
-    <span class="s1">'VHT'</span><span class="p">,</span> <span class="s1">'Timestamp'</span><span class="p">,</span> <span class="s1">'HE'</span><span class="p">,</span> <span class="s1">'HEMU'</span><span class="p">,</span> <span class="s1">'HEMUOtherUser'</span><span class="p">,</span> <span class="s1">'ZeroLengthPSDU'</span><span class="p">,</span> <span class="s1">'LSIG'</span><span class="p">,</span>
-    <span class="s1">'TLVFields'</span><span class="p">,</span> <span class="s1">'RadiotapNamespace'</span><span class="p">,</span> <span class="s1">'VendorNamespace'</span><span class="p">,</span> <span class="s1">'S1G'</span><span class="p">,</span> <span class="s1">'USIG'</span><span class="p">,</span> <span class="s1">'EHT'</span><span class="p">,</span>
+    <span class="s1">'MCS'</span><span class="p">,</span> <span class="s1">'MCSFlags'</span><span class="p">,</span> <span class="s1">'AMPDUStatus'</span><span class="p">,</span>
+    <span class="s1">'VHT'</span><span class="p">,</span> <span class="s1">'Timestamp'</span><span class="p">,</span> <span class="s1">'HE'</span><span class="p">,</span> <span class="s1">'HEData1'</span><span class="p">,</span> <span class="s1">'HEData2'</span><span class="p">,</span> <span class="s1">'HEMU'</span><span class="p">,</span> <span class="s1">'HEMUFlags1'</span><span class="p">,</span> <span class="s1">'HEMUFlags2'</span><span class="p">,</span> <span class="s1">'HEMUOtherUser'</span><span class="p">,</span>
+    <span class="s1">'ZeroLengthPSDU'</span><span class="p">,</span> <span class="s1">'LSIG'</span><span class="p">,</span>
+    <span class="s1">'TLVFields'</span><span class="p">,</span> <span class="s1">'RadiotapNamespace'</span><span class="p">,</span> <span class="s1">'VendorNamespace'</span><span class="p">,</span> <span class="s1">'S1G'</span><span class="p">,</span> <span class="s1">'USIG'</span><span class="p">,</span> <span class="s1">'USIGCommon'</span><span class="p">,</span> <span class="s1">'EHT'</span><span class="p">,</span>
     <span class="s1">'TLV'</span><span class="p">,</span> <span class="s1">'VendorTLV'</span><span class="p">,</span>
 <span class="p">]</span>
 
@@ -883,6 +889,35 @@
 
 
 
+<div class="viewcode-block" id="MCSFlags">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.MCSFlags">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MCSFlags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the MCS field's ``flags``, each a value subfield.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Bandwidth, ``0`` for 20, ``1`` for 40, ``2`` for 20L and ``3`` for 20U.</span>
+    <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Guard interval, ``0`` for long and ``1`` for short.</span>
+    <span class="n">guard_interval</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: HT format, ``0`` for mixed and ``1`` for greenfield.</span>
+    <span class="n">ht_format</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: FEC type, ``0`` for BCC and ``1`` for LDPC.</span>
+    <span class="n">fec_type</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Number of STBC streams.</span>
+    <span class="n">stbc_streams</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Bit 0, the least significant, of the number of extension spatial streams.</span>
+    <span class="n">ness_bit0</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">guard_interval</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ht_format</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fec_type</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+                     <span class="n">stbc_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ness_bit0</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
+
+
+
 <div class="viewcode-block" id="MCS">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.MCS">[docs]</a>
 <span class="nd">@info_final</span>
@@ -891,13 +926,13 @@
 
     <span class="c1">#: Which of :attr:`flags` and :attr:`mcs` are known.</span>
     <span class="n">known</span><span class="p">:</span> <span class="s1">'MCSKnown'</span>
-    <span class="c1">#: Bandwidth, guard interval, HT format, FEC type, STBC and Ness, a bitmap.</span>
-    <span class="n">flags</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Bandwidth, guard interval, HT format, FEC type, STBC and Ness.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">'MCSFlags'</span>
     <span class="c1">#: MCS rate index, as in IEEE Std 802.11n-2009.</span>
     <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'MCSKnown'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'MCSKnown'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'MCSFlags'</span><span class="p">,</span> <span class="n">mcs</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
 
 
 
@@ -972,6 +1007,49 @@
 
 
 
+<div class="viewcode-block" id="HEData1">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.HEData1">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HEData1</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the HE field's ``data1``, a value subfield and known bits.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: HE PPDU format, ``0`` for HE_SU, ``1`` for HE_EXT_SU, ``2`` for HE_MU and</span>
+    <span class="c1">#: ``3`` for HE_TRIG.</span>
+    <span class="n">ppdu_format</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Which of the other subfields are known.</span>
+    <span class="n">known</span><span class="p">:</span> <span class="s1">'HEData1Known'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ppdu_format</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'HEData1Known'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+
+
+
+<div class="viewcode-block" id="HEData2">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.HEData2">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HEData2</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the HE field's ``data2``, value subfields and known bits.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: RU allocation offset, within the 80 MHz channel.</span>
+    <span class="n">ru_offset</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The 80 MHz channel, ``0`` for the primary and ``1`` for the secondary.</span>
+    <span class="n">pri_sec_80mhz</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Which of the other subfields are known.</span>
+    <span class="n">known</span><span class="p">:</span> <span class="s1">'HEData2Known'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ru_offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pri_sec_80mhz</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="s1">'HEData2Known'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+
+
+
 <div class="viewcode-block" id="HE">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.HE">[docs]</a>
 <span class="nd">@info_final</span>
@@ -979,9 +1057,9 @@
 <span class="w">    </span><span class="sd">"""Data model for the HE field, bit 23, mostly the common part of HE-SIG-A."""</span>
 
     <span class="c1">#: PPDU format and which of the subfields are known.</span>
-    <span class="n">data1</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Which of the subfields are known, and the primary 80 MHz channel.</span>
-    <span class="n">data2</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="n">data1</span><span class="p">:</span> <span class="s1">'HEData1'</span>
+    <span class="c1">#: RU allocation offset, the 80 MHz channel, and which subfields are known.</span>
+    <span class="n">data2</span><span class="p">:</span> <span class="s1">'HEData2'</span>
     <span class="c1">#: BSS color, beam change, UL/DL, MCS, DCM, coding, LDPC and STBC.</span>
     <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Spatial reuse, or STA-ID in an HE MU PPDU.</span>
@@ -992,8 +1070,64 @@
     <span class="n">data6</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">data1</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">data1</span><span class="p">:</span> <span class="s1">'HEData1'</span><span class="p">,</span> <span class="n">data2</span><span class="p">:</span> <span class="s1">'HEData2'</span><span class="p">,</span> <span class="n">data3</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span>
                      <span class="n">data4</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data5</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data6</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
+
+
+
+<div class="viewcode-block" id="HEMUFlags1">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.HEMUFlags1">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HEMUFlags1</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the HE-MU field's ``flags1``, value subfields and known bits.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: SIG-B MCS, from HE-SIG-A.</span>
+    <span class="n">sig_b_mcs</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: SIG-B DCM, from HE-SIG-A.</span>
+    <span class="n">sig_b_dcm</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Channel 1 center 26-tone RU value.</span>
+    <span class="n">ch1_center_26_tone_ru</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Which of the subfields of this word and of ``flags2`` are known.</span>
+    <span class="n">known</span><span class="p">:</span> <span class="s1">'HEMUFlags1Known'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig_b_mcs</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sig_b_dcm</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ch1_center_26_tone_ru</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+                     <span class="n">known</span><span class="p">:</span> <span class="s1">'HEMUFlags1Known'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
+
+
+
+<div class="viewcode-block" id="HEMUFlags2">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.HEMUFlags2">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HEMUFlags2</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the HE-MU field's ``flags2``, value subfields and known bits.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Bandwidth from the Bandwidth field of HE-SIG-A, ``0`` for 20 MHz up to</span>
+    <span class="c1">#: ``3`` for 160 or 80+80 MHz.</span>
+    <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: SIG-B compression, from HE-SIG-A.</span>
+    <span class="n">sig_b_compression</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Number of HE-SIG-B symbols or MU-MIMO users, less one, from HE-SIG-A.</span>
+    <span class="n">sig_b_symbols_users</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Preamble puncturing, from the Bandwidth field of HE-SIG-A.</span>
+    <span class="n">preamble_puncturing</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Channel 2 center 26-tone RU value.</span>
+    <span class="n">ch2_center_26_tone_ru</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Which of the bandwidth and preamble puncturing are known.</span>
+    <span class="n">known</span><span class="p">:</span> <span class="s1">'HEMUFlags2Known'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sig_b_compression</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sig_b_symbols_users</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+                     <span class="n">preamble_puncturing</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ch2_center_26_tone_ru</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                     <span class="n">known</span><span class="p">:</span> <span class="s1">'HEMUFlags2Known'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
 
 
 
@@ -1003,17 +1137,19 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HEMU</span><span class="p">(</span><span class="n">RadiotapField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the HE-MU field, bit 24, from HE-SIG-A and HE-SIG-B."""</span>
 
-    <span class="c1">#: SIG-B MCS, DCM, compression and which of the subfields are known.</span>
-    <span class="n">flags1</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Bandwidth, SIG-B symbols or MU-MIMO users, and punctured preamble.</span>
-    <span class="n">flags2</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: SIG-B MCS and DCM, the channel 1 center 26-tone RU, and which subfields</span>
+    <span class="c1">#: are known.</span>
+    <span class="n">flags1</span><span class="p">:</span> <span class="s1">'HEMUFlags1'</span>
+    <span class="c1">#: Bandwidth, SIG-B compression, SIG-B symbols or MU-MIMO users, preamble</span>
+    <span class="c1">#: puncturing and the channel 2 center 26-tone RU.</span>
+    <span class="n">flags2</span><span class="p">:</span> <span class="s1">'HEMUFlags2'</span>
     <span class="c1">#: RU_channel1, one octet per RU.</span>
     <span class="n">ru_channel1</span><span class="p">:</span> <span class="s1">'tuple[int, int, int, int]'</span>
     <span class="c1">#: RU_channel2, one octet per RU.</span>
     <span class="n">ru_channel2</span><span class="p">:</span> <span class="s1">'tuple[int, int, int, int]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">flags1</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">flags1</span><span class="p">:</span> <span class="s1">'HEMUFlags1'</span><span class="p">,</span> <span class="n">flags2</span><span class="p">:</span> <span class="s1">'HEMUFlags2'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span>
                      <span class="n">ru_channel1</span><span class="p">:</span> <span class="s1">'tuple[int, int, int, int]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                      <span class="n">ru_channel2</span><span class="p">:</span> <span class="s1">'tuple[int, int, int, int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
 
@@ -1080,8 +1216,10 @@
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span>
     <span class="c1">#: Length of :attr:`data`, in octets, less the padding after it.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: The data, decoded where the type defines a layout and :attr:`length`</span>
-    <span class="c1">#: matches it; the raw octets otherwise.</span>
+    <span class="c1">#: The data, decoded where the type defines a layout :attr:`length` does</span>
+    <span class="c1">#: not run past; the raw octets otherwise. Data short of the layout is</span>
+    <span class="c1">#: decoded with the octets it lacks as zeros, and records the cut as</span>
+    <span class="c1">#: ``__short_read__``.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">'RadiotapField | VendorTLV | bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1170,21 +1308,52 @@
 
 
 
+<div class="viewcode-block" id="USIGCommon">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.USIGCommon">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">USIGCommon</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the U-SIG field's ``common``, value subfields and known bits.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: PHY version identifier.</span>
+    <span class="n">phy_version</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Bandwidth, ``0`` for 20 MHz up to ``3`` for 160 MHz, and ``4`` and ``5`` for</span>
+    <span class="c1">#: the two 320 MHz channelizations.</span>
+    <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: UL/DL.</span>
+    <span class="n">ul_dl</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: BSS color.</span>
+    <span class="n">bss_color</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: TXOP.</span>
+    <span class="n">txop</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Which of the subfields are known, and whether the U-SIG CRC failed and its</span>
+    <span class="c1">#: validate bits were checked and found right.</span>
+    <span class="n">known</span><span class="p">:</span> <span class="s1">'USIGCommonKnown'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phy_version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ul_dl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">bss_color</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">txop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span>
+                     <span class="n">known</span><span class="p">:</span> <span class="s1">'USIGCommonKnown'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument</span></div>
+
+
+
 <div class="viewcode-block" id="USIG">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.data.link.radiotap.USIG">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">USIG</span><span class="p">(</span><span class="n">RadiotapField</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the U-SIG field, TLV type 33."""</span>
 
-    <span class="c1">#: Which of the common subfields are known, and their values.</span>
-    <span class="n">common</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The common subfields, and which are known.</span>
+    <span class="n">common</span><span class="p">:</span> <span class="s1">'USIGCommon'</span>
     <span class="c1">#: Version-dependent subfields.</span>
     <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Which bits of :attr:`value` are known.</span>
     <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">common</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'FieldType'</span><span class="p">,</span> <span class="n">common</span><span class="p">:</span> <span class="s1">'USIGCommon'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
 
 
 

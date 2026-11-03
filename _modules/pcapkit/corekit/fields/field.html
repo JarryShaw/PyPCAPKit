@@ -626,7 +626,8 @@
 <span class="c1">#: *not* weighed against it: a shortfall within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`</span>
 <span class="c1">#: neither consults this ledger nor is charged to it, which is what keeps every</span>
 <span class="c1">#: legitimate short read answering the same however much preceded it. Only the</span>
-<span class="c1">#: 32-bit band above reads and writes ``[1]``.</span>
+<span class="c1">#: 32-bit band above reads and writes ``[1]``, and :func:`_zero_filled_items`, whose</span>
+<span class="c1">#: fill of a list of schema items has no free band (:issue:`2686`).</span>
 <span class="n">_zero_pad_ledger</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span>
     <span class="s1">'pcapkit.corekit.fields.field._zero_pad_ledger'</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[list[int]]'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
@@ -659,6 +660,71 @@
         <span class="k">yield</span> <span class="n">ledger</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zero_filled_items</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[bytes]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Zero-fill the octets of a list of schema items to its declared width.</span>
+
+<span class="sd">    :meth:`FieldBase.unpack` reads a field the data ends inside as though its</span>
+<span class="sd">    missing octets were zeros, and :meth:`ListField.unpack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;` gives a list of</span>
+<span class="sd">    schema items the same reading here, so its items cover the width it</span>
+<span class="sd">    declares (:issue:`2686`). The items are read inside the block.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Field name.</span>
+<span class="sd">        length: Octets the field declares.</span>
+<span class="sd">        data: Octets actually present, fewer than ``length``.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``data``, zero-filled to ``length``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``length`` is past</span>
+<span class="sd">            :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, or if the</span>
+<span class="sd">            fill takes this parse's padding past</span>
+<span class="sd">            :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` times the</span>
+<span class="sd">            octets it has actually read.</span>
+
+<span class="sd">    """</span>
+    <span class="n">ceiling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_LENGTH</span>
+    <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">ceiling</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> declares a length of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s), '</span>
+            <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
+        <span class="p">)</span>
+
+    <span class="n">ledger</span> <span class="o">=</span> <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ledger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ledger</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ledger</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: The fill is made-up schema objects, not zeros, so it gets no free band or one-off</span>
+    <span class="c1"># allowance: a 15-octet SETTINGS frame declaring 65,532 octets made 10,922 pairs in 7.5 MB.</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">shortfall</span><span class="p">,</span> <span class="n">ratio</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_SHORTFALL</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ZERO_PAD_BUDGET_RATIO</span>
+    <span class="k">if</span> <span class="n">shortfall</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ratio</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">allowance</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="p">(</span><span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">allowance</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> would zero-fill </span><span class="si">{</span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s) of items, '</span>
+                    <span class="sa">f</span><span class="s1">'taking this parse to </span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s) of padding '</span>
+                    <span class="sa">f</span><span class="s1">'against </span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) actually read, past the '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">allowance</span><span class="si">}</span><span class="s1"> octet(s) allowed.'</span>
+                <span class="p">)</span>
+        <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
+
+    <span class="c1"># NOTE: The items credit the zeros they read as octets supplied, so they are taken off in</span>
+    <span class="c1"># advance; items that fail credit an unknown share, so the octets read go back as they were.</span>
+    <span class="n">read</span> <span class="o">=</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">padding</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+        <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">read</span>
+        <span class="k">raise</span>
 
 
 <span class="c1">#: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative</span>

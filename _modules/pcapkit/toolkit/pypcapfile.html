@@ -1077,9 +1077,13 @@
 <span class="sd">        data: Raw octets from the header on, as far as the IPv4 packet goes.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The header's Next Header field and its length, or :data:`None` if its</span>
-<span class="sd">        parser raises anything at all, or fewer octets were captured than the</span>
-<span class="sd">        header needs.</span>
+<span class="sd">        The header's Next Header field and the length it declares, or</span>
+<span class="sd">        :data:`None` if its parser raises anything at all, or fewer octets were</span>
+<span class="sd">        captured than its :meth:`__length_hint__</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.__length_hint__&gt;`. A header</span>
+<span class="sd">        captured at least that long is kept even when cut short of the length</span>
+<span class="sd">        it declares, as pcapkit's own IPv4 dissection keeps it, so the length</span>
+<span class="sd">        can run past ``data`` (:issue:`2695`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The header is parsed on trial as under</span>
@@ -1098,7 +1102,7 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">beholding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-    <span class="n">nxt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># none on a header cut short, read as raw octets</span>
+    <span class="n">nxt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># none on a header short of its hint, kept as raw octets</span>
     <span class="k">if</span> <span class="n">nxt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nxt</span><span class="p">),</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span></div>
@@ -1117,13 +1121,16 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The protocol number after the last of them, the octets from its header</span>
 <span class="sd">        on, and how many headers were stepped over -- ``protocol``, ``data`` and</span>
-<span class="sd">        ``0`` if ``protocol`` is none of them -- or :data:`None` if one of them</span>
-<span class="sd">        is cut short or rejected, or more than</span>
+<span class="sd">        ``0`` if ``protocol`` is none of them -- or :data:`None` if an AH is cut</span>
+<span class="sd">        short or rejected, :func:`_default_extension_header` answers</span>
+<span class="sd">        :data:`None` for any other, or more than</span>
 <span class="sd">        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`</span>
 <span class="sd">        follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long</span>
 <span class="sd">        (:rfc:`4302#section-2.2`), and no shorter than</span>
-<span class="sd">        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`;</span>
-<span class="sd">        any other is read by :func:`_default_extension_header`.</span>
+<span class="sd">        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`. Any other</span>
+<span class="sd">        is stepped over by the length :func:`_default_extension_header` gives,</span>
+<span class="sd">        so one it keeps though cut short leaves no octets after it</span>
+<span class="sd">        (:issue:`2695`).</span>
 
 <span class="sd">    """</span>
     <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>

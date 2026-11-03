@@ -598,6 +598,18 @@ radiotap.org <a class="footnote-reference brackets" href="#id2" id="id1" role="d
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags" title="pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_TimestampFlags</span></code></a></p></td>
 <td><p>Timestamp Flags</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known" title="pcapkit.vendor.radiotap.he_data1_known.HEData1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_HEData1Known</span></code></a></p></td>
+<td><p>HE Data1 Known Flags</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known" title="pcapkit.vendor.radiotap.he_data2_known.HEData2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_HEData2Known</span></code></a></p></td>
+<td><p>HE Data2 Known Flags</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_HEMUFlags1Known</span></code></a></p></td>
+<td><p>HE-MU Flags1 Known Flags</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_HEMUFlags2Known</span></code></a></p></td>
+<td><p>HE-MU Flags2 Known Flags</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown" title="pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_HEMUOtherUserKnown</span></code></a></p></td>
 <td><p>HE-MU-other-user Known Flags</p></td>
 </tr>
@@ -607,7 +619,10 @@ radiotap.org <a class="footnote-reference brackets" href="#id2" id="id1" role="d
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.s1g_known.S1GKnown" title="pcapkit.vendor.radiotap.s1g_known.S1GKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_S1GKnown</span></code></a></p></td>
 <td><p>S1G Known Flags</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.eht_known.EHTKnown" title="pcapkit.vendor.radiotap.eht_known.EHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_EHTKnown</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown" title="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_USIGCommonKnown</span></code></a></p></td>
+<td><p>U-SIG Common Known Flags</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.radiotap.eht_known.EHTKnown" title="pcapkit.vendor.radiotap.eht_known.EHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap_EHTKnown</span></code></a></p></td>
 <td><p>EHT Known Flags</p></td>
 </tr>
 </tbody>
@@ -672,7 +687,9 @@ the field, the systems that generate it and those that parse it.</p>
 which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.flags.Flags" title="pcapkit.const.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.flags.Flags</span></code></a>.</p>
 <p>Each flag crawler scrapes the table on its field’s page, and subclasses this one.
 A row whose mask sets one bit is a member; a row that sets more bits, or that
-radiotap.org marks reserved or unused, is not, and its bits stay undefined. A
+radiotap.org marks reserved or unused, is not, and its bits stay undefined; nor
+is a row of a crawler’s <code class="docutils literal notranslate"><span class="pre">VALUES</span></code>, a value subfield of a bitmap that mixes them
+with flags, which its schema splits off. A
 member’s name is the macro the crawler’s <code class="docutils literal notranslate"><span class="pre">NAMES</span></code> gives its bit, less the
 <code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP_</span></code> or <code class="docutils literal notranslate"><span class="pre">IEEE80211_</span></code> prefix: the Linux kernel’s, from
 <code class="docutils literal notranslate"><span class="pre">include/net/ieee80211_radiotap.h</span></code>, or Wireshark’s where Linux names none.
@@ -1040,6 +1057,174 @@ which is automatically generating <a class="reference internal" href="../const/r
 </dd></dl>
 
 </section>
+<section id="module-pcapkit.vendor.radiotap.he_data1_known">
+<span id="he-data1-known-flags"></span><h2>HE Data1 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_data1_known" title="Link to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Radiotap HE Data1 Known Flags</strong>,
+which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data1_known.HEData1Known" title="pcapkit.const.radiotap.he_data1_known.HEData1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data1_known.HEData1Known</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_data1_known.</span></span><span class="sig-name descname"><span class="pre">HEData1Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_data1_known.html#HEData1Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.radiotap.flags.Flags" title="pcapkit.vendor.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a></p>
+<p>Radiotap HE Data1 Known Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.radiotap.org/fields/HE.html'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known.SUBFIELD">
+<span class="sig-name descname"><span class="pre">SUBFIELD</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'data1'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known.SUBFIELD" title="Link to this definition">¶</a></dt>
+<dd><p>Subfield whose table is scraped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known.VALUES">
+<span class="sig-name descname"><span class="pre">VALUES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(3,)</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known.VALUES" title="Link to this definition">¶</a></dt>
+<dd><p>Masks of the value subfields, which the schema splits off.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known.NAMES">
+<span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{4:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_BSS_COLOR_KNOWN',</span> <span class="pre">8:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_BEAM_CHANGE_KNOWN',</span> <span class="pre">16:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_UL_DL_KNOWN',</span> <span class="pre">32:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_DATA_MCS_KNOWN',</span> <span class="pre">64:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_DATA_DCM_KNOWN',</span> <span class="pre">128:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_CODING_KNOWN',</span> <span class="pre">256:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_LDPC_XSYMSEG_KNOWN',</span> <span class="pre">512:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_STBC_KNOWN',</span> <span class="pre">1024:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_SPTL_REUSE_KNOWN',</span> <span class="pre">2048:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_SPTL_REUSE2_KNOWN',</span> <span class="pre">4096:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_SPTL_REUSE3_KNOWN',</span> <span class="pre">8192:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_SPTL_REUSE4_KNOWN',</span> <span class="pre">16384:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_BW_RU_ALLOC_KNOWN',</span> <span class="pre">32768:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA1_DOPPLER_KNOWN'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known.NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.radiotap.he_data2_known">
+<span id="he-data2-known-flags"></span><h2>HE Data2 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_data2_known" title="Link to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Radiotap HE Data2 Known Flags</strong>,
+which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data2_known.HEData2Known" title="pcapkit.const.radiotap.he_data2_known.HEData2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data2_known.HEData2Known</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_data2_known.</span></span><span class="sig-name descname"><span class="pre">HEData2Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_data2_known.html#HEData2Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.radiotap.flags.Flags" title="pcapkit.vendor.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a></p>
+<p>Radiotap HE Data2 Known Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.radiotap.org/fields/HE.html'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known.SUBFIELD">
+<span class="sig-name descname"><span class="pre">SUBFIELD</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'data2'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known.SUBFIELD" title="Link to this definition">¶</a></dt>
+<dd><p>Subfield whose table is scraped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known.VALUES">
+<span class="sig-name descname"><span class="pre">VALUES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(16128,</span> <span class="pre">32768)</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known.VALUES" title="Link to this definition">¶</a></dt>
+<dd><p>Masks of the value subfields, which the schema splits off.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known.NAMES">
+<span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{1:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_PRISEC_80_KNOWN',</span> <span class="pre">2:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_GI_KNOWN',</span> <span class="pre">4:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_NUM_LTF_SYMS_KNOWN',</span> <span class="pre">8:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_PRE_FEC_PAD_KNOWN',</span> <span class="pre">16:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_TXBF_KNOWN',</span> <span class="pre">32:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_PE_DISAMBIG_KNOWN',</span> <span class="pre">64:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_TXOP_KNOWN',</span> <span class="pre">128:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_MIDAMBLE_KNOWN',</span> <span class="pre">16384:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_DATA2_RU_OFFSET_KNOWN'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known.NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.radiotap.he_mu_flags1_known">
+<span id="he-mu-flags1-known-flags"></span><h2>HE-MU Flags1 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_flags1_known" title="Link to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Radiotap HE-MU Flags1 Known Flags</strong>,
+which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_mu_flags1_known.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags1Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_mu_flags1_known.html#HEMUFlags1Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.radiotap.flags.Flags" title="pcapkit.vendor.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a></p>
+<p>Radiotap HE-MU Flags1 Known Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.radiotap.org/fields/HE-MU.html'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.SUBFIELD">
+<span class="sig-name descname"><span class="pre">SUBFIELD</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'flags1'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.SUBFIELD" title="Link to this definition">¶</a></dt>
+<dd><p>Subfield whose table is scraped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.VALUES">
+<span class="sig-name descname"><span class="pre">VALUES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(15,</span> <span class="pre">32,</span> <span class="pre">8192)</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.VALUES" title="Link to this definition">¶</a></dt>
+<dd><p>Masks of the value subfields, which the schema splits off.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.NAMES">
+<span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{16:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_SIG_B_MCS_KNOWN',</span> <span class="pre">64:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_SIG_B_DCM_KNOWN',</span> <span class="pre">128:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_CH2_CTR_26T_RU_KNOWN',</span> <span class="pre">256:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_CH1_RU_KNOWN',</span> <span class="pre">512:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_CH2_RU_KNOWN',</span> <span class="pre">4096:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_CH1_CTR_26T_RU_KNOWN',</span> <span class="pre">16384:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_SIG_B_COMP_KNOWN',</span> <span class="pre">32768:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS1_SIG_B_SYMS_USERS_KNOWN'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known.NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.radiotap.he_mu_flags2_known">
+<span id="he-mu-flags2-known-flags"></span><h2>HE-MU Flags2 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_flags2_known" title="Link to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Radiotap HE-MU Flags2 Known Flags</strong>,
+which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_mu_flags2_known.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags2Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_mu_flags2_known.html#HEMUFlags2Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.radiotap.flags.Flags" title="pcapkit.vendor.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a></p>
+<p>Radiotap HE-MU Flags2 Known Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.radiotap.org/fields/HE-MU.html'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.SUBFIELD">
+<span class="sig-name descname"><span class="pre">SUBFIELD</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'flags2'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.SUBFIELD" title="Link to this definition">¶</a></dt>
+<dd><p>Subfield whose table is scraped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.VALUES">
+<span class="sig-name descname"><span class="pre">VALUES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(3,</span> <span class="pre">8,</span> <span class="pre">240,</span> <span class="pre">768,</span> <span class="pre">2048)</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.VALUES" title="Link to this definition">¶</a></dt>
+<dd><p>Masks of the value subfields, which the schema splits off.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.NAMES">
+<span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{4:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS2_BW_FROM_SIG_A_BW_KNOWN',</span> <span class="pre">1024:</span> <span class="pre">'IEEE80211_RADIOTAP_HE_MU_FLAGS2_PUNC_FROM_SIG_A_BW_KNOWN'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known.NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-pcapkit.vendor.radiotap.he_mu_other_user_known">
 <span id="he-mu-other-user-known-flags"></span><h2>HE-MU-other-user Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_other_user_known" title="Link to this heading">¶</a></h2>
 <p>This module contains the vendor crawler for <strong>Radiotap HE-MU-other-user Known Flags</strong>,
@@ -1143,6 +1328,48 @@ which is automatically generating <a class="reference internal" href="../const/r
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.s1g_known.S1GKnown.NAMES">
 <span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{1:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_PPDU_FORMAT',</span> <span class="pre">2:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_RESPONSE_IND',</span> <span class="pre">4:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_GI',</span> <span class="pre">8:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_NSS',</span> <span class="pre">16:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_BW',</span> <span class="pre">32:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_MCS',</span> <span class="pre">64:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_COLOR',</span> <span class="pre">128:</span> <span class="pre">'IEEE80211_RADIOTAP_S1G_KNOWN_UPLINK_IND'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.s1g_known.S1GKnown.NAMES" title="Link to this definition">¶</a></dt>
+<dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.radiotap.usig_common_known">
+<span id="u-sig-common-known-flags"></span><h2>U-SIG Common Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.usig_common_known" title="Link to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Radiotap U-SIG Common Known Flags</strong>,
+which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.usig_common_known.USIGCommonKnown" title="pcapkit.const.radiotap.usig_common_known.USIGCommonKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.usig_common_known.USIGCommonKnown</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.usig_common_known.</span></span><span class="sig-name descname"><span class="pre">USIGCommonKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/usig_common_known.html#USIGCommonKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.radiotap.flags.Flags" title="pcapkit.vendor.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a></p>
+<p>Radiotap U-SIG Common Known Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFFFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.radiotap.org/fields/U-SIG.html'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.SUBFIELD">
+<span class="sig-name descname"><span class="pre">SUBFIELD</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'common'</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.SUBFIELD" title="Link to this definition">¶</a></dt>
+<dd><p>Subfield whose table is scraped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.VALUES">
+<span class="sig-name descname"><span class="pre">VALUES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(28672,</span> <span class="pre">229376,</span> <span class="pre">262144,</span> <span class="pre">33030144,</span> <span class="pre">4261412864)</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.VALUES" title="Link to this definition">¶</a></dt>
+<dd><p>Masks of the value subfields, which the schema splits off.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.NAMES">
+<span class="sig-name descname"><span class="pre">NAMES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{1:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_PHY_VER_KNOWN',</span> <span class="pre">2:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_BW_KNOWN',</span> <span class="pre">4:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_UL_DL_KNOWN',</span> <span class="pre">8:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_BSS_COLOR_KNOWN',</span> <span class="pre">16:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_TXOP_KNOWN',</span> <span class="pre">32:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_BAD_USIG_CRC',</span> <span class="pre">64:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_VALIDATE_BITS_CHECKED',</span> <span class="pre">128:</span> <span class="pre">'IEEE80211_RADIOTAP_EHT_USIG_COMMON_VALIDATE_BITS_OK'}</span></span><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown.NAMES" title="Link to this definition">¶</a></dt>
 <dd><p>The source macro of each bit, keyed by mask, which is Linux’s.</p>
 </dd></dl>
 
@@ -1262,9 +1489,14 @@ page and each field’s own page.</p>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.vht_flags">VHT Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.vht_coding">VHT Coding Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.timestamp_flags">Timestamp Flags</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.he_data1_known">HE Data1 Known Flags</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.he_data2_known">HE Data2 Known Flags</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.he_mu_flags1_known">HE-MU Flags1 Known Flags</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.he_mu_flags2_known">HE-MU Flags2 Known Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.he_mu_other_user_known">HE-MU-other-user Known Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.lsig_data1">L-SIG Data1 Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.s1g_known">S1G Known Flags</a></li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.usig_common_known">U-SIG Common Known Flags</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.radiotap.eht_known">EHT Known Flags</a></li>
 </ul>
 </li>

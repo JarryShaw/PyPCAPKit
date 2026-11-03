@@ -571,6 +571,7 @@ describe the structure of protocol headers.</p>
 <li class="toctree-l1"><a class="reference internal" href="numbers.html">Numerical Fields</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="numbers.html#sized-fields">Sized Fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="numbers.html#enumeration-fields">Enumeration Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numbers.html#bitmap-fields">Bitmap Fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="numbers.html#internal-definitions">Internal Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="numbers.html#type-variables">Type Variables</a></li>
 </ul>
@@ -625,6 +626,7 @@ hierarchy:</p>
         NumberField --&gt; Int8Field &amp; UInt8Field
         NumberField --&gt; EnumField
         EnumField --&gt; PortEnumField
+        NumberField --&gt; BitmapField
     end
     C --&gt; NumberField
 
@@ -679,6 +681,7 @@ hierarchy:</p>
     click UInt8Field &quot;numbers.html#pcapkit.corekit.fields.numbers.UInt8Field&quot;
     click EnumField &quot;numbers.html#pcapkit.corekit.fields.numbers.EnumField&quot;
     click PortEnumField &quot;numbers.html#pcapkit.corekit.fields.numbers.PortEnumField&quot;
+    click BitmapField &quot;numbers.html#pcapkit.corekit.fields.numbers.BitmapField&quot;
 
     click _TextField &quot;strings.html#pcapkit.corekit.fields.strings._TextField&quot;
     click BytesField &quot;strings.html#pcapkit.corekit.fields.strings.BytesField&quot;

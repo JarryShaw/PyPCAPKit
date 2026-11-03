@@ -605,6 +605,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">,</span> <span class="n">StringField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -680,15 +681,26 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotRequired</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <div class="viewcode-block" id="ANSIKeyLengthTest">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">ANSIKeyLengthTest</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Length test for ASN.1 encoded data, see</span>
-<span class="sd">        :attr:`CGAParameter.public_key_test`."""</span>
+<span class="sd">        :attr:`CGAParameter.public_key_test`.</span>
 
-        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span></div>
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           New key ``long`` (:issue:`2684`).</span>
+
+<span class="sd">        """</span>
+
+        <span class="c1">#: First length octet: the length itself, or ``0x80`` plus the number of</span>
+        <span class="c1">#: length octets that follow.</span>
+        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: The two octets after it, which hold a long-form length; absent from a</span>
+        <span class="c1">#: test the maker sets.</span>
+        <span class="n">long</span><span class="p">:</span> <span class="s1">'NotRequired[int]'</span></div>
 
 
 <div class="viewcode-block" id="MultiPrefixExtensionFlags">
@@ -1258,6 +1270,53 @@
 
 
 
+<div class="viewcode-block" id="cga_public_key_length">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.cga_public_key_length">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cga_public_key_length</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the length of :attr:`CGAParameter.public_key`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The octets of the key's ASN.1 type, length and value. The key is a DER</span>
+<span class="sd">        ``SubjectPublicKeyInfo`` [:rfc:`3972#section-3`], whose length octet is</span>
+<span class="sd">        either the length or, from ``0x80``, the count of length octets after it</span>
+<span class="sd">        [ITU-T X.690 section 8.1.3]; a key of more than 127 octets takes the</span>
+<span class="sd">        latter.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the key runs past the CGA Parameters option it is read</span>
+<span class="sd">            from, or its length is indefinite or wider than an option can hold.</span>
+<span class="sd">            :rfc:`4866#section-5.1` lets the parameters span several options,</span>
+<span class="sd">            which are not joined here, so such a key is refused rather than read</span>
+<span class="sd">            from the octets after the option (:issue:`2684`).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The check is skipped when ``__length__`` is absent or negative, which is</span>
+<span class="sd">        what :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`</span>
+<span class="sd">        leaves it as. A key test set by</span>
+<span class="sd">        :meth:`MH._make_opt_cga_param &lt;pcapkit.protocols.internet.mh.MH._make_opt_cga_param&gt;`</span>
+<span class="sd">        carries no ``long``, and its ``len`` is the key's length less two.</span>
+
+<span class="sd">    """</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'public_key_test'</span><span class="p">]</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">'long'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mh">0x80</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x81</span><span class="p">,</span> <span class="mh">0x82</span><span class="p">):</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">size</span> <span class="o">&amp;</span> <span class="mh">0x7F</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="s1">'long'</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mh">0x81</span> <span class="k">else</span> <span class="n">test</span><span class="p">[</span><span class="s1">'long'</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="si">}</span><span class="s1">] invalid CGA public key '</span>
+                            <span class="sa">f</span><span class="s1">'length octet: </span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s1">#04x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">remaining</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="si">}</span><span class="s1">] CGA public key of '</span>
+                            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) runs past the option, with </span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1"> left'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="MH">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.MH">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -1666,7 +1725,15 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.CGAParameter">[docs]</a>
 <span class="nd">@schema_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CGAParameter</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for CGA Parameters."""</span>
+<span class="w">    </span><span class="sd">"""Header schema for CGA Parameters.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       The public key takes the long form of a DER length, and parameters whose</span>
+<span class="sd">       fixed fields or public key run past the CGA Parameters option are refused,</span>
+<span class="sd">       rather than read from the octets after it (:issue:`2684`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Modifier.</span>
     <span class="n">modifier</span><span class="p">:</span> <span class="s1">'Enum_CGAType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_CGAType</span><span class="p">)</span>
@@ -1675,11 +1742,12 @@
     <span class="c1">#: Collision count.</span>
     <span class="n">collision_count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Public key length test.</span>
-    <span class="n">public_key_test</span><span class="p">:</span> <span class="s1">'ANSIKeyLengthTest'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+    <span class="n">public_key_test</span><span class="p">:</span> <span class="s1">'ANSIKeyLengthTest'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="s1">'long'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: Public key (ASN.1 encoded).</span>
-    <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'public_key_test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># 2 bytes for type &amp; length</span>
+    <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">cga_public_key_length</span><span class="p">)</span>
     <span class="c1">#: Extension fields.</span>
     <span class="n">extensions</span><span class="p">:</span> <span class="s1">'list[CGAExtension]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">25</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'public_key'</span><span class="p">]),</span>
@@ -1688,6 +1756,27 @@
         <span class="n">registry</span><span class="o">=</span><span class="n">CGAExtension</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
+
+<div class="viewcode-block" id="CGAParameter.pre_unpack">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.CGAParameter.pre_unpack">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse parameters whose fixed fields do not fit in what is left.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If fewer octets are left than the 25 of the modifier,</span>
+<span class="sd">                subnet prefix and collision count [:rfc:`3972#section-3`], which</span>
+<span class="sd">                :func:`cga_public_key_length` gives its reason for refusing.</span>
+
+<span class="sd">        """</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'MH: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="si">}</span><span class="s1">] CGA parameters of '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1"> octet(s) cannot hold their fixed fields'</span><span class="p">)</span></div>
+
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifier</span><span class="p">:</span> <span class="s1">'Enum_CGAType'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">collision_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>

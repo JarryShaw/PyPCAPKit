@@ -1014,7 +1014,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                            <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4, 6]'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">'Optional[ProtoChain]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">payload</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
+                           <span class="n">payload</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">declared</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1026,6 +1026,7 @@
 <span class="sd">            ipv6_exthdr: protocol chain of IPv6 extension headers</span>
 <span class="sd">            payload: payload from packet. If not provided, will extract from</span>
 <span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.schema.Schema.get_payload&gt;`</span>
+<span class="sd">            declared: whether this layer declares the length of its payload</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Current protocol with next layer extracted.</span>
@@ -1039,18 +1040,22 @@
 <span class="sd">            The next layer is parsed with</span>
 <span class="sd">            :data:`~pcapkit.utilities.contextvars.frame_length` cleared, since</span>
 <span class="sd">            this layer, not the frame, bounds its payload (:issue:`2653`).</span>
+<span class="sd">            With ``declared`` false it is left as it is, for a payload that</span>
+<span class="sd">            runs to the end of the frame, as behind an IPv4 Total Length of 0,</span>
+<span class="sd">            or to the end of the parent's (:issue:`2689`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The length this layer hands on bounds the payload, so octets the</span>
         <span class="c1"># capture cut off the frame past it are none of the next layer's (#2653).</span>
-        <span class="c1"># An IPv4 Total Length of 0, read as the rest of the frame, loses the cut.</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># A layer declaring none hands the frame's cut on instead (#2689).</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">frame_length</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">declared</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>
                          <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
                                                  <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">))</span>  <span class="c1"># type: ignore[misc,call-arg]</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="n">frame_length</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">frame_length</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
 
         <span class="c1"># make next layer protocol name</span>

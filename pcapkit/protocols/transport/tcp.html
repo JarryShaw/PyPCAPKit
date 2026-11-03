@@ -1953,6 +1953,10 @@ leaves on the sending host, and is
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is not the one the <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code> and
+    <code class="docutils literal notranslate"><span class="pre">m</span></code> flags give, or, with <code class="docutils literal notranslate"><span class="pre">M</span></code> set, that plus the 2-octet checksum.</p>
+</dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1960,6 +1964,10 @@ leaves on the sending host, and is
 3 high bits of the flags octet; it is kept as one 7-bit value. The
 checksum is absent when the option length leaves no room for it,
 i.e., when checksums were not negotiated.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>A length the flags do not give is refused, rather than read with the
+missing fields as zeros or the extra octets dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2669">#2669</a>).</p>
 </div>
 </dd></dl>
 

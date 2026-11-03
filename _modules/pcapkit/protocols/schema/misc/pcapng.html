@@ -574,7 +574,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
+                                        <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PCAPNG'</span><span class="p">,</span>
@@ -1253,30 +1254,30 @@
 <span class="sd">        data: The Secrets Data octets, as the block held them.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A ``schema`` instance that packs back to exactly ``data``.</span>
+<span class="sd">        A ``schema`` instance that holds, and packs back to, exactly ``data``.</span>
 
-<span class="sd">    The fixed fields are read from ``data``, and any octets past them are kept</span>
-<span class="sd">    as the schema's ``trailing`` octets. A ``data`` short of the fixed width is</span>
-<span class="sd">    read as though zero-filled and recorded as a short read, so that packing</span>
-<span class="sd">    cuts it back to the octets held, as :meth:`Schema._cut_short_read</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._cut_short_read&gt;` describes. A key</span>
-<span class="sd">    shorter than its fixed width, or a Secrets Length longer than it, then</span>
-<span class="sd">    rebuilds byte for byte (:issue:`1986`).</span>
+<span class="sd">    ``data`` is unpacked as the block's Secrets Data is, with any octets past</span>
+<span class="sd">    the fixed fields kept as the schema's ``trailing`` octets. A ``data`` short</span>
+<span class="sd">    of the fixed width is a short read, which :meth:`Schema.unpack</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records for</span>
+<span class="sd">    :meth:`Schema._cut_short_read</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._cut_short_read&gt;`. A key shorter</span>
+<span class="sd">    than its fixed width, or a Secrets Length longer than it, then rebuilds</span>
+<span class="sd">    byte for byte (:issue:`1986`). The length is declared, so an empty ``data``</span>
+<span class="sd">    is an empty key rather than the end of the stream. The short read's</span>
+<span class="sd">    warnings are dropped, since the parse that held ``data`` reported them.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       The schema's buffers hold ``data`` as given, rather than zero-filled</span>
+<span class="sd">       to the fixed width, so its :func:`bytes` and :func:`len` are those of</span>
+<span class="sd">       ``data`` and a block sized from it is written as captured</span>
+<span class="sd">       (:issue:`2688`).</span>
 
 <span class="sd">    """</span>
-    <span class="n">fixed</span> <span class="o">=</span> <span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-             <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'trailing'</span><span class="p">]</span>
-    <span class="n">width</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">length</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">)</span>
-    <span class="n">padded</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ZigBeeKey'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">padded</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
-
-    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">length</span><span class="p">:</span>
-            <span class="n">value</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
-            <span class="k">break</span>
-        <span class="n">offset</span> <span class="o">+=</span> <span class="n">length</span>
-    <span class="k">return</span> <span class="n">value</span></div>
+    <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+        <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ZigBeeKey'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>  <span class="c1"># type: ignore[call-arg,misc]</span></div>
 
 
 
