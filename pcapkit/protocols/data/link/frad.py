@@ -31,15 +31,17 @@ class FRAD(Protocol):
     #: NLPID selecting the encapsulated protocol, with any ``0x00`` pad
     #: already resolved to the real value that followed it.
     nlpid: 'int'
+    #: Whether a ``0x00`` pad octet precedes the NLPID (:rfc:`2427#section-3`).
+    pad: 'bool'
     #: SNAP OUI, present only when :attr:`nlpid` is ``0x80``.
     snap_oui: 'Optional[bytes]'
     #: SNAP PID, present only when :attr:`nlpid` is ``0x80``.
     snap_pid: 'Optional[int]'
-    #: Header length, in octets -- 4 for a direct NLPID, 5 with the pad byte,
-    #: or 10 with the SNAP header besides.
+    #: Header length, in octets -- 4 for a direct NLPID, one more with the pad
+    #: octet, and 5 more with a SNAP header.
     len: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, dlci: 'int', cr: 'int', fecn: 'int', becn: 'int', de: 'int',  # pylint: disable=unused-argument,super-init-not-called
-                     control: 'int', nlpid: 'int', snap_oui: 'Optional[bytes]',  # pylint: disable=unused-argument
+                     control: 'int', nlpid: 'int', pad: 'bool', snap_oui: 'Optional[bytes]',  # pylint: disable=unused-argument
                      snap_pid: 'Optional[int]', len: 'int') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin

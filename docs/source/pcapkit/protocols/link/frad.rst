@@ -18,13 +18,12 @@ LAPF address onward with no trailing FCS, is described as below:
    ====== ==== ================= ==========================================
    0      0    ``frad.addr``     Q.922 Address (2-octet form)
    2      16   ``frad.control``  Control (``0x03``, UI, for data traffic)
-   3      24   ``frad.nlpid``    NLPID, or the ``0x00`` pad ahead of a SNAP
-                                  header
+   3      24   ``frad.nlpid``    NLPID, or the ``0x00`` pad ahead of one
    ====== ==== ================= ==========================================
 
-When ``nlpid`` is the ``0x00`` pad marker, a further NLPID octet (``0x80``
-for SNAP), a 3-octet OUI and a 2-octet PID follow, kept as ``frad.ext_nlpid``,
-``frad.oui`` and ``frad.pid``.
+When ``nlpid`` is the ``0x00`` pad, the NLPID follows it as ``frad.ext_nlpid``.
+An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
+3-octet OUI and a 2-octet PID, kept as ``frad.oui`` and ``frad.pid``.
 
 .. autoclass:: pcapkit.protocols.link.frad.FRAD
    :no-members:
