@@ -15,9 +15,9 @@ dispatches here instead of falling back to
 :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`. Its
 structure is the Q.922 LAPF address onward, with no trailing FCS: a 2-octet
 ``frad.addr``, a 1-octet ``frad.control`` (``0x03``, UI, for ordinary data
-traffic), then a 1-octet ``frad.nlpid`` -- or, when SNAP-encapsulated, the
-``0x00`` pad RFC 2427 writes in its place, followed by the real NLPID
-(``0x80``) and a 5-octet SNAP header (OUI and PID). See
+traffic), then a 1-octet ``frad.nlpid``, which a ``0x00`` pad octet may
+precede. RFC 2427 writes the pad ahead of a SNAP header: the NLPID ``0x80``,
+then a 5-octet OUI and PID. See
 :meth:`FRAD.read <pcapkit.protocols.link.frad.FRAD.read>` for the full byte
 diagram and :mod:`pcapkit.protocols.schema.link.frad` for the field-by-field
 schema.
@@ -54,8 +54,8 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
           schema=Schema_FRAD, data=Data_FRAD):
     """This class implements Frame Relay Access Device (FRAD) frames.
 
-    A frame whose NLPID (after resolving the ``0x00`` pad RFC 2427 writes
-    ahead of a SNAP header) is ``0xCC`` or ``0x8E`` dispatches to
+    A frame whose NLPID (after resolving any ``0x00`` pad ahead of it) is
+    ``0xCC`` or ``0x8E`` dispatches to
     :class:`~pcapkit.protocols.internet.ipv4.IPv4` or
     :class:`~pcapkit.protocols.internet.ipv6.IPv6` respectively, registered
     in the :attr:`self.__proto__ <pcapkit.protocols.link.frad.FRAD.__proto__>`
@@ -145,7 +145,10 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
 
         A SNAP-encapsulated frame inserts a ``0x00`` pad and a ``0x80`` NLPID
         in place of the single NLPID octet above, followed by a 3-octet OUI
-        and a 2-octet PID (:rfc:`2427#section-4.1`).
+        and a 2-octet PID (:rfc:`2427#section-4.1`). The pad may precede any
+        NLPID, or be left out ahead of ``0x80`` (:rfc:`2427#section-3`), and
+        :attr:`~pcapkit.protocols.data.link.frad.FRAD.pad` records whether
+        it is there.
 
         Args:
             length: Length of packet data.
@@ -175,7 +178,8 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         _dlci = (addr['dlci_hi'] << 4) | addr['dlci_lo']
 
         _raw_nlpid = schema.nlpid
-        if not _raw_nlpid:
+        _pad = not _raw_nlpid
+        if _pad:
             _ext = schema.ext_nlpid
             _nlpid = _ext if isinstance(_ext, int) else 0
             _hdr_len = 5
@@ -201,6 +205,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             de=addr['de'],
             control=schema.control,
             nlpid=_nlpid,
+            pad=_pad,
             snap_oui=_snap_oui,
             snap_pid=_snap_pid,
             len=_hdr_len,
@@ -215,6 +220,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
              de: 'int' = 0,
              control: 'int' = 0x03,
              nlpid: 'int' = 0xCC,
+             pad: 'Optional[bool]' = None,
              snap_oui: 'Optional[bytes]' = None,
              snap_pid: 'Optional[int]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
@@ -230,6 +236,10 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             control: Control field; ``0x03`` (UI) for ordinary data traffic.
             nlpid: NLPID selecting the encapsulated protocol; ``0xCC`` for
                 IPv4, ``0x8E`` for IPv6, ``0x80`` for a SNAP header.
+            pad: Whether a ``0x00`` pad octet precedes ``nlpid``
+                (:rfc:`2427#section-3`). When :data:`None`, there is one ahead
+                of a SNAP header alone, as :rfc:`2427#section-4.1` writes it,
+                and ahead of an ``nlpid`` of ``0``, which reads as the pad.
             snap_oui: SNAP OUI; required, and only meaningful, when ``nlpid``
                 is ``0x80``.
             snap_pid: SNAP PID; required, and only meaningful, when ``nlpid``
@@ -245,9 +255,10 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
                 ``fecn``, ``becn`` or ``de`` is not ``0`` or ``1``; if
                 ``control`` or ``nlpid`` does not fit in 8 bits; if ``nlpid``
                 is ``0x80`` and ``snap_oui`` is not exactly 3 octets or
-                ``snap_pid`` does not fit in 16 bits; or if either
+                ``snap_pid`` does not fit in 16 bits; if either
                 ``snap_oui`` or ``snap_pid`` is given while ``nlpid`` is not
-                ``0x80``.
+                ``0x80``; or if ``pad`` is :data:`False` with an ``nlpid`` of
+                ``0``.
 
         Note:
             ``nlpid`` is not refused for being ``0`` -- the value of the one
@@ -273,22 +284,25 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         control = self._make_uint(control, bits=8, name='control')
         nlpid = self._make_uint(nlpid, bits=8, name='nlpid')
 
+        if pad is None:
+            pad = nlpid in (0x00, 0x80)
+        elif not pad and not nlpid:
+            raise ProtocolError(f'{self.alias}: an nlpid of 0 reads as the pad, so pad cannot be False')
+
         if nlpid == 0x80:
             if not isinstance(snap_oui, (bytes, bytearray)) or len(snap_oui) != 3:
                 raise ProtocolError(f'{self.alias}: invalid snap_oui: {snap_oui!r}, '
                                     f'must be exactly 3 octets when nlpid is 0x80')
-            _schema_nlpid, _ext_nlpid = 0, 0x80
             _oui, _pid = bytes(snap_oui), self._make_uint(snap_pid, bits=16, name='snap_pid')
         else:
             if snap_oui is not None or snap_pid is not None:
                 raise ProtocolError(f'{self.alias}: snap_oui and snap_pid are only meaningful '
                                     f'when nlpid is 0x80, not {nlpid!r}')
-            _schema_nlpid, _ext_nlpid = nlpid, None
             _oui, _pid = None, None
-            if not nlpid:
-                # NOTE: A zero NLPID is the pad, which the schema follows with
-                # ``ext_nlpid``, so that is written too (#2710).
-                _ext_nlpid = 0
+
+        # NOTE: The pad is a zero ``nlpid`` octet, which the schema follows with
+        # ``ext_nlpid``: a zero NLPID is written that way too (#2710, #2716).
+        _schema_nlpid, _ext_nlpid = (0, nlpid) if pad else (nlpid, None)
 
         return Schema_FRAD(
             addr={
@@ -318,7 +332,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
-            code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header
+            code: NLPID, after resolving any ``0x00`` pad ahead of it
             protocol: module descriptor or a
                 :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
@@ -405,6 +419,7 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
             'de': data.de,
             'control': data.control,
             'nlpid': data.nlpid,
+            'pad': data.pad,
             'snap_oui': data.snap_oui,
             'snap_pid': data.snap_pid,
             'payload': cls._make_payload(data),
