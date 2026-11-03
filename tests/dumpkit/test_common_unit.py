@@ -225,6 +225,23 @@ class DumpkitCommonTests(unittest.TestCase):
         dumper._append_fallback(123, file)
         self.assertEqual(file.getvalue(), "{'base': '123'}")
 
+    def test_make_dumper_dumps_renamed_builtin_key(self) -> None:
+        """A key renamed for clashing with a builtin is kept under its original name (:issue:`2733`)."""
+        from pcapkit.corekit.infoclass import Info
+        from pcapkit.dumpkit.common import make_dumper
+        from pcapkit.foundation.reassembly.data.tcp import Datagram
+
+        Dumper = make_dumper(BaseDumper)
+        dumper = Dumper()
+
+        info = Info(items='catalog', normal='value')
+        self.assertEqual(dumper.object_hook(info), {'items': 'catalog', 'normal': 'value'})
+
+        datagram = Datagram(True, 'tcp-id', (0,), b'header', b'payload', b'raw_packet', [])
+        dumped = dumper.object_hook(datagram)
+        self.assertIn('packet', dumped)
+        self.assertEqual(dumped['packet'], b'raw_packet')
+
     def test_make_dumper_object_hook_leaves_strings_and_enum_renderings_unescaped(self) -> None:
         """GitHub issue #772: escaping is now the writer's own job, not this hook's.
 

@@ -440,11 +440,14 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             extension header, maps to the :class:`list` of all its values, in
             order (GitHub issue :issue:`1484`). The values are left as they
             are, so each comes back through :meth:`DictDumper.object_hook` when
-            written. The keys :func:`excluded` names are left out.
+            The keys :func:`excluded` names are left out, while a key
+            renamed for clashing with a builtin name is kept under its original
+            name (:issue:`2733`).
 
         """
         skip = excluded(info)
-        pairs = [(key, val) for key, val in info.items(multi=True) if key not in skip]
+        keymap = getattr(info, '__map__', {})
+        pairs = [(key, val) for key, val in info.items(multi=True) if keymap.get(key, key) not in skip]
         counts = collections.Counter(key for key, _ in pairs)
         result = {}  # type: dict[Any, Any]
         for key, val in pairs:
