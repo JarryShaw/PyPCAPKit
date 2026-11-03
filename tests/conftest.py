@@ -620,9 +620,11 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, such
     as the Windows leg of :file:`.github/workflows/experimental.yml`, which runs
     ``--dist load`` too. Nothing that has to stay correct there relies on the lock
-    (#2114): :func:`tests._tiers.suite_modules` never lists the probe, and
-    :class:`~tests.test_tier_guard.SuiteIsCleanTests` skips it where this is a
-    no-op. :func:`msvcrt.locking` is no substitute, since it has no shared mode.
+    (#2114): :func:`tests._tiers.suite_modules` never lists the probe,
+    :class:`~tests.test_tier_guard.FixtureTierSelectionTests`'s grep-based scan
+    never reads it, and :class:`~tests.test_tier_guard.SuiteIsCleanTests` skips
+    it where this is a no-op. :func:`msvcrt.locking` is no substitute, since it
+    has no shared mode.
 
     Linux :func:`fcntl.flock` grants a shared request whenever no exclusive
     hold is *granted*, however long a writer has been waiting, so readers whose
