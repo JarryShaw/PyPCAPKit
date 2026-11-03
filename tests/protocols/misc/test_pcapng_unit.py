@@ -3962,6 +3962,9 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls._swept = None
+        # The failures keep their tracebacks, and with them this class's pcapkit
+        # import, so the sweep goes once the class is done (#2750).
+        cls.addClassCleanup(setattr, cls, '_swept', None)
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
