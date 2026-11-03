@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -639,6 +640,13 @@ octets read; and <a class="reference internal" href="../../pcapkit/corekit/schem
 through them, never through an <code class="docutils literal notranslate"><span class="pre">unpack</span></code> override of its own or a length callable
 clamped to the octets present, which hides the cut from the record. Ruled in review
 of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2682">#2682</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2680">#2680</a>), and applied to option areas on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2694">#2694</a>.</p>
+<p>A field callback tells a value the cut left as zero from one read through the same
+record: <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> gives
+it to the fields after the one the data ends inside, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in their
+packet. A callback that would refuse such a zero leaves it to the short read, and
+refuses a value read with a <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, as
+the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> helpers of
+<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_option.html#module-pcapkit.protocols.schema.internet.ipv6_option" title="pcapkit.protocols.schema.internet.ipv6_option"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option</span></code></a> do (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).</p>
 <p><strong>A helper in one protocol’s own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse</strong>, so that another implementor can
 find it; a helper only its own protocol calls stays beside the schema. Ruled on

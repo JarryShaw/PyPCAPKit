@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -573,7 +574,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TransportProtocol'</span><span class="p">,</span> <span class="s1">'AppType'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span>
 
@@ -2933,9 +2934,9 @@
 
     <span class="c1">#: Registry class owning each transport protocol, i.e. what</span>
     <span class="c1">#: :meth:`get` delegates to when called on this class rather than on one of</span>
-    <span class="c1">#: them. Populated by :mod:`pcapkit.const.reg.apptype` once every one of</span>
-    <span class="c1">#: them has been imported, since this module cannot import its own subclasses.</span>
-    <span class="n">__registries__</span><span class="p">:</span> <span class="s1">'dict[TransportProtocol, Type[AppType]]'</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#: them. Populated by :mod:`pcapkit.const.reg.apptype`, which imports each</span>
+    <span class="c1">#: of them on first use, since this module cannot import its own subclasses.</span>
+    <span class="n">__registries__</span><span class="p">:</span> <span class="s1">'Mapping[TransportProtocol, Type[AppType]]'</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1">#: Canonical service per port, for the ports carrying more than one. The base</span>
     <span class="c1">#: registry has no members and so no collisions.</span>
@@ -3138,13 +3139,13 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">proto</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 
-        <span class="c1"># NOTE: a direct dict lookup covers every genuine single transport --</span>
+        <span class="c1"># NOTE: a direct lookup covers every genuine single transport --</span>
         <span class="c1"># one of the real members, or a bare int equal to one of their</span>
         <span class="c1"># values -- since ``__registries__`` keys compare by the same</span>
         <span class="c1"># int-valued hash/eq every member and bare int alike already use. The</span>
-        <span class="c1"># cast is for mypy alone: ``dict.get`` accepts any hashable key at run</span>
+        <span class="c1"># cast is for mypy alone: ``.get`` accepts any hashable key at run</span>
         <span class="c1"># time regardless of its declared key type, but mypy holds ``.get`` to</span>
-        <span class="c1"># the dict's own ``TransportProtocol`` keys, and does not know ``proto``</span>
+        <span class="c1"># the mapping's own ``TransportProtocol`` keys, and does not know ``proto``</span>
         <span class="c1"># can genuinely be a bare :class:`int` here, TransportProtocol not being</span>
         <span class="c1"># an ``IntFlag`` (GitHub issue #808) -- see the annotation on ``proto``</span>
         <span class="c1"># above.</span>

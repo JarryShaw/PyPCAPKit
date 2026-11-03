@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1093,6 +1094,10 @@ maker as empty raw octets, which hold no type, raises
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, rather than being
 dropped beside another item or, for most, raising an
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2723">#2723</a>).</p></li>
+<li><p>A CGA parameter builds from a data model holding raw extensions, where
+it raised an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>, and from a schema without
+<code class="docutils literal notranslate"><span class="pre">public_key_test</span></code>, where it raised a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2725">#2725</a>).</p></li>
 <li><p>Each enumeration field of <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH.make" title="pcapkit.protocols.internet.mh.MH.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> and of the message, option and
 sub-option makers, and the type of each option, sub-option, QoS
 attribute and CGA extension given to them, takes a member or an
@@ -6705,7 +6710,9 @@ than its characters (<a class="extlink-issue reference external" href="https://g
 <li><p><strong>parameters</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParameter" title="pcapkit.protocols.schema.internet.mh.CGAParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParameter</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParameter" title="pcapkit.protocols.data.internet.mh.CGAParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParameter</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – CGA parameters, each as octets, a schema or a data
 model. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> is refused: a mapping stands for a
 maker’s keyword arguments, and no maker takes a CGA
-parameter’s fields, so build the data model from them.</p></li>
+parameter’s fields, so build the data model from them. A
+schema without <code class="docutils literal notranslate"><span class="pre">public_key_test</span></code> is built from a copy that
+takes one from its key, and is left as given.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -12248,13 +12255,8 @@ by <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGA
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest.len">
 <span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest.len" title="Link to this definition">¶</a></dt>
-<dd><p>the length itself, or <code class="docutils literal notranslate"><span class="pre">0x80</span></code> plus the number of
+<dd><p>First length octet – the length itself, or <code class="docutils literal notranslate"><span class="pre">0x80</span></code> plus the number of
 length octets that follow.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>First length octet</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">

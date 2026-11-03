@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -664,7 +665,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DCCP'</span><span class="p">]</span>
 
-<span class="c1">#: Longest a DCCP header can be: a Data Offset of 255 words, :rfc:`4340#section-5`.</span>
+<span class="c1">#: Longest a DCCP header can be -- a Data Offset of 255 words, :rfc:`4340#section-5`.</span>
 <span class="n">DCCP_MAX_HEADER_LEN</span> <span class="o">=</span> <span class="mi">1020</span>
 
 
@@ -761,7 +762,7 @@
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
-    <span class="c1">#: What :attr:`__proto__` is keyed by: the enum a key must be a member of,</span>
+    <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
     <span class="c1">#: and whether a bare :class:`int` is a valid key there too, as for</span>
     <span class="c1">#: :attr:`TCP.__proto_key__ &lt;pcapkit.protocols.transport.tcp.TCP.__proto_key__&gt;`.</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_AppType</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>

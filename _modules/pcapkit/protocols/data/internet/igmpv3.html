@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -583,7 +584,7 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Version of IGMP, always ``3``. It is on no octet: it names the class</span>
+    <span class="c1">#: Version of IGMP, always ``3``. It is on no octet; it names the class</span>
     <span class="c1">#: that read or built the message, as on the IGMPv1/v2 data model, and</span>
     <span class="c1">#: :meth:`IGMP.from_data &lt;pcapkit.protocols.internet.igmp.IGMP.from_data&gt;`</span>
     <span class="c1">#: dispatches on it (:issue:`2574`).</span>
@@ -627,7 +628,7 @@
     <span class="n">max_resp_time</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Checksum.</span>
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
-    <span class="c1">#: Group address: the IPv4 multicast group being queried, or ``0.0.0.0``</span>
+    <span class="c1">#: Group address -- the IPv4 multicast group being queried, or ``0.0.0.0``</span>
     <span class="c1">#: on a General Query.</span>
     <span class="n">group</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
     <span class="c1">#: Resv, the 4 reserved high-order bits of the flags octet</span>

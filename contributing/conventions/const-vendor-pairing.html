@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -650,6 +651,26 @@ docstrings and comments, the way <a class="reference internal" href="../../pcapk
 does for ARPHRD; the generated <code class="docutils literal notranslate"><span class="pre">const</span></code> modules carry only the plain,
 templated docstring every other generated module does.</p>
 </section>
+<section id="lazy-package-imports">
+<h2>Lazy Package Imports<a class="headerlink" href="#lazy-package-imports" title="Link to this heading">¶</a></h2>
+<p><strong>A</strong> <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> <strong>package imports its enumerations on first use</strong>, not with
+itself. Ruled by the owner in session and recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2729">#2729</a>. Its
+<code class="file docutils literal notranslate"><span class="pre">__init__.py</span></code> names each export in an import under <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code>, for
+the type checkers, and binds the <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__dir__</span></code> that
+<a class="reference internal" href="../../pcapkit/utilities/lazy.html#pcapkit.utilities.lazy.lazy_exports" title="pcapkit.utilities.lazy.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a> returns; <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> re-exports
+its subpackages’ <code class="docutils literal notranslate"><span class="pre">__all__</span></code> the same way. The one real import is of
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a>, which
+<a class="reference internal" href="../../pcapkit/const/reg.html#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a> builds
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.__registries__</span></code>
+on. A crawler writes the enumeration module and never a package’s
+<code class="file docutils literal notranslate"><span class="pre">__init__.py</span></code>, so regenerating keeps the laziness, and a module a crawler adds
+takes its export there by hand, in both places.
+<code class="file docutils literal notranslate"><span class="pre">tests/const/test_const_lazy_exports_2729_unit.py</span></code> fails on an export imported
+outside <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code>, or one that does not resolve to what its import names, and
+<code class="file docutils literal notranslate"><span class="pre">tests/const/test_const_apptype_lazy_1538_unit.py</span></code> on a package that loads an
+enumeration with itself.</p>
+</section>
 </section>
 
         </article>
@@ -710,6 +731,7 @@ templated docstring every other generated module does.</p>
 <li><a class="reference internal" href="#">Const-Vendor Pairing</a><ul>
 <li><a class="reference internal" href="#the-data-attribute-for-a-registry-with-no-web-source">The <code class="docutils literal notranslate"><span class="pre">DATA</span></code> Attribute, for a Registry With No Web Source</a></li>
 <li><a class="reference internal" href="#link-and-scrape-pairing-tls-content-types-and-handshaketype"><code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-Scrape Pairing: TLS Content Types and HandshakeType</a></li>
+<li><a class="reference internal" href="#lazy-package-imports">Lazy Package Imports</a></li>
 </ul>
 </li>
 </ul>

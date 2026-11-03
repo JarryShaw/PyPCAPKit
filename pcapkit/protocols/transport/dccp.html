@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1711,14 +1712,9 @@ port number, and empty until a protocol is registered.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.DCCP.__proto_key__">
 <span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.DCCP.__proto_key__" title="Link to this definition">¶</a></dt>
-<dd><p>the enum a key must be a member of,
+<dd><p>What <a class="reference internal" href="#pcapkit.protocols.transport.dccp.DCCP.__proto__" title="pcapkit.protocols.transport.dccp.DCCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by – the enum a key must be a member of,
 and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too, as for
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto_key__" title="pcapkit.protocols.transport.tcp.TCP.__proto_key__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto_key__</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>What <a class="reference internal" href="#pcapkit.protocols.transport.dccp.DCCP.__proto__" title="pcapkit.protocols.transport.dccp.DCCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1751,12 +1747,7 @@ pair of callables.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.DCCP_MAX_HEADER_LEN">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.dccp.</span></span><span class="sig-name descname"><span class="pre">DCCP_MAX_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1020</span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.DCCP_MAX_HEADER_LEN" title="Link to this definition">¶</a></dt>
-<dd><p>a Data Offset of 255 words, <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Longest a DCCP header can be</p>
-</dd>
-</dl>
+<dd><p>Longest a DCCP header can be – a Data Offset of 255 words, <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a>.</p>
 </dd></dl>
 
 <section id="module-pcapkit.protocols.schema.transport.dccp">
@@ -1779,26 +1770,16 @@ value (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.dccp.ACK_TYPES">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.dccp.</span></span><span class="sig-name descname"><span class="pre">ACK_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.dccp.ACK_TYPES" title="Link to this definition">¶</a></dt>
-<dd><p>every one
+<dd><p>Packet types carrying an Acknowledgement Number Subheader – every one
 <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5"><strong>RFC 4340 Section 5</strong></a> defines but DCCP-Request and DCCP-Data. DCCP-Listen
 (<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>) carries none either.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Packet types carrying an Acknowledgement Number Subheader</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.dccp.SERVICE_TYPES">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.dccp.</span></span><span class="sig-name descname"><span class="pre">SERVICE_TYPES</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.dccp.SERVICE_TYPES" title="Link to this definition">¶</a></dt>
-<dd><p>DCCP-Request, DCCP-Response and
+<dd><p>Packet types carrying a Service Code – DCCP-Request, DCCP-Response and
 DCCP-Listen (<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-5.2"><strong>RFC 4340 Section 5.2</strong></a>, <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html#section-2.2.1"><strong>RFC 5596 Section 2.2.1</strong></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Packet types carrying a Service Code</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py data">
@@ -1911,16 +1892,8 @@ DCCP-Listen (<span class="target" id="index-26"></span><a class="rfc reference e
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.dccp.DCCP.options">
 <span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.transport.dccp.Option" title="pcapkit.protocols.schema.transport.dccp.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptionField</span> <span class="pre">options&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.dccp.DCCP.options" title="Link to this definition">¶</a></dt>
-<dd><p><cite>DCCP.read
-&lt;pcapkit.protocols.transport.dccp.DCCP.read&gt;</cite> refuses such a header.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Options, cut short where the data is;</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>meth</p>
-</dd>
-</dl>
+<dd><p>Options, cut short where the data is;
+<a class="reference internal" href="#pcapkit.protocols.transport.dccp.DCCP.read" title="pcapkit.protocols.transport.dccp.DCCP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DCCP.read</span></code></a> refuses such a header.</p>
 </dd></dl>
 
 <dl class="py attribute">

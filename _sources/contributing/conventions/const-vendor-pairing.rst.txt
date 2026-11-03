@@ -91,3 +91,24 @@ record-layer header citations, the Unassigned/Reserved band rationale, the
 docstrings and comments, the way :mod:`pcapkit.vendor.linux.arphrd` already
 does for ARPHRD; the generated ``const`` modules carry only the plain,
 templated docstring every other generated module does.
+
+Lazy Package Imports
+~~~~~~~~~~~~~~~~~~~~
+
+**A** :mod:`pcapkit.const` **package imports its enumerations on first use**, not with
+itself. Ruled by the owner in session and recorded on :issue:`2729`. Its
+:file:`__init__.py` names each export in an import under ``if TYPE_CHECKING:``, for
+the type checkers, and binds the ``__getattr__`` and ``__dir__`` that
+:func:`~pcapkit.utilities.lazy.lazy_exports` returns; :mod:`pcapkit.const` re-exports
+its subpackages' ``__all__`` the same way. The one real import is of
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` and
+:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, which
+:mod:`pcapkit.const.reg.apptype` builds
+:attr:`AppType.__registries__ <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`
+on. A crawler writes the enumeration module and never a package's
+:file:`__init__.py`, so regenerating keeps the laziness, and a module a crawler adds
+takes its export there by hand, in both places.
+:file:`tests/const/test_const_lazy_exports_2729_unit.py` fails on an export imported
+outside ``TYPE_CHECKING``, or one that does not resolve to what its import names, and
+:file:`tests/const/test_const_apptype_lazy_1538_unit.py` on a package that loads an
+enumeration with itself.

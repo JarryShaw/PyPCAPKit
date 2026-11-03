@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -628,7 +629,7 @@
 
     <span class="c1">#: Protocol name of current reassembly object.</span>
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'DTLS'</span>
-    <span class="c1">#: Protocol of current reassembly object. An extension point: a protocol</span>
+    <span class="c1">#: Protocol of current reassembly object. An extension point -- a protocol</span>
     <span class="c1">#: named here need only define ``analyze_handshake``, with the signature of</span>
     <span class="c1">#: :meth:`DTLS.analyze_handshake</span>
     <span class="c1">#: &lt;pcapkit.protocols.application.dtls.DTLS.analyze_handshake&gt;`, and is read</span>

@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -571,6 +572,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
@@ -600,15 +602,28 @@
 <span class="sd">        * :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.dump`</span>
 <span class="sd">        * :term:`trace.tcp.packet`</span>
 
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A third-party engine's :attr:`frame` is a</span>
+<span class="sd">       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, which</span>
+<span class="sd">       :meth:`to_dict` exports as an</span>
+<span class="sd">       :class:`~pcapkit.corekit.multidict.OrderedMultiDict`; so</span>
+<span class="sd">       ``Packet.from_dict(packet.to_dict())`` holds the frame as an</span>
+<span class="sd">       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`, not a</span>
+<span class="sd">       :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`</span>
+<span class="sd">       (:issue:`2726`).</span>
+
 <span class="sd">    """</span>
 
-    <span class="c1">#: Data link type: the PCAP global header's, or that of the PCAP-NG</span>
+    <span class="c1">#: Data link type -- the PCAP global header's, or that of the PCAP-NG</span>
     <span class="c1">#: interface the packet was captured on.</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
     <span class="c1">#: Frame number.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Extracted frame info.</span>
-    <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | dict[str, Any]'</span>
+    <span class="c1">#: Extracted frame info -- the default engine's frame, a third-party</span>
+    <span class="c1">#: engine's :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`, or</span>
+    <span class="c1">#: the :obj:`dict` PyShark's adapter reports, which carries no frame record.</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | FrameRecord | dict[str, Any]'</span>
     <span class="c1">#: TCP synchronise (SYN) flag.</span>
     <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: TCP finish (FIN) flag.</span>
@@ -644,7 +659,7 @@
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | dict[str, Any]'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">'Data_Frame | FrameRecord | dict[str, Any]'</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">'_AT'</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 

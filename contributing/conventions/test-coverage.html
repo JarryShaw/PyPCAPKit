@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -746,7 +747,8 @@ root-level modules, in one plain-unittest process, which is what CI’s
 <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> job does per leg. Run it on the directory a change touches
 when the change moves imports or module state:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols/internet
-python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols<span class="w"> </span>--exclude<span class="w"> </span>protocols/internet
+python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols<span class="w"> </span>--exclude<span class="w"> </span>protocols/internet<span class="w"> </span>--half<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols<span class="w"> </span>--exclude<span class="w"> </span>protocols/internet<span class="w"> </span>--half<span class="w"> </span><span class="m">2</span>
 python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>project<span class="w"> </span>--half<span class="w"> </span><span class="m">1</span>
 python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>project<span class="w"> </span>--half<span class="w"> </span><span class="m">2</span>
 </pre></div>

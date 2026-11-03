@@ -689,7 +689,7 @@ CI Timing Review (:issue:`1538`)
 or on dispatch with a ``days`` window and an optional ``concurrency_hours`` runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
 Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (:issue:`1732`, so
-its two-hour legs stay measured), a day per query because a filtered listing stops
+its long legs stay measured), a day per query because a filtered listing stops
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow -- and the summary says how many runs each sample
@@ -1159,8 +1159,8 @@ though the leg's check run still reads ``failure``. A job past its
 ``timeout-minutes`` is cancelled, and that page does not say whether the job-level
 guard covers a cancellation. So setup-python, the install, the watcher's setup-python
 and ``requests`` (:issue:`1938`,
-below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
-the job's 140, which leaves 3 for the rest: a step at its cap
+below) and the tests have caps of their own, of 5, 10, 1, 1 and 190 minutes, under
+the job's 210, which leaves 3 for the rest: a step at its cap
 fails rather than cancels, and the guard holds (actions/runner's
 ``StepsRunner.RunStepAsync``). The runner's ``has timed out`` error
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.
@@ -1170,7 +1170,7 @@ job, and none on a step. Promoting one whose leg stays green is a hand edit, whi
 :file:`util/python_versions.py` refuses until the build has a wheel, a conda build
 and a ``Compat`` leg.
 
-The tests' 120 minutes are sized for GraalPy, the slowest of the legs that share
+The tests' 190 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
 3.14t's ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
 ``ALL`` test tier alone, as every leg but ``latest`` does (see `Test Tiers`_ below):
@@ -1180,7 +1180,13 @@ passes each module it printed as an ``--ignore``. The
 round-trip sweeps of :issue:`1732`
 took 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
 the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
-88-113 minutes (estimate).
+88-113 minutes (estimate). That was low. In job 125752017215, on ``ab7be2fb0``, the
+shards below took 6386 s, and the ``timeout``, of 110 minutes at that commit, ended the
+run over the rest, which had taken 404 s in job 125639681253, on a runner 1.46-1.86
+times as fast (see below). With that run at 589-750 s on the slower runner, and
+70-100 s of start-up for each of the two runs the later split adds, the leg comes to
+7110-7340 s there (estimate). So the ``timeout`` is 180 minutes, about 1.5 times that,
+and the step's cap 10 minutes more (:issue:`2739`).
 
 GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
 has received a shutdown signal`` (:issue:`1740`),
@@ -1242,14 +1248,21 @@ warnings:
   sized from that job's ``junit-experimental-graalpy-25.4`` artifact: a shard's
   estimate is its tests' JUnit seconds over the 3 workers, plus 50 s for the 46-57 s
   that each of the job's shards that lost no worker took beyond that, start to start.
-  Every shard split this way comes to under 5 minutes, and the tier to about 4750 s
-  (estimate). The run over the rest is left whole: in that job it took about 6.7
-  minutes and lost no worker. The runs share the step's ``timeout``, scope and
+  That put every shard split this way under 5 minutes, and the tier at about 4750 s,
+  on that job's runner (estimate). The run over the rest is left whole: in that job it
+  took about 6.7 minutes and lost no worker. In job 125752017215, on ``ab7be2fb0``, no
+  worker went down, but on a runner whose unchanged shards each took 1.46-1.86 times
+  as long, ``tests/protocols/internet`` and ``tests/protocols/application`` ran 11.5
+  and 13.9 minutes, their largest worker reaching 2.25 and 2.48 GiB RSS, and the
+  other shards of that split 2.3-8.1 (:issue:`2739`). So those two are split again by
+  that job's JUnit seconds, at ``test_igmp*`` and ``test_tls*``, which leaves every
+  other shard fewer JUnit seconds there than ``tests/const`` took, whose largest
+  worker peaked at 2.05 GiB. The runs share the step's ``timeout``, scope and
   watcher, so the caps hold over the whole tier; on ``timeout``'s SIGINT the run in
   progress writes its JUnit file and no later one starts. Each shard's run writes a
   JUnit file of its own beside ``junit.xml``, such as ``junit-tests-protocols.xml``,
   and ``Upload test timings`` takes them all. 3.14t's leg runs pytest once.
-* ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
+* ``timeout --signal=INT --kill-after=3m 180m`` ends pytest under the step's 190-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
   (:issue:`2020`): on Ubuntu 26.04 ``timeout`` is uutils', whose ``--kill-after`` sends SIGKILL
@@ -1269,20 +1282,21 @@ probe's error, the seconds the tests took, the OOM kills while they ran
 (``/proc/vmstat``), the lines in their output that report a raised ``MemoryError`` (#1962),
 not those that mention one, such as a docstring a traceback prints, and xdist's ``node
 down`` lines. From it and the monitor's last sample, ``Containment summary`` warns
-``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 110
+``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 180
 minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
 warning of its own. Its closing line gives the exit status, but where the watcher
 stopped the run and wrote ``stopped=true`` it reads ``tests were stopped as
 superseded``, not ``tests exited 0``, and adds no warning, since the ``Superseded``
 notice already says why (`#2077
 <https://github.com/JarryShaw/PyPCAPKit/issues/2077>`__). A timeout is exit 124, or 137 with no OOM kill
-after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
+after 180 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step but the job summary's and the
 KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,
 ``-n 3`` and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
-workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inference
-from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
-warning: that is expected, blocks nothing, and leaves the caps as they are.
+workers rather than 4, GraalPy's tests were to take about 117-151 minutes (an inference
+from the 88-113 above, not measured), and job 125752017215's came to about 119-122 in
+the shards above (estimate). A leg that still ends on the 180-minute timeout does so as
+a warning that blocks nothing.
 
 **The Windows leg.** :file:`experimental.yml`'s ``windows`` job runs the ``ALL`` tier
 on ``windows-latest`` under ``latest``, the newest CPython the conda builds target, as

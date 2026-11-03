@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -597,6 +598,15 @@ offset in seconds, and <a class="reference internal" href="../corekit/sentinels.
 <code class="docutils literal notranslate"><span class="pre">'&lt;NO_VALUE&gt;'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1258">#1258</a>). In <code class="docutils literal notranslate"><span class="pre">plist</span></code> output, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is
 kept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1257">#1257</a>), and a string carrying a character XML forbids
 is written as <code class="docutils literal notranslate"><span class="pre">&lt;data&gt;</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1262">#1262</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>A field an <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> renamed for
+clashing with a builtin name, such as a reassembled datagram’s
+<code class="docutils literal notranslate"><span class="pre">packet</span></code>, is written under its own name rather than left out, and
+reading it resolves a deferred <code class="docutils literal notranslate"><span class="pre">packet</span></code> as indexing does. A protocol
+object, such as that <code class="docutils literal notranslate"><span class="pre">packet</span></code>, is written as its
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>, as a frame is,
+rather than by its attributes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2733">#2733</a>).</p>
 </div>
 </dd></dl>
 

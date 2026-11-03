@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -647,12 +648,7 @@ one it is not given.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmp.IGMP.version">
 <span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>IGMP version this class reads</p>
-</dd>
-</dl>
+<dd><p>IGMP version this class reads, <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -932,7 +928,7 @@ before any class is built, and <a class="reference internal" href="#pcapkit.prot
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type">Type[ProtocolBase] | Type[Raw]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="igmpv1.html#pcapkit.protocols.internet.igmpv1.IGMPv1" title="pcapkit.protocols.internet.igmpv1.IGMPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>,
@@ -1036,16 +1032,11 @@ scope here – see <a class="reference internal" href="igmpv3.html#module-pcapki
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.version">
 <span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.version" title="Link to this definition">¶</a></dt>
-<dd><p>the
+<dd><p>Version of IGMP the message was read as, <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> – the
 <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.version" title="pcapkit.protocols.internet.igmp.IGMP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">version</span></code></a> of the class that
 read or built it. It is on no octet, since the versions share this
 layout, and <a class="reference internal" href="#pcapkit.protocols.internet.igmp.IGMP.from_data" title="pcapkit.protocols.internet.igmp.IGMP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP.from_data</span></code></a> dispatches on it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Version of IGMP the message was read as, <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1072,13 +1063,8 @@ zero on every other message, including every IGMPv1 one
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmp.IGMP.group">
 <span class="sig-name descname"><span class="pre">group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmp.IGMP.group" title="Link to this definition">¶</a></dt>
-<dd><p>the IPv4 multicast group being queried, reported or
+<dd><p>Group address – the IPv4 multicast group being queried, reported or
 left, or <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> on a General Query.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Group address</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">

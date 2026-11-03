@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -706,12 +707,7 @@ group-record list – so this class carries its own (<a class="extlink-issue ref
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.IGMPv3.version">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.IGMPv3.version" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>IGMP version this class reads</p>
-</dd>
-</dl>
+<dd><p>IGMP version this class reads, <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -981,30 +977,17 @@ refuses it.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.Query.max_resp_code">
 <span class="sig-name descname"><span class="pre">max_resp_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">max_resp_code&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.Query.max_resp_code" title="Link to this definition">¶</a></dt>
-<dd><p><cite>IGMPv3.read
-&lt;pcapkit.protocols.internet.igmpv3.IGMPv3.read&gt;</cite> decodes per
+<dd><p>Max response code; the raw octet
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.IGMPv3.read" title="pcapkit.protocols.internet.igmpv3.IGMPv3.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMPv3.read</span></code></a> decodes per
 <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.1"><strong>RFC 3376 Section 4.1.1</strong></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Max response code; the raw octet</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>meth</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.Query.checksum">
 <span class="sig-name descname"><span class="pre">checksum</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">checksum&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.Query.checksum" title="Link to this definition">¶</a></dt>
-<dd><p>the 16-bit one’s complement of the one’s complement sum of
+<dd><p>Checksum. The 16-bit one’s complement of the one’s complement sum of
 the message, with the checksum field itself taken as zero and no
 pseudo-header involved – the whole IP payload (<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.checksum.Checksum" title="pcapkit.const.tcp.checksum.Checksum">Checksum</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1089,15 +1072,10 @@ per <span class="target" id="index-18"></span><a class="rfc reference external" 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.igmpv3.QueryExtension.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.igmpv3.QueryExtension.payload" title="Link to this definition">¶</a></dt>
-<dd><p>octets past the source
+<dd><p>Additional data (<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.10"><strong>RFC 3376 Section 4.1.10</strong></a>) – octets past the source
 list that a received Query may carry and that must be kept (to verify
 the checksum) but not otherwise acted on. Empty for a
 standards-conformant Query, since <a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.IGMPv3.make" title="pcapkit.protocols.internet.igmpv3.IGMPv3.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMPv3.make</span></code></a> never writes any.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Additional data (<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.10"><strong>RFC 3376 Section 4.1.10</strong></a>)</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1235,15 +1213,10 @@ records instead (<a class="extlink-issue reference external" href="https://githu
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmpv3.IGMPv3.version">
 <span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmpv3.IGMPv3.version" title="Link to this definition">¶</a></dt>
-<dd><p>it names the class
+<dd><p>Version of IGMP, always <code class="docutils literal notranslate"><span class="pre">3</span></code>. It is on no octet; it names the class
 that read or built the message, as on the IGMPv1/v2 data model, and
 <a class="reference internal" href="igmp.html#pcapkit.protocols.internet.igmp.IGMP.from_data" title="pcapkit.protocols.internet.igmp.IGMP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP.from_data</span></code></a>
 dispatches on it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Version of IGMP, always <code class="docutils literal notranslate"><span class="pre">3</span></code>. It is on no octet</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1304,13 +1277,8 @@ with.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.igmpv3.Query.group">
 <span class="sig-name descname"><span class="pre">group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.igmpv3.Query.group" title="Link to this definition">¶</a></dt>
-<dd><p>the IPv4 multicast group being queried, or <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code>
+<dd><p>Group address – the IPv4 multicast group being queried, or <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code>
 on a General Query.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Group address</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">

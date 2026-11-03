@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/pickle.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.pickle holds the pickle reductions several pcapkit classes share, so each is written once (#2714). ReduceAsProtocol2 lets a typing.Generic subclass or a slotted dict pickle under ..." />
-<meta name="description" content="pcapkit.utilities.pickle holds the pickle reductions several pcapkit classes share, so each is written once (#2714). ReduceAsProtocol2 lets a typing.Generic subclass or a slotted dict pickle under ..." />
+<meta property="og:description" content="pcapkit.utilities.pickle holds the pickle reductions several pcapkit classes share, so each is written once (#2714). ReduceAsProtocol2 lets a typing.Generic subclass or a class with__slots__ pickle..." />
+<meta name="description" content="pcapkit.utilities.pickle holds the pickle reductions several pcapkit classes share, so each is written once (#2714). ReduceAsProtocol2 lets a typing.Generic subclass or a class with__slots__ pickle..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Shared Context Variables" href="contextvars.html"><link rel="prev" title="Timestamp Conversion" href="datetime.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -569,8 +570,8 @@
 <span id="pickle-reductions"></span><h1>Pickle Reductions<a class="headerlink" href="#module-pcapkit.utilities.pickle" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities.pickle" title="pcapkit.utilities.pickle"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.pickle</span></code></a> holds the <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> reductions several
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> classes share, so each is written once (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2714">#2714</a>).
-<a class="reference internal" href="#pcapkit.utilities.pickle.ReduceAsProtocol2" title="pcapkit.utilities.pickle.ReduceAsProtocol2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceAsProtocol2</span></code></a> lets a <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Generic</span></code></a> subclass or a slotted
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> pickle under protocol 0 and 1, on GraalPy as on CPython;
+<a class="reference internal" href="#pcapkit.utilities.pickle.ReduceAsProtocol2" title="pcapkit.utilities.pickle.ReduceAsProtocol2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceAsProtocol2</span></code></a> lets a <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Generic</span></code></a> subclass or a class with
+<code class="docutils literal notranslate"><span class="pre">__slots__</span></code> pickle under protocol 0 and 1, on GraalPy as on CPython;
 <a class="reference internal" href="#pcapkit.utilities.pickle.ReduceToName" title="pcapkit.utilities.pickle.ReduceToName"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceToName</span></code></a> reduces a singleton to the module-level name holding it;
 <a class="reference internal" href="#pcapkit.utilities.pickle.ReduceToItems" title="pcapkit.utilities.pickle.ReduceToItems"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceToItems</span></code></a> reduces a multi-valued mapping to a call of its class on its
 item pairs; and <a class="reference internal" href="#pcapkit.utilities.pickle.reduce_to" title="pcapkit.utilities.pickle.reduce_to"><code class="xref py py-func docutils literal notranslate"><span class="pre">reduce_to()</span></code></a> makes one instance reduce to a call of a given
@@ -601,8 +602,7 @@ overriding <code class="docutils literal notranslate"><span class="pre">__reduce
 <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>,
 <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>,
 <a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a> and
-<a class="reference internal" href="../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>, and before
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> on <a class="reference internal" href="../foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.FrameRecord" title="pcapkit.foundation.traceflow.data.data.FrameRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></a>.</p>
+<a class="reference internal" href="../foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>

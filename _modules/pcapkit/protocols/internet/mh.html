@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1731,6 +1732,10 @@
 <span class="sd">         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than being</span>
 <span class="sd">         dropped beside another item or, for most, raising an</span>
 <span class="sd">         :exc:`AttributeError` alone (:issue:`2723`).</span>
+<span class="sd">       * A CGA parameter builds from a data model holding raw extensions, where</span>
+<span class="sd">         it raised an :exc:`AttributeError`, and from a schema without</span>
+<span class="sd">         ``public_key_test``, where it raised a :exc:`KeyError`</span>
+<span class="sd">         (:issue:`2725`).</span>
 <span class="sd">       * Each enumeration field of :meth:`make` and of the message, option and</span>
 <span class="sd">         sub-option makers, and the type of each option, sub-option, QoS</span>
 <span class="sd">         attribute and CGA extension given to them, takes a member or an</span>
@@ -9740,7 +9745,9 @@
 <span class="sd">            parameters: CGA parameters, each as octets, a schema or a data</span>
 <span class="sd">                model. A :obj:`dict` is refused: a mapping stands for a</span>
 <span class="sd">                maker's keyword arguments, and no maker takes a CGA</span>
-<span class="sd">                parameter's fields, so build the data model from them.</span>
+<span class="sd">                parameter's fields, so build the data model from them. A</span>
+<span class="sd">                schema without ``public_key_test`` is built from a copy that</span>
+<span class="sd">                takes one from its key, and is left as given.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9765,11 +9772,16 @@
                 <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema_CGAParameter</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'public_key_test'</span><span class="p">):</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">public_key_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'len'</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)}</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">ext_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
-                <span class="n">length</span> <span class="o">+=</span> <span class="mi">25</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext_len</span>
-                <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="c1"># NOTE: Test the schema, not ``hasattr``: an unset field is not</span>
+                <span class="c1"># stored, so ``hasattr`` finds the class's field object (#2725).</span>
+                <span class="k">if</span> <span class="s1">'public_key_test'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="c1"># A copy takes the key test, leaving the caller's schema as given.</span>
+                    <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_CGAParameter</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">public_key_test</span><span class="o">=</span><span class="p">{</span><span class="s1">'len'</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)})</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">ext_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+                <span class="n">length</span> <span class="o">+=</span> <span class="mi">25</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext_len</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_CGAParameter</span><span class="p">):</span>
                 <span class="n">ext</span><span class="p">,</span> <span class="n">ext_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
                 <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_CGAParameter</span><span class="p">(</span>

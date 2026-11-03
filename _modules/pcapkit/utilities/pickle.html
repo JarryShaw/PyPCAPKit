@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -559,7 +560,7 @@
 <span class="sd">:mod:`pcapkit` classes share, so each is written once (:issue:`2714`):</span>
 
 <span class="sd">* :class:`ReduceAsProtocol2` reduces under every protocol as protocol 2 does, so a</span>
-<span class="sd">  :class:`typing.Generic` subclass or a slotted :class:`dict` pickles under</span>
+<span class="sd">  :class:`typing.Generic` subclass or a class with ``__slots__`` pickles under</span>
 <span class="sd">  protocol 0 and 1, on GraalPy as on CPython;</span>
 <span class="sd">* :class:`ReduceToName` reduces a singleton to the module-level name holding it;</span>
 <span class="sd">* :class:`ReduceToItems` reduces a multi-valued mapping to a call of its class on</span>
@@ -609,8 +610,7 @@
 <span class="sd">    :class:`~pcapkit.corekit.infoclass.Info`,</span>
 <span class="sd">    :class:`~pcapkit.protocols.schema.schema.Schema`,</span>
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and</span>
-<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, and before</span>
-<span class="sd">    :class:`dict` on :class:`~pcapkit.foundation.traceflow.data.data.FrameRecord`.</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.</span>
 
 <span class="sd">    .. versionadded:: 1.6.0</span>
 

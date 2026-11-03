@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -615,7 +616,7 @@ below:</p>
 <p>Only this fixed 16-octet header is dissected; per-family message payloads and
 multiple messages packed into one capture are out of scope for this first
 cut – see the module docstring’s <em>Scope</em> section. The byte order the header
-was written in is ambiguous (Netlink is kernel/userspace IPC, not wire
+was written in is ambiguous (Netlink <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> is kernel/userspace IPC, not wire
 format) and is guessed by <a class="reference internal" href="#pcapkit.protocols.link.netlink.nlmsg_byteorder" title="pcapkit.protocols.link.netlink.nlmsg_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlmsg_byteorder()</span></code></a>; either way it is kept as
 <code class="docutils literal notranslate"><span class="pre">netlink.byteorder</span></code>.</p>
 <dl class="py class">
@@ -971,8 +972,8 @@ whether the message is a request, so they are not decoded further.</p>
 
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id1" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/7/netlink">netlink(7)</a></em>; <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3549.html#section-2.3.2"><strong>RFC 3549 Section 2.3.2</strong></a></p>
 </aside>
 </aside>

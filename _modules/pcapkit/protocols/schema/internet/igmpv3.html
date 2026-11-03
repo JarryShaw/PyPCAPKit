@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -669,7 +670,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'num_sources'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
-    <span class="c1">#: Additional data (:rfc:`3376#section-4.1.10`): octets past the source</span>
+    <span class="c1">#: Additional data (:rfc:`3376#section-4.1.10`) -- octets past the source</span>
     <span class="c1">#: list that a received Query may carry and that must be kept (to verify</span>
     <span class="c1">#: the checksum) but not otherwise acted on. Empty for a</span>
     <span class="c1">#: standards-conformant Query, since :meth:`IGMPv3.make</span>
@@ -699,11 +700,11 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Max response code; the raw octet :meth:`IGMPv3.read</span>
-    <span class="c1">#: &lt;pcapkit.protocols.internet.igmpv3.IGMPv3.read&gt;` decodes per</span>
+    <span class="c1">#: Max response code; the raw octet</span>
+    <span class="c1">#: :meth:`IGMPv3.read &lt;pcapkit.protocols.internet.igmpv3.IGMPv3.read&gt;` decodes per</span>
     <span class="c1">#: :rfc:`3376#section-4.1.1`.</span>
     <span class="n">max_resp_code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Checksum: the 16-bit one's complement of the one's complement sum of</span>
+    <span class="c1">#: Checksum. The 16-bit one's complement of the one's complement sum of</span>
     <span class="c1">#: the message, with the checksum field itself taken as zero and no</span>
     <span class="c1">#: pseudo-header involved -- the whole IP payload (:rfc:`3376#section-4.1.2`).</span>
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>

@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -665,7 +666,7 @@
 <span class="s1">__all__ = ['TransportProtocol', '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
-<span class="s1">    from typing import Any, Optional, Type</span>
+<span class="s1">    from typing import Any, Mapping, Optional, Type</span>
 
 <span class="s1">    from pcapkit.corekit.multidict import MultiDict</span>
 
@@ -879,9 +880,9 @@
 
 <span class="s1">    #: Registry class owning each transport protocol, i.e. what</span>
 <span class="s1">    #: :meth:`get` delegates to when called on this class rather than on one of</span>
-<span class="s1">    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once every one of</span>
-<span class="s1">    #: them has been imported, since this module cannot import its own subclasses.</span>
-<span class="s1">    __registries__: 'dict[TransportProtocol, Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]]' = </span><span class="se">{{}}</span>
+<span class="s1">    #: them. Populated by :mod:`pcapkit.const.reg.apptype`, which imports each</span>
+<span class="s1">    #: of them on first use, since this module cannot import its own subclasses.</span>
+<span class="s1">    __registries__: 'Mapping[TransportProtocol, Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]]' = </span><span class="se">{{}}</span>
 
 <span class="s1">    #: Canonical service per port, for the ports carrying more than one. The base</span>
 <span class="s1">    #: registry has no members and so no collisions.</span>
@@ -1067,13 +1068,13 @@
 <span class="s1">        if isinstance(proto, str):</span>
 <span class="s1">            proto = TransportProtocol.get(proto.lower())</span>
 
-<span class="s1">        # NOTE: a direct dict lookup covers every genuine single transport --</span>
+<span class="s1">        # NOTE: a direct lookup covers every genuine single transport --</span>
 <span class="s1">        # one of the real members, or a bare int equal to one of their</span>
 <span class="s1">        # values -- since ``__registries__`` keys compare by the same</span>
 <span class="s1">        # int-valued hash/eq every member and bare int alike already use. The</span>
-<span class="s1">        # cast is for mypy alone: ``dict.get`` accepts any hashable key at run</span>
+<span class="s1">        # cast is for mypy alone: ``.get`` accepts any hashable key at run</span>
 <span class="s1">        # time regardless of its declared key type, but mypy holds ``.get`` to</span>
-<span class="s1">        # the dict's own ``TransportProtocol`` keys, and does not know ``proto``</span>
+<span class="s1">        # the mapping's own ``TransportProtocol`` keys, and does not know ``proto``</span>
 <span class="s1">        # can genuinely be a bare :class:`int` here, TransportProtocol not being</span>
 <span class="s1">        # an ``IntFlag`` (GitHub issue #808) -- see the annotation on ``proto``</span>
 <span class="s1">        # above.</span>

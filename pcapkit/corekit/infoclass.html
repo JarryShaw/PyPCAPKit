@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -630,7 +631,10 @@ subclass its key’s annotation names.</p></li>
 <dd><p>List of names of keys left out of <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps of
 <a class="reference internal" href="../dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> – metadata such as <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>, which
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> may still carry, see <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a>.
-Finalisation adds the names in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__builtin__</span></code>.</p>
+Finalisation adds the names in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__builtin__</span></code>, though <code class="docutils literal notranslate"><span class="pre">repr</span></code>,
+<code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps write a field renamed for clashing with one of
+them, such as a reassembled datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code>, under its own name
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2733">#2733</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -844,6 +848,12 @@ value (<a class="extlink-issue reference external" href="https://github.com/Jarr
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a> does not name, carries the keys in
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>, and records those as its own <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code>
 for the dumpers to leave out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>The <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code> it records leaves out a field renamed for
+clashing with a builtin name, such as a reassembled datagram’s
+<code class="docutils literal notranslate"><span class="pre">packet</span></code>, so the dumpers write that field under its own name
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2733">#2733</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

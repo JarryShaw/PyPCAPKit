@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -595,7 +596,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABSENT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
@@ -647,15 +650,20 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,</span>
-<span class="sd">        :obj:`tuple` or :obj:`dict` among ``value``, or a</span>
+<span class="sd">        :obj:`tuple`, :obj:`dict` or data model among ``value``, or a</span>
 <span class="sd">        :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A</span>
-<span class="sd">        top-level :obj:`bytes` keyword (e.g. a payload) does not count.</span>
+<span class="sd">        top-level :obj:`bytes` keyword (e.g. a payload) does not count. A data</span>
+<span class="sd">        model is looked into as a :obj:`dict` is, since a maker builds from its</span>
+<span class="sd">        fields as given, and a multi-mapping through every value of each key</span>
+<span class="sd">        (:issue:`2725`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">nested</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>  <span class="c1"># a ready-made item, which ``make()`` may pack into raw octets</span>
         <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_passes_raw</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">'__packet__'</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">_passes_raw</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">'__packet__'</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
@@ -1427,14 +1435,21 @@
 <span class="sd">            :meth:`__post_init__` makes to construct the instance, that schema</span>
 <span class="sd">            is kept, unless it still holds raw :obj:`bytes` where parsing its</span>
 <span class="sd">            packed octets yields a schema -- e.g. a raw option given to</span>
-<span class="sd">            ``make()`` -- which :meth:`read` cannot consume. The header is</span>
-<span class="sd">            then replaced by the parsed one (:issue:`1312`).</span>
+<span class="sd">            ``make()``, directly or inside a data model -- which :meth:`read`</span>
+<span class="sd">            cannot consume. The header is then replaced by the parsed one</span>
+<span class="sd">            (:issue:`1312`).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If the made header holds raw items and its packed</span>
 <span class="sd">                octets do not parse, either as a schema or by :meth:`read`.</span>
 <span class="sd">                The message carries the original error's, which is also</span>
 <span class="sd">                chained as ``__cause__``.</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A raw item that ``make()`` takes from inside a data model, such as</span>
+<span class="sd">           the one :meth:`from_data` passes on, is replaced too, rather than</span>
+<span class="sd">           reaching :meth:`read` (:issue:`2725`).</span>
 
 <span class="sd">        """</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>

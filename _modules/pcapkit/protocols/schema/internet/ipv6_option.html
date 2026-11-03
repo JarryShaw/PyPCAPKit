@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -574,7 +575,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">IPv6AddressField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueField</span><span class="p">,</span> <span class="n">SchemaField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'rpl_opt_sub_tlv_len'</span><span class="p">,</span> <span class="s1">'mpl_opt_seed_id_len'</span><span class="p">,</span> <span class="s1">'smf_i_dpd_id_len'</span><span class="p">,</span>
@@ -587,6 +588,23 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumMeta</span><span class="p">,</span> <span class="n">Schema</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_opt_data_len_cut</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the data ends before an option's ``Opt Data Len``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether the field :meth:`Schema.unpack</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` gives as the one the</span>
+<span class="sd">        data ends inside is ``len``, so that its value is the zero a capture cut</span>
+<span class="sd">        leaves rather than a length read (:issue:`2727`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'len'</span>
 
 
 <div class="viewcode-block" id="rpl_opt_sub_tlv_len">
@@ -646,17 +664,27 @@
 <span class="sd">        prefix: Name of the extension header, leading the error message.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        SMF I-DPD identifier length.</span>
+<span class="sd">        SMF I-DPD identifier length, or zero if the data ends before</span>
+<span class="sd">        ``Opt Data Len``, which leaves the option to the short read.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold</span>
 <span class="sd">            the TaggerID it declares, which would otherwise underflow the</span>
 <span class="sd">            identifier length below zero.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A length the data ends before is left to the short read, and one too</span>
+<span class="sd">       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather</span>
+<span class="sd">       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">       (:issue:`2727`).</span>
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid SMF I-DPD option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_opt_data_len_cut</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid SMF I-DPD option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">length</span></div>
 
 
@@ -682,8 +710,8 @@
 <span class="sd">          wrapped ``SMFHashBasedDPDOption`` instance.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` is ``0``, or if no schema is</span>
-<span class="sd">            registered for the DPD mode.</span>
+<span class="sd">        ProtocolError: If ``Opt Data Len`` is ``0`` on the wire.</span>
+<span class="sd">        FieldValueError: If no schema is registered for the DPD mode.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The field is sized ``Opt Data Len + 2`` rather than ``Opt Data Len``.</span>
@@ -695,11 +723,26 @@
 <span class="sd">        :class:`~pcapkit.corekit.fields.collections.OptionField` would then</span>
 <span class="sd">        mis-count against the option area.</span>
 
+<span class="sd">        Where the data ends before ``Opt Data Len``, the forward match reads</span>
+<span class="sd">        it as zero, and the option is the short read of the schema chosen by</span>
+<span class="sd">        the mode bit, likewise zero.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A length the data ends before is left to the short read, and a zero</span>
+<span class="sd">       on the wire raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`</span>
+<span class="sd">       rather than :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">       (:issue:`2727`).</span>
+
 <span class="sd">    """</span>
     <span class="c1"># NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode</span>
-    <span class="c1"># bit forward-matched above belongs to whatever follows the option.</span>
-    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid SMF DPD option length: 0'</span><span class="p">)</span>
+    <span class="c1"># bit forward-matched above belongs to whatever follows the option. Unless</span>
+    <span class="c1"># the data ends inside the forward match before ``Opt Data Len``, the</span>
+    <span class="c1"># option's second octet, which then reads as zero (#2727).</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+    <span class="n">cut</span> <span class="o">=</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'test'</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cut</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid SMF DPD option length: 0'</span><span class="p">)</span>
 
     <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>
     <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema]]'</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
@@ -842,18 +885,28 @@
 <span class="sd">        prefix: Name of the extension header, leading the error message.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        CALIPSO option padding length.</span>
+<span class="sd">        CALIPSO option padding length, or zero if the data ends before</span>
+<span class="sd">        ``Opt Data Len``, which leaves the option to the short read.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold</span>
 <span class="sd">            the fixed header and the compartment bitmap declared by</span>
 <span class="sd">            ``cmpt_len``, which would otherwise underflow the padding length</span>
 <span class="sd">            below zero.</span>
 
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A length the data ends before is left to the short read, and one too</span>
+<span class="sd">       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather</span>
+<span class="sd">       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">       (:issue:`2727`).</span>
+
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
     <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid CALIPSO option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_opt_data_len_cut</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid CALIPSO option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">length</span></div>
 
 
@@ -868,18 +921,28 @@
 <span class="sd">        prefix: Name of the extension header, leading the error message.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        MPL option padding length.</span>
+<span class="sd">        MPL option padding length, or zero if the data ends before</span>
+<span class="sd">        ``Opt Data Len``, which leaves the option to the short read.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">        ProtocolError: If ``Opt Data Len`` on the wire is too short to hold</span>
 <span class="sd">            the fixed header and the Seed-ID declared by ``flags.type``, which</span>
 <span class="sd">            would otherwise underflow the padding length below zero.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A length the data ends before is left to the short read, and one too</span>
+<span class="sd">       short raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather</span>
+<span class="sd">       than :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">       (:issue:`2727`).</span>
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
                                <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid MPL option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_opt_data_len_cut</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">: invalid MPL option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">length</span></div>
 
 </pre></div>

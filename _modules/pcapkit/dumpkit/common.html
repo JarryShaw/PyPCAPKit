@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -579,9 +580,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.plist</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.tree</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">_dump_excluded</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span><span class="p">,</span> <span class="n">NullType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
@@ -922,6 +924,16 @@
 <span class="sd">       kept (:issue:`1257`), and a string carrying a character XML forbids</span>
 <span class="sd">       is written as ``&lt;data&gt;`` (:issue:`1262`).</span>
 
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       A field an :class:`~pcapkit.corekit.infoclass.Info` renamed for</span>
+<span class="sd">       clashing with a builtin name, such as a reassembled datagram's</span>
+<span class="sd">       ``packet``, is written under its own name rather than left out, and</span>
+<span class="sd">       reading it resolves a deferred ``packet`` as indexing does. A protocol</span>
+<span class="sd">       object, such as that ``packet``, is written as its</span>
+<span class="sd">       :attr:`~pcapkit.protocols.protocol.Protocol.info`, as a frame is,</span>
+<span class="sd">       rather than by its attributes (:issue:`2733`).</span>
+
 <span class="sd">    """</span>
     <span class="c1"># NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what</span>
     <span class="c1"># :attr:`Extractor.__output__ &lt;pcapkit.foundation.extraction.Extractor.__output__&gt;`</span>
@@ -981,21 +993,27 @@
 <span class="sd">            The :attr:`~pcapkit.corekit.infoclass.Info.__excluded__` of a field</span>
 <span class="sd">            model, or of the field model an export was made from -- metadata</span>
 <span class="sd">            such as ``__next_type__``, which only a rebuild reads</span>
-<span class="sd">            (:issue:`2003`). Empty for an option list, whose keys are its</span>
+<span class="sd">            (:issue:`2003`) -- less the fields it renamed for clashing with a</span>
+<span class="sd">            builtin name, which are written under their own names</span>
+<span class="sd">            (:issue:`2733`). Empty for an option list, whose keys are its</span>
 <span class="sd">            options.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">()</span>
+            <span class="k">return</span> <span class="n">_dump_excluded</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">,</span> <span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[Any, Any]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any] | ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[Any, Any]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return the fields of ``info`` as the :class:`dict` the writer is handed.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            info: The fields, as an :class:`~pcapkit.corekit.infoclass.Info` or</span>
 <span class="sd">                as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` its</span>
-<span class="sd">                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns.</span>
+<span class="sd">                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, or a</span>
+<span class="sd">                protocol object, whose fields are those of its</span>
+<span class="sd">                :attr:`~pcapkit.protocols.protocol.Protocol.info`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            One entry per field, in order, with its key unchanged -- the writer</span>
@@ -1008,8 +1026,11 @@
 <span class="sd">            written. The keys :func:`excluded` names are left out.</span>
 
 <span class="sd">        """</span>
-        <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip</span><span class="p">]</span>
+        <span class="c1"># NOTE: a protocol object, as a reassembled datagram's ``packet``, is</span>
+        <span class="c1"># written as its info, as a frame is, never by its attributes (#2733).</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">info</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)</span> <span class="k">else</span> <span class="n">info</span>  <span class="c1"># type: Info | MultiDict[Any, Any]</span>
+        <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip</span><span class="p">]</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[Any, Any]</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
@@ -1019,7 +1040,7 @@
                 <span class="c1"># NOTE: read by indexing, so that a model overriding it is</span>
                 <span class="c1"># honoured -- the traceflow and reassembly models resolve a</span>
                 <span class="c1"># deferred ``packet`` there.</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="c1">#: Whether the writer is handed the fields of an</span>
@@ -1049,12 +1070,13 @@
 <span class="sd">                    :class:`~pcapkit.corekit.multidict.MultiDict` its</span>
 <span class="sd">                    :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, is</span>
 <span class="sd">                    written as the :class:`dict` :func:`fields` makes of it, so</span>
-<span class="sd">                    that a repeated field keeps every value. The writer walks</span>
+<span class="sd">                    that a repeated field keeps every value; a protocol object</span>
+<span class="sd">                    is written as that of its info. The writer walks</span>
 <span class="sd">                    the block it is handed without calling</span>
 <span class="sd">                    :meth:`object_hook` on it, only on what it holds.</span>
 
 <span class="sd">                """</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
@@ -1091,14 +1113,18 @@
 <span class="sd">                the option lists an :class:`~pcapkit.corekit.infoclass.Info`</span>
 <span class="sd">                holds. An :class:`~pcapkit.corekit.infoclass.Info` itself</span>
 <span class="sd">                becomes the :class:`dict` of its fields that :func:`fields`</span>
-<span class="sd">                returns, holding every value of a repeated field.</span>
+<span class="sd">                returns, holding every value of a repeated field, and so does a</span>
+<span class="sd">                protocol object, as its</span>
+<span class="sd">                :attr:`~pcapkit.protocols.protocol.Protocol.info`, rather</span>
+<span class="sd">                than by its attributes, which hold such per-process detail as</span>
+<span class="sd">                the address of its file object (:issue:`2733`).</span>
 
 <span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: Any</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)):</span>
                 <span class="c1"># NOTE: a MultiInfo or OrderedMultiInfo, though an Info, is</span>
                 <span class="c1"># an option list, and is written by the branches below.</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>

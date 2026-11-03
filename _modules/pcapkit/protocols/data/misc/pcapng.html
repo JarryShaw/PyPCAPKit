@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -552,6 +553,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">"""data models for PCAP-NG file format"""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -580,8 +582,8 @@
 
     <span class="s1">'NameResolutionRecord'</span><span class="p">,</span> <span class="s1">'UnknownRecord'</span><span class="p">,</span> <span class="s1">'EndRecord'</span><span class="p">,</span> <span class="s1">'IPv4Record'</span><span class="p">,</span> <span class="s1">'IPv6Record'</span><span class="p">,</span>
 
-    <span class="s1">'DSBSecrets'</span><span class="p">,</span> <span class="s1">'UnknownSecrets'</span><span class="p">,</span> <span class="s1">'TLSKeyLog'</span><span class="p">,</span> <span class="s1">'WireGuardKeyLog'</span><span class="p">,</span> <span class="s1">'ZigBeeNWKKey'</span><span class="p">,</span>
-    <span class="s1">'ZigBeeAPSKey'</span><span class="p">,</span>
+    <span class="s1">'DSBSecrets'</span><span class="p">,</span> <span class="s1">'UnknownSecrets'</span><span class="p">,</span> <span class="s1">'TLSKeyLogEntries'</span><span class="p">,</span> <span class="s1">'TLSKeyLog'</span><span class="p">,</span> <span class="s1">'WireGuardKeyLog'</span><span class="p">,</span>
+    <span class="s1">'ZigBeeNWKKey'</span><span class="p">,</span> <span class="s1">'ZigBeeAPSKey'</span><span class="p">,</span>
 
     <span class="s1">'UnknownBlock'</span><span class="p">,</span> <span class="s1">'SectionHeaderBlock'</span><span class="p">,</span> <span class="s1">'InterfaceDescriptionBlock'</span><span class="p">,</span>
     <span class="s1">'EnhancedPacketBlock'</span><span class="p">,</span> <span class="s1">'SimplePacketBlock'</span><span class="p">,</span> <span class="s1">'NameResolutionBlock'</span><span class="p">,</span>
@@ -595,6 +597,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span> <span class="k">as</span> <span class="n">dt_timezone</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -1545,22 +1548,101 @@
 
 
 
+<div class="viewcode-block" id="TLSKeyLogEntries">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLogEntries">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TLSKeyLogEntries</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for the entries of a TLS key log, keyed by label.</span>
+
+<span class="sd">    A key is each :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`</span>
+<span class="sd">    the log has an entry under, and its value that label's client random to</span>
+<span class="sd">    secret pairs, in log order, as an</span>
+<span class="sd">    :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`. A label also reads</span>
+<span class="sd">    as an attribute, as ``entries.CLIENT_RANDOM``.</span>
+
+<span class="sd">    .. versionadded:: 1.6.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+
+
+
 <div class="viewcode-block" id="TLSKeyLog">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TLSKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for TLS key log DSB secrets."""</span>
+<span class="w">    </span><span class="sd">"""Data model for TLS key log DSB secrets.</span>
+
+<span class="sd">    .. versionchanged:: 1.6.0</span>
+
+<span class="sd">       :attr:`entries` is a :class:`TLSKeyLogEntries` rather than a</span>
+<span class="sd">       :obj:`dict`, and a mapping given for it is stored as one; :meth:`to_dict`</span>
+<span class="sd">       exports it as an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`,</span>
+<span class="sd">       as it does any nested data model. A pickle holds it as a :obj:`dict`, so</span>
+<span class="sd">       pickles load across 1.6.0 in both directions (:issue:`2726`).</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: TLS key log entries.</span>
-    <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiInfo[bytes, bytes]]'</span>
+    <span class="n">entries</span><span class="p">:</span> <span class="s1">'TLSKeyLogEntries'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: TLS key log text as the block carries it, comments and line order</span>
         <span class="c1">#: included. Set on parsing only, and written back verbatim on rebuild.</span>
         <span class="n">data</span><span class="p">:</span> <span class="s1">'str'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'TLSKeyLogEntries | Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span>
 
+<div class="viewcode-block" id="TLSKeyLog.__post_init__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.__post_init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Store a mapping given for :attr:`entries` as a :class:`TLSKeyLogEntries`."""</span>
+        <span class="n">_hold_entries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TLSKeyLog.__getstate__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.__getstate__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the state to pickle, holding :attr:`entries` as a :obj:`dict`.</span>
+
+<span class="sd">        A release before 1.6.0 loads them as the :obj:`dict` it holds, and</span>
+<span class="sd">        :meth:`__setstate__` loads them as a :class:`TLSKeyLogEntries`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entries'</span><span class="p">),</span> <span class="n">TLSKeyLogEntries</span><span class="p">):</span>
+            <span class="n">state</span><span class="p">[</span><span class="s1">'entries'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">'entries'</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+
+<div class="viewcode-block" id="TLSKeyLog.__setstate__">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.__setstate__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Restore a pickled state, storing :attr:`entries` as a :class:`TLSKeyLogEntries`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state: The state :meth:`__getstate__` returns, or one holding the</span>
+<span class="sd">                entries as a :obj:`dict`, as before 1.6.0.</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">_hold_entries</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hold_entries</span><span class="p">(</span><span class="n">namespace</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Store the ``entries`` in ``namespace`` as a :class:`TLSKeyLogEntries`, unless they are one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        namespace: The :attr:`~object.__dict__` of a :class:`TLSKeyLog`.</span>
+
+<span class="sd">    """</span>
+    <span class="n">entries</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entries'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">TLSKeyLogEntries</span><span class="p">):</span>
+        <span class="n">namespace</span><span class="p">[</span><span class="s1">'entries'</span><span class="p">]</span> <span class="o">=</span> <span class="n">TLSKeyLogEntries</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="WireGuardKeyLog">

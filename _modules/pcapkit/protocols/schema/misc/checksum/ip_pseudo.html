@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -571,13 +572,13 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
 
-<span class="c1">#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1`: source, destination,</span>
+<span class="c1">#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1` -- source, destination,</span>
 <span class="c1">#: zero, protocol and length.</span>
 <span class="c1">#:</span>
 <span class="c1">#: .. versionadded:: 1.6.0</span>
 <span class="n">IPV4_PSEUDO_LEN</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPV4LENGTH</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span>
 
-<span class="c1">#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1`: source, destination,</span>
+<span class="c1">#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1` -- source, destination,</span>
 <span class="c1">#: length, zero and next header.</span>
 <span class="c1">#:</span>
 <span class="c1">#: .. versionadded:: 1.6.0</span>

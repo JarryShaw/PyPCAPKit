@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1242,7 +1243,7 @@ pull request, so its report goes to Discussions instead (see <a class="reference
 or on dispatch with a <code class="docutils literal notranslate"><span class="pre">days</span></code> window and an optional <code class="docutils literal notranslate"><span class="pre">concurrency_hours</span></code> runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
 Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, so
-its two-hour legs stay measured), a day per query because a filtered listing stops
+its long legs stay measured), a day per query because a filtered listing stops
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample – 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow – and the summary says how many runs each sample
@@ -1728,8 +1729,8 @@ though the leg’s check run still reads <code class="docutils literal notransla
 <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is cancelled, and that page does not say whether the job-level
 guard covers a cancellation. So setup-python, the install, the watcher’s setup-python
 and <code class="docutils literal notranslate"><span class="pre">requests</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1938">#1938</a>,
-below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
-the job’s 140, which leaves 3 for the rest: a step at its cap
+below) and the tests have caps of their own, of 5, 10, 1, 1 and 190 minutes, under
+the job’s 210, which leaves 3 for the rest: a step at its cap
 fails rather than cancels, and the guard holds (actions/runner’s
 <code class="docutils literal notranslate"><span class="pre">StepsRunner.RunStepAsync</span></code>). The runner’s <code class="docutils literal notranslate"><span class="pre">has</span> <span class="pre">timed</span> <span class="pre">out</span></code> error
 stays, changing no conclusion, as <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span> <span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> does.
@@ -1738,7 +1739,7 @@ leg of runs 38569321543-38569522442. <code class="docutils literal notranslate">
 job, and none on a step. Promoting one whose leg stays green is a hand edit, which
 <code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code> refuses until the build has a wheel, a conda build
 and a <code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
-<p>The tests’ 120 minutes are sized for GraalPy, the slowest of the legs that share
+<p>The tests’ 190 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
 3.14t’s ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
 <code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier alone, as every leg but <code class="docutils literal notranslate"><span class="pre">latest</span></code> does (see <a class="reference internal" href="#test-tiers">Test Tiers</a> below):
@@ -1748,7 +1749,13 @@ passes each module it printed as an <code class="docutils literal notranslate"><
 round-trip sweeps of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>
 took 8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
 the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
-88-113 minutes (estimate).</p>
+88-113 minutes (estimate). That was low. In job 125752017215, on <code class="docutils literal notranslate"><span class="pre">ab7be2fb0</span></code>, the
+shards below took 6386 s, and the <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, of 110 minutes at that commit, ended the
+run over the rest, which had taken 404 s in job 125639681253, on a runner 1.46-1.86
+times as fast (see below). With that run at 589-750 s on the slower runner, and
+70-100 s of start-up for each of the two runs the later split adds, the leg comes to
+7110-7340 s there (estimate). So the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is 180 minutes, about 1.5 times that,
+and the step’s cap 10 minutes more (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2739">#2739</a>).</p>
 <p>GraalPy’s leg still loses its runner 18-30 minutes into its tests, with <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">runner</span>
 <span class="pre">has</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">shutdown</span> <span class="pre">signal</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1740">#1740</a>),
 so each experimental leg samples its runner while the tests run. <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">the</span> <span class="pre">resource</span>
@@ -1805,14 +1812,21 @@ tests took 4510 s of the <code class="docutils literal notranslate"><span class=
 sized from that job’s <code class="docutils literal notranslate"><span class="pre">junit-experimental-graalpy-25.4</span></code> artifact: a shard’s
 estimate is its tests’ JUnit seconds over the 3 workers, plus 50 s for the 46-57 s
 that each of the job’s shards that lost no worker took beyond that, start to start.
-Every shard split this way comes to under 5 minutes, and the tier to about 4750 s
-(estimate). The run over the rest is left whole: in that job it took about 6.7
-minutes and lost no worker. The runs share the step’s <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, scope and
+That put every shard split this way under 5 minutes, and the tier at about 4750 s,
+on that job’s runner (estimate). The run over the rest is left whole: in that job it
+took about 6.7 minutes and lost no worker. In job 125752017215, on <code class="docutils literal notranslate"><span class="pre">ab7be2fb0</span></code>, no
+worker went down, but on a runner whose unchanged shards each took 1.46-1.86 times
+as long, <code class="docutils literal notranslate"><span class="pre">tests/protocols/internet</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/protocols/application</span></code> ran 11.5
+and 13.9 minutes, their largest worker reaching 2.25 and 2.48 GiB RSS, and the
+other shards of that split 2.3-8.1 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2739">#2739</a>). So those two are split again by
+that job’s JUnit seconds, at <code class="docutils literal notranslate"><span class="pre">test_igmp*</span></code> and <code class="docutils literal notranslate"><span class="pre">test_tls*</span></code>, which leaves every
+other shard fewer JUnit seconds there than <code class="docutils literal notranslate"><span class="pre">tests/const</span></code> took, whose largest
+worker peaked at 2.05 GiB. The runs share the step’s <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, scope and
 watcher, so the caps hold over the whole tier; on <code class="docutils literal notranslate"><span class="pre">timeout</span></code>’s SIGINT the run in
 progress writes its JUnit file and no later one starts. Each shard’s run writes a
 JUnit file of its own beside <code class="docutils literal notranslate"><span class="pre">junit.xml</span></code>, such as <code class="docutils literal notranslate"><span class="pre">junit-tests-protocols.xml</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">test</span> <span class="pre">timings</span></code> takes them all. 3.14t’s leg runs pytest once.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">110m</span></code> ends pytest under the step’s 120-minute
+<li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">180m</span></code> ends pytest under the step’s 190-minute
 cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
 caps any file at 2 GiB. The <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is GNU’s, <code class="docutils literal notranslate"><span class="pre">gnutimeout</span></code> where it exists
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>): on Ubuntu 26.04 <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is uutils’, whose <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code> sends SIGKILL
@@ -1832,19 +1846,20 @@ probe’s error, the seconds the tests took, the OOM kills while they ran
 (<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>), the lines in their output that report a raised <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> (#1962),
 not those that mention one, such as a docstring a traceback prints, and xdist’s <code class="docutils literal notranslate"><span class="pre">node</span>
 <span class="pre">down</span></code> lines. From it and the monitor’s last sample, <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> warns
-<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span> <span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">110</span>
+<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span> <span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">180</span>
 <span class="pre">minutes</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span> <span class="pre">MemoryError</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">an</span> <span class="pre">xdist</span> <span class="pre">worker</span></code>, each a
 warning of its own. Its closing line gives the exit status, but where the watcher
 stopped the run and wrote <code class="docutils literal notranslate"><span class="pre">stopped=true</span></code> it reads <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">were</span> <span class="pre">stopped</span> <span class="pre">as</span>
 <span class="pre">superseded</span></code>, not <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">exited</span> <span class="pre">0</span></code>, and adds no warning, since the <code class="docutils literal notranslate"><span class="pre">Superseded</span></code>
 notice already says why (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2077">#2077</a>). A timeout is exit 124, or 137 with no OOM kill
-after 110 minutes: <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code>’s SIGKILL to a teardown SIGINT did not end, where an
+after 180 minutes: <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code>’s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the job’s last step but the job summary’s and the
 KTLO summary’s script, still warns of every failed step, <code class="docutils literal notranslate"><span class="pre">tests</span></code> included. The 2 GiB,
 <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code> and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
-workers rather than 4, GraalPy’s tests should take about 117-151 minutes (an inference
-from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
-warning: that is expected, blocks nothing, and leaves the caps as they are.</p>
+workers rather than 4, GraalPy’s tests were to take about 117-151 minutes (an inference
+from the 88-113 above, not measured), and job 125752017215’s came to about 119-122 in
+the shards above (estimate). A leg that still ends on the 180-minute timeout does so as
+a warning that blocks nothing.</p>
 <p><strong>The Windows leg.</strong> <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">windows</span></code> job runs the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier
 on <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> under <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the newest CPython the conda builds target, as
 <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;latest&gt;</span> <span class="pre">on</span> <span class="pre">Windows</span> <span class="pre">(experimental)</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>),

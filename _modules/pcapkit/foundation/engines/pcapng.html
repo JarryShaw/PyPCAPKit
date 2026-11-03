@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -664,7 +665,7 @@
         <span class="c1">#: across the whole file rather than per section.</span>
         <span class="n">_block_count</span><span class="p">:</span> <span class="s1">'collections.Counter[str]'</span>
 
-    <span class="c1">#: The PCAP-NG magic number this engine claims: the Block Type of a Section</span>
+    <span class="c1">#: The PCAP-NG magic number this engine claims -- the Block Type of a Section</span>
     <span class="c1">#: Header Block, read from its one home,</span>
     <span class="c1">#: :class:`~pcapkit.const.pcapng.block_type.BlockType` (:issue:`1739`). It</span>
     <span class="c1">#: reads the same in either byte order.</span>

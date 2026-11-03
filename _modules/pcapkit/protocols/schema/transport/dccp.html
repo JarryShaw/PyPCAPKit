@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -592,7 +593,7 @@
 <span class="c1">#: :rfc:`4340#section-5.8`.</span>
 <span class="n">DCCP_SINGLE_OCTET_OPTION_MAX</span> <span class="o">=</span> <span class="mi">31</span>
 
-<span class="c1">#: Packet types carrying an Acknowledgement Number Subheader: every one</span>
+<span class="c1">#: Packet types carrying an Acknowledgement Number Subheader -- every one</span>
 <span class="c1">#: :rfc:`4340#section-5` defines but DCCP-Request and DCCP-Data. DCCP-Listen</span>
 <span class="c1">#: (:rfc:`5596#section-2.2.1`) carries none either.</span>
 <span class="n">ACK_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
@@ -601,7 +602,7 @@
     <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Sync</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_SyncAck</span><span class="p">,</span>
 <span class="p">})</span>
 
-<span class="c1">#: Packet types carrying a Service Code: DCCP-Request, DCCP-Response and</span>
+<span class="c1">#: Packet types carrying a Service Code -- DCCP-Request, DCCP-Response and</span>
 <span class="c1">#: DCCP-Listen (:rfc:`4340#section-5.2`, :rfc:`5596#section-2.2.1`).</span>
 <span class="n">SERVICE_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
     <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Request</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Response</span><span class="p">,</span> <span class="n">Enum_PacketType</span><span class="o">.</span><span class="n">DCCP_Listen</span><span class="p">,</span>
@@ -970,8 +971,8 @@
         <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="n">RESET_TYPE</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1">#: Options, cut short where the data is; :meth:`DCCP.read</span>
-    <span class="c1">#: &lt;pcapkit.protocols.transport.dccp.DCCP.read&gt;` refuses such a header.</span>
+    <span class="c1">#: Options, cut short where the data is;</span>
+    <span class="c1">#: :meth:`DCCP.read &lt;pcapkit.protocols.transport.dccp.DCCP.read&gt;` refuses such a header.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="n">header_length</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]),</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>

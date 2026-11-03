@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -680,6 +681,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">SystemdJournalExportBlock</span> <span class="k">as</span> <span class="n">Data_SystemdJournalExportBlock</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLog</span> <span class="k">as</span> <span class="n">Data_TLSKeyLog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLogEntries</span> <span class="k">as</span> <span class="n">Data_TLSKeyLogEntries</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownBlock</span> <span class="k">as</span> <span class="n">Data_UnknownBlock</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownOption</span> <span class="k">as</span> <span class="n">Data_UnknownOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownRecord</span> <span class="k">as</span> <span class="n">Data_UnknownRecord</span>
@@ -776,8 +778,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">timezone</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span>
-                        <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span>
+                        <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -1384,7 +1386,7 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
-    <span class="c1">#: What :attr:`__proto__` is keyed by: the enum a key must be a member of,</span>
+    <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
     <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
     <span class="c1">#: class *owning* the registry, and read from it by</span>
     <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
@@ -5162,9 +5164,9 @@
 
 <span class="sd">        """</span>
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_TLSKeyLog</span><span class="p">(</span>
-            <span class="c1"># NOTE: each label's entries as an OrderedMultiInfo, which ``Info``</span>
-            <span class="c1"># does not do for a mapping held in a dict (#1484).</span>
-            <span class="n">entries</span><span class="o">=</span><span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="c1"># NOTE: each label's entries become an OrderedMultiInfo as the model</span>
+            <span class="c1"># stores them (#1484, #2726).</span>
+            <span class="n">entries</span><span class="o">=</span><span class="n">Data_TLSKeyLogEntries</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
         <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
@@ -7843,7 +7845,7 @@
 <div class="viewcode-block" id="PCAPNG._make_secrets_tls">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_tls">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_secrets_tls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="s1">'Optional[Data_TLSKeyLog]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TLSKeyLog'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG TLS Key Log secrets.</span>
@@ -7880,7 +7882,7 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.</span>
-            <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">,</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span>
+            <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Mapping[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">,</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>

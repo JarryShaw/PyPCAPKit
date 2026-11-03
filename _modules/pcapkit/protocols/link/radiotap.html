@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -775,18 +776,18 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitmapField</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.radiotap</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiotapField</span> <span class="k">as</span> <span class="n">Data_Field</span>
 
-    <span class="c1">#: A field given to :meth:`Radiotap.make`: a data model, or a ``(type, mapping)`` pair.</span>
+    <span class="c1">#: A field given to :meth:`Radiotap.make` -- a data model, or a ``(type, mapping)`` pair.</span>
     <span class="n">FieldEntry</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Data_Field</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Enum_FieldType</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span>
-    <span class="c1">#: Parser of a field type registered as a callable: the type and the</span>
+    <span class="c1">#: Parser of a field type registered as a callable -- the type and the</span>
     <span class="c1">#: parsed schema, to the data model.</span>
     <span class="n">FieldParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_FieldType</span><span class="p">,</span> <span class="n">Schema_Field</span><span class="p">],</span> <span class="n">Data_Field</span><span class="p">]</span>
-    <span class="c1">#: Constructor of a field type registered as a callable: the type and a</span>
+    <span class="c1">#: Constructor of a field type registered as a callable -- the type and a</span>
     <span class="c1">#: data model or a mapping of its subfields, to the schema.</span>
     <span class="n">FieldConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_FieldType</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Data_Field</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span> <span class="n">Schema_Field</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Radiotap'</span><span class="p">]</span>
 
-<span class="c1">#: Bit 31 of an ``it_present`` word: set, another present-flags word</span>
+<span class="c1">#: Bit 31 of an ``it_present`` word -- set, another present-flags word</span>
 <span class="c1">#: follows; clear, the field-data region starts right after this word.</span>
 <span class="n">_IT_PRESENT_EXTENDED</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span>
 

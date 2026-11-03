@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -942,7 +943,10 @@
     <span class="c1">#: List of names of keys left out of ``repr``, ``str`` and the dumps of</span>
     <span class="c1">#: :mod:`pcapkit.dumpkit` -- metadata such as ``__next_type__``, which</span>
     <span class="c1">#: :meth:`to_dict` may still carry, see :attr:`__included__`.</span>
-    <span class="c1">#: Finalisation adds the names in :attr:`__builtin__`.</span>
+    <span class="c1">#: Finalisation adds the names in :attr:`__builtin__`, though ``repr``,</span>
+    <span class="c1">#: ``str`` and the dumps write a field renamed for clashing with one of</span>
+    <span class="c1">#: them, such as a reassembled datagram's ``packet``, under its own name</span>
+    <span class="c1">#: (:issue:`2733`).</span>
     <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1">#: List of names of dunder keys that iterating an instance, ``len()`` and</span>
     <span class="c1">#: :meth:`to_dict` carry -- metadata such as ``__next_type__``, which a</span>
@@ -1353,9 +1357,16 @@
 <span class="sd">           :attr:`__excluded__`, and records those as its own ``__excluded__``</span>
 <span class="sd">           for the dumpers to leave out (:issue:`2003`).</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           The ``__excluded__`` it records leaves out a field renamed for</span>
+<span class="sd">           clashing with a builtin name, such as a reassembled datagram's</span>
+<span class="sd">           ``packet``, so the dumpers write that field under its own name</span>
+<span class="sd">           (:issue:`2733`).</span>
+
 <span class="sd">        """</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="n">_OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: _OrderedMultiDict[str, Any]</span>
-        <span class="n">dict_</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="n">_dump_excluded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_multi</span><span class="p">():</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
@@ -1415,9 +1426,10 @@
 
     <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
 
-    <span class="c1">#: Names of the keys the dumpers leave out: the :attr:`Info.__excluded__`</span>
-    <span class="c1">#: of the info exported, kept by copies, deep copies and pickles; none for</span>
-    <span class="c1">#: an export of a multi-mapping (:issue:`2003`).</span>
+    <span class="c1">#: Names of the keys the dumpers leave out -- the :attr:`Info.__excluded__`</span>
+    <span class="c1">#: of the info exported, less the fields it renamed for clashing with a</span>
+    <span class="c1">#: builtin name (:issue:`2733`), kept by copies, deep copies and pickles;</span>
+    <span class="c1">#: none for an export of a multi-mapping (:issue:`2003`).</span>
     <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: Collection[str]</span>
 
 <div class="viewcode-block" id="_OrderedMultiDict.__repr__">
@@ -1453,6 +1465,29 @@
     <span class="n">new</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
     <span class="n">new</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="n">excluded</span>
     <span class="k">return</span> <span class="n">new</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dump_excluded</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Collection[str]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the names of the keys of ``info`` the dumps leave out.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        info: A field model, i.e. an :class:`Info` that is no multi-mapping.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Its :attr:`Info.__excluded__`, less each field it renamed for clashing</span>
+<span class="sd">        with a builtin name. Finalisation adds every such name to</span>
+<span class="sd">        :attr:`Info.__excluded__`, and the dumps see a key under its own name</span>
+<span class="sd">        rather than as renamed, so they would otherwise leave out every renamed</span>
+<span class="sd">        field, a reassembled datagram's ``packet`` among them (:issue:`2733`).</span>
+<span class="sd">        ``repr`` and ``str`` see the renamed key, and write the field. A</span>
+<span class="sd">        renamed dunder key stays left out, being metadata.</span>
+
+<span class="sd">    """</span>
+    <span class="n">renamed</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">__map__</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">renamed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">__excluded__</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">__excluded__</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">renamed</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">))]</span>
 
 
 <div class="viewcode-block" id="_MultiInfo">

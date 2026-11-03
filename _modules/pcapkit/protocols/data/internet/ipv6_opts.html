@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -713,7 +714,7 @@
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
     <span class="n">domain</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Compartment bitmap length, in octets: four times the ``Cmpt Length``</span>
+    <span class="c1">#: Compartment bitmap length, in octets -- four times the ``Cmpt Length``</span>
     <span class="c1">#: field, which counts 32-bit words.</span>
     <span class="n">cmpt_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Sensitivity level.</span>
@@ -750,7 +751,7 @@
 
     <span class="c1">#: TaggerID type.</span>
     <span class="n">tid_type</span><span class="p">:</span> <span class="s1">'TaggerID'</span>
-    <span class="c1">#: ``TidLen`` field as on the wire: the TaggerID length in octets minus</span>
+    <span class="c1">#: ``TidLen`` field as on the wire -- the TaggerID length in octets minus</span>
     <span class="c1">#: one, or ``0`` when there is no TaggerID [:rfc:`6621#section-6.1.1`].</span>
     <span class="n">tid_len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: TaggerID.</span>
@@ -817,7 +818,7 @@
 
     <span class="c1">#: QS function.</span>
     <span class="n">func</span><span class="p">:</span> <span class="s1">'QSFunction'</span>
-    <span class="c1">#: Rate request/report, in kbps: ``40 * 2 ** N`` for the Rate Request or</span>
+    <span class="c1">#: Rate request/report, in kbps -- ``40 * 2 ** N`` for the Rate Request or</span>
     <span class="c1">#: Rate Report field ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782`</span>
     <span class="c1">#: Section 3.1).</span>
     <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span></div>

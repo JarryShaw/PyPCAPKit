@@ -335,6 +335,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/lazy.html">Lazy Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -666,7 +667,7 @@
 <span class="c1">#: The ``supported_versions`` value for DTLS 1.3 (:rfc:`9147#section-5.3`).</span>
 <span class="n">DTLS13_VERSION</span> <span class="o">=</span> <span class="mh">0xFEFC</span>
 
-<span class="c1">#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest``: the</span>
+<span class="c1">#: The ``random`` that makes a ``ServerHello`` a ``HelloRetryRequest`` -- the</span>
 <span class="c1">#: SHA-256 of ``"HelloRetryRequest"`` (:rfc:`9846#section-4.2.3`).</span>
 <span class="n">_HRR_RANDOM</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="s1">'cf21ad74e59a6111be1d8c021e65b891c2a211167abb8c5e079e09e2c8a8339c'</span><span class="p">)</span>
 
