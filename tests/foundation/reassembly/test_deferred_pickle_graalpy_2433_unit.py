@@ -18,10 +18,11 @@ itself a non-heap (built-in) type, so the walk's first check breaks on
 
     TypeError: typing.Generic() takes no arguments
 
-:meth:`Deferred.__reduce_ex__` now hard-codes the ``base=object, state=None``
-outcome the walk always reached on CPython for protocol 0 and 1, which means
-``copyreg._reduce_ex`` -- and its MRO walk -- is no longer called for those
-two protocols at all.
+``Deferred`` reduces under protocol 0 and 1 as protocol 2 does, through
+:class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` (#2714), so
+``copyreg._reduce_ex`` -- and its MRO walk -- is not called for those two
+protocols at all. #2435 first did so with a reduction of its own, which
+hard-coded the ``base=object, state=None`` outcome the walk reached on CPython.
 
 A cross-reviewer confirmed this directly against real GraalPy 25.4.4
 (``graalpy3.13-community-25.4.4``, downloaded from the
@@ -118,7 +119,7 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
 
     GraalPy 25.4's failure happens inside that function, before
     ``__getstate__`` is ever consulted (see the module docstring), so the fix
-    this file pins is that ``Deferred.__reduce_ex__`` never calls it for
+    this file pins is that pickling a ``Deferred`` never calls it for
     protocol 0 or 1 -- simulated here by making the call raise the same
     :exc:`TypeError` real GraalPy does.
 

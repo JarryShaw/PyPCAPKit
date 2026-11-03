@@ -44,21 +44,14 @@ if TYPE_CHECKING:
 #: Test tier (#1958): exercises pickling, whose protocols differ by interpreter.
 __tier__ = 'ALL'
 
-#: Pickle protocols a whole :class:`Deferred` can go through.
+#: Every pickle protocol a whole datagram goes through, ``0`` and ``1`` included.
 #:
-#: Protocols ``0`` and ``1`` are excluded, and not because of anything
-#: :issue:`2417` changed: :class:`~pcapkit.foundation.reassembly.data.data.Deferred`
-#: declares ``__slots__`` and no ``__getstate__``, which those two protocols
-#: cannot serialise at all -- ``TypeError: a class that defines __slots__
-#: without defining __getstate__ cannot be pickled``, raised from
-#: :mod:`copyreg`. Measured on CPython 3.14.10 to be independent of the ports:
-#: it reproduces for an assigned flow, for an unassigned one, and for a bare
-#: ``Deferred(..., 42, b'x')`` holding a plain :obj:`int`, while ``2``-``5``
-#: pass in every one of those cases. That is a separate limitation of the class,
-#: not of the members it holds, which is why it is scoped out here rather than
-#: worked around; the member-level round trip is pinned on *every* protocol from
-#: ``0`` up in :mod:`tests.const.test_const_apptype_unregistered_pickle_2417_unit`.
-PROTOCOLS = tuple(range(2, pickle.HIGHEST_PROTOCOL + 1))
+#: Below protocol 2, ``copyreg._reduce_ex`` refuses a slotted class with no
+#: ``__getstate__`` (#2423), and its MRO walk is one GraalPy cannot pass (#2433).
+#: The slotted :class:`~pcapkit.foundation.reassembly.data.data.Deferred` and the
+#: :class:`~pcapkit.corekit.infoclass.Info` datagram around it both reduce as
+#: protocol 2 does, which reaches neither (#2714).
+PROTOCOLS = tuple(range(pickle.HIGHEST_PROTOCOL + 1))
 
 #: A flow on two unassigned ports, which is what used to fail.
 UNASSIGNED_BUFID = (ip_address('192.0.2.1'), 50000, ip_address('198.51.100.2'), 65535)

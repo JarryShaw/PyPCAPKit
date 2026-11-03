@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.utilities.pickle import ReduceAsProtocol2
 
 __all__ = ['TraceFlowData', 'Deferred', 'FrameRecord']
 
@@ -66,7 +67,7 @@ class Deferred:
         return self.reassembly.datagram
 
 
-class FrameRecord(dict):
+class FrameRecord(ReduceAsProtocol2, dict):
     """A frame as a third-party engine's flow tracing adapter reports it.
 
     The mapping is the engine's own dissection of the frame, which every trace
@@ -105,15 +106,14 @@ class FrameRecord(dict):
         self.frame_info = frame_info
         self.time_epoch = time_epoch
 
-    def __reduce__(self) -> 'tuple[Any, ...]':
-        # NOTE: spelled out because a ``dict`` subclass with ``__slots__`` cannot
-        # be pickled with protocol 0 or 1 otherwise
-        return _frame_record, (dict(self), self.packet, self.frame_info, self.time_epoch)
-
 
 def _frame_record(mapping: 'dict[str, Any]', packet: 'bytes',
                   frame_info: 'Data_FrameInfo', time_epoch: 'Decimal') -> 'FrameRecord':
-    """Rebuild a pickled :class:`FrameRecord`.
+    """Rebuild a :class:`FrameRecord` pickled by a release before 1.6.0.
+
+    Those pickles call this; a :class:`FrameRecord` reduces through
+    :class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` instead, which carries
+    the slots under every protocol (:issue:`2714`).
 
     Args:
         mapping: The engine's dissection of the frame.

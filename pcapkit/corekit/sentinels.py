@@ -45,6 +45,7 @@ import abc
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.compat import final
+from pcapkit.utilities.pickle import ReduceToName
 
 __all__ = ['Sentinel', 'NULL', 'NO_VALUE', 'NO_DEFAULT']
 
@@ -197,7 +198,7 @@ class SentinelMeta(abc.ABCMeta):
         return super().register(subclass)
 
 
-class Sentinel(metaclass=SentinelMeta):
+class Sentinel(ReduceToName, metaclass=SentinelMeta):
     """Abstract base of every sentinel type, so each behaves like the type of :obj:`None`.
 
     A subclass sets ``_name`` to the name of the module-level variable that
@@ -210,10 +211,11 @@ class Sentinel(metaclass=SentinelMeta):
       :obj:`None`, so a caller who builds one by mistake still gets the
       sentinel.
     * :meth:`__copy__` and :meth:`__deepcopy__` return ``self``.
-    * :meth:`__reduce__` returns ``_name``, as ``Ellipsis.__reduce__()``
-      returns ``'Ellipsis'``, so :mod:`pickle` stores the instance as a
-      reference to that module-level name and loads it back as the same
-      object, at every protocol. Guarding :meth:`__new__` alone would not
+    * :meth:`~pcapkit.utilities.pickle.ReduceToName.__reduce__`, from
+      :class:`~pcapkit.utilities.pickle.ReduceToName`, returns ``_name``, as
+      ``Ellipsis.__reduce__()`` returns ``'Ellipsis'``, so :mod:`pickle` stores
+      the instance as a reference to that module-level name and loads it back
+      as the same object, at every protocol. Guarding :meth:`__new__` alone would not
       cover protocols 0 and 1, which rebuild through
       :func:`copyreg._reconstructor` and so call :meth:`object.__new__`
       directly.
@@ -317,10 +319,6 @@ class Sentinel(metaclass=SentinelMeta):
 
         """
         return self
-
-    def __reduce__(self) -> 'str':
-        """Reduce to ``_name``, which :mod:`pickle` stores as a global reference."""
-        return self._name
 
 
 @final
