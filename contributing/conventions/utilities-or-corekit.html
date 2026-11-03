@@ -340,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
@@ -351,7 +352,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -367,22 +367,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -411,7 +419,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -450,7 +458,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -496,7 +504,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="registry-protocol.html">The Registry Protocol</a></li>
@@ -605,6 +613,53 @@ checks that. What needs IPv4 and IPv6 stays beside
 <a class="reference internal" href="../../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a>. The package holds one
 module per checksum family, so a new family sits beside
 <a class="reference internal" href="../../pcapkit/corekit/checksum/internet.html#module-pcapkit.corekit.checksum.internet" title="pcapkit.corekit.checksum.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">internet</span></code></a>.</p>
+<section id="shared-schema-helpers">
+<h2>Shared Schema Helpers<a class="headerlink" href="#shared-schema-helpers" title="Link to this heading">¶</a></h2>
+<p><strong>A helper that code outside the schema layer calls lives in</strong>
+<a class="reference internal" href="../../pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a>, one module per group, rather than in the module that
+first needed it; the schema layer is <a class="reference internal" href="../../pcapkit/corekit/fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a> and
+<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a>. It keeps no re-export at its old path. Ruled by the
+owner in session, on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>, who grouped these helpers in one package instead
+of placing each by the questions above. So
+<a class="reference internal" href="../../pcapkit/corekit/schema/padding.html#pcapkit.corekit.schema.padding.pad_length" title="pcapkit.corekit.schema.padding.pad_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">pad_length()</span></code></a> is in
+<a class="reference internal" href="../../pcapkit/corekit/schema/padding.html#module-pcapkit.corekit.schema.padding" title="pcapkit.corekit.schema.padding"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.padding</span></code></a>, and
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read" title="pcapkit.corekit.schema.shortread.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.replay_short_read" title="pcapkit.corekit.schema.shortread.replay_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">replay_short_read()</span></code></a> in
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#module-pcapkit.corekit.schema.shortread" title="pcapkit.corekit.schema.shortread"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.shortread</span></code></a>. <a class="reference internal" href="../../pcapkit/corekit/schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a> is not the
+header schema framework, which stays <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a> and its
+<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>; it holds only the helpers shared
+across the layer.</p>
+<p><strong>A capture cut belongs to the built-in short read of</strong>
+<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>. <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records the field the data ends
+inside, through <code class="docutils literal notranslate"><span class="pre">_note_short_read</span></code>, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>;
+<a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema._cut_short_read" title="pcapkit.protocols.schema.schema.Schema._cut_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cut_short_read()</span></code></a> packs back only the
+octets read; and <a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read" title="pcapkit.corekit.schema.shortread.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> and
+<a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.replay_short_read" title="pcapkit.corekit.schema.shortread.replay_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">replay_short_read()</span></code></a> carry the record through
+<code class="docutils literal notranslate"><span class="pre">info</span></code> and cut a rebuild back by it. A protocol reads and rebuilds a cut header
+through them, never through an <code class="docutils literal notranslate"><span class="pre">unpack</span></code> override of its own or a length callable
+clamped to the octets present, which hides the cut from the record. Ruled in review
+of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2682">#2682</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2680">#2680</a>), and applied to option areas on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2694">#2694</a>.</p>
+<p><strong>A helper in one protocol’s own schema module moves there too once code outside that
+protocol uses it and it is generic enough to reuse</strong>, so that another implementor can
+find it; a helper only its own protocol calls stays beside the schema. Ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>. A protocol’s own modules are its protocol, data and schema modules. So
+<a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html#pcapkit.corekit.schema.jumbogram.jumbo_payload_length" title="pcapkit.corekit.schema.jumbogram.jumbo_payload_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code></a>, which the IPv6
+pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
+<a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html#module-pcapkit.corekit.schema.jumbogram" title="pcapkit.corekit.schema.jumbogram"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.jumbogram</span></code></a>, while
+<a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.schema.internet.ipv6.jumbogram_error" title="pcapkit.protocols.schema.internet.ipv6.jumbogram_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbogram_error()</span></code></a>, which only IPv6
+calls, stays in <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#module-pcapkit.protocols.schema.internet.ipv6" title="pcapkit.protocols.schema.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6</span></code></a>. The IPv6 option
+helpers in <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_option.html#module-pcapkit.protocols.schema.internet.ipv6_option" title="pcapkit.protocols.schema.internet.ipv6_option"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option</span></code></a> belong to the HOPOPT
+and IPv6-Opts headers that share them, and stay there too.</p>
+<p>The field modules and the protocols import these helpers, so a helper module imports
+neither of them, nor <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>, outside an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code>
+block; the package’s <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> imports none of its modules, so a field module
+loads only the group it asks for.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_schema_helpers_boundary_2674_unit.py</span></code> fails on a helper
+module that does, on a module outside the layer that refers to a function defined in
+a field module or in <a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols.schema.schema" title="pcapkit.protocols.schema.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema</span></code></a>, and on a module outside
+a protocol that refers to a function defined in that protocol’s schema module, by
+import or as an attribute of the module.</p>
+</section>
 <section id="context-variables">
 <h2>Context Variables<a class="headerlink" href="#context-variables" title="Link to this heading">¶</a></h2>
 <p>Where a <a class="reference external" href="https://docs.python.org/3/library/contextvars.html#contextvars.ContextVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextVar</span></code></a> lives depends on which modules use it.
@@ -684,6 +739,7 @@ from <code class="docutils literal notranslate"><span class="pre">__all__</span>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a><ul>
+<li><a class="reference internal" href="#shared-schema-helpers">Shared Schema Helpers</a></li>
 <li><a class="reference internal" href="#context-variables">Context Variables</a></li>
 </ul>
 </li>

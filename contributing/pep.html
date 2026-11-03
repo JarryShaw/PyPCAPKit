@@ -340,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
@@ -351,7 +352,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -367,22 +367,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -411,7 +419,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -450,7 +458,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -496,7 +504,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="conventions/registry-protocol.html">The Registry Protocol</a></li>
@@ -1475,66 +1483,56 @@ since ESP has already laid the groundwork.</p>
 </section>
 <section id="deterministic-construction-arguments">
 <h2>Deterministic Construction Arguments<a class="headerlink" href="#deterministic-construction-arguments" title="Link to this heading">¶</a></h2>
-<p>This is meant to open a broader run of proposals for the construction
-(<code class="docutils literal notranslate"><span class="pre">make()</span></code>) workflow in general rather than stand alone – more will be added
-under that heading as they get scoped, and the concrete item ready to write
-down now is making a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call’s own argument list deterministic.</p>
-<p><a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_index" title="pcapkit.protocols.protocol.Protocol._make_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index()</span></code></a> is where that is not
-currently true. A number of <code class="docutils literal notranslate"><span class="pre">make()</span></code> methods accept a plain <code class="docutils literal notranslate"><span class="pre">str</span></code>
-enum-member name for a field and resolve it by frame-introspecting the
-caller’s locals for a conventional four-argument group – <code class="docutils literal notranslate"><span class="pre">X</span></code>,
-<code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> – looking for the one
-argument whose own default is an enum member, and taking that member’s class
-as the namespace to search. The actual contract of a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call is
-therefore not fully visible from its own signature: knowing what a bare
-string resolves against means knowing the convention and trusting that every
-call site followed it exactly, rather than reading it off the call itself.
-That gap is exactly how this round’s bug family happened. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a> is
-the walk coming up empty because the relevant argument’s own default is
-<code class="docutils literal notranslate"><span class="pre">None</span></code>, leaving nothing to anchor a namespace to; <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a> is the same
-inference failing by a different route – the name is a loop variable over a
-<em>list</em> parameter rather than a scalar argument, so the walk’s
-<code class="docutils literal notranslate"><span class="pre">isinstance(value,</span> <span class="pre">str)</span></code> check can never see it. Both were fixed narrowly,
-by naming the correct enum explicitly at each affected call site rather than
-touching the inference, so the mechanism is exactly as fragile as it was
-before and just as liable to the same shape of defect at the next call site
-that does not fit its assumptions precisely.</p>
-<p>The owner’s proposed direction – recorded here, and explicitly <strong>not</strong>
-scheduled for 1.5.0 – removes the inference rather than patching it again.
-<code class="docutils literal notranslate"><span class="pre">make()</span></code> would require an actual enum value, or an <code class="docutils literal notranslate"><span class="pre">int</span></code> where one is
-already accepted, for these fields, with no implicit string-to-enum
-resolution performed inside <code class="docutils literal notranslate"><span class="pre">make()</span></code> itself. In its place, a small public
-wrapper would take the same four-argument group explicitly – name, default,
-namespace, reversed – and <em>resolve</em> a string name to its enum member on
-request, so a caller holding a bare string calls that helper first and passes
-the resolved value into <code class="docutils literal notranslate"><span class="pre">make()</span></code>. That mirrors how a finalised
-<a class="reference internal" href="../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> or
-<a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> already settles its
-constructor’s keyword set once, when
-<a class="reference internal" href="../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a> or
-<a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> is applied at
-class-definition time, rather than inferring it afresh at every call –
+<p>This opens a broader run of proposals for the construction (<code class="docutils literal notranslate"><span class="pre">make()</span></code>)
+workflow in general – more go under this heading as they get scoped – and
+its first item, making a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call’s own argument list deterministic, is
+<strong>done for 1.6.0</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
+<p>Inferring a namespace from the caller’s frame, for a conventional
+four-argument group – <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and
+<code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> – leaves a call’s contract invisible from its signature:
+knowing what a bare string resolves against means knowing the convention and
+trusting that every call site follows it exactly. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a> and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a> are that inference failing, the first because an argument’s own
+default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, leaving nothing to anchor a namespace to, the second
+because the name is a loop variable over a <em>list</em> parameter, which an
+<code class="docutils literal notranslate"><span class="pre">isinstance(value,</span> <span class="pre">str)</span></code> check on the arguments cannot see. Naming the enum
+at each affected call site fixes an instance and leaves the mechanism as
+fragile as it is.</p>
+<p>So no <code class="docutils literal notranslate"><span class="pre">make()</span></code> infers a member from a string, ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2593">#2593</a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>): a field holding an enumeration takes the member or an
+<code class="docutils literal notranslate"><span class="pre">int</span></code>, resolved with the enumeration’s
+<a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>. That settles a call’s contract
+at the signature, the way <a class="reference internal" href="../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a> and
+<a class="reference internal" href="../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> settle a constructor’s
+keyword set once at class-definition time, and
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="pcapkit.protocols.protocol.Protocol.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__own_make_keywords__</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>) settles the same kind of question explicitly rather than
-inferring it, though for a different question: which keywords a <code class="docutils literal notranslate"><span class="pre">make()</span></code>
-override owns, not what the names passed to it resolve against.</p>
-<p>The trade-off is real and worth stating rather than glossed over. Accepting a
-bare string for these fields is a pattern used throughout the docs and the
-examples, so dropping the inference is a likely-breaking change at every
-<code class="docutils literal notranslate"><span class="pre">make()</span></code> call site that currently relies on it – not a one-line fix.
-Deciding that scope – which call sites change, whether string acceptance is
-dropped outright or only the silent-inference path behind it, and what the
-wrapper is named and where it lives – is itself design work, which is
-exactly why this belongs on this page rather than as a quick issue. Done, it
-removes the root cause of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a>/<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a> family rather than
-leaving its next instance to be found and patched the same way.</p>
-<p><strong>Scoped for 1.6.0.</strong> The owner took this direction for every <code class="docutils literal notranslate"><span class="pre">make()</span></code>, ruled
-in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2593">#2593</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>): a field holding an enum takes the member
-or an <code class="docutils literal notranslate"><span class="pre">int</span></code>, resolved with the enumeration’s <code class="docutils literal notranslate"><span class="pre">get</span></code> rather than inferred from
-the caller’s frame. The shipped <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code>
-keywords go in 1.6.0 with no deprecation period, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>, which
-carries the change across <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code> in one pass and leaves the
-helper’s name and module to it.</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>) which keywords a <code class="docutils literal notranslate"><span class="pre">make()</span></code> override owns. The pieces:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_index" title="pcapkit.protocols.protocol.Protocol._make_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index()</span></code></a> takes the value, the
+enumeration and the field’s width, and returns what <code class="docutils literal notranslate"><span class="pre">get</span></code> resolves. A
+name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for a field wider than one bit, and a code the field
+cannot carry raise <a class="reference internal" href="../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, so
+every caller gets the range check <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2617">#2617</a> asks for, with no masking.
+An option, a sub-option or a chunk given as a <code class="docutils literal notranslate"><span class="pre">(code,</span> <span class="pre">arguments)</span></code> pair
+resolves its code the same way.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> keywords are removed
+in 1.6.0 with no deprecation period and no shim, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>;
+each class that shipped them records them under <code class="docutils literal notranslate"><span class="pre">versionremoved</span></code>.</p></li>
+<li><p>The public wrapper is <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.resolve_index</span></code></a>, which takes the group
+explicitly – name, default, namespace, reversed – so a caller holding a
+bare string resolves it first and passes the result to <code class="docutils literal notranslate"><span class="pre">make()</span></code>. It is a
+static method every protocol inherits, beside
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.decode" title="pcapkit.protocols.protocol.Protocol.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decode()</span></code></a> and
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.unquote" title="pcapkit.protocols.protocol.Protocol.unquote"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unquote()</span></code></a>, rather than a module of
+its own, since it serves <code class="docutils literal notranslate"><span class="pre">make()</span></code> alone.</p></li>
+</ul>
+<p>The trade-off: a bare string for these fields is a pattern the docs and the
+examples relied on, so the change breaks every <code class="docutils literal notranslate"><span class="pre">make()</span></code> call site that
+relies on the inference. That is why it is one change across
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code> rather than folded into the next defect fix on this
+family, and it removes the root cause of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a>/<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a>
+family rather than leaving its next instance to be found and patched the same
+way.</p>
 </section>
 <section id="release-plan-1-5-0-in-two-steps">
 <h2>Release Plan — 1.5.0 in Two Steps<a class="headerlink" href="#release-plan-1-5-0-in-two-steps" title="Link to this heading">¶</a></h2>
@@ -1851,13 +1849,12 @@ as are IGMP’s and GRE’s (<a class="extlink-issue reference external" href="h
 <strong>pseudo-protocol class</strong> for the IP family the owner settled on, serving both
 the parsing and the constructing path, rather than a back-reference from a
 parsed protocol to its parent.</p>
-<p><strong>Scoped for 1.6.0 — deterministic construction arguments</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>). See
+<p><strong>Deterministic construction arguments — done</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>). See
 <a class="reference internal" href="#deterministic-construction-arguments">Deterministic Construction Arguments</a> above: every <code class="docutils literal notranslate"><span class="pre">make()</span></code> takes an enum
-field as the member or an <code class="docutils literal notranslate"><span class="pre">int</span></code>, dropping the implicit string-to-enum inference
-and the <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> keywords behind it, and
-an explicit helper resolves a bare string. That breaks every call site relying on
-the inference, so it lands as one change rather than folded into the next defect
-fix on this family.</p>
+field as the member or an <code class="docutils literal notranslate"><span class="pre">int</span></code>, with no string-to-enum inference and no
+<code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> keywords behind it, and
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.resolve_index</span></code></a>
+resolves a bare string first.</p>
 </section>
 </section>
 

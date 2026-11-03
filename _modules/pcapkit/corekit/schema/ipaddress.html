@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>pcapkit.corekit.fields.byteorder - PyPCAPKit</title>
+        <title>pcapkit.corekit.schema.ipaddress - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -333,6 +333,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
@@ -344,7 +345,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -360,22 +360,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -404,7 +412,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -443,7 +451,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -489,7 +497,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
@@ -540,92 +548,229 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.corekit.fields.byteorder</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.corekit.schema.ipaddress</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""byte-order field helpers</span>
+<span class="sd">"""IP Address Conversion</span>
+<span class="sd">===========================</span>
 
-<span class="sd">:mod:`pcapkit.corekit.fields.byteorder` holds the field callback that reads a</span>
-<span class="sd">capture file's byte order out of the packet data. The record header of a</span>
-<span class="sd">classic PCAP file (:mod:`~pcapkit.protocols.schema.misc.pcap.frame`) and the</span>
-<span class="sd">blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.schema.misc.pcapng`) both use</span>
-<span class="sd">it. It acts on a :class:`~pcapkit.corekit.fields.numbers.NumberField` and on the</span>
-<span class="sd">``__packet__`` key :class:`~pcapkit.corekit.fields.misc.SchemaField` hands a</span>
-<span class="sd">nested schema, so it lives with the fields rather than with either schema</span>
-<span class="sd">(:issue:`1711`).</span>
+<span class="sd">.. module:: pcapkit.corekit.schema.ipaddress</span>
 
-<span class="sd">.. versionadded:: 1.5.0</span>
+<span class="sd">:mod:`pcapkit.corekit.schema.ipaddress` converts a caller-supplied IP address to an</span>
+<span class="sd">:mod:`ipaddress` object, refusing a :obj:`bool` before :mod:`ipaddress` reads it as</span>
+<span class="sd">an :class:`int` (:issue:`491`), for the IP address fields</span>
+<span class="sd">(:mod:`pcapkit.corekit.fields.ipaddress`) and the protocols' makers alike. It is one</span>
+<span class="sd">of the :mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not</span>
+<span class="sd">part of the header schema framework in :mod:`pcapkit.protocols.schema`; see</span>
+<span class="sd">:ref:`utilities-or-corekit`.</span>
 
-<span class="sd">   :func:`byteorder_callback` moves here from</span>
-<span class="sd">   :mod:`pcapkit.protocols.schema.misc.pcap.frame` (:issue:`1711`).</span>
+<span class="sd">.. versionadded:: 1.6.0</span>
+
+<span class="sd">   Moved here from ``pcapkit.corekit.fields.ipaddress``, with the guards the</span>
+<span class="sd">   IP address fields share (:issue:`2674`).</span>
 
 <span class="sd">"""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet_byteorder'</span><span class="p">,</span> <span class="s1">'byteorder_callback'</span><span class="p">]</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'parse_ip_address'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
 
 
-<div class="viewcode-block" id="packet_byteorder">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.packet_byteorder">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Byte order declared for the file or section that ``packet`` belongs to.</span>
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_reraise_as_field_value_error</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[None]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Translate a bare :exc:`ValueError` from :mod:`ipaddress` into :exc:`FieldValueError`.</span>
 
-<span class="sd">    A nested schema is handed its parent's packet data under a ``__packet__``</span>
-<span class="sd">    key (see :meth:`SchemaField.pack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.misc.SchemaField.pack&gt;`), so the byte order may</span>
-<span class="sd">    live one level up.</span>
+<span class="sd">    Every conversion here and in :mod:`pcapkit.corekit.fields.ipaddress`</span>
+<span class="sd">    ultimately calls into the stdlib</span>
+<span class="sd">    :mod:`ipaddress` module, which raises a bare :exc:`ValueError` (or a</span>
+<span class="sd">    subclass of it, e.g. :exc:`~ipaddress.AddressValueError` or</span>
+<span class="sd">    :exc:`~ipaddress.NetmaskValueError`) for a malformed value. Left alone,</span>
+<span class="sd">    that exception is not an instance of</span>
+<span class="sd">    :exc:`~pcapkit.utilities.exceptions.BaseError`, unlike every other</span>
+<span class="sd">    exception those modules raise -- so a caller cannot rely on</span>
+<span class="sd">    ``except BaseError`` to catch a bad field value. Wrapping the conversion</span>
+<span class="sd">    in this context manager re-raises it as :exc:`FieldValueError` instead,</span>
+<span class="sd">    preserving the original message.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        packet: Packet data.</span>
+<span class="sd">        description: Human-readable description of the value being</span>
+<span class="sd">            converted, used to build the :exc:`FieldValueError` message.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        Byte order of the enclosing file or section, falling back to the host</span>
-<span class="sd">        byte order when the packet data declares none.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If the code inside the ``with`` block raises</span>
+<span class="sd">            :exc:`ValueError`.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'byteorder'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span> <span class="ow">and</span> <span class="s1">'__packet__'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__packet__'</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">except</span> <span class="n">FieldValueError</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``FieldValueError`` is itself a ``ValueError``, so without this</span>
+        <span class="c1"># clause first, a ``FieldValueError`` raised inside the ``with`` block</span>
+        <span class="c1"># (e.g. a version-mismatch check) would be caught below and re-wrapped,</span>
+        <span class="c1"># losing its original message. Callers are expected to keep such</span>
+        <span class="c1"># raises outside the ``with`` block, but this is the same ordering</span>
+        <span class="c1"># trap ``ProtocolError`` carries at ``exceptions.py``, so it is guarded</span>
+        <span class="c1"># here too rather than relied upon by convention alone.</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
-
-<div class="viewcode-block" id="byteorder_callback">
-<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.byteorder_callback">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">byteorder_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Update byte order of a PCAP or PCAP-NG file.</span>
+<div class="viewcode-block" id="_reject_bool">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/ipaddress.html#pcapkit.corekit.schema.ipaddress._reject_bool">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject a :obj:`bool` value before it reaches :mod:`ipaddress`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        field: Field instance.</span>
-<span class="sd">        packet: Packet data.</span>
+<span class="sd">        value: Value to check.</span>
+<span class="sd">        description: Human-readable description of what ``value`` is, used</span>
+<span class="sd">            to build the :exc:`~pcapkit.utilities.exceptions.FieldValueError` message.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool`.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        ``byteorder`` is the key a caller has to seed, and</span>
-<span class="sd">        :func:`packet_byteorder` is what reads it.</span>
-<span class="sd">        :meth:`Frame.pack &lt;pcapkit.protocols.misc.pcap.frame.Frame.pack&gt;` and</span>
-<span class="sd">        :meth:`Frame.unpack &lt;pcapkit.protocols.misc.pcap.frame.Frame.unpack&gt;`</span>
-<span class="sd">        both write it from the global header's magic number. A PCAP-NG Section</span>
-<span class="sd">        Header Block writes it from its own Byte-Order Magic (see</span>
-<span class="sd">        :func:`~pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback`),</span>
-<span class="sd">        and the blocks, options and records of that section read it, nested or</span>
-<span class="sd">        not. The fallback to :data:`sys.byteorder` is for a schema packed or</span>
-<span class="sd">        unpacked on its own, with no header to ask. That also means a</span>
-<span class="sd">        *misspelled* key looks exactly like an absent one and reports nothing:</span>
-<span class="sd">        every field would be read in the host's order rather than the file's,</span>
-<span class="sd">        which is right by coincidence on a little-endian capture and</span>
-<span class="sd">        byte-swapped on a big-endian one. See</span>
-<span class="sd">        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` for the</span>
-<span class="sd">        fixtures that take the other side of the branch.</span>
+<span class="sd">        :obj:`bool` is an :class:`int` subclass, and every conversion here and</span>
+<span class="sd">        in :mod:`pcapkit.corekit.fields.ipaddress` ultimately calls</span>
+<span class="sd">        :func:`ipaddress.ip_address` or</span>
+<span class="sd">        :func:`ipaddress.ip_interface`, both of which treat any :class:`int`</span>
+<span class="sd">        below ``2**32`` as IPv4 -- so without this guard, ``True``/``False``</span>
+<span class="sd">        are silently accepted as ``0.0.0.1``/``0.0.0.0`` (or the equivalent</span>
+<span class="sd">        interface) on an IPv4-typed field, with **no exception and no</span>
+<span class="sd">        warning**. On an IPv6-typed field the same conversion happens to</span>
+<span class="sd">        raise instead, because the resulting</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that</span>
+<span class="sd">        asymmetry is exactly what let this slip past :issue:`469`'s otherwise</span>
+<span class="sd">        equivalent guard for :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (cf.</span>
+<span class="sd">        :issue:`491`).</span>
+
+<span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
+<span class="sd">        for the same placement reason :issue:`469` gives: a correct check</span>
+<span class="sd">        in the wrong position does not fire.</span>
+
+<span class="sd">        Guarding the field classes is necessary but not sufficient, because a</span>
+<span class="sd">        ``_make_*`` that must know the address family before it can build the</span>
+<span class="sd">        schema converts the argument itself and so never hands the fields a</span>
+<span class="sd">        :obj:`bool` at all. :func:`parse_ip_address` is where those callers</span>
+<span class="sd">        reach this guard (cf. :issue:`508`).</span>
 
 <span class="sd">    """</span>
-    <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: must not be a bool, not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> -- pass '</span>
+            <span class="sa">f</span><span class="s1">'int(</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_ip_address">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/schema/ipaddress.html#pcapkit.corekit.schema.ipaddress.parse_ip_address">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes | int | str'</span><span class="p">,</span>
+                     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address | IPv6Address'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a caller-supplied address on the **construction** path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Address as the caller gave it -- an :mod:`ipaddress` object,</span>
+<span class="sd">            which is returned unchanged, or anything :mod:`ipaddress` accepts.</span>
+<span class="sd">        description: Human-readable description of what ``value`` is, used to</span>
+<span class="sd">            build the :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
+<span class="sd">            message. Callers in a protocol should carry their usual context</span>
+<span class="sd">            into it, e.g. ``f'{self.alias}: [OptNo {type}] care-of address'``.</span>
+<span class="sd">        version: IP version to demand, ``4`` or ``6``, or :obj:`None` to take</span>
+<span class="sd">            whichever family ``value`` describes. Pass it where the wire format</span>
+<span class="sd">            fixes the family, so that an :class:`int` is widened to the right</span>
+<span class="sd">            one -- ``258`` is ``::102`` for ``version=6`` but ``0.0.1.2`` for</span>
+<span class="sd">            :func:`ipaddress.ip_address`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The converted address.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool` (cf.</span>
+<span class="sd">            :func:`_reject_bool`), is not a valid IP address, or is not of</span>
+<span class="sd">            ``version``.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        This is the sanctioned way for a ``_make_*`` method to turn a</span>
+<span class="sd">        caller-supplied address into an :mod:`ipaddress` object, and it exists</span>
+<span class="sd">        because doing it with :func:`ipaddress.ip_address` directly is the</span>
+<span class="sd">        defect :issue:`508` found: a ``_make_*`` that has to know the address</span>
+<span class="sd">        *family* before it can build the schema -- to size an option whose</span>
+<span class="sd">        length is the only thing on the wire that carries the family -- must</span>
+<span class="sd">        convert the argument itself, and that conversion happens **before**</span>
+<span class="sd">        the schema, so it launders a :obj:`bool` into an</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address` that the :issue:`491` guard in</span>
+<span class="sd">        :meth:`_IPAddressField.pre_process</span>
+<span class="sd">        &lt;pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process&gt;` can then only see as a</span>
+<span class="sd">        legitimate address: ``True`` / ``False`` become ``0.0.0.1`` /</span>
+<span class="sd">        ``0.0.0.0`` -- or ``::1`` / ``::`` where the wire format fixes the</span>
+<span class="sd">        family as IPv6 -- without complaint.</span>
+
+<span class="sd">        Routing every one of them through here rather than giving each its own</span>
+<span class="sd">        :func:`isinstance` check is the whole point: :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` carries exactly</span>
+<span class="sd">        such a check (:issue:`469`), and :issue:`491` is the same defect at</span>
+<span class="sd">        every site that lacks one. A guard that has to be remembered per call</span>
+<span class="sd">        site is a guard that will be forgotten at the next one.</span>
+
+<span class="sd">        The :obj:`bool` rejection is the **first** statement here, ahead of any</span>
+<span class="sd">        dispatch on the value's type, for the placement reason :issue:`469`</span>
+<span class="sd">        gives and :func:`_reject_bool` repeats.</span>
+
+<span class="sd">        This raises :exc:`~pcapkit.utilities.exceptions.FieldValueError` and not</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate</span>
+<span class="sd">        even though sibling guards for the same mistake --</span>
+<span class="sd">        :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` from :issue:`469`</span>
+<span class="sd">        and :class:`ESP's SecurityAssociation</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.esp.SecurityAssociation&gt;` from :issue:`491`</span>
+<span class="sd">        -- raise the latter. The layer decides: this is a field-level</span>
+<span class="sd">        conversion, so it answers with what :meth:`_IPAddressField.pre_process</span>
+<span class="sd">        &lt;pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process&gt;`</span>
+<span class="sd">        answers with for the identical value, and a caller sees one exception</span>
+<span class="sd">        whether the :obj:`bool` reached the field through the schema or through</span>
+<span class="sd">        a ``_make_*``. Those protocol-level guards answer for the *option*,</span>
+<span class="sd">        alongside siblings that are not about addresses at all --</span>
+<span class="sd">        ``_make_opt_mn_id`` refuses a :obj:`bool` for every MN-ID subtype,</span>
+<span class="sd">        address-typed or not -- so none of them can route through here</span>
+<span class="sd">        without losing the subtype-aware message that is the point of it. Both</span>
+<span class="sd">        exception classes derive from</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,</span>
+<span class="sd">        so the difference is invisible to ``except BaseError`` and ``except</span>
+<span class="sd">        ValueError``, and no call of this function or of a ``_make_*`` in the</span>
+<span class="sd">        library sits inside an ``except`` for either one specifically.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">    """</span>
+    <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># type: IPv4Address | IPv6Address</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="n">description</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: Checked outside the ``with`` block above, and after it, because an</span>
+    <span class="c1"># :mod:`ipaddress` object taken from the branch that skips the conversion</span>
+    <span class="c1"># has not been version-checked at all -- ``IPv6Address(IPv4Address(...))``</span>
+    <span class="c1"># would have raised, but returning the object unchanged cannot.</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="n">version</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: IP version mismatch: </span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ip</span></div>
 
 </pre></div>
         </article>

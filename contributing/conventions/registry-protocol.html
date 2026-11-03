@@ -340,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
@@ -351,7 +352,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -367,22 +367,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/corekit/schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/corekit/schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -411,7 +419,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -450,7 +458,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -496,7 +504,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" checked="" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">The Registry Protocol</a></li>
@@ -1412,6 +1420,39 @@ above, and each type’s layout is a
 <a class="reference internal" href="../../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.schema.link.radiotap.RadiotapField" title="pcapkit.protocols.schema.link.radiotap.RadiotapField"><code class="xref py py-class docutils literal notranslate"><span class="pre">RadiotapField</span></code></a> subclass, whose fields
 are the type’s subfields and whose <code class="docutils literal notranslate"><span class="pre">__align__</span></code> is its alignment.</p>
 </section>
+<section id="enumeration-fields-of-make">
+<span id="registry-protocol-make-fields"></span><h2>Enumeration Fields of <code class="docutils literal notranslate"><span class="pre">make()</span></code><a class="headerlink" href="#enumeration-fields-of-make" title="Link to this heading">¶</a></h2>
+<p><strong>A</strong> <code class="docutils literal notranslate"><span class="pre">make()</span></code> <strong>field that holds an enumeration takes the member or an</strong>
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> <strong>code, resolved with the enumeration’s</strong>
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>. Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2593">#2593</a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>), for every <code class="docutils literal notranslate"><span class="pre">make()</span></code> and every <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> maker. Nothing inside
+<code class="docutils literal notranslate"><span class="pre">make()</span></code> turns a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> into a member: a name is refused, and a caller holding
+one resolves it first with <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.resolve_index</span></code></a>, which takes the name, a
+default, the namespace and whether a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> namespace maps names to codes. No
+such field takes an <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> or <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> keyword beside
+it, and none is kept as a shim, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>.</p>
+<ul class="simple">
+<li><p><strong>Resolve through</strong> <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._make_index" title="pcapkit.protocols.protocol.Protocol._make_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_index()</span></code></a>, giving
+the enumeration and the field’s width in bits. It checks the code as
+<code class="docutils literal notranslate"><span class="pre">_make_uint()</span></code> checks an integer – a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> passes only for a one-bit
+field, and a negative or too wide code is refused – and each refusal is
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, never a masked or wrapped
+code, by <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2617">#2617</a>’s ruling. The field’s width decides what is refused, not
+the enumeration’s range, so every code the field carries builds and parses
+back. It returns what <code class="docutils literal notranslate"><span class="pre">get</span></code> resolves, which is a minted <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> member
+for most registries’ unassigned codes. Where <code class="docutils literal notranslate"><span class="pre">get</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for
+a code the field carries, it returns the code itself as an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>.</p></li>
+<li><p><strong>An option, a sub-option or a chunk given as a</strong> <code class="docutils literal notranslate"><span class="pre">(code,</span> <span class="pre">arguments)</span></code> <strong>pair
+resolves its code the same way</strong>, before anything reads it, so that a
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> is refused rather than read as a padding code.</p></li>
+<li><p><strong>The enumeration is named at the call</strong>, never read from the caller’s frame or
+from its arguments’ defaults: that inference is what <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a> and
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a> broke.</p></li>
+</ul>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_make_keyword_groups_2594_unit.py</span></code> fails on a maker taking
+an <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> or <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> parameter, on a <code class="docutils literal notranslate"><span class="pre">_make_index</span></code>
+call without the field’s width, and on the resolver reaching a frame.</p>
+</section>
 <section id="the-registry-index">
 <span id="registry-protocol-index"></span><h2>The Registry Index<a class="headerlink" href="#the-registry-index" title="Link to this heading">¶</a></h2>
 <p><strong>A protocol’s</strong> <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> <strong>returns its</strong>
@@ -1558,6 +1599,7 @@ class to the rule, with each value derived from the registry and the number it a
 <li><a class="reference internal" href="#the-lenient-criterion-in-two-limbs">The Lenient Criterion, in Two Limbs</a></li>
 <li><a class="reference internal" href="#the-audit-per-class">The Audit, per Class</a></li>
 <li><a class="reference internal" href="#registration-wrappers">Registration Wrappers</a></li>
+<li><a class="reference internal" href="#enumeration-fields-of-make">Enumeration Fields of <code class="docutils literal notranslate"><span class="pre">make()</span></code></a></li>
 <li><a class="reference internal" href="#the-registry-index">The Registry Index</a></li>
 </ul>
 </li>

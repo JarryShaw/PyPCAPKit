@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Byte-Order Helpers" />
+<meta property="og:title" content="IP Address Conversion" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/byteorder.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/schema/ipaddress.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.fields.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blocks ( p..." />
-<meta name="description" content="pcapkit.corekit.fields.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blocks ( p..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Checksums" href="../checksum/index.html"><link rel="prev" title="Miscellaneous Fields" href="misc.html">
+<meta property="og:description" content="pcapkit.corekit.schema.ipaddress converts a caller-supplied IP address to an ipaddress object, refusing a bool before ipaddress reads it as an int(#491), for the IP address fields ( pcapkit.corekit..." />
+<meta name="description" content="pcapkit.corekit.schema.ipaddress converts a caller-supplied IP address to an ipaddress object, refusing a bool before ipaddress reads it as an int(#491), for the IP address fields ( pcapkit.corekit..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Jumbo Payload Lookup" href="jumbogram.html"><link rel="prev" title="Byte-Order Helpers" href="byteorder.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>Byte-Order Helpers - PyPCAPKit</title>
+        <title>IP Address Conversion - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -340,18 +340,18 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" checked="" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="field.html">Base Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="numbers.html">Numerical Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="strings.html">Text Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="collections.html">Container Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Byte-Order Helpers</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../fields/field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fields/numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fields/strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fields/ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fields/collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fields/misc.html">Miscellaneous Fields</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -367,22 +367,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -411,7 +419,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -450,7 +458,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -496,7 +504,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
@@ -535,12 +543,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/fields/byteorder.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/schema/ipaddress.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/fields/byteorder.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/schema/ipaddress.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -557,70 +565,144 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.corekit.fields.byteorder">
-<span id="byte-order-helpers"></span><h1>Byte-Order Helpers<a class="headerlink" href="#module-pcapkit.corekit.fields.byteorder" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.fields.byteorder" title="pcapkit.corekit.fields.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.byteorder</span></code></a> contains the field callback that reads
-a capture file’s byte order out of the packet data. It is shared by the PCAP
-frame header (<a class="reference internal" href="../../protocols/misc/pcap.html#module-pcapkit.protocols.schema.misc.pcap.frame" title="pcapkit.protocols.schema.misc.pcap.frame"><code class="xref py py-mod docutils literal notranslate"><span class="pre">frame</span></code></a>) and the PCAP-NG
-blocks (<a class="reference internal" href="../../protocols/misc/pcapng.html#module-pcapkit.protocols.schema.misc.pcapng" title="pcapkit.protocols.schema.misc.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapng</span></code></a>).</p>
+          <section id="module-pcapkit.corekit.schema.ipaddress">
+<span id="ip-address-conversion"></span><h1>IP Address Conversion<a class="headerlink" href="#module-pcapkit.corekit.schema.ipaddress" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.schema.ipaddress" title="pcapkit.corekit.schema.ipaddress"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.ipaddress</span></code></a> converts a caller-supplied IP address to an
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> object, refusing a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> before <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> reads it as
+an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>), for the IP address fields
+(<a class="reference internal" href="../fields/ipaddress.html#module-pcapkit.corekit.fields.ipaddress" title="pcapkit.corekit.fields.ipaddress"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.ipaddress</span></code></a>) and the protocols’ makers alike. It is one
+of the <a class="reference internal" href="index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a> helpers shared across the schema layer, not
+part of the header schema framework in <a class="reference internal" href="../../protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a>; see
+<a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span><a class="reference internal" href="#pcapkit.corekit.fields.byteorder.byteorder_callback" title="pcapkit.corekit.fields.byteorder.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a> moves here from
-<a class="reference internal" href="../../protocols/misc/pcap.html#module-pcapkit.protocols.schema.misc.pcap.frame" title="pcapkit.protocols.schema.misc.pcap.frame"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcap.frame</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1711">#1711</a>).</p>
+<p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.ipaddress</span></code>, with the guards the
+IP address fields share (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
 </div>
-<section id="auxiliary-functions">
-<h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h2>
+<section id="construction-helpers">
+<h2>Construction Helpers<a class="headerlink" href="#construction-helpers" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.byteorder.byteorder_callback">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.byteorder.</span></span><span class="sig-name descname"><span class="pre">byteorder_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/byteorder.html#byteorder_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.byteorder.byteorder_callback" title="Link to this definition">¶</a></dt>
-<dd><p>Update byte order of a PCAP or PCAP-NG file.</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.ipaddress.parse_ip_address">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.ipaddress.</span></span><span class="sig-name descname"><span class="pre">parse_ip_address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/ipaddress.html#parse_ip_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.ipaddress.parse_ip_address" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a caller-supplied address on the <strong>construction</strong> path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a></span>) – Field instance.</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Address as the caller gave it – an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> object,
+which is returned unchanged, or anything <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> accepts.</p></li>
+<li><p><strong>description</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Human-readable description of what <code class="docutils literal notranslate"><span class="pre">value</span></code> is, used to
+build the <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a>
+message. Callers in a protocol should carry their usual context
+into it, e.g. <code class="docutils literal notranslate"><span class="pre">f'{self.alias}:</span> <span class="pre">[OptNo</span> <span class="pre">{type}]</span> <span class="pre">care-of</span> <span class="pre">address'</span></code>.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – IP version to demand, <code class="docutils literal notranslate"><span class="pre">4</span></code> or <code class="docutils literal notranslate"><span class="pre">6</span></code>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> to take
+whichever family <code class="docutils literal notranslate"><span class="pre">value</span></code> describes. Pass it where the wire format
+fixes the family, so that an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is widened to the right
+one – <code class="docutils literal notranslate"><span class="pre">258</span></code> is <code class="docutils literal notranslate"><span class="pre">::102</span></code> for <code class="docutils literal notranslate"><span class="pre">version=6</span></code> but <code class="docutils literal notranslate"><span class="pre">0.0.1.2</span></code> for
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a>.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The converted address.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (cf.
+    <a class="reference internal" href="#pcapkit.corekit.schema.ipaddress._reject_bool" title="pcapkit.corekit.schema.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a>), is not a valid IP address, or is not of
+    <code class="docutils literal notranslate"><span class="pre">version</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p><code class="docutils literal notranslate"><span class="pre">byteorder</span></code> is the key a caller has to seed, and
-<a class="reference internal" href="#pcapkit.corekit.fields.byteorder.packet_byteorder" title="pcapkit.corekit.fields.byteorder.packet_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet_byteorder()</span></code></a> is what reads it.
-<a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.pack" title="pcapkit.protocols.misc.pcap.frame.Frame.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.pack</span></code></a> and
-<a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.unpack" title="pcapkit.protocols.misc.pcap.frame.Frame.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.unpack</span></code></a>
-both write it from the global header’s magic number. A PCAP-NG Section
-Header Block writes it from its own Byte-Order Magic (see
-<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">shb_byteorder_callback()</span></code></a>),
-and the blocks, options and records of that section read it, nested or
-not. The fallback to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.byteorder" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.byteorder</span></code></a> is for a schema packed or
-unpacked on its own, with no header to ask. That also means a
-<em>misspelled</em> key looks exactly like an absent one and reports nothing:
-every field would be read in the host’s order rather than the file’s,
-which is right by coincidence on a little-endian capture and
-byte-swapped on a big-endian one. See
-<code class="file docutils literal notranslate"><span class="pre">tests/protocols/misc/pcap/test_frame_endian_runtime.py</span></code> for the
-fixtures that take the other side of the branch.</p>
+<p>This is the sanctioned way for a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> method to turn a
+caller-supplied address into an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> object, and it exists
+because doing it with <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a> directly is the
+defect <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/508">#508</a> found: a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> that has to know the address
+<em>family</em> before it can build the schema – to size an option whose
+length is the only thing on the wire that carries the family – must
+convert the argument itself, and that conversion happens <strong>before</strong>
+the schema, so it launders a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> into an
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a> guard in
+<a class="reference internal" href="../fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process</span></code></a> can then only see as a
+legitimate address: <code class="docutils literal notranslate"><span class="pre">True</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> become <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code> /
+<code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> – or <code class="docutils literal notranslate"><span class="pre">::1</span></code> / <code class="docutils literal notranslate"><span class="pre">::</span></code> where the wire format fixes the
+family as IPv6 – without complaint.</p>
+<p>Routing every one of them through here rather than giving each its own
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> carries exactly
+such a check (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>), and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a> is the same defect at
+every site that lacks one. A guard that has to be remembered per call
+site is a guard that will be forgotten at the next one.</p>
+<p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rejection is the <strong>first</strong> statement here, ahead of any
+dispatch on the value’s type, for the placement reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>
+gives and <a class="reference internal" href="#pcapkit.corekit.schema.ipaddress._reject_bool" title="pcapkit.corekit.schema.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a> repeats.</p>
+<p>This raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> and not
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, which is deliberate
+even though sibling guards for the same mistake –
+<a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> from <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>
+and <a class="reference internal" href="../../protocols/internet/esp.html#pcapkit.protocols.internet.esp.SecurityAssociation" title="pcapkit.protocols.internet.esp.SecurityAssociation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP's</span> <span class="pre">SecurityAssociation</span></code></a> from <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>
+– raise the latter. The layer decides: this is a field-level
+conversion, so it answers with what <a class="reference internal" href="../fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process</span></code></a>
+answers with for the identical value, and a caller sees one exception
+whether the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> reached the field through the schema or through
+a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code>. Those protocol-level guards answer for the <em>option</em>,
+alongside siblings that are not about addresses at all –
+<code class="docutils literal notranslate"><span class="pre">_make_opt_mn_id</span></code> refuses a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for every MN-ID subtype,
+address-typed or not – so none of them can route through here
+without losing the subtype-aware message that is the point of it. Both
+exception classes derive from
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> <em>and</em> <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>,
+so the difference is invisible to <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">BaseError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span>
+<span class="pre">ValueError</span></code>, and no call of this function or of a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> in the
+library sits inside an <code class="docutils literal notranslate"><span class="pre">except</span></code> for either one specifically.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
 </div>
 </dd></dl>
 
+</section>
+<section id="internal-definitions">
+<h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.byteorder.packet_byteorder">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.byteorder.</span></span><span class="sig-name descname"><span class="pre">packet_byteorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/byteorder.html#packet_byteorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.byteorder.packet_byteorder" title="Link to this definition">¶</a></dt>
-<dd><p>Byte order declared for the file or section that <code class="docutils literal notranslate"><span class="pre">packet</span></code> belongs to.</p>
-<p>A nested schema is handed its parent’s packet data under a <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>
-key (see <a class="reference internal" href="misc.html#pcapkit.corekit.fields.misc.SchemaField.pack" title="pcapkit.corekit.fields.misc.SchemaField.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.pack</span></code></a>), so the byte order may
-live one level up.</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.schema.ipaddress._reject_bool">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.schema.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_reject_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/schema/ipaddress.html#_reject_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.schema.ipaddress._reject_bool" title="Link to this definition">¶</a></dt>
+<dd><p>Reject a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value before it reaches <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></span>) – Value to check.</p></li>
+<li><p><strong>description</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Human-readable description of what <code class="docutils literal notranslate"><span class="pre">value</span></code> is, used
+to build the <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> message.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Byte order of the enclosing file or section, falling back to the host
-byte order when the packet data declares none.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> is an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> subclass, and every conversion here and
+in <a class="reference internal" href="../fields/ipaddress.html#module-pcapkit.corekit.fields.ipaddress" title="pcapkit.corekit.fields.ipaddress"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.ipaddress</span></code></a> ultimately calls
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a> or
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_interface" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_interface()</span></code></a>, both of which treat any <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>
+below <code class="docutils literal notranslate"><span class="pre">2**32</span></code> as IPv4 – so without this guard, <code class="docutils literal notranslate"><span class="pre">True</span></code>/<code class="docutils literal notranslate"><span class="pre">False</span></code>
+are silently accepted as <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code>/<code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> (or the equivalent
+interface) on an IPv4-typed field, with <strong>no exception and no
+warning</strong>. On an IPv6-typed field the same conversion happens to
+raise instead, because the resulting
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>’s version mismatches – and that
+asymmetry is exactly what let this slip past <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>’s otherwise
+equivalent guard for <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> (cf.
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>).</p>
+<p>Every caller checks this <em>before</em> dispatching on the value’s type,
+for the same placement reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a> gives: a correct check
+in the wrong position does not fire.</p>
+<p>Guarding the field classes is necessary but not sufficient, because a
+<code class="docutils literal notranslate"><span class="pre">_make_*</span></code> that must know the address family before it can build the
+schema converts the argument itself and so never hands the fields a
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> at all. <a class="reference internal" href="#pcapkit.corekit.schema.ipaddress.parse_ip_address" title="pcapkit.corekit.schema.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a> is where those callers
+reach this guard (cf. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/508">#508</a>).</p>
+</div>
 </dd></dl>
 
 </section>
@@ -631,23 +713,23 @@ byte order when the packet data declares none.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../checksum/index.html">
+          <a class="next-page" href="jumbogram.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Checksums</div>
+                <div class="title">Jumbo Payload Lookup</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="misc.html">
+          <a class="prev-page" href="byteorder.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Miscellaneous Fields</div>
+                <div class="title">Byte-Order Helpers</div>
                 
               </div>
             </a>
@@ -681,8 +763,9 @@ byte order when the packet data declares none.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Byte-Order Helpers</a><ul>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#">IP Address Conversion</a><ul>
+<li><a class="reference internal" href="#construction-helpers">Construction Helpers</a></li>
+<li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>
 </ul>

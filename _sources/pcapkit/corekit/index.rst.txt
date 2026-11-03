@@ -18,7 +18,8 @@ the :class:`~pcapkit.corekit.io.SeekableReader` and stream proxies of
 :class:`~pcapkit.corekit.multidict.MultiDict` family for multi-entry mappings,
 the :class:`~pcapkit.corekit.packet.DeferredPacket` mixin for a ``packet``
 parsed on first read, the protocol collection
-:class:`~pcapkit.corekit.protochain.ProtoChain`, the shared
+:class:`~pcapkit.corekit.protochain.ProtoChain`, the
+:mod:`~pcapkit.corekit.schema` helpers shared across the schema layer, the shared
 :mod:`~pcapkit.corekit.sentinels`, and the :obj:`tuple`-like
 :class:`~pcapkit.corekit.version.VersionInfo`.
 
@@ -36,5 +37,6 @@ parsed on first read, the protocol collection
    multidict
    packet
    protochain
+   schema/index
    sentinels
    version

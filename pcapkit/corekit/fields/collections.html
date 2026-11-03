@@ -340,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/datetime.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/pickle.html">Pickle Reductions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/contextvars.html">Shared Context Variables</a></li>
 </ul>
 </li>
@@ -351,7 +352,6 @@
 <li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="misc.html">Miscellaneous Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../checksum/index.html">Checksums</a><input aria-label="Toggle navigation of Checksums" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -367,22 +367,30 @@
 <li class="toctree-l3"><a class="reference internal" href="../multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../schema/index.html">Schema Helpers</a><input aria-label="Toggle navigation of Schema Helpers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../schema/byteorder.html">Byte-Order Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../schema/ipaddress.html">IP Address Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../schema/jumbogram.html">Jumbo Payload Lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../schema/padding.html">Padding Arithmetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../schema/shortread.html">Short-Read Replay</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../dumpkit/null.html">Null Dumper</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../const/ieee802_11.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code> Constant Enumerations</a></li>
@@ -411,7 +419,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
@@ -450,7 +458,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
@@ -496,7 +504,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../contributing/conventions/index.html">House Conventions</a><input aria-label="Toggle navigation of House Conventions" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/mint-criterion.html">Minting an Unrecognised Value</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/sentinel-convention.html">Naming a Sentinel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/registry-protocol.html">The Registry Protocol</a></li>
@@ -797,6 +805,12 @@ comes second cannot be silently misread.</p>
 to the remaining length, which <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records in
 <code class="docutils literal notranslate"><span class="pre">packet</span></code> as <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> so that the next fields can
 be aware of it.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">__capture_cut__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code>, false, says that the data
+ends at the length the enclosing layer declares for it, so that an
+area the data ends inside runs past that length rather than being
+cut short by the capture, as
+<a class="reference internal" href="../../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> tells the extension
+headers it walks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2694">#2694</a>). Absent, the data may end at a cut.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -804,7 +818,12 @@ be aware of it.</p>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an option consumes nothing from <code class="docutils literal notranslate"><span class="pre">buffer</span></code>, since
     the loop below has then no way to get past it.</p></li>
 <li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If an option that begins with octets present reads
-    past the end of the data.</p></li>
+    past the end of the data, unless the data ends inside the area,
+    the option’s fields fit it and <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField._accepts_cut" title="pcapkit.corekit.fields.collections.OptionField._accepts_cut"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_accepts_cut()</span></code></a> keeps it, or
+    <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField._accepts_short_read" title="pcapkit.corekit.fields.collections.OptionField._accepts_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_accepts_short_read()</span></code></a> accepts it. Or if the area runs past
+    the end of the data where <code class="docutils literal notranslate"><span class="pre">packet</span></code> gives <code class="docutils literal notranslate"><span class="pre">__capture_cut__</span></code>
+    as false, the data ending at the length the enclosing layer
+    declares rather than at a cut.</p></li>
 </ul>
 </dd>
 </dl>
@@ -813,6 +832,60 @@ be aware of it.</p>
 the data raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>,
 where it was parsed from zero-filled octets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1325">#1325</a>).</p>
 </div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Where the data ends inside the area, as a capture cut short leaves
+it, the list ends with the data, and an option it ends inside is
+kept if its fields fit the area, so <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records the cut as
+a short read rather than either error being raised
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2694">#2694</a>). See <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField._accepts_cut" title="pcapkit.corekit.fields.collections.OptionField._accepts_cut"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_accepts_cut()</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">__capture_cut__</span></code>
+above.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.OptionField._accepts_short_read">
+<span class="sig-name descname"><span class="pre">_accepts_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/collections.html#OptionField._accepts_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.collections.OptionField._accepts_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Whether an option that read past the end of the data may stand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_TS</span></code></span>) – Option just unpacked, which read short and ran past its area
+or past the data at the end of the area.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, so that <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.unpack" title="pcapkit.corekit.fields.collections.OptionField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> refuses the option
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1325">#1325</a>): padding cut short may be content the option’s own
+length declares, as a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option’s is. A list whose items’
+lengths leave out their trailing padding may override this, as
+<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.PaddedOptionField" title="pcapkit.protocols.schema.transport.sctp.PaddedOptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddedOptionField</span></code></a>
+does; <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a>
+then writes back only the octets read.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.OptionField._accepts_cut">
+<span class="sig-name descname"><span class="pre">_accepts_cut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/collections.html#OptionField._accepts_cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.collections.OptionField._accepts_cut" title="Link to this definition">¶</a></dt>
+<dd><p>Whether an option the data ends inside, inside its area, may stand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>option</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_TS</span></code></span>) – Option just unpacked, which read short where the data ends
+short of the area declared, and whose fields fit the area.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, so that <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.unpack" title="pcapkit.corekit.fields.collections.OptionField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> keeps the option, as the short
+read <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
+records (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2694">#2694</a>). A list that keeps such an area as the octets
+captured instead may override this, as
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.OptionAreaField" title="pcapkit.protocols.schema.misc.pcapng.OptionAreaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionAreaField</span></code></a> does.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

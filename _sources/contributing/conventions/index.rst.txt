@@ -14,7 +14,8 @@ House Conventions
      questions have mostly arisen;
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
    * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, the registration
-     wrappers of :mod:`pcapkit.foundation.registry`, and the value a protocol's
+     wrappers of :mod:`pcapkit.foundation.registry`, how a ``make()`` field holding
+     an enumeration resolves, and the value a protocol's
      :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns;
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members
@@ -28,8 +29,9 @@ House Conventions
      reference, rather than any code at all;
    * :ref:`test-coverage` -- what the test suite has to prove;
    * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
-     :mod:`pcapkit.corekit` a support module belongs in, and where a context
-     variable lives;
+     :mod:`pcapkit.corekit` a support module belongs in, where a context
+     variable lives, where a schema helper used outside the schema layer or
+     outside its own protocol lives, and what reads a capture cut;
    * :ref:`reassembly-integration` -- :mod:`pcapkit.foundation.reassembly` and what a
      new engine there needs from :mod:`pcapkit.toolkit` and
      :mod:`pcapkit.foundation.analysis`;
