@@ -82,6 +82,18 @@ def _analyze(proto: 'object', payload: 'bytes') -> 'tuple[object, bytes]':
     return (proto, payload)
 
 
+def _state(obj: 'object') -> 'object':
+    """The state :mod:`pickle` carries for ``obj``, under every protocol.
+
+    ``Deferred`` defines no ``__getstate__`` of its own (#2714), so this is
+    Python's default state for a slotted class: ``object.__getstate__()`` on
+    3.11 and later, and the same pair from the protocol-2 reduction below it,
+    which is why it is read through ``__reduce_ex__(2)[2]``.
+
+    """
+    return obj.__reduce_ex__(2)[2]
+
+
 class _BareStringSlotSub(_Deferred):
     """A subclass declaring its own slot as a bare string, not a tuple.
 
@@ -161,7 +173,7 @@ class DeferredPickleTests(unittest.TestCase):
         self.assertEqual(restored.payload, b'payload')
 
     def test_getstate_shape_is_dict_state_and_slots_state(self) -> None:
-        """``__getstate__`` returns the native ``(dict_or_None, slots)`` pair.
+        """The state is the native ``(dict_or_None, slots)`` pair.
 
         Not a flat :obj:`dict` -- that was the first revision's shape, and
         :issue:`2425` finding 1 is exactly that it disagreed with the shape
@@ -171,7 +183,7 @@ class DeferredPickleTests(unittest.TestCase):
         from pcapkit.foundation.reassembly.data.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
-        state = deferred.__getstate__()
+        state = _state(deferred)
         self.assertIsInstance(state, tuple)
         self.assertEqual(len(state), 2)
 
@@ -261,25 +273,18 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
     def test_a_pickle_made_before_the_2423_fix_still_unpickles(self) -> None:
         """End-to-end: real pickle bytes, built the way a released version would.
 
-        ``Deferred.__getstate__``/``__setstate__`` are removed for just long
-        enough to dump a real ``Deferred`` instance through Python's default
-        slotted-class reduction, standing in for a pickle made by any
-        pre-:issue:`2423` release. The dump itself never touches this
-        class's own (fixed) ``__getstate__``; only the restore does.
+        ``Deferred`` defines no ``__getstate__`` (#2714), so a protocol-2 dump
+        goes through Python's default slotted-class reduction, as any
+        pre-:issue:`2423` release's did; only the restore goes through
+        ``__setstate__``.
 
         """
         from pcapkit.foundation.reassembly.data.data import Deferred
 
-        getstate = Deferred.__dict__['__getstate__']
-        setstate = Deferred.__dict__['__setstate__']
-        del Deferred.__getstate__
-        del Deferred.__setstate__
-        try:
-            pre_fix = Deferred(_analyze, 7, b'released')
-            pickled = pickle.dumps(pre_fix, protocol=2)
-        finally:
-            Deferred.__getstate__ = getstate
-            Deferred.__setstate__ = setstate
+        self.assertNotIn('__getstate__', vars(Deferred))
+        pre_fix = Deferred(_analyze, 7, b'released')
+        self.assertEqual(pre_fix.__reduce_ex__(2), object.__reduce_ex__(pre_fix, 2))
+        pickled = pickle.dumps(pre_fix, protocol=2)
 
         restored = pickle.loads(pickled)
         self.assertEqual(restored.proto, 7)
@@ -297,14 +302,15 @@ class DeferredPickleSubclassTests(unittest.TestCase):
     raising -- the loss is silent on ``__getstate__`` and only surfaces as a
     missing attribute later, on whatever first reads it back.
 
-    Exercised directly through ``__getstate__``/``__setstate__`` rather than a
-    full :func:`pickle.dumps`/:func:`pickle.loads` round trip: the subclass
+    Exercised directly through the state :mod:`pickle` carries and
+    ``__setstate__`` rather than a full :func:`pickle.dumps`/:func:`pickle.loads`
+    round trip: the subclass
     has to be defined inside the test for the same reason the module
     docstring gives for not using a lambda as the analyser -- a class local to
     a function is not importable by its qualified name, so :mod:`pickle`
-    cannot locate it to build a real pickle. The two methods are exactly the
-    mechanism :issue:`2425` finding 2 is about, so calling them directly still
-    exercises the regression.
+    cannot locate it to build a real pickle. The state and ``__setstate__`` are
+    exactly the mechanism :issue:`2425` finding 2 is about, so reading them
+    directly still exercises the regression.
 
     """
 
@@ -329,7 +335,7 @@ class DeferredPickleSubclassTests(unittest.TestCase):
         subclass = self._subclass_with_extra_slot()
         sub = subclass(_analyze, 7, b'x', 'extra-value')
 
-        dict_state, slots_state = sub.__getstate__()
+        dict_state, slots_state = _state(sub)
         self.assertIsNone(dict_state)
         self.assertEqual(slots_state, {
             'analyze': _analyze, 'proto': 7, 'payload': b'x', 'extra': 'extra-value',
@@ -339,7 +345,7 @@ class DeferredPickleSubclassTests(unittest.TestCase):
         subclass = self._subclass_with_extra_slot()
         sub = subclass(_analyze, 7, b'x', 'extra-value')
 
-        state = sub.__getstate__()
+        state = _state(sub)
         restored = subclass.__new__(subclass)
         restored.__setstate__(state)
         self.assertEqual(restored.proto, 7)
@@ -349,7 +355,7 @@ class DeferredPickleSubclassTests(unittest.TestCase):
 
 
 class DeferredGetstateEdgeCaseTests(unittest.TestCase):
-    """The edge cases ``__getstate__``'s MRO walk has to match Python's own.
+    """The edge cases of the state, which ``Deferred`` takes from Python's own default.
 
     Each of these mirrors a branch of the native default state construction
     (see the module docstring's worked example in
@@ -371,7 +377,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
         partial.payload = b'p'
         # ``analyze`` is deliberately left unset.
 
-        dict_state, slots_state = partial.__getstate__()
+        dict_state, slots_state = _state(partial)
         self.assertIsNone(dict_state)
         self.assertEqual(slots_state, {'proto': 1, 'payload': b'p'})
 
@@ -383,7 +389,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
             __slots__ = ('__weakref__',)
 
         sub = _WithWeakrefSlot(_analyze, 7, b'x')
-        dict_state, slots_state = sub.__getstate__()
+        dict_state, slots_state = _state(sub)
         self.assertIsNone(dict_state)
         self.assertNotIn('__weakref__', slots_state)
         self.assertEqual(slots_state, {'analyze': _analyze, 'proto': 7, 'payload': b'x'})
@@ -398,7 +404,7 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
         sub = _WithBareDict(_analyze, 7, b'x')
         sub.extra = 'extra-value'  # lands in __dict__, not in a slot
 
-        dict_state, slots_state = sub.__getstate__()
+        dict_state, slots_state = _state(sub)
         self.assertEqual(dict_state, {'extra': 'extra-value'})
         self.assertEqual(slots_state, {'analyze': _analyze, 'proto': 7, 'payload': b'x'})
 

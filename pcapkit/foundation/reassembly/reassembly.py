@@ -19,6 +19,7 @@ from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import FieldValueError, UnsupportedCall
 from pcapkit.utilities.logging import get_logger
+from pcapkit.utilities.pickle import ReduceAsProtocol2
 
 # NB: declared above the ``TYPE_CHECKING`` block, not below it, so that
 # ``CallbackFn`` can name ``_DT`` outright. As a quoted forward reference it would
@@ -106,7 +107,7 @@ class ReassemblyMeta(abc.ABCMeta):
         return Extractor.__reassembly__
 
 
-class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
+class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
     """Base class for reassembly procedure.
 
     Args:

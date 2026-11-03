@@ -27,6 +27,7 @@ from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict, iter_multi_items
 from pcapkit.utilities.compat import Mapping, UnionType, final, get_annotations
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
+from pcapkit.utilities.pickle import ReduceAsProtocol2, ReduceToItems
 from pcapkit.utilities.warnings import InfoWarning, warn
 
 if TYPE_CHECKING:
@@ -318,7 +319,7 @@ class InfoMeta(abc.ABCMeta):
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
-class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
+class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     """Turn dictionaries into :obj:`object` like instances.
 
     * :class:`Info` objects are :class:`~collections.abc.Mapping` instances,
@@ -975,7 +976,7 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
     __setstate__ = _immutable
 
 
-class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
+class MultiInfo(ReduceToItems, _MultiInfo[KT, VT], MultiDict[KT, VT]):
     """An immutable :class:`~pcapkit.corekit.multidict.MultiDict` that is an :class:`Info`.
 
     It holds every value of a key, as a
@@ -1064,9 +1065,6 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
 
         """
         return (values for (_, values) in self.lists())
-
-    def __reduce_ex__(self, protocol: 'Any') -> 'tuple[type, tuple[list[tuple[KT, VT]]]]':
-        return type(self), (list(self.items(multi=True)),)
 
 
 class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):

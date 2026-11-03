@@ -15,9 +15,10 @@ import copy
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.utilities.exceptions import MissingKeyError, UnsupportedCall
+from pcapkit.utilities.pickle import ReduceToItems, ReduceToName
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional, SupportsIndex
+    from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional
 
     from typing_extensions import Literal, Self
 
@@ -68,12 +69,11 @@ class _omd_bucket(Generic[_KT, _VT]):
             omd._last_bucket = self.prev  # pylint: disable=protected-access
 
 
-class _Missing:
+class _Missing(ReduceToName):
+    _name = '_missing'
+
     def __repr__(self) -> 'str':
         return "no value"
-
-    def __reduce__(self) -> 'str':
-        return "_missing"
 
 
 _missing = _Missing()
@@ -470,7 +470,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         return f"{type(self).__name__}({list(self.items(multi=True))!r})"
 
 
-class OrderedMultiDict(MultiDict[_KT, _VT]):
+class OrderedMultiDict(ReduceToItems, MultiDict[_KT, _VT]):
     """Works like a regular :class:`MultiDict` but preserves the
     order of the fields.  To convert the ordered multi dict into a
     list you can use the :meth:`items` method and pass it ``multi=True``.
@@ -536,9 +536,6 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
 
         """
         return self.__class__(copy.deepcopy(list(self.items(multi=True)), memo=memo))
-
-    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'Any':
-        return type(self), (list(self.items(multi=True)),)
 
     def __getstate__(self) -> 'Any':
         return list(self.items(multi=True))

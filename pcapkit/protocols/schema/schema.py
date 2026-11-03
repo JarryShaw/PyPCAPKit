@@ -28,6 +28,7 @@ from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.compat import Mapping, final
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
+from pcapkit.utilities.pickle import ReduceAsProtocol2
 from pcapkit.utilities.warnings import RegistryWarning, SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
@@ -374,7 +375,7 @@ class SchemaMeta(abc.ABCMeta):
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
-class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
+class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
     """Schema for protocol headers.
 
     Note:
