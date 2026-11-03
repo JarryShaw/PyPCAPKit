@@ -423,6 +423,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          :meth:`make` for parameters too long for the Header Length, and so do
          the ``PUZZLE`` and registration makers for a lifetime that is a
          :obj:`bool` or not a finite number of seconds (:issue:`2614`).
+       * The same makers raise it for a fixed-size octet argument of the wrong
+         width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
+         ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
+         or cutting it to the field. The opaque and payload data default to
+         zeros of that width (:issue:`2676`).
        * Each enumeration field of :meth:`make` and of the parameter makers,
          and the code of each parameter in ``parameters``, as a ``(code,
          value)`` pair or parsed data, takes a member or an :class:`int` code,
@@ -454,12 +459,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        the items of ``groups``; resolve a name with
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
-
-       The same makers raise it for a fixed-size octet argument of the wrong
-       width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
-       ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
-       or cutting it to the field. The opaque and payload data default to
-       zeros of that width (:issue:`2676`).
 
     """
 
