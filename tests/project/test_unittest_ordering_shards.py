@@ -16,7 +16,9 @@ job stays green while covering less. The assertions are therefore over the
   ``--half 1`` in one cell and ``--half 2`` in the other, both read from
   :data:`run_unittest_leg.SHARD_BOUNDARIES`, so they too are disjoint and
   together equal the unsharded leg, a module added later included; and
-  ``project-tests``' docs-only steps cut it the same way;
+  ``project-tests``' docs-only steps cut it the same way. The rest of
+  ``protocols``, everything but ``protocols/internet``, is halved at its own
+  entry there, both halves leaving out the same subdirectory;
 * every other matrix cell is a bare direct child of ``tests/`` with no
   ``--exclude`` or boundary, i.e. runs that whole directory;
 * every ``tests/`` subdirectory holding a test module is a leg, except the
@@ -136,24 +138,33 @@ class TestShardedProtocolsLeg(unittest.TestCase):
                 self.assertEqual(set(flat), set(leg.leg_modules(top)),
                                  f'a tests/{top} module falls between shards')
 
-    def test_the_project_cells_cut_at_one_name(self):
+    def test_each_halved_leg_cuts_at_one_name(self):
         """#2254: ``--half 1`` in one cell and ``--half 2`` in the other, one name between
-        them, so any module name, one added later included, sorts into exactly one cell."""
+        them, so any module name, one added later included, sorts into exactly one cell.
+        The rest of ``protocols`` is halved the same way, both halves leaving out
+        ``protocols/internet``."""
         text = _job('unittest-ordering')
         self.assertEqual(sorted(half for flags in re.findall(r'shard:\s*([^\n]*)', text)
-                                for half in _halves(flags)), ['1', '2'])
-        boundaries = [boundary for name, _, boundary in _matrix() if name == 'project']
-        self.assertEqual(sorted(sorted(b) for b in boundaries), [['before'], ['start']])
-        self.assertEqual({value for b in boundaries for value in b.values()},
-                         {leg.SHARD_BOUNDARIES['project']},
-                         f'the project cells cut at {boundaries}, not all at '
-                         f"SHARD_BOUNDARIES' {leg.SHARD_BOUNDARIES['project']!r}")
-        edge = leg.SHARD_BOUNDARIES['project']
-        for key in ('test_aaa_new.py', edge, f'{edge}.py', 'test_zzz_new.py'):
-            with self.subTest(key=key):
-                hits = [b for b in boundaries
-                        if ('before' not in b or key < b['before']) and key >= b.get('start', '')]
-                self.assertEqual(len(hits), 1)
+                                for half in _halves(flags)), sorted(['1', '2'] * len(SHARDED)))
+        for top in SHARDED:
+            with self.subTest(leg=top):
+                cells = [(exclude, boundary) for name, exclude, boundary in _matrix()
+                         if name == top and boundary]
+                boundaries = [boundary for _, boundary in cells]
+                self.assertEqual(sorted(sorted(b) for b in boundaries), [['before'], ['start']])
+                self.assertEqual({value for b in boundaries for value in b.values()},
+                                 {leg.SHARD_BOUNDARIES[top]},
+                                 f'the {top} cells cut at {boundaries}, not all at '
+                                 f"SHARD_BOUNDARIES' {leg.SHARD_BOUNDARIES[top]!r}")
+                self.assertEqual(len({tuple(exclude) for exclude, _ in cells}), 1,
+                                 f'the {top} halves leave out different subdirectories')
+                edge = leg.SHARD_BOUNDARIES[top]
+                for key in ('aaa/test_new.py', 'test_aaa_new.py', edge, f'{edge}.py',
+                            'test_zzz_new.py', 'zzz/test_new.py'):
+                    with self.subTest(key=key):
+                        hits = [b for b in boundaries
+                                if ('before' not in b or key < b['before']) and key >= b.get('start', '')]
+                        self.assertEqual(len(hits), 1)
 
     def test_project_tests_cuts_where_the_matrix_does(self):
         """#2254: ``project-tests``' docs-only steps run the two halves the ``project``
@@ -226,9 +237,10 @@ class TestLegModulesSubpath(unittest.TestCase):
         self.assertEqual(leg.leg_modules('project', before=edge, start=edge), ())
 
     def test_a_half_is_the_boundary_from_shard_boundaries(self):
-        edge = leg.SHARD_BOUNDARIES['project']
-        self.assertEqual(leg.half_bounds('project', 1), {'before': edge})
-        self.assertEqual(leg.half_bounds('project', 2), {'start': edge})
+        for directory, edge in leg.SHARD_BOUNDARIES.items():
+            with self.subTest(directory=directory):
+                self.assertEqual(leg.half_bounds(directory, 1), {'before': edge})
+                self.assertEqual(leg.half_bounds(directory, 2), {'start': edge})
         for directory, half in (('cli', 1), ('project', 3)):
             with self.subTest(directory=directory, half=half), self.assertRaises(SystemExit):
                 leg.half_bounds(directory, half)

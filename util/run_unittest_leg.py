@@ -91,6 +91,10 @@ name :data:`SHARD_BOUNDARIES` holds for it: half 1 is every module sorting befor
 it, half 2 the rest, so a new module lands in exactly one half. Every caller asks
 for a half rather than naming the boundary, so they cannot cut in different
 places. ``--before NAME`` and ``--from NAME`` cut at any other name, by hand.
+The name is compared with each module's path below the leg, so it can sit
+inside a subdirectory as well: ``protocols --exclude protocols/internet
+--half 1`` and ``--half 2`` halve the rest of :mod:`tests.protocols` at its
+entry, the same ``--exclude`` on both.
 
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
@@ -175,9 +179,11 @@ DEFAULT_STALL_DUMP = 1080
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
-#: The module name at which ``--half`` cuts each flat leg (#2254). Move it to
-#: rebalance; the workflow's cells and steps ask for a half and follow.
-SHARD_BOUNDARIES = {'project': 'test_q'}
+#: The path below each leg at which ``--half`` cuts it (#2254): a module name for
+#: the flat ``project``, and a path inside ``misc/`` for ``protocols``, whose
+#: cells also pass ``--exclude protocols/internet``. Move one to rebalance; the
+#: workflow's cells and steps ask for a half and follow.
+SHARD_BOUNDARIES = {'project': 'test_q', 'protocols': 'misc/test_q'}
 
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.
