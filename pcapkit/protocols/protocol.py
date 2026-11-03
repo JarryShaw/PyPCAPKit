@@ -581,6 +581,20 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: built without ``__init__``.
     __reconstructing__: 'bool' = False
 
+    #: The ``__short_read__`` record of the data model :meth:`from_data` rebuilds
+    #: this instance from. :meth:`pack` cuts the header it makes back to the
+    #: octets captured, and :meth:`__post_init__` reads them at the width the
+    #: header declares, so the rebuild is parsed and verified as its capture was
+    #: (:issue:`2703`). Set for the duration of that call alone, like
+    #: :attr:`__reconstructing__`; the class-level :data:`None` is what every
+    #: other code path sees.
+    __short_read__: 'Optional[tuple[str, int]]' = None
+
+    #: How many octets of its header :meth:`pack` cut back by
+    #: :attr:`__short_read__`, which :meth:`__post_init__` adds back to the width
+    #: it reads the rebuild at. Set between those two calls alone.
+    _uncaptured: 'Optional[int]' = None
+
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
     #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level
@@ -811,6 +825,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :meth:`__post_init__` makes to construct the instance keeps the
             header made here, as the one :meth:`unpack` reads back.
 
+            That call, when :meth:`from_data` rebuilds a header the capture cut
+            short, cuts the header back to the octets captured, through its own
+            ``__short_read__`` and :meth:`Schema._cut_short_read
+            <pcapkit.protocols.schema.schema.Schema._cut_short_read>`, and
+            returns only those (:issue:`2703`).
+
         .. versionchanged:: 1.5.0
 
            Calling it no longer replaces the instance's
@@ -824,7 +844,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         target._make_raw = _passes_raw(kwargs) or any(  # pylint: disable=protected-access
             isinstance(header.get(name), bytes) for name in _schema_slots(type(header)))
         packet = kwargs.get('__packet__', {})  # packet data
-        return header.pack(packet)
+        data = header.pack(packet)
+        if target.__short_read__ is None:
+            return data
+
+        # NOTE: Cut back before ``unpack`` reads and verifies it, at the width
+        # packed here, which ``__post_init__`` passes on (#2703).
+        header.__dict__['__short_read__'] = target.__short_read__
+        header._cut_short_read()  # pylint: disable=protected-access
+        captured = bytes(header)
+        target._uncaptured = len(data) - len(captured)  # pylint: disable=protected-access
+        return captured
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
@@ -1085,6 +1115,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         read is cut back, see :meth:`_make_payload`; nothing is guessed from
         its other keys (:issue:`2003`).
 
+        A header the capture cut short, as ``__short_read__`` records, is cut
+        back before it is read, and read at the width it declares, so the
+        rebuild parses and verifies the octets captured as the capture did
+        (:issue:`2703`).
+
         Args:
             data: Protocol data.
             **kwargs: Construction keywords that ``data`` does not carry, such as
@@ -1122,13 +1157,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # spread into is a defect in this protocol, and the caller of
         # ``from_data`` can do nothing about it. Set for the duration of the call
         # and removed afterwards, so the instance is indistinguishable from one
-        # built directly.
+        # built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).
         self.__reconstructing__ = True
+        self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
         try:
             # initialize protocol instance
             self.__init__(**kwargs)  # type: ignore[misc]
         finally:
             del self.__reconstructing__
+            del self.__short_read__
 
         return self
 
@@ -1348,6 +1385,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         if file is None:
             _data = self.pack(**kwargs)
+            # NOTE: A header rebuilt from a short read holds only what was captured,
+            # read at the width it declares, as a capture is at its parent's (#2703).
+            uncaptured = vars(self).pop('_uncaptured', None)
+            if uncaptured is not None and length is None:
+                length = len(_data) + uncaptured
         else:
             _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
 
